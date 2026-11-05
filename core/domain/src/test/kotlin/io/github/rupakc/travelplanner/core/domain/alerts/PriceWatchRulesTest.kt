@@ -1,0 +1,99 @@
+package io.github.rupakc.travelplanner.core.domain.alerts
+
+import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
+import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
+import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
+import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import kotlinx.serialization.json.JsonObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+/** Mirrors frontend/src/utils/priceWatch.test.js and components/alerts/alertKinds.test.js. */
+class PriceWatchRulesTest {
+    private fun json(text: String) = TravelJson.parseToJsonElement(text) as JsonObject
+
+    private val fare = FareWatch(id = 7, departureDate = "2026-12-01")
+    private val hotel = PriceWatch(id = 7, kind = "hotel", expiresOn = "2026-11-20")
+    private val trip = PriceWatch(id = 8, kind = "trip", expiresOn = "2026-12-20")
+
+    @Test
+    fun `tabs counts and filters`() {
+        val list = mergeWatches(listOf(fare), listOf(hotel, trip))
+        assertEquals(listOf("price-watch-7", "watch-7", "price-watch-8"), list.map { it.key })
+        assertEquals(
+            mapOf(AlertTab.ALL to 3, AlertTab.FLIGHTS to 1, AlertTab.HOTELS to 1, AlertTab.ACTIVITIES to 0, AlertTab.TRIPS to 1),
+            countByTab(list),
+        )
+        assertEquals(listOf("hotel"), list.filter { inTab(it, AlertTab.HOTELS) }.map { it.kind })
+        assertEquals(AlertTab.TRIPS, AlertTab.forKind("trip"))
+        assertNull(AlertTab.forKind(null))
+    }
+
+    @Test
+    fun unavailable() {
+        assertTrue(isUnavailable(hotel.copy(lastObservation = json("""{"status":"unavailable"}"""))))
+        assertFalse(isUnavailable(hotel.copy(lastObservation = json("""{"status":"ok"}"""))))
+        assertFalse(isUnavailable(hotel))
+    }
+
+    @Test
+    fun `check outcomes`() {
+        val n = AppNotification(id = 1, title = "Hotel Lumen dropped to €90")
+        assertEquals(CheckOutcome(CheckType.ALERT, Tone.GOOD, notificationTitle = n.title), checkOutcome(hotel.copy(checkStatus = "checked", notification = n)))
+        assertEquals(CheckOutcome(CheckType.CHECKED_PRICE, Tone.NEUTRAL, price = 9.9), checkOutcome(hotel.copy(checkStatus = "checked", lastPrice = 9.9)))
+        assertEquals(CheckType.CHECKED_NOTHING, checkOutcome(hotel.copy(checkStatus = "checked")).type)
+        assertEquals(Tone.WARN, checkOutcome(hotel.copy(checkStatus = "unavailable")).tone)
+        assertEquals(CheckType.FAILED, checkOutcome(fare.copy(checkStatus = "failed")).type)
+        assertEquals(CheckType.ERRORED, checkOutcome(fare.copy(checkStatus = "errored")).type)
+        assertEquals(CheckType.EXPIRED, checkOutcome(fare.copy(checkStatus = "expired")).type)
+        assertEquals(CheckType.POSTPONED, checkOutcome(fare.copy(checkStatus = "postponed")).type)
+        assertEquals(CheckType.DELETED, checkOutcome(fare.copy(checkStatus = "deleted")).type)
+        assertEquals(CheckType.NOT_WATCHED, checkOutcome(fare.copy(checkStatus = "skipped")).type)
+    }
+
+    @Test
+    fun `price change keeps cents`() {
+        assertEquals(PriceChange(-1.73, Direction.DOWN), priceWatchChange(PriceWatch(id = 1, baselinePrice = 11.63, lastPrice = 9.9)))
+        assertEquals(Direction.UP, priceWatchChange(PriceWatch(id = 1, baselinePrice = 24.0, lastPrice = 24.4))?.direction)
+        assertEquals(Direction.SAME, priceWatchChange(PriceWatch(id = 1, baselinePrice = 398.0, lastPrice = 398.0))?.direction)
+        assertNull(priceWatchChange(PriceWatch(id = 1, lastPrice = 3.0)))
+    }
+
+    @Test
+    fun `currency and target`() {
+        assertEquals("€", currencySymbol("EUR"))
+        assertEquals("$", currencySymbol("USD"))
+        assertEquals("$", currencySymbol(null))
+        assertEquals("XYZ1", currencySymbol("XYZ1"))
+        assertEquals(TargetCheck(1250.0, null), checkPriceTarget("€ 1,250"))
+        assertEquals(TargetError.NOT_A_PRICE, checkPriceTarget("").error)
+        assertEquals(TargetError.NOT_A_PRICE, checkPriceTarget("-3").error)
+    }
+
+    @Test
+    fun `notification links`() {
+        val linked = AppNotification(id = 1, data = json("""{"watch_id":7,"links":{"alerts":"/alerts?kind=hotel&watch=7"}}"""))
+        assertEquals(AlertLink("hotel", 7), notificationLink(linked))
+        assertEquals(AlertLink(null, 9), notificationLink(AppNotification(id = 2, data = json("""{"watch_id":9}"""))))
+        assertEquals(AlertLink(null, null), notificationLink(AppNotification(id = 3)))
+        assertEquals(AlertLink(null, 7), parseAlertsPath("/alerts?watch=7"))
+        assertNull(parseAlertsPath("/plans"))
+    }
+
+    @Test
+    fun `alert kinds read per watch kind`() {
+        assertEquals(AlertAction.SEE_FARE, alertKindFor(AppNotification(id = 1, kind = "fare_drop")).action)
+        assertEquals(AlertAction.SEE_DATES, alertKindFor(AppNotification(id = 1, kind = "fare_cheaper_date")).action)
+        assertEquals(AlertIcon.ENDED, alertKindFor(AppNotification(id = 1, kind = "mystery")).icon)
+        val hotelEnded = AppNotification(id = 1, kind = "watch_expired", data = json("""{"watch_kind":"hotel"}"""))
+        assertEquals(AlertAction.SEE_HOTEL, alertKindFor(hotelEnded).action)
+        val activityEnded = AppNotification(id = 1, kind = "watch_expired", data = json("""{"watch_kind":"activity"}"""))
+        assertEquals(AlertIcon.TICKET, alertKindFor(activityEnded).icon)
+        val tripPaused = AppNotification(id = 1, kind = "watch_error", data = json("""{"watch_kind":"trip"}"""))
+        assertEquals(AlertAction.CHECK_TRIP, alertKindFor(tripPaused).action)
+        assertEquals("Lisbon (−⁠$70)", keepDeltaTogether("Lisbon (−$70)"))
+    }
+}
