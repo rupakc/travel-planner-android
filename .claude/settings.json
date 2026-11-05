@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew tasks:*)",
+      "Bash(./gradlew projects:*)",
+      "Bash(./gradlew dependencies:*)",
+      "Bash(./gradlew spotlessCheck:*)",
+      "Bash(./gradlew detekt:*)",
+      "Bash(./gradlew lintLocalDebug:*)",
+      "Bash(./gradlew testLocalDebugUnitTest:*)",
+      "Bash(./gradlew assembleLocalDebug:*)",
+      "Bash(./gradlew assembleProdRelease:*)",
+      "Bash(./gradlew -Dorg.gradle.jvmargs=-Xmx2g -Pkotlin.compiler.execution.strategy=in-process --max-workers=2 spotlessCheck:*)",
+      "Bash(./gradlew -Dorg.gradle.jvmargs=-Xmx2g -Pkotlin.compiler.execution.strategy=in-process --max-workers=2 detekt:*)",
+      "Bash(./gradlew -Dorg.gradle.jvmargs=-Xmx2g -Pkotlin.compiler.execution.strategy=in-process --max-workers=2 lintLocalDebug:*)",
+      "Bash(./gradlew -Dorg.gradle.jvmargs=-Xmx2g -Pkotlin.compiler.execution.strategy=in-process --max-workers=2 testLocalDebugUnitTest:*)",
+      "Bash(scripts/check-doc-links.sh:*)",
+      "Bash(adb devices:*)",
+      "Bash(adb logcat -d:*)",
+      "Bash(adb shell getprop:*)",
+      "Bash(adb shell pm list packages:*)",
+      "Bash(adb shell dumpsys:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git branch --list:*)",
+      "Bash(git branch --show-current)"
+    ],
+    "deny": [
+      "Bash(./gradlew --stop:*)",
+      "Read(./local.properties)",
+      "Read(./app/google-services.json)",
+      "Read(./keystore.properties)"
+    ]
+  }
+}

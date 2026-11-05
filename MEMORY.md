@@ -1,6 +1,9 @@
 # Decision log
 
-One line per decision: what, and why. Newest last. Builders add to this file for every call the spec leaves open.
+How to use: one line per decision, newest last in its section: `- YYYY-MM-DD what was decided - why` (a bold topic first is welcome). Add a line for every call the spec leaves open;
+never delete an entry, supersede it with a new line that says "supersedes". The design spec wins over this file; the code wins over both.
+
+## Foundation (build, core, shell)
 
 - 2026-11-05 Package/applicationId `io.github.rupakc.travelplanner` (+ `.local`, `.debug` suffixes) — matches the public GitHub owner; flavours/debug installable side by side.
 - 2026-11-05 Kept all pinned versions (AGP 9.5.0, Kotlin 2.4.21, KSP 2.3.13, Compose BOM 2026.09.00, …); KSP 2.3.x is versioned independently of Kotlin and works with AGP 9 built-in Kotlin.
@@ -31,3 +34,15 @@ One line per decision: what, and why. Newest last. Builders add to this file for
 - 2026-11-05 Admin wire models + `AdminApi` exist (contract completeness) but no admin UI (spec non-goal).
 - 2026-11-05 Auth gate re-evaluates on every destination change (not only on session change): Back from a deep-linked share screen popped to the synthetic Home entry while signed out. Share is always allowed; Onboarding with `fromSettings=true` is allowed when signed in.
 - 2026-11-05 MainActivity is `singleTask`; deep links arriving while running are forwarded with `addOnNewIntentListener { navController.handleDeepLink(it) }` (verified on the emulator, cold and warm).
+
+## Documentation and tooling
+
+- 2026-11-05 **Docs home** - `docs/*.md` (TitleCase) are the wiki source; `wiki-sync.yml` publishes them on push to main. Pages for unmerged features say "Planned" instead of describing code that does not exist.
+- 2026-11-05 **Doc link check** - `scripts/check-doc-links.sh` verifies relative links (CI runs it); pages owned by other teams (Firebase-Setup, Onboarding-and-Traveller-Types) are allowed to be missing until they merge.
+- 2026-11-05 **Claude Code settings** - `.claude/settings.json` allows only read-only gradle/adb/git commands; build and install commands still prompt.
+- 2026-11-05 **Pseudo-locales** - enabled on the debug build type by the convention plugin; documented in Localization.
+
+## Open items
+
+- Keystore-wrapped session storage before a store release (see Security).
+- Baseline profile module (see Performance).
