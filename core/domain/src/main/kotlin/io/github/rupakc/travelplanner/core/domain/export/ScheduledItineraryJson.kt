@@ -2,15 +2,14 @@ package io.github.rupakc.travelplanner.core.domain.export
 
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItineraryLayouts
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItinerarySchedule
+import io.github.rupakc.travelplanner.core.domain.itinerary.LenientItinerary
 import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledDay
 import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledSlot
 import io.github.rupakc.travelplanner.core.domain.itinerary.SlotEdit
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
-import io.github.rupakc.travelplanner.core.model.json.decodeRawBackedList
 import io.github.rupakc.travelplanner.core.model.json.toJson
 import io.github.rupakc.travelplanner.core.model.plan.ItineraryLayout
 import io.github.rupakc.travelplanner.core.model.section.ItineraryData
-import io.github.rupakc.travelplanner.core.model.section.ItineraryDay
 import io.github.rupakc.travelplanner.core.model.section.ItinerarySlot
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -30,8 +29,8 @@ import kotlinx.serialization.json.put
 internal object ScheduledItineraryJson {
     /** [source]'s days arranged by [layout] (when it belongs to them) and given estimated times. */
     fun scheduledDays(source: JsonObject, layout: JsonObject?, edits: JsonObject?): List<JsonObject> {
-        val rawDays = source["days"].objects()
-        val itinerary = ItineraryData(days = rawDays.map(::typedDay))
+        val rawDays = LenientItinerary.dayObjects(source)
+        val itinerary = ItineraryData(days = rawDays.map(LenientItinerary::day))
         val slotEdits = SlotEdit.fromSelections(edits.orEmpty().mapNotNull { (k, v) -> (v as? JsonObject)?.let { k to it } }.toMap())
         val arranged = ItineraryLayouts.arrange(itinerary, typedLayout(layout), slotEdits).days
         return ItinerarySchedule.scheduleDays(arranged, slotEdits).mapIndexed { i, day -> dayJson(rawDays[i], day) }
@@ -41,16 +40,6 @@ internal object ScheduledItineraryJson {
     private fun typedLayout(layout: JsonObject?): ItineraryLayout? =
         layout?.takeIf { it["positions"] is JsonObject }
             ?.let { runCatching { TravelJson.decodeFromJsonElement(ItineraryLayout.serializer(), it) }.getOrNull() }
-
-    /** A day that does not decode as a whole still keeps its number, city and (raw-backed) slots. */
-    private fun typedDay(day: JsonObject): ItineraryDay =
-        runCatching { TravelJson.decodeFromJsonElement(ItineraryDay.serializer(), day) }.getOrElse {
-            ItineraryDay(
-                dayNumber = day["day_number"].looseNumber()?.takeIf { it % 1.0 == 0.0 }?.toInt(),
-                city = day["city"].str(),
-                slots = decodeRawBackedList(ItinerarySlot.serializer(), day["slots"]),
-            )
-        }
 
     private fun dayJson(original: JsonObject, day: ScheduledDay): JsonObject {
         val fields = LinkedHashMap<String, JsonElement>(original)
