@@ -186,6 +186,9 @@ internal class PlanDetailViewModel
 
         private val cachedPlan: Plan? get() = (cache.value as? CacheState.Loaded)?.plan
 
+        /** The cached plan on screen (for "Watch whole trip"). */
+        val currentPlan: Plan? get() = cachedPlan
+
         private val content: Flow<Pair<Boolean, PlanDetailContent?>> =
             cache.map { c -> (c is CacheState.Loaded) to (c as? CacheState.Loaded)?.plan?.let(::contentOf) }.flowOn(dispatchers.default)
 

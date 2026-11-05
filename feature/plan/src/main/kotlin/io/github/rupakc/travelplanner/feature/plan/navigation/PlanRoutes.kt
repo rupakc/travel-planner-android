@@ -25,10 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
+import io.github.rupakc.travelplanner.core.ui.watch.PriceWatchSheet
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.detail.DetailNavigation
 import io.github.rupakc.travelplanner.feature.plan.detail.PlanDetailScreen
 import io.github.rupakc.travelplanner.feature.plan.detail.PlanDetailViewModel
+import io.github.rupakc.travelplanner.feature.plan.detail.TripWatchViewModel
 import io.github.rupakc.travelplanner.feature.plan.export.ExportEffects
 import io.github.rupakc.travelplanner.feature.plan.list.PlansEvent
 import io.github.rupakc.travelplanner.feature.plan.list.PlansMessage
@@ -127,7 +129,16 @@ private fun DetailContent(viewModel: PlanDetailViewModel, onBack: (() -> Unit)?,
     val openLink = rememberLinkOpener()
     ExportEffects(viewModel.exportRequests, snackbar)
     NavigationEffects(viewModel.navigationRequests, onOpenResults, onDeleted)
-    PlanDetailScreen(state, viewModel::onEvent, onOpenLink = openLink, onBack = onBack, snackbar = snackbar)
+    val tripWatch: TripWatchViewModel = hiltViewModel()
+    val watchAvailable by tripWatch.available.collectAsStateWithLifecycle()
+    val plan = viewModel.currentPlan
+    val onWatchTrip = plan?.takeIf { watchAvailable && tripWatch.canWatch(it) }?.let { p -> { tripWatch.open(p) } }
+    PlanDetailScreen(state, viewModel::onEvent, onOpenLink = openLink, onBack = onBack, snackbar = snackbar, onWatchTrip = onWatchTrip)
+    val sheet by tripWatch.sheet.collectAsStateWithLifecycle()
+    val email by tripWatch.userEmail.collectAsStateWithLifecycle()
+    sheet?.let { controller ->
+        PriceWatchSheet(controller = controller, userEmail = email, onDismiss = tripWatch::dismiss, onSeeAlerts = { tripWatch.dismiss() })
+    }
 }
 
 @Composable

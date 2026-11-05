@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DropdownMenu
@@ -89,6 +90,8 @@ internal fun PlanDetailScreen(
     onBack: (() -> Unit)?,
     modifier: Modifier = Modifier,
     snackbar: SnackbarHostState = remember { SnackbarHostState() },
+    /** "Watch whole trip" (Team G's price-watch sheet); null hides the button (not watchable / no live prices). */
+    onWatchTrip: (() -> Unit)? = null,
 ) {
     val content = state.content
     Scaffold(
@@ -105,7 +108,7 @@ internal fun PlanDetailScreen(
         Box(Modifier.padding(padding).fillMaxSize()) {
             when {
                 content != null -> {
-                    DetailBody(content, state, onEvent, onOpenLink)
+                    DetailBody(content, state, onEvent, onOpenLink, onWatchTrip)
                 }
 
                 state.error != null -> {
@@ -158,7 +161,13 @@ private fun OverflowMenu(onEvent: (PlanDetailEvent) -> Unit, deleteEnabled: Bool
 }
 
 @Composable
-private fun DetailBody(content: PlanDetailContent, state: PlanDetailUiState, onEvent: (PlanDetailEvent) -> Unit, onOpenLink: (String) -> Unit) {
+private fun DetailBody(
+    content: PlanDetailContent,
+    state: PlanDetailUiState,
+    onEvent: (PlanDetailEvent) -> Unit,
+    onOpenLink: (String) -> Unit,
+    onWatchTrip: (() -> Unit)?,
+) {
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = TravelTheme.spacing.gutter, vertical = TravelTheme.spacing.md),
@@ -167,7 +176,7 @@ private fun DetailBody(content: PlanDetailContent, state: PlanDetailUiState, onE
             item(key = "stale", contentType = "banner") { StaleBanner(error, onRetry = { onEvent(PlanDetailEvent.Retry) }) }
         }
         item(key = "header", contentType = "header") { TripHeader(content.summary) }
-        item(key = "actions", contentType = "actions") { ActionRow(content.summary, state, onEvent) }
+        item(key = "actions", contentType = "actions") { ActionRow(content.summary, state, onEvent, onWatchTrip) }
         if (content.costParts.isNotEmpty()) {
             item(key = "cost", contentType = "cost") {
                 CostCard(content.costParts, content.budgetStatus, content.hasTransport, Modifier.padding(top = TravelTheme.spacing.lg))
@@ -216,7 +225,7 @@ internal fun TripHeader(summary: TripSummary, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (PlanDetailEvent) -> Unit) {
+private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (PlanDetailEvent) -> Unit, onWatchTrip: (() -> Unit)?) {
     Column(Modifier.padding(top = TravelTheme.spacing.lg), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
         TpButton(
             stringResource(R.string.plan_action_open_results),
@@ -238,6 +247,15 @@ private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (
                 variant = TpButtonVariant.Tonal,
                 leadingIcon = Icons.Filled.DateRange,
             )
+            if (onWatchTrip != null) {
+                TpButton(
+                    stringResource(R.string.plan_action_watch_trip),
+                    onClick = onWatchTrip,
+                    variant = TpButtonVariant.Tonal,
+                    enabled = !state.offline,
+                    leadingIcon = Icons.Filled.Notifications,
+                )
+            }
         }
         if (summary.isShared) {
             Surface(color = TravelTheme.colors.secondaryContainer, shape = TravelShape.ItemCard, modifier = Modifier.fillMaxWidth()) {
