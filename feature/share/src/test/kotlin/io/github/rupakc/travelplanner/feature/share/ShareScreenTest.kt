@@ -66,6 +66,19 @@ class ShareScreenTest {
     }
 
     @Test
+    fun `shared itinerary renders through the shared day cards with derived times and notes`() {
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                ShareScreen(ShareUiState(isLoading = false, trip = SharedTrip.from(sharedFixture)), {}, {}, {}, {}, {})
+            }
+        }
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Market"))
+        compose.onNodeWithText("Market").assertExists()
+        compose.onNodeWithText("09:00–11:00").assertExists()
+        compose.onNodeWithText("📝 Go early", substring = true).assertExists()
+    }
+
+    @Test
     fun `app and https share deep links open the share route with the token`() {
         lateinit var nav: TestNavHostController
         compose.setContent {
