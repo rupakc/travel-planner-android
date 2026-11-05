@@ -206,7 +206,7 @@ internal object ItineraryArrangement {
     private const val ROUND_TO = 5.0
     private const val TENTHS = 10.0
 
-    private fun clock(minutes: Int): String = "%02d:%02d".format(minutes / 60 % 24, minutes % 60)
+    private fun clock(minutes: Int): String = String.format(java.util.Locale.ROOT, "%02d:%02d", minutes / 60 % 24, minutes % 60)
 
     private fun coords(slot: JsonObject): Pair<Double, Double>? {
         val lat = slot["lat"].strictNumber() ?: return null

@@ -68,9 +68,9 @@ object PlanIcs {
     private val TIME = Regex("^\\s*(\\d{1,2}):(\\d{2})\\s*(am|pm)?", RegexOption.IGNORE_CASE)
     private val CONTROL = Regex("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]")
     private val NEWLINE = Regex("\r\n|\r|\n")
-    private val DATE = DateTimeFormatter.ofPattern("yyyyMMdd")
-    private val DATE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss")
-    private val STAMP = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC)
+    private val DATE = DateTimeFormatter.ofPattern("yyyyMMdd", java.util.Locale.ROOT)
+    private val DATE_TIME = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss", java.util.Locale.ROOT)
+    private val STAMP = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'", java.util.Locale.ROOT).withZone(ZoneOffset.UTC)
 
     /** Escape a TEXT value (RFC 5545 §3.3.11). */
     fun escape(text: String): String =
