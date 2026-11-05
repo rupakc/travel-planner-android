@@ -2,10 +2,11 @@ package io.github.rupakc.travelplanner.e2e
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToKey
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.rupakc.travelplanner.MainActivity
 import io.github.rupakc.travelplanner.core.ui.R as UiR
@@ -40,14 +41,23 @@ class SearchResultsE2eTest {
 
     /** Waits until [section]'s header shows the Ready status (errors also end in Ready, with their own copy). */
     private fun awaitTerminal(@StringRes section: Int) {
-        val header = hasText(robot.str(section)) and hasContentDescription(robot.str(UiR.string.section_status_done))
+        val header = header(section) and hasContentDescription(robot.str(UiR.string.section_status_done))
         rule.waitUntil(STREAM_TIMEOUT) { robot.scrollListTo(LIST, header) && robot.existsMerged(header) }
     }
 
+    /** The section card's header row (not the jump chip with the same title): it carries an expand/collapse state. */
+    private fun header(@StringRes section: Int) =
+        robot.str(section).let { title ->
+            hasStateDescription(robot.str(UiR.string.section_collapse, title)) or hasStateDescription(robot.str(UiR.string.section_expand, title))
+        }
+
     /** Adds the first item listed under [section] and returns its name. */
-    private fun addFirstUnder(@StringRes section: Int): String {
-        val header = hasText(robot.str(section))
-        robot.scrollListTo(LIST, header)
+    private fun addFirstUnder(@StringRes section: Int, key: String): String {
+        val header = header(section)
+        // The section card is the lazy item keyed by its SectionId; scrolling to the key puts it at the top so the
+        // rows after it (separate items) are composed.
+        rule.onNode(androidx.compose.ui.test.hasTestTag(LIST)).performScrollToKey(key)
+        rule.waitForIdle()
         val headerTop = rule.onAllNodes(header).onFirst().fetchSemanticsNode().boundsInWindow.bottom
         val (name, _) = robot.addButtons().filter { it.second > headerTop }.minBy { it.second }
         rule.onAllNodes(robot.hasDescription(robot.str(UiR.string.plan_add_a11y, name))).onFirst().performClick()
@@ -71,8 +81,8 @@ class SearchResultsE2eTest {
             UiR.string.section_visa,
         ).forEach(::awaitTerminal)
 
-        val hotel = addFirstUnder(UiR.string.section_hotels)
-        val activity = addFirstUnder(UiR.string.section_activities)
+        val hotel = addFirstUnder(UiR.string.section_hotels, "HOTELS")
+        val activity = addFirstUnder(UiR.string.section_activities, "ACTIVITIES")
 
         robot.tap(ResultsR.string.results_open_my_plan)
         robot.waitForText(hotel, substring = true)
@@ -90,7 +100,9 @@ class SearchResultsE2eTest {
         assertTrue(selections.getValue("hotel").jsonObject["name"]?.jsonPrimitive?.content == hotel)
         val activities = selections.getValue("activities") as JsonArray
         assertTrue("activity saved", activities.any { it.jsonObject["name"]?.jsonPrimitive?.content == activity })
-        assertTrue("search_data saved", saved.getValue("search_data").jsonObject["destination"] != null)
+        val searchData = saved.getValue("search_data").jsonObject
+        assertTrue("search_data saved: $searchData", searchData["destination"]?.jsonPrimitive?.content == "LIS")
+        assertTrue("2 adults: $searchData", searchData["adults"]?.jsonPrimitive?.content == "2")
     }
 
     private companion object {

@@ -80,7 +80,9 @@ class AppRobot(val rule: AppRule) {
 
     fun tapDescription(text: String, substring: Boolean = false) {
         waitFor(hasDescription(text, substring))
-        rule.onAllNodes(hasDescription(text, substring)).onFirst().performClick()
+        val target = rule.onAllNodes(hasDescription(text, substring)).onFirst()
+        runCatching { target.performScrollTo() }
+        target.performClick()
         rule.waitForIdle()
     }
 
@@ -233,9 +235,11 @@ class AppRobot(val rule: AppRule) {
         type("Start date", trip.departureDigits)
         type("End date", trip.returnDigits)
         tap(SearchR.string.search_dates_ok)
-        type(str(SearchR.string.search_nationality), trip.nationality)
+        // Pick the suggestion so its dropdown closes before the travellers panel is used.
+        pickSuggestion(str(SearchR.string.search_nationality), trip.nationality, trip.nationality)
         tap(SearchR.string.search_travelers)
         repeat(trip.adults - 1) { tapDescription(str(SearchR.string.search_add_one, str(SearchR.string.search_adults))) }
+        waitFor(hasDescription("${str(SearchR.string.search_adults)} ${trip.adults}"))
         val submit = androidx.compose.ui.test.hasTestTag("search_submit")
         rule.onNode(submit).performScrollTo().performClick()
         rule.waitForIdle()
