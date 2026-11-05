@@ -36,8 +36,6 @@ Alert notifications link to `alerts?kind=&watch=`, mirroring the web's `/alerts?
   unless "always" is chosen, using the last location from the Near me screen (no background location permission).
 - **In-app inbox**: the bell in the top bar shows the unread count (`GET /api/notifications/unread-count`); `NotificationsRoute` lists, marks read and opens alerts.
 
-Review fixes to the scheduling (capabilities caching, KEEP when unchanged, Retry-After) are in progress in a separate fix pass and may land after this page.
-
 ## Path 2: FCM (wired, inert until configured)
 
 ```mermaid
@@ -54,8 +52,9 @@ sequenceDiagram
     App->>API: POST /api/devices/unregister {token} on sign-out
 ```
 
-- Client: `FirebasePushTokenSource` returns null when Firebase is not initialised; `PushRegistrar` registers the token after every sign-in
-  (and app start while signed in) and `TravelMessagingService.onNewToken` on refresh; `onMessageReceived` hands the data-only message to
+- Client: `FirebasePushTokenSource` returns null when Firebase is not initialised; `PushRegistrar` registers the token only when the
+  user/token/locale/server fingerprint changed since the last successful registration, or once a week (recorded in the `push_registration` prefs,
+  cleared with the user's data), and `TravelMessagingService.onNewToken` on refresh; `onMessageReceived` hands the data-only message to
   `PushAlertHandler`, which marks the id seen first (so the poller will not duplicate it) and posts the alert. A system-shown push from an older
   server carries only a web `link` extra; `MainActivity` maps it to the app deep link. The service is disabled in the manifest unless Firebase is configured.
 - Backend endpoints (travel-planner repo, [API-Reference](https://github.com/rupakc/travel-planner/blob/main/docs/API-Reference.md)):

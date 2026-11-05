@@ -31,4 +31,4 @@ Source of truth for scope: the [design spec](superpowers/specs/2026-11-05-androi
 - Decision log: [MEMORY](../MEMORY.md)
 
 Pages marked "Planned" describe work that is specified but not yet merged. The pages describe `main` after the review-round-4 fix pass FP3;
-the parallel fix passes for notifications/push performance (FP1) and UI/accessibility/i18n (FP2) may land separately and update their pages then.
+the notifications/push performance fix pass (FP1) has landed; the UI/accessibility/i18n fix pass (FP2) may land separately and update its pages then.
