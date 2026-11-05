@@ -42,6 +42,7 @@ class OnboardingE2eTest {
         )
         // Result names a traveller type.
         robot.waitForText(robot.str(OnboardingR.string.onboarding_result_heading))
+        Screenshots.capture("onboarding-result")
         robot.finishOnboarding(allowNotifications = true)
 
         val prefs = api.preferences(api.adminToken())

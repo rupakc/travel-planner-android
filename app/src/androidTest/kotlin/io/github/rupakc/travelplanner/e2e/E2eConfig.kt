@@ -12,6 +12,9 @@ object E2eConfig {
     /** The backend's `ADMIN_PASSWORD` (`-Pe2eAdminPassword`). */
     val adminPassword: String get() = args.getString("e2eAdminPassword") ?: "e2e-Test-Pass1"
 
+    /** The fake SerpAPI as the emulator sees it (`-Pe2eFakeSerpUrl`). */
+    val fakeSerpUrl: String get() = args.getString("e2eFakeSerpUrl") ?: "http://10.0.2.2:9100"
+
     const val ADMIN = "admin"
 
     /** Second, non-admin account the suite creates through the admin API when missing. */

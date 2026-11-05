@@ -11,7 +11,7 @@ Test-first. No network in any test. Robolectric runs on **SDK 35** while compile
 | Data | Repositories against recorded responses | OkHttp MockWebServer (`TestNetwork.kt`), SSE fixtures (`Fixtures.kt`) |
 | Database | Room DAOs | Robolectric in-memory database (`core:database` tests) |
 | UI | Each screen's main states and key interactions, incl. semantics | Compose UI tests on Robolectric (`createComposeRule`) |
-| Instrumented | Smoke tests on an emulator | Planned: there is no `androidTest` source set yet |
+| Instrumented E2E | Real app on an emulator against a real backend (opt-in) | `app/src/androidTest`, Compose UI test + UiAutomator, `@E2eTest` |
 | End to end | Manual or scripted run against the real backend | below |
 
 ## Commands
@@ -64,3 +64,35 @@ curl -s localhost:8001/health      # expect serpapi_configured: true
 - The `verify-android` skill has the scripted commands.
 
 Tests run with the backend's `RATE_LIMIT_ENABLED=false` when scripting many requests.
+
+## Instrumented end to end (`app/src/androidTest`)
+
+The E2E suite drives the real app on an emulator against the backend above. It is opt-in: every class is annotated
+`@E2eTest`, and the `travelplanner.android.e2e` convention plugin filters them out unless `-Pe2e=true` is set, so a
+plain `connectedLocalDebugAndroidTest` (and CI, which runs no device tests) never needs a backend.
+
+```bash
+# backend on 8031 + fake SerpAPI on 9100 as above, emulator booted (one emulator only)
+./gradlew :app:connectedLocalDebugAndroidTest -Pe2e=true -Pe2eAdminPassword='<the ADMIN_PASSWORD you started it with>'
+# one class
+./gradlew :app:connectedLocalDebugAndroidTest -Pe2e=true -Pe2eAdminPassword=... \
+  -Pandroid.testInstrumentationRunnerArguments.class=io.github.rupakc.travelplanner.e2e.OnboardingE2eTest
+```
+
+| Property | Default | Meaning |
+|---|---|---|
+| `e2e` | `false` | Run the `@E2eTest` classes (otherwise they are skipped) |
+| `e2eBaseUrl` | `http://10.0.2.2:8031` | Backend as the emulator sees it; the tests type it into the Login screen's Server sheet |
+| `e2eAdminPassword` | `e2e-Test-Pass1` | The backend's `ADMIN_PASSWORD` (a throwaway test value) |
+| `e2eFakeSerpUrl` | `http://10.0.2.2:9100` | The fake SerpAPI as the emulator sees it (price-drop flow) |
+| `e2eScreenshots` | `false` | `true` saves PNGs to `app/build/outputs/connected_android_test_additional_output/` |
+
+- Android Test Orchestrator runs each test in its own process with `clearPackageData`, so every test starts signed out
+  and tests share state only through the backend. Animations are disabled for the run.
+- `BackendApi` (OkHttp, on the device) arranges state and checks what the app stored (Preferences, plans, watches);
+  the second account (`e2e-traveller`) is created through the admin API when missing.
+- Waits poll the semantics tree (`AppRobot.waitFor…`): network work is not an Espresso idling resource. System UI
+  (permission dialogs, the notification shade) is driven with UiAutomator.
+- The price-drop flow lowers prices through the fake SerpAPI's test-control endpoint
+  `GET http://10.0.2.2:9100/__scale?value=0.8` (`-Pe2eFakeSerpUrl` overrides the base), which rewrites its scale file,
+  and sets it back to 1.0 afterwards.

@@ -12,6 +12,8 @@ import org.gradle.kotlin.dsl.dependencies
  * They are opt-in: CI only runs unit tests, and a plain `connectedLocalDebugAndroidTest` skips every test annotated
  * `@E2eTest`. Run them with `-Pe2e=true` (see docs/Testing.md). Optional properties, passed to the tests as
  * instrumentation arguments: `e2eBaseUrl` (default `http://10.0.2.2:8031`, the emulator's view of the host),
+ * `e2eAdminPassword` (the backend's `ADMIN_PASSWORD`) , `e2eFakeSerpUrl` (default
+ * `http://10.0.2.2:9100`) and `e2eScreenshots` (`true` saves README screenshots).
  *
  * Each test runs in its own process with the app's data cleared (Android Test Orchestrator, `clearPackageData`),
  * so tests are independent and share state only through the backend.
@@ -22,15 +24,22 @@ class AndroidE2eConventionPlugin : Plugin<Project> {
             val e2e = providers.gradleProperty("e2e").map(String::toBoolean).orElse(false).get()
             val baseUrl = providers.gradleProperty("e2eBaseUrl").orElse("http://10.0.2.2:8031").get()
             val adminPassword = providers.gradleProperty("e2eAdminPassword").orElse("e2e-Test-Pass1").get()
+            val fakeSerp = providers.gradleProperty("e2eFakeSerpUrl").orElse("http://10.0.2.2:9100").get()
+            val screenshots = providers.gradleProperty("e2eScreenshots").orElse("false").get()
             extensions.configure<ApplicationExtension> {
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 val args = defaultConfig.testInstrumentationRunnerArguments
                 args["clearPackageData"] = "true"
+                // Screenshots go through the test storage service; AGP copies them to
+                // build/outputs/connected_android_test_additional_output.
+                args["useTestStorageService"] = "true"
                 val marker = "io.github.rupakc.travelplanner.e2e.E2eTest"
                 if (e2e) {
                     args["annotation"] = marker
                     args["e2eBaseUrl"] = baseUrl
                     args["e2eAdminPassword"] = adminPassword
+                    args["e2eScreenshots"] = screenshots
+                    args["e2eFakeSerpUrl"] = fakeSerp
                 } else {
                     args["notAnnotation"] = marker
                 }
@@ -54,6 +63,7 @@ class AndroidE2eConventionPlugin : Plugin<Project> {
                 add("androidTestImplementation", libs.lib("androidx-test-uiautomator"))
                 add("androidTestImplementation", libs.lib("androidx-compose-ui-test-junit4"))
                 add("androidTestImplementation", libs.lib("androidx-compose-ui-test-junit4-accessibility"))
+                add("androidTestImplementation", libs.lib("androidx-test-services-storage"))
                 add("androidTestImplementation", libs.lib("okhttp"))
                 add("androidTestImplementation", libs.lib("kotlinx-serialization-json"))
                 add("androidTestImplementation", libs.lib("junit"))
