@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import io.github.rupakc.travelplanner.core.common.AppClock
+import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
@@ -17,11 +19,20 @@ import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import java.io.IOException
+import java.security.GeneralSecurityException
+import java.util.Base64
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
@@ -29,37 +40,146 @@ import kotlinx.serialization.builtins.serializer
 private fun DataStore<Preferences>.safeData(): Flow<Preferences> =
     data.catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
 
-class PreferencesSessionStore(private val store: DataStore<Preferences>) : SessionStore {
-    private val token = stringPreferencesKey("token")
-    private val user = stringPreferencesKey("user_json")
+/**
+ * Session store sealed with an AEAD (Tink, Keystore-wrapped key; review I4).
+ *
+ * - The session (token, user, issuing base URL) is one encrypted value; nothing about the token is
+ *   stored in clear. The plaintext layout of earlier builds is migrated on first read.
+ * - A value that fails to decrypt (lost Keystore key, corrupt file) reads as signed out and is removed.
+ * - The JWT `exp` claim is checked against [clock]: an expired token reads as signed out, and a live
+ *   session flips to null at its expiry instant, so the auth gate routes to Login without waiting for a 401.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class EncryptedSessionStore(
+    private val store: DataStore<Preferences>,
+    cipherFactory: () -> SessionCipher,
+    private val clock: AppClock,
+) : SessionStore {
+    private val cipher by lazy(cipherFactory)
+    private val sealed = stringPreferencesKey("session_v2")
+    private val legacyToken = stringPreferencesKey("token")
+    private val legacyUser = stringPreferencesKey("user_json")
+    private val lastUser = stringPreferencesKey("last_username")
 
-    override val session: Flow<Session?> = store.safeData().map { it.toSession() }.distinctUntilChanged()
+    @Serializable
+    private data class Record(val token: String, val user: User, val baseUrl: String? = null)
 
-    override suspend fun current(): Session? = session.first()
+    private sealed interface Read {
+        data class Ok(val session: Session) : Read
+
+        data object Empty : Read
+
+        data object Corrupt : Read
+
+        data class Legacy(val session: Session) : Read
+    }
+
+    private val stored: Flow<Session?> =
+        store.safeData()
+            .map { read(it) }
+            .transform { r ->
+                when (r) {
+                    is Read.Ok -> {
+                        emit(r.session)
+                    }
+
+                    Read.Empty -> {
+                        emit(null)
+                    }
+
+                    Read.Corrupt -> {
+                        store.edit { it.remove(sealed) }
+                        emit(null)
+                    }
+
+                    is Read.Legacy -> {
+                        save(r.session)
+                        emit(r.session)
+                    }
+                }
+            }
+            .distinctUntilChanged()
+
+    override val session: Flow<Session?> = stored.flatMapLatest { s -> if (s == null) flowOf(null) else untilExpiry(s) }.distinctUntilChanged()
+
+    override suspend fun current(): Session? = stored.first()?.takeUnless { isExpired(it) }
 
     override suspend fun save(session: Session) {
+        val sealedValue = seal(Record(session.token, session.user, session.baseUrl))
         store.edit {
-            it[token] = session.token
-            it[user] = TravelJson.encodeToString(User.serializer(), session.user)
+            it[sealed] = sealedValue
+            it[lastUser] = session.user.username
+            it.remove(legacyToken)
+            it.remove(legacyUser)
         }
     }
 
     override suspend fun updateToken(token: String) {
-        store.edit { it[this.token] = token }
+        current()?.let { save(it.copy(token = token)) }
     }
 
     override suspend fun updateUser(user: User) {
-        store.edit { it[this.user] = TravelJson.encodeToString(User.serializer(), user) }
+        stored.first()?.let { save(it.copy(user = user)) }
     }
 
     override suspend fun clear() {
-        store.edit { it.clear() }
+        store.edit {
+            it.remove(sealed)
+            it.remove(legacyToken)
+            it.remove(legacyUser)
+        }
     }
 
-    private fun Preferences.toSession(): Session? {
-        val t = this[token] ?: return null
-        val u = this[user]?.let { runCatching { TravelJson.decodeFromString(User.serializer(), it) }.getOrNull() } ?: return null
-        return Session(t, u)
+    override suspend fun lastUsername(): String? = store.safeData().first()[lastUser]
+
+    private fun untilExpiry(session: Session): Flow<Session?> =
+        flow {
+            val exp = JwtExpiry.expiresAtEpochSeconds(session.token)
+            if (exp == null) {
+                emit(session)
+                return@flow
+            }
+            val remaining = exp * MILLIS - clock.now().toEpochMilli()
+            if (remaining <= 0) {
+                emit(null)
+                return@flow
+            }
+            emit(session)
+            delay(remaining)
+            emit(null)
+        }
+
+    private fun isExpired(session: Session): Boolean {
+        val exp = JwtExpiry.expiresAtEpochSeconds(session.token) ?: return false
+        return exp * MILLIS <= clock.now().toEpochMilli()
+    }
+
+    private fun read(p: Preferences): Read {
+        p[sealed]?.let { value ->
+            return try {
+                val plain = cipher.decrypt(Base64.getDecoder().decode(value), AAD)
+                val record = TravelJson.decodeFromString(Record.serializer(), plain.decodeToString())
+                Read.Ok(Session(record.token, record.user, record.baseUrl))
+            } catch (e: GeneralSecurityException) {
+                AppLogger.w(TAG, "Stored session could not be decrypted; signing out", e)
+                Read.Corrupt
+            } catch (e: IllegalArgumentException) {
+                AppLogger.w(TAG, "Stored session is malformed; signing out", e)
+                Read.Corrupt
+            }
+        }
+        val token = p[legacyToken] ?: return Read.Empty
+        val user = p[legacyUser]?.let { runCatching { TravelJson.decodeFromString(User.serializer(), it) }.getOrNull() } ?: return Read.Empty
+        return Read.Legacy(Session(token, user))
+    }
+
+    private fun seal(record: Record): String =
+        Base64.getEncoder().encodeToString(cipher.encrypt(TravelJson.encodeToString(Record.serializer(), record).encodeToByteArray(), AAD))
+
+    private companion object {
+        const val TAG = "SessionStore"
+        const val MILLIS = 1000L
+        val AAD = "travelplanner.session.v2".encodeToByteArray()
     }
 }
 

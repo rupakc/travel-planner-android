@@ -10,9 +10,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.rupakc.travelplanner.core.common.AppClock
 import javax.inject.Singleton
 
-/** File names; excluded from cloud backup in the app's data_extraction_rules (the session token must not leave the device). */
+/** File names (+ the Tink keyset prefs `tp_keys`); excluded from cloud backup in the app's data_extraction_rules (the session token must not leave the device). */
 object DataStoreFiles {
     const val SESSION = "session"
     const val SETTINGS = "settings"
@@ -29,7 +30,8 @@ object DataStoreModule {
     @Provides @Singleton
     fun sessionStore(
         @ApplicationContext context: Context,
-    ): SessionStore = PreferencesSessionStore(context.store(DataStoreFiles.SESSION))
+        clock: AppClock,
+    ): SessionStore = EncryptedSessionStore(context.store(DataStoreFiles.SESSION), { TinkSessionCrypto.create(context) }, clock)
 
     @Provides @Singleton
     fun settingsStore(

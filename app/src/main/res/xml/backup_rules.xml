@@ -2,4 +2,7 @@
 <full-backup-content>
     <exclude domain="file" path="datastore/session.preferences_pb" />
     <exclude domain="database" path="travel-planner.db" />
+    <exclude domain="database" path="travel-planner.db-wal" />
+    <exclude domain="database" path="travel-planner.db-shm" />
+    <exclude domain="sharedpref" path="tp_keys.xml" />
 </full-backup-content>
