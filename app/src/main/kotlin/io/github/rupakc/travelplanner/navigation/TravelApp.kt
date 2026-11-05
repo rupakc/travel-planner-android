@@ -103,7 +103,7 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
         snackbarHostState = snackbarHostState,
     ) {
         NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.fillMaxSize()) {
-            authGraph(onLoggedIn = {}, onPasswordChanged = {})
+            authGraph(onLoggedIn = {}, onPasswordChanged = {}, onBack = { navController.popBackStack() })
             onboardingGraph(onFinished = { fromSettings ->
                 if (fromSettings) navController.popBackStack() else shellViewModel.completeOnboarding()
             })

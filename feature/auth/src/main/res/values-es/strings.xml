@@ -1,8 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="auth_app_name">Travel Planner</string>
+    <string name="auth_tagline">Planifica tu viaje perfecto</string>
     <string name="auth_login_title">Inicia sesión en tu cuenta</string>
-    <string name="auth_login_message">Aquí va el inicio de sesión con usuario y contraseña. Las cuentas las crea un administrador; no hay registro propio.</string>
+    <string name="auth_username">Usuario</string>
+    <string name="auth_username_placeholder">Introduce tu usuario</string>
+    <string name="auth_password">Contraseña</string>
+    <string name="auth_password_placeholder">Introduce tu contraseña</string>
+    <string name="auth_sign_in">Iniciar sesión</string>
+    <string name="auth_signing_in">Iniciando sesión…</string>
+    <string name="auth_no_registration">Las cuentas las crea un administrador. Pídele un usuario y una contraseña temporal.</string>
+    <string name="auth_show_password">Mostrar contraseña</string>
+    <string name="auth_hide_password">Ocultar contraseña</string>
+    <string name="auth_password_shown">Contraseña visible</string>
+    <string name="auth_password_hidden">Contraseña oculta</string>
+    <string name="auth_error_login_failed">No se pudo iniciar sesión. Inténtalo de nuevo.</string>
+    <string name="auth_error_network">No se puede conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.</string>
+
     <string name="auth_change_password_title">Define tu contraseña</string>
-    <string name="auth_change_password_message">Sustituye la contraseña temporal (mínimo 8 caracteres).</string>
-    <string name="auth_continue">Continuar</string>
+    <string name="auth_change_password_welcome">¡Hola, %1$s! Define una contraseña nueva para continuar.</string>
+    <string name="auth_change_password_voluntary_title">Cambiar contraseña</string>
+    <string name="auth_change_password_voluntary_message">Introduce tu contraseña actual y elige una nueva.</string>
+    <string name="auth_temporary_password">Contraseña temporal</string>
+    <string name="auth_current_password">Contraseña actual</string>
+    <string name="auth_new_password">Contraseña nueva</string>
+    <string name="auth_new_password_placeholder">Al menos 8 caracteres</string>
+    <string name="auth_confirm_password">Confirma la contraseña nueva</string>
+    <string name="auth_set_password">Guardar contraseña y continuar</string>
+    <string name="auth_update_password">Actualizar contraseña</string>
+    <string name="auth_saving">Guardando…</string>
+    <string name="auth_password_updated">Contraseña actualizada</string>
+    <string name="auth_error_mismatch">Las contraseñas nuevas no coinciden</string>
+    <string name="auth_error_too_short">La contraseña debe tener al menos 8 caracteres</string>
+    <string name="auth_error_change_failed">No se pudo cambiar la contraseña</string>
+    <string name="auth_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="auth_done">Hecho</string>
 </resources>

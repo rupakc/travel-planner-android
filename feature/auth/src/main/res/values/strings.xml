@@ -1,8 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Login (web LoginPage) -->
+    <string name="auth_app_name">Travel Planner</string>
+    <string name="auth_tagline">Plan your perfect trip</string>
     <string name="auth_login_title">Sign in to your account</string>
-    <string name="auth_login_message">Username and password sign-in goes here. Accounts are created by an admin; there is no self-registration.</string>
+    <string name="auth_username">Username</string>
+    <string name="auth_username_placeholder">Enter username</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_password_placeholder">Enter password</string>
+    <string name="auth_sign_in">Sign In</string>
+    <string name="auth_signing_in">Signing in…</string>
+    <string name="auth_no_registration">Accounts are created by an admin. Ask yours for a username and a temporary password.</string>
+    <string name="auth_show_password">Show password</string>
+    <string name="auth_hide_password">Hide password</string>
+    <string name="auth_password_shown">Password shown</string>
+    <string name="auth_password_hidden">Password hidden</string>
+    <string name="auth_error_login_failed">Login failed. Please try again.</string>
+    <string name="auth_error_network">Can\'t reach the server. Check your connection and try again.</string>
+
+    <!-- Change password (web ChangePasswordPage) -->
     <string name="auth_change_password_title">Set your password</string>
-    <string name="auth_change_password_message">Replace the temporary password (at least 8 characters).</string>
-    <string name="auth_continue">Continue</string>
+    <string name="auth_change_password_welcome">Welcome, %1$s! Please set a new password to continue.</string>
+    <string name="auth_change_password_voluntary_title">Change password</string>
+    <string name="auth_change_password_voluntary_message">Enter your current password, then choose a new one.</string>
+    <string name="auth_temporary_password">Temporary password</string>
+    <string name="auth_current_password">Current password</string>
+    <string name="auth_new_password">New password</string>
+    <string name="auth_new_password_placeholder">At least 8 characters</string>
+    <string name="auth_confirm_password">Confirm new password</string>
+    <string name="auth_set_password">Set password &amp; continue</string>
+    <string name="auth_update_password">Update password</string>
+    <string name="auth_saving">Saving…</string>
+    <string name="auth_password_updated">Password updated</string>
+    <string name="auth_error_mismatch">New passwords do not match</string>
+    <string name="auth_error_too_short">Password must be at least 8 characters</string>
+    <string name="auth_error_change_failed">Password change failed</string>
+    <string name="auth_error_generic">Something went wrong. Please try again.</string>
+    <string name="auth_done">Done</string>
 </resources>
