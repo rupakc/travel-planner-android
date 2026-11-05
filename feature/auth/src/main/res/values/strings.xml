@@ -16,7 +16,7 @@
     <string name="auth_password_shown">Password shown</string>
     <string name="auth_password_hidden">Password hidden</string>
     <string name="auth_error_login_failed">Login failed. Please try again.</string>
-    <string name="auth_error_network">Can\'t reach the server. Check your connection and try again.</string>
+    <string name="auth_error_network">Can\'t reach the server. Check your connection, or the address under Server.</string>
 
     <!-- Change password (web ChangePasswordPage) -->
     <string name="auth_change_password_title">Set your password</string>
@@ -37,4 +37,30 @@
     <string name="auth_error_change_failed">Password change failed</string>
     <string name="auth_error_generic">Something went wrong. Please try again.</string>
     <string name="auth_done">Done</string>
+    <string name="auth_error_not_configured">No server is set. Tap Server to enter its address.</string>
+
+    <!-- Server (signed-out base URL setup) -->
+    <string name="auth_server">Server</string>
+    <string name="auth_server_button">Server: %1$s</string>
+    <string name="auth_server_button_unset">Set up server</string>
+    <string name="auth_server_title">Server</string>
+    <string name="auth_server_message">The address of your Travel Planner backend, for example http://192.168.1.20:8001.</string>
+    <string name="auth_server_url">Server address</string>
+    <string name="auth_server_default">Default: %1$s</string>
+    <string name="auth_server_no_default">This build has no default server.</string>
+    <string name="auth_server_test">Test connection</string>
+    <string name="auth_server_testing">Testing…</string>
+    <string name="auth_server_save">Save</string>
+    <string name="auth_server_reset">Reset to default</string>
+    <string name="auth_server_reachable">Connected. The server is reachable.</string>
+    <string name="auth_server_serpapi_on">Live prices: available</string>
+    <string name="auth_server_serpapi_off">Live prices: not set up on this server</string>
+    <string name="auth_server_push_on">Push notifications: available</string>
+    <string name="auth_server_push_off">Push notifications: not set up on this server</string>
+    <string name="auth_server_unreachable">Can\'t reach a server at this address. Check it and your connection.</string>
+    <string name="auth_server_error_blank">Enter the server address.</string>
+    <string name="auth_server_error_malformed">That doesn\'t look like a web address. Start with http:// or https://.</string>
+    <string name="auth_server_error_scheme">Use an http:// or https:// address.</string>
+    <string name="auth_server_error_host">Add the server\'s host name or IP address.</string>
+    <string name="auth_server_error_https">This build only connects over HTTPS. Use an https:// address.</string>
 </resources>

@@ -12,6 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.focus.FocusDirection
@@ -26,12 +29,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.feature.auth.AuthMessage
 import io.github.rupakc.travelplanner.feature.auth.R
+import io.github.rupakc.travelplanner.feature.auth.server.ServerEvent
+import io.github.rupakc.travelplanner.feature.auth.server.ServerSheet
+import io.github.rupakc.travelplanner.feature.auth.server.ServerViewModel
 import io.github.rupakc.travelplanner.feature.auth.ui.AuthBackdrop
 import io.github.rupakc.travelplanner.feature.auth.ui.AuthErrorBanner
 import io.github.rupakc.travelplanner.feature.auth.ui.AuthHeader
@@ -40,15 +47,46 @@ import io.github.rupakc.travelplanner.feature.auth.ui.PasswordTextField
 
 /** Login route: wires [LoginViewModel]; [onLoggedIn] fires once after a successful sign-in. */
 @Composable
-internal fun LoginRoute(onLoggedIn: () -> Unit, viewModel: LoginViewModel = hiltViewModel()) {
+internal fun LoginRoute(
+    onLoggedIn: () -> Unit,
+    viewModel: LoginViewModel = hiltViewModel(),
+    serverViewModel: ServerViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val server by serverViewModel.state.collectAsStateWithLifecycle()
+    var showServer by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(state.signedIn) { if (state.signedIn) onLoggedIn() }
-    LoginScreen(state, viewModel::onEvent)
+    LaunchedEffect(server.done) { if (server.done) showServer = false }
+    LoginScreen(
+        state = state,
+        onEvent = viewModel::onEvent,
+        serverUrl = server.current,
+        onOpenServer = {
+            serverViewModel.onEvent(ServerEvent.Open)
+            showServer = true
+        },
+    )
+    if (showServer) {
+        ServerSheet(
+            state = server,
+            onEvent = serverViewModel::onEvent,
+            onDismiss = {
+                serverViewModel.onEvent(ServerEvent.Dismiss)
+                showServer = false
+            },
+        )
+    }
 }
 
 /** Web LoginPage: logo, "Travel Planner", "Plan your perfect trip", card with username/password, Sign In. */
 @Composable
-internal fun LoginScreen(state: LoginUiState, onEvent: (LoginEvent) -> Unit, modifier: Modifier = Modifier) {
+internal fun LoginScreen(
+    state: LoginUiState,
+    onEvent: (LoginEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    serverUrl: String = "",
+    onOpenServer: () -> Unit = {},
+) {
     val focus = LocalFocusManager.current
     AuthBackdrop(modifier) {
         AuthHeader(
@@ -63,7 +101,12 @@ internal fun LoginScreen(state: LoginUiState, onEvent: (LoginEvent) -> Unit, mod
                     style = TravelTheme.typography.titleLarge,
                     modifier = Modifier.semantics { heading() },
                 )
-                state.error?.let { AuthErrorBanner(it) }
+                state.error?.let { error ->
+                    AuthErrorBanner(error)
+                    if ((error as? AuthMessage.Local)?.suggestServer == true) {
+                        TpButton(stringResource(R.string.auth_server), onOpenServer, variant = TpButtonVariant.Tonal)
+                    }
+                }
                 AuthTextField(
                     value = state.username,
                     onValueChange = { onEvent(LoginEvent.UsernameChanged(it)) },
@@ -104,6 +147,16 @@ internal fun LoginScreen(state: LoginUiState, onEvent: (LoginEvent) -> Unit, mod
             style = TravelTheme.typography.bodySmall,
             color = TravelTheme.colors.onSurfaceVariant,
             textAlign = TextAlign.Center,
+        )
+        TpButton(
+            text =
+                if (serverUrl.isBlank()) {
+                    stringResource(R.string.auth_server_button_unset)
+                } else {
+                    stringResource(R.string.auth_server_button, serverUrl)
+                },
+            onClick = onOpenServer,
+            variant = TpButtonVariant.Text,
         )
     }
 }

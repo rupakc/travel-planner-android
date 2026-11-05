@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.rupakc.travelplanner.core.common.AppError
@@ -22,11 +23,14 @@ import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import io.github.rupakc.travelplanner.feature.auth.login.LoginRoute
 import io.github.rupakc.travelplanner.feature.auth.login.LoginViewModel
 import io.github.rupakc.travelplanner.feature.auth.password.ChangePasswordRoute
 import io.github.rupakc.travelplanner.feature.auth.password.ChangePasswordViewModel
+import io.github.rupakc.travelplanner.feature.auth.server.ServerViewModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -41,12 +45,46 @@ class AuthScreensTest {
 
     @get:Rule val compose = createComposeRule()
 
+    private val settings = FakeSettingsRepository()
+
+    private fun serverVm() = ServerViewModel(settings, FakeHealthRepository(), BUILD_INFO)
+
+    @Test
+    fun `server sheet opens from login and saves a new address`() {
+        val vm = LoginViewModel(FakeAuthRepository(), SavedStateHandle())
+        val server = serverVm()
+        compose.setContent { TravelTheme { LoginRoute({}, vm, server) } }
+        compose.onNodeWithText("Server: http://10.0.2.2:8001").performScrollTo().performClick()
+        compose.onNodeWithText("Server address").performTextReplacement("http://192.168.1.20:8001/")
+        compose.onNodeWithText("Test connection").performClick()
+        compose.onNodeWithText("Connected. The server is reachable.").assertExists()
+        compose.onNodeWithText("Save").performClick()
+        compose.waitForIdle()
+        assertEquals("http://192.168.1.20:8001", settings.state.value.baseUrlOverride)
+        compose.onNodeWithText("Server: http://192.168.1.20:8001").assertExists()
+    }
+
+    @Test
+    fun `unreachable server gets its own copy and a server action`() {
+        val auth = FakeAuthRepository().apply { loginResult = AppResult.Failure(AppError.Network("java.net.ConnectException: failed")) }
+        val vm = LoginViewModel(auth, SavedStateHandle())
+        val server = serverVm()
+        compose.setContent { TravelTheme { LoginRoute({}, vm, server) } }
+        compose.onNodeWithText("Username").performTextInput("alice")
+        compose.onNodeWithText("Password").performTextInput("pw")
+        compose.onNodeWithText("Sign In").performScrollTo().performClick()
+        compose.onNodeWithText("Can't reach the server. Check your connection, or the address under Server.").assertExists()
+        compose.onNodeWithText("ConnectException", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Server").performScrollTo().performClick()
+        compose.onNodeWithText("Server address").assertExists()
+    }
+
     @Test
     fun `login error from the server is shown and sign in stays available`() {
         val auth = FakeAuthRepository().apply { loginResult = AppResult.Failure(AppError.Unauthorized("Invalid username or password")) }
         var loggedIn = 0
         val vm = LoginViewModel(auth, SavedStateHandle())
-        compose.setContent { TravelTheme(themeMode = ThemeMode.LIGHT) { LoginRoute({ loggedIn++ }, vm) } }
+        compose.setContent { TravelTheme(themeMode = ThemeMode.LIGHT) { LoginRoute({ loggedIn++ }, vm, serverVm()) } }
 
         compose.onNodeWithText("Sign In").assertIsNotEnabled()
         compose.onNodeWithText("Username").performTextInput("alice")
@@ -63,7 +101,7 @@ class AuthScreensTest {
         val auth = FakeAuthRepository()
         var loggedIn = 0
         val vm = LoginViewModel(auth, SavedStateHandle())
-        compose.setContent { TravelTheme(themeMode = ThemeMode.DARK) { LoginRoute({ loggedIn++ }, vm) } }
+        compose.setContent { TravelTheme(themeMode = ThemeMode.DARK) { LoginRoute({ loggedIn++ }, vm, serverVm()) } }
         compose.onNodeWithText("Username").performTextInput("alice")
         compose.onNodeWithText("Password").performTextInput("secret")
         compose.onNodeWithText("Sign In").performScrollTo().performClick()
@@ -74,7 +112,7 @@ class AuthScreensTest {
     @Test
     fun `password toggle is labelled and describes its state`() {
         val vm = LoginViewModel(FakeAuthRepository(), SavedStateHandle())
-        compose.setContent { TravelTheme { LoginRoute({}, vm) } }
+        compose.setContent { TravelTheme { LoginRoute({}, vm, serverVm()) } }
         compose.onNodeWithContentDescription("Show password")
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Password hidden"))
             .performClick()

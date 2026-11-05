@@ -80,7 +80,7 @@ class LoginViewModelTest {
     fun `rate limit, network and blank errors map to the right copy`() {
         val limited = AppError.RateLimited("Too many requests — please wait 30 seconds and try again.", 30)
         assertEquals(AuthMessage.Server(limited.message.orEmpty()), limited.toLoginMessage())
-        assertEquals(AuthMessage.Local(R.string.auth_error_network), AppError.Network("timeout").toLoginMessage())
+        assertEquals(AuthMessage.Local(R.string.auth_error_network, suggestServer = true), AppError.Network("timeout").toLoginMessage())
         assertEquals(AuthMessage.Local(R.string.auth_error_login_failed), AppError.Server(500, " ").toLoginMessage())
     }
 
@@ -159,7 +159,7 @@ class ChangePasswordViewModelTest {
 
         assertEquals(AuthMessage.Local(R.string.auth_error_change_failed), AppError.Server(500, null).toChangePasswordMessage())
         assertEquals(AuthMessage.Local(R.string.auth_error_generic), AppError.Unknown(null).toChangePasswordMessage())
-        assertEquals(AuthMessage.Local(R.string.auth_error_network), AppError.Network().toChangePasswordMessage())
+        assertEquals(AuthMessage.Local(R.string.auth_error_network, suggestServer = true), AppError.Network().toChangePasswordMessage())
     }
 
     @Test
