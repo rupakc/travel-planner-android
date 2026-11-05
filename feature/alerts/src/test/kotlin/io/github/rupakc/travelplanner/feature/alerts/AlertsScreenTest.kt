@@ -61,6 +61,8 @@ class AlertsScreenTest {
         compose.onNodeWithContentDescription("Flights, 1").assertIsDisplayed()
         compose.onNodeWithContentDescription("All, 2").assertIsDisplayed()
         compose.onNodeWithText("Showing 2 watches").assertIsDisplayed()
+        // R4 ui M9: the search box offers the Search IME action.
+        compose.onNode(androidx.compose.ui.test.hasImeAction(androidx.compose.ui.text.input.ImeAction.Search)).assertExists()
         compose.onNodeWithContentDescription("Hotels, 1").performClick()
         assertEquals(AlertsEvent.SelectTab(AlertTab.HOTELS), events.last())
     }
