@@ -112,9 +112,6 @@ sealed interface SearchFormEvent {
 
     data object Submit : SearchFormEvent
 
-    /** The UI language (per-app locale): budgets are read in it ("1.500" is 1500 in Spanish). */
-    data class SetLocale(val locale: Locale) : SearchFormEvent
-
     data class LoadRecent(val id: String) : SearchFormEvent
 
     data class RerunRecent(val id: String) : SearchFormEvent
@@ -237,6 +234,11 @@ class SearchViewModel
             (pendingRemoval.value - deleting).forEach(::deleteOnServer)
         }
 
+        /** The UI language (per-app locale), sent by the route: budgets are read in it ("1.500" is 1500 in Spanish). */
+        fun setLocale(locale: Locale) {
+            this.locale = locale
+        }
+
         fun onEvent(event: SearchFormEvent) {
             when (event) {
                 is SearchFormEvent.SelectMode -> {
@@ -262,10 +264,6 @@ class SearchViewModel
 
                 SearchFormEvent.Submit -> {
                     submitKnown()
-                }
-
-                is SearchFormEvent.SetLocale -> {
-                    locale = event.locale
                 }
 
                 is SearchFormEvent.LoadRecent -> {

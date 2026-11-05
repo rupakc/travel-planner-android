@@ -109,7 +109,7 @@ internal fun SearchFormRoute(
 
     val locale = currentLocale()
     LaunchedEffect(locale) {
-        viewModel.onEvent(SearchFormEvent.SetLocale(locale))
+        viewModel.setLocale(locale)
         discoverViewModel.onEvent(DiscoverEvent.SetLocale(locale))
         compareViewModel.onEvent(CompareEvent.SetLocale(locale))
     }

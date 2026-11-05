@@ -121,7 +121,7 @@ class SearchViewModelTest {
     fun `the budget is read in the UI language`() =
         runTest {
             val vm = vm()
-            vm.onEvent(SearchFormEvent.SetLocale(java.util.Locale.forLanguageTag("es-ES")))
+            vm.setLocale(java.util.Locale.forLanguageTag("es-ES"))
             vm.effect.test {
                 vm.onEvent(SearchFormEvent.UpdateForm(vm.state.value.form.copy(origin = "JFK", destination = "HND", budgetUsd = "1.500,50")))
                 vm.onEvent(SearchFormEvent.Submit)
