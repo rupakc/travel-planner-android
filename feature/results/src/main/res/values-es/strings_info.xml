@@ -164,7 +164,7 @@
     <string name="forex_money_tips">Consejos de dinero</string>
 
     <string name="itin_empty">No hay itinerario disponible</string>
-    <string name="itin_total_cost">Coste est. del itinerario: %1$s</string>
+    <string name="itin_total_cost">Coste estimado del itinerario: %1$s</string>
     <string name="itin_template">Generado automáticamente: toca cualquier franja para editarla</string>
     <string name="itin_times_note">Las horas son estimaciones según duraciones y distancias habituales.</string>
     <string name="itin_editing_locked">La edición está desactivada mientras hay un plan guardado abierto. Toca Nuevo en Mi plan para editar este itinerario.</string>
@@ -191,7 +191,7 @@
     <string name="itin_plan_remove_a11y">Quitar %1$s del plan</string>
     <string name="itin_field_activity">Actividad</string>
     <string name="itin_field_location">Lugar</string>
-    <string name="itin_field_cost">Coste est. ($)</string>
+    <string name="itin_field_cost">Coste estimado (US$)</string>
     <string name="itin_field_note">Nota personal</string>
     <string name="itin_note_placeholder">Añade tu nota…</string>
     <string name="itin_note_placeholder_personal">Añade tu nota personal…</string>
@@ -209,7 +209,7 @@
     <string name="itin_restore_a11y">Restaurar %1$s</string>
     <string name="itin_restore_blocked">No queda tiempo libre el día %1$d: mueve o quita algo de ese día primero</string>
     <string name="itin_status_moved">Se movió %1$s al día %2$d · %3$s</string>
-    <string name="itin_status_moved_swap">%1$s movida al día %2$d · %3$s (intercambiada con %4$s)</string>
+    <string name="itin_status_moved_swap">Se movió %1$s al día %2$d · %3$s (se intercambió con %4$s)</string>
     <string name="itin_status_removed">Se quitó %1$s del día %2$d</string>
     <string name="itin_status_restored">Se restauró %1$s</string>
     <string name="itin_status_undo">Se deshizo el último cambio</string>

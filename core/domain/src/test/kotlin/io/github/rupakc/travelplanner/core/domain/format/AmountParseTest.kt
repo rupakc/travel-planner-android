@@ -67,6 +67,16 @@ class AmountParseTest {
         assertNull(parseLocalizedAmount(null, en))
     }
 
+    @Test fun lettersOtherThanACurrencyAreNotANumber() {
+        assertNull(en("1o0"))
+        assertNull(en("2k"))
+        assertNull(es("1.5OO"))
+        assertNull(en("about 100"))
+        assertEquals(24.0, es("EUR 24")!!, 0.0)
+        assertEquals(24.0, es("24 eur")!!, 0.0)
+        assertEquals(1200.0, es("1.200 US$")!!, 0.0)
+    }
+
     @Test fun negativeKeepsItsSign() {
         assertEquals(-20.5, es("-20,5")!!, 0.0)
     }

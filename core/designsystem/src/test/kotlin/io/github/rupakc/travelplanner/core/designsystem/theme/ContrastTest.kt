@@ -27,6 +27,12 @@ class ContrastTest {
         fun onSurfaces(name: String, fg: Color, min: Double = TEXT) = surfaces.map { (n, bg) -> Pair("$name on $n", fg, bg, min) }
         return listOf(
             Pair("onPrimary on primary", s.onPrimary, s.primary, TEXT),
+            Pair("onSecondary on secondary", s.onSecondary, s.secondary, TEXT),
+            Pair("onTertiary on tertiary", s.onTertiary, s.tertiary, TEXT),
+            // Navigation bar / rail container (M3 NavigationBar uses surfaceContainer).
+            Pair("onSurface on surfaceContainer", s.onSurface, s.surfaceContainer, TEXT),
+            Pair("onSurfaceVariant on surfaceContainer", s.onSurfaceVariant, s.surfaceContainer, TEXT),
+            Pair("onSecondaryContainer on secondaryContainer (nav indicator)", s.onSecondaryContainer, s.secondaryContainer, TEXT),
             Pair("onPrimaryContainer on primaryContainer", s.onPrimaryContainer, s.primaryContainer, TEXT),
             Pair("onSecondaryContainer on secondaryContainer", s.onSecondaryContainer, s.secondaryContainer, TEXT),
             Pair("onTertiaryContainer on tertiaryContainer", s.onTertiaryContainer, s.tertiaryContainer, TEXT),
