@@ -22,11 +22,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.core.net.toUri
 import androidx.core.util.Consumer
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination
@@ -77,8 +79,16 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
     val destination = backStack?.destination
     // singleTask activity: deep links that arrive while running come through onNewIntent.
     val activity = LocalActivity.current as? ComponentActivity
+    // Deep links held behind the auth gate (kept on Login, replayed once READY; see DeepLinkHold).
+    val deepLinks = remember(shellViewModel) { DeepLinkHold(shellViewModel, DeepLinkIntents.appLink(activity?.intent)) }
+    val currentGate by rememberUpdatedState(gate)
     DisposableEffect(activity, navController) {
-        val listener = Consumer<Intent> { intent -> navController.handleDeepLink(intent) }
+        val listener =
+            Consumer<Intent> { intent ->
+                deepLinks.onIntent(DeepLinkIntents.appLink(intent))
+                navController.handleDeepLink(intent)
+                deepLinks.afterHandled(currentGate)
+            }
         activity?.addOnNewIntentListener(listener)
         onDispose { activity?.removeOnNewIntentListener(listener) }
     }
@@ -94,8 +104,11 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
         val current = navController.currentDestination ?: return@LaunchedEffect
         val entry = navController.currentBackStackEntry
         val retakingQuiz = current.hasRoute(OnboardingRoute::class) && entry?.toRoute<OnboardingRoute>()?.fromSettings == true
-        val target = gateTarget(gate, current, retakingQuiz) ?: return@LaunchedEffect
+        val target = gateTarget(gate, current, retakingQuiz)
+        val replay = deepLinks.onGateCheck(gate, target, current.isGateScreen())
+        target ?: return@LaunchedEffect
         navController.navigate(target) { popUpTo(0) { inclusive = true } }
+        replay?.let { link -> navController.handleDeepLink(Intent(Intent.ACTION_VIEW, link.toUri())) }
     }
 
     val topLevel = TopLevelDestination.entries.firstOrNull { destination.isOn(it) }

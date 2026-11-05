@@ -3,8 +3,8 @@
 Native Android companion to the [travel-planner](https://github.com/rupakc/travel-planner) web app: the same
 account, the same backend, the same saved plans. Kotlin, Jetpack Compose, Material 3. MIT licence.
 
-Status: foundation merged (build system, core modules, app shell); feature screens land module by module
-(see [Modules](docs/Modules.md) for what exists today).
+Status: every feature module is merged and integrated on `main` (sign-in, onboarding, Home, Search, Results, My Plan,
+Chat, Alerts, Settings, Near me, share viewer); review fixes are landing as separate PRs. See [Modules](docs/Modules.md).
 
 ## Screenshots
 
@@ -33,14 +33,14 @@ Tablet (800 dp wide):
 
 Parity with the traveller-facing web flows, plus what a phone is good at (design: [spec](docs/superpowers/specs/2026-11-05-android-app-design.md)).
 
-- Sign in and change password (the backend has no self-registration; admins create accounts).
+- Sign in and change password (the backend has no self-registration; admins create accounts). The session is stored encrypted (Tink, Android Keystore).
 - Search in four modes: known destination, Surprise me, Compare (2-3 destinations), From a link.
 - Streamed results, section by section, each with the backend's verification chip; Estimates stay labelled.
 - My Plan: select items, save, load, share by link, export (.ics, print).
 - Chat with plan commands, streamed.
 - Alerts: fare and hotel/activity/trip price watches, notification inbox.
 - Traveller-type onboarding, a personalised Home and per-feature visibility (device-local).
-- Notifications: channels and an in-app inbox now; WorkManager polling and trip reminders are planned; Firebase Cloud Messaging is wired but inert until configured.
+- Notifications: an in-app inbox with an unread bell, a jittered WorkManager alert poll, local trip reminders and opt-in Near me suggestions; Firebase Cloud Messaging is wired but inert until configured.
 - Near me recommendations, public share-link viewer (deep link), English and Spanish, dark theme, dynamic colour.
 - Booking is always "open the provider's page in a Custom Tab"; there are no in-app payments.
 
@@ -74,7 +74,7 @@ Features see repository interfaces only. Details: [Architecture](docs/Architectu
 | `core:network`, `core:database`, `core:datastore` | Retrofit/OkHttp/SSE, Room, DataStore (internal to `core:data`) |
 | `core:data` | Repository interfaces and implementations, `CurrentPlanStore` |
 | `core:designsystem`, `core:ui` | Theme, components; shared feature UI |
-| `core:notifications`, `core:testing` | Channels/notifier/FCM; fakes and fixtures |
+| `core:notifications`, `core:testing` | Channels, notifier, background workers (alert poll, trip reminders, Near me), FCM; fakes and fixtures |
 | `feature:auth` ... `feature:share` | One module per screen group (11 in total) |
 
 Full table with allowed dependencies: [Modules](docs/Modules.md).

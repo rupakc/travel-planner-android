@@ -58,6 +58,7 @@ import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
+import io.github.rupakc.travelplanner.feature.plan.model.PlanItineraryUi
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionEntry
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroup
 import io.github.rupakc.travelplanner.feature.plan.model.TripSummary
@@ -414,7 +415,7 @@ private val previewContent =
                 SelectionGroup(PlanCategory.HOTEL, listOf(SelectionEntry("h", "Park Hyatt Tokyo", listOf("Shinjuku"), 2400.0))),
                 SelectionGroup(PlanCategory.ACTIVITIES, listOf(SelectionEntry("a", "Sushi making class", listOf("Tsukiji"), 80.0))),
             ),
-        itinerary = emptyList(),
+        itinerary = PlanItineraryUi(),
         costParts =
             listOf(
                 io.github.rupakc.travelplanner.core.domain.plan.CostPart(io.github.rupakc.travelplanner.core.domain.plan.CostCategory.HOTEL, 2400.0),

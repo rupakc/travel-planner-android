@@ -1,22 +1,17 @@
 package io.github.rupakc.travelplanner.feature.share
 
 import androidx.compose.runtime.Immutable
-import io.github.rupakc.travelplanner.core.domain.export.PlanIcs
+import io.github.rupakc.travelplanner.core.domain.itinerary.PlanItinerary
+import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledDay
+import io.github.rupakc.travelplanner.core.domain.itinerary.SlotEdit
 import io.github.rupakc.travelplanner.core.domain.plan.computePlanCost
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
-import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.core.model.plan.SharedPlan
 import io.github.rupakc.travelplanner.core.model.section.Flight
 import io.github.rupakc.travelplanner.core.model.section.FlightLeg
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.intOrNull
 
 /** Which flight line this is (web share page tags). */
 internal sealed interface FlightTag {
@@ -31,19 +26,6 @@ internal sealed interface FlightTag {
 
 @Immutable
 internal data class SharedFlightRow(val tag: FlightTag, val leg: FlightLeg, val route: String?, val date: String?, val priceUsd: Double?)
-
-@Immutable
-internal data class SharedSlot(
-    val timeOfDay: String?,
-    val timeRange: String?,
-    val activity: String?,
-    val location: String?,
-    val note: String?,
-    val fromLink: Boolean,
-)
-
-@Immutable
-internal data class SharedDay(val dayNumber: Int?, val date: String?, val city: String?, val theme: String?, val slots: List<SharedSlot>)
 
 /** A public shared plan, prepared like the web SharePage (`frontend/src/pages/SharePage.jsx`). */
 @Immutable
@@ -61,9 +43,12 @@ internal data class SharedTrip(
     val flights: List<SharedFlightRow>,
     /** Sum of leg prices when the plan has two or more legs. */
     val legsTotalUsd: Double?,
-    val itinerary: List<SharedDay>,
+    /** The arranged, scheduled itinerary (same days as My Plan and the .ics export). */
+    val itinerary: List<ScheduledDay>,
     /** True when [itinerary] is the full saved itinerary, false for individually picked slots. */
     val fullItinerary: Boolean,
+    val itineraryEdits: Map<String, SlotEdit>,
+    val itineraryNotes: Map<String, String>,
     val selections: PlanSelections,
 ) {
     companion object {
@@ -71,7 +56,6 @@ internal data class SharedTrip(
             val sd = plan.searchData
             val sel = plan.selections
             val stops = sd.destinations.orEmpty()
-            val selectionsJson = PlanSelectionsSerializer.toJson(sel)
             val full = sel.itinerarySnapshot?.get("days") is JsonArray && (sel.itinerarySnapshot?.get("days") as JsonArray).isNotEmpty()
             return SharedTrip(
                 name = plan.name,
@@ -86,8 +70,10 @@ internal data class SharedTrip(
                 importUrl = sd.importSource?.url,
                 flights = flights(sel),
                 legsTotalUsd = sel.flights.takeIf { it.size > 1 }?.sumOf { it.priceUsd ?: 0.0 },
-                itinerary = PlanIcs.planItineraryDays(selectionsJson, null).map { day(it, sel) },
+                itinerary = PlanItinerary.days(sel),
                 fullItinerary = full,
+                itineraryEdits = SlotEdit.fromSelections(sel.itineraryEdits),
+                itineraryNotes = sel.itineraryNotes.filterValues(String::isNotBlank),
                 selections = sel,
             )
         }
@@ -114,33 +100,6 @@ internal data class SharedTrip(
         }
 
         private fun route(from: String?, to: String?): String? = if (from != null && to != null) "$from → $to" else from ?: to
-
-        private fun day(json: JsonObject, sel: PlanSelections): SharedDay =
-            SharedDay(
-                dayNumber = json["day_number"].prim()?.intOrNull,
-                date = json["date"].text(),
-                city = city(json["city"].text()),
-                theme = json["theme"].text(),
-                slots =
-                    (json["slots"] as? JsonArray).orEmpty().filterIsInstance<JsonObject>().map { slot ->
-                        val key = slot["key"].text().orEmpty()
-                        val edit = sel.itineraryEdits[key]
-                        val start = slot["start_time"].text()
-                        val end = slot["end_time"].text()
-                        SharedSlot(
-                            timeOfDay = slot["time_of_day"].text(),
-                            timeRange = if (start != null && end != null) "$start–$end" else null,
-                            activity = edit?.get("activity").text() ?: slot["activity"].text(),
-                            location = (edit?.get("location") ?: slot["location"]).text(),
-                            note = sel.itineraryNotes[key]?.takeIf(String::isNotBlank),
-                            fromLink = slot["from_link"].prim()?.booleanOrNull == true,
-                        )
-                    },
-            )
-
-        private fun JsonElement?.prim(): JsonPrimitive? = (this as? JsonPrimitive)?.takeIf { it !is JsonNull }
-
-        private fun JsonElement?.text(): String? = prim()?.content?.takeIf(String::isNotBlank)
 
         private const val ISO_DATE_LENGTH = 10
     }

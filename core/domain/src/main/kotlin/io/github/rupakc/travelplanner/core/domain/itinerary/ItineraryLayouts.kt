@@ -226,7 +226,8 @@ object ItineraryLayouts {
         val movable: List<String>,
     )
 
-    private fun fnv1a(text: String): String {
+    /** FNV-1a over code points, base 36 (web `hash`): short and stable, not for security. Also used by the plan export ids. */
+    internal fun fnv1a(text: String): String {
         var h = FNV_OFFSET
         var i = 0
         while (i < text.length) {

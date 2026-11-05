@@ -16,6 +16,7 @@ import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionRules
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.plan.SelectionKeys
+import io.github.rupakc.travelplanner.core.model.plan.stripLinkEvidence
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.SectionId
@@ -150,9 +151,9 @@ class CurrentPlanStoreImpl
                             sent.searchRequest
                                 ?.let { TravelJson.encodeToJsonElement(TravelSearchRequest.serializer(), it) as JsonObject }
                                 ?: EmptyJsonObject
-                        plansRepository.create(planName, searchData, withItinerarySnapshot(sent))
+                        plansRepository.create(planName, searchData, stripLinkEvidence(withItinerarySnapshot(sent)))
                     } else {
-                        plansRepository.update(planId, planName, withItinerarySnapshot(sent))
+                        plansRepository.update(planId, planName, stripLinkEvidence(withItinerarySnapshot(sent)))
                     }
                 result.onSuccess { plan ->
                     // Apply only identity fields: edits made while the request was in flight are kept and stay dirty.

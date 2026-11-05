@@ -1,0 +1,185 @@
+{
+  "id": 202,
+  "name": "Rome & Florence",
+  "search_data": {
+    "origin": "New York, USA (JFK)",
+    "destination": "Rome, Italy (FCO)",
+    "destinations": [
+      "Rome, Italy",
+      "Florence, Italy"
+    ],
+    "destination_nights": [
+      2,
+      2
+    ],
+    "departure_date": "2027-09-20",
+    "return_date": "2027-09-24",
+    "num_travelers": 1
+  },
+  "selections": {
+    "flight": {
+      "price_usd": 612,
+      "outbound": {
+        "airline": "ITA Airways",
+        "flight_number": "AZ609",
+        "departure_airport": "JFK",
+        "arrival_airport": "FCO",
+        "departure_time": "2027-09-19T17:35",
+        "arrival_time": "2027-09-20T08:05"
+      }
+    },
+    "hotel": {
+      "name": "Hotel Artemide",
+      "address": "Via Nazionale 22, Rome",
+      "price_per_night_usd": 260
+    },
+    "itinerary_layout": {
+      "fingerprint": "13m4ps5",
+      "positions": {
+        "2-afternoon": "3-evening",
+        "1-evening": "2-evening",
+        "4-afternoon": "4-evening"
+      }
+    },
+    "itinerary_edits": {
+      "1-morning#2": {
+        "activity": "Palatine Hill (same ticket)"
+      },
+      "3-morning": {
+        "activity": "",
+        "cost": null
+      }
+    },
+    "itinerary_notes": {
+      "2-morning": "Skip-the-line slot 08:30"
+    }
+  },
+  "live_itinerary": {
+    "days": [
+      {
+        "day_number": 1,
+        "city": "Rome, Italy",
+        "theme": "Ancient Rome",
+        "slots": [
+          {
+            "time_of_day": "morning",
+            "activity": "Colosseum and Roman Forum",
+            "location": "Piazza del Colosseo",
+            "duration_hours": 3,
+            "estimated_cost_usd": 24,
+            "lat": 41.8902,
+            "lng": 12.4922
+          },
+          {
+            "time_of_day": "morning",
+            "activity": "Palatine Hill",
+            "location": "Via di San Gregorio",
+            "duration_hours": "1.5",
+            "estimated_cost_usd": 0
+          },
+          {
+            "time_of_day": "afternoon",
+            "activity": "Pantheon",
+            "location": "Piazza della Rotonda",
+            "duration_hours": 1,
+            "lat": 41.8986,
+            "lng": 12.4769
+          },
+          {
+            "time_of_day": "late night",
+            "activity": "Gelato crawl in Trastevere",
+            "location": "Trastevere",
+            "estimated_cost_usd": "12"
+          },
+          {
+            "time_of_day": "evening",
+            "activity": "Dinner in Monti",
+            "location": "Monti, Rome",
+            "duration_hours": 2,
+            "estimated_cost_usd": 40,
+            "lat": 41.8955,
+            "lng": 12.493
+          }
+        ]
+      },
+      {
+        "day_number": 2,
+        "city": "Rome, Italy",
+        "theme": "Vatican",
+        "slots": [
+          {
+            "time_of_day": "morning",
+            "activity": "Vatican Museums and Sistine Chapel",
+            "location": "Viale Vaticano",
+            "duration_hours": 4,
+            "estimated_cost_usd": 32,
+            "lat": 41.9065,
+            "lng": 12.4536
+          },
+          {
+            "time_of_day": "afternoon",
+            "activity": "St Peter's Basilica dome climb",
+            "location": "Piazza San Pietro",
+            "duration_hours": 2,
+            "estimated_cost_usd": 10,
+            "lat": 41.9022,
+            "lng": 12.4539
+          }
+        ]
+      },
+      {
+        "day_number": 3,
+        "city": "Florence, Italy",
+        "theme": "Train north",
+        "slots": [
+          {
+            "time_of_day": "morning",
+            "activity": "Frecciarossa Rome → Florence",
+            "location": "Roma Termini",
+            "duration_hours": 1.75,
+            "estimated_cost_usd": 35
+          },
+          {
+            "time_of_day": "afternoon",
+            "activity": "Uffizi Gallery",
+            "location": "Piazzale degli Uffizi",
+            "duration_hours": 3,
+            "estimated_cost_usd": 29,
+            "lat": 43.7678,
+            "lng": 11.2553
+          },
+          {
+            "time_of_day": "evening",
+            "activity": "Sunset at Piazzale Michelangelo",
+            "location": "Oltrarno",
+            "duration_hours": 1.5,
+            "lat": 43.7629,
+            "lng": 11.265
+          }
+        ]
+      },
+      {
+        "day_number": 4,
+        "city": "Florence, Italy",
+        "slots": [
+          {
+            "time_of_day": "morning",
+            "activity": "Duomo and Brunelleschi's Dome",
+            "location": "Piazza del Duomo",
+            "duration_hours": 2.5,
+            "estimated_cost_usd": 30,
+            "lat": 43.7731,
+            "lng": 11.256
+          },
+          {
+            "time_of_day": "afternoon",
+            "activity": "Mercato Centrale",
+            "location": "San Lorenzo",
+            "estimated_cost_usd": 20
+          }
+        ]
+      }
+    ],
+    "total_estimated_cost_usd": 980
+  }
+}

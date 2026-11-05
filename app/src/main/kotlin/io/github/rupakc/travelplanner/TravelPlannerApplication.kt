@@ -7,9 +7,12 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import io.github.rupakc.travelplanner.core.common.AppLogger
+import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.notifications.NotificationChannels
 import io.github.rupakc.travelplanner.core.notifications.NotificationsInitializer
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @HiltAndroidApp
 class TravelPlannerApplication :
@@ -17,7 +20,16 @@ class TravelPlannerApplication :
     Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
-    @Inject lateinit var notifications: NotificationsInitializer
+    /**
+     * Lazy (performance M1): building it constructs the session DataStore, Retrofit, Room and the push
+     * registrar. `get()` runs on [appScope] (Dispatchers.Default), so that graph is built off the main thread
+     * in every process start (UI, worker, FCM, broadcast); it is still built in each of them. Avoiding the
+     * network calls in non-UI starts is NotificationsInitializer's foreground gate, not this.
+     */
+    @Inject lateinit var notifications: dagger.Lazy<NotificationsInitializer>
+
+    @Inject @ApplicationScope
+    lateinit var appScope: CoroutineScope
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
@@ -41,6 +53,6 @@ class TravelPlannerApplication :
         }
         NotificationChannels.createAll(this)
         // Alert poll, trip reminders, nearby worker and FCM registration (all off the main thread).
-        notifications.start()
+        appScope.launch { notifications.get().start() }
     }
 }

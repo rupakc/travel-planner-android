@@ -129,12 +129,17 @@ class ChatViewModel
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState())
 
-        /** Opens [threadId] (from the route), or the most recent thread when null. Only the first call counts. */
+        /**
+         * Opens [threadId] (from the route), or the most recent thread when null. Only the first call counts.
+         * The id must be one of the signed-in user's threads ([ChatRepository.threads] is per username):
+         * any other id (another user's, or a forged route) falls back to the user's latest thread.
+         */
         fun open(threadId: Long?) {
             if (opened) return
             opened = true
             viewModelScope.launch {
-                val id = threadId ?: chat.threads.first().firstOrNull()?.id
+                val own = chat.threads.first()
+                val id = threadId?.takeIf { wanted -> own.any { it.id == wanted } } ?: own.firstOrNull()?.id
                 if (currentThread.value == null && id != null) switchTo(id)
             }
         }

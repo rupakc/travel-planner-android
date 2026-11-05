@@ -9,4 +9,6 @@
     <exclude domain="sharedpref" path="alert_poll.xml" />
     <exclude domain="sharedpref" path="trip_reminders.xml" />
     <exclude domain="sharedpref" path="nearby_notifications.xml" />
+    <exclude domain="sharedpref" path="push_registration.xml" />
+    <exclude domain="sharedpref" path="server_capabilities.xml" />
 </full-backup-content>

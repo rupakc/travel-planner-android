@@ -167,7 +167,7 @@ class SearchRepositoryImpl
                     SectionId.ITINERARY -> searchApi::itinerary
                     SectionId.EVENTS -> searchApi::events
                     SectionId.WALKING_TOURS -> searchApi::walkingTours
-                    else -> return AppResult.Failure(AppError.Unknown("No single-agent route for ${section.wire}"))
+                    else -> return AppResult.Failure(AppError.Unknown(null))
                 }
             return apiCall { call(request) }.map { SectionDecoder.decode(section, it) }
         }
