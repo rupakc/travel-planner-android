@@ -23,6 +23,7 @@ class ContrastTest {
 
     private fun textPairs(s: ColorScheme, x: ExtendedColors): List<Pair> {
         val surfaces = listOf("surface" to s.surface, "background" to s.background, "surfaceContainerLow" to s.surfaceContainerLow)
+
         fun onSurfaces(name: String, fg: Color, min: Double = TEXT) = surfaces.map { (n, bg) -> Pair("$name on $n", fg, bg, min) }
         return listOf(
             Pair("onPrimary on primary", s.onPrimary, s.primary, TEXT),
