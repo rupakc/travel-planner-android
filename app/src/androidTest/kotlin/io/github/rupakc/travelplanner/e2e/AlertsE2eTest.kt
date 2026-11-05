@@ -1,16 +1,16 @@
 package io.github.rupakc.travelplanner.e2e
 
 import android.app.NotificationManager
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollWorker
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import io.github.rupakc.travelplanner.MainActivity
 import io.github.rupakc.travelplanner.R as AppR
+import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollWorker
 import io.github.rupakc.travelplanner.feature.alerts.R as AlertsR
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -29,9 +29,11 @@ import org.junit.runner.RunWith
 @E2eTest
 @RunWith(AndroidJUnit4::class)
 class AlertsE2eTest {
-    @get:Rule(order = 0) val rule = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0)
+    val rule = createAndroidComposeRule<MainActivity>()
 
-    @get:Rule(order = 1) val failureShot = Screenshots.onFailure()
+    @get:Rule(order = 1)
+    val failureShot = Screenshots.onFailure()
     private val api = BackendApi()
     private lateinit var robot: AppRobot
 
