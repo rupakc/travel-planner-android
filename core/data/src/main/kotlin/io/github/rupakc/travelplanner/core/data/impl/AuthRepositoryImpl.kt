@@ -3,7 +3,6 @@ package io.github.rupakc.travelplanner.core.data.impl
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.map
 import io.github.rupakc.travelplanner.core.common.onSuccess
-import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PushTokenSource
 import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
@@ -14,7 +13,6 @@ import io.github.rupakc.travelplanner.core.model.auth.LoginRequest
 import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.devices.UnregisterDeviceRequest
 import io.github.rupakc.travelplanner.core.model.settings.Session
-import io.github.rupakc.travelplanner.core.network.AuthEvents
 import io.github.rupakc.travelplanner.core.network.BaseUrlProvider
 import io.github.rupakc.travelplanner.core.network.api.AuthApi
 import io.github.rupakc.travelplanner.core.network.api.DevicesApi
@@ -22,9 +20,7 @@ import io.github.rupakc.travelplanner.core.network.apiCall
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 @Singleton
@@ -37,13 +33,10 @@ class AuthRepositoryImpl
         private val pushTokenSource: Optional<PushTokenSource>,
         private val baseUrlProvider: BaseUrlProvider,
         private val sessionCleaner: SessionCleaner,
-        authEvents: AuthEvents,
-        @ApplicationScope appScope: CoroutineScope,
     ) : AuthRepository {
-        init {
-            // A 401 cleared the session in the network layer: drop the user's local data too (review I6).
-            appScope.launch { authEvents.flow.collect { sessionCleaner.clearUserData() } }
-        }
+        // A 401 or a locally expired JWT only signs out (the session reads null → Login); the user's draft,
+        // cached plans, recent searches and chat survive so their work outlives a 24 h token. Local data is
+        // wiped only on explicit logout, on login as a different user, and on a server change.
 
         override val session: Flow<Session?> = sessionStore.session
 

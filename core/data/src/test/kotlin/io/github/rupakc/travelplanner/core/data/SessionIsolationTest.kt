@@ -36,7 +36,6 @@ import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -60,7 +59,6 @@ class SessionIsolationTest {
     private fun TestScope.auth(
         store: FakeSessionStore,
         cleaner: SessionCleaner,
-        events: AuthEvents = AuthEvents(),
         authApi: AuthApi = mockk(),
         devicesApi: DevicesApi = mockk(relaxed = true),
         push: PushTokenSource? = null,
@@ -71,8 +69,6 @@ class SessionIsolationTest {
         Optional.ofNullable(push),
         BaseUrlProvider(FakeSettingsStore(), buildInfo),
         cleaner,
-        events,
-        kotlinx.coroutines.CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
     )
 
     @Test
@@ -123,13 +119,54 @@ class SessionIsolationTest {
         }
 
     @Test
-    fun `a 401 clears local data`() =
+    fun `a 401 signs out but keeps the user's data`() =
         runTest {
             val events = AuthEvents()
             val cleaner = CountingCleaner()
-            auth(FakeSessionStore(), cleaner, events)
+            val store = FakeSessionStore(Session("t", User("alice")))
+            auth(store, cleaner)
+            store.state.value = null // what AuthInterceptor does on a 401
             events.emit(AuthEvent.SessionExpired)
-            assertEquals(1, cleaner.calls)
+            assertEquals(0, cleaner.calls)
+        }
+
+    private fun cleanerFor(plan: FakeCurrentPlanStore) =
+        SessionCleanerImpl(
+            plan,
+            FakeSearchRepository(),
+            NearbyRepositoryImpl(mockk(), SystemAppClock()),
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+            mockk(relaxed = true),
+        )
+
+    private fun loginApi(): AuthApi =
+        mockk<AuthApi>().also { api ->
+            coEvery { api.login(any()) } answers {
+                LoginResponse("tok", user = User(firstArg<io.github.rupakc.travelplanner.core.model.auth.LoginRequest>().username))
+            }
+        }
+
+    @Test
+    fun `token expiry then login as the same user keeps the draft`() =
+        runTest {
+            val plan = FakeCurrentPlanStore().apply { toggle(PlanItem.HotelItem(Hotel(name = "Alice's hotel"))) }
+            val store = FakeSessionStore(Session("expired", User("alice")))
+            val repo = auth(store, cleanerFor(plan), authApi = loginApi())
+            store.state.value = null // the JWT expired locally / a 401 cleared the session
+            repo.login("alice", "pw")
+            assertEquals("Alice's hotel", plan.draft.value.selections.hotel?.name)
+        }
+
+    @Test
+    fun `token expiry then login as a different user wipes the draft`() =
+        runTest {
+            val plan = FakeCurrentPlanStore().apply { toggle(PlanItem.HotelItem(Hotel(name = "Alice's hotel"))) }
+            val store = FakeSessionStore(Session("expired", User("alice")))
+            val repo = auth(store, cleanerFor(plan), authApi = loginApi())
+            store.state.value = null
+            repo.login("bob", "pw")
+            assertNull(plan.draft.value.selections.hotel)
         }
 
     @Test

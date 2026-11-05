@@ -348,8 +348,8 @@ interface FeedbackRepository {
 }
 
 /**
- * Wipes the signed-in user's local data (draft, search, caches; not chat history). Called on logout,
- * after a 401 cleared the session, when a different user signs in, and when the server URL changes.
+ * Wipes the signed-in user's local data (draft, search, caches; not chat history). Called only on explicit
+ * logout, when a different user signs in, and when the server URL changes — never on a 401 or token expiry.
  * Features normally never call it.
  */
 interface SessionCleaner {

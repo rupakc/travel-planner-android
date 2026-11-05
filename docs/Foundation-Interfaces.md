@@ -72,8 +72,9 @@ sealed interface AppError { val message: String? }   // message = backend `detai
 `AppError.Client.code`/`extras` carry structured details: `/api/import/*` codes (`empty_page`, `no_places`, …),
 price-watch 422s (`no_live_price` with `suggestions`/`estimate` in `extras` as raw JSON text — decode with
 `TravelJson` into `NoLivePriceError`; `target_currency_mismatch`), nearby `NotFound(code = "no_place")`,
-`Server(code = "agent_error")`. 401 anywhere clears the session automatically (the shell shows Login and a snackbar)
-and `SessionCleaner` wipes the user's local data (draft, search, caches; chat history is kept per username).
+`Server(code = "agent_error")`. 401 anywhere clears the session automatically (the shell shows Login and a snackbar).
+A 401 or an expired token only signs out: the draft, cached plans, recent searches and chat survive. Local data is
+wiped (`SessionCleaner`) only on explicit logout, on login as a different user, and on a server change.
 
 Session rules (fix round 1): the session is encrypted at rest (Tink, Keystore-wrapped key); an expired JWT
 (`exp`) reads as signed out, so `AuthRepository.session` emits `null` at expiry and the gate shows Login;
@@ -369,8 +370,8 @@ interface FeedbackRepository {
 }
 
 /**
- * Wipes the signed-in user's local data (draft, search, caches; not chat history). Called on logout,
- * after a 401 cleared the session, when a different user signs in, and when the server URL changes.
+ * Wipes the signed-in user's local data (draft, search, caches; not chat history). Called only on explicit
+ * logout, when a different user signs in, and when the server URL changes — never on a 401 or token expiry.
  * Features normally never call it.
  */
 interface SessionCleaner {
