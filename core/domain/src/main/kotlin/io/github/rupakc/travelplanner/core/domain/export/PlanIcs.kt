@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.core.domain.export
 
+import io.github.rupakc.travelplanner.core.domain.itinerary.ItineraryLayouts
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import java.time.Instant
@@ -118,7 +119,7 @@ object PlanIcs {
         val edits = selections?.get("itinerary_edits").obj()
         val layout = selections?.get("itinerary_layout").obj()
 
-        fun arranged(source: JsonObject) = ItineraryArrangement.scheduleDays(ItineraryArrangement.arrange(source, layout), edits)
+        fun arranged(source: JsonObject) = ScheduledItineraryJson.scheduledDays(source, layout, edits)
         if (itinerary?.get("days").array().isNotEmpty()) return arranged(itinerary!!)
         val snapshot = selections?.get("itinerary").obj()
         if (snapshot?.get("days").array().isNotEmpty()) return arranged(snapshot!!)
@@ -248,7 +249,7 @@ object PlanIcs {
     }
 
     private fun slotEvent(day: JsonObject, slot: JsonObject, date: String, selections: JsonObject?): PlanCalendarEvent {
-        val key = slot["key"].orIfNull { null }?.js() ?: ItineraryArrangement.slotKey(day["day_number"], slot["time_of_day"])
+        val key = slot["key"].orIfNull { null }?.js() ?: "${day["day_number"].js()}-${slot["time_of_day"].js()}"
         val edit = selections?.get("itinerary_edits").obj()?.get(key).obj()
         val note = selections?.get("itinerary_notes").obj()?.get(key).text()
         var start = clockMinutes(slot["start_time"].str())
@@ -374,7 +375,7 @@ object PlanIcs {
                 val endDate = ev["end_date"].str()
                 val last = if (isIsoDate(endDate) && endDate!! >= first) endDate else first
                 PlanCalendarEvent(
-                    id = "event-${ItineraryArrangement.fnv("${ev["name"].js()}|$first")}",
+                    id = "event-${ItineraryLayouts.fnv1a("${ev["name"].js()}|$first")}",
                     summary = "🎉 ${ev["name"].js()}",
                     location = ev["location"].text(),
                     description = listOfNotNull(ev["description"].text(), ev["price"].text()?.let { "Price: $it" }).joinToString("\n"),
@@ -396,6 +397,6 @@ object PlanIcs {
             listOf("origin", "destination", "departure_date", "return_date").map { key ->
                 searchData?.get(key).let { if (it == null || it == kotlinx.serialization.json.JsonNull) "" else it.js() }
             } + (planName ?: "")
-        return "trip-${slug(planName)}-${ItineraryArrangement.fnv(trip.joinToString("|"))}"
+        return "trip-${slug(planName)}-${ItineraryLayouts.fnv1a(trip.joinToString("|"))}"
     }
 }
