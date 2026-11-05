@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.semantics
 import io.github.rupakc.travelplanner.core.designsystem.component.LoadingIndicator
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.ui.PriceText
@@ -54,7 +55,7 @@ private fun Sheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun Title(text: String) = Text(text, style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+private fun Title(text: String) = Text(text, style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() }.readsWithoutEmoji(text))
 
 /** Web LayoverModal: can you leave the airport, transit visa, a mini-plan, buffers, airside alternative. */
 @Suppress("CyclomaticComplexMethod")

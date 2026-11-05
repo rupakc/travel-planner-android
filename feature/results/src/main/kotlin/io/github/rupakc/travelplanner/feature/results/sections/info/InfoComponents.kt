@@ -33,6 +33,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.section.SectionId
@@ -108,7 +109,11 @@ internal fun InfoPill(text: String, modifier: Modifier = Modifier, tone: Tone = 
         text,
         style = TravelTheme.typography.labelMedium,
         color = colors.content,
-        modifier = modifier.background(colors.container, TravelShape.Pill).padding(horizontal = TravelTheme.spacing.sm, vertical = TravelTheme.spacing.xxs),
+        modifier =
+            modifier
+                .background(colors.container, TravelShape.Pill)
+                .padding(horizontal = TravelTheme.spacing.sm, vertical = TravelTheme.spacing.xxs)
+                .readsWithoutEmoji(text),
     )
 }
 
@@ -121,14 +126,14 @@ internal fun Callout(text: String, modifier: Modifier = Modifier, tone: Tone = T
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
     ) {
         if (icon != null) Icon(icon, contentDescription = null, tint = colors.content, modifier = Modifier.size(InfoDimens.SmallIcon))
-        Text(text, style = TravelTheme.typography.bodySmall, color = colors.content, modifier = Modifier.weight(1f))
+        Text(text, style = TravelTheme.typography.bodySmall, color = colors.content, modifier = Modifier.weight(1f).readsWithoutEmoji(text))
     }
 }
 
 /** A sub-heading inside a section (semantic heading for TalkBack navigation). */
 @Composable
 internal fun SubHeading(text: String, modifier: Modifier = Modifier, color: Color = TravelTheme.colors.onSurface) {
-    Text(text, style = TravelTheme.typography.titleSmall, color = color, modifier = modifier.semantics { heading() })
+    Text(text, style = TravelTheme.typography.titleSmall, color = color, modifier = modifier.semantics { heading() }.readsWithoutEmoji(text))
 }
 
 /** "Label: value" line (Coverage:, Price:, Fees:…). Hidden when [value] is blank. */
