@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.core.net.toUri
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
@@ -50,16 +52,22 @@ fun rememberLinkOpener(): (String) -> Unit {
     return { url -> openInCustomTab(context, url, color) }
 }
 
-/** "View & book" / "Open <provider>" button; hidden when [url] is null/blank. */
+/**
+ * "View & book" / "Open <provider>" button; hidden when [url] is null/blank.
+ * [accessibilityLabel] names the item for TalkBack (e.g. "View and book Hotel Lisboa") so a
+ * list of cards does not read the same label over and over.
+ */
 @Composable
 fun BookingLinkButton(
     url: String?,
     modifier: Modifier = Modifier,
     providerName: String? = null,
     variant: TpButtonVariant = TpButtonVariant.Secondary,
+    accessibilityLabel: String? = null,
 ) {
     if (url.isNullOrBlank()) return
     val open = rememberLinkOpener()
     val label = providerName?.let { stringResource(R.string.booking_open, it) } ?: stringResource(R.string.booking_open_generic)
-    TpButton(label, onClick = { open(url) }, modifier = modifier, variant = variant, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp)
+    val described = if (accessibilityLabel != null) modifier.semantics { contentDescription = accessibilityLabel } else modifier
+    TpButton(label, onClick = { open(url) }, modifier = described, variant = variant, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp)
 }
