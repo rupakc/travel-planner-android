@@ -21,10 +21,14 @@ internal object DeepLinkIntents {
             "android-support-nav:controller:deepLinkIntent",
         )
 
-    /** Strips Navigation's internal extras and any non-app-scheme data from [intent] (in place). */
+    /**
+     * Strips Navigation's internal extras from [intent] (in place) and keeps its data only for a `travelplanner://`
+     * VIEW intent, the one shape the gate knows how to hold and replay. Run after `withPushDeepLink`, which turns a
+     * system-shown push into such a VIEW intent.
+     */
     fun sanitize(intent: Intent): Intent {
         NAV_EXTRAS.forEach(intent::removeExtra)
-        if (intent.data != null && intent.data?.scheme != DeepLinks.SCHEME) intent.data = null
+        if (intent.data != null && (intent.action != Intent.ACTION_VIEW || intent.data?.scheme != DeepLinks.SCHEME)) intent.data = null
         return intent
     }
 
