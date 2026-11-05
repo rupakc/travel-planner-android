@@ -19,8 +19,8 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import io.github.rupakc.travelplanner.MainActivity
-import io.github.rupakc.travelplanner.feature.auth.R as AuthR
 import io.github.rupakc.travelplanner.core.ui.R as UiR
+import io.github.rupakc.travelplanner.feature.auth.R as AuthR
 import io.github.rupakc.travelplanner.feature.chat.R as ChatR
 import io.github.rupakc.travelplanner.feature.onboarding.R as OnboardingR
 import io.github.rupakc.travelplanner.feature.search.R as SearchR
@@ -258,8 +258,9 @@ class AppRobot(val rule: AppRule) {
         return rule.onAllNodes(androidx.compose.ui.test.hasContentDescription(prefix, substring = true))
             .fetchSemanticsNodes()
             .mapNotNull { node ->
-                val d = node.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription) { emptyList() }
-                    .firstOrNull { it.startsWith(prefix) && it.endsWith(suffix) } ?: return@mapNotNull null
+                val d =
+                    node.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription) { emptyList() }
+                        .firstOrNull { it.startsWith(prefix) && it.endsWith(suffix) } ?: return@mapNotNull null
                 d.removePrefix(prefix).removeSuffix(suffix) to node.boundsInWindow.top
             }
     }
