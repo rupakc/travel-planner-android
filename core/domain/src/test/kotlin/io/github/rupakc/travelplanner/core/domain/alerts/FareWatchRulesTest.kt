@@ -8,6 +8,7 @@ import io.github.rupakc.travelplanner.core.model.section.FlightLegGroup
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import java.time.Instant
 import java.time.LocalDate
+import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -116,13 +117,13 @@ class FareWatchRulesTest {
         assertEquals(450.0, defaultTarget(520.0, 500.0))
         assertEquals(450.0, defaultTarget(null, 500.0))
         assertNull(defaultTarget(null, null))
-        assertEquals(TargetError.NOT_A_PRICE, checkTarget("", 500.0).error)
-        assertEquals(TargetError.NOT_A_PRICE, checkTarget("abc", 500.0).error)
-        assertEquals(TargetError.NOT_A_PRICE, checkTarget("0", 500.0).error)
-        assertEquals(TargetError.NOT_A_PRICE, checkTarget("-4", 500.0).error)
-        assertEquals(TargetCheck(450.0, null, false), checkTarget("450", 500.0))
-        assertEquals(1200.0, checkTarget("$1,200", 1500.0).value)
-        assertTrue(checkTarget("520", 500.0).alreadyUnder)
+        assertEquals(TargetError.NOT_A_PRICE, checkTarget("", 500.0, Locale.US).error)
+        assertEquals(TargetError.NOT_A_PRICE, checkTarget("abc", 500.0, Locale.US).error)
+        assertEquals(TargetError.NOT_A_PRICE, checkTarget("0", 500.0, Locale.US).error)
+        assertEquals(TargetError.NOT_A_PRICE, checkTarget("-4", 500.0, Locale.US).error)
+        assertEquals(TargetCheck(450.0, null, false), checkTarget("450", 500.0, Locale.US))
+        assertEquals(1200.0, checkTarget("$1,200", 1500.0, Locale.US).value)
+        assertTrue(checkTarget("520", 500.0, Locale.US).alreadyUnder)
         assertEquals(50.0, rangePosition(400.0, 600.0, 500.0)!!, 0.01)
         assertEquals(0.0, rangePosition(400.0, 600.0, 100.0))
         assertEquals(100.0, rangePosition(400.0, 600.0, 900.0))
@@ -182,5 +183,14 @@ class FareWatchRulesTest {
         assertEquals(400.0, req.targetPrice)
         assertEquals(4L, t.toMatchRequest().planId)
         assertNotNull(req)
+    }
+
+    @Test
+    fun `fare targets are read in the user's language`() {
+        val es = Locale.forLanguageTag("es-ES")
+        assertEquals(450.5, checkTarget("450,50", 500.0, es).value)
+        assertEquals(1500.5, checkTarget("1.500,50", 2000.0, es).value)
+        assertEquals(1500.5, checkTarget("1,500.50", 2000.0, Locale.US).value)
+        assertEquals(1200.0, checkTarget("1.200 US$", 2000.0, es).value)
     }
 }

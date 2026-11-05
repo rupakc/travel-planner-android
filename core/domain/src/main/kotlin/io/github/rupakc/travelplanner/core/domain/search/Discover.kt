@@ -2,17 +2,18 @@ package io.github.rupakc.travelplanner.core.domain.search
 
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
 import io.github.rupakc.travelplanner.core.model.search.DiscoveryRequest
+import java.util.Locale
 
 /** Web Surprise-me button rule: enabled only with an origin and a nationality. */
 fun canDiscover(form: SearchForm): Boolean = form.origin.isNotBlank() && form.nationality.isNotBlank()
 
 /** Web `handleDiscover` body from the discover form. */
-fun toDiscoveryRequest(form: SearchForm): DiscoveryRequest =
+fun toDiscoveryRequest(form: SearchForm, locale: Locale): DiscoveryRequest =
     DiscoveryRequest(
         origin = form.origin.trim(),
         departureDate = form.departureDate,
         nationality = form.nationality.trim(),
-        budgetUsd = parseBudget(form.budgetUsd),
+        budgetUsd = parseBudget(form.budgetUsd, locale),
         returnDate = form.returnDate.ifBlank { null },
         interests = form.interests,
         // The backend requires adults ≥ 1 (DiscoveryRequest.adults ge=1); a seniors-only party still sends 1.

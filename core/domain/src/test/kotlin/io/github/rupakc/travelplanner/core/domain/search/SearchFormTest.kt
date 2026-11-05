@@ -3,6 +3,7 @@ package io.github.rupakc.travelplanner.core.domain.search
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
 import java.time.LocalDate
+import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -28,6 +29,7 @@ class SearchFormTest {
             buildSearchRequest(
                 filled.copy(budgetUsd = "2500", travellers = TravellerCounts(adults = 2, infants = 1), returnDate = ""),
                 listOf(ExtraStop(" Seoul ", "2"), ExtraStop("  ", "3"), ExtraStop("Osaka", "")),
+                Locale.US,
             )
         assertEquals(2500.0, req.budgetUsd)
         assertEquals(3, req.numTravelers)
@@ -39,7 +41,7 @@ class SearchFormTest {
 
     @Test
     fun `single city has no destinations and a blank budget is null`() {
-        val req = buildSearchRequest(filled, emptyList())
+        val req = buildSearchRequest(filled, emptyList(), Locale.US)
         assertNull(req.destinations)
         assertNull(req.destinationNights)
         assertNull(req.budgetUsd)
@@ -48,10 +50,10 @@ class SearchFormTest {
 
     @Test
     fun `budget categories map both ways like the web`() {
-        assertEquals("medium", usdToBudgetCategory(""))
-        assertEquals("low", usdToBudgetCategory("1500"))
-        assertEquals("medium", usdToBudgetCategory("5000"))
-        assertEquals("high", usdToBudgetCategory("5001"))
+        assertEquals("medium", usdToBudgetCategory("", Locale.US))
+        assertEquals("low", usdToBudgetCategory("1500", Locale.US))
+        assertEquals("medium", usdToBudgetCategory("5000", Locale.US))
+        assertEquals("high", usdToBudgetCategory("5001", Locale.US))
         assertEquals("1000", budgetCategoryToUsd("low"))
         assertEquals("3000", budgetCategoryToUsd("medium"))
         assertEquals("8000", budgetCategoryToUsd("high"))
@@ -82,30 +84,30 @@ class SearchFormTest {
     fun `writes back the preference fields and keeps the others`() {
         val current = Preferences(username = "alice", currentResidence = "Munich, Germany")
         val form = filled.copy(budgetUsd = "9000", interests = listOf("art"), travellers = TravellerCounts(adults = 1, seniors = 2))
-        val next = preferencesFromForm(current, form)
+        val next = preferencesFromForm(current, form, Locale.US)
         assertEquals("alice", next.username)
         assertEquals("Munich, Germany", next.currentResidence)
         assertEquals("high", next.budgetCategory)
         assertEquals(3, next.numTravelers)
         assertEquals(2, next.seniors)
         assertEquals(listOf("art"), next.interests)
-        assertTrue(preferencesChanged(current, form))
-        assertFalse(preferencesChanged(next, form))
+        assertTrue(preferencesChanged(current, form, Locale.US))
+        assertFalse(preferencesChanged(next, form, Locale.US))
     }
 
     @Test
     fun `validation mirrors the web's required and min rules`() {
-        assertEquals(emptyList<SearchFormIssue>(), validateSearchForm(filled, emptyList(), today))
+        assertEquals(emptyList<SearchFormIssue>(), validateSearchForm(filled, emptyList(), today, Locale.US))
         val empty = SearchForm.initial(today)
         assertEquals(
             listOf(SearchFormIssue.ORIGIN_REQUIRED, SearchFormIssue.DESTINATION_REQUIRED, SearchFormIssue.NATIONALITY_REQUIRED),
-            validateSearchForm(empty, emptyList(), today),
+            validateSearchForm(empty, emptyList(), today, Locale.US),
         )
         assertEquals(
             listOf(SearchFormIssue.STOP_CITY_REQUIRED, SearchFormIssue.STOP_NIGHTS_OUT_OF_RANGE),
-            validateSearchForm(filled, listOf(ExtraStop("", ""), ExtraStop("Rome", "31")), today),
+            validateSearchForm(filled, listOf(ExtraStop("", ""), ExtraStop("Rome", "31")), today, Locale.US),
         )
-        assertEquals(listOf(SearchFormIssue.BUDGET_INVALID), validateSearchForm(filled.copy(budgetUsd = "-5"), emptyList(), today))
+        assertEquals(listOf(SearchFormIssue.BUDGET_INVALID), validateSearchForm(filled.copy(budgetUsd = "-5"), emptyList(), today, Locale.US))
     }
 
     @Test
@@ -151,10 +153,22 @@ class SearchFormTest {
         assertEquals("JFK", picked.origin)
         assertEquals(listOf("US"), picked.existingVisas)
         assertEquals("1200", picked.budgetUsd)
-        val req = toDiscoveryRequest(discover)
+        val req = toDiscoveryRequest(discover, Locale.US)
         assertEquals(1200.0, req.budgetUsd)
         assertEquals(listOf("nature"), req.interests)
         assertEquals(VisaBadge.VISA_FREE, visaBadge("visa-free"))
         assertEquals(VisaBadge.VERIFY, visaBadge(null))
+    }
+
+    @Test
+    fun `the budget is read in the user's language`() {
+        val es = Locale.forLanguageTag("es-ES")
+        assertEquals(1500.0, buildSearchRequest(filled.copy(budgetUsd = "1.500"), emptyList(), es).budgetUsd)
+        assertEquals(1500.5, buildSearchRequest(filled.copy(budgetUsd = "1.500,50"), emptyList(), es).budgetUsd)
+        assertEquals(1500.5, buildSearchRequest(filled.copy(budgetUsd = "1,500.50"), emptyList(), Locale.US).budgetUsd)
+        assertEquals(emptyList<SearchFormIssue>(), validateSearchForm(filled.copy(budgetUsd = "1500,50"), emptyList(), today, es))
+        assertEquals("medium", usdToBudgetCategory("1.600", es))
+        assertEquals(1500.0, toDiscoveryRequest(filled.copy(budgetUsd = "1.500"), es).budgetUsd)
+        assertEquals("medium", preferencesFromForm(Preferences(), filled.copy(budgetUsd = "3.000"), es).budgetCategory)
     }
 }

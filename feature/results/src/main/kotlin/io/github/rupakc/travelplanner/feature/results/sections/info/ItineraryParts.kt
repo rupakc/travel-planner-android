@@ -487,11 +487,12 @@ private fun SlotEditor(slot: ItinerarySlot, key: String, edit: SlotEdit, note: S
                 label = { Text(stringResource(R.string.itin_field_location)) },
                 modifier = Modifier.weight(1f),
             )
+            val locale = currentLocale()
             OutlinedTextField(
                 value = costText,
                 onValueChange = { v ->
                     costText = v
-                    host.onUpdateSelections { ItineraryEdits.setEdit(it, key, SlotEditFields.COST, ItineraryEdits.costValue(v)) }
+                    host.onUpdateSelections { ItineraryEdits.setEdit(it, key, SlotEditFields.COST, ItineraryEdits.costValue(v, locale)) }
                 },
                 label = { Text(stringResource(R.string.itin_field_cost)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),

@@ -72,11 +72,20 @@ class DiscoverViewModelTest {
     }
 
     @Test
+    fun `the discover budget is read in the UI language`() {
+        vm.onEvent(DiscoverEvent.SetLocale(java.util.Locale.forLanguageTag("es-ES")))
+        vm.onEvent(DiscoverEvent.UpdateForm(vm.state.value.form.copy(origin = "JFK", budgetUsd = "1.500")))
+        vm.onEvent(DiscoverEvent.Submit)
+        assertEquals(1500.0, repo.requests.last().budgetUsd)
+    }
+
+    @Test
     fun `a seniors-only party still sends one adult (backend adults ge 1)`() {
         assertEquals(
             1,
             io.github.rupakc.travelplanner.core.domain.search.toDiscoveryRequest(
                 SearchForm(travellers = io.github.rupakc.travelplanner.core.domain.search.TravellerCounts(adults = 0, seniors = 2)),
+                java.util.Locale.US,
             ).adults,
         )
     }

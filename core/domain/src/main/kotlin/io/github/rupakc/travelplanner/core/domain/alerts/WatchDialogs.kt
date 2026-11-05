@@ -12,6 +12,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatchKinds
 import io.github.rupakc.travelplanner.core.model.alerts.TargetCurrencyMismatchError
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,6 +50,8 @@ data class FareWatchDialogState(
     val mode: AlertMode = AlertMode.ANY_DROP,
     val target: String = "",
     val targetTouched: Boolean = false,
+    /** The language [target] was typed in (decides "1.500" vs "1,500"); the pre-filled target is plain digits. */
+    val targetLocale: Locale = Locale.ROOT,
     val flexible: Boolean = false,
     val email: Boolean = false,
     val emailAvailable: Boolean = false,
@@ -56,7 +59,7 @@ data class FareWatchDialogState(
     val error: DialogError? = null,
     val done: FareWatch? = null,
 ) {
-    val targetCheck: TargetCheck get() = if (mode == AlertMode.BELOW_TARGET) checkTarget(target, price) else TargetCheck(null, null)
+    val targetCheck: TargetCheck get() = if (mode == AlertMode.BELOW_TARGET) checkTarget(target, price, targetLocale) else TargetCheck(null, null)
 
     /** Shown only once the target was typed in (or submitted). */
     val shownTargetError: TargetError? get() = targetCheck.error.takeIf { targetTouched }
@@ -74,7 +77,7 @@ class FareWatchDialogController(
 
     fun setMode(mode: AlertMode) = mutable.update { it.copy(mode = mode) }
 
-    fun setTarget(text: String) = mutable.update { it.copy(target = text, targetTouched = true) }
+    fun setTarget(text: String, locale: Locale) = mutable.update { it.copy(target = text, targetTouched = true, targetLocale = locale) }
 
     fun setFlexible(on: Boolean) = mutable.update { it.copy(flexible = on) }
 
@@ -135,6 +138,8 @@ data class PriceWatchDialogState(
     val mode: AlertMode = AlertMode.ANY_DROP,
     val target: String = "",
     val targetTouched: Boolean = false,
+    /** The language [target] was typed in (decides "1.500" vs "1,500"); the pre-filled target is plain digits. */
+    val targetLocale: Locale = Locale.ROOT,
     val email: Boolean = false,
     val emailAvailable: Boolean = false,
     val saving: Boolean = false,
@@ -151,7 +156,7 @@ data class PriceWatchDialogState(
     /** The currency the target is typed in. */
     val currency: String get() = currencyAsk?.currency ?: preview.currency
 
-    val targetCheck: TargetCheck get() = if (mode == AlertMode.BELOW_TARGET) checkPriceTarget(target) else TargetCheck(null, null)
+    val targetCheck: TargetCheck get() = if (mode == AlertMode.BELOW_TARGET) checkPriceTarget(target, targetLocale) else TargetCheck(null, null)
 
     val shownTargetError: TargetError? get() = targetCheck.error.takeIf { targetTouched }
 
@@ -178,7 +183,7 @@ class PriceWatchDialogController(
 
     fun setMode(mode: AlertMode) = mutable.update { it.copy(mode = mode) }
 
-    fun setTarget(text: String) = mutable.update { it.copy(target = text, targetTouched = true) }
+    fun setTarget(text: String, locale: Locale) = mutable.update { it.copy(target = text, targetTouched = true, targetLocale = locale) }
 
     fun setEmail(on: Boolean) = mutable.update { it.copy(email = on) }
 

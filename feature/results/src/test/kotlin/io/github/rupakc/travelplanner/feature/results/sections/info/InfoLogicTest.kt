@@ -124,10 +124,12 @@ class InfoLogicTest {
     @Test
     fun `edits, notes and cost text are stored like the web`() {
         var s = ItineraryEdits.setEdit(PlanSelections.EMPTY, "1-morning", "activity", JsonPrimitive("Castle"))
-        s = ItineraryEdits.setEdit(s, "1-morning", "cost", ItineraryEdits.costValue("abc"))
+        s = ItineraryEdits.setEdit(s, "1-morning", "cost", ItineraryEdits.costValue("abc", java.util.Locale.US))
         assertEquals(JsonNull, s.itineraryEdits["1-morning"]!!["cost"])
         assertEquals("Castle", s.itineraryEdits["1-morning"]!!["activity"]!!.jsonPrimitive.content)
-        assertEquals(JsonPrimitive(12.5), ItineraryEdits.costValue(" 12.5 "))
+        assertEquals(JsonPrimitive(12.5), ItineraryEdits.costValue(" 12.5 ", java.util.Locale.US))
+        assertEquals(JsonPrimitive(12.5), ItineraryEdits.costValue("12,5", java.util.Locale.forLanguageTag("es-ES")))
+        assertEquals(JsonPrimitive(1200.0), ItineraryEdits.costValue("1.200", java.util.Locale.forLanguageTag("es-ES")))
         assertEquals("Book", ItineraryEdits.setNote(s, "1-morning", "Book").itineraryNotes["1-morning"])
         val layout = ItineraryLayouts.removeSlot(itinerary, null, "1-afternoon")
         assertEquals(layout, ItineraryEdits.decodeLayout(ItineraryEdits.encodeLayout(layout)))

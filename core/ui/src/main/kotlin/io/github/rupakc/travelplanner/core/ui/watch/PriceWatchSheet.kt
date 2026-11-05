@@ -80,7 +80,7 @@ fun WatchSheetEvent.applyTo(controller: PriceWatchDialogController, scope: Corou
         }
 
         is WatchSheetEvent.SetTarget -> {
-            controller.setTarget(text)
+            controller.setTarget(text, locale)
         }
 
         is WatchSheetEvent.SetEmail -> {
@@ -192,11 +192,12 @@ private fun PriceForm(state: PriceWatchDialogState, noun: String, userEmail: Str
         PriceWatchKinds.TRIP -> TripBefore(state.preview.parts)
         else -> GenericBefore(state)
     }
+    val locale = currentLocale()
     AlertModeGroup(
         mode = state.mode,
         onMode = { onEvent(WatchSheetEvent.SetMode(it)) },
         target = state.target,
-        onTarget = { onEvent(WatchSheetEvent.SetTarget(it)) },
+        onTarget = { onEvent(WatchSheetEvent.SetTarget(it, locale)) },
         currency = state.currency,
         anyDropHint = stringResource(R.string.watch_price_any_drop_hint),
         targetError = targetErrorText(state.shownTargetError),

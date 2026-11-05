@@ -22,6 +22,7 @@ import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.search.CompareSummary
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import java.time.LocalDate
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -74,6 +75,9 @@ sealed interface CompareEvent {
     data object Run : CompareEvent
 
     data class Retry(val index: Int) : CompareEvent
+
+    /** The UI language (per-app locale): budgets are read in it ("1.500" is 1500 in Spanish). */
+    data class SetLocale(val locale: Locale) : CompareEvent
 }
 
 /**
@@ -92,6 +96,7 @@ class CompareViewModel
         val state: StateFlow<CompareUiState> = _state.asStateFlow()
         private var requests: List<TravelSearchRequest> = emptyList()
         private var run = 0
+        private var locale: Locale = Locale.getDefault()
 
         /** The user edited the shared fields: late preferences must not overwrite them. */
         private var touched = false
@@ -136,6 +141,10 @@ class CompareViewModel
                     runCompare()
                 }
 
+                is CompareEvent.SetLocale -> {
+                    locale = event.locale
+                }
+
                 is CompareEvent.Retry -> {
                     if (_state.value.columns?.getOrNull(event.index)?.status != CompareColumn.Status.LOADING) load(event.index)
                 }
@@ -148,7 +157,7 @@ class CompareViewModel
             if (s.loading) return
             val today = clock.today()
             _state.update { it.copy(today = today) }
-            val built = buildCompareRequests(form, s.destinations)
+            val built = buildCompareRequests(form, s.destinations, locale)
             val issue =
                 when {
                     built.size < MIN_COMPARE_DESTINATIONS -> CompareIssue.NEED_TWO_DESTINATIONS
