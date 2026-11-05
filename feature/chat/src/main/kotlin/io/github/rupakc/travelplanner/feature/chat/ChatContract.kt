@@ -84,6 +84,9 @@ sealed interface ChatUiEvent {
     data class UndoDelete(val threadId: Long) : ChatUiEvent
 
     data class CommitDelete(val threadId: Long) : ChatUiEvent
+
+    /** The live region has read announcement [seq]; it is not announced again. */
+    data class AnnouncementShown(val seq: Int) : ChatUiEvent
 }
 
 /** One-shot effects for the route (navigation, snackbars). */

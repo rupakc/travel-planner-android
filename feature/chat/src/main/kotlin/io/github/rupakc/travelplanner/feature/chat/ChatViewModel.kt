@@ -31,15 +31,16 @@ import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -61,7 +62,7 @@ import kotlinx.serialization.json.JsonObject
  * `session_context` (the server is stateless). `plan_action` events edit
  * [CurrentPlanStore] exactly like the web's `applyPlanAction`.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @HiltViewModel
 class ChatViewModel
     @Inject
@@ -85,7 +86,6 @@ class ChatViewModel
         private var sessionContext: JsonObject = EmptyJsonObject
         private var opened = false
         private var announcementSeq = 0
-        private val pendingDeletes = mutableMapOf<Long, Job>()
 
         private val messages: Flow<MessagesLoad> =
             currentThread.flatMapLatest { id ->
@@ -101,7 +101,9 @@ class ChatViewModel
 
         /** Threads whose messages contain the query (Room LIKE search), empty for a blank query. */
         private val contentMatches: Flow<Set<Long>> =
-            query.flatMapLatest { q -> if (q.isBlank()) flowOf(emptySet()) else chat.threadIdsMatching(q.trim()) }
+            query.debounce(SEARCH_DEBOUNCE_MILLIS).flatMapLatest { q -> if (q.isBlank()) flowOf(emptySet()) else chat.threadIdsMatching(q.trim()) }
+                // Titles filter at once; content matches join after the debounce.
+                .onStart { emit(emptySet()) }
 
         private val threadList =
             combine(chat.threads, query, hiddenThreads, contentMatches) { threads, q, hidden, matches ->
@@ -154,6 +156,7 @@ class ChatViewModel
                 is ChatUiEvent.DeleteThread -> delete(event.threadId)
                 is ChatUiEvent.UndoDelete -> undoDelete(event.threadId)
                 is ChatUiEvent.CommitDelete -> commitDelete(event.threadId)
+                is ChatUiEvent.AnnouncementShown -> local.update { if (it.announcement?.seq == event.seq) it.copy(announcement = null) else it }
             }
         }
 
@@ -185,26 +188,17 @@ class ChatViewModel
             if (isStreaming() && threadId == currentThread.value) return
             hiddenThreads.update { it + threadId }
             if (threadId == currentThread.value) viewModelScope.launch { switchTo(null) }
-            // Commits on its own after the undo window, so a dismissed or cancelled snackbar never leaves it pending.
-            pendingDeletes.put(
-                threadId,
-                viewModelScope.launch {
-                    delay(UNDO_WINDOW_MILLIS)
-                    commitDelete(threadId)
-                },
-            )?.cancel()
+            // Committed by the route when the undo snackbar is dismissed (or cancelled), or in onCleared.
             effects.trySend(ChatEffect.ThreadDeleted(threadId))
         }
 
         private fun undoDelete(threadId: Long) {
-            pendingDeletes.remove(threadId)?.cancel()
             hiddenThreads.update { it - threadId }
         }
 
         /** Deletes on the application scope so the delete survives this screen. */
         private fun commitDelete(threadId: Long) {
             if (threadId !in hiddenThreads.value) return
-            pendingDeletes.remove(threadId)?.cancel()
             appScope.launch {
                 chat.deleteThread(threadId)
                 hiddenThreads.update { it - threadId }
@@ -380,9 +374,7 @@ class ChatViewModel
             private const val STOP_TIMEOUT_MILLIS = 5_000L
             private const val MAX_TITLE = 60
             private const val MAX_ANNOUNCE = 280
-
-            /** Longer than the snackbar's short duration, so Undo is always possible while it shows. */
-            internal const val UNDO_WINDOW_MILLIS = 10_000L
+            private const val SEARCH_DEBOUNCE_MILLIS = 250L
 
             /** Web `getLatestSearchResults`: the sections of the latest turn that has any. */
             internal fun latestSections(turns: List<ChatTurn>): JsonObject =

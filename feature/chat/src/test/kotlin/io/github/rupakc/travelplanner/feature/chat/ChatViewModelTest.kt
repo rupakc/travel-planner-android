@@ -214,7 +214,7 @@ class ChatViewModelTest {
         }
 
     @Test
-    fun `a delete commits by itself when the undo window passes`() =
+    fun `undo long after the delete still keeps the thread`() =
         runTest(main.testDispatcher) {
             val first = repo.createThread("Tokyo")
             val vm = viewModel()
@@ -222,15 +222,31 @@ class ChatViewModelTest {
                 expectMostRecentItemMatching { it.threads.size == 1 }
                 vm.onEvent(ChatUiEvent.DeleteThread(first))
                 expectMostRecentItemMatching { it.threads.isEmpty() }
-                advanceTimeBy(ChatViewModel.UNDO_WINDOW_MILLIS + 1)
+                // An accessibility-extended snackbar can stay up for minutes.
+                advanceTimeBy(120_000)
+                vm.onEvent(ChatUiEvent.UndoDelete(first))
+                expectMostRecentItemMatching { it.threads.size == 1 }
                 cancelAndIgnoreRemainingEvents()
             }
-            assertTrue(repo.threads.first().isEmpty())
+            assertEquals(listOf(first), repo.threads.first().map { it.id })
+        }
+
+    @Test
+    fun `an announcement is cleared once shown`() =
+        runTest {
+            val vm = viewModel()
+            vm.uiState.test {
+                vm.onEvent(ChatUiEvent.Send("Visa?"))
+                val seq = expectMostRecentItemMatching { it.announcement != null }.announcement!!.seq
+                vm.onEvent(ChatUiEvent.AnnouncementShown(seq))
+                expectMostRecentItemMatching { it.announcement == null }
+                cancelAndIgnoreRemainingEvents()
+            }
         }
 
     @Test
     fun `search matches message text as well as titles`() =
-        runTest {
+        runTest(main.testDispatcher) {
             val japan = repo.createThread("Plan 5 days in Japan")
             repo.appendMessage(japan, "assistant", "Day 3: Kyoto temples")
             repo.createThread("Lisbon")

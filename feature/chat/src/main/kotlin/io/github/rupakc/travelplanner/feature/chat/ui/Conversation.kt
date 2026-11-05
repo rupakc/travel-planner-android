@@ -32,9 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -91,7 +93,7 @@ internal fun ConversationPane(state: ChatUiState, onEvent: (ChatUiEvent) -> Unit
                 else -> MessageList(state, plan, onEvent)
             }
         }
-        ReplyAnnouncer(state.announcement)
+        ReplyAnnouncer(state.announcement, onShown = { onEvent(ChatUiEvent.AnnouncementShown(it)) })
         Composer(isStreaming = state.isStreaming, onSend = { onEvent(ChatUiEvent.Send(it)) }, onStop = { onEvent(ChatUiEvent.Stop) })
     }
 }
@@ -157,7 +159,7 @@ private fun Turn(turn: ChatTurn, plan: PlanCallbacks, saving: Boolean, onEvent: 
 
 /** Polite live region: announces each finished reply once (spec §9). */
 @Composable
-private fun ReplyAnnouncer(announcement: ReplyAnnouncement?) {
+private fun ReplyAnnouncer(announcement: ReplyAnnouncement?, onShown: (Int) -> Unit) {
     val announced =
         when (announcement) {
             is ReplyAnnouncement.Text -> {
@@ -177,14 +179,19 @@ private fun ReplyAnnouncer(announcement: ReplyAnnouncement?) {
                 ""
             }
         }
-    // Cleared after a few seconds, so swipe navigation doesn't land on a stale announcement.
+    // Each reply is announced once: the last read seq survives leaving and re-entering the screen,
+    // and the text is cleared afterwards so swipe navigation doesn't land on a stale announcement.
+    var lastSeq by rememberSaveable { mutableIntStateOf(0) }
     var text by remember { mutableStateOf("") }
+    val shown by rememberUpdatedState(onShown)
     LaunchedEffect(announcement?.seq) {
+        val seq = announcement?.seq ?: return@LaunchedEffect
+        if (seq == lastSeq || announced.isEmpty()) return@LaunchedEffect
+        lastSeq = seq
         text = announced
-        if (announced.isNotEmpty()) {
-            delay(ANNOUNCE_CLEAR_MILLIS)
-            text = ""
-        }
+        delay(ANNOUNCE_CLEAR_MILLIS)
+        text = ""
+        shown(seq)
     }
     Box(
         Modifier

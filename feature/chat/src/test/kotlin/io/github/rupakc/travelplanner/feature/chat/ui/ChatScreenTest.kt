@@ -10,6 +10,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -133,6 +134,21 @@ class ChatScreenTest {
         compose.onNodeWithTag(ChatTags.ANNOUNCER)
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
             .assert(hasContentDescription("Assistant: Visa-free for 60 days."))
+    }
+
+    @Test
+    fun `returning to the screen does not re-announce the last reply`() {
+        val restoration = StateRestorationTester(compose)
+        val state =
+            ChatUiState(
+                currentThreadId = 1,
+                turns = listOf(user(1, "Visa?"), assistant(2, "Visa-free for 60 days.")),
+                announcement = ReplyAnnouncement.Text(1, "Visa-free for 60 days."),
+            )
+        restoration.setContent { TravelTheme(themeMode = ThemeMode.LIGHT) { ChatScreen(state = state, onEvent = { events += it }) } }
+        compose.onNodeWithTag(ChatTags.ANNOUNCER).assert(hasContentDescription("Assistant: Visa-free for 60 days."))
+        restoration.emulateSavedInstanceStateRestore()
+        compose.onNodeWithTag(ChatTags.ANNOUNCER).assert(hasContentDescription(""))
     }
 
     @Test

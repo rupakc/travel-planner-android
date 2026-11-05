@@ -63,14 +63,20 @@ fun ChatRoute(
 
                     is ChatEffect.ThreadDeleted -> {
                         launch {
-                            val result = snackbar.showSnackbar(deleted, actionLabel = undo, duration = SnackbarDuration.Short)
-                            viewModel.onEvent(
-                                if (result == SnackbarResult.ActionPerformed) {
-                                    ChatUiEvent.UndoDelete(effect.threadId)
-                                } else {
-                                    ChatUiEvent.CommitDelete(effect.threadId)
-                                },
-                            )
+                            // Undo is possible for exactly as long as the snackbar shows (its duration
+                            // grows with accessibility timeouts); dismissed or cancelled → commit.
+                            var result: SnackbarResult? = null
+                            try {
+                                result = snackbar.showSnackbar(deleted, actionLabel = undo, duration = SnackbarDuration.Short)
+                            } finally {
+                                viewModel.onEvent(
+                                    if (result == SnackbarResult.ActionPerformed) {
+                                        ChatUiEvent.UndoDelete(effect.threadId)
+                                    } else {
+                                        ChatUiEvent.CommitDelete(effect.threadId)
+                                    },
+                                )
+                            }
                         }
                     }
                 }
