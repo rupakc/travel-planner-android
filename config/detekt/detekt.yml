@@ -36,7 +36,7 @@ naming:
 
 style:
   MagicNumber:
-    excludes: ['**/test/**', '**/designsystem/**', '**/model/**', '**/*Fixtures*.kt', '**/*.kts']
+    excludes: ['**/test/**', '**/androidTest/**', '**/designsystem/**', '**/model/**', '**/*Fixtures*.kt', '**/*.kts']
     ignorePropertyDeclaration: true
     ignoreCompanionObjectPropertyDeclaration: true
     ignoreAnnotated: ['Composable', 'Preview']

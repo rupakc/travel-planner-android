@@ -54,6 +54,10 @@ gradlePlugin {
             id = libs.plugins.travelplanner.jvm.library.get().pluginId
             implementationClass = "JvmLibraryConventionPlugin"
         }
+        register("androidE2e") {
+            id = libs.plugins.travelplanner.android.e2e.get().pluginId
+            implementationClass = "AndroidE2eConventionPlugin"
+        }
         register("unitTest") {
             id = libs.plugins.travelplanner.unit.test.get().pluginId
             implementationClass = "UnitTestConventionPlugin"

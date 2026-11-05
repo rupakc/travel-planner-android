@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.travelplanner.android.compose)
     alias(libs.plugins.travelplanner.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.travelplanner.android.e2e)
 }
 
 // Firebase is optional (spec §7): FCM is wired but inert until app/google-services.json is supplied.
