@@ -79,8 +79,9 @@ object NetworkModule {
         OkHttpClient.Builder()
             .connectTimeout(Duration.ofSeconds(CONNECT_SECONDS))
             .readTimeout(Duration.ofSeconds(READ_SECONDS))
-            .addInterceptor(baseUrl)
+            // Auth first: it must see the placeholder host to scope the token to our backend (review I3).
             .addInterceptor(auth)
+            .addInterceptor(baseUrl)
             .apply {
                 if (buildInfo.debug) {
                     addInterceptor(

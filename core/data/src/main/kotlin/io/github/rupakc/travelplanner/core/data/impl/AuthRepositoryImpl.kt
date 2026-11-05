@@ -17,6 +17,7 @@ import io.github.rupakc.travelplanner.core.model.auth.LoginRequest
 import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.devices.UnregisterDeviceRequest
 import io.github.rupakc.travelplanner.core.model.settings.Session
+import io.github.rupakc.travelplanner.core.network.BaseUrlProvider
 import io.github.rupakc.travelplanner.core.network.api.AuthApi
 import io.github.rupakc.travelplanner.core.network.api.DevicesApi
 import io.github.rupakc.travelplanner.core.network.apiCall
@@ -38,12 +39,13 @@ class AuthRepositoryImpl
         private val recentSearchDao: RecentSearchDao,
         private val seenNotificationDao: SeenNotificationDao,
         private val planDraftDao: PlanDraftDao,
+        private val baseUrlProvider: BaseUrlProvider,
     ) : AuthRepository {
         override val session: Flow<Session?> = sessionStore.session
 
         override suspend fun login(username: String, password: String): AppResult<User> =
             apiCall { authApi.login(LoginRequest(username.trim(), password)) }
-                .onSuccess { sessionStore.save(Session(it.accessToken, it.user)) }
+                .onSuccess { sessionStore.save(Session(it.accessToken, it.user, baseUrlProvider.current()?.toString()?.trimEnd('/'))) }
                 .map { it.user }
 
         override suspend fun changePassword(currentPassword: String, newPassword: String): AppResult<Unit> =
