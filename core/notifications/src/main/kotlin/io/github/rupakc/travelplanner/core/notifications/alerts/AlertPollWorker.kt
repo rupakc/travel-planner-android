@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.core.notifications.alerts
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker
+import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -82,7 +83,7 @@ class AlertPollWorker
             val unseen =
                 when (val result = notifications.unseen()) {
                     is AppResult.Success -> result.value
-                    is AppResult.Failure -> return if (result.error.isTransient()) Result.retry() else Result.success()
+                    is AppResult.Failure -> return if (result.error.isRetryable()) Result.retry() else Result.success()
                 }
             val first = baseline.user() != user
             // Seen first: a crash after posting must not post (and alert) again.
@@ -99,7 +100,11 @@ class AlertPollWorker
         }
     }
 
-private fun AppError.isTransient(): Boolean = this is AppError.Network || this is AppError.Server || this is AppError.RateLimited
+/**
+ * Network and 5xx retry with the request's backoff (from [AlertPollIntervals.RETRY_BACKOFF]). A 429 does not:
+ * the next period is the retry, so a throttled server never sees a retry burst (performance review M2).
+ */
+private fun AppError.isRetryable(): Boolean = this is AppError.Network || this is AppError.Server
 
 /** Keeps the periodic alert poll scheduled at the right interval. */
 interface AlertPollScheduler {
@@ -114,34 +119,76 @@ object AlertPollIntervals {
     val WITHOUT_PUSH: Duration = Duration.ofMinutes(30)
     val WITH_PUSH: Duration = Duration.ofHours(6)
 
+    /** First retry delay after a network or server failure (exponential after that), instead of WorkManager's 30 s. */
+    val RETRY_BACKOFF: Duration = Duration.ofMinutes(10)
+
     fun of(pushActive: Boolean): Duration = if (pushActive) WITH_PUSH else WITHOUT_PUSH
+
+    /**
+     * How to enqueue [wanted] when [applied] was last enqueued (persisted across processes): the same interval
+     * KEEPs the running schedule (and its next run time); a different one UPDATEs it (performance review I2).
+     */
+    fun policy(applied: Duration?, wanted: Duration): ExistingPeriodicWorkPolicy =
+        if (applied == wanted) ExistingPeriodicWorkPolicy.KEEP else ExistingPeriodicWorkPolicy.UPDATE
 }
+
+/** The poll interval last enqueued, persisted so a new process doesn't re-enqueue (or flip) it. */
+interface AlertPollIntervalStore {
+    fun applied(): Duration?
+
+    fun set(interval: Duration?)
+}
+
+@Singleton
+class SharedPrefsAlertPollIntervalStore
+    @Inject
+    constructor(
+        @param:ApplicationContext private val context: Context,
+    ) : AlertPollIntervalStore {
+        private val prefs by lazy { context.getSharedPreferences(FILE, Context.MODE_PRIVATE) }
+
+        override fun applied(): Duration? = prefs.getLong(KEY, -1).takeIf { it > 0 }?.let(Duration::ofMinutes)
+
+        override fun set(interval: Duration?) = prefs.edit().putLong(KEY, interval?.toMinutes() ?: -1).apply()
+
+        private companion object {
+            const val FILE = "alert_poll"
+            const val KEY = "interval_minutes"
+        }
+    }
 
 @Singleton
 class WorkManagerAlertPollScheduler
     @Inject
     constructor(
         @param:ApplicationContext private val context: Context,
+        private val store: AlertPollIntervalStore,
     ) : AlertPollScheduler {
-        private var current: Duration? = null
+        /** What this process already made sure of; skips even the KEEP enqueue on repeats. */
+        private var ensured: Duration? = null
 
         @Synchronized
         override fun schedule(pushActive: Boolean) {
             val interval = AlertPollIntervals.of(pushActive)
-            if (interval == current) return
-            current = interval
+            if (interval == ensured) return
+            val policy = AlertPollIntervals.policy(store.applied(), interval)
             val request =
                 PeriodicWorkRequestBuilder<AlertPollWorker>(interval.toMinutes(), TimeUnit.MINUTES)
                     .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, AlertPollIntervals.RETRY_BACKOFF.toMinutes(), TimeUnit.MINUTES)
                     // Jitter: spread devices so polls never line up across users (spec §4 Scale).
                     .setInitialDelay(Random.nextLong(interval.toMinutes() / 2 + 1), TimeUnit.MINUTES)
                     .build()
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(UNIQUE, ExistingPeriodicWorkPolicy.UPDATE, request)
+            // KEEP when unchanged: still re-creates the work if it was lost, never moves its next run.
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(UNIQUE, policy, request)
+            store.set(interval)
+            ensured = interval
         }
 
         @Synchronized
         override fun cancel() {
-            current = null
+            ensured = null
+            store.set(null)
             WorkManager.getInstance(context).cancelUniqueWork(UNIQUE)
         }
 
@@ -156,6 +203,8 @@ abstract class AlertPollModule {
     @Binds abstract fun scheduler(impl: WorkManagerAlertPollScheduler): AlertPollScheduler
 
     @Binds abstract fun baseline(impl: SharedPrefsPollBaseline): PollBaseline
+
+    @Binds abstract fun intervalStore(impl: SharedPrefsAlertPollIntervalStore): AlertPollIntervalStore
 
     @Binds @IntoSet
     abstract fun baselineCleaner(impl: PollBaselineCleaner): UserStateCleaner

@@ -15,6 +15,7 @@ dependencies {
     implementation(projects.core.domain)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
     implementation(platform(libs.firebase.bom))

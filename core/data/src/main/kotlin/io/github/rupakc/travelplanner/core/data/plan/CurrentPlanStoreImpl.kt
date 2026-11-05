@@ -207,6 +207,15 @@ class CurrentPlanStoreImpl
             return if (snapshot.isEmpty()) draft.selections else draft.selections.copy(itinerarySnapshot = snapshot)
         }
 
+        override suspend fun draftRequest(): TravelSearchRequest? {
+            state.value.searchRequest?.let { return it }
+            if (restoreJob.isCompleted) return null
+            // Still restoring (it parses the up-to-1.5 MB snapshot): read only the small draft row.
+            return guarded("read the draft request") {
+                draftDao.getRow(PlanDraftEntity.SINGLE_ROW)?.let { TravelJson.decodeFromString(PlanDraft.serializer(), it.json).searchRequest }
+            }
+        }
+
         private suspend fun restore() {
             val saved =
                 guarded("restore the draft") {
