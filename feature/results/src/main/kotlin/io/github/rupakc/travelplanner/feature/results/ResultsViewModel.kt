@@ -8,15 +8,22 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
-import io.github.rupakc.travelplanner.core.data.impl.SearchResultsReducer
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
+import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
+import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareCalendarRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PriceWatchesRepository
-import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
-import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
+import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
+import io.github.rupakc.travelplanner.core.domain.alerts.FareWatchDialogController
+import io.github.rupakc.travelplanner.core.domain.alerts.FareWatchDialogState
+import io.github.rupakc.travelplanner.core.domain.alerts.PricePreview
+import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogController
+import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogState
+import io.github.rupakc.travelplanner.core.domain.alerts.WatchTrip
+import io.github.rupakc.travelplanner.core.domain.alerts.WatchedOutcome
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.results.BestValuePackage
 import io.github.rupakc.travelplanner.core.domain.results.BudgetAllocation
@@ -25,11 +32,10 @@ import io.github.rupakc.travelplanner.core.domain.results.FareCalendarRules
 import io.github.rupakc.travelplanner.core.domain.results.Remix
 import io.github.rupakc.travelplanner.core.domain.results.RemixPreset
 import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
-import io.github.rupakc.travelplanner.core.domain.results.searchKey
-import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.alerts.ALERT_ANY_DROP
 import io.github.rupakc.travelplanner.core.model.alerts.ActivityWatchSpec
 import io.github.rupakc.travelplanner.core.model.alerts.CreatePriceWatchRequest
+import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.HotelWatchSpec
 import io.github.rupakc.travelplanner.core.model.alerts.NoLivePriceError
 import io.github.rupakc.travelplanner.core.model.alerts.PriceSuggestion
@@ -37,12 +43,15 @@ import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatchKinds
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
+import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.search.HotelFilters
 import io.github.rupakc.travelplanner.core.model.search.LayoverRequest
 import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
 import io.github.rupakc.travelplanner.core.model.search.SectionResult
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
+import io.github.rupakc.travelplanner.core.model.search.StressTestPayload
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.ConfidenceData
@@ -56,7 +65,8 @@ import io.github.rupakc.travelplanner.core.model.section.SectionData
 import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
-import java.util.Optional
+import io.github.rupakc.travelplanner.core.model.section.StressTestData
+import io.github.rupakc.travelplanner.feature.results.sections.info.StressRecheckController
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -66,8 +76,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -91,15 +101,16 @@ class ResultsViewModel
     @Inject
     constructor(
         private val search: SearchRepository,
+        private val searchLauncher: SearchLauncher,
         private val plan: CurrentPlanStore,
         private val health: HealthRepository,
         private val fareCalendar: FareCalendarRepository,
         private val fareWatches: FareWatchesRepository,
         private val priceWatches: PriceWatchesRepository,
-        profile: ProfileRepository,
-        catalogue: Optional<FeatureCatalogue>,
+        featureVisibility: FeatureVisibility,
+        private val auth: AuthRepository,
         private val clock: AppClock,
-        dispatchers: AppDispatchers,
+        private val dispatchers: AppDispatchers,
         private val savedState: SavedStateHandle,
     ) : ViewModel() {
         private val local = MutableStateFlow(LocalState())
@@ -121,15 +132,8 @@ class ResultsViewModel
             return ResultsStateBuilder.snapshot(draft)?.let(::withSavedExtras).also { snapshotMemo = draft.searchData to it }
         }
 
-        private val visibleFeatures: Flow<Set<FeatureId>?> =
-            if (catalogue.isPresent) {
-                combine(profile.profile, profile.featureOverrides) { p, overrides ->
-                    val types = (listOfNotNull(p.primaryType) + p.secondaryTypes).mapNotNull { name -> TravellerType.entries.firstOrNull { it.name == name } }
-                    if (!p.onboardingCompleted || types.isEmpty()) null else catalogue.get().visible(types, overrides)
-                }
-            } else {
-                flowOf(null)
-            }
+        /** The shared visibility rule (core:data): hidden features' sections drop down the order, as on Home and Search. */
+        private val visibleFeatures: Flow<Set<FeatureId>?> = featureVisibility.visible()
 
         private val source: Flow<SourcedResults> =
             combine(search.current, plan.draft) { live, draft -> sourceOf(live, draft) }.flowOn(dispatchers.default)
@@ -148,16 +152,52 @@ class ResultsViewModel
             }.flowOn(dispatchers.default)
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ResultsUiState())
 
+        // ── Team E's SectionActions members (info sections, itinerary editor, health re-check) ──
+
+        /** The draft's selections, observed (itinerary layout/edits/notes/slots, packing list). */
+        val selections: StateFlow<PlanSelections> =
+            plan.draft.map { it.selections }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.Eagerly, plan.draft.value.selections)
+
+        /** The results on screen, by the same source rule as [state] (live stream, draft snapshot, …). */
+        val results: StateFlow<SearchResultsState> =
+            source.map { it.results }.stateIn(viewModelScope, SharingStarted.Eagerly, sourceOf(search.current.value, plan.draft.value).results)
+
+        /**
+         * Read-only itinerary while a saved plan is open (web `loadedPlanId`, ResultsPage.jsx:3482): set only by
+         * `CurrentPlanStore.load`, never by saving, cleared by a new search or New plan.
+         */
+        val itineraryEditingLocked: Boolean get() = plan.draft.value.loadedPlan
+
+        /** Retained Trip Health Check re-check (survives scrolling the card away and rotation). */
+        val stressRecheck = StressRecheckController(viewModelScope) { search.stressTest(it) }
+
+        /** Synchronous read-modify-write of the draft's selections, applied exactly once. */
+        fun updateSelections(transform: (PlanSelections) -> PlanSelections) {
+            plan.setSelections(transform(plan.draft.value.selections))
+        }
+
+        suspend fun recheckStressTest(payload: StressTestPayload): AppResult<StressTestData> = search.stressTest(payload)
+
+        /** Web `clearRecheck`: a new search, opening a saved plan and clearing the selections drop the re-check. */
+        private suspend fun clearRecheckOnPlanChange() {
+            plan.draft
+                .map { Triple(it.searchKey, it.planId.takeIf { _ -> it.loadedPlan }, it.selections.isEmpty) }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { stressRecheck.clear() }
+        }
+
         init {
             viewModelScope.launch { if (health.capabilities.value == null) health.refresh() }
+            viewModelScope.launch { clearRecheckOnPlanChange() }
             viewModelScope.launch { resetOnNewSearch() }
-            viewModelScope.launch { attachToDraft() }
+            viewModelScope.launch(dispatchers.default) { attachToDraft() }
             viewModelScope.launch { rememberExtras() }
         }
 
         /** A different search on screen: cancel its filter/retry jobs and reset the per-search state. */
         private suspend fun resetOnNewSearch() {
-            source.map { searchKey(it.results.request) }.distinctUntilChanged().collect { key ->
+            source.map { it.results.request?.searchKey() }.distinctUntilChanged().collect { key ->
                 if (key != local.value.key) {
                     jobs.values.forEach { it.cancel() }
                     jobs.clear()
@@ -167,45 +207,36 @@ class ResultsViewModel
         }
 
         /**
-         * Keeps the draft's `searchData` = the sections on screen (plan snapshot, chat context,
-         * process death). Only for the draft's own search: a stream for another trip is never written.
+         * Keeps the draft's `searchData` = the draft's own live search (plan snapshot, chat context, process
+         * death). A stream for another trip is never written. Every Results screen computes the same target
+         * from the shared state (filter/retry results live in SearchRepository), and "already written" is
+         * checked per section by reference, so several screens converge after one write instead of
+         * ping-ponging (architecture review I1) and nothing deep-compares the snapshot (performance review I3).
+         * Runs on the default dispatcher.
          */
         private suspend fun attachToDraft() {
-            combine(search.current, plan.draft, local) { live, draft, l -> Triple(live, draft, l.overrides) }
-                .collect { (live, draft, overrides) ->
-                    val target =
-                        when (ResultsStateBuilder.selectSource(live, draft)) {
-                            ResultsSource.LIVE -> {
-                                if (live.phase == StreamPhase.FAILED) return@collect
-                                SearchResultsReducer.sectionsJson(SearchResultsState(request = live.request, sections = live.sections + overrides))
-                            }
-
-                            ResultsSource.SNAPSHOT -> {
-                                if (overrides.isEmpty()) return@collect
-                                JsonObject(draft.searchData.orEmpty() + overrides.map { (id, r) -> id.wire to r.raw })
-                            }
-
-                            else -> {
-                                return@collect
-                            }
-                        }
-                    val request =
-                        (if (live.request != null && searchKey(live.request) == searchKey(draft.searchRequest)) live.request else null)
-                            ?: draft.searchRequest ?: live.request ?: return@collect
-                    if (draft.searchData != target || draft.searchRequest != request) plan.attachSearch(request, target)
+            combine(search.current, plan.draft) { live, draft -> live to draft }
+                .collect { (live, draft) ->
+                    if (ResultsStateBuilder.selectSource(live, draft) != ResultsSource.LIVE || live.phase == StreamPhase.FAILED) return@collect
+                    val request = live.request ?: return@collect
+                    if (draft.searchRequest == request && draft.searchData.holdsSameSections(live)) return@collect
+                    plan.attachSearch(request, live.sectionsJson())
                 }
         }
+
+        private fun JsonObject?.holdsSameSections(live: SearchResultsState): Boolean =
+            this != null && size == live.sections.size && live.sections.all { (id, r) -> this[id.wire] === r.raw }
 
         /** Travel Ease and the pricing advisor are not sections; keep them across process death (M1). */
         private suspend fun rememberExtras() {
             search.current.map {
                 Triple(
-                    searchKey(it.request),
+                    it.request?.searchKey(),
                     it.confidence,
                     it.pricingAdvisor,
                 )
             }.distinctUntilChanged().collect { (key, confidence, advisor) ->
-                if (key == null || key != searchKey(plan.draft.value.searchRequest)) return@collect
+                if (key == null || key != plan.draft.value.searchRequest?.searchKey()) return@collect
                 savedState[KEY_EXTRAS_SEARCH] = key
                 savedState[KEY_CONFIDENCE] = confidence?.let { TravelJson.encodeToString(ConfidenceData.serializer(), it) }
                 savedState[KEY_ADVISOR] = advisor?.let { TravelJson.encodeToString(PricingAdvisorData.serializer(), it) }
@@ -213,7 +244,7 @@ class ResultsViewModel
         }
 
         private fun withSavedExtras(snapshot: SearchResultsState): SearchResultsState {
-            if (savedState.get<String>(KEY_EXTRAS_SEARCH) != searchKey(snapshot.request)) return snapshot
+            if (savedState.get<String>(KEY_EXTRAS_SEARCH) != snapshot.request?.searchKey()) return snapshot
             val confidence =
                 savedState.get<String>(KEY_CONFIDENCE)?.let {
                     runCatching { TravelJson.decodeFromString(ConfidenceData.serializer(), it) }.getOrNull()
@@ -349,14 +380,6 @@ class ResultsViewModel
                     watchActivity(event.activity)
                 }
 
-                is ResultsEvent.WatchSuggestion -> {
-                    watchSuggestion(event.suggestion)
-                }
-
-                ResultsEvent.DismissNoLivePrice -> {
-                    local.update { it.copy(noLivePrice = null) }
-                }
-
                 is ResultsEvent.ShowVerification -> {
                     local.update { it.copy(verificationFor = event.section) }
                 }
@@ -404,18 +427,16 @@ class ResultsViewModel
         /** Web `runSearch`: a new search starts a new plan; the previous picks can be restored from the snackbar. */
         private fun rerun(next: TravelSearchRequest) {
             val previous = plan.snapshot()
-            plan.newPlan()
             // The new plan is for the new search, so its stream is the one shown and stored.
-            plan.attachSearch(next, null)
+            searchLauncher.startNewSearch(next)
             local.update { it.copy(newPlanUndo = previous.takeUnless { p -> p.selections.isEmpty }) }
             if (!previous.selections.isEmpty) messageChannel.trySend(ResultsMessage.NewPlanStarted)
-            search.start(next)
         }
 
         private fun remix(preset: RemixPreset) {
             val req = request ?: return
             val remixed = Remix.apply(req, preset) ?: return
-            val before = Remix.snapshot(ResultsStateBuilder.tripResults(builder.effectiveSections(currentResults(), local.value)))
+            val before = Remix.snapshot(ResultsStateBuilder.tripResults(builder.effectiveSections(currentResults())))
             local.update { it.copy(remix = preset to before) }
             rerun(remixed)
         }
@@ -466,7 +487,7 @@ class ResultsViewModel
             onFailure: (AppError) -> Unit,
             call: suspend (TravelSearchRequest) -> AppResult<Pair<SectionData, JsonObject>>,
         ) {
-            val key = searchKey(req)
+            val key = req.searchKey()
             jobs.remove(id)?.cancel()
             local.update { it.copy(loading = it.loading + id, errors = it.errors - id) }
             jobs[id] =
@@ -476,17 +497,8 @@ class ResultsViewModel
                     when (result) {
                         is AppResult.Success -> {
                             val (data, raw) = result.value
-                            local.update {
-                                if (it.key != key) {
-                                    it
-                                } else {
-                                    it.copy(
-                                        loading = it.loading - id,
-                                        overrides = it.overrides + (id to SectionResult(id, data, raw, null)),
-                                        findingCheaperHotels = false,
-                                    )
-                                }
-                            }
+                            publish(key, SectionResult(id, data, raw, null))
+                            local.update { if (it.key != key) it else it.copy(loading = it.loading - id, findingCheaperHotels = false) }
                         }
 
                         is AppResult.Failure -> {
@@ -499,6 +511,29 @@ class ResultsViewModel
         }
 
         private fun encode(data: SectionData): JsonObject = ResultsStateBuilder.encode(data)
+
+        /**
+         * One writer per source (architecture review I1): the live search's result goes to SearchRepository,
+         * a saved plan's snapshot is updated once in the draft. Either way every Results screen sees it.
+         */
+        private fun publish(key: String, result: SectionResult) {
+            val live = search.current.value
+            val draft = plan.draft.value
+            when (ResultsStateBuilder.selectSource(live, draft)) {
+                ResultsSource.LIVE -> {
+                    search.applySectionResult(key, result)
+                }
+
+                ResultsSource.SNAPSHOT -> {
+                    val request = draft.searchRequest?.takeIf { it.searchKey() == key } ?: return
+                    plan.attachSearch(request, JsonObject(draft.searchData.orEmpty() + (result.id.wire to result.raw)))
+                }
+
+                else -> {
+                    Unit
+                }
+            }
+        }
 
         // ── fare calendar / layover ───────────────────────────────────────────
 
@@ -543,34 +578,62 @@ class ResultsViewModel
             }
         }
 
-        // ── watches (call the repositories directly; Team G's dialogs swap in at integration) ──
+        // ── watches: Team G's sheets over their dialog controllers (web FareWatchDialog / PriceWatchDialog) ──
+
+        private val sheet = MutableStateFlow<WatchSheet?>(null)
+
+        /** The watch sheet to show, if any (the route hosts FareWatchSheet / PriceWatchSheet). */
+        val watchSheet: StateFlow<WatchSheet?> = sheet
+
+        /** The signed-in user's email (the sheets offer email alerts only with one). */
+        val userEmail: StateFlow<String?> =
+            auth.session.map { it?.user?.email }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+        fun dismissWatchSheet() {
+            sheet.value = null
+            local.update { l ->
+                // A sheet closed without watching leaves no "busy" marker behind.
+                l.copy(
+                    watches =
+                        l.watches.copy(
+                            fare = l.watches.fare?.takeIf { it.watchId != null },
+                            hotels = l.watches.hotels.filterValues { it.watchId != null },
+                            activities = l.watches.activities.filterValues { it.watchId != null },
+                        ),
+                )
+            }
+        }
+
+        /** A fare watch was created from the sheet: mark the flights section "Watching". */
+        fun onFareWatched(watch: FareWatch) {
+            local.update {
+                it.copy(watches = it.watches.copy(fare = WatchState(watchId = watch.id, price = watch.lastPrice ?: watch.baselinePrice, currency = "USD")))
+            }
+        }
+
+        /** A price watch was created; only the card's own item is marked (not a suggestion picked instead). */
+        fun onPriceWatched(kind: String, itemName: String, outcome: WatchedOutcome) {
+            if (outcome.viaSuggestion) return
+            val w = outcome.watch
+            val state = WatchState(watchId = w.id, price = w.baselinePrice ?: w.lastPrice, currency = w.currency)
+            if (kind == PriceWatchKinds.HOTEL) setHotelWatch(itemName, state) else setActivityWatch(itemName, state)
+        }
 
         private fun watchFare() {
             val req = request ?: return
-            if (!WatchSpecs.isWatchableTrip(req, clock.today())) {
+            val trip = WatchTrip.from(req)
+            if (trip == null || !WatchSpecs.isWatchableTrip(req, clock.today())) {
                 messageChannel.trySend(ResultsMessage.WatchUnavailable)
                 return
             }
-            local.update { it.copy(watches = it.watches.copy(fare = WatchState(busy = true))) }
-            viewModelScope.launch {
-                val trip = WatchSpecs.fareTrip(req).copy(alertMode = ALERT_ANY_DROP, flexibleDays = 0)
-                when (val r = fareWatches.create(trip)) {
-                    is AppResult.Success -> {
-                        val w = r.value
-                        val live = w.lastPrice ?: w.baselinePrice
-                        val shown = state.value.sections.firstOrNull { it.id == SectionId.FLIGHTS }?.data as? FlightsData
-                        val price = live ?: WatchSpecs.cheapestFlightPrice(shown)
-                        local.update { it.copy(watches = it.watches.copy(fare = WatchState(watchId = w.id, price = live, currency = "USD"))) }
-                        val travellers = w.numTravelers ?: trip.numTravelers
-                        messageChannel.trySend(ResultsMessage.FareWatched(price, travellers, w.alreadyLow == true, w.alreadyWatching == true))
-                    }
-
-                    is AppResult.Failure -> {
-                        local.update { it.copy(watches = it.watches.copy(fare = null)) }
-                        messageChannel.trySend(ResultsMessage.WatchFailed(KIND_FARE, r.error.message))
-                    }
-                }
-            }
+            val shown = state.value.sections.firstOrNull { it.id == SectionId.FLIGHTS }?.data as? FlightsData
+            val initial =
+                FareWatchDialogState(
+                    trip = trip,
+                    price = WatchSpecs.cheapestFlightPrice(shown),
+                    emailAvailable = health.capabilities.value?.emailAlertsAvailable == true,
+                )
+            sheet.value = WatchSheet.Fare(FareWatchDialogController(initial) { fareWatches.create(it) })
         }
 
         /** Airport codes → city names, as the web's `useAirportCities` (local airport data, no live price calls). */
@@ -596,7 +659,7 @@ class ResultsViewModel
                     return@launch
                 }
                 val body = TravelJson.encodeToJsonElement(HotelWatchSpec.serializer(), spec) as JsonObject
-                createPriceWatch(PriceWatchKinds.HOTEL, name, body) { setHotelWatch(name, it) }
+                openPriceSheet(PriceWatchKinds.HOTEL, name, body, PricePreview(title = name, subtitle = hotel.city, estimate = hotel.pricePerNightUsd))
             }
         }
 
@@ -613,47 +676,14 @@ class ResultsViewModel
                     return@launch
                 }
                 val body = TravelJson.encodeToJsonElement(ActivityWatchSpec.serializer(), spec) as JsonObject
-                createPriceWatch(PriceWatchKinds.ACTIVITY, name, body) { setActivityWatch(name, it) }
+                openPriceSheet(PriceWatchKinds.ACTIVITY, name, body, PricePreview(title = name, subtitle = activity.city, estimate = activity.priceUsd))
             }
         }
 
-        private fun watchSuggestion(suggestion: PriceSuggestion) {
-            val pending = local.value.noLivePrice ?: return
-            val spec = suggestion.spec ?: return
-            local.update { it.copy(noLivePrice = null) }
-            viewModelScope.launch {
-                createPriceWatch(pending.kind, pending.itemName, spec) { }
-            }
-        }
-
-        private suspend fun createPriceWatch(kind: String, itemName: String, spec: JsonObject, onState: (WatchState?) -> Unit) {
-            when (val r = priceWatches.create(CreatePriceWatchRequest(kind = kind, spec = spec, alertMode = ALERT_ANY_DROP))) {
-                is AppResult.Success -> {
-                    val w: PriceWatch = r.value
-                    onState(WatchState(watchId = w.id, price = w.baselinePrice ?: w.lastPrice, currency = w.currency))
-                    messageChannel.trySend(ResultsMessage.PriceWatched(w.baselinePrice ?: w.lastPrice, w.currency, w.alreadyWatching == true))
-                }
-
-                is AppResult.Failure -> {
-                    onState(null)
-                    val error = r.error
-                    val noLive = (error as? AppError.Client)?.takeIf { it.code == NO_LIVE_PRICE }?.let(::decodeNoLivePrice)
-                    if (noLive != null) {
-                        local.update { it.copy(noLivePrice = NoLivePriceUi(kind, itemName, noLive.message ?: error.message, noLive.suggestions)) }
-                    } else {
-                        messageChannel.trySend(ResultsMessage.WatchFailed(kind, error.message))
-                    }
-                }
-            }
-        }
-
-        /** 422 `no_live_price`: `extras` carries the other top-level keys as raw JSON text. */
-        private fun decodeNoLivePrice(error: AppError.Client): NoLivePriceError {
-            val suggestions =
-                error.extras["suggestions"]?.let { text ->
-                    runCatching { TravelJson.decodeFromString(ListSerializer(PriceSuggestion.serializer()), text) }.getOrNull()
-                }.orEmpty()
-            return NoLivePriceError(message = error.message, code = error.code, suggestions = suggestions)
+        private fun openPriceSheet(kind: String, itemName: String, spec: JsonObject, preview: PricePreview) {
+            val initial = PriceWatchDialogState(kind, spec, preview, emailAvailable = health.capabilities.value?.emailAlertsAvailable == true)
+            val controller = PriceWatchDialogController(initial, { priceWatches.create(it) }, { priceWatches.delete(it) })
+            sheet.value = WatchSheet.Price(controller, kind, itemName)
         }
 
         private fun setHotelWatch(name: String, value: WatchState?) =
@@ -667,8 +697,6 @@ class ResultsViewModel
         private companion object {
             const val STOP_TIMEOUT_MS = 5_000L
             const val AIRPORT_LOOKUP_LIMIT = 5
-            const val KIND_FARE = "fare"
-            const val NO_LIVE_PRICE = "no_live_price"
             const val KEY_EXTRAS_SEARCH = "results_extras_search"
             const val KEY_CONFIDENCE = "results_confidence"
             const val KEY_ADVISOR = "results_pricing_advisor"

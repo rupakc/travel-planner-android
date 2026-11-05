@@ -171,6 +171,7 @@ class SettingsScreensTest {
         }
         val always = hasText("Suggest places even when I'm not on a trip") and SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)
         compose.onNode(always).assertIsNotEnabled()
+        compose.onNodeWithText("Uses your location from the last time you opened Near me.").assertExists()
         compose.onNode(hasText("Nearby suggestions") and SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)).performClick()
         assertEquals(
             listOf(

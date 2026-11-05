@@ -34,7 +34,6 @@
     <string name="settings_retake_quiz">Retake quiz</string>
     <string name="settings_features">Features</string>
     <string name="settings_features_intro">Turn any feature on or off. Search, results, My Plan and Settings are always available.</string>
-    <string name="settings_features_no_defaults">Traveller-type defaults aren\'t available in this build, so only the features you turn on are shown.</string>
     <string name="settings_features_default_on">On for your type. %1$s</string>
     <string name="settings_features_reset">Reset to my type\'s defaults</string>
     <string name="settings_features_group_plan">Plan and discover</string>
@@ -67,6 +66,7 @@
     <string name="settings_notif_price_sub">When a watched fare, hotel, activity or trip drops</string>
     <string name="settings_notif_nearby">Nearby suggestions</string>
     <string name="settings_notif_nearby_sub">Things to do around you, at most one every 4 hours</string>
+    <string name="settings_notif_nearby_location_note">Uses your location from the last time you opened Near me.</string>
     <string name="settings_notif_account">Account</string>
     <string name="settings_notif_system">Sound and pop-up per type</string>
     <string name="settings_notif_system_note">Android controls sound, vibration and pop-ups for each type.</string>

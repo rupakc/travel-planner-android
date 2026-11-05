@@ -3,8 +3,10 @@ package io.github.rupakc.travelplanner.feature.home
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.profile.ProfileFeatureVisibility
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
+import io.github.rupakc.travelplanner.core.domain.profile.DefaultFeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
@@ -17,13 +19,13 @@ import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeFeatureVisibility
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeRecentSearchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import java.time.LocalDate
-import java.util.Optional
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -41,8 +43,8 @@ class HomeViewModelTest {
     private val recent = FakeRecentSearchesRepository()
     private val prefs = FakePreferencesRepository()
 
-    private fun vm(catalogue: FeatureCatalogue? = FakeFeatureCatalogue(setOf(FeatureId.CHAT, FeatureId.COMPARE, FeatureId.BUDGET_PLANNER))) =
-        HomeViewModel(auth, profile, plans, recent, prefs, Optional.ofNullable(catalogue), FixedClock(LocalDate.of(2027, 3, 10)))
+    private fun vm(catalogue: FeatureCatalogue = FakeFeatureCatalogue(setOf(FeatureId.CHAT, FeatureId.COMPARE, FeatureId.BUDGET_PLANNER))) =
+        HomeViewModel(auth, profile, plans, recent, prefs, catalogue, ProfileFeatureVisibility(profile, catalogue), FixedClock(LocalDate.of(2027, 3, 10)))
 
     @Test
     fun `state combines user, type, trip and visible tiles`() =
@@ -88,11 +90,13 @@ class HomeViewModelTest {
         }
 
     @Test
-    fun `without a catalogue only explicitly enabled features show`() =
+    fun `a user who skipped the quiz gets every feature tile except the ones they turned off`() =
         runTest {
-            profile.setFeature(FeatureId.NEAR_ME.id, true)
-            vm(catalogue = null).state.test {
-                assertEquals(listOf(FeatureId.NEAR_ME), expectMostRecentItem().tiles.map { it.feature })
+            profile.profileState.value = TravellerProfile()
+            profile.setFeature(FeatureId.EVENTS.id, false)
+            vm(catalogue = DefaultFeatureCatalogue).state.test {
+                val tiles = expectMostRecentItem().tiles.map { it.feature }.toSet()
+                assertEquals(FeatureId.entries.toSet() - FeatureId.EVENTS, tiles)
             }
         }
 
@@ -104,7 +108,17 @@ class HomeViewModelTest {
                 object : io.github.rupakc.travelplanner.core.data.repository.RecentSearchesRepository by recent {
                     override suspend fun refresh(): AppResult<Unit> = AppResult.Failure(AppError.Network())
                 }
-            val model = HomeViewModel(auth, profile, plans, failingRecent, prefs, Optional.empty(), FixedClock(LocalDate.of(2027, 3, 10)))
+            val model =
+                HomeViewModel(
+                    auth,
+                    profile,
+                    plans,
+                    failingRecent,
+                    prefs,
+                    DefaultFeatureCatalogue,
+                    FakeFeatureVisibility(),
+                    FixedClock(LocalDate.of(2027, 3, 10)),
+                )
             model.state.test {
                 val s = expectMostRecentItem()
                 assertEquals(AppError.Network(), s.refreshError)

@@ -10,10 +10,14 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.getOrNull
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
+import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
+import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
 import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
+import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
+import io.github.rupakc.travelplanner.core.domain.profile.quizPace
 import io.github.rupakc.travelplanner.core.domain.search.ExtraStop
 import io.github.rupakc.travelplanner.core.domain.search.MAX_EXTRA_STOPS
 import io.github.rupakc.travelplanner.core.domain.search.RecentSearchSummary
@@ -38,7 +42,6 @@ import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.reference.Nationality
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
-import io.github.rupakc.travelplanner.feature.search.di.FeatureVisibility
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -86,6 +89,8 @@ data class SearchUiState(
     val notice: RecentNotice? = null,
     /** Saved preferences, once loaded (null = not loaded or failed: the form keeps its defaults). */
     val preferences: Preferences? = null,
+    /** Set while asking "Start a new plan?" because the current draft has unsaved picks. */
+    val confirmNewPlan: Boolean = false,
 ) {
     val canAddStop: Boolean get() = stops.size < MAX_EXTRA_STOPS
 }
@@ -118,6 +123,12 @@ sealed interface SearchFormEvent {
     data object ToggleRecent : SearchFormEvent
 
     data object DismissNotice : SearchFormEvent
+
+    /** "Start new plan" in the unsaved-picks dialog. */
+    data object ConfirmNewPlan : SearchFormEvent
+
+    /** "Keep editing" in the unsaved-picks dialog. */
+    data object CancelNewPlan : SearchFormEvent
 }
 
 /** One-shot effects for the route. */
@@ -140,6 +151,8 @@ class SearchViewModel
     constructor(
         private val savedStateHandle: SavedStateHandle,
         private val searchRepository: SearchRepository,
+        private val searchLauncher: SearchLauncher,
+        private val currentPlan: CurrentPlanStore,
         private val preferencesRepository: PreferencesRepository,
         private val recentSearchesRepository: RecentSearchesRepository,
         private val profileRepository: ProfileRepository,
@@ -205,7 +218,7 @@ class SearchViewModel
                 }
                 // Spec §6.1 Q4: the onboarding pace answer seeds the form when nothing else set it.
                 if (!loadedRecent && !paceTouched) {
-                    quizPaceAnswer(profileRepository.profile.first().answers)?.let { pace ->
+                    quizPace(profileRepository.profile.first().answers)?.let { pace ->
                         if (!paceTouched) _state.update { it.copy(form = it.form.copy(pace = pace)) }
                     }
                 }
@@ -270,6 +283,14 @@ class SearchViewModel
 
                 SearchFormEvent.DismissNotice -> {
                     _state.update { it.copy(notice = null) }
+                }
+
+                SearchFormEvent.ConfirmNewPlan -> {
+                    confirmNewPlan(confirmed = true)
+                }
+
+                SearchFormEvent.CancelNewPlan -> {
+                    confirmNewPlan(confirmed = false)
                 }
             }
         }
@@ -339,6 +360,17 @@ class SearchViewModel
          * search, start the app-wide stream and go to Results.
          */
         private fun startSearch(request: TravelSearchRequest, form: SearchForm, preferenceInterests: List<String> = form.interests) {
+            val draft = currentPlan.draft.value
+            if (draft.dirty && !draft.selections.isEmpty) {
+                // A new search starts a new plan (web runSearch); ask before dropping unsaved picks.
+                pendingStart = PendingStart(request, form, preferenceInterests)
+                _state.update { it.copy(confirmNewPlan = true) }
+                return
+            }
+            launch(request, form, preferenceInterests)
+        }
+
+        private fun launch(request: TravelSearchRequest, form: SearchForm, preferenceInterests: List<String>) {
             val now = clock.now()
             val last = lastStartAt
             if (last != null && Duration.between(last, now) < DOUBLE_SUBMIT_WINDOW) return
@@ -352,8 +384,19 @@ class SearchViewModel
             viewModelScope.launch { recentSearchesRepository.add(toRecentSearch(request)) }
             loadedRecent = false
             _state.update { it.copy(notice = null, issues = emptyList()) }
-            searchRepository.start(request)
+            searchLauncher.startNewSearch(request)
             effects.trySend(SearchEffect.SearchStarted)
+        }
+
+        private class PendingStart(val request: TravelSearchRequest, val form: SearchForm, val interests: List<String>)
+
+        private var pendingStart: PendingStart? = null
+
+        private fun confirmNewPlan(confirmed: Boolean) {
+            val pending = pendingStart
+            pendingStart = null
+            _state.update { it.copy(confirmNewPlan = false) }
+            if (confirmed && pending != null) launch(pending.request, pending.form, pending.interests)
         }
 
         private fun recentById(id: String): RecentSearch? = _state.value.recent.firstOrNull { it.id == id }?.entry

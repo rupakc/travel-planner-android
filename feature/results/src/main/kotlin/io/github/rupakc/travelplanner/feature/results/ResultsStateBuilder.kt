@@ -16,7 +16,6 @@ import io.github.rupakc.travelplanner.core.domain.results.TripResults
 import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
 import io.github.rupakc.travelplanner.core.domain.results.clearPendingVerification
 import io.github.rupakc.travelplanner.core.domain.results.orderSectionByCity
-import io.github.rupakc.travelplanner.core.domain.results.searchKey
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
@@ -27,6 +26,7 @@ import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
 import io.github.rupakc.travelplanner.core.model.search.SectionResult
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.EventsData
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
@@ -60,10 +60,8 @@ internal data class SourcedResults(val results: SearchResultsState, val source: 
 
 /** Per-search local state of the results screen (owned by the ViewModel). */
 internal data class LocalState(
-    /** [searchKey] of the search these fields belong to; a new search resets them. */
+    /** [TravelSearchRequest.searchKey] of the search these fields belong to; a new search resets them. */
     val key: String? = null,
-    /** Section data replaced by a filter / single-section retry (web `setResults`). */
-    val overrides: Map<SectionId, SectionResult> = emptyMap(),
     val loading: Set<SectionId> = emptySet(),
     val errors: Map<SectionId, FilterError> = emptyMap(),
     val flightFilters: FlightFilters? = null,
@@ -82,7 +80,6 @@ internal data class LocalState(
     val fareCalendar: FareCalendarUi = FareCalendarUi(),
     val layover: LayoverUi? = null,
     val watches: WatchesUi = WatchesUi(),
-    val noLivePrice: NoLivePriceUi? = null,
     val verificationFor: SectionId? = null,
     val selected: SectionId? = null,
 ) {
@@ -110,11 +107,12 @@ internal class ResultsStateBuilder {
         }
 
     /**
-     * Effective section data: overrides, journey order (not flights/weather, web parity), resolved
+     * Effective section data (filter / retry results are already in [results]: SearchRepository or the
+     * draft snapshot hold them for every screen): journey order (not flights/weather, web parity), resolved
      * pending chips. Each section is ordered and decoded once per original JSON object (M5).
      */
-    fun effectiveSections(results: SearchResultsState, local: LocalState): Map<SectionId, Pair<SectionData, JsonObject>> {
-        val merged = results.sections + local.overrides
+    fun effectiveSections(results: SearchResultsState): Map<SectionId, Pair<SectionData, JsonObject>> {
+        val merged = results.sections
         val destinations = results.request?.destinations
         val streaming = results.phase == StreamPhase.STREAMING
         return merged.mapValues { (id, r) ->
@@ -142,7 +140,7 @@ internal class ResultsStateBuilder {
         val fromSnapshot = sourced.source == ResultsSource.SNAPSHOT
         val stored = sourced.source == ResultsSource.SNAPSHOT || sourced.source == ResultsSource.RUN_SAVED
         val request = results.request
-        val effective = effectiveSections(results, local)
+        val effective = effectiveSections(results)
         val done = results.phase == StreamPhase.DONE || fromSnapshot
         val trip = tripResults(effective)
         val query = local.query
@@ -182,7 +180,7 @@ internal class ResultsStateBuilder {
             query = query,
             hiddenByQuery = sections.size - visibleSections.size,
             selections = selections,
-            plan = PlanSummary(selections.count, total, getBudgetStatus(total, request?.budgetUsd), savedPlanOpen = draft.planId != null),
+            plan = PlanSummary(selections.count, total, getBudgetStatus(total, request?.budgetUsd), savedPlanOpen = draft.loadedPlan),
             bestValue = if (done) bestValue(trip, request, draft, local) else null,
             budget = if (done) budget(trip, request, local) else null,
             remix = local.remix?.let { (preset, before) -> RemixUi(preset, if (done) Remix.diff(before, Remix.snapshot(trip)) else null) },
@@ -193,7 +191,6 @@ internal class ResultsStateBuilder {
                     fareAvailable = health?.fareWatchAvailable == true && WatchSpecs.isWatchableTrip(request, today),
                     priceAvailable = health?.fareWatchAvailable == true,
                 ),
-            noLivePrice = local.noLivePrice,
             verificationDetail =
                 local.verificationFor?.let { id ->
                     effective[id]?.first?.verification?.let { VerificationDetail(id, it) }
@@ -257,7 +254,7 @@ internal class ResultsStateBuilder {
             applied = applied,
             conflicts = if (applied) emptyList() else BestValuePackage.conflicts(draft.selections, pkg),
             canUndo = local.packageUndo != null,
-            disabled = draft.planId != null,
+            disabled = draft.loadedPlan,
             planTotal = planTotal?.takeIf { Math.round(it) != Math.round(pkg.total) },
         )
     }
@@ -295,7 +292,7 @@ internal class ResultsStateBuilder {
             )
 
         /**
-         * Which results to show (explicit source selection by search identity, [searchKey]):
+         * Which results to show (explicit source selection by search identity, [TravelSearchRequest.searchKey]):
          * - the live stream only when its request has the draft's key (or the draft has no search yet,
          *   e.g. right after New plan / Remix); a stream is never written into a draft with another key;
          * - else the draft's stored sections when it has some (saved plan, process death);
@@ -304,10 +301,10 @@ internal class ResultsStateBuilder {
          */
         fun selectSource(live: SearchResultsState, draft: PlanDraft): ResultsSource {
             val liveActive = live.phase != StreamPhase.IDLE && live.request != null
-            val draftKey = searchKey(draft.searchRequest)
+            val draftKey = draft.searchRequest?.searchKey()
             return when {
                 draftKey == null -> if (liveActive) ResultsSource.LIVE else ResultsSource.NONE
-                liveActive && searchKey(live.request) == draftKey -> ResultsSource.LIVE
+                liveActive && live.request?.searchKey() == draftKey -> ResultsSource.LIVE
                 hasStoredSections(draft) -> ResultsSource.SNAPSHOT
                 else -> ResultsSource.RUN_SAVED
             }

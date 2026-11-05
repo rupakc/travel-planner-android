@@ -5,12 +5,8 @@ import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 
-/** Parses stored type names (`TravellerProfile.primaryType` / `secondaryTypes`), dropping unknown ones. */
-internal fun travellerTypesOf(primary: String?, secondary: List<String>): List<TravellerType> =
-    (listOfNotNull(primary) + secondary).distinct().mapNotNull { name -> TravellerType.entries.firstOrNull { it.name == name } }
-
-/** Catalogue icon names (`FeatureDescriptor.iconName`) by feature; empty without a catalogue. */
-internal fun FeatureCatalogue?.iconNames(): Map<FeatureId, String> = this?.all?.associate { it.id to it.iconName }.orEmpty()
+/** Catalogue icon names (`FeatureDescriptor.iconName`) by feature. */
+internal fun FeatureCatalogue.iconNames(): Map<FeatureId, String> = all.associate { it.id to it.iconName }
 
 /** The results section a feature lives in (for its accent colour), or null for stand-alone tools. */
 internal fun FeatureId.sectionId(): SectionId? =

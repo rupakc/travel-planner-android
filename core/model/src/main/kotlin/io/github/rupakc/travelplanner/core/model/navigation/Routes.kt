@@ -44,9 +44,6 @@ sealed interface AppRoute
 /** Streamed results for the search currently held by `SearchRepository` / `CurrentPlanStore`. */
 @Serializable data object ResultsRoute : AppRoute
 
-/** Compare table for 2–3 destinations of the current compare request. */
-@Serializable data object CompareRoute : AppRoute
-
 /** "My trips": saved plans list. */
 @Serializable data object PlansRoute : AppRoute
 

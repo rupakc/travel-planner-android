@@ -560,9 +560,6 @@ sealed interface AppRoute
 /** Streamed results for the search currently held by `SearchRepository` / `CurrentPlanStore`. */
 @Serializable data object ResultsRoute : AppRoute
 
-/** Compare table for 2–3 destinations of the current compare request. */
-@Serializable data object CompareRoute : AppRoute
-
 /** "My trips": saved plans list. */
 @Serializable data object PlansRoute : AppRoute
 
@@ -623,8 +620,8 @@ Graphs (each feature exports exactly one; `app` calls them in `TravelApp.kt`):
 | auth | `authGraph(onLoggedIn: () -> Unit, onPasswordChanged: () -> Unit, onBack: () -> Unit = {})` | `LoginRoute`, `ChangePasswordRoute`, `AccountChangePasswordRoute` |
 | onboarding | `onboardingGraph(onFinished: (fromSettings: Boolean) -> Unit)` | `OnboardingRoute` |
 | home | `homeGraph(onPlanTrip, onOpenNearby, onOpenPlan: (Long) -> Unit)` | `HomeRoute` |
-| search | `searchGraph(onSearchStarted, onCompare)` | `SearchRoute` |
-| results | `resultsGraph(onBack)` | `ResultsRoute`, `CompareRoute` |
+| search | `searchGraph(onSearchStarted)` (Compare renders inside Search) | `SearchRoute` |
+| results | `resultsGraph(onBack, onOpenMyPlan, onOpenAlerts)` | `ResultsRoute` |
 | plan | `planGraph(onOpenPlan: (Long) -> Unit, onBack)` | `PlansRoute`, `PlanDetailRoute` |
 | chat | `chatGraph(onOpenImport: (url: String) -> Unit)` | `ChatRoute` |
 | alerts | `alertsGraph(onReplan, onBack)` | `AlertsRoute` (deep link), `NotificationsRoute` |

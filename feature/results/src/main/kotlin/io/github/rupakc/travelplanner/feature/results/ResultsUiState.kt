@@ -55,7 +55,6 @@ data class ResultsUiState(
     val fareCalendar: FareCalendarUi = FareCalendarUi(),
     val layover: LayoverUi? = null,
     val watches: WatchesUi = WatchesUi(),
-    val noLivePrice: NoLivePriceUi? = null,
     val verificationDetail: VerificationDetail? = null,
     val selectedSection: SectionId? = null,
     /** Every section's stream status (for the "<Section> ready" announcer). */
@@ -158,9 +157,6 @@ data class WatchesUi(
 /** A watch being created ([busy]) or created (with its price/currency when known). */
 data class WatchState(val busy: Boolean = false, val watchId: Long? = null, val price: Double? = null, val currency: String? = null)
 
-/** 422 `no_live_price`: show the backend message and the live prices it did find. */
-data class NoLivePriceUi(val kind: String, val itemName: String, val message: String?, val suggestions: List<PriceSuggestion>)
-
 data class VerificationDetail(val section: SectionId, val verification: Verification)
 
 /** One-shot messages (snackbar). */
@@ -239,11 +235,18 @@ sealed interface ResultsEvent {
 
     data class WatchActivity(val activity: io.github.rupakc.travelplanner.core.model.section.Activity) : ResultsEvent
 
-    data class WatchSuggestion(val suggestion: PriceSuggestion) : ResultsEvent
-
-    data object DismissNoLivePrice : ResultsEvent
-
     data class ShowVerification(val section: SectionId) : ResultsEvent
 
     data object DismissVerification : ResultsEvent
+}
+
+/** The watch sheet Results hosts (Team G's sheets over their dialog controllers). */
+sealed interface WatchSheet {
+    data class Fare(val controller: io.github.rupakc.travelplanner.core.domain.alerts.FareWatchDialogController) : WatchSheet
+
+    data class Price(
+        val controller: io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogController,
+        val kind: String,
+        val itemName: String,
+    ) : WatchSheet
 }

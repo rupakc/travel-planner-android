@@ -346,4 +346,8 @@
     <string name="search_import_kind_event">Event</string>
     <string name="search_import_kind_transport">Getting around</string>
     <string name="search_import_kind_area">Neighbourhood</string>
+    <string name="search_new_plan_title">Start a new plan?</string>
+    <string name="search_new_plan_message">My Plan has picks you haven\'t saved. A new search starts a new plan; save first if you want to keep them.</string>
+    <string name="search_new_plan_confirm">Start new plan</string>
+    <string name="search_new_plan_keep">Keep editing</string>
 </resources>

@@ -23,6 +23,7 @@ import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.StressTestPayload
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
@@ -40,6 +41,7 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.JsonObject
 
 /** Default "not configured" failure for fakes: set the result you need in the test. */
@@ -96,6 +98,10 @@ class FakeSearchRepository(var events: List<SearchEvent> = Fixtures.searchEvents
     var syncResult: AppResult<JsonObject> = AppResult.Success(EmptyJsonObject)
     var airports: List<Airport> = emptyList()
     var nationalities: List<Nationality> = emptyList()
+
+    override fun applySectionResult(searchKey: String, result: io.github.rupakc.travelplanner.core.model.search.SectionResult) {
+        state.update { if (it.request?.searchKey() == searchKey) it.copy(sections = it.sections + (result.id to result)) else it }
+    }
 
     /** Folds all [events] synchronously into [current]. */
     override fun start(request: TravelSearchRequest) {

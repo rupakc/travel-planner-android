@@ -9,6 +9,7 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.errorOrNull
 import io.github.rupakc.travelplanner.core.common.getOrNull
+import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
@@ -16,11 +17,11 @@ import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesRepository
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
+import io.github.rupakc.travelplanner.core.domain.profile.types
 import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
 import io.github.rupakc.travelplanner.core.model.preferences.TasteProfile
 import io.github.rupakc.travelplanner.core.model.settings.FeatureOverrides
-import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,14 +32,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-/**
- * Visible features: the catalogue's defaults ∪ enabled − disabled (spec §6.3). Without a bound
- * catalogue (before the onboarding team's implementation is wired) only explicitly enabled ones.
- */
-internal fun visibleFeatures(catalogue: FeatureCatalogue?, types: List<TravellerType>, overrides: FeatureOverrides): Set<FeatureId> =
-    catalogue?.visible(types, overrides)
-        ?: (overrides.enabled.mapNotNull(FeatureId::fromId).toSet() - overrides.disabled.mapNotNull(FeatureId::fromId).toSet())
 
 /** Home screen state; every value comes from a repository (nothing invented). */
 @Immutable
@@ -88,21 +81,22 @@ class HomeViewModel
         private val plansRepository: PlansRepository,
         private val recentSearchesRepository: RecentSearchesRepository,
         private val preferencesRepository: PreferencesRepository,
-        private val catalogue: Optional<FeatureCatalogue>,
+        private val catalogue: FeatureCatalogue,
+        featureVisibility: FeatureVisibility,
         private val clock: AppClock,
     ) : ViewModel() {
         private val taste = MutableStateFlow<TasteProfile?>(null)
         private val refresh = MutableStateFlow(RefreshState())
 
         private val profileTypes =
-            profileRepository.profile.map { travellerTypesOf(it.primaryType, it.secondaryTypes) }
+            profileRepository.profile.map { it.types() }
 
-        private val visible =
-            combine(profileTypes, profileRepository.featureOverrides) { types, overrides -> visibleFeatures(catalogue.orElse(null), types, overrides) }
+        /** The shared visibility rule (core:data), same as Search, Settings and Results. */
+        private val visible = featureVisibility.visible()
 
         private val personal =
             combine(visible, recentSearchesRepository.recent, taste) { features, recent, tasteProfile ->
-                val icons = catalogue.orElse(null).iconNames()
+                val icons = catalogue.iconNames()
                 Personal(
                     tiles =
                         HomePersonalisation.orderTiles(features, HomePersonalisation.reasons(recent, tasteProfile)).map {

@@ -1,13 +1,13 @@
 package io.github.rupakc.travelplanner.core.domain.results
 
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -45,9 +45,9 @@ class ResultsExtrasTest {
     fun `search key ignores case, spacing and list order but not the trip`() {
         val a = search(destination = "Tokyo").copy(interests = listOf("food", "art"))
         val b = a.copy(destination = " tokyo ", interests = listOf("Art", "food", "food"))
-        assertEquals(searchKey(a), searchKey(b))
-        assertNotEquals(searchKey(a), searchKey(a.copy(departureDate = "2026-04-02")))
-        assertEquals(24, searchKey(a)!!.length)
-        assertNull(searchKey(null))
+        // Results uses the foundation key (core:model), which this suite checks for the Results cases.
+        assertEquals(a.searchKey(), b.searchKey())
+        assertNotEquals(a.searchKey(), a.copy(departureDate = "2026-04-02").searchKey())
+        assertEquals(24, a.searchKey().length)
     }
 }

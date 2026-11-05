@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
+import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.ChatRepository
 import io.github.rupakc.travelplanner.core.data.repository.ChatThread
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
@@ -29,9 +30,6 @@ import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
 import io.github.rupakc.travelplanner.feature.home.destination
 import io.github.rupakc.travelplanner.feature.home.routeLabel
-import io.github.rupakc.travelplanner.feature.home.travellerTypesOf
-import io.github.rupakc.travelplanner.feature.home.visibleFeatures
-import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -84,7 +82,7 @@ class GlobalSearchViewModel
         private val chatRepository: ChatRepository,
         recentSearchesRepository: RecentSearchesRepository,
         private val profileRepository: ProfileRepository,
-        private val catalogue: Optional<FeatureCatalogue>,
+        featureVisibility: FeatureVisibility,
         private val labels: SearchLabels,
         dispatchers: AppDispatchers,
     ) : ViewModel() {
@@ -95,10 +93,7 @@ class GlobalSearchViewModel
             }
 
         private val hidden: Flow<Set<String>> =
-            combine(profileRepository.profile, profileRepository.featureOverrides) { profile, overrides ->
-                val visible = visibleFeatures(catalogue.orElse(null), travellerTypesOf(profile.primaryType, profile.secondaryTypes), overrides)
-                FeatureId.entries.filterNot { it in visible }.map { it.id }.toSet()
-            }
+            featureVisibility.visible().map { visible -> FeatureId.entries.filterNot { it in visible }.map { it.id }.toSet() }
 
         /**
          * Chat threads with their messages. One live query (threads, debounced so streaming writes don't

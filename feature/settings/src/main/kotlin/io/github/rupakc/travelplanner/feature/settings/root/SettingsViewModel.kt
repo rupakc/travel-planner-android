@@ -10,11 +10,11 @@ import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
+import io.github.rupakc.travelplanner.core.domain.profile.types
+import io.github.rupakc.travelplanner.core.domain.profile.visibleFeatures
 import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
-import io.github.rupakc.travelplanner.feature.settings.common.travellerTypesOf
-import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +67,7 @@ class SettingsViewModel
         private val authRepository: AuthRepository,
         profileRepository: ProfileRepository,
         private val settingsRepository: SettingsRepository,
-        catalogue: Optional<FeatureCatalogue>,
+        catalogue: FeatureCatalogue,
         private val appLocales: AppLocales,
         buildInfo: AppBuildInfo,
     ) : ViewModel() {
@@ -86,10 +86,8 @@ class SettingsViewModel
                 settingsRepository.effectiveBaseUrl,
                 dialogs,
             ) { session, (profile, overrides), settings, url, d ->
-                val types = travellerTypesOf(profile.primaryType, profile.secondaryTypes)
-                val visible =
-                    catalogue.orElse(null)?.visible(types, overrides)
-                        ?: (overrides.enabled.mapNotNull(FeatureId::fromId).toSet() - overrides.disabled.mapNotNull(FeatureId::fromId).toSet())
+                val types = profile.types()
+                val visible = catalogue.visibleFeatures(profile, overrides)
                 SettingsUiState(
                     loading = false,
                     user = session?.user,

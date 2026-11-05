@@ -42,6 +42,7 @@ import io.github.rupakc.travelplanner.core.model.search.HotelFilters
 import io.github.rupakc.travelplanner.core.model.search.LayoverPlan
 import io.github.rupakc.travelplanner.core.model.search.LayoverRequest
 import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
+import io.github.rupakc.travelplanner.core.model.search.SectionResult
 import io.github.rupakc.travelplanner.core.model.search.StressTestPayload
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
@@ -99,6 +100,14 @@ interface SearchRepository {
 
     /** Resets [current] to idle (New Search). */
     fun clear()
+
+    /**
+     * Replaces one section of the current search with a filter or single-agent result, for every screen at
+     * once (architecture review I1: one writer of the shared results instead of a private copy per Results
+     * screen). Ignored unless [searchKey] is the current search's. Later stream events of the same search
+     * keep it; a new search drops it.
+     */
+    fun applySectionResult(searchKey: String, result: SectionResult)
 
     /** Cold stream folded into state; retries once when the stream ends without `done`. */
     fun results(request: TravelSearchRequest): Flow<SearchResultsState>
@@ -340,6 +349,13 @@ interface SettingsRepository {
      * the user is signed out (the token belongs to the old server) and local user data is cleared.
      */
     suspend fun setBaseUrl(url: String?): AppResult<Unit>
+
+    /**
+     * [setBaseUrl]'s own validation without storing anything: the normalised URL, or the same failure
+     * `setBaseUrl` would return. Callers that sign out before switching check this first, so a URL the
+     * store would reject never costs the user their session.
+     */
+    fun checkBaseUrl(url: String): AppResult<String>
 
     suspend fun setThemeMode(mode: ThemeMode)
 

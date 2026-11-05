@@ -7,13 +7,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppBuildInfo
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.common.userFacingDetail
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.domain.server.ServerUrl
 import io.github.rupakc.travelplanner.core.domain.server.ServerUrlResult
 import io.github.rupakc.travelplanner.feature.auth.AuthMessage
 import io.github.rupakc.travelplanner.feature.auth.R
-import io.github.rupakc.travelplanner.feature.auth.serverDetail
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -185,5 +185,5 @@ class ServerViewModel
         }
 
         private fun AppError.unreachableMessage(): AuthMessage =
-            serverDetail()?.let(AuthMessage::Server) ?: AuthMessage.Local(R.string.auth_server_unreachable)
+            userFacingDetail()?.let(AuthMessage::Server) ?: AuthMessage.Local(R.string.auth_server_unreachable)
     }

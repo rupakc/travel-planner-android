@@ -35,7 +35,6 @@ import io.github.rupakc.travelplanner.feature.settings.server.ServerViewModel
 import io.github.rupakc.travelplanner.feature.settings.server.UrlProblem
 import io.github.rupakc.travelplanner.feature.settings.taste.TasteEvent
 import io.github.rupakc.travelplanner.feature.settings.taste.TasteProfileViewModel
-import java.util.Optional
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
@@ -55,7 +54,7 @@ class SettingsViewModelsTest {
     private val locales = FakeAppLocales()
     private val catalogue = FakeCatalogue(setOf(FeatureId.CHAT, FeatureId.COMPARE))
 
-    private fun root() = SettingsViewModel(auth, profile, settings, Optional.of(catalogue), locales, TestBuildInfo)
+    private fun root() = SettingsViewModel(auth, profile, settings, catalogue, locales, TestBuildInfo)
 
     @Test
     fun `root shows account, type, feature count, url and version`() =
@@ -137,7 +136,7 @@ class SettingsViewModelsTest {
     @Test
     fun `feature toggles store overrides only when they differ from the type default`() =
         runTest {
-            val vm = FeaturesViewModel(profile, Optional.of(catalogue))
+            val vm = FeaturesViewModel(profile, catalogue)
             vm.state.test {
                 val s = expectMostRecentItem()
                 assertEquals(FeatureId.entries.size, s.rows.size)
@@ -215,6 +214,20 @@ class SettingsViewModelsTest {
         }
 
     @Test
+    fun `a url the store would reject does not sign the user out (review M12)`() =
+        runTest {
+            settings.rejectUrls = AppError.Client(status = 0, message = null, code = "https_required")
+            val vm = ServerViewModel(SavedStateHandle(), settings, FakeHealthRepository(), auth, TestBuildInfo)
+            vm.onEvent(ServerEvent.InputChanged("http://192.168.1.2:8001"))
+            vm.onEvent(ServerEvent.Save)
+            vm.onEvent(ServerEvent.ConfirmSwitch)
+            assertEquals(0, auth.logoutCalls)
+            assertTrue(auth.sessionFlow.value != null)
+            assertNull(settings.state.value.baseUrlOverride)
+            assertEquals(UrlProblem.HTTPS_REQUIRED, vm.state.value.problem)
+        }
+
+    @Test
     fun `server switch finishes logout and stores the url even when the screen closes mid-switch`() =
         runTest {
             lateinit var vm: ServerViewModel
@@ -274,7 +287,7 @@ class SettingsViewModelsTest {
                         cachesCleared = true
                     }
                 }
-            vm = SettingsViewModel(closingAuth, profile, settings, Optional.of(catalogue), locales, TestBuildInfo)
+            vm = SettingsViewModel(closingAuth, profile, settings, catalogue, locales, TestBuildInfo)
             vm.onEvent(SettingsEvent.ConfirmSignOut)
             assertTrue(cachesCleared)
         }
@@ -298,7 +311,7 @@ class SettingsViewModelsTest {
     @Test
     fun `a toggle before the state is collected still compares against the type default`() =
         runTest {
-            val vm = FeaturesViewModel(profile, Optional.of(catalogue))
+            val vm = FeaturesViewModel(profile, catalogue)
             vm.onEvent(FeaturesEvent.Toggle(FeatureId.CHAT, true))
             assertTrue(profile.overridesState.value.enabled.isEmpty())
             vm.onEvent(FeaturesEvent.Toggle(FeatureId.NEAR_ME, true))

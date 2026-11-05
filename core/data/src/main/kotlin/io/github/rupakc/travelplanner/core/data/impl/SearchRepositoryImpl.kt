@@ -15,9 +15,11 @@ import io.github.rupakc.travelplanner.core.model.search.HotelFilters
 import io.github.rupakc.travelplanner.core.model.search.LayoverPlan
 import io.github.rupakc.travelplanner.core.model.search.LayoverRequest
 import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
+import io.github.rupakc.travelplanner.core.model.search.SectionResult
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.StressTestPayload
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
@@ -40,6 +42,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonObject
@@ -58,11 +61,17 @@ class SearchRepositoryImpl
         override val current: StateFlow<SearchResultsState> = state.asStateFlow()
         private var job: Job? = null
 
+        /** Filter / single-agent results for the current search, laid over every stream emission. */
+        @Volatile private var overrides: Map<SectionId, SectionResult> = emptyMap()
+
+        private fun SearchResultsState.withOverrides(): SearchResultsState = if (overrides.isEmpty()) this else copy(sections = sections + overrides)
+
         @Synchronized
         override fun start(request: TravelSearchRequest) {
             job?.cancel()
+            overrides = emptyMap()
             state.value = SearchResultsState(request = request, phase = StreamPhase.STREAMING)
-            job = appScope.launch { results(request).collect { state.value = it } }
+            job = appScope.launch { results(request).collect { state.value = it.withOverrides() } }
         }
 
         @Synchronized
@@ -76,7 +85,15 @@ class SearchRepositoryImpl
         override fun clear() {
             job?.cancel()
             job = null
+            overrides = emptyMap()
             state.value = SearchResultsState()
+        }
+
+        @Synchronized
+        override fun applySectionResult(searchKey: String, result: SectionResult) {
+            if (state.value.request?.searchKey() != searchKey) return
+            overrides = overrides + (result.id to result)
+            state.update { if (it.request?.searchKey() == searchKey) it.copy(sections = it.sections + (result.id to result)) else it }
         }
 
         override fun results(request: TravelSearchRequest): Flow<SearchResultsState> =
