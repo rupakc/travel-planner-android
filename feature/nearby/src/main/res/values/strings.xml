@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nearby_title">Near me</string>
+    <string name="nearby_message">Suggestions near where you are, from your interests. Location is asked for here, only while you use this screen.</string>
+</resources>

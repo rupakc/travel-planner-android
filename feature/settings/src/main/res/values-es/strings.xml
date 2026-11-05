@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_message">Preferencias, Taste Graph, tipo de viajero, funciones, tema, idioma, servidor y notificaciones.</string>
+    <string name="settings_retake_quiz">Tu tipo de viajero</string>
+    <string name="settings_sign_out">Cerrar sesión</string>
+    <string name="settings_sub_message">Lo implementa el equipo de ajustes.</string>
+</resources>

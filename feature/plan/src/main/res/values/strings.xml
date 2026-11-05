@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plan_title">My trips</string>
+    <string name="plan_message">Saved plans (available offline), search and filter.</string>
+    <string name="plan_detail_title">Trip plan</string>
+    <string name="plan_detail_message">Plan detail, share link and calendar export.</string>
+</resources>

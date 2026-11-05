@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="results_title">Your trip</string>
+    <string name="results_message">Streamed results appear here section by section.</string>
+    <string name="results_new_search">New Search</string>
+    <string name="results_compare_title">Compare destinations</string>
+    <string name="results_compare_message">Side-by-side cost, flight, hotel, weather, visa and ease.</string>
+    <plurals name="results_items">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    <string name="results_section_error">This section couldn\'t load.</string>
+</resources>

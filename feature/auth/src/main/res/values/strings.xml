@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_login_title">Sign in to your account</string>
+    <string name="auth_login_message">Username and password sign-in goes here. Accounts are created by an admin; there is no self-registration.</string>
+    <string name="auth_change_password_title">Set your password</string>
+    <string name="auth_change_password_message">Replace the temporary password (at least 8 characters).</string>
+    <string name="auth_continue">Continue</string>
+</resources>

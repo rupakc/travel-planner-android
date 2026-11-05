@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title">Te damos la bienvenida a Voyager</string>
+    <string name="onboarding_message">Seis preguntas rápidas adaptan tu inicio y tus funciones a tu forma de viajar.</string>
+    <string name="onboarding_finish">Terminar</string>
+</resources>

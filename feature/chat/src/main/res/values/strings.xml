@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_title">Travel Planner Chat</string>
+    <string name="chat_message">Chat with your AI travel assistant. Ask for a full trip plan and results will stream in real-time with interactive cards.</string>
+</resources>

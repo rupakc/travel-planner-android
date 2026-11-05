@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_login_title">Inicia sesión en tu cuenta</string>
+    <string name="auth_login_message">Aquí va el inicio de sesión con usuario y contraseña. Las cuentas las crea un administrador; no hay registro propio.</string>
+    <string name="auth_change_password_title">Define tu contraseña</string>
+    <string name="auth_change_password_message">Sustituye la contraseña temporal (mínimo 8 caracteres).</string>
+    <string name="auth_continue">Continuar</string>
+</resources>

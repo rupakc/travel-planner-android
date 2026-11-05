@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_title">Precios vigilados</string>
+    <string name="alerts_message">Revisamos estos precios unas dos veces al día y solo te avisamos cuando una bajada merece la pena.</string>
+    <string name="alerts_notifications_title">Alertas de precio</string>
+    <string name="alerts_notifications_message">Aún no hay alertas</string>
+</resources>

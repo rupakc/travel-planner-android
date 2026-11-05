@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_message">Preferences, Taste Graph, traveller type, features, theme, language, server and notifications.</string>
+    <string name="settings_retake_quiz">Your traveller type</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_sub_message">Coming from the settings team.</string>
+</resources>

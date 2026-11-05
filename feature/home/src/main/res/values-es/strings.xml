@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">Inicio</string>
+    <string name="home_message">Tu inicio personalizado: funciones para tu tipo de viajero, tu próximo viaje y accesos rápidos.</string>
+    <string name="home_plan_trip">Planificar un viaje</string>
+    <string name="home_near_me">Cerca de mí</string>
+</resources>

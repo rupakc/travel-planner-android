@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plan_title">Mis viajes</string>
+    <string name="plan_message">Planes guardados (disponibles sin conexión), búsqueda y filtros.</string>
+    <string name="plan_detail_title">Plan de viaje</string>
+    <string name="plan_detail_message">Detalle del plan, enlace para compartir y exportación al calendario.</string>
+</resources>

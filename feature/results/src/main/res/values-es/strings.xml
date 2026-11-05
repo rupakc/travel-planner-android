@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="results_title">Tu viaje</string>
+    <string name="results_message">Los resultados aparecen aquí sección a sección.</string>
+    <string name="results_new_search">Nueva búsqueda</string>
+    <string name="results_compare_title">Comparar destinos</string>
+    <string name="results_compare_message">Coste, vuelo, hotel, clima, visado y facilidad, lado a lado.</string>
+    <plurals name="results_items">
+        <item quantity="one">%1$d elemento</item>
+        <item quantity="many">%1$d elementos</item>
+        <item quantity="other">%1$d elementos</item>
+    </plurals>
+    <string name="results_section_error">No se pudo cargar esta sección.</string>
+</resources>

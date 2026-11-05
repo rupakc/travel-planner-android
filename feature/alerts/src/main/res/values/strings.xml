@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_title">Watched prices</string>
+    <string name="alerts_message">We re-check these prices about twice a day and tell you only when a drop is worth knowing about.</string>
+    <string name="alerts_notifications_title">Price alerts</string>
+    <string name="alerts_notifications_message">No alerts yet</string>
+</resources>

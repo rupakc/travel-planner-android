@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">Home</string>
+    <string name="home_message">Your personalised home: feature tiles for your traveller type, your next trip and quick actions.</string>
+    <string name="home_plan_trip">Plan a trip</string>
+    <string name="home_near_me">Near me</string>
+</resources>

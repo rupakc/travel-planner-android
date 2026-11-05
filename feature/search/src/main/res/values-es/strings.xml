@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_title">Planifica tu viaje perfecto</string>
+    <string name="search_message">Vuelos, hoteles, actividades, visado, SIM e itinerario, todo en un solo lugar.</string>
+    <string name="search_show_results">Ver resultados</string>
+</resources>
