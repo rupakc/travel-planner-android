@@ -293,16 +293,19 @@ class ChatViewModelTest {
         }
 
     @Test
-    fun `a thread id that is not one of the signed-in user's threads opens their latest thread instead`() =
+    fun `another user's thread id opens the signed-in user's latest thread instead`() =
         runTest {
-            val newest = repo.createThread("Mine")
+            val foreign = repo.createThreadForAnotherUser("Their trip")
+            repo.appendMessage(foreign, "user", "my private plans", null)
+            val mine = repo.createThread("Mine")
             val vm = viewModel()
             vm.uiState.test {
-                // e.g. another user's thread id arriving through a route argument (security S-M2).
-                vm.open(newest + 41)
-                expectMostRecentItemMatching { it.currentThreadId == newest }
+                // A real, existing thread of user A arriving through a route argument while B is signed in (security S-M2).
+                vm.open(foreign)
+                expectMostRecentItemMatching { it.currentThreadId == mine }
                 cancelAndIgnoreRemainingEvents()
             }
+            assertTrue(vm.uiState.value.turns.none { it.toString().contains("my private plans") })
         }
 
     @Test
