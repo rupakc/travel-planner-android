@@ -58,7 +58,8 @@ class AppRobot(val rule: AppRule) {
     /** Clicks the first clickable node showing [text] (scrolling to it when it sits in a scrollable list). */
     fun tap(text: String, substring: Boolean = false) {
         waitForText(text, substring)
-        val clickable = rule.onAllNodes(hasText(text, substring = substring) and hasClickAction())
+        // Never the text field that merely contains the query.
+        val clickable = rule.onAllNodes(hasText(text, substring = substring) and hasClickAction() and !hasSetTextAction())
         val target = if (clickable.fetchSemanticsNodes().isNotEmpty()) clickable.onFirst() else node(text, substring)
         runCatching { target.performScrollTo() }
         target.performClick()
@@ -264,6 +265,16 @@ class AppRobot(val rule: AppRule) {
                 d.removePrefix(prefix).removeSuffix(suffix) to node.boundsInWindow.top
             }
     }
+
+    /** Content descriptions currently composed that start with [prefix] (merged tree). */
+    fun descriptionsStartingWith(prefix: String): List<String> =
+        rule.onAllNodes(androidx.compose.ui.test.hasContentDescription(prefix, substring = true))
+            .fetchSemanticsNodes()
+            .flatMap { it.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription) { emptyList() } }
+            .filter { it.startsWith(prefix) }
+
+    /** The text before the first argument of a one-argument format string, e.g. "Move " for "Move %1${'$'}s". */
+    fun prefixOf(@StringRes id: Int): String = str(id, MARK).substringBefore(MARK)
 
     /** Sends a chat message and waits until its reply has finished streaming (Stop shows, then goes). */
     fun chatSend(text: String, timeoutMs: Long = LONG_TIMEOUT * 2) {
