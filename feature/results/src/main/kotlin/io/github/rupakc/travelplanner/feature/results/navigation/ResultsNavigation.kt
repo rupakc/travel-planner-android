@@ -31,12 +31,15 @@ import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.StressTestData
 import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
+import io.github.rupakc.travelplanner.core.ui.watch.FareWatchSheet
+import io.github.rupakc.travelplanner.core.ui.watch.PriceWatchSheet
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.ResultsEvent
 import io.github.rupakc.travelplanner.feature.results.ResultsMessage
 import io.github.rupakc.travelplanner.feature.results.ResultsScreen
 import io.github.rupakc.travelplanner.feature.results.ResultsUiState
 import io.github.rupakc.travelplanner.feature.results.ResultsViewModel
+import io.github.rupakc.travelplanner.feature.results.WatchSheet
 import io.github.rupakc.travelplanner.feature.results.sections.ResultsSection
 import io.github.rupakc.travelplanner.feature.results.sections.SectionActions
 import io.github.rupakc.travelplanner.feature.results.sections.SelectionsSource
@@ -100,6 +103,40 @@ internal fun ResultsRoute(onBack: () -> Unit, onOpenMyPlan: () -> Unit, onOpenAl
         onOpenMyPlan = onOpenMyPlan,
         snackbarHostState = snackbar,
     )
+    // Team G's watch sheets (web FareWatchDialog / PriceWatchDialog) instead of creating watches directly.
+    val sheet by viewModel.watchSheet.collectAsStateWithLifecycle()
+    val email by viewModel.userEmail.collectAsStateWithLifecycle()
+    when (val current = sheet) {
+        is WatchSheet.Fare -> {
+            FareWatchSheet(
+                controller = current.controller,
+                userEmail = email,
+                onDismiss = viewModel::dismissWatchSheet,
+                onSeeAlerts = {
+                    viewModel.dismissWatchSheet()
+                    onOpenAlerts()
+                },
+                onWatched = viewModel::onFareWatched,
+            )
+        }
+
+        is WatchSheet.Price -> {
+            PriceWatchSheet(
+                controller = current.controller,
+                userEmail = email,
+                onDismiss = viewModel::dismissWatchSheet,
+                onSeeAlerts = {
+                    viewModel.dismissWatchSheet()
+                    onOpenAlerts()
+                },
+                onWatched = { viewModel.onPriceWatched(current.kind, current.itemName, it) },
+            )
+        }
+
+        null -> {
+            Unit
+        }
+    }
 }
 
 /** The one [SectionActions] implementation: plan toggles, Custom Tabs, watches and retries go to the ViewModel. */

@@ -58,7 +58,6 @@ import io.github.rupakc.travelplanner.feature.results.ui.FilterSheet
 import io.github.rupakc.travelplanner.feature.results.ui.FlightFilterSheet
 import io.github.rupakc.travelplanner.feature.results.ui.HotelFilterSheet
 import io.github.rupakc.travelplanner.feature.results.ui.LayoverSheet
-import io.github.rupakc.travelplanner.feature.results.ui.NoLivePriceSheet
 import io.github.rupakc.travelplanner.feature.results.ui.PlanBar
 import io.github.rupakc.travelplanner.feature.results.ui.QuickJumpRow
 import io.github.rupakc.travelplanner.feature.results.ui.RemixBar
@@ -312,9 +311,4 @@ private fun Sheets(state: ResultsUiState, onEvent: (ResultsEvent) -> Unit, actio
     }
     state.layover?.let { LayoverSheet(it, onDismiss = { onEvent(ResultsEvent.CloseLayover) }) }
     state.verificationDetail?.let { VerificationSheet(it, onOpenLink = actions::onOpenLink, onDismiss = { onEvent(ResultsEvent.DismissVerification) }) }
-    state.noLivePrice?.let {
-        NoLivePriceSheet(it, onWatch = { s ->
-            onEvent(ResultsEvent.WatchSuggestion(s))
-        }, onOpenLink = actions::onOpenLink, onDismiss = { onEvent(ResultsEvent.DismissNoLivePrice) })
-    }
 }

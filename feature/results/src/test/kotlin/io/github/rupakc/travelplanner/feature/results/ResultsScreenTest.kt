@@ -24,8 +24,10 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
+import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
+import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareCalendarRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepository
@@ -35,6 +37,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesReposito
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchLauncher
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
+import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import io.github.rupakc.travelplanner.feature.results.navigation.ResultsRoute
 import java.time.Instant
 import java.time.LocalDate
@@ -87,6 +90,7 @@ class ResultsScreenTest {
                 FakeFareWatchesRepository(),
                 FakePriceWatchesRepository(),
                 FakeFeatureVisibility(),
+                FakeAuthRepository(Session("t", TestUser)),
                 clock,
                 TestAppDispatchers(Dispatchers.Unconfined),
                 androidx.lifecycle.SavedStateHandle(),

@@ -80,7 +80,6 @@ internal data class LocalState(
     val fareCalendar: FareCalendarUi = FareCalendarUi(),
     val layover: LayoverUi? = null,
     val watches: WatchesUi = WatchesUi(),
-    val noLivePrice: NoLivePriceUi? = null,
     val verificationFor: SectionId? = null,
     val selected: SectionId? = null,
 ) {
@@ -192,7 +191,6 @@ internal class ResultsStateBuilder {
                     fareAvailable = health?.fareWatchAvailable == true && WatchSpecs.isWatchableTrip(request, today),
                     priceAvailable = health?.fareWatchAvailable == true,
                 ),
-            noLivePrice = local.noLivePrice,
             verificationDetail =
                 local.verificationFor?.let { id ->
                     effective[id]?.first?.verification?.let { VerificationDetail(id, it) }

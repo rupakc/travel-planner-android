@@ -33,7 +33,6 @@ import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.ui.PriceText
 import io.github.rupakc.travelplanner.feature.results.LayoverUi
 import io.github.rupakc.travelplanner.feature.results.LoadStatus
-import io.github.rupakc.travelplanner.feature.results.NoLivePriceUi
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.VerificationDetail
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.Pill
@@ -156,49 +155,5 @@ internal fun VerificationSheet(detail: VerificationDetail, onOpenLink: (String) 
                 }
             }
         }
-    }
-}
-
-/** 422 `no_live_price`: the backend's message and "Live prices we did find:" with "Watch this one instead". */
-@Composable
-internal fun NoLivePriceSheet(
-    ui: NoLivePriceUi,
-    onWatch: (io.github.rupakc.travelplanner.core.model.alerts.PriceSuggestion) -> Unit,
-    onOpenLink: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    Sheet(onDismiss) {
-        Title(ui.itemName)
-        Text(
-            ui.message ?: stringResource(R.string.results_no_live_price),
-            style = TravelTheme.typography.bodyMedium,
-            modifier =
-                Modifier.semantics {
-                    liveRegion =
-                        LiveRegionMode.Polite
-                },
-        )
-        if (ui.suggestions.isNotEmpty()) {
-            Text(stringResource(R.string.results_live_prices_found), style = TravelTheme.typography.titleSmall)
-            ui.suggestions.forEach { s ->
-                Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
-                    Text(s.title.orEmpty(), style = TravelTheme.typography.titleSmall)
-                    listOfNotNull(s.subtitle, s.price?.let { formatPrice(it) }).takeIf { it.isNotEmpty() }?.let {
-                        Text(it.joinToString(" · "), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                        if (s.spec !=
-                            null
-                        ) {
-                            TpButton(stringResource(R.string.results_watch_this_instead), onClick = { onWatch(s) }, variant = TpButtonVariant.Tonal)
-                        }
-                        s.link?.takeIf {
-                            it.startsWith("http")
-                        }?.let { TpButton(stringResource(R.string.results_open_link), onClick = { onOpenLink(it) }, variant = TpButtonVariant.Text) }
-                    }
-                }
-            }
-        }
-        TpButton(stringResource(R.string.results_done), onClick = onDismiss, variant = TpButtonVariant.Secondary)
     }
 }

@@ -10,12 +10,20 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
+import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareCalendarRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PriceWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
 import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
+import io.github.rupakc.travelplanner.core.domain.alerts.FareWatchDialogController
+import io.github.rupakc.travelplanner.core.domain.alerts.FareWatchDialogState
+import io.github.rupakc.travelplanner.core.domain.alerts.PricePreview
+import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogController
+import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogState
+import io.github.rupakc.travelplanner.core.domain.alerts.WatchTrip
+import io.github.rupakc.travelplanner.core.domain.alerts.WatchedOutcome
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.results.BestValuePackage
 import io.github.rupakc.travelplanner.core.domain.results.BudgetAllocation
@@ -27,6 +35,7 @@ import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
 import io.github.rupakc.travelplanner.core.model.alerts.ALERT_ANY_DROP
 import io.github.rupakc.travelplanner.core.model.alerts.ActivityWatchSpec
 import io.github.rupakc.travelplanner.core.model.alerts.CreatePriceWatchRequest
+import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.HotelWatchSpec
 import io.github.rupakc.travelplanner.core.model.alerts.NoLivePriceError
 import io.github.rupakc.travelplanner.core.model.alerts.PriceSuggestion
@@ -99,6 +108,7 @@ class ResultsViewModel
         private val fareWatches: FareWatchesRepository,
         private val priceWatches: PriceWatchesRepository,
         featureVisibility: FeatureVisibility,
+        private val auth: AuthRepository,
         private val clock: AppClock,
         private val dispatchers: AppDispatchers,
         private val savedState: SavedStateHandle,
@@ -370,14 +380,6 @@ class ResultsViewModel
                     watchActivity(event.activity)
                 }
 
-                is ResultsEvent.WatchSuggestion -> {
-                    watchSuggestion(event.suggestion)
-                }
-
-                ResultsEvent.DismissNoLivePrice -> {
-                    local.update { it.copy(noLivePrice = null) }
-                }
-
                 is ResultsEvent.ShowVerification -> {
                     local.update { it.copy(verificationFor = event.section) }
                 }
@@ -576,34 +578,62 @@ class ResultsViewModel
             }
         }
 
-        // ── watches (call the repositories directly; Team G's dialogs swap in at integration) ──
+        // ── watches: Team G's sheets over their dialog controllers (web FareWatchDialog / PriceWatchDialog) ──
+
+        private val sheet = MutableStateFlow<WatchSheet?>(null)
+
+        /** The watch sheet to show, if any (the route hosts FareWatchSheet / PriceWatchSheet). */
+        val watchSheet: StateFlow<WatchSheet?> = sheet
+
+        /** The signed-in user's email (the sheets offer email alerts only with one). */
+        val userEmail: StateFlow<String?> =
+            auth.session.map { it?.user?.email }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), null)
+
+        fun dismissWatchSheet() {
+            sheet.value = null
+            local.update { l ->
+                // A sheet closed without watching leaves no "busy" marker behind.
+                l.copy(
+                    watches =
+                        l.watches.copy(
+                            fare = l.watches.fare?.takeIf { it.watchId != null },
+                            hotels = l.watches.hotels.filterValues { it.watchId != null },
+                            activities = l.watches.activities.filterValues { it.watchId != null },
+                        ),
+                )
+            }
+        }
+
+        /** A fare watch was created from the sheet: mark the flights section "Watching". */
+        fun onFareWatched(watch: FareWatch) {
+            local.update {
+                it.copy(watches = it.watches.copy(fare = WatchState(watchId = watch.id, price = watch.lastPrice ?: watch.baselinePrice, currency = "USD")))
+            }
+        }
+
+        /** A price watch was created; only the card's own item is marked (not a suggestion picked instead). */
+        fun onPriceWatched(kind: String, itemName: String, outcome: WatchedOutcome) {
+            if (outcome.viaSuggestion) return
+            val w = outcome.watch
+            val state = WatchState(watchId = w.id, price = w.baselinePrice ?: w.lastPrice, currency = w.currency)
+            if (kind == PriceWatchKinds.HOTEL) setHotelWatch(itemName, state) else setActivityWatch(itemName, state)
+        }
 
         private fun watchFare() {
             val req = request ?: return
-            if (!WatchSpecs.isWatchableTrip(req, clock.today())) {
+            val trip = WatchTrip.from(req)
+            if (trip == null || !WatchSpecs.isWatchableTrip(req, clock.today())) {
                 messageChannel.trySend(ResultsMessage.WatchUnavailable)
                 return
             }
-            local.update { it.copy(watches = it.watches.copy(fare = WatchState(busy = true))) }
-            viewModelScope.launch {
-                val trip = WatchSpecs.fareTrip(req).copy(alertMode = ALERT_ANY_DROP, flexibleDays = 0)
-                when (val r = fareWatches.create(trip)) {
-                    is AppResult.Success -> {
-                        val w = r.value
-                        val live = w.lastPrice ?: w.baselinePrice
-                        val shown = state.value.sections.firstOrNull { it.id == SectionId.FLIGHTS }?.data as? FlightsData
-                        val price = live ?: WatchSpecs.cheapestFlightPrice(shown)
-                        local.update { it.copy(watches = it.watches.copy(fare = WatchState(watchId = w.id, price = live, currency = "USD"))) }
-                        val travellers = w.numTravelers ?: trip.numTravelers
-                        messageChannel.trySend(ResultsMessage.FareWatched(price, travellers, w.alreadyLow == true, w.alreadyWatching == true))
-                    }
-
-                    is AppResult.Failure -> {
-                        local.update { it.copy(watches = it.watches.copy(fare = null)) }
-                        messageChannel.trySend(ResultsMessage.WatchFailed(KIND_FARE, r.error.message))
-                    }
-                }
-            }
+            val shown = state.value.sections.firstOrNull { it.id == SectionId.FLIGHTS }?.data as? FlightsData
+            val initial =
+                FareWatchDialogState(
+                    trip = trip,
+                    price = WatchSpecs.cheapestFlightPrice(shown),
+                    emailAvailable = health.capabilities.value?.emailAlertsAvailable == true,
+                )
+            sheet.value = WatchSheet.Fare(FareWatchDialogController(initial) { fareWatches.create(it) })
         }
 
         /** Airport codes → city names, as the web's `useAirportCities` (local airport data, no live price calls). */
@@ -629,7 +659,7 @@ class ResultsViewModel
                     return@launch
                 }
                 val body = TravelJson.encodeToJsonElement(HotelWatchSpec.serializer(), spec) as JsonObject
-                createPriceWatch(PriceWatchKinds.HOTEL, name, body) { setHotelWatch(name, it) }
+                openPriceSheet(PriceWatchKinds.HOTEL, name, body, PricePreview(title = name, subtitle = hotel.city, estimate = hotel.pricePerNightUsd))
             }
         }
 
@@ -646,47 +676,14 @@ class ResultsViewModel
                     return@launch
                 }
                 val body = TravelJson.encodeToJsonElement(ActivityWatchSpec.serializer(), spec) as JsonObject
-                createPriceWatch(PriceWatchKinds.ACTIVITY, name, body) { setActivityWatch(name, it) }
+                openPriceSheet(PriceWatchKinds.ACTIVITY, name, body, PricePreview(title = name, subtitle = activity.city, estimate = activity.priceUsd))
             }
         }
 
-        private fun watchSuggestion(suggestion: PriceSuggestion) {
-            val pending = local.value.noLivePrice ?: return
-            val spec = suggestion.spec ?: return
-            local.update { it.copy(noLivePrice = null) }
-            viewModelScope.launch {
-                createPriceWatch(pending.kind, pending.itemName, spec) { }
-            }
-        }
-
-        private suspend fun createPriceWatch(kind: String, itemName: String, spec: JsonObject, onState: (WatchState?) -> Unit) {
-            when (val r = priceWatches.create(CreatePriceWatchRequest(kind = kind, spec = spec, alertMode = ALERT_ANY_DROP))) {
-                is AppResult.Success -> {
-                    val w: PriceWatch = r.value
-                    onState(WatchState(watchId = w.id, price = w.baselinePrice ?: w.lastPrice, currency = w.currency))
-                    messageChannel.trySend(ResultsMessage.PriceWatched(w.baselinePrice ?: w.lastPrice, w.currency, w.alreadyWatching == true))
-                }
-
-                is AppResult.Failure -> {
-                    onState(null)
-                    val error = r.error
-                    val noLive = (error as? AppError.Client)?.takeIf { it.code == NO_LIVE_PRICE }?.let(::decodeNoLivePrice)
-                    if (noLive != null) {
-                        local.update { it.copy(noLivePrice = NoLivePriceUi(kind, itemName, noLive.message ?: error.message, noLive.suggestions)) }
-                    } else {
-                        messageChannel.trySend(ResultsMessage.WatchFailed(kind, error.message))
-                    }
-                }
-            }
-        }
-
-        /** 422 `no_live_price`: `extras` carries the other top-level keys as raw JSON text. */
-        private fun decodeNoLivePrice(error: AppError.Client): NoLivePriceError {
-            val suggestions =
-                error.extras["suggestions"]?.let { text ->
-                    runCatching { TravelJson.decodeFromString(ListSerializer(PriceSuggestion.serializer()), text) }.getOrNull()
-                }.orEmpty()
-            return NoLivePriceError(message = error.message, code = error.code, suggestions = suggestions)
+        private fun openPriceSheet(kind: String, itemName: String, spec: JsonObject, preview: PricePreview) {
+            val initial = PriceWatchDialogState(kind, spec, preview, emailAvailable = health.capabilities.value?.emailAlertsAvailable == true)
+            val controller = PriceWatchDialogController(initial, { priceWatches.create(it) }, { priceWatches.delete(it) })
+            sheet.value = WatchSheet.Price(controller, kind, itemName)
         }
 
         private fun setHotelWatch(name: String, value: WatchState?) =
@@ -700,8 +697,6 @@ class ResultsViewModel
         private companion object {
             const val STOP_TIMEOUT_MS = 5_000L
             const val AIRPORT_LOOKUP_LIMIT = 5
-            const val KIND_FARE = "fare"
-            const val NO_LIVE_PRICE = "no_live_price"
             const val KEY_EXTRAS_SEARCH = "results_extras_search"
             const val KEY_CONFIDENCE = "results_confidence"
             const val KEY_ADVISOR = "results_pricing_advisor"

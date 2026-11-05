@@ -25,11 +25,13 @@ import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
 import io.github.rupakc.travelplanner.core.model.section.VisaData
+import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.model.stream.SearchEvent
 import io.github.rupakc.travelplanner.core.testing.Fixtures
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
+import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareCalendarRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepository
@@ -39,6 +41,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesReposito
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchLauncher
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
+import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -95,6 +98,7 @@ class ResultsViewModelTest {
             fareWatches = fareWatches,
             priceWatches = priceWatches,
             featureVisibility = visibility,
+            auth = FakeAuthRepository(Session("t", TestUser.copy(email = "a@b.c"))),
             clock = clock,
             dispatchers = TestAppDispatchers(main.testDispatcher),
             savedState = SavedStateHandle(),
@@ -327,6 +331,7 @@ class ResultsViewModelTest {
                     fareWatches,
                     priceWatches,
                     FakeFeatureVisibility(),
+                    FakeAuthRepository(Session("t", TestUser)),
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     SavedStateHandle(),
@@ -358,6 +363,7 @@ class ResultsViewModelTest {
                     fareWatches,
                     priceWatches,
                     FakeFeatureVisibility(),
+                    FakeAuthRepository(Session("t", TestUser)),
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     saved,
@@ -379,6 +385,7 @@ class ResultsViewModelTest {
                     fareWatches,
                     priceWatches,
                     FakeFeatureVisibility(),
+                    FakeAuthRepository(Session("t", TestUser)),
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     saved,
@@ -612,31 +619,30 @@ class ResultsViewModelTest {
         }
 
     @Test
-    fun `fare watch success and price watch no-live-price`() =
+    fun `watch buttons open Team G's sheets and watching through them marks the card`() =
         runTest {
             val vm = vm()
-            vm.messages.test {
-                search.start(request)
-                vm.onEvent(ResultsEvent.WatchFare)
-                assertTrue(awaitItem() is ResultsMessage.FareWatched)
-                cancelAndIgnoreRemainingEvents()
-            }
-            assertEquals(1, fareWatches.watches.value.size)
-            priceWatches.createResult =
-                AppResult.Failure(
-                    AppError.Client(
-                        422,
-                        "No live price for this hotel",
-                        code = "no_live_price",
-                        extras = mapOf("suggestions" to """[{"title":"Park Hyatt","price":700,"spec":{"name":"Park Hyatt"}}]"""),
-                    ),
-                )
             vm.state.test {
+                search.start(request)
                 val hotel = (expectMostRecentItem().section(SectionId.HOTELS).data as HotelsData).results.first()
+                vm.onEvent(ResultsEvent.WatchFare)
+                val fare = vm.watchSheet.value as WatchSheet.Fare
+                assertEquals("NYC", fare.controller.state.value.trip.origin)
+                assertTrue(fareWatches.watches.value.isEmpty()) // nothing is created before the user confirms
+                fare.controller.submit()
+                val created = fare.controller.state.value.done!!
+                vm.onFareWatched(created)
+                vm.dismissWatchSheet()
+                assertEquals(created.id, expectMostRecentItem().watches.fare?.watchId)
+                assertEquals(1, fareWatches.watches.value.size)
+
                 vm.onEvent(ResultsEvent.WatchHotel(hotel))
-                val noLive = expectMostRecentItem().noLivePrice
-                assertEquals("No live price for this hotel", noLive?.message)
-                assertEquals("Park Hyatt", noLive?.suggestions?.single()?.title)
+                val price = vm.watchSheet.value as WatchSheet.Price
+                assertEquals(hotel.name, price.itemName)
+                assertEquals("hotel", price.controller.state.value.kind)
+                vm.dismissWatchSheet()
+                assertNull(vm.watchSheet.value)
+                cancelAndIgnoreRemainingEvents()
             }
         }
 
