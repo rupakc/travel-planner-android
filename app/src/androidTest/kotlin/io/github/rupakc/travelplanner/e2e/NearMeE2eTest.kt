@@ -3,12 +3,12 @@ package io.github.rupakc.travelplanner.e2e
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import io.github.rupakc.travelplanner.MainActivity
 import io.github.rupakc.travelplanner.core.ui.R as UiR
 import io.github.rupakc.travelplanner.feature.nearby.R as NearbyR
-import org.junit.Assert.assertTrue
-import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -22,9 +22,11 @@ import org.junit.runner.RunWith
 @E2eTest
 @RunWith(AndroidJUnit4::class)
 class NearMeE2eTest {
-    @get:Rule(order = 0) val rule = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0)
+    val rule = createAndroidComposeRule<MainActivity>()
 
-    @get:Rule(order = 1) val failureShot = Screenshots.onFailure()
+    @get:Rule(order = 1)
+    val failureShot = Screenshots.onFailure()
     private lateinit var robot: AppRobot
 
     @Before fun setUp() {
