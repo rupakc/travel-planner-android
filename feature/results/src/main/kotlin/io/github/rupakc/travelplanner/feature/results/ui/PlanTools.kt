@@ -431,11 +431,11 @@ private fun categoryColor(c: BudgetCategory): Color =
 private fun fitText(c: BudgetCategory, ui: BudgetUi): String =
     when (c) {
         BudgetCategory.FLIGHTS -> {
-            pluralStringResource(R.plurals.results_budget_flights_fit, ui.fit.flights.total, ui.fit.flights.count, ui.fit.flights.total)
+            stringResource(R.string.results_budget_flights_fit, ui.fit.flights.count, ui.fit.flights.total)
         }
 
         BudgetCategory.STAY -> {
-            pluralStringResource(R.plurals.results_budget_hotels_fit, ui.fit.hotels.total, ui.fit.hotels.count, ui.fit.hotels.total)
+            stringResource(R.string.results_budget_hotels_fit, ui.fit.hotels.count, ui.fit.hotels.total)
         }
 
         BudgetCategory.ACTIVITIES -> {

@@ -48,7 +48,7 @@
     <string name="settings_dynamic_color">Dynamic colour</string>
     <string name="settings_dynamic_color_sub">Use colours from your wallpaper</string>
     <string name="settings_dynamic_color_unsupported">Needs Android 12 or later</string>
-    <string name="settings_dynamic_color_note">Off by default to keep the Voyager teal. Section colours stay the same either way.</string>
+    <string name="settings_dynamic_color_note">Off by default to keep the %1$s teal. Section colours stay the same either way.</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_system">System default</string>
     <string name="settings_language_en">English</string>
@@ -175,10 +175,7 @@
     <string name="settings_prefs_saved">Preferences saved!</string>
     <string name="settings_prefs_save_error">Error: %1$s</string>
     <string name="settings_prefs_save_failed">Save failed</string>
-    <plurals name="settings_features_on">
-        <item quantity="one">%1$d of %2$d feature on</item>
-        <item quantity="other">%1$d of %2$d features on</item>
-    </plurals>
+    <string name="settings_features_on">Features on: %1$d of %2$d</string>
     <plurals name="settings_taste_built_from">
         <item quantity="one">Built from %d signal in your saved plans. Logged-in searches are automatically personalised with this profile.</item>
         <item quantity="other">Built from %d signals in your saved plans. Logged-in searches are automatically personalised with this profile.</item>
