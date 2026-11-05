@@ -37,7 +37,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.common.AppError
@@ -53,7 +52,11 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.export.safeUrl
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
+import io.github.rupakc.travelplanner.core.domain.itinerary.ItinerarySchedule
 import io.github.rupakc.travelplanner.core.model.section.Activity
+import io.github.rupakc.travelplanner.core.model.section.ItineraryDay
+import io.github.rupakc.travelplanner.core.model.section.ItinerarySlot
+import io.github.rupakc.travelplanner.core.ui.itinerary.ItineraryDayCard
 import io.github.rupakc.travelplanner.core.model.section.FlightLeg
 import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.SectionId
@@ -62,8 +65,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-/** Width of the time column in itinerary rows and max content width (layout constants). */
-private val TimeColumnWidth = 88.dp
+/** Max content width (layout constant). */
 private val MaxContentWidth = 640.dp
 
 /**
@@ -314,54 +316,30 @@ private fun HotelCard(hotel: Hotel) {
     }
 }
 
+/** Section heading + one shared core/ui day card per day (the same cards My Plan and Results render). */
 private fun LazyListScope.itinerary(trip: SharedTrip) {
-    item(key = "itinerary", contentType = "card") {
+    item(key = "itinerary-heading", contentType = "section-heading") {
         val title =
             if (trip.fullItinerary) {
                 stringResource(R.string.share_itinerary, pluralStringResource(R.plurals.share_days, trip.itinerary.size, trip.itinerary.size))
             } else {
                 stringResource(R.string.share_itinerary_picks)
             }
-        DetailCard(title, SectionId.ITINERARY) {
-            trip.itinerary.forEach { day ->
-                Column {
-                    val heading = listOfNotNull(day.dayNumber?.let { stringResource(R.string.share_day, it) }, day.date, day.city).joinToString(", ")
-                    Text(heading, style = TravelTheme.typography.titleSmall, color = TravelTheme.colors.primary, modifier = Modifier.semantics { heading() })
-                    day.theme?.let {
-                        Text(it, style = TravelTheme.typography.bodySmall, fontStyle = FontStyle.Italic, color = TravelTheme.colors.onSurfaceVariant)
-                    }
-                    day.slots.forEach { SlotLine(it) }
-                }
-            }
+        val accent = TravelTheme.sectionAccents[SectionId.ITINERARY]
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.semantics { heading() }) {
+            Box(Modifier.width(TravelTheme.spacing.accentBar).height(TravelTheme.spacing.lg).background(accent.bar))
+            Spacer(Modifier.width(TravelTheme.spacing.sm))
+            Text(title, style = TravelTheme.typography.titleMedium, color = accent.icon)
         }
     }
-}
-
-@Composable
-private fun SlotLine(slot: SharedSlot) {
-    Row(Modifier.fillMaxWidth().padding(top = TravelTheme.spacing.xs)) {
-        Column(Modifier.widthIn(min = TimeColumnWidth)) {
-            val tod =
-                when (slot.timeOfDay) {
-                    "morning" -> stringResource(R.string.share_morning)
-                    "afternoon" -> stringResource(R.string.share_afternoon)
-                    "evening" -> stringResource(R.string.share_evening)
-                    else -> slot.timeOfDay
-                }
-            tod?.let { Text(it, style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.onSurfaceVariant) }
-            slot.timeRange?.let { Text(it, style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant) }
-        }
-        Column(Modifier.weight(1f)) {
-            Text(slot.activity ?: stringResource(R.string.share_unnamed), style = TravelTheme.typography.bodyMedium)
-            slot.location?.let { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
-            if (slot.fromLink) {
-                Text(
-                    stringResource(R.string.share_from_link),
-                    style = TravelTheme.typography.labelSmall,
-                    color = TravelTheme.extendedColors.warning,
-                )
-            }
-            slot.note?.let { Text(it, style = TravelTheme.typography.bodySmall, fontStyle = FontStyle.Italic, color = TravelTheme.colors.primary) }
+    trip.itinerary.forEachIndexed { index, day ->
+        item(key = "itinerary-day-$index", contentType = "itinerary-day") {
+            ItineraryDayCard(
+                day = day,
+                edits = trip.itineraryEdits,
+                notes = trip.itineraryNotes,
+                showTransit = ItinerarySchedule.listedInScheduleOrder(day.day),
+            )
         }
     }
 }
@@ -462,10 +440,20 @@ private val previewTrip =
         flights = emptyList(),
         legsTotalUsd = null,
         itinerary =
-            listOf(
-                SharedDay(1, "2027-04-01", "Tokyo", "Arrival", listOf(SharedSlot("morning", "09:00–11:00", "Tsukiji Outer Market", "Tsukiji", null, false))),
+            ItinerarySchedule.scheduleDays(
+                listOf(
+                    ItineraryDay(
+                        dayNumber = 1,
+                        date = "2027-04-01",
+                        city = "Tokyo",
+                        theme = "Arrival",
+                        slots = listOf(ItinerarySlot(timeOfDay = "morning", activity = "Tsukiji Outer Market", location = "Tsukiji", key = "1-morning")),
+                    ),
+                ),
             ),
         fullItinerary = true,
+        itineraryEdits = emptyMap(),
+        itineraryNotes = emptyMap(),
         selections = PlanSelections(hotel = Hotel(name = "Park Hyatt Tokyo", starRating = 5.0, location = "Shinjuku")),
     )
 
