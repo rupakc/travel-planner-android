@@ -171,4 +171,5 @@
     <!-- Share as text -->
     <string name="plan_text_estimated_cost">Estimated cost: %1$s</string>
     <string name="plan_text_estimate">Estimate</string>
+    <string name="plan_action_watch_trip">Watch whole trip</string>
 </resources>

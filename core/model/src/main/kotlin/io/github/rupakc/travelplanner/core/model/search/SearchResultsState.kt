@@ -34,6 +34,9 @@ data class SearchResultsState(
 
     inline fun <reified T : SectionData> section(id: SectionId): T? = sections[id]?.data as? T
 
+    /** Sections as `{"flights":{…},…}` (the chat `search_results` / plan draft `search_data` shape), reusing each raw object. */
+    fun sectionsJson(): JsonObject = JsonObject(sections.values.associate { it.id.wire to it.raw })
+
     companion object {
         fun initialStatuses(): Map<SectionId, SectionStatus> =
             SectionId.entries.associateWith { if (it.phaseOne) SectionStatus.LOADING else SectionStatus.WAITING }

@@ -15,7 +15,7 @@ import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
 import io.github.rupakc.travelplanner.core.data.repository.PriceWatchesRepository
-import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
+import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertMode
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertTab
 import io.github.rupakc.travelplanner.core.domain.alerts.AnyWatch
@@ -163,7 +163,7 @@ class AlertsViewModel
         private val health: HealthRepository,
         private val auth: AuthRepository,
         private val preferences: PreferencesRepository,
-        private val search: SearchRepository,
+        private val searchLauncher: SearchLauncher,
         private val notifications: NotificationsRepository,
         private val clock: AppClock,
         @param:ApplicationScope private val appScope: CoroutineScope,
@@ -427,7 +427,8 @@ class AlertsViewModel
                         is AnyWatch.Fare -> replanRequest(w.watch, prefs, cheapest)
                         is AnyWatch.Price -> tripReplanRequest(w.watch, prefs)
                     } ?: return@launch
-                search.start(request)
+                // A re-plan is a new search: it starts a new plan for that trip (web runSearch).
+                searchLauncher.startNewSearch(request)
                 effects.send(AlertsEffect.Replanned)
             }
         }

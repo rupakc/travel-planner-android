@@ -158,10 +158,23 @@ class ServerViewModel
          * change itself is harmless.
          */
         private suspend fun switchServer(url: String?) {
+            // Check with the store's own rules first (review M12): a URL setBaseUrl would reject must not sign the user out.
+            if (url != null) {
+                val checked = settingsRepository.checkBaseUrl(url)
+                if (checked is AppResult.Failure) {
+                    showStoreFailure(checked.error)
+                    return
+                }
+            }
             withContext(NonCancellable) {
                 if (authRepository.session.first() != null) authRepository.logout()
                 store(url)
             }
+        }
+
+        private fun showStoreFailure(error: AppError) {
+            val problem = if ((error as? AppError.Client)?.code == CODE_HTTPS_REQUIRED) UrlProblem.HTTPS_REQUIRED else UrlProblem.INVALID
+            mutableState.update { it.copy(problem = problem, saved = false) }
         }
 
         private suspend fun store(url: String?) {
@@ -172,8 +185,7 @@ class ServerViewModel
                 }
 
                 is AppResult.Failure -> {
-                    val problem = if ((result.error as? AppError.Client)?.code == CODE_HTTPS_REQUIRED) UrlProblem.HTTPS_REQUIRED else UrlProblem.INVALID
-                    mutableState.update { it.copy(problem = problem, saved = false) }
+                    showStoreFailure(result.error)
                 }
             }
         }

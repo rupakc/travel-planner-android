@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.plan.model
 
 import androidx.compose.runtime.Immutable
+import io.github.rupakc.travelplanner.core.domain.plan.computePlanCost
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import java.text.Normalizer
 import java.time.LocalDate
@@ -58,7 +59,7 @@ internal data class TripSummary(
                 shareToken = plan.shareToken,
                 updatedAt = plan.updatedAt?.let { runCatching { LocalDateTime.parse(it, SQLITE_TIME) }.getOrNull() },
                 itemCount = plan.selections.count,
-                totalCostUsd = PlanCost.total(plan.selections, sd.string("departure_date"), sd.string("return_date")),
+                totalCostUsd = computePlanCost(plan.selections, sd.string("departure_date"), sd.string("return_date")),
                 timing = timing(start, end, today),
             )
         }

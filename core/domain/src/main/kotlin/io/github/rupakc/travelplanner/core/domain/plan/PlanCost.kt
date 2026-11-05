@@ -32,14 +32,16 @@ internal fun daysBetween(from: String?, to: String?): Long? {
     return ChronoUnit.DAYS.between(start, end)
 }
 
-private fun hotelCost(hotel: Hotel?, search: TravelSearchRequest?): Double {
+private fun hotelCost(hotel: Hotel?, search: TravelSearchRequest?): Double = hotelCost(hotel, search?.departureDate, search?.returnDate)
+
+private fun hotelCost(hotel: Hotel?, departureDate: String?, returnDate: String?): Double {
     if (hotel == null) return 0.0
     price(hotel.totalPriceUsd).takeIf { it > 0 }?.let { return it }
-    val hasDates = !search?.returnDate.isNullOrBlank() && !search?.departureDate.isNullOrBlank()
+    val hasDates = !returnDate.isNullOrBlank() && !departureDate.isNullOrBlank()
     val nights =
         if (hasDates) {
             // Web: NaN for unparseable dates, which then drops the hotel from the breakdown.
-            daysBetween(search?.departureDate, search?.returnDate)?.coerceAtLeast(1) ?: return 0.0
+            daysBetween(departureDate, returnDate)?.coerceAtLeast(1) ?: return 0.0
         } else {
             DEFAULT_TRIP_NIGHTS.toLong()
         }
@@ -47,12 +49,16 @@ private fun hotelCost(hotel: Hotel?, search: TravelSearchRequest?): Double {
 }
 
 /** Per-category split of the plan's cost, biggest first; only categories with a priced item. */
-fun computePlanCostBreakdown(selections: PlanSelections?, search: TravelSearchRequest? = null): List<CostPart> {
+fun computePlanCostBreakdown(selections: PlanSelections?, search: TravelSearchRequest? = null): List<CostPart> =
+    computePlanCostBreakdown(selections, search?.departureDate, search?.returnDate)
+
+/** [computePlanCostBreakdown] from the trip dates alone (saved / shared plans keep only `search_data` JSON). */
+fun computePlanCostBreakdown(selections: PlanSelections?, departureDate: String?, returnDate: String?): List<CostPart> {
     if (selections == null) return emptyList()
     val parts =
         listOf(
             CostPart(CostCategory.FLIGHTS, price(selections.flight?.priceUsd) + selections.flights.sumOf { price(it.priceUsd) }),
-            CostPart(CostCategory.HOTEL, hotelCost(selections.hotel, search)),
+            CostPart(CostCategory.HOTEL, hotelCost(selections.hotel, departureDate, returnDate)),
             CostPart(CostCategory.ACTIVITIES, selections.activities.sumOf { price(it.priceUsd) }),
             CostPart(CostCategory.SIM, price(selections.sim?.priceUsd)),
         )
@@ -62,6 +68,10 @@ fun computePlanCostBreakdown(selections: PlanSelections?, search: TravelSearchRe
 /** Total estimated plan cost in USD (web `computePlanCost`). */
 fun computePlanCost(selections: PlanSelections?, search: TravelSearchRequest? = null): Double =
     computePlanCostBreakdown(selections, search).sumOf { it.amount }
+
+/** [computePlanCost] from the trip dates alone. */
+fun computePlanCost(selections: PlanSelections?, departureDate: String?, returnDate: String?): Double =
+    computePlanCostBreakdown(selections, departureDate, returnDate).sumOf { it.amount }
 
 /** Web `getBudgetStatus`: [amount] is the rounded absolute difference. */
 data class BudgetStatus(val over: Boolean, val amount: Long)

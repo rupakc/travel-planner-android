@@ -48,10 +48,7 @@ object SearchResultsReducer {
         state.copy(statuses = state.statuses.mapValues { SectionStatus.DONE }, phase = phase)
 
     /** Sections as `{"flights":{…},…}` — the chat `search_results` / plan draft `search_data` shape. */
-    fun sectionsJson(state: SearchResultsState): JsonObject =
-        buildJsonObject {
-            state.sections.values.forEach { put(it.id.wire, it.raw) }
-        }
+    fun sectionsJson(state: SearchResultsState): JsonObject = state.sectionsJson()
 
     private fun onSection(state: SearchResultsState, event: SearchEvent.Section): SearchResultsState {
         val existing = state.sections[event.id]

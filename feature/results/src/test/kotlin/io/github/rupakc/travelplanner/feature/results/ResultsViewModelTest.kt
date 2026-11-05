@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.feature.results
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
@@ -18,23 +19,29 @@ import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.DataSource
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
+import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
 import io.github.rupakc.travelplanner.core.model.section.VisaData
+import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.model.stream.SearchEvent
 import io.github.rupakc.travelplanner.core.testing.Fixtures
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
+import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareCalendarRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeFeatureVisibility
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchLauncher
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
+import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -79,18 +86,19 @@ class ResultsViewModelTest {
     private val health = FakeHealthRepository(Health(status = "ok", serpapiConfigured = true, fareWatchAvailable = true))
     private val fareWatches = FakeFareWatchesRepository()
     private val priceWatches = FakePriceWatchesRepository()
-    private val profile = FakeProfileRepository()
+    private val visibility = FakeFeatureVisibility()
 
-    private fun vm(catalogue: FeatureCatalogue? = null) =
+    private fun vm(store: io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore = plan) =
         ResultsViewModel(
             search = search,
-            plan = plan,
+            searchLauncher = FakeSearchLauncher(store, search),
+            plan = store,
             health = health,
             fareCalendar = FakeFareCalendarRepository(),
             fareWatches = fareWatches,
             priceWatches = priceWatches,
-            profile = profile,
-            catalogue = Optional.ofNullable(catalogue),
+            featureVisibility = visibility,
+            auth = FakeAuthRepository(Session("t", TestUser.copy(email = "a@b.c"))),
             clock = clock,
             dispatchers = TestAppDispatchers(main.testDispatcher),
             savedState = SavedStateHandle(),
@@ -316,13 +324,14 @@ class ResultsViewModelTest {
             val vm =
                 ResultsViewModel(
                     slow,
+                    FakeSearchLauncher(plan, slow),
                     plan,
                     health,
                     FakeFareCalendarRepository(),
                     fareWatches,
                     priceWatches,
-                    profile,
-                    Optional.empty(),
+                    FakeFeatureVisibility(),
+                    FakeAuthRepository(Session("t", TestUser)),
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     SavedStateHandle(),
@@ -347,13 +356,14 @@ class ResultsViewModelTest {
             val first =
                 ResultsViewModel(
                     search,
+                    FakeSearchLauncher(plan, search),
                     plan,
                     health,
                     FakeFareCalendarRepository(),
                     fareWatches,
                     priceWatches,
-                    profile,
-                    Optional.empty(),
+                    FakeFeatureVisibility(),
+                    FakeAuthRepository(Session("t", TestUser)),
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     saved,
@@ -368,13 +378,14 @@ class ResultsViewModelTest {
             val restored =
                 ResultsViewModel(
                     FakeSearchRepository(),
+                    FakeSearchLauncher(newPlan),
                     newPlan,
                     health,
                     FakeFareCalendarRepository(),
                     fareWatches,
                     priceWatches,
-                    profile,
-                    Optional.empty(),
+                    FakeFeatureVisibility(),
+                    FakeAuthRepository(Session("t", TestUser)),
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     saved,
@@ -426,11 +437,46 @@ class ResultsViewModelTest {
             val vm = vm()
             vm.state.test {
                 search.start(request)
-                plan.restore(plan.draft.value.copy(planId = 3))
+                plan.restore(plan.draft.value.copy(planId = 3, loadedPlan = true))
                 assertTrue(expectMostRecentItem().bestValue!!.disabled)
                 vm.onEvent(ResultsEvent.ApplyPackage)
                 assertEquals(0, plan.draft.value.selections.count)
             }
+        }
+
+    @Test
+    fun `saving does not lock the itinerary, opening a saved plan does, a new search unlocks (web loadedPlanId)`() =
+        runTest {
+            val vm = vm()
+            vm.state.test {
+                search.start(request)
+                plan.attachSearch(request, null)
+                plan.save("Tokyo")
+                assertTrue(plan.draft.value.planId != null)
+                assertFalse(vm.itineraryEditingLocked)
+                assertFalse(expectMostRecentItem().bestValue!!.disabled)
+                plan.load(io.github.rupakc.travelplanner.core.model.plan.Plan(id = 9, name = "Saved"))
+                assertTrue(vm.itineraryEditingLocked)
+                FakeSearchLauncher(plan, search).startNewSearch(request)
+                assertFalse(vm.itineraryEditingLocked)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `section actions update selections synchronously once and expose the shown results`() =
+        runTest {
+            val vm = vm()
+            search.start(request)
+            var calls = 0
+            vm.updateSelections {
+                calls++
+                it.copy(itineraryNotes = mapOf("0-morning" to "Bring cash"))
+            }
+            assertEquals(1, calls)
+            assertEquals("Bring cash", plan.draft.value.selections.itineraryNotes["0-morning"])
+            assertEquals("Bring cash", vm.selections.value.itineraryNotes["0-morning"])
+            assertEquals(request, vm.results.value.request)
         }
 
     @Test
@@ -450,6 +496,63 @@ class ResultsViewModelTest {
                 val s = expectMostRecentItem()
                 assertEquals(listOf("Cheap Inn"), (s.section(SectionId.HOTELS).data as HotelsData).results.map { it.name })
                 assertEquals(2, s.section(SectionId.HOTELS).activeFilterCount)
+            }
+        }
+
+    @Test
+    fun `two Results screens share one filter result and stop writing the draft (single writer)`() =
+        runTest {
+            search.hotelsResult =
+                AppResult.Success(
+                    SectionDecoder.decode(SectionId.HOTELS, Json.parseToJsonElement("""{"results":[{"name":"Cheap Inn"}]}""").jsonObject) as HotelsData,
+                )
+            var attaches = 0
+            val counting =
+                object : io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore by plan {
+                    override fun attachSearch(request: TravelSearchRequest, data: kotlinx.serialization.json.JsonObject?) {
+                        attaches++
+                        plan.attachSearch(request, data)
+                    }
+                }
+            val first = vm(counting)
+            val second = vm(counting) // e.g. Results kept alive on another tab's back stack
+            turbineScope {
+                val a = first.state.testIn(backgroundScope)
+                val b = second.state.testIn(backgroundScope)
+                search.start(request)
+                first.onEvent(ResultsEvent.ApplyHotelFilters(HotelFilters(numBeds = 2)))
+                assertEquals(listOf("Cheap Inn"), (a.expectMostRecentItem().section(SectionId.HOTELS).data as HotelsData).results.map { it.name })
+                assertEquals(listOf("Cheap Inn"), (b.expectMostRecentItem().section(SectionId.HOTELS).data as HotelsData).results.map { it.name })
+                val settled = attaches
+                assertTrue("attachSearch ran $settled times", settled <= 4)
+                // Unrelated changes (a toggle, typing in the filter box) do not write the draft again.
+                first.onEvent(ResultsEvent.Query("inn"))
+                plan.toggle(PlanItem.HotelItem(Hotel(name = "Cheap Inn")))
+                a.expectMostRecentItem()
+                b.expectMostRecentItem()
+                assertEquals(settled, attaches)
+                val stored = plan.draft.value.searchData!!["hotels"]!!.jsonObject["results"] as kotlinx.serialization.json.JsonArray
+                assertEquals("\"Cheap Inn\"", stored.single().jsonObject["name"].toString())
+                a.cancel()
+                b.cancel()
+            }
+        }
+
+    @Test
+    fun `a new search from Search replaces a draft that holds another trip's sections and Results shows it live`() =
+        runTest {
+            val paris = request.copy(destination = "Paris")
+            plan.attachSearch(paris, Json.parseToJsonElement("""{"hotels":{"results":[{"name":"Paris hotel"}]}}""").jsonObject)
+            plan.toggle(PlanItem.HotelItem(Hotel(name = "Paris hotel")))
+            val vm = vm()
+            vm.state.test {
+                assertEquals("Paris", expectMostRecentItem().request?.destination)
+                FakeSearchLauncher(plan, search).startNewSearch(request) // what Search submit does
+                val s = expectMostRecentItem()
+                assertEquals("Tokyo", s.request?.destination)
+                assertEquals(ResultsSource.LIVE, ResultsStateBuilder.selectSource(search.current.value, plan.draft.value))
+                assertFalse((s.section(SectionId.HOTELS).data as HotelsData).results.any { it.name == "Paris hotel" })
+                assertNull(plan.draft.value.selections.hotel)
             }
         }
 
@@ -516,45 +619,38 @@ class ResultsViewModelTest {
         }
 
     @Test
-    fun `fare watch success and price watch no-live-price`() =
+    fun `watch buttons open Team G's sheets and watching through them marks the card`() =
         runTest {
             val vm = vm()
-            vm.messages.test {
-                search.start(request)
-                vm.onEvent(ResultsEvent.WatchFare)
-                assertTrue(awaitItem() is ResultsMessage.FareWatched)
-                cancelAndIgnoreRemainingEvents()
-            }
-            assertEquals(1, fareWatches.watches.value.size)
-            priceWatches.createResult =
-                AppResult.Failure(
-                    AppError.Client(
-                        422,
-                        "No live price for this hotel",
-                        code = "no_live_price",
-                        extras = mapOf("suggestions" to """[{"title":"Park Hyatt","price":700,"spec":{"name":"Park Hyatt"}}]"""),
-                    ),
-                )
             vm.state.test {
+                search.start(request)
                 val hotel = (expectMostRecentItem().section(SectionId.HOTELS).data as HotelsData).results.first()
+                vm.onEvent(ResultsEvent.WatchFare)
+                val fare = vm.watchSheet.value as WatchSheet.Fare
+                assertEquals("NYC", fare.controller.state.value.trip.origin)
+                assertTrue(fareWatches.watches.value.isEmpty()) // nothing is created before the user confirms
+                fare.controller.submit()
+                val created = fare.controller.state.value.done!!
+                vm.onFareWatched(created)
+                vm.dismissWatchSheet()
+                assertEquals(created.id, expectMostRecentItem().watches.fare?.watchId)
+                assertEquals(1, fareWatches.watches.value.size)
+
                 vm.onEvent(ResultsEvent.WatchHotel(hotel))
-                val noLive = expectMostRecentItem().noLivePrice
-                assertEquals("No live price for this hotel", noLive?.message)
-                assertEquals("Park Hyatt", noLive?.suggestions?.single()?.title)
+                val price = vm.watchSheet.value as WatchSheet.Price
+                assertEquals(hotel.name, price.itemName)
+                assertEquals("hotel", price.controller.state.value.kind)
+                vm.dismissWatchSheet()
+                assertNull(vm.watchSheet.value)
+                cancelAndIgnoreRemainingEvents()
             }
         }
 
     @Test
     fun `traveller type puts hidden features last and collapsed`() =
         runTest {
-            profile.profileState.value = TravellerProfile(onboardingCompleted = true, primaryType = TravellerType.LUXURY.name)
-            val catalogue =
-                object : FeatureCatalogue {
-                    override val all: List<FeatureDescriptor> = emptyList()
-
-                    override fun defaultsFor(types: Collection<TravellerType>): Set<FeatureId> = setOf(FeatureId.VISA_CHECKER)
-                }
-            val vm = vm(catalogue)
+            visibility.state.value = setOf(FeatureId.VISA_CHECKER)
+            val vm = vm()
             vm.state.test {
                 search.start(request)
                 val s = expectMostRecentItem()
@@ -565,6 +661,20 @@ class ResultsViewModelTest {
                 assertTrue(s.sections.indexOfFirst { !it.relevant } > s.sections.indexOfFirst { it.id == SectionId.VISA })
                 vm.onEvent(ResultsEvent.ToggleSection(SectionId.EVENTS))
                 assertTrue(expectMostRecentItem().section(SectionId.EVENTS).expanded)
+            }
+        }
+
+    @Test
+    fun `a skipped-quiz user who turned Events off gets Events collapsed and last, everything else relevant`() =
+        runTest {
+            // The shared rule (core:data) for no traveller type: every feature minus explicit disables.
+            visibility.state.value = FeatureId.entries.toSet() - FeatureId.EVENTS
+            val vm = vm()
+            vm.state.test {
+                search.start(request)
+                val s = expectMostRecentItem()
+                assertFalse(s.section(SectionId.EVENTS).relevant)
+                assertTrue(s.sections.filter { it.id != SectionId.EVENTS }.all { it.relevant })
             }
         }
 

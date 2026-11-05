@@ -123,6 +123,8 @@ fun NotificationSettingsScreen(
                 checked = settings.nearbyNotifications,
                 onCheckedChange = { onToggle(SetToggle(NotificationToggle.NEARBY, it)) },
             )
+            // The background check never asks for a fresh fix: it reuses the coarse cell stored by Near me.
+            SettingsNote(stringResource(R.string.settings_notif_nearby_location_note))
             SettingsSwitchRow(
                 title = stringResource(R.string.settings_notif_nearby_always),
                 subtitle = stringResource(R.string.settings_notif_nearby_always_sub),

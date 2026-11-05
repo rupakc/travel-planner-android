@@ -48,7 +48,11 @@ import kotlinx.serialization.json.buildJsonObject
  *   dropped (with a logged warning) above [MAX_SEARCH_DATA_BYTES] instead of risking an oversized row;
  * - every Room call is guarded: a failed write is logged and the next change retries; a failed read
  *   deletes the bad rows and starts empty.
- * `save`/`load`/`reset` are serialised with a mutex (review I5).
+ * `save`/`load`/`reset` are serialised with a mutex (review I5). Every whole-draft replacement (`newPlan`,
+ * `replace`, `load`, `reset`; not the undo `restore`) bumps a generation counter under [lock]; `save` applies the returned
+ * plan id only when the generation is unchanged, so a slow save can never stamp its id on a different trip
+ * (architecture review I2). Replacements don't wait for the save mutex, so opening a trip never blocks
+ * behind a slow network save.
  */
 @OptIn(FlowPreview::class)
 @Singleton
@@ -62,6 +66,8 @@ class CurrentPlanStoreImpl
         private val state = MutableStateFlow(PlanDraft())
         override val draft: StateFlow<PlanDraft> = state.asStateFlow()
         private val mutex = Mutex()
+        private val lock = Any()
+        private var generation = 0L
         private val restoreJob: Job = scope.launch { restore() }
 
         init {
@@ -71,7 +77,12 @@ class CurrentPlanStoreImpl
                     state.map { it.copy(searchData = null) }.distinctUntilChanged().collectLatest { persistDraft(it) }
                 }
                 launch {
-                    state.map { it.searchData }.distinctUntilChanged().debounce(SEARCH_DATA_DEBOUNCE_MS).collectLatest { persistSearchData(it) }
+                    state.map { it.searchData }.distinctUntilChanged {
+                        a,
+                        b,
+                        ->
+                        a === b
+                    }.debounce(SEARCH_DATA_DEBOUNCE_MS).collectLatest { persistSearchData(it) }
                 }
             }
         }
@@ -87,40 +98,50 @@ class CurrentPlanStoreImpl
         override fun attachSearch(request: TravelSearchRequest, data: JsonObject?) =
             state.update { it.copy(searchRequest = request, searchData = data, searchKey = request.searchKey()) }
 
-        override fun newPlan() {
-            state.value = PlanDraft() // searchKey = null
+        override fun newPlan() = replace(PlanDraft()) // searchKey = null
+
+        override fun replace(draft: PlanDraft) {
+            synchronized(lock) {
+                generation++
+                state.value = draft
+            }
         }
+
+        override fun load(plan: Plan): PlanDraft = draftOf(plan).also(::replace)
 
         override suspend fun reset() {
             restoreJob.join()
             mutex.withLock {
-                state.value = PlanDraft()
+                replace(PlanDraft())
                 guarded("clear the draft") { draftDao.clear() }
             }
+        }
+
+        private fun draftOf(plan: Plan): PlanDraft {
+            val request = plan.searchRequest
+            return PlanDraft(
+                planId = plan.id,
+                name = plan.name,
+                searchRequest = request,
+                searchData = sectionsOf(plan),
+                selections = plan.selections,
+                dirty = false,
+                searchKey = request?.searchKey(),
+                loadedPlan = true,
+            )
         }
 
         override suspend fun load(planId: Long): AppResult<PlanDraft> {
             restoreJob.join()
             return mutex.withLock {
-                plansRepository.get(planId).map { plan ->
-                    val request = plan.searchRequest
-                    PlanDraft(
-                        planId = plan.id,
-                        name = plan.name,
-                        searchRequest = request,
-                        searchData = sectionsOf(plan),
-                        selections = plan.selections,
-                        dirty = false,
-                        searchKey = request?.searchKey(),
-                    )
-                }.onSuccess { loaded -> state.value = loaded }
+                plansRepository.get(planId).map(::draftOf).onSuccess(::replace)
             }
         }
 
         override suspend fun save(name: String?): AppResult<Plan> {
             restoreJob.join()
             return mutex.withLock {
-                val sent = state.value
+                val (sent, sentGeneration) = synchronized(lock) { state.value to generation }
                 val planName = name?.takeIf(String::isNotBlank) ?: sent.name?.takeIf(String::isNotBlank) ?: PlanDraft.DEFAULT_NAME
                 val planId = sent.planId
                 val result =
@@ -135,13 +156,17 @@ class CurrentPlanStoreImpl
                     }
                 result.onSuccess { plan ->
                     // Apply only identity fields: edits made while the request was in flight are kept and stay dirty.
-                    state.update { now ->
-                        val nameUnchanged = now.name == sent.name
-                        now.copy(
-                            planId = plan.id,
-                            name = if (nameUnchanged) plan.name else now.name,
-                            dirty = now.selections != sent.selections || !nameUnchanged,
-                        )
+                    // A different draft (another trip opened, a new search) never gets this plan's id.
+                    synchronized(lock) {
+                        if (generation != sentGeneration) return@onSuccess
+                        state.update { now ->
+                            val nameUnchanged = now.name == sent.name
+                            now.copy(
+                                planId = plan.id,
+                                name = if (nameUnchanged) plan.name else now.name,
+                                dirty = now.selections != sent.selections || !nameUnchanged,
+                            )
+                        }
                     }
                 }
             }
@@ -149,6 +174,7 @@ class CurrentPlanStoreImpl
 
         override fun snapshot(): PlanDraft = state.value
 
+        /** Undo within the same draft: keeps the generation, so an in-flight save of this trip still applies. */
         override fun restore(snapshot: PlanDraft) {
             state.value = snapshot
         }

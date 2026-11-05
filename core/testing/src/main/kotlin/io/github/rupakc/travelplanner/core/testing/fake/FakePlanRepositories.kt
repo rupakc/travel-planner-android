@@ -5,6 +5,9 @@ import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.map
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
+import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
+import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
+import io.github.rupakc.travelplanner.core.data.search.SearchLauncherImpl
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
@@ -111,6 +114,24 @@ class FakeCurrentPlanStore(private val plans: PlansRepository = FakePlansReposit
         state.value = PlanDraft()
     }
 
+    /** Every whole-draft replacement, in order (newPlan/reset are not recorded). */
+    val replaced = mutableListOf<PlanDraft>()
+
+    override fun replace(draft: PlanDraft) {
+        replaced += draft
+        state.value = draft
+    }
+
+    override fun load(plan: Plan): PlanDraft =
+        PlanDraft(
+            planId = plan.id,
+            name = plan.name,
+            searchRequest = plan.searchRequest,
+            selections = plan.selections,
+            searchKey = plan.searchRequest?.searchKey(),
+            loadedPlan = true,
+        ).also { state.value = it }
+
     override suspend fun reset() {
         state.value = PlanDraft()
     }
@@ -123,6 +144,7 @@ class FakeCurrentPlanStore(private val plans: PlansRepository = FakePlansReposit
                 searchRequest = it.searchRequest,
                 selections = it.selections,
                 searchKey = it.searchRequest?.searchKey(),
+                loadedPlan = true,
             ).also { d ->
                 state.value = d
             }
@@ -148,5 +170,19 @@ class FakeCurrentPlanStore(private val plans: PlansRepository = FakePlansReposit
 
     override fun restore(snapshot: PlanDraft) {
         state.value = snapshot
+    }
+}
+
+/** Records launches and behaves like the real launcher over the given fakes. */
+class FakeSearchLauncher(
+    private val plan: CurrentPlanStore = FakeCurrentPlanStore(),
+    private val search: SearchRepository = FakeSearchRepository(),
+) : SearchLauncher {
+    val launched = mutableListOf<Pair<TravelSearchRequest, PlanSelections?>>()
+    private val real = SearchLauncherImpl(plan, search)
+
+    override fun startNewSearch(request: TravelSearchRequest, preloadSelections: PlanSelections?) {
+        launched += request to preloadSelections
+        real.startNewSearch(request, preloadSelections)
     }
 }

@@ -104,11 +104,21 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 Trip reminders: diff, don't cancel-all (KEEP unchanged unique names, cancel removed ones); a reminder overdue by ≤ 2 h today still fires (zero delay); a posted-names log stops repeats; TIMEZONE_CHANGED / TIME_SET re-time all (REPLACE) using the zone at call time.
 - 2026-11-05 No background location: Near me stores its last fix as a 0.05° cell centre with a timestamp (DataStore `last_location`, excluded from backup, cleared on sign-out); the nearby worker uses it only if under 24 h old. The nearby channel description and Near me screen say so.
 - 2026-11-05 (integration, security S-I1/S-M5) SessionCleaner also forgets the last Near me location and runs every `@IntoSet UserStateCleaner` (core:notifications contributes the alert-poll baseline reset). G's per-DAO logout list was dropped in favour of SessionCleaner; chat stays per user. `alert_poll`, `trip_reminders` and `nearby_notifications` prefs are excluded from backup and device transfer.
+- 2026-11-05 (integration) Per-app language uses AppCompat (`AppCompatDelegate.setApplicationLocales` + `AppLocalesMetadataHolderService` autoStoreLocales), so Settings → Language works on API 26–32 too; MainActivity is an AppCompatActivity and `Theme.Voyager` has an AppCompat parent.
+- 2026-11-05 (integration, arch I2) CurrentPlanStore has draft generations: newPlan / replace / load / reset bump it and save() applies its id only when unchanged; restore() is undo within the same draft and keeps it. Switching trips = load(plan) or replace(draft), never restore.
+- 2026-11-05 (integration) Every new search goes through core:data SearchLauncher.startNewSearch (new plan for that search, then stream; web runSearch). Search asks "Start a new plan?" first when the draft has unsaved picks (improvement over the web). Retrying the same search keeps the plan.
+- 2026-11-05 (integration) `PlanDraft.loadedPlan` (set only by load) drives Results' itinerary lock and best-value disable (web loadedPlanId); saving never locks.
+- 2026-11-05 (integration, arch I1) Filter / single-agent results are applied once to the shared search (SearchRepository.applySectionResult) or, for a saved plan's snapshot, to the draft; Results screens never keep private overrides.
+- 2026-11-05 (integration, perf I3) PlanDraft equality compares searchData by reference; snapshot writes compare sections by reference.
+- 2026-11-05 (integration, arch I3) One feature-visibility rule (core:data FeatureVisibility = A1's visibleFeatures) bound once with the catalogue/classifier in core:data; no @BindsOptionalOf FeatureCatalogue anywhere (supersedes the "keep @BindsOptionalOf" ruling).
+- 2026-11-05 (integration) Results watch buttons and trip detail "Watch whole trip" open Team G's sheets over their dialog controllers; nothing is created before the user confirms (web dialogs).
+- 2026-11-05 (integration) Deferred: Team D's raw-JSON ItineraryArrangement and read-only itinerary composables stay; PlanIcs (exact web .ics port) runs on them, and moving it to Team E's typed port needs an .ics parity check. Follow-up.
 
 ## Documentation and tooling
 
 - 2026-11-05 **Docs home** - `docs/*.md` (TitleCase) are the wiki source; `wiki-sync.yml` publishes them on push to main. Pages for unmerged features say "Planned" instead of describing code that does not exist.
 - 2026-11-05 **Doc link check** - `scripts/check-doc-links.sh` verifies relative links (CI runs it); pages owned by other teams (Firebase-Setup, Onboarding-and-Traveller-Types) are allowed to be missing until they merge.
+- 2026-11-05 **Doc link check** - both pages are merged; the PENDING list is empty (supersedes the line above), so a missing page now fails CI.
 - 2026-11-05 **Claude Code settings** - `.claude/settings.json` allows only read-only gradle/adb/git commands; build and install commands still prompt.
 - 2026-11-05 **Pseudo-locales** - enabled on the debug build type by the convention plugin; documented in Localization.
 

@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-PENDING=("docs/Firebase-Setup.md" "docs/Onboarding-and-Traveller-Types.md")
+PENDING=()
 
 files=(README.md CONTRIBUTING.md CODE_OF_CONDUCT.md CLAUDE.md MEMORY.md docs/*.md docs/reference/*.md)
 errors=0
@@ -14,7 +14,8 @@ warnings=0
 
 is_pending() {
   local t="$1"
-  for p in "${PENDING[@]}"; do [[ "$t" == "$p" ]] && return 0; done
+  # ${arr[@]+...} keeps an empty array safe under `set -u` on bash 3.2 (macOS).
+  for p in ${PENDING[@]+"${PENDING[@]}"}; do [[ "$t" == "$p" ]] && return 0; done
   return 1
 }
 

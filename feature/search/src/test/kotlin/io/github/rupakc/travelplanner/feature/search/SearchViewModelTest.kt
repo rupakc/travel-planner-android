@@ -16,15 +16,21 @@ import io.github.rupakc.travelplanner.core.domain.search.SearchFormIssue
 import io.github.rupakc.travelplanner.core.domain.search.TravellerCounts
 import io.github.rupakc.travelplanner.core.model.navigation.SearchModes
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
+import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearchIn
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
+import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
+import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
+import io.github.rupakc.travelplanner.core.testing.fake.FakeFeatureVisibility
 import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeRecentSearchesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchLauncher
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
@@ -58,6 +64,8 @@ class SearchViewModelTest {
             ),
         )
     private val recent = FakeRecentSearchesRepository()
+    private val plan = FakeCurrentPlanStore()
+    private val launcher = FakeSearchLauncher(plan, search)
     private val visibility = FakeFeatureVisibility()
     private val profile = FakeProfileRepository()
 
@@ -65,7 +73,7 @@ class SearchViewModelTest {
     private val appScope = CoroutineScope(main.testDispatcher)
 
     private fun vm(route: SearchRoute = SearchRoute(), handle: SavedStateHandle = SavedStateHandle(route)) =
-        SearchViewModel(handle, search, prefs, recent, profile, FixedClock, visibility, appScope)
+        SearchViewModel(handle, search, launcher, plan, prefs, recent, profile, FixedClock, visibility, appScope)
 
     @Test
     fun `pre-fills the form from preferences`() {
@@ -110,6 +118,38 @@ class SearchViewModelTest {
         }
 
     @Test
+    fun `a search over unsaved picks asks first, then starts a new plan for the new search`() {
+        plan.attachSearch(TravelSearchRequest(origin = "NYC", destination = "Paris", departureDate = "2026-12-01", nationality = "Indian"), null)
+        plan.toggle(PlanItem.HotelItem(Hotel(name = "Paris hotel")))
+        val vm = vm()
+        vm.onEvent(SearchFormEvent.UpdateForm(vm.state.value.form.copy(origin = "JFK", destination = "HND")))
+        vm.onEvent(SearchFormEvent.Submit)
+        assertTrue(vm.state.value.confirmNewPlan)
+        assertTrue(search.started.isEmpty())
+
+        vm.onEvent(SearchFormEvent.CancelNewPlan)
+        assertFalse(vm.state.value.confirmNewPlan)
+        assertTrue(search.started.isEmpty())
+        assertEquals("Paris hotel", plan.draft.value.selections.hotel?.name)
+
+        vm.onEvent(SearchFormEvent.Submit)
+        vm.onEvent(SearchFormEvent.ConfirmNewPlan)
+        val started = search.started.single()
+        assertEquals("HND", started.destination)
+        assertNull(plan.draft.value.selections.hotel)
+        assertEquals(started.searchKey(), plan.draft.value.searchKey)
+    }
+
+    @Test
+    fun `a search with nothing unsaved starts straight away through the launcher`() {
+        val vm = vm()
+        vm.onEvent(SearchFormEvent.UpdateForm(vm.state.value.form.copy(origin = "JFK", destination = "HND")))
+        vm.onEvent(SearchFormEvent.Submit)
+        assertFalse(vm.state.value.confirmNewPlan)
+        assertEquals(1, launcher.launched.size)
+    }
+
+    @Test
     fun `unchanged preferences are not written back`() {
         val vm = vm()
         val before = prefs.current.value
@@ -140,7 +180,7 @@ class SearchViewModelTest {
         assertEquals(listOf(SearchMode.KNOWN, SearchMode.SURPRISE, SearchMode.COMPARE), vm.state.value.visibleModes)
         vm.onEvent(SearchFormEvent.SelectMode(SearchMode.KNOWN))
         assertEquals(listOf(SearchMode.KNOWN, SearchMode.SURPRISE), vm.state.value.visibleModes)
-        visibility.state.value = null
+        visibility.state.value = FeatureId.entries.toSet()
         assertEquals(SearchMode.entries, vm.state.value.visibleModes)
     }
 

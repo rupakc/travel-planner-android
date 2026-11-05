@@ -362,4 +362,8 @@
     <string name="search_import_kind_event">Evento</string>
     <string name="search_import_kind_transport">Transporte</string>
     <string name="search_import_kind_area">Barrio</string>
+    <string name="search_new_plan_title">¿Empezar un plan nuevo?</string>
+    <string name="search_new_plan_message">Mi plan tiene elecciones sin guardar. Una búsqueda nueva empieza un plan nuevo; guárdalo antes si quieres conservarlas.</string>
+    <string name="search_new_plan_confirm">Empezar plan nuevo</string>
+    <string name="search_new_plan_keep">Seguir editando</string>
 </resources>

@@ -37,12 +37,12 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.export.safeUrl
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
+import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
+import io.github.rupakc.travelplanner.core.domain.plan.CostCategory
+import io.github.rupakc.travelplanner.core.domain.plan.CostPart
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.ui.PriceText
 import io.github.rupakc.travelplanner.feature.plan.R
-import io.github.rupakc.travelplanner.feature.plan.model.BudgetStatus
-import io.github.rupakc.travelplanner.feature.plan.model.CostCategory
-import io.github.rupakc.travelplanner.feature.plan.model.CostPart
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
 import io.github.rupakc.travelplanner.feature.plan.model.Removal
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionEntry

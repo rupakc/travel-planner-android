@@ -50,6 +50,8 @@ import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
 import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.data.repository.UserStateCleaner
+import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
+import io.github.rupakc.travelplanner.core.data.search.SearchLauncherImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -95,6 +97,8 @@ abstract class DataModule {
     @Binds abstract fun currentPlan(impl: CurrentPlanStoreImpl): CurrentPlanStore
 
     @Binds abstract fun sessionCleaner(impl: SessionCleanerImpl): SessionCleaner
+
+    @Binds abstract fun searchLauncher(impl: SearchLauncherImpl): SearchLauncher
 
     /** Per-user state other modules contribute to the session wipe (may be empty). */
     @Multibinds abstract fun userStateCleaners(): Set<UserStateCleaner>

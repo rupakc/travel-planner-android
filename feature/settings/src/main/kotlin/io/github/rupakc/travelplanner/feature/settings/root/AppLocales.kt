@@ -1,15 +1,12 @@
 package io.github.rupakc.travelplanner.feature.settings.root
 
-import android.app.LocaleManager
-import android.content.Context
-import android.os.Build
-import android.os.LocaleList
-import dagger.hilt.android.qualifiers.ApplicationContext
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import javax.inject.Inject
 
-/** Applies the per-app language (Android 13+ per-app locales; locales declared in `locales_config.xml`). */
+/** Applies the per-app language (AppCompat per-app locales; locales declared in `locales_config.xml`). */
 interface AppLocales {
-    /** True when the system supports per-app languages (API 33+). */
+    /** True when per-app languages work on this device (always, via AppCompat, on minSdk 26+). */
     val perAppSupported: Boolean
 
     /** [tag] null = follow the system language. */
@@ -19,23 +16,22 @@ interface AppLocales {
     fun current(): String?
 }
 
-/** [AppLocales] over `LocaleManager` (the system persists the choice and recreates the activity). */
+/**
+ * [AppLocales] over `AppCompatDelegate`: on Android 13+ it forwards to the system `LocaleManager`; below that
+ * AppCompat stores the choice (`AppLocalesMetadataHolderService` with `autoStoreLocales`) and applies it to the
+ * AppCompat activity, which it recreates.
+ */
 class SystemAppLocales
     @Inject
-    constructor(
-        @param:ApplicationContext private val context: Context,
-    ) : AppLocales {
-        override val perAppSupported: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    constructor() : AppLocales {
+        override val perAppSupported: Boolean = true
 
         override fun apply(tag: String?) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-            val manager = context.getSystemService(LocaleManager::class.java) ?: return
-            manager.applicationLocales = if (tag == null) LocaleList.getEmptyLocaleList() else LocaleList.forLanguageTags(tag)
+            AppCompatDelegate.setApplicationLocales(if (tag == null) LocaleListCompat.getEmptyLocaleList() else LocaleListCompat.forLanguageTags(tag))
         }
 
         override fun current(): String? {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return null
-            val locales = context.getSystemService(LocaleManager::class.java)?.applicationLocales ?: return null
-            return if (locales.isEmpty) null else locales[0].language
+            val locales = AppCompatDelegate.getApplicationLocales()
+            return if (locales.isEmpty) null else locales[0]?.language
         }
     }

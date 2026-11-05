@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.feature.plan.myplan
 
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
+import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.Activity
@@ -12,7 +13,6 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
 import io.github.rupakc.travelplanner.feature.plan.FixedClock
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
-import io.github.rupakc.travelplanner.feature.plan.model.BudgetStatus
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

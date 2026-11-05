@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.feature.share
 
 import androidx.compose.runtime.Immutable
 import io.github.rupakc.travelplanner.core.domain.export.PlanIcs
+import io.github.rupakc.travelplanner.core.domain.plan.computePlanCost
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.core.model.plan.SharedPlan
@@ -80,7 +81,7 @@ internal data class SharedTrip(
                 endDate = sd.returnDate?.let(::date),
                 travellers = sd.numTravelers?.takeIf { it > 0 } ?: 1,
                 interests = sd.interests,
-                plannedUsd = SharedPlanCost.total(sel, sd.departureDate, sd.returnDate),
+                plannedUsd = computePlanCost(sel, sd.departureDate, sd.returnDate),
                 importTitle = sd.importSource?.title,
                 importUrl = sd.importSource?.url,
                 flights = flights(sel),
@@ -142,31 +143,6 @@ internal data class SharedTrip(
         private fun JsonElement?.text(): String? = prim()?.content?.takeIf(String::isNotBlank)
 
         private const val ISO_DATE_LENGTH = 10
-    }
-}
-
-// TODO(integration): replace with core/domain plan cost (Team C's planHelpers port). Web `computePlanCost`.
-internal object SharedPlanCost {
-    private const val DEFAULT_NIGHTS = 7.0
-
-    private fun price(value: Double?): Double = value?.takeIf { it.isFinite() && it > 0 } ?: 0.0
-
-    fun total(sel: PlanSelections, departureDate: String?, returnDate: String?): Double {
-        val hotel = sel.hotel
-        val hotelCost =
-            when {
-                hotel == null -> 0.0
-                price(hotel.totalPriceUsd) > 0 -> price(hotel.totalPriceUsd)
-                else -> price(hotel.pricePerNightUsd) * nights(departureDate, returnDate)
-            }
-        return price(sel.flight?.priceUsd) + sel.flights.sumOf { price(it.priceUsd) } + hotelCost +
-            sel.activities.sumOf { price(it.priceUsd) } + price(sel.sim?.priceUsd)
-    }
-
-    private fun nights(from: String?, to: String?): Double {
-        val a = from?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-        val b = to?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-        return if (a == null || b == null) DEFAULT_NIGHTS else maxOf(1.0, ChronoUnit.DAYS.between(a, b).toDouble())
     }
 }
 

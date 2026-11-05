@@ -20,6 +20,7 @@ import io.github.rupakc.travelplanner.core.model.chat.ChatRequest
 import io.github.rupakc.travelplanner.core.model.json.EmptyJsonObject
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.stream.ChatEvent
 import io.github.rupakc.travelplanner.feature.chat.model.ChatStreamReducer
 import io.github.rupakc.travelplanner.feature.chat.model.ChatTurn
@@ -343,16 +344,21 @@ class ChatViewModel
                 }
                 val request = chatTripSearchRequest(turn.sessionContext ?: sessionContext, turn.tripMap?.route)
                 val cities = turn.tripMap?.cities?.mapNotNull { it.city }.orEmpty()
-                planStore.newPlan()
-                request?.let { planStore.attachSearch(it, null) }
-                planStore.setSelections(
-                    PlanSelections.EMPTY.copy(
-                        itinerarySlots = chatItinerarySlots(itinerary),
-                        itinerarySnapshot = chatItinerarySnapshot(itinerary),
+                val name = cities.joinToString(" → ").ifBlank { PlanDraft.DEFAULT_NAME }
+                // One step (new draft generation), so an in-flight save of the previous draft can't take this one over.
+                planStore.replace(
+                    PlanDraft(
+                        name = name,
+                        searchRequest = request,
+                        searchKey = request?.searchKey(),
+                        selections =
+                            PlanSelections.EMPTY.copy(
+                                itinerarySlots = chatItinerarySlots(itinerary),
+                                itinerarySnapshot = chatItinerarySnapshot(itinerary),
+                            ),
+                        dirty = true,
                     ),
                 )
-                val name = cities.joinToString(" → ").ifBlank { PlanDraft.DEFAULT_NAME }
-                planStore.rename(name)
                 when (val result = planStore.save(name)) {
                     is AppResult.Success -> effects.trySend(ChatEffect.OpenPlan(result.value.id))
                     is AppResult.Failure -> effects.trySend(ChatEffect.SaveFailed(result.error))

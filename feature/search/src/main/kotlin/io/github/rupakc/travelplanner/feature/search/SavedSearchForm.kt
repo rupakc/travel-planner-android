@@ -90,13 +90,3 @@ internal data class SavedSearchForm(
         fun decode(json: String): SavedSearchForm? = runCatching { TravelJson.decodeFromString(serializer(), json) }.getOrNull()
     }
 }
-
-/** Onboarding question id for trip pace (A1's `TravellerQuiz.PACE`); its option ids are the `pace` values. */
-private const val QUIZ_PACE = "pace"
-private val PACES = setOf(TravelSearchRequest.PACE_RELAXED, TravelSearchRequest.PACE_BALANCED, TravelSearchRequest.PACE_PACKED)
-
-/**
- * The stored onboarding pace answer as a search `pace`, or null when skipped (same rule as A1's
- * `quizPace(answers)` in core:domain profile; switch to it once both are on main).
- */
-internal fun quizPaceAnswer(answers: Map<String, List<String>>): String? = answers[QUIZ_PACE]?.firstOrNull()?.takeIf { it in PACES }

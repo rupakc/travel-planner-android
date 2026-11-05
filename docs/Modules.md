@@ -33,7 +33,7 @@ other project dependencies). Each exports one graph function that `app` calls in
 | `feature:onboarding` | Traveller-type quiz, result, feature picker | `OnboardingRoute` |
 | `feature:home` | Personalised home | `HomeRoute` |
 | `feature:search` | Search form (4 modes), recent searches | `SearchRoute` |
-| `feature:results` | Streamed results, compare table | `ResultsRoute`, `CompareRoute` |
+| `feature:results` | Streamed results | `ResultsRoute` |
 | `feature:plan` | My trips, plan detail | `PlansRoute`, `PlanDetailRoute` |
 | `feature:chat` | Chat threads and streaming | `ChatRoute` |
 | `feature:alerts` | Watches, notification inbox | `AlertsRoute`, `NotificationsRoute` |

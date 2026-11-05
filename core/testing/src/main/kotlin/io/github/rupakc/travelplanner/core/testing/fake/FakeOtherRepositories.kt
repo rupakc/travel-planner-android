@@ -264,8 +264,15 @@ class FakeSettingsRepository(initial: AppSettings = AppSettings(), private val d
     override val settings: Flow<AppSettings> = state
     override val effectiveBaseUrl: Flow<String> = state.map { it.baseUrlOverride ?: defaultBaseUrl }
 
-    override suspend fun setBaseUrl(url: String?): AppResult<Unit> =
-        AppResult.Success(state.update { it.copy(baseUrlOverride = url?.takeIf(String::isNotBlank)) })
+    /** Set to make [checkBaseUrl] (and so [setBaseUrl]) reject every URL with this error. */
+    var rejectUrls: io.github.rupakc.travelplanner.core.common.AppError? = null
+
+    override suspend fun setBaseUrl(url: String?): AppResult<Unit> {
+        if (!url.isNullOrBlank()) rejectUrls?.let { return AppResult.Failure(it) }
+        return AppResult.Success(state.update { it.copy(baseUrlOverride = url?.takeIf(String::isNotBlank)) })
+    }
+
+    override fun checkBaseUrl(url: String): AppResult<String> = rejectUrls?.let { AppResult.Failure(it) } ?: AppResult.Success(url)
 
     override suspend fun setThemeMode(mode: ThemeMode) = state.update { it.copy(themeMode = mode) }
 

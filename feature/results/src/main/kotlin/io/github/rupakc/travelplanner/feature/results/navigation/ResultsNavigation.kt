@@ -17,24 +17,32 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
-import io.github.rupakc.travelplanner.core.model.navigation.CompareRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
+import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
+import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
+import io.github.rupakc.travelplanner.core.model.search.StressTestPayload
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.Flight
 import io.github.rupakc.travelplanner.core.model.section.Hotel
-import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
+import io.github.rupakc.travelplanner.core.model.section.StressTestData
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
+import io.github.rupakc.travelplanner.core.ui.watch.FareWatchSheet
+import io.github.rupakc.travelplanner.core.ui.watch.PriceWatchSheet
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.ResultsEvent
 import io.github.rupakc.travelplanner.feature.results.ResultsMessage
 import io.github.rupakc.travelplanner.feature.results.ResultsScreen
 import io.github.rupakc.travelplanner.feature.results.ResultsUiState
 import io.github.rupakc.travelplanner.feature.results.ResultsViewModel
+import io.github.rupakc.travelplanner.feature.results.WatchSheet
 import io.github.rupakc.travelplanner.feature.results.sections.ResultsSection
 import io.github.rupakc.travelplanner.feature.results.sections.SectionActions
 import io.github.rupakc.travelplanner.feature.results.sections.SelectionsSource
+import io.github.rupakc.travelplanner.feature.results.sections.info.StressRecheckController
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Streamed results + compare table.
@@ -46,13 +54,6 @@ fun NavGraphBuilder.resultsGraph(
     onOpenAlerts: () -> Unit = {},
 ) {
     composable<ResultsRoute> { ResultsRoute(onBack = onBack, onOpenMyPlan = onOpenMyPlan, onOpenAlerts = onOpenAlerts) }
-    composable<CompareRoute> {
-        FeaturePlaceholder(
-            title = stringResource(R.string.results_compare_title),
-            message = stringResource(R.string.results_compare_message),
-            onBack = onBack,
-        )
-    }
 }
 
 /** Wires [ResultsViewModel] to [ResultsScreen]: state, snackbar messages, Custom Tabs and section actions. */
@@ -62,7 +63,7 @@ internal fun ResultsRoute(onBack: () -> Unit, onOpenMyPlan: () -> Unit, onOpenAl
     val open = rememberLinkOpener()
     val snackbar = remember { SnackbarHostState() }
     val latest by rememberUpdatedState(state)
-    val actions = remember(viewModel, open) { ResultsSectionActions(viewModel::onEvent, open) { latest } }
+    val actions = remember(viewModel, open) { ResultsSectionActions(viewModel, open) { latest } }
     val context = LocalContext.current
     val seeAlerts = stringResource(R.string.results_see_alerts)
     val undo = stringResource(R.string.results_undo)
@@ -93,14 +94,64 @@ internal fun ResultsRoute(onBack: () -> Unit, onOpenMyPlan: () -> Unit, onOpenAl
         onOpenMyPlan = onOpenMyPlan,
         snackbarHostState = snackbar,
     )
+    // Team G's watch sheets (web FareWatchDialog / PriceWatchDialog) instead of creating watches directly.
+    val sheet by viewModel.watchSheet.collectAsStateWithLifecycle()
+    val email by viewModel.userEmail.collectAsStateWithLifecycle()
+    when (val current = sheet) {
+        is WatchSheet.Fare -> {
+            FareWatchSheet(
+                controller = current.controller,
+                userEmail = email,
+                onDismiss = viewModel::dismissWatchSheet,
+                onSeeAlerts = {
+                    viewModel.dismissWatchSheet()
+                    onOpenAlerts()
+                },
+                onWatched = viewModel::onFareWatched,
+            )
+        }
+
+        is WatchSheet.Price -> {
+            PriceWatchSheet(
+                controller = current.controller,
+                userEmail = email,
+                onDismiss = viewModel::dismissWatchSheet,
+                onSeeAlerts = {
+                    viewModel.dismissWatchSheet()
+                    onOpenAlerts()
+                },
+                onWatched = { viewModel.onPriceWatched(current.kind, current.itemName, it) },
+            )
+        }
+
+        null -> {
+            Unit
+        }
+    }
 }
 
 /** The one [SectionActions] implementation: plan toggles, Custom Tabs, watches and retries go to the ViewModel. */
 internal class ResultsSectionActions(
-    private val onEvent: (ResultsEvent) -> Unit,
+    private val viewModel: ResultsViewModel,
     private val openLink: (String) -> Unit,
     private val state: () -> ResultsUiState,
 ) : SectionActions, SelectionsSource {
+    private val onEvent: (ResultsEvent) -> Unit = viewModel::onEvent
+
+    // Team E's members: observed selections, synchronous updates, the results on screen, the editing lock
+    // and the retained health re-check.
+    override val selections: StateFlow<PlanSelections> get() = viewModel.selections
+
+    override fun onUpdateSelections(transform: (PlanSelections) -> PlanSelections) = viewModel.updateSelections(transform)
+
+    override val results: StateFlow<SearchResultsState> get() = viewModel.results
+
+    override val itineraryEditingLocked: Boolean get() = viewModel.itineraryEditingLocked
+
+    override suspend fun recheckStressTest(payload: StressTestPayload): AppResult<StressTestData> = viewModel.recheckStressTest(payload)
+
+    override val stressRecheck: StressRecheckController get() = viewModel.stressRecheck
+
     override val selectionsNow: io.github.rupakc.travelplanner.core.model.plan.PlanSelections get() = state().selections
 
     override fun onToggle(item: PlanItem) = onEvent(ResultsEvent.Toggle(item))
