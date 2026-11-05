@@ -21,6 +21,7 @@ import androidx.test.uiautomator.Until
 import io.github.rupakc.travelplanner.MainActivity
 import io.github.rupakc.travelplanner.feature.auth.R as AuthR
 import io.github.rupakc.travelplanner.feature.onboarding.R as OnboardingR
+import io.github.rupakc.travelplanner.feature.search.R as SearchR
 
 typealias AppRule = AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>
 
@@ -192,6 +193,49 @@ class AppRobot(val rule: AppRule) {
         completeOnboarding()
         finishOnboarding()
     }
+
+    /** Types into a typeahead and picks the suggestion tagged `suggestion:<key>`. */
+    fun pickSuggestion(label: String, query: String, key: String) {
+        type(label, query)
+        val tag = androidx.compose.ui.test.hasTestTag("suggestion:$key")
+        waitFor(tag)
+        rule.onAllNodes(tag, useUnmergedTree = true).onFirst().performClick()
+        rule.waitForIdle()
+    }
+
+    /**
+     * Fills the "I know where I'm going" form and submits it. Dates go through the Material date range picker's
+     * text-input mode (digits only; the field formats them for the locale).
+     */
+    fun searchTrip(trip: Trip) {
+        openTab(io.github.rupakc.travelplanner.R.string.nav_search)
+        waitFor(androidx.compose.ui.test.hasTestTag("search_submit"))
+        pickSuggestion(str(SearchR.string.search_from), trip.originQuery, trip.originCode)
+        pickSuggestion(str(SearchR.string.search_to), trip.destinationQuery, trip.destinationCode)
+        tap(SearchR.string.search_departure)
+        tapDescription("Switch to text input mode", substring = true)
+        type("Start date", trip.departureDigits)
+        type("End date", trip.returnDigits)
+        tap(SearchR.string.search_dates_ok)
+        type(str(SearchR.string.search_nationality), trip.nationality)
+        tap(SearchR.string.search_travelers)
+        repeat(trip.adults - 1) { tapDescription(str(SearchR.string.search_add_one, str(SearchR.string.search_adults))) }
+        val submit = androidx.compose.ui.test.hasTestTag("search_submit")
+        rule.onNode(submit).performScrollTo().performClick()
+        rule.waitForIdle()
+    }
+
+    /** A trip for [searchTrip]; dates are MMDDYYYY digits for the en-US date input. */
+    data class Trip(
+        val originQuery: String = "New York",
+        val originCode: String = "JFK",
+        val destinationQuery: String = "Lisbon",
+        val destinationCode: String = "LIS",
+        val departureDigits: String = "12012026",
+        val returnDigits: String = "12042026",
+        val nationality: String = "American",
+        val adults: Int = 2,
+    )
 
     companion object {
         const val QUESTIONS = 6
