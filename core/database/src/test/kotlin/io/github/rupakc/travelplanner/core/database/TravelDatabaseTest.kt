@@ -41,6 +41,8 @@ class TravelDatabaseTest {
             assertEquals(listOf("New", "Old"), dao.observeAll("alice").first().map { it.name })
             dao.delete(2)
             assertEquals(listOf("Old"), dao.observeAll("alice").first().map { it.name })
+            assertEquals("Bob", dao.observeFor(3, "bob").first()?.name)
+            assertEquals(null, dao.observeFor(3, "alice").first())
         }
 
     @Test

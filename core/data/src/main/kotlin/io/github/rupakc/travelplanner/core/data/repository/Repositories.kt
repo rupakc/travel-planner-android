@@ -168,10 +168,12 @@ data class StoredChatMessage(
 interface PlansRepository {
     val plans: Flow<List<Plan>>
 
+    /** The signed-in user's cached plan [id] (null when signed out, not cached, or another account's). */
     fun plan(id: Long): Flow<Plan?>
 
     suspend fun refresh(): AppResult<Unit>
 
+    /** Fetches and caches plan [id]; a 404 evicts its cached copy. */
     suspend fun get(id: Long): AppResult<Plan>
 
     suspend fun create(name: String, searchData: JsonObject, selections: PlanSelections): AppResult<Plan>
