@@ -126,6 +126,7 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 (fix pass FP3) Release builds do not keep AdminApi (no admin UI); verifyReleaseKeepRules fails if R8 keeps it. Notifications start-up and OkHttp init run off the main thread (dagger.Lazy + lazy Retrofit call factory).
 - 2026-11-05 (fix pass FP3) Delete-with-undo is still implemented per screen (Chat, Plans, Search, Alerts): deduping it into one helper would touch the Alerts undo that fix pass FP2 reworks (snackbar-tied commit), so it waits until FP2 lands.
 - 2026-11-05 (fix pass FP3, review ruling) `push_registration` and `server_capabilities` prefs are excluded from cloud backup and device transfer (device-specific; a restored fingerprint would skip a needed registration); `BackupRulesTest` checks every device-specific file in all three rule sections.
+- 2026-11-05 (fix pass FP3, review m1) The share viewer opens only `travelplanner://share/{token}`: the `https://{host}/share/{token}` nav pattern (spec §modules) is removed, because the manifest has no https filter and MainActivity drops non-app data. Web share links in the app need verified App Links plus an allowance in DeepLinkIntents; not planned for v1.
 
 ## Documentation and tooling
 
