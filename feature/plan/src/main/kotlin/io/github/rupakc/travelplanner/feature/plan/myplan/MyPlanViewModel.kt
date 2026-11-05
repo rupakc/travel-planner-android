@@ -22,8 +22,7 @@ import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
 import io.github.rupakc.travelplanner.feature.plan.export.ShareTextInput
-import io.github.rupakc.travelplanner.feature.plan.model.ItineraryDayUi
-import io.github.rupakc.travelplanner.feature.plan.model.ItineraryUi
+import io.github.rupakc.travelplanner.feature.plan.model.PlanItineraryUi
 import io.github.rupakc.travelplanner.feature.plan.model.Removal
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroup
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroups
@@ -53,7 +52,7 @@ internal data class MyPlanContent(
     val destination: String?,
     val budgetUsd: Double?,
     val groups: List<SelectionGroup>,
-    val itinerary: List<ItineraryDayUi>,
+    val itinerary: PlanItineraryUi,
     val costParts: List<CostPart>,
     val totalUsd: Double,
     val budgetStatus: BudgetStatus?,
@@ -176,7 +175,7 @@ internal class MyPlanViewModel
                 destination = request?.destination,
                 budgetUsd = request?.budgetUsd,
                 groups = SelectionGroups.of(draft.selections),
-                itinerary = ItineraryUi.of(draft.selections, liveItinerary(draft)),
+                itinerary = PlanItineraryUi.of(draft.selections, liveItinerary(draft)),
                 costParts = parts,
                 totalUsd = total,
                 budgetStatus = getBudgetStatus(total, request?.budgetUsd),

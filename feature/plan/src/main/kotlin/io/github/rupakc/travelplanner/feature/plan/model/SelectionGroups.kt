@@ -1,16 +1,15 @@
 package io.github.rupakc.travelplanner.feature.plan.model
 
 import androidx.compose.runtime.Immutable
-import io.github.rupakc.travelplanner.core.domain.export.PlanIcs
+import io.github.rupakc.travelplanner.core.domain.itinerary.PlanItinerary
+import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledDay
+import io.github.rupakc.travelplanner.core.domain.itinerary.SlotEdit
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
-import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.core.model.section.Flight
 import io.github.rupakc.travelplanner.core.model.section.SectionId
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.intOrNull
 
 /**
@@ -272,65 +271,24 @@ internal object SelectionGroups {
     private const val ESTIMATE = "estimate"
 }
 
-/** One itinerary slot as the read-only itinerary shows it (edits and notes applied). */
+/**
+ * The plan's arranged, scheduled itinerary (same days the .ics export uses) with the edits and notes the
+ * shared core/ui itinerary composables apply.
+ */
 @Immutable
-internal data class ItinerarySlotUi(
-    val key: String,
-    val timeOfDay: String?,
-    val timeRange: String?,
-    val activity: String?,
-    val location: String?,
-    val note: String?,
-    val slotNotes: String?,
-    val costUsd: Double?,
-    val fromLink: Boolean,
-)
+internal data class PlanItineraryUi(
+    val days: List<ScheduledDay> = emptyList(),
+    val edits: Map<String, SlotEdit> = emptyMap(),
+    val notes: Map<String, String> = emptyMap(),
+) {
+    fun isEmpty(): Boolean = days.isEmpty()
 
-@Immutable
-internal data class ItineraryDayUi(
-    val dayNumber: Int?,
-    val date: String?,
-    val city: String?,
-    val theme: String?,
-    val slots: List<ItinerarySlotUi>,
-)
-
-/** The plan's arranged, scheduled itinerary (same days the .ics export uses). */
-internal object ItineraryUi {
-    fun of(selections: PlanSelections, liveItinerary: JsonObject? = null): List<ItineraryDayUi> {
-        val selectionsJson = PlanSelectionsSerializer.toJson(selections)
-        return PlanIcs.planItineraryDays(selectionsJson, liveItinerary).map { day ->
-            ItineraryDayUi(
-                dayNumber = day["day_number"].prim()?.intOrNull,
-                date = day["date"].text(),
-                city = day["city"].text(),
-                theme = day["theme"].text(),
-                slots =
-                    (day["slots"] as? kotlinx.serialization.json.JsonArray).orEmpty().filterIsInstance<JsonObject>().map { slot ->
-                        val key = slot["key"].text().orEmpty()
-                        val edit = selections.itineraryEdits[key]
-                        val start = slot["start_time"].text()
-                        val end = slot["end_time"].text()
-                        ItinerarySlotUi(
-                            key = key,
-                            timeOfDay = slot["time_of_day"].text(),
-                            timeRange = if (start != null && end != null) "$start–$end" else null,
-                            activity = edit?.get("activity").text() ?: slot["activity"].text(),
-                            location = edit?.get("location").orNull(slot["location"]).text(),
-                            note = selections.itineraryNotes[key]?.takeIf(String::isNotBlank),
-                            slotNotes = slot["notes"].text(),
-                            costUsd = edit?.get("cost").orNull(slot["estimated_cost_usd"]).prim()?.content?.toDoubleOrNull()?.takeIf { it > 0 },
-                            fromLink = slot["from_link"].prim()?.booleanOrNull == true,
-                        )
-                    },
+    companion object {
+        fun of(selections: PlanSelections, liveItinerary: JsonObject? = null): PlanItineraryUi =
+            PlanItineraryUi(
+                days = PlanItinerary.days(selections, liveItinerary),
+                edits = SlotEdit.fromSelections(selections.itineraryEdits),
+                notes = selections.itineraryNotes.filterValues(String::isNotBlank),
             )
-        }
     }
-
-    /** JS `a ?? b`: an explicit JSON null falls back too. */
-    private fun JsonElement?.orNull(other: JsonElement?): JsonElement? = if (this == null || this is kotlinx.serialization.json.JsonNull) other else this
-
-    private fun JsonElement?.prim(): JsonPrimitive? = (this as? JsonPrimitive)?.takeIf { it !is kotlinx.serialization.json.JsonNull }
-
-    private fun JsonElement?.text(): String? = prim()?.content?.takeIf(String::isNotBlank)
 }
