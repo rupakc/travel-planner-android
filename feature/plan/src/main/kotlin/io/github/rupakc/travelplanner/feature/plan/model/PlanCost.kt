@@ -93,7 +93,8 @@ internal object PlanCost {
 
     /** Web `generatePlanName`: "The {Adj} {Destination} {Noun}" (English, like the web; it is saved as plan data). */
     fun generateName(destination: String?, interests: List<String>, departureDate: String?, random: Random = Random.Default): String {
-        val adjectives = interests.firstOrNull()?.let(themes::get) ?: season(departureDate)?.let(seasonal::get) ?: listOf("Grand", "Dreamy", "Cosmic", "Wanderlust")
+        val adjectives =
+            interests.firstOrNull()?.let(themes::get) ?: season(departureDate)?.let(seasonal::get) ?: listOf("Grand", "Dreamy", "Cosmic", "Wanderlust")
         val dest = destination?.takeIf(String::isNotBlank) ?: "Mystery"
         return "The ${adjectives.random(random)} $dest ${nouns.random(random)}"
     }

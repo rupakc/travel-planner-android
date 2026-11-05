@@ -34,12 +34,14 @@ internal fun plan(
         searchData(
             buildString {
                 append("{")
-                append(listOfNotNull(
-                    destination?.let { "\"destination\":\"$it\"" },
-                    departure?.let { "\"departure_date\":\"$it\"" },
-                    returnDate?.let { "\"return_date\":\"$it\"" },
-                    "\"num_travelers\":2",
-                ).joinToString(","))
+                append(
+                    listOfNotNull(
+                        destination?.let { "\"destination\":\"$it\"" },
+                        departure?.let { "\"departure_date\":\"$it\"" },
+                        returnDate?.let { "\"return_date\":\"$it\"" },
+                        "\"num_travelers\":2",
+                    ).joinToString(","),
+                )
                 append("}")
             },
         ),

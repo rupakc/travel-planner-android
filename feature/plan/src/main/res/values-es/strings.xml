@@ -1,7 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- My trips (saved plans) -->
     <string name="plan_title">Mis viajes</string>
-    <string name="plan_message">Planes guardados (disponibles sin conexión), búsqueda y filtros.</string>
-    <string name="plan_detail_title">Plan de viaje</string>
-    <string name="plan_detail_message">Detalle del plan, enlace para compartir y exportación al calendario.</string>
+    <string name="plan_detail_title">Plan del viaje</string>
+    <string name="plan_search_hint">Busca viajes por nombre o destino</string>
+    <string name="plan_search_clear">Borrar búsqueda</string>
+    <string name="plan_filter_group">Filtrar viajes</string>
+    <string name="plan_filter_upcoming">Próximos</string>
+    <string name="plan_filter_past">Pasados</string>
+    <string name="plan_filter_all">Todos</string>
+    <string name="plan_filter_shared">Compartidos</string>
+    <string name="plan_sort">Ordenar</string>
+    <string name="plan_sort_by">Orden: %1$s</string>
+    <string name="plan_sort_trip_date">Fecha del viaje</string>
+    <string name="plan_sort_updated">Última modificación</string>
+    <string name="plan_refresh">Actualizar</string>
+    <string name="plan_empty_title">Aún no hay planes guardados</string>
+    <string name="plan_empty_message">Guarda un plan desde tus resultados o un chat y aparecerá aquí, incluso sin conexión.</string>
+    <string name="plan_empty_action">Planear un viaje</string>
+    <string name="plan_no_match_title">Ningún viaje coincide</string>
+    <string name="plan_no_match_message">Prueba otra búsqueda u otro filtro.</string>
+    <string name="plan_no_match_action">Ver todos los viajes</string>
+    <string name="plan_offline_banner">Sin conexión. Mostramos las copias guardadas en este teléfono.</string>
+    <string name="plan_stale_banner">No se pudo actualizar. Mostramos las copias guardadas en este teléfono.</string>
+    <string name="plan_load_error">No se pudieron cargar tus viajes.</string>
+    <string name="plan_trip_deleted">«%1$s» eliminado</string>
+    <string name="plan_undo">Deshacer</string>
+    <string name="plan_delete_failed">No se pudo eliminar el viaje. Ha vuelto a tu lista.</string>
+    <string name="plan_delete_action">Eliminar</string>
+    <string name="plan_trip_undated">Sin fechas</string>
+    <string name="plan_trip_ongoing">En curso</string>
+    <string name="plan_trip_past">Viaje pasado</string>
+    <string name="plan_trip_upcoming">Próximo</string>
+    <string name="plan_trip_shared">Compartido</string>
+    <string name="plan_trip_unnamed">Plan sin título</string>
+    <string name="plan_destination_unknown">Destino sin definir</string>
+    <string name="plan_select_trip">Elige un viaje para ver su plan.</string>
+    <string name="plan_open_trip_a11y">Abrir %1$s</string>
+    <plurals name="plan_trip_count">
+        <item quantity="one">Mostrando %1$d viaje</item>
+        <item quantity="many">Mostrando %1$d viajes</item>
+        <item quantity="other">Mostrando %1$d viajes</item>
+    </plurals>
+    <plurals name="plan_items">
+        <item quantity="one">%1$d elemento</item>
+        <item quantity="many">%1$d elementos</item>
+        <item quantity="other">%1$d elementos</item>
+    </plurals>
+    <plurals name="plan_travellers">
+        <item quantity="one">%1$d viajero</item>
+        <item quantity="many">%1$d viajeros</item>
+        <item quantity="other">%1$d viajeros</item>
+    </plurals>
+    <plurals name="plan_days">
+        <item quantity="one">%1$d día</item>
+        <item quantity="many">%1$d días</item>
+        <item quantity="other">%1$d días</item>
+    </plurals>
+
+    <!-- Trip detail -->
+    <string name="plan_from">desde %1$s</string>
+    <string name="plan_dates_range">%1$s → %2$s</string>
+    <string name="plan_planned_spend">~%1$s previstos</string>
+    <string name="plan_action_open_results">Abrir en resultados</string>
+    <string name="plan_action_share_link">Compartir enlace</string>
+    <string name="plan_action_revoke">Dejar de compartir</string>
+    <string name="plan_action_calendar">Añadir al calendario</string>
+    <string name="plan_action_share_text">Compartir como texto</string>
+    <string name="plan_action_delete">Eliminar viaje</string>
+    <string name="plan_more_actions">Más acciones</string>
+    <string name="plan_share_hint">Comparte un enlace público. Cualquiera puede ver esta tarjeta del viaje sin iniciar sesión.</string>
+    <string name="plan_shared_status">Compartido: cualquiera con el enlace puede ver este viaje.</string>
+    <string name="plan_link_revoked">Ya no se comparte. El enlace anterior ha dejado de funcionar.</string>
+    <string name="plan_share_failed">No se pudo crear el enlace para compartir</string>
+    <string name="plan_no_selections">Este plan aún no tiene selecciones guardadas.</string>
+    <string name="plan_full_itinerary">Itinerario completo (%1$s)</string>
+    <string name="plan_confirm_cancel">Cancelar</string>
+    <string name="plan_confirm_delete_title">¿Eliminar este viaje?</string>
+    <string name="plan_confirm_delete_message">«%1$s» se eliminará de Mis viajes en todos tus dispositivos y su enlace compartido dejará de funcionar.</string>
+    <string name="plan_confirm_delete">Eliminar</string>
+    <string name="plan_confirm_revoke_title">¿Dejar de compartir este viaje?</string>
+    <string name="plan_confirm_revoke_message">El enlace dejará de funcionar para todos los que lo tengan. Puedes volver a compartirlo más tarde.</string>
+    <string name="plan_confirm_revoke">Dejar de compartir</string>
+    <string name="plan_confirm_discard_title">¿Reemplazar Mi plan?</string>
+    <string name="plan_confirm_discard_message">Mi plan tiene cambios sin guardar. Abrir este viaje los reemplaza.</string>
+    <string name="plan_confirm_discard">Reemplazar</string>
+    <string name="plan_not_found">Este plan no está disponible. Puede que se haya eliminado.</string>
+
+    <!-- Calendar -->
+    <string name="plan_calendar_title">Añadir al calendario</string>
+    <string name="plan_calendar_export_all">Descargar .ics con todos los eventos</string>
+    <string name="plan_calendar_export_hint">Un archivo .ics para Google Calendar, Apple Calendar u Outlook.</string>
+    <string name="plan_calendar_add_one">Añadir</string>
+    <string name="plan_calendar_add_one_a11y">Añadir %1$s a tu calendario</string>
+    <string name="plan_calendar_all_day">Todo el día</string>
+    <string name="plan_nothing_to_export">Nada de este plan tiene fecha todavía, así que no hay nada que añadir a un calendario.</string>
+    <string name="plan_no_app">Ninguna app de este teléfono puede abrir esto.</string>
+    <string name="plan_share_chooser">Compartir viaje</string>
+
+    <!-- My Plan -->
+    <string name="plan_my_plan_title">Mi plan</string>
+    <string name="plan_name_label">Nombre del plan</string>
+    <string name="plan_editing_saved">Editando un plan guardado</string>
+    <string name="plan_unsaved">Cambios sin guardar</string>
+    <string name="plan_all_saved">Guardado</string>
+    <string name="plan_budget">(presupuesto: %1$s)</string>
+    <string name="plan_my_plan_empty_title">Elige vuelos, hoteles y actividades para crear tu plan</string>
+    <string name="plan_my_plan_empty_message">Añade cosas desde tus resultados o un chat. Los planes guardados están en Mis viajes.</string>
+    <string name="plan_open_trips">Mis viajes</string>
+    <string name="plan_save">Guardar plan</string>
+    <string name="plan_update">Actualizar plan</string>
+    <string name="plan_saving">Guardando…</string>
+    <string name="plan_save_as_new">Guardar como nuevo</string>
+    <string name="plan_new">Nuevo</string>
+    <string name="plan_saved">¡Plan guardado!</string>
+    <string name="plan_updated">¡Plan actualizado!</string>
+    <string name="plan_save_failed">No se pudo guardar</string>
+    <string name="plan_login_to_save">Inicia sesión para guardar planes</string>
+    <string name="plan_removed">Se quitó %1$s</string>
+    <string name="plan_removed_generic">Se quitó de tu plan</string>
+    <string name="plan_remove_a11y">Quitar %1$s</string>
+    <string name="plan_confirm_new_title">¿Empezar un plan nuevo?</string>
+    <string name="plan_confirm_new_message">Se perderán los cambios sin guardar de Mi plan.</string>
+    <string name="plan_confirm_new">Empezar nuevo</string>
+    <string name="plan_estimated_cost">Coste estimado</string>
+    <string name="plan_under_budget">%1$s por debajo del presupuesto</string>
+    <string name="plan_over_budget">%1$s por encima del presupuesto</string>
+    <string name="plan_cost_breakdown">En qué se va el dinero</string>
+    <string name="plan_cost_transport_note">El transporte local no está incluido: las tarifas varían según el viaje.</string>
+    <string name="plan_cost_part_a11y">%1$s %2$s, %3$d por ciento</string>
+    <string name="plan_cost_flights">Vuelos</string>
+    <string name="plan_cost_hotel">Hotel</string>
+    <string name="plan_cost_activities">Actividades</string>
+    <string name="plan_cost_sim">SIM / eSIM</string>
+
+    <!-- Categories (web My Plan drawer) -->
+    <string name="plan_cat_flight">Vuelo</string>
+    <string name="plan_cat_flight_legs">Vuelos</string>
+    <string name="plan_cat_hotel">Hotel</string>
+    <string name="plan_cat_activities">Actividades</string>
+    <string name="plan_cat_places">Lugares</string>
+    <string name="plan_cat_walking_tours">Free tours a pie</string>
+    <string name="plan_cat_sim">SIM</string>
+    <string name="plan_cat_getting_around">Cómo moverse</string>
+    <string name="plan_cat_tips">Consejos</string>
+    <string name="plan_cat_events">Eventos</string>
+    <string name="plan_cat_notes">Notas</string>
+    <string name="plan_cat_itinerary">Itinerario</string>
+    <string name="plan_cat_packing">Lista de equipaje</string>
+    <string name="plan_category_heading">%1$s (%2$d)</string>
+    <string name="plan_leg">Tramo %1$d</string>
+    <string name="plan_day">Día %1$d</string>
+    <string name="plan_per_night">%1$s / noche</string>
+    <string name="plan_free_entry">Entrada gratuita</string>
+    <string name="plan_packed">%1$d de %2$d en la maleta</string>
+    <string name="plan_packing_saved">Lista de equipaje guardada</string>
+    <string name="plan_item_unnamed">Elemento sin nombre</string>
+    <string name="plan_open_link">Abrir enlace</string>
+    <string name="plan_open_link_a11y">Abrir %1$s</string>
+    <string name="plan_from_link">De tu enlace</string>
+    <string name="plan_time_morning">Mañana</string>
+    <string name="plan_time_afternoon">Tarde</string>
+    <string name="plan_time_evening">Noche</string>
+    <string name="plan_day_cost">~%1$s</string>
+
+    <!-- Share as text -->
+    <string name="plan_text_estimated_cost">Coste estimado: %1$s</string>
+    <string name="plan_text_estimate">Estimación</string>
 </resources>

@@ -37,7 +37,11 @@ class PlanDetailViewModelTest {
             "2027-04-01",
             "2027-04-04",
             "2026-11-01 10:00:00",
-            selections = PlanSelections(hotel = Hotel(name = "Park Hyatt", totalPriceUsd = 1200.0), activities = listOf(Activity(name = "Sushi", priceUsd = 80.0))),
+            selections =
+                PlanSelections(
+                    hotel = Hotel(name = "Park Hyatt", totalPriceUsd = 1200.0),
+                    activities = listOf(Activity(name = "Sushi", priceUsd = 80.0)),
+                ),
         )
 
     private val repo = FakePlansRepository(listOf(saved))

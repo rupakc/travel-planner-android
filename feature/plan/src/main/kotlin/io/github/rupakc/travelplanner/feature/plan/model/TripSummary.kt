@@ -106,14 +106,18 @@ internal object TripQuery {
                     }
             }
         return when (sort) {
-            TripSort.UPDATED -> matching.sortedWith(compareByDescending<TripSummary> { it.updatedAt }.thenByDescending { it.id })
+            TripSort.UPDATED -> {
+                matching.sortedWith(compareByDescending<TripSummary> { it.updatedAt }.thenByDescending { it.id })
+            }
+
             // Upcoming: soonest first. Past / All: most recent trip first; undated trips last.
-            TripSort.TRIP_DATE ->
+            TripSort.TRIP_DATE -> {
                 if (filter == TripFilter.UPCOMING) {
                     matching.sortedWith(compareBy<TripSummary, LocalDate?>(nullsLast()) { it.startDate }.thenByDescending { it.id })
                 } else {
                     matching.sortedWith(compareByDescending<TripSummary, LocalDate?>(nullsFirst()) { it.startDate }.thenByDescending { it.id })
                 }
+            }
         }
     }
 

@@ -116,7 +116,13 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 navController.navigate(ResultsRoute)
             }, onCompare = { navController.navigate(io.github.rupakc.travelplanner.core.model.navigation.CompareRoute) })
             resultsGraph(onBack = { navController.popBackStack() })
-            planGraph(onOpenPlan = { navController.navigate(PlanDetailRoute(it)) }, onBack = { navController.popBackStack() })
+            planGraph(
+                onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
+                onBack = { navController.popBackStack() },
+                onOpenResults = { navController.navigate(ResultsRoute) },
+                onPlanTrip = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
+                onOpenTrips = { navController.navigateToTopLevel(TopLevelDestination.PLANS) },
+            )
             chatGraph(onOpenImport = { url ->
                 navController.navigate(
                     SearchRoute(mode = io.github.rupakc.travelplanner.core.model.navigation.SearchModes.IMPORT, importUrl = url),

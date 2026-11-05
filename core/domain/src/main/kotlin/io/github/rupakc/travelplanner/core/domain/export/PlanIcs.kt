@@ -61,6 +61,9 @@ object PlanIcs {
     private const val MAX_OCTETS = 75
     private const val HOUR = 60
     private const val NOON = 12
+    private const val AM = "am"
+    private const val MERIDIEM_GROUP = 3
+    private const val PM = "pm"
     private const val LAST_HOUR = 23
     private const val LAST_MINUTE = 59
     private val ISO_DATE = Regex("^\\d{4}-\\d{2}-\\d{2}$")
@@ -203,9 +206,9 @@ object PlanIcs {
         val m = TIME.find(value ?: return null) ?: return null
         var h = m.groupValues[1].toInt()
         val min = m.groupValues[2].toInt()
-        val meridiem = m.groupValues[3].lowercase()
-        if (meridiem == "pm" && h < NOON) h += NOON
-        if (meridiem == "am" && h == NOON) h = 0
+        val meridiem = m.groupValues[MERIDIEM_GROUP].lowercase()
+        if (meridiem == PM && h < NOON) h += NOON
+        if (meridiem == AM && h == NOON) h = 0
         if (h > LAST_HOUR || min > LAST_MINUTE) return null
         return h * HOUR + min
     }
@@ -226,42 +229,7 @@ object PlanIcs {
         val events = mutableListOf<PlanCalendarEvent>()
         for (day in days) {
             val date = dayDate(day, searchData) ?: continue
-            for (slot in day["slots"].objects()) {
-                val key = slot["key"].orIfNull { null }?.js() ?: ItineraryArrangement.slotKey(day["day_number"], slot["time_of_day"])
-                val edit = selections?.get("itinerary_edits").obj()?.get(key).obj()
-                val note = selections?.get("itinerary_notes").obj()?.get(key).text()
-                var start = clockMinutes(slot["start_time"].str())
-                var end = clockMinutes(slot["end_time"].str())
-                if (start != null && end != null) {
-                    // Scheduled clock times wrap at midnight; the day offsets say which day
-                    start += dayOffset(slot["start_day_offset"]) * MINUTES_PER_DAY
-                    end += dayOffset(slot["end_day_offset"]) * MINUTES_PER_DAY
-                } else {
-                    val hours = SLOT_HOURS[slot["time_of_day"].str()] ?: SLOT_HOURS.getValue("morning")
-                    start = hours.first * HOUR
-                    val duration = slot["duration_hours"].looseNumber()
-                    end = if (duration != null && duration > 0) start + (duration * HOUR).roundToLong().toInt() else hours.second * HOUR
-                }
-                val cost = (edit?.get("cost").orIfNull { slot["estimated_cost_usd"] }).looseNumber()
-                val description =
-                    listOfNotNull(
-                        day["theme"].text()?.let { "Day ${day["day_number"].js()}: $it" },
-                        if (slot["from_link"].truthy()) "From your link" + (slot["link_quote"].text()?.let { ": “$it”" } ?: "") else null,
-                        slot["notes"].text(),
-                        note,
-                        cost?.takeIf { it > 0 }?.let { "Est. cost: $${enUs(it)}" },
-                    ).joinToString("\n")
-                events +=
-                    PlanCalendarEvent(
-                        id = "slot-$key",
-                        summary = edit?.get("activity").text() ?: slot["activity"].text(),
-                        location = edit?.get("location").orIfNull { slot["location"].orIfNull { day["city"] } }.text(),
-                        description = description,
-                        allDay = false,
-                        start = at(date, start),
-                        end = at(date, end),
-                    )
-            }
+            day["slots"].objects().mapTo(events) { slot -> slotEvent(day, slot, date, selections) }
             val extras = day["link_extras"].objects()
             if (extras.isNotEmpty()) {
                 events +=
@@ -277,6 +245,42 @@ object PlanIcs {
             }
         }
         return events
+    }
+
+    private fun slotEvent(day: JsonObject, slot: JsonObject, date: String, selections: JsonObject?): PlanCalendarEvent {
+        val key = slot["key"].orIfNull { null }?.js() ?: ItineraryArrangement.slotKey(day["day_number"], slot["time_of_day"])
+        val edit = selections?.get("itinerary_edits").obj()?.get(key).obj()
+        val note = selections?.get("itinerary_notes").obj()?.get(key).text()
+        var start = clockMinutes(slot["start_time"].str())
+        var end = clockMinutes(slot["end_time"].str())
+        if (start != null && end != null) {
+            // Scheduled clock times wrap at midnight; the day offsets say which day
+            start += dayOffset(slot["start_day_offset"]) * MINUTES_PER_DAY
+            end += dayOffset(slot["end_day_offset"]) * MINUTES_PER_DAY
+        } else {
+            val hours = SLOT_HOURS[slot["time_of_day"].str()] ?: SLOT_HOURS.getValue("morning")
+            start = hours.first * HOUR
+            val duration = slot["duration_hours"].looseNumber()
+            end = if (duration != null && duration > 0) start + (duration * HOUR).roundToLong().toInt() else hours.second * HOUR
+        }
+        val cost = (edit?.get("cost").orIfNull { slot["estimated_cost_usd"] }).looseNumber()
+        val description =
+            listOfNotNull(
+                day["theme"].text()?.let { "Day ${day["day_number"].js()}: $it" },
+                if (slot["from_link"].truthy()) "From your link" + (slot["link_quote"].text()?.let { ": “$it”" } ?: "") else null,
+                slot["notes"].text(),
+                note,
+                cost?.takeIf { it > 0 }?.let { "Est. cost: $${enUs(it)}" },
+            ).joinToString("\n")
+        return PlanCalendarEvent(
+            id = "slot-$key",
+            summary = edit?.get("activity").text() ?: slot["activity"].text(),
+            location = edit?.get("location").orIfNull { slot["location"].orIfNull { day["city"] } }.text(),
+            description = description,
+            allDay = false,
+            start = at(date, start),
+            end = at(date, end),
+        )
     }
 
     private fun dayOffset(n: JsonElement?): Int = n.strictInt()?.takeIf { it > 0 } ?: 0

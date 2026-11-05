@@ -457,8 +457,10 @@ class PlanIcsTest {
         val sel =
             obj(
                 """{"itinerary_slots":[
-                {"key":"1-afternoon","day_number":1,"date":"2027-04-01","time_of_day":"afternoon","activity":"Picked","start_time":"13:30","end_time":"16:00","start_day_offset":0,"end_day_offset":0},
-                {"key":"1-evening","day_number":1,"date":"2027-04-01","time_of_day":"evening","activity":"Late","start_time":"23:00","end_time":"01:00","start_day_offset":0,"end_day_offset":1}]}""",
+                {"key":"1-afternoon","day_number":1,"date":"2027-04-01","time_of_day":"afternoon","activity":"Picked",
+                 "start_time":"13:30","end_time":"16:00","start_day_offset":0,"end_day_offset":0},
+                {"key":"1-evening","day_number":1,"date":"2027-04-01","time_of_day":"evening","activity":"Late",
+                 "start_time":"23:00","end_time":"01:00","start_day_offset":0,"end_day_offset":1}]}""",
             )
         val (a, b) = events(build(sel, planName = "T", itinerary = null))
         assertEquals("DTSTART:20270401T133000", a.field("DTSTART"))

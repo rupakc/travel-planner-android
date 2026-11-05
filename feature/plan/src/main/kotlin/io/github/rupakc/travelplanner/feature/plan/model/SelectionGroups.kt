@@ -69,6 +69,7 @@ internal data class SelectionEntry(
 internal data class SelectionGroup(val category: PlanCategory, val entries: List<SelectionEntry>)
 
 internal object SelectionGroups {
+    @Suppress("LongMethod") // One declarative mapping per web drawer category; splitting it hides the order.
     fun of(selections: PlanSelections): List<SelectionGroup> =
         listOf(
             group(PlanCategory.FLIGHT, listOfNotNull(selections.flight).map { flightEntry(it, null) }),

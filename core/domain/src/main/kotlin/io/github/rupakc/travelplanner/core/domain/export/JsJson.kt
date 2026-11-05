@@ -56,7 +56,13 @@ internal fun JsonElement?.js(): String =
     }
 
 internal fun jsNumber(value: Double): String =
-    if (value % 1.0 == 0.0 && kotlin.math.abs(value) < 1e21) value.toLong().toString() else BigDecimal(value.toString()).stripTrailingZeros().toPlainString()
+    if (value % 1.0 == 0.0 &&
+        kotlin.math.abs(value) < JS_EXPONENT_FROM
+    ) {
+        value.toLong().toString()
+    } else {
+        BigDecimal(value.toString()).stripTrailingZeros().toPlainString()
+    }
 
 internal fun JsonElement?.obj(): JsonObject? = this as? JsonObject
 
@@ -69,3 +75,6 @@ internal fun JsonElement?.orIfNull(other: () -> JsonElement?): JsonElement? = if
 
 /** `Number(n).toLocaleString('en-US')`: grouping, at most 3 fraction digits. */
 internal fun enUs(value: Double): String = DecimalFormat("#,##0.###", DecimalFormatSymbols.getInstance(Locale.US)).format(value)
+
+/** JavaScript prints numbers from 1e21 up in exponent form. */
+private const val JS_EXPONENT_FROM = 1e21

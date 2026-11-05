@@ -246,7 +246,8 @@ internal class PlanDetailViewModel
         private fun openInResults(confirmed: Boolean) {
             val plan = cached.value ?: return
             val draft = store.draft.value
-            if (!confirmed && draft.dirty && draft.planId != plan.id && !draft.selections.isEmpty) {
+            val wouldLoseChanges = draft.dirty && draft.planId != plan.id && !draft.selections.isEmpty
+            if (!confirmed && wouldLoseChanges) {
                 status.update { it.copy(confirm = DetailConfirm.DISCARD_DRAFT) }
                 return
             }

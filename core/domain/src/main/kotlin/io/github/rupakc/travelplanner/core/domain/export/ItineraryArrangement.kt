@@ -200,13 +200,21 @@ internal object ItineraryArrangement {
     private const val LATE_MINUTES = 45
     private const val DAY_END = 23 * 60
     private const val MINUTES_PER_DAY = 1440
+    private const val MINUTES_PER_HOUR = 60
+    private const val HOURS_PER_DAY = 24
     private const val MAX_LAT = 90.0
     private const val MAX_LNG = 180.0
     private const val EARTH_KM = 6371.0
     private const val ROUND_TO = 5.0
     private const val TENTHS = 10.0
 
-    private fun clock(minutes: Int): String = String.format(java.util.Locale.ROOT, "%02d:%02d", minutes / 60 % 24, minutes % 60)
+    private fun clock(minutes: Int): String =
+        String.format(
+            java.util.Locale.ROOT,
+            "%02d:%02d",
+            minutes / MINUTES_PER_HOUR % HOURS_PER_DAY,
+            minutes % MINUTES_PER_HOUR,
+        )
 
     private fun coords(slot: JsonObject): Pair<Double, Double>? {
         val lat = slot["lat"].strictNumber() ?: return null
@@ -216,7 +224,7 @@ internal object ItineraryArrangement {
 
     private fun durationMinutes(slot: JsonObject): Int {
         val hours = slot["duration_hours"].strictNumber()
-        if (hours != null && hours in MIN_HOURS..MAX_HOURS) return (hours * 60).roundToLong().toInt()
+        if (hours != null && hours in MIN_HOURS..MAX_HOURS) return (hours * MINUTES_PER_HOUR).roundToLong().toInt()
         return DEFAULT_MINUTES[slot["time_of_day"].str()] ?: OTHER_DEFAULT_MINUTES
     }
 
@@ -233,7 +241,7 @@ internal object ItineraryArrangement {
         val b = coords(slot) ?: return null
         val km = haversineKm(a.first, a.second, b.first, b.second) * DETOUR
         val walk = km <= WALK_MAX_KM
-        val minutes = if (walk) km / WALK_KMH * 60 else km / TRANSIT_KMH * 60 + TRANSIT_OVERHEAD_MINUTES
+        val minutes = if (walk) km / WALK_KMH * MINUTES_PER_HOUR else km / TRANSIT_KMH * MINUTES_PER_HOUR + TRANSIT_OVERHEAD_MINUTES
         return buildJsonObject {
             put("minutes", maxOf(ROUND_TO, ceil(minutes / ROUND_TO) * ROUND_TO).toInt())
             put("mode", if (walk) "walk" else "transit")
@@ -251,7 +259,7 @@ internal object ItineraryArrangement {
         var prev: Pair<JsonObject, Int>? = null
         for (i in order) {
             val slot = slots[i]
-            val anchor = if (ranks[i] % 1.0 == 0.0 && ranks[i] >= 0) ANCHORS[TIMES[ranks[i].toInt()]] else null
+            val anchor = anchorOf(ranks[i])
             if (anchor == null && prev == null) continue
             val transit = prev?.let { transitBetween(it.first, slot) }
             val earliest = prev?.let { it.second + (transit?.get("minutes").strictInt() ?: UNKNOWN_TRAVEL_MINUTES) } ?: 0
@@ -268,14 +276,19 @@ internal object ItineraryArrangement {
                             "transit_from_prev" to (transit ?: JsonNull),
                         ),
                 )
-            if (anchor != null && start - anchor > LATE_MINUTES) {
-                val name = edits?.get(slot["key"].js()).obj()?.get("activity").text() ?: slot["activity"].text() ?: "An activity"
-                warnings += "$name starts at ${clock(start)} — later than planned"
-            }
+            if (anchor != null && start - anchor > LATE_MINUTES) warnings += lateWarning(slot, edits, start)
             prev = slot to end
         }
         if (prev != null && prev.second > DAY_END) warnings += "Day ${day["day_number"].js()} runs past 23:00"
         return JsonObject(day + mapOf("slots" to JsonArray(out), "schedule_warnings" to JsonArray(warnings.map(::JsonPrimitive))))
+    }
+
+    /** A whole rank is a standard time and starts no earlier than its anchor; a fractional one just follows. */
+    private fun anchorOf(rank: Double): Int? = if (rank % 1.0 == 0.0 && rank >= 0) ANCHORS[TIMES[rank.toInt()]] else null
+
+    private fun lateWarning(slot: JsonObject, edits: JsonObject?, start: Int): String {
+        val name = edits?.get(slot["key"].js()).obj()?.get("activity").text() ?: slot["activity"].text() ?: "An activity"
+        return "$name starts at ${clock(start)} — later than planned"
     }
 
     /** Web `scheduleDays`: estimated `start_time`/`end_time` (+ day offsets, transit) on every slot. */
