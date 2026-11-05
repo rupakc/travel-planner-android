@@ -57,6 +57,22 @@ class TravelDatabaseTest {
         }
 
     @Test
+    fun `chat text search finds the user's threads by message content`() =
+        runTest {
+            val dao = db.chatDao()
+            val japan = dao.insertThread(ChatThreadEntity(username = "alice", title = "Plan 5 days in Japan", createdAtMillis = 1, updatedAtMillis = 1))
+            val lisbon = dao.insertThread(ChatThreadEntity(username = "alice", title = "Lisbon", createdAtMillis = 1, updatedAtMillis = 1))
+            val bobs = dao.insertThread(ChatThreadEntity(username = "bob", title = "Kyoto", createdAtMillis = 1, updatedAtMillis = 1))
+            dao.insertMessage(ChatMessageEntity(threadId = japan, role = "assistant", content = "Day 3: Kyoto temples", createdAtMillis = 2))
+            dao.insertMessage(ChatMessageEntity(threadId = japan, role = "user", content = "More kyoto food?", createdAtMillis = 3))
+            dao.insertMessage(ChatMessageEntity(threadId = lisbon, role = "user", content = "100% sure? Tram_28", createdAtMillis = 2))
+            dao.insertMessage(ChatMessageEntity(threadId = bobs, role = "user", content = "Kyoto", createdAtMillis = 2))
+            assertEquals(listOf(japan), dao.observeThreadIdsWithText("alice", "%kyoto%", 10).first())
+            assertEquals(listOf(lisbon), dao.observeThreadIdsWithText("alice", "%100\\%%", 10).first())
+            assertEquals(emptyList<Long>(), dao.observeThreadIdsWithText("alice", "%Tram\\_29%", 10).first())
+        }
+
+    @Test
     fun `seen notifications dedupe and the draft row is single`() =
         runTest {
             db.seenNotificationDao().markSeen(listOf(SeenNotificationEntity(5, 10), SeenNotificationEntity(5, 11)))
