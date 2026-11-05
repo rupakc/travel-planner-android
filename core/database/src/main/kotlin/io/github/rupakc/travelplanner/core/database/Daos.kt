@@ -16,6 +16,10 @@ interface PlanDao {
     @Query("SELECT * FROM cached_plans WHERE id = :id")
     fun observe(id: Long): Flow<CachedPlanEntity?>
 
+    /** One cached plan of [username] only (another account's cached row never shows). */
+    @Query("SELECT * FROM cached_plans WHERE id = :id AND username = :username")
+    fun observeFor(id: Long, username: String): Flow<CachedPlanEntity?>
+
     @Query("SELECT * FROM cached_plans WHERE id = :id")
     suspend fun get(id: Long): CachedPlanEntity?
 

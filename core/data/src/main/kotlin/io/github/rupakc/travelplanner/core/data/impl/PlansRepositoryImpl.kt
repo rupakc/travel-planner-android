@@ -1,7 +1,9 @@
 package io.github.rupakc.travelplanner.core.data.impl
 
+import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.map
+import io.github.rupakc.travelplanner.core.common.onFailure
 import io.github.rupakc.travelplanner.core.common.onSuccess
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.database.CachedPlanEntity
@@ -39,7 +41,10 @@ class PlansRepositoryImpl
                 if (session == null) flowOf(emptyList()) else dao.observeAll(session.user.username).map { rows -> rows.mapNotNull { it.toPlan() } }
             }
 
-        override fun plan(id: Long): Flow<Plan?> = dao.observe(id).map { it?.toPlan() }
+        override fun plan(id: Long): Flow<Plan?> =
+            sessionStore.session.flatMapLatest { session ->
+                if (session == null) flowOf(null) else dao.observeFor(id, session.user.username).map { it?.toPlan() }
+            }
 
         override suspend fun refresh(): AppResult<Unit> =
             apiCall { api.list() }
@@ -49,7 +54,11 @@ class PlansRepositoryImpl
                 }
                 .map { }
 
-        override suspend fun get(id: Long): AppResult<Plan> = apiCall { api.get(id) }.onSuccess { cache(it) }
+        /** A 404 means the plan is gone (deleted elsewhere or not this user's): its cached copy is evicted. */
+        override suspend fun get(id: Long): AppResult<Plan> =
+            apiCall { api.get(id) }
+                .onSuccess { cache(it) }
+                .onFailure { if (it is AppError.NotFound) dao.delete(id) }
 
         override suspend fun create(name: String, searchData: JsonObject, selections: PlanSelections): AppResult<Plan> =
             apiCall { api.create(CreatePlanRequest(name, searchData, selections)) }.onSuccess { cache(it) }
