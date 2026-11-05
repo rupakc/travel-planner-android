@@ -33,26 +33,32 @@ sealed interface ServerUrlResult {
 object ServerUrl {
     fun validate(raw: String, allowHttp: Boolean = true): ServerUrlResult {
         val input = raw.trim()
-        if (input.isEmpty()) return ServerUrlResult.Blank
-        if (!input.contains("://")) return ServerUrlResult.Malformed
-        val rawScheme = input.substringBefore("://").lowercase()
-        if (rawScheme != HTTP && rawScheme != HTTPS) return ServerUrlResult.UnsupportedScheme
-        val rest = input.substringAfter("://")
-        if (rest.isBlank() || rest.startsWith("/")) return ServerUrlResult.MissingHost
-        val uri =
-            try {
-                URI(input)
-            } catch (_: URISyntaxException) {
-                return ServerUrlResult.Malformed
-            }
-        val scheme = uri.scheme?.lowercase() ?: return ServerUrlResult.Malformed
-        if (uri.rawQuery != null || uri.rawFragment != null || uri.rawUserInfo != null) return ServerUrlResult.Malformed
-        val host =
-            uri.host?.takeIf { it.isNotBlank() } ?: return if (uri.rawAuthority.isNullOrBlank()) ServerUrlResult.MissingHost else ServerUrlResult.Malformed
-        if (scheme == HTTP && !allowHttp) return ServerUrlResult.HttpsRequired
+        val scheme = input.substringBefore("://", missingDelimiterValue = "").lowercase()
+        val rest = input.substringAfter("://", missingDelimiterValue = "")
+        val uri = if (rest.isBlank()) null else parse(input)
+        val host = uri?.host?.takeIf { it.isNotBlank() }
+        return when {
+            input.isEmpty() -> ServerUrlResult.Blank
+            !input.contains("://") -> ServerUrlResult.Malformed
+            scheme != HTTP && scheme != HTTPS -> ServerUrlResult.UnsupportedScheme
+            rest.isBlank() || rest.startsWith("/") -> ServerUrlResult.MissingHost
+            uri == null || host == null -> ServerUrlResult.Malformed
+            uri.rawQuery != null || uri.rawFragment != null || uri.rawUserInfo != null -> ServerUrlResult.Malformed
+            scheme == HTTP && !allowHttp -> ServerUrlResult.HttpsRequired
+            else -> ServerUrlResult.Valid(normalise(scheme, host, uri))
+        }
+    }
+
+    private fun parse(input: String): URI? =
+        try {
+            URI(input)
+        } catch (_: URISyntaxException) {
+            null
+        }
+
+    private fun normalise(scheme: String, host: String, uri: URI): String {
         val port = if (uri.port == -1) "" else ":${uri.port}"
-        val path = uri.rawPath.orEmpty().trimEnd('/')
-        return ServerUrlResult.Valid("$scheme://${host.lowercase()}$port$path")
+        return "$scheme://${host.lowercase()}$port${uri.rawPath.orEmpty().trimEnd('/')}"
     }
 
     private const val HTTP = "http"
