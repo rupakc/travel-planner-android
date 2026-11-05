@@ -16,7 +16,6 @@ import io.github.rupakc.travelplanner.core.data.impl.FareWatchesRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.FeedbackRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.HealthCacheStore
 import io.github.rupakc.travelplanner.core.data.impl.HealthRepositoryImpl
-import io.github.rupakc.travelplanner.core.data.impl.SharedPrefsHealthCacheStore
 import io.github.rupakc.travelplanner.core.data.impl.ImportRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.NearbyRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.NotificationsRepositoryImpl
@@ -28,6 +27,7 @@ import io.github.rupakc.travelplanner.core.data.impl.RecentSearchesRepositoryImp
 import io.github.rupakc.travelplanner.core.data.impl.SearchRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.SessionCleanerImpl
 import io.github.rupakc.travelplanner.core.data.impl.SettingsRepositoryImpl
+import io.github.rupakc.travelplanner.core.data.impl.SharedPrefsHealthCacheStore
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStoreImpl
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository

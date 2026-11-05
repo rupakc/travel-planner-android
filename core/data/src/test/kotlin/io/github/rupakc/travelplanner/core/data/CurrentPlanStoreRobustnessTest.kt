@@ -90,7 +90,10 @@ class CurrentPlanStoreRobustnessTest {
             val dao = Dao()
             val draftJson =
                 io.github.rupakc.travelplanner.core.model.json.TravelJson
-                    .encodeToString(io.github.rupakc.travelplanner.core.model.plan.PlanDraft.serializer(), io.github.rupakc.travelplanner.core.model.plan.PlanDraft(searchRequest = request))
+                    .encodeToString(
+                        io.github.rupakc.travelplanner.core.model.plan.PlanDraft.serializer(),
+                        io.github.rupakc.travelplanner.core.model.plan.PlanDraft(searchRequest = request),
+                    )
             dao.rows[PlanDraftEntity.SINGLE_ROW] = PlanDraftEntity(PlanDraftEntity.SINGLE_ROW, draftJson)
             dao.rows[PlanDraftEntity.SEARCH_ROW] = PlanDraftEntity(PlanDraftEntity.SEARCH_ROW, """{"flights":{"flights":[]}}""")
             // A scope that has not run the restore yet (a worker process right after start).
