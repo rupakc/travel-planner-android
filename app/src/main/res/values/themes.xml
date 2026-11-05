@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Voyager" parent="android:Theme.Material.Light.NoActionBar">
+    <!-- AppCompat parent: MainActivity is an AppCompatActivity so per-app languages work below API 33. -->
+    <style name="Theme.Voyager" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@color/splash_background</item>
     </style>
 

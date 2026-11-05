@@ -104,6 +104,7 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 Trip reminders: diff, don't cancel-all (KEEP unchanged unique names, cancel removed ones); a reminder overdue by ≤ 2 h today still fires (zero delay); a posted-names log stops repeats; TIMEZONE_CHANGED / TIME_SET re-time all (REPLACE) using the zone at call time.
 - 2026-11-05 No background location: Near me stores its last fix as a 0.05° cell centre with a timestamp (DataStore `last_location`, excluded from backup, cleared on sign-out); the nearby worker uses it only if under 24 h old. The nearby channel description and Near me screen say so.
 - 2026-11-05 (integration, security S-I1/S-M5) SessionCleaner also forgets the last Near me location and runs every `@IntoSet UserStateCleaner` (core:notifications contributes the alert-poll baseline reset). G's per-DAO logout list was dropped in favour of SessionCleaner; chat stays per user. `alert_poll`, `trip_reminders` and `nearby_notifications` prefs are excluded from backup and device transfer.
+- 2026-11-05 (integration) Per-app language uses AppCompat (`AppCompatDelegate.setApplicationLocales` + `AppLocalesMetadataHolderService` autoStoreLocales), so Settings → Language works on API 26–32 too; MainActivity is an AppCompatActivity and `Theme.Voyager` has an AppCompat parent.
 
 ## Documentation and tooling
 
