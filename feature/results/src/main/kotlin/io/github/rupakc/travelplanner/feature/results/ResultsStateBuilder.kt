@@ -16,7 +16,6 @@ import io.github.rupakc.travelplanner.core.domain.results.TripResults
 import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
 import io.github.rupakc.travelplanner.core.domain.results.clearPendingVerification
 import io.github.rupakc.travelplanner.core.domain.results.orderSectionByCity
-import io.github.rupakc.travelplanner.core.domain.results.searchKey
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
@@ -27,6 +26,7 @@ import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
 import io.github.rupakc.travelplanner.core.model.search.SectionResult
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.EventsData
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
@@ -60,7 +60,7 @@ internal data class SourcedResults(val results: SearchResultsState, val source: 
 
 /** Per-search local state of the results screen (owned by the ViewModel). */
 internal data class LocalState(
-    /** [searchKey] of the search these fields belong to; a new search resets them. */
+    /** [TravelSearchRequest.searchKey] of the search these fields belong to; a new search resets them. */
     val key: String? = null,
     /** Section data replaced by a filter / single-section retry (web `setResults`). */
     val overrides: Map<SectionId, SectionResult> = emptyMap(),
@@ -295,7 +295,7 @@ internal class ResultsStateBuilder {
             )
 
         /**
-         * Which results to show (explicit source selection by search identity, [searchKey]):
+         * Which results to show (explicit source selection by search identity, [TravelSearchRequest.searchKey]):
          * - the live stream only when its request has the draft's key (or the draft has no search yet,
          *   e.g. right after New plan / Remix); a stream is never written into a draft with another key;
          * - else the draft's stored sections when it has some (saved plan, process death);
@@ -304,10 +304,10 @@ internal class ResultsStateBuilder {
          */
         fun selectSource(live: SearchResultsState, draft: PlanDraft): ResultsSource {
             val liveActive = live.phase != StreamPhase.IDLE && live.request != null
-            val draftKey = searchKey(draft.searchRequest)
+            val draftKey = draft.searchRequest?.searchKey()
             return when {
                 draftKey == null -> if (liveActive) ResultsSource.LIVE else ResultsSource.NONE
-                liveActive && searchKey(live.request) == draftKey -> ResultsSource.LIVE
+                liveActive && live.request?.searchKey() == draftKey -> ResultsSource.LIVE
                 hasStoredSections(draft) -> ResultsSource.SNAPSHOT
                 else -> ResultsSource.RUN_SAVED
             }

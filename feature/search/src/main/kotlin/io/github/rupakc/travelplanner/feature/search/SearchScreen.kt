@@ -263,6 +263,23 @@ fun SearchScreen(
         }
         SnackbarHost(snackbarHostState, Modifier.align(Alignment.BottomCenter).padding(TravelTheme.spacing.gutter))
     }
+    if (state.confirmNewPlan) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { onEvent(SearchFormEvent.CancelNewPlan) },
+            title = { androidx.compose.material3.Text(stringResource(R.string.search_new_plan_title)) },
+            text = { androidx.compose.material3.Text(stringResource(R.string.search_new_plan_message)) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { onEvent(SearchFormEvent.ConfirmNewPlan) }) {
+                    androidx.compose.material3.Text(stringResource(R.string.search_new_plan_confirm))
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { onEvent(SearchFormEvent.CancelNewPlan) }) {
+                    androidx.compose.material3.Text(stringResource(R.string.search_new_plan_keep))
+                }
+            },
+        )
+    }
 }
 
 @Composable

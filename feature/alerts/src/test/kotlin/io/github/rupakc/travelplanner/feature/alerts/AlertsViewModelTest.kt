@@ -10,14 +10,17 @@ import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.health.Health
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchLauncher
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import java.time.Instant
@@ -47,6 +50,8 @@ class AlertsViewModelTest {
     private val fares = FakeFareWatchesRepository()
     private val prices = FakePriceWatchesRepository()
     private val search = FakeSearchRepository()
+    private val plan = FakeCurrentPlanStore()
+    private val launcher = FakeSearchLauncher(plan, search)
     private val notifications = FakeNotificationsRepository()
 
     private fun fare(id: Long, status: String = "active") =
@@ -70,7 +75,7 @@ class AlertsViewModelTest {
             FakeHealthRepository(Health(serpapiConfigured = true, emailAlertsAvailable = true)),
             FakeAuthRepository(Session("t", TestUser.copy(email = "a@b.c"))),
             FakePreferencesRepository(),
-            search,
+            launcher,
             notifications,
             clock,
             appScope,
@@ -159,7 +164,7 @@ class AlertsViewModelTest {
                     FakeHealthRepository(Health(serpapiConfigured = false)),
                     FakeAuthRepository(null),
                     FakePreferencesRepository(),
-                    search,
+                    launcher,
                     notifications,
                     clock,
                     backgroundScope,
@@ -181,6 +186,7 @@ class AlertsViewModelTest {
             vm.onEvent(AlertsEvent.Replan("watch-1"))
             advanceUntilIdle()
             assertEquals("Berlin, Germany", search.current.value.request?.origin)
+            assertEquals(search.current.value.request?.searchKey(), plan.draft.value.searchKey)
         }
 
     @Test
@@ -211,7 +217,7 @@ class AlertsViewModelTest {
                     FakeHealthRepository(Health()),
                     FakeAuthRepository(null),
                     FakePreferencesRepository(),
-                    search,
+                    launcher,
                     notifications,
                     clock,
                     backgroundScope,

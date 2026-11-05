@@ -34,6 +34,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepositor
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchLauncher
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import java.time.Instant
 import java.time.LocalDate
@@ -84,6 +85,7 @@ class ResultsViewModelTest {
     private fun vm(catalogue: FeatureCatalogue? = null) =
         ResultsViewModel(
             search = search,
+            searchLauncher = FakeSearchLauncher(plan, search),
             plan = plan,
             health = health,
             fareCalendar = FakeFareCalendarRepository(),
@@ -316,6 +318,7 @@ class ResultsViewModelTest {
             val vm =
                 ResultsViewModel(
                     slow,
+                    FakeSearchLauncher(plan, slow),
                     plan,
                     health,
                     FakeFareCalendarRepository(),
@@ -347,6 +350,7 @@ class ResultsViewModelTest {
             val first =
                 ResultsViewModel(
                     search,
+                    FakeSearchLauncher(plan, search),
                     plan,
                     health,
                     FakeFareCalendarRepository(),
@@ -368,6 +372,7 @@ class ResultsViewModelTest {
             val restored =
                 ResultsViewModel(
                     FakeSearchRepository(),
+                    FakeSearchLauncher(newPlan),
                     newPlan,
                     health,
                     FakeFareCalendarRepository(),

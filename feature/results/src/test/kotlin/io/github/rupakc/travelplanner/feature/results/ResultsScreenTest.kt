@@ -32,6 +32,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepositor
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchLauncher
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.feature.results.navigation.ResultsRoute
 import java.time.Instant
@@ -78,6 +79,7 @@ class ResultsScreenTest {
         vm =
             ResultsViewModel(
                 search,
+                FakeSearchLauncher(plan, search),
                 plan,
                 FakeHealthRepository(Health(status = "ok")),
                 FakeFareCalendarRepository(),

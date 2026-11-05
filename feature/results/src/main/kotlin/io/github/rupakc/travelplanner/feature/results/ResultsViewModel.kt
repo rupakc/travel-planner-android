@@ -16,6 +16,7 @@ import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PriceWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
+import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.results.BestValuePackage
@@ -25,7 +26,6 @@ import io.github.rupakc.travelplanner.core.domain.results.FareCalendarRules
 import io.github.rupakc.travelplanner.core.domain.results.Remix
 import io.github.rupakc.travelplanner.core.domain.results.RemixPreset
 import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
-import io.github.rupakc.travelplanner.core.domain.results.searchKey
 import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.alerts.ALERT_ANY_DROP
 import io.github.rupakc.travelplanner.core.model.alerts.ActivityWatchSpec
@@ -43,6 +43,7 @@ import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
 import io.github.rupakc.travelplanner.core.model.search.SectionResult
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.ConfidenceData
@@ -91,6 +92,7 @@ class ResultsViewModel
     @Inject
     constructor(
         private val search: SearchRepository,
+        private val searchLauncher: SearchLauncher,
         private val plan: CurrentPlanStore,
         private val health: HealthRepository,
         private val fareCalendar: FareCalendarRepository,
@@ -157,7 +159,7 @@ class ResultsViewModel
 
         /** A different search on screen: cancel its filter/retry jobs and reset the per-search state. */
         private suspend fun resetOnNewSearch() {
-            source.map { searchKey(it.results.request) }.distinctUntilChanged().collect { key ->
+            source.map { it.results.request?.searchKey() }.distinctUntilChanged().collect { key ->
                 if (key != local.value.key) {
                     jobs.values.forEach { it.cancel() }
                     jobs.clear()
@@ -190,7 +192,7 @@ class ResultsViewModel
                             }
                         }
                     val request =
-                        (if (live.request != null && searchKey(live.request) == searchKey(draft.searchRequest)) live.request else null)
+                        (if (live.request != null && live.request?.searchKey() == draft.searchRequest?.searchKey()) live.request else null)
                             ?: draft.searchRequest ?: live.request ?: return@collect
                     if (draft.searchData != target || draft.searchRequest != request) plan.attachSearch(request, target)
                 }
@@ -200,12 +202,12 @@ class ResultsViewModel
         private suspend fun rememberExtras() {
             search.current.map {
                 Triple(
-                    searchKey(it.request),
+                    it.request?.searchKey(),
                     it.confidence,
                     it.pricingAdvisor,
                 )
             }.distinctUntilChanged().collect { (key, confidence, advisor) ->
-                if (key == null || key != searchKey(plan.draft.value.searchRequest)) return@collect
+                if (key == null || key != plan.draft.value.searchRequest?.searchKey()) return@collect
                 savedState[KEY_EXTRAS_SEARCH] = key
                 savedState[KEY_CONFIDENCE] = confidence?.let { TravelJson.encodeToString(ConfidenceData.serializer(), it) }
                 savedState[KEY_ADVISOR] = advisor?.let { TravelJson.encodeToString(PricingAdvisorData.serializer(), it) }
@@ -213,7 +215,7 @@ class ResultsViewModel
         }
 
         private fun withSavedExtras(snapshot: SearchResultsState): SearchResultsState {
-            if (savedState.get<String>(KEY_EXTRAS_SEARCH) != searchKey(snapshot.request)) return snapshot
+            if (savedState.get<String>(KEY_EXTRAS_SEARCH) != snapshot.request?.searchKey()) return snapshot
             val confidence =
                 savedState.get<String>(KEY_CONFIDENCE)?.let {
                     runCatching { TravelJson.decodeFromString(ConfidenceData.serializer(), it) }.getOrNull()
@@ -404,12 +406,10 @@ class ResultsViewModel
         /** Web `runSearch`: a new search starts a new plan; the previous picks can be restored from the snackbar. */
         private fun rerun(next: TravelSearchRequest) {
             val previous = plan.snapshot()
-            plan.newPlan()
             // The new plan is for the new search, so its stream is the one shown and stored.
-            plan.attachSearch(next, null)
+            searchLauncher.startNewSearch(next)
             local.update { it.copy(newPlanUndo = previous.takeUnless { p -> p.selections.isEmpty }) }
             if (!previous.selections.isEmpty) messageChannel.trySend(ResultsMessage.NewPlanStarted)
-            search.start(next)
         }
 
         private fun remix(preset: RemixPreset) {
@@ -466,7 +466,7 @@ class ResultsViewModel
             onFailure: (AppError) -> Unit,
             call: suspend (TravelSearchRequest) -> AppResult<Pair<SectionData, JsonObject>>,
         ) {
-            val key = searchKey(req)
+            val key = req.searchKey()
             jobs.remove(id)?.cancel()
             local.update { it.copy(loading = it.loading + id, errors = it.errors - id) }
             jobs[id] =
