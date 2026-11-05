@@ -57,8 +57,8 @@ import io.github.rupakc.travelplanner.core.domain.export.PlanCalendarEvent
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.feature.plan.R
-import io.github.rupakc.travelplanner.feature.plan.model.PlanItineraryUi
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
+import io.github.rupakc.travelplanner.feature.plan.model.PlanItineraryUi
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionEntry
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroup
 import io.github.rupakc.travelplanner.feature.plan.model.TripSummary
