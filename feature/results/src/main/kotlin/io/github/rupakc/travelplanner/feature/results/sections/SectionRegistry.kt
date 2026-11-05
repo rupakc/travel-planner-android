@@ -1,10 +1,25 @@
 package io.github.rupakc.travelplanner.feature.results.sections
 
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
+import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
+import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.EmergencyCardData
 import io.github.rupakc.travelplanner.core.model.section.EventsData
@@ -26,36 +41,111 @@ import io.github.rupakc.travelplanner.core.model.section.WeatherData
 import io.github.rupakc.travelplanner.core.ui.SectionScaffold
 import io.github.rupakc.travelplanner.core.ui.VerificationChip
 import io.github.rupakc.travelplanner.feature.results.R
+import io.github.rupakc.travelplanner.feature.results.SectionUi
+import io.github.rupakc.travelplanner.feature.results.sections.commerce.Pill
+import io.github.rupakc.travelplanner.feature.results.sections.commerce.PillTone
+import kotlinx.coroutines.delay
+
+private const val LOADING_ROTATE_MS = 3_000L
 
 /**
- * Maps each [ResultsSection] to its content composable inside [SectionScaffold].
- * Loading → skeleton; error with no data → ErrorState with retry; otherwise the section body.
+ * Maps each [ResultsSection] into [SectionScaffold]: verification chip, header
+ * actions (filters, fare calendar, watch), rotating loading skeleton, error with
+ * retry, the "No results" fallback, and the section body.
  */
 @Composable
 internal fun ResultsSectionCard(
-    section: ResultsSection,
-    status: SectionStatus,
-    data: SectionData?,
-    expanded: Boolean,
-    onToggleExpanded: () -> Unit,
+    section: SectionUi,
     actions: SectionActions,
+    onToggleExpanded: () -> Unit,
+    onShowVerification: () -> Unit,
     modifier: Modifier = Modifier,
+    headerActions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
 ) {
+    val data = section.data
     SectionScaffold(
         section = section.id,
-        status = status,
-        expanded = expanded,
+        status = section.status,
+        expanded = section.expanded,
         onToggle = onToggleExpanded,
         modifier = modifier,
-        badge = data?.verification?.let { v -> { VerificationChip(v) } },
+        badge = data?.verification?.let { v -> { VerificationChip(v, onClick = onShowVerification) } },
+        headerActions = headerActions,
     ) {
-        when {
-            data == null -> SkeletonList()
-            data.isError -> ErrorState(message = stringResource(R.string.results_section_error), onRetry = { actions.onRetry(section) })
-            else -> SectionContent(section, data, actions)
+        Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+            section.filterError?.let { error ->
+                Text(
+                    error.message ?: stringResource(R.string.results_filter_error),
+                    style = TravelTheme.typography.bodySmall,
+                    color = TravelTheme.colors.error,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+            if (section.activeFilterCount > 0) {
+                Pill(pluralStringResource(R.plurals.results_filters_active, section.activeFilterCount, section.activeFilterCount), tone = PillTone.Info)
+            }
+            when {
+                data == null && section.status == SectionStatus.DONE -> {
+                    Text(stringResource(R.string.results_no_results), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
+                }
+
+                data == null && section.status == SectionStatus.WAITING -> {
+                    Text(stringResource(R.string.results_section_waiting), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
+                }
+
+                data == null || section.filterLoading -> {
+                    LoadingSkeleton(section.section)
+                }
+
+                data.isError -> {
+                    ErrorState(message = stringResource(R.string.results_section_error), onRetry = { actions.onRetry(section.section) })
+                }
+
+                else -> {
+                    SectionContent(section.section, data, actions)
+                }
+            }
         }
     }
 }
+
+/** Web skeleton: rotating message every 3 s (static under reduce-motion) + shimmer bars. */
+@Composable
+private fun LoadingSkeleton(section: ResultsSection) {
+    val messages = loadingMessages(section)
+    val reduceMotion = rememberReduceMotion()
+    var index by remember(section) { mutableIntStateOf(0) }
+    if (!reduceMotion && messages.size > 1) {
+        LaunchedEffect(section) {
+            while (true) {
+                delay(LOADING_ROTATE_MS)
+                index = (index + 1) % messages.size
+            }
+        }
+    }
+    SkeletonList(message = stringResource(messages[index % messages.size]))
+}
+
+@StringRes
+private fun loadingMessages(section: ResultsSection): List<Int> =
+    when (section) {
+        ResultsSection.Flights -> listOf(R.string.results_loading_flights_1, R.string.results_loading_flights_2, R.string.results_loading_flights_3)
+        ResultsSection.Weather -> listOf(R.string.results_loading_weather)
+        ResultsSection.Hotels -> listOf(R.string.results_loading_hotels_1, R.string.results_loading_hotels_2)
+        ResultsSection.Activities -> listOf(R.string.results_loading_activities)
+        ResultsSection.PlacesToSee -> listOf(R.string.results_loading_places)
+        ResultsSection.WalkingTours -> listOf(R.string.results_loading_walking_tours)
+        ResultsSection.Events -> listOf(R.string.results_loading_events)
+        ResultsSection.Visa -> listOf(R.string.results_loading_visa)
+        ResultsSection.Sim -> listOf(R.string.results_loading_sim)
+        ResultsSection.Tips -> listOf(R.string.results_loading_tips)
+        ResultsSection.EmergencyCard -> listOf(R.string.results_loading_emergency)
+        ResultsSection.GettingAround -> listOf(R.string.results_loading_getting_around)
+        ResultsSection.Forex -> listOf(R.string.results_loading_forex)
+        ResultsSection.Itinerary -> listOf(R.string.results_loading_itinerary)
+        ResultsSection.StressTest -> listOf(R.string.results_loading_stress_test)
+        ResultsSection.PackingList -> listOf(R.string.results_loading_packing)
+    }
 
 @Suppress("CyclomaticComplexMethod")
 @Composable
