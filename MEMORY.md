@@ -86,6 +86,11 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 Chat trip route: no map SDK; numbered stops on a route spine, each with an "Open in Maps" `geo:` intent (coordinates when the API sent them, else a place search).
 - 2026-11-05 Chat thread delete: hidden at once, committed when the undo snackbar is dismissed or cancelled (no fixed timer: accessibility timeouts can keep it up for minutes), with onCleared as a backstop; commits run on the application scope.
 - 2026-11-05 Chat thread search: titles filter immediately; message-text matches are debounced 250 ms. Reply announcements are read once (last seq kept in saved state, the ViewModel clears it once shown).
+- 2026-11-05 (Team E) Itinerary utils ported to `core:domain/itinerary` on the typed models; the layout fingerprint is checked against the web's value in a test so layouts saved on either side apply on both. `duration_hours` is read from the raw JSON number (a string "2" falls back to the default, like the web).
+- 2026-11-05 (Team E) Info sections get plan selections, search results, the editing lock and `/stress-test` through default-implemented `SectionActions` members (no Hilt ViewModel inside section composables, so previews/tests and the registry keep working).
+- 2026-11-05 (Team E) Sections inside the results LazyColumn lay items out with Column/FlowRow + a 1/2-column adaptive grid (nested vertical lazy lists are not allowed); Weather uses LazyRow with keys.
+- 2026-11-05 (Team E) Emergency card "Print Card" becomes "Share card" (plain text via the share sheet) — works offline and on every device; numbers are tap-to-dial with ACTION_DIAL (no CALL_PHONE permission).
+- 2026-11-05 (Team E) Itinerary reorder is menu-only (Move → day/time, swaps); no long-press drag and no trip map yet (no map library in the app).
 
 ## Documentation and tooling
 

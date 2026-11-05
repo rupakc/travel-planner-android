@@ -1,19 +1,31 @@
 package io.github.rupakc.travelplanner.feature.results.sections
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.model.section.ItineraryData
-import io.github.rupakc.travelplanner.feature.results.R
+import io.github.rupakc.travelplanner.feature.results.sections.info.ItineraryBody
+import io.github.rupakc.travelplanner.feature.results.sections.info.ItineraryHost
 
 /**
- * Itinerary section body (inside SectionScaffold). Placeholder: replace this whole
- * file; keep the signature so SectionRegistry keeps compiling.
+ * Itinerary: days with Morning/Afternoon/Evening slots, derived times, travel between stops, notes,
+ * and editing (Edit, Note, Move with swap, Remove/Restore, Undo, Reset, Plan) persisted through
+ * My Plan selections exactly as the web stores them (web ItinerarySection).
  */
-@Suppress("UnusedParameter") // placeholder: the section team uses `actions`
 @Composable
 internal fun ItinerarySectionContent(data: ItineraryData, actions: SectionActions, modifier: Modifier = Modifier) {
-    val count = data.days.size
-    Text(pluralStringResource(R.plurals.results_items, count, count), modifier = modifier)
+    val selections by actions.selections.collectAsStateWithLifecycle()
+    ItineraryBody(
+        data = data,
+        host =
+            ItineraryHost(
+                selections = selections,
+                locked = actions.itineraryEditingLocked,
+                isInPlan = actions::isSelected,
+                onTogglePlan = actions::onToggle,
+                onUpdateSelections = actions::onUpdateSelections,
+            ),
+        modifier = modifier,
+    )
 }
