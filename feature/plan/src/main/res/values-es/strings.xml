@@ -167,7 +167,6 @@
     <string name="plan_item_unnamed">Elemento sin nombre</string>
     <string name="plan_open_link">Abrir enlace</string>
     <string name="plan_open_link_a11y">Abrir %1$s</string>
-    <string name="plan_from_link">De tu enlace</string>
     <string name="plan_time_morning">Mañana</string>
     <string name="plan_time_afternoon">Tarde</string>
     <string name="plan_time_evening">Noche</string>
