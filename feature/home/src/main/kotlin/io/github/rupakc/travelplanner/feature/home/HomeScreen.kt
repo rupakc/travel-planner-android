@@ -67,11 +67,9 @@ import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearchIn
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
-import io.github.rupakc.travelplanner.core.ui.descriptionRes
-import io.github.rupakc.travelplanner.core.ui.icon
-import io.github.rupakc.travelplanner.core.ui.labelRes
-import io.github.rupakc.travelplanner.core.ui.sectionId
-import io.github.rupakc.travelplanner.core.ui.titleRes
+import io.github.rupakc.travelplanner.core.ui.profile.descriptionRes
+import io.github.rupakc.travelplanner.core.ui.profile.featureIcon
+import io.github.rupakc.travelplanner.core.ui.profile.titleRes
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -179,7 +177,7 @@ private fun Greeting(userName: String?, types: List<TravellerType>, onEvent: (Ho
             if (types.isEmpty()) {
                 stringResource(R.string.home_type_unset)
             } else {
-                types.map { stringResource(it.labelRes()) }.joinToString(stringResource(R.string.home_type_joiner))
+                types.map { stringResource(it.titleRes()) }.joinToString(stringResource(R.string.home_type_joiner))
             }
         val typeDescription = stringResource(R.string.home_type_a11y, typeLabel)
         AssistChip(
@@ -298,7 +296,7 @@ private fun PlanNextTripCard(onEvent: (HomeEvent) -> Unit) {
 }
 
 @Composable
-private fun FeatureIconBadge(feature: FeatureId) {
+private fun FeatureIconBadge(feature: FeatureId, iconName: String?) {
     val accent = feature.sectionId()?.let { TravelTheme.sectionAccents[it] }
     Box(
         Modifier
@@ -307,7 +305,7 @@ private fun FeatureIconBadge(feature: FeatureId) {
             .background(accent?.tint ?: TravelTheme.colors.primaryContainer),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(feature.icon(), contentDescription = null, tint = accent?.icon ?: TravelTheme.colors.onPrimaryContainer)
+        Icon(featureIcon(iconName.orEmpty()), contentDescription = null, tint = accent?.icon ?: TravelTheme.colors.onPrimaryContainer)
     }
 }
 
@@ -315,7 +313,7 @@ private fun FeatureIconBadge(feature: FeatureId) {
 private fun FeatureTileCard(tile: FeatureTile, onClick: () -> Unit) {
     TpCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(TravelTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-            FeatureIconBadge(tile.feature)
+            FeatureIconBadge(tile.feature, tile.iconName)
             Text(stringResource(tile.feature.titleRes()), style = TravelTheme.typography.titleSmall, color = TravelTheme.colors.onSurface)
             Text(
                 stringResource(tile.feature.descriptionRes()),
@@ -367,7 +365,7 @@ private fun BecauseYouSearchedRow(because: BecauseYouSearched, onEvent: (HomeEve
             items(because.tiles, key = { "because-${it.feature.id}" }, contentType = { "suggestion" }) { tile ->
                 TpCard(onClick = { onEvent(HomeEvent.OpenFeature(tile.feature)) }, modifier = Modifier.width(HomeDimens.SuggestionCardWidth)) {
                     Row(Modifier.padding(TravelTheme.spacing.md), verticalAlignment = Alignment.CenterVertically) {
-                        FeatureIconBadge(tile.feature)
+                        FeatureIconBadge(tile.feature, tile.iconName)
                         Spacer(Modifier.width(TravelTheme.spacing.md))
                         Column {
                             Text(stringResource(tile.feature.titleRes()), style = TravelTheme.typography.titleSmall)

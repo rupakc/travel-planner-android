@@ -21,10 +21,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -57,13 +57,11 @@ import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.globalsearch.GlobalSearch
 import io.github.rupakc.travelplanner.core.domain.globalsearch.GlobalSearchKind
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SearchableItem
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
-import io.github.rupakc.travelplanner.core.ui.icon
 import io.github.rupakc.travelplanner.feature.home.R
 
 private val SearchMaxWidth = 840.dp
@@ -219,7 +217,7 @@ private fun SearchableItem.icon(): ImageVector =
         GlobalSearchKind.TRIP -> Icons.AutoMirrored.Filled.List
         GlobalSearchKind.CHAT -> Icons.AutoMirrored.Filled.Send
         GlobalSearchKind.RECENT_SEARCH -> Icons.Filled.Refresh
-        GlobalSearchKind.FEATURE -> FeatureId.fromId(id)?.icon() ?: Icons.Filled.DateRange
+        GlobalSearchKind.FEATURE -> Icons.Filled.Star
         GlobalSearchKind.SETTING -> Icons.Filled.Settings
     }
 

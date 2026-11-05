@@ -39,7 +39,7 @@ enum class TileReason {
 }
 
 /** A Home tile: one visible feature plus the reason it moved up, if any. */
-data class FeatureTile(val feature: FeatureId, val reason: TileReason? = null)
+data class FeatureTile(val feature: FeatureId, val reason: TileReason? = null, val iconName: String? = null)
 
 /** "Because you searched {destination}": the features the latest search points at. */
 data class BecauseYouSearched(val recentSearchId: String, val destination: String, val tiles: List<FeatureTile>)

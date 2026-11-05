@@ -51,7 +51,7 @@ class HomeScreenTest {
     fun `shows greeting, type, trip, tiles and personalised row`() {
         show(full)
         compose.onNodeWithText("Hello, alice").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Your traveller type: Culture seeker and foodie. Opens Settings.").performClick()
+        compose.onNodeWithContentDescription("Your traveller type: Culture Seeker & Foodie. Opens Settings.").performClick()
         compose.onNodeWithText("Tokyo").performClick()
         compose.onNodeWithText("In 22 days").assertExists()
         compose.onNodeWithText("Because you searched Lisbon").assertExists()

@@ -4,8 +4,8 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
-import io.github.rupakc.travelplanner.core.ui.descriptionRes
-import io.github.rupakc.travelplanner.core.ui.titleRes
+import io.github.rupakc.travelplanner.core.ui.profile.descriptionRes
+import io.github.rupakc.travelplanner.core.ui.profile.titleRes
 import io.github.rupakc.travelplanner.feature.home.R
 import javax.inject.Inject
 

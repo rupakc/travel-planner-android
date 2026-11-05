@@ -20,7 +20,6 @@ import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
 import io.github.rupakc.travelplanner.core.model.preferences.TasteProfile
 import io.github.rupakc.travelplanner.core.model.settings.FeatureOverrides
-import io.github.rupakc.travelplanner.core.ui.travellerTypesOf
 import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.async
@@ -103,9 +102,16 @@ class HomeViewModel
 
         private val personal =
             combine(visible, recentSearchesRepository.recent, taste) { features, recent, tasteProfile ->
+                val icons = catalogue.orElse(null).iconNames()
                 Personal(
-                    tiles = HomePersonalisation.orderTiles(features, HomePersonalisation.reasons(recent, tasteProfile)),
-                    because = HomePersonalisation.becauseYouSearched(recent, features),
+                    tiles =
+                        HomePersonalisation.orderTiles(features, HomePersonalisation.reasons(recent, tasteProfile)).map {
+                            it.copy(iconName = icons[it.feature])
+                        },
+                    because =
+                        HomePersonalisation.becauseYouSearched(recent, features)?.let { b ->
+                            b.copy(tiles = b.tiles.map { it.copy(iconName = icons[it.feature]) })
+                        },
                     recent = recent,
                     taste = HomePersonalisation.tasteHighlights(tasteProfile),
                 )

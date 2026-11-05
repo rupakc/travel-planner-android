@@ -26,9 +26,9 @@ import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsEntryRoute
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
-import io.github.rupakc.travelplanner.core.ui.travellerTypesOf
 import io.github.rupakc.travelplanner.feature.home.destination
 import io.github.rupakc.travelplanner.feature.home.routeLabel
+import io.github.rupakc.travelplanner.feature.home.travellerTypesOf
 import io.github.rupakc.travelplanner.feature.home.visibleFeatures
 import java.util.Optional
 import javax.inject.Inject
