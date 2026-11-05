@@ -17,9 +17,6 @@ import io.github.rupakc.travelplanner.feature.share.ShareViewModel
 /** App link base: `travelplanner://share/{token}`. */
 internal const val SHARE_APP_LINK_BASE = "travelplanner://share"
 
-/** Web share route on any host (`https://<web>/share/{token}`), for when the OS hands the app such a link. */
-internal const val SHARE_WEB_LINK_PATTERN = "https://{host}/share/{token}"
-
 /**
  * Public share viewer; opens without a session.
  *
@@ -32,11 +29,9 @@ fun NavGraphBuilder.shareGraph(
     onPlanTrip: () -> Unit = onBack,
 ) {
     composable<ShareRoute>(
-        deepLinks =
-            listOf(
-                navDeepLink<ShareRoute>(basePath = SHARE_APP_LINK_BASE),
-                navDeepLink { uriPattern = SHARE_WEB_LINK_PATTERN },
-            ),
+        // App scheme only: the manifest declares no https filter and MainActivity drops non-app data (S-M1).
+        // Opening web share links would need verified App Links plus an explicit allowance in DeepLinkIntents.
+        deepLinks = listOf(navDeepLink<ShareRoute>(basePath = SHARE_APP_LINK_BASE)),
     ) {
         ShareRoute(onBack = onBack, onOpenPlan = onOpenPlan, onPlanTrip = onPlanTrip)
     }
