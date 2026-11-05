@@ -17,16 +17,20 @@ exported schema by hand.
 
 ## DataStore (`core:datastore`)
 
-Four Preferences DataStore files: `session` (JWT and user), `settings` (server override, theme mode, dynamic colour, locale tag,
-notification toggles), `traveller_profile`, `feature_overrides`. Traveller profile and feature overrides are device-local because the server
-Preferences schema has no field for them. The session file is excluded from cloud backup and device transfer (`data_extraction_rules.xml`).
-The token is stored unencrypted in the app-private directory (decision in [MEMORY](../MEMORY.md); see [Security](Security.md)).
+Five Preferences DataStore files: `session` (JWT and user, sealed with Tink), `settings` (server override, theme mode, dynamic colour,
+locale tag, notification toggles), `traveller_profile`, `feature_overrides` and `last_location` (the coarse cell of the last Near me
+lookup, for background suggestions). Traveller profile and feature overrides are device-local because the server Preferences schema has no
+field for them. The session and last-location files, the Room database, the Tink keyset and the notification bookkeeping
+SharedPreferences (`alert_poll`, `trip_reminders`, `nearby_notifications`) are excluded from cloud backup and device transfer
+(`data_extraction_rules.xml`, `backup_rules.xml`). Token encryption: [Security](Security.md).
 
 ## Caching rules
 
 - Plans are offline-first: `PlansRepository.plans` / `plan(id)` read Room; network calls refresh it.
 - Result items and plan selections keep their original JSON (`RawBacked`, `extras` for unknown keys), so a plan saved on the web and re-saved on the phone loses nothing.
-- Logout clears plans, recent searches, seen notifications, the draft and chat caches.
+- Sign-out, a different user signing in and a server change run `SessionCleaner`: the current search, the Near me cache and last location,
+  the My Plan draft, cached plans, recent searches, seen notifications and every contributed `UserStateCleaner` (e.g. the alert-poll baseline).
+  Chat history is kept: it is stored per username and only that user can list or open it. A 401 or an expired token keeps all local data.
 - Near-me results are cached in memory (not Room) for 1 hour per roughly 5 km cell (0.05 degree grid) in `NearbyRepository`; the cache is lost with the process.
 - Search results are held in memory (`SearchRepository.current`), not persisted; the 30-minute server cache makes a repeat search cheap.
 
@@ -34,7 +38,8 @@ The token is stored unencrypted in the app-private directory (decision in [MEMOR
 
 Hilt singleton shared by results, chat and plan screens. Holds a `PlanDraft` (`planId`, `name`, `searchRequest`, `searchData`, `selections`, `dirty`).
 `toggle(item)` follows the web rules (single-choice categories replace, lists add/remove); writes to Room go through a conflated channel (latest wins);
-`save()` creates or updates via `PlansRepository`; `snapshot()`/`restore()` back the "Undo" for adding the whole best-value package. Details: [Foundation-Interfaces](Foundation-Interfaces.md) section 3.1.
+`save()` creates or updates via `PlansRepository`, snapshotting the live itinerary into `selections.itinerary` and dropping link evidence
+(`link_verified`, `link_checked`) like the web; `snapshot()`/`restore()` back the "Undo" for adding the whole best-value package. Details: [Foundation-Interfaces](Foundation-Interfaces.md) section 3.1.
 
 ## Unparseable numbers
 

@@ -25,7 +25,7 @@ Retrofit declarations are in `core/network/.../api/Apis.kt`; wire models in `cor
 | `POST /api/import/extract`, `/import/resolve-place` | `ImportApi` | `ImportRepository` |
 | `POST /api/feedback`, `POST /api/analytics/events` | `FeedbackApi` | `FeedbackRepository` |
 | `GET /health` | `HealthApi` | `HealthRepository` (capability flags, e.g. `serpapi_configured`, `push_configured`) |
-| `/api/admin/*` | `AdminApi` | none yet: wire models exist, no admin UI (non-goal) |
+| `/api/admin/*` | `AdminApi` | none: wire models exist, no admin UI (non-goal); R8 removes it from release builds |
 
 ## Adding an endpoint
 

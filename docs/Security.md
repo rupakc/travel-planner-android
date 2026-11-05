@@ -8,7 +8,7 @@ keeps the session in memory only for the process and deletes any keyset Tink sto
 The JWT `exp` is checked on the device, so an expired token reads as signed out. Session, keyset and the Room database are excluded from cloud backup and
 device transfer (`data_extraction_rules.xml`, `backup_rules.xml`). Logout best-effort unregisters the push token, then clears the session and per-user caches;
 a 401 or an expired token only signs out and keeps the user's local data.
-Debug HTTP logs redact the `Authorization` header.
+Debug HTTP logs redact the `Authorization` header. Saved plans drop this search's link evidence (`link_verified`, `link_checked`) on save, like the web.
 
 ## Network and cleartext policy
 
@@ -20,12 +20,22 @@ Debug HTTP logs redact the `Authorization` header.
 ## Deep links
 
 Scheme `travelplanner://` with hosts `share`, `alerts`, `plan`, `chat`, `nearby` (declared in the manifest and `DeepLinks`). Treat all link parameters as untrusted:
-tokens and ids are validated by the backend, `kind` must be a known kind, numeric ids are parsed safely. `MainActivity` is `singleTask`; links arriving while running are handled with `handleDeepLink`.
-Auth gating still applies (only Share is reachable signed out). Notification PendingIntents are `FLAG_IMMUTABLE` and restricted to this package.
+tokens and ids are validated by the backend, `kind` must be a known kind, numeric ids are parsed safely. `MainActivity` is `singleTask` and exported, so
+`DeepLinkIntents.sanitize` runs on every incoming intent (before `super.onCreate` and in `onNewIntent`): it removes Navigation's internal deep-link extras
+(`deepLinkIds`/`Args`/`Extras`/`Intent`, which would otherwise let another app open any destination with arguments of its choosing) and drops any data
+that is not a `travelplanner://` URI. Links arriving while running are handled with `handleDeepLink`.
+Auth gating still applies (only Share is reachable signed out); a link the gate redirects away from is kept by `ShellViewModel` and opened once signed in.
+A chat thread opens by id only if it is one of the signed-in user's threads. Notification PendingIntents are `FLAG_IMMUTABLE` and restricted to this package.
 
 ## Outbound links
 
 Booking and provider links open in a Custom Tab through `BookingLinkButton`, which allows only `http` and `https` URLs. Never launch a URL scheme taken from API data.
+
+## CI
+
+`.github/workflows/android.yml` runs with a read-only `GITHUB_TOKEN` (`permissions: contents: read`); third-party actions
+(`android-actions/setup-android`, `gradle/actions/setup-gradle`) are pinned by commit SHA. `wiki-sync.yml` is read-only at workflow level and
+grants `contents: write` only to the job that pushes the wiki.
 
 ## Secrets
 

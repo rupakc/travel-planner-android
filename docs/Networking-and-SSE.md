@@ -50,7 +50,11 @@ Implemented by `SseParser` (pure, unit-tested) over `data:` lines as the backend
 | `RateLimited(message, retryAfterSeconds)` | 429 | show the backend string as-is; honour `Retry-After` |
 | `Client` (status, code, fieldErrors, extras) | other 4xx incl. 422 `no_live_price` | feature-specific copy |
 | `NotFound`, `Forbidden`, `Server` | 404, 403, 5xx | message or own string with Retry |
-| `Network`, `Interrupted`, `Decoding`, `NotConfigured` | I/O, cut stream, bad JSON, no base URL | own strings |
+| `Network`, `Interrupted`, `Decoding`, `NotConfigured`, `Unknown` | I/O, cut stream, bad JSON (e.g. a captive portal's HTML 200), no base URL, anything else | own strings |
+
+`AppError.message` is user-facing copy only: the backend's `detail`, or null. Client-side failures never carry exception text:
+`toAppError` builds `Decoding(null)` / `Unknown(null)` and logs the throwable (debug builds only), so screens fall back to their own localized
+string. Use `AppError.userFacingDetail()` (core:common) when only server text may be shown.
 
 Rate limits are per user (or IP when anonymous) in 10-minute windows; defaults (search 10, chat 30, compare 30, discover 10, light_ai 60) are in [Scaling](Scaling.md) and the backend's `docs/Configuration.md`.
 Chat-triggered full plans over the search limit produce an in-stream message, not a 429.
