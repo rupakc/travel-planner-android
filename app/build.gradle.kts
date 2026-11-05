@@ -85,17 +85,31 @@ dependencies {
     testImplementation(projects.core.testing)
 }
 
-// Review M8: fail if R8 stripped any core:model serializer from the minified prod release.
+// Review M8 / R2-M3: fail if R8 removed anything kotlinx.serialization needs from core:model in the prod release:
+// a generated `$$serializer`, a custom `*Serializer` object, a `Companion` field or a `serializer()` member.
 val verifyReleaseKeepRules by tasks.registering {
     group = "verification"
-    description = "Checks the prodRelease R8 usage report: no core:model serializer may be removed."
+    description = "Checks the prodRelease R8 usage report for removed core:model serializers."
     dependsOn("minifyProdReleaseWithR8")
     val usage = layout.buildDirectory.file("outputs/mapping/prodRelease/usage.txt")
     inputs.file(usage)
     doLast {
-        val stripped =
-            usage.get().asFile.readLines()
-                .filter { it.startsWith("io.github.rupakc.travelplanner.core.model.") && it.trimEnd().endsWith("\$\$serializer") }
-        check(stripped.isEmpty()) { "R8 removed serializers:\n" + stripped.joinToString("\n") }
+        val modelPrefix = "io.github.rupakc.travelplanner.core.model."
+        val serializerMember = Regex("""(\sCompanion;?$)|(KSerializer serializer\()""")
+        var owner: String? = null
+        val problems = mutableListOf<String>()
+        usage.get().asFile.forEachLine { line ->
+            if (!line.startsWith(" ")) {
+                val name = line.removeSuffix(":")
+                owner = if (line.endsWith(":")) name else null
+                if (!line.endsWith(":") && name.startsWith(modelPrefix) && (name.endsWith("\$\$serializer") || name.endsWith("Serializer"))) {
+                    problems += "removed class $name"
+                }
+            } else {
+                val cls = owner
+                if (cls != null && cls.startsWith(modelPrefix) && serializerMember.containsMatchIn(line.trim())) problems += "$cls: ${line.trim()}"
+            }
+        }
+        check(problems.isEmpty()) { "R8 removed serialization members:\n" + problems.joinToString("\n") }
     }
 }
