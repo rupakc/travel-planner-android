@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="itinerary_day">Día %1$d</string>
+    <string name="itinerary_day_unknown">Día</string>
+    <string name="itinerary_day_cost">%1$s est.</string>
+    <string name="itinerary_time_morning">Mañana</string>
+    <string name="itinerary_time_afternoon">Tarde</string>
+    <string name="itinerary_time_evening">Noche</string>
+    <string name="itinerary_tight_schedule">Horario ajustado</string>
+    <string name="itinerary_warning_late">%1$s empieza a las %2$s — más tarde de lo previsto</string>
+    <string name="itinerary_warning_an_activity">Una actividad</string>
+    <string name="itinerary_warning_runs_late">El día %1$s termina después de las 23:00</string>
+    <string name="itinerary_transit_walk">🚶 %1$d min a pie · %2$s km</string>
+    <string name="itinerary_transit_walk_short">🚶 %1$d min a pie</string>
+    <string name="itinerary_transit_ride">🚇 ~%1$d min en transporte público</string>
+    <string name="itinerary_free_time">Tiempo libre</string>
+    <string name="itinerary_user_note">📝 %1$s</string>
+    <string name="itinerary_from_link">De tu enlace</string>
+    <string name="itinerary_time_range_a11y">de %1$s a %2$s</string>
+    <plurals name="itinerary_link_extras">
+        <item quantity="one">También de tu enlace: %1$s — encájalo durante el día.</item>
+        <item quantity="many">También de tu enlace: %1$s — encájalos durante el día.</item>
+        <item quantity="other">También de tu enlace: %1$s — encájalos durante el día.</item>
+    </plurals>
+</resources>

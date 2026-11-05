@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shared read-only itinerary UI (results + My Plan). Copy from the web ItinerarySection. -->
+<resources>
+    <string name="itinerary_day">Day %1$d</string>
+    <string name="itinerary_day_unknown">Day</string>
+    <string name="itinerary_day_cost">%1$s est.</string>
+    <string name="itinerary_time_morning">Morning</string>
+    <string name="itinerary_time_afternoon">Afternoon</string>
+    <string name="itinerary_time_evening">Evening</string>
+    <string name="itinerary_tight_schedule">Tight schedule</string>
+    <string name="itinerary_warning_late">%1$s starts at %2$s — later than planned</string>
+    <string name="itinerary_warning_an_activity">An activity</string>
+    <string name="itinerary_warning_runs_late">Day %1$s runs past 23:00</string>
+    <string name="itinerary_transit_walk">🚶 %1$d min walk · %2$s km</string>
+    <string name="itinerary_transit_walk_short">🚶 %1$d min walk</string>
+    <string name="itinerary_transit_ride">🚇 ~%1$d min by transit</string>
+    <string name="itinerary_free_time">Free time</string>
+    <string name="itinerary_user_note">📝 %1$s</string>
+    <string name="itinerary_from_link">From your link</string>
+    <string name="itinerary_time_range_a11y">from %1$s to %2$s</string>
+    <plurals name="itinerary_link_extras">
+        <item quantity="one">Also from your link: %1$s — fit it in around the day.</item>
+        <item quantity="other">Also from your link: %1$s — fit them in around the day.</item>
+    </plurals>
+</resources>

@@ -1,19 +1,21 @@
 package io.github.rupakc.travelplanner.feature.results.sections
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.model.section.PlacesData
-import io.github.rupakc.travelplanner.feature.results.R
+import io.github.rupakc.travelplanner.core.model.section.SectionId
+import io.github.rupakc.travelplanner.core.model.section.WeatherData
+import io.github.rupakc.travelplanner.feature.results.sections.info.PlacesBody
 
 /**
- * PlacesToSee section body (inside SectionScaffold). Placeholder: replace this whole
- * file; keep the signature so SectionRegistry keeps compiling.
+ * Places to See: category, rating, "Free entry"/"~$N", highlights, badges, weather chips for
+ * outdoor places, "View details" (Custom Tab) and Add (web PlacesToSeeSection).
  */
-@Suppress("UnusedParameter") // placeholder: the section team uses `actions`
 @Composable
 internal fun PlacesToSeeSectionContent(data: PlacesData, actions: SectionActions, modifier: Modifier = Modifier) {
-    val count = data.results.size
-    Text(pluralStringResource(R.plurals.results_items, count, count), modifier = modifier)
+    val results by actions.results.collectAsStateWithLifecycle()
+    val weather = results.sections[SectionId.WEATHER]?.data as? WeatherData
+    PlacesBody(data, weather, actions::isSelected, actions::onToggle, actions::onOpenLink, modifier)
 }
