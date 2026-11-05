@@ -2,4 +2,34 @@
 <resources>
     <string name="nearby_title">Near me</string>
     <string name="nearby_message">Suggestions near where you are, from your interests. Location is asked for here, only while you use this screen.</string>
+    <string name="nearby_rationale_title">See things to do near you</string>
+    <string name="nearby_rationale_precise">Approximate location is enough. You can share your precise location if you like; we never track you in the background for this screen.</string>
+    <string name="nearby_allow">Allow location</string>
+    <string name="nearby_denied_title">Location is off for Voyager</string>
+    <string name="nearby_denied_body">Near me needs your approximate location to find things to do around you. You can allow it in Settings.</string>
+    <string name="nearby_open_settings">Open settings</string>
+    <string name="nearby_try_again">Try again</string>
+    <string name="nearby_locating">Finding where you are…</string>
+    <string name="nearby_loading">Finding things to do near you… The first time here can take up to a minute.</string>
+    <string name="nearby_off_title">Location services are off</string>
+    <string name="nearby_off_body">Turn on location in your phone’s settings, then try again.</string>
+    <string name="nearby_open_location_settings">Open location settings</string>
+    <string name="nearby_no_fix_title">Couldn’t get your location</string>
+    <string name="nearby_no_fix">Your phone didn’t return a position. Step outside or wait a moment, then try again.</string>
+    <string name="nearby_no_place_title">Nothing nearby yet</string>
+    <string name="nearby_no_place">We don’t know a town or city near you yet.</string>
+    <string name="nearby_failed">We couldn’t find things to do nearby. Try again.</string>
+    <string name="nearby_refresh">Refresh suggestions</string>
+    <string name="nearby_distance">%1$s km from you</string>
+    <string name="nearby_for_interests">For your interests: %1$s</string>
+    <string name="nearby_empty_title">No suggestions here</string>
+    <string name="nearby_empty">We found the place but nothing to suggest right now. Try again later.</string>
+    <string name="nearby_rating">★ %1$s</string>
+    <string name="nearby_duration">~%1$s h</string>
+    <string name="nearby_why">Why this? It matches %1$s.</string>
+    <string name="nearby_open_maps">Open in Maps</string>
+    <plurals name="nearby_count">
+        <item quantity="one">%d suggestion</item>
+        <item quantity="other">%d suggestions</item>
+    </plurals>
 </resources>

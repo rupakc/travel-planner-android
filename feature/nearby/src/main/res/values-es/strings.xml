@@ -1,5 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="nearby_title">Cerca de mí</string>
-    <string name="nearby_message">Sugerencias cerca de donde estás según tus intereses. La ubicación se pide aquí y solo mientras usas esta pantalla.</string>
+    <string name="nearby_message">Sugerencias cerca de donde estás, según tus intereses. La ubicación se pide aquí y solo mientras usas esta pantalla.</string>
+    <string name="nearby_rationale_title">Descubre qué hacer cerca de ti</string>
+    <string name="nearby_rationale_precise">Basta con la ubicación aproximada. Puedes compartir la exacta si quieres; esta pantalla nunca te sigue en segundo plano.</string>
+    <string name="nearby_allow">Permitir ubicación</string>
+    <string name="nearby_denied_title">La ubicación está desactivada para Voyager</string>
+    <string name="nearby_denied_body">Cerca de mí necesita tu ubicación aproximada para encontrar qué hacer a tu alrededor. Puedes permitirla en Ajustes.</string>
+    <string name="nearby_open_settings">Abrir ajustes</string>
+    <string name="nearby_try_again">Reintentar</string>
+    <string name="nearby_locating">Buscando dónde estás…</string>
+    <string name="nearby_loading">Buscando qué hacer cerca de ti… La primera vez aquí puede tardar hasta un minuto.</string>
+    <string name="nearby_off_title">Los servicios de ubicación están desactivados</string>
+    <string name="nearby_off_body">Activa la ubicación en los ajustes del teléfono y vuelve a intentarlo.</string>
+    <string name="nearby_open_location_settings">Abrir ajustes de ubicación</string>
+    <string name="nearby_no_fix_title">No se pudo obtener tu ubicación</string>
+    <string name="nearby_no_fix">Tu teléfono no devolvió una posición. Sal al exterior o espera un momento y vuelve a intentarlo.</string>
+    <string name="nearby_no_place_title">Aún no hay nada cerca</string>
+    <string name="nearby_no_place">Aún no conocemos ningún pueblo o ciudad cerca de ti.</string>
+    <string name="nearby_failed">No pudimos encontrar qué hacer cerca. Inténtalo de nuevo.</string>
+    <string name="nearby_refresh">Actualizar sugerencias</string>
+    <string name="nearby_distance">A %1$s km de ti</string>
+    <string name="nearby_for_interests">Según tus intereses: %1$s</string>
+    <string name="nearby_empty_title">No hay sugerencias aquí</string>
+    <string name="nearby_empty">Encontramos el lugar, pero ahora no hay nada que sugerir. Inténtalo más tarde.</string>
+    <string name="nearby_rating">★ %1$s</string>
+    <string name="nearby_duration">~%1$s h</string>
+    <string name="nearby_why">¿Por qué? Coincide con %1$s.</string>
+    <string name="nearby_open_maps">Abrir en Mapas</string>
+    <plurals name="nearby_count">
+        <item quantity="one">%d sugerencia</item>
+        <item quantity="many">%d sugerencias</item>
+        <item quantity="other">%d sugerencias</item>
+    </plurals>
 </resources>
