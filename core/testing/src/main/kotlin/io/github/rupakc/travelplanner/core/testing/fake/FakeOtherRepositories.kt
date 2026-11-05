@@ -283,6 +283,14 @@ class FakeProfileRepository(initial: TravellerProfile = TravellerProfile()) : Pr
     override suspend fun resetFeatures() {
         overridesState.value = FeatureOverrides()
     }
+
+    /** Number of whole-set writes (atomic replace). */
+    var overrideWrites = 0
+
+    override suspend fun setFeatureOverrides(overrides: FeatureOverrides) {
+        overrideWrites++
+        overridesState.value = FeatureOverrides(overrides.enabled, overrides.disabled - overrides.enabled)
+    }
 }
 
 class FakeFeedbackRepository : FeedbackRepository {

@@ -260,9 +260,7 @@ class OnboardingViewModel
                 val profile = profileRepository.profile.first()
                 profileRepository.saveProfile(profile.withClassification(s.answers, classification))
                 val overrides = catalogue.overridesFor(classification.types(), s.selectedFeatures)
-                profileRepository.resetFeatures()
-                overrides.enabled.forEach { profileRepository.setFeature(it, true) }
-                overrides.disabled.forEach { profileRepository.setFeature(it, false) }
+                profileRepository.setFeatureOverrides(overrides)
                 syncThenProceed()
             }
         }

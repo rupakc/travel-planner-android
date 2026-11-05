@@ -85,4 +85,8 @@ class FakeFeatureOverridesStore : FeatureOverridesStore {
     override suspend fun clear() {
         state.value = FeatureOverrides()
     }
+
+    override suspend fun replace(overrides: FeatureOverrides) {
+        state.value = FeatureOverrides(overrides.enabled, overrides.disabled - overrides.enabled)
+    }
 }

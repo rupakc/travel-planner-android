@@ -154,6 +154,7 @@ class OnboardingViewModelTest {
             assertTrue("ACCESSIBLE" in stored.secondaryTypes)
             assertEquals(listOf("work"), stored.answers[TravellerQuiz.COMPANIONS])
             assertEquals(FeatureOverrides(enabled = setOf("walking_tours"), disabled = setOf("chat")), profile.overridesState.value)
+            assertEquals(1, profile.overrideWrites)
 
             val sent = preferences.saved.single()
             assertEquals("Indian", sent.nationality)

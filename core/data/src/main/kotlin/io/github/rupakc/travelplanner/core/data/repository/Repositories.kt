@@ -333,6 +333,13 @@ interface ProfileRepository {
     suspend fun setFeature(featureId: String, enabled: Boolean?)
 
     suspend fun resetFeatures()
+
+    /** Replaces all overrides in one write (observers never see a half-applied set). */
+    suspend fun setFeatureOverrides(overrides: FeatureOverrides) {
+        resetFeatures()
+        overrides.enabled.forEach { setFeature(it, true) }
+        overrides.disabled.forEach { setFeature(it, false) }
+    }
 }
 
 interface FeedbackRepository {
