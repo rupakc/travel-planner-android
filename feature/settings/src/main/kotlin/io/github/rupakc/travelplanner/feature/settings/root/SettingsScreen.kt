@@ -42,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -233,7 +232,7 @@ private fun RootItem(key: String, state: SettingsUiState, highlightKey: String?,
         SettingsEntry.FEATURES.key -> {
             SettingsRow(
                 stringResource(R.string.settings_features),
-                subtitle = pluralStringResource(R.plurals.settings_features_on, state.featuresOn, state.featuresOn, state.featuresTotal),
+                subtitle = stringResource(R.string.settings_features_on, state.featuresOn, state.featuresTotal),
                 icon = Icons.Filled.Star,
                 highlighted = lit,
                 onClick = { onNav(SettingsNav.Open(FeaturesRoute)) },

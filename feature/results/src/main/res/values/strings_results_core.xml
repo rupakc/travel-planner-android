@@ -282,18 +282,12 @@
         <item quantity="one">Fits %1$d activity (%2$s)</item>
         <item quantity="other">Fits %1$d activities (%2$s)</item>
     </plurals>
-    <plurals name="results_budget_flights_fit">
-        <item quantity="one">%1$d of %2$d flight fits</item>
-        <item quantity="other">%1$d of %2$d flights fit</item>
-    </plurals>
+    <string name="results_budget_flights_fit">Flights within budget: %1$d of %2$d</string>
     <plurals name="results_budget_hidden">
         <item quantity="one">%1$d hidden — show all</item>
         <item quantity="other">%1$d hidden — show all</item>
     </plurals>
-    <plurals name="results_budget_hotels_fit">
-        <item quantity="one">%1$d of %2$d hotel fits</item>
-        <item quantity="other">%1$d of %2$d hotels fit</item>
-    </plurals>
+    <string name="results_budget_hotels_fit">Hotels within budget: %1$d of %2$d</string>
     <plurals name="results_fare_travellers">
         <item quantity="one">total for %1$d traveller</item>
         <item quantity="other">total for %1$d travellers</item>
