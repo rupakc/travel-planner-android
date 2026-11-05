@@ -76,6 +76,20 @@ class PlanItineraryTest {
     }
 
     @Test
+    fun `a day that fails to decode keeps its slots, and the views match the export day for day`() {
+        // link_extras must be a list: day 2 fails whole-day decoding but keeps its number and slots.
+        val snapshot =
+            """{"days":[{"day_number":1,"slots":[{"time_of_day":"morning","activity":"A"}]},
+            {"day_number":2,"link_extras":"oops","slots":[{"time_of_day":"evening","activity":"B"}]}, "not a day"]}"""
+        val sel = selections("""{"itinerary":$snapshot,"itinerary_slots":[{"key":"9-morning","day_number":9,"time_of_day":"morning","activity":"Picked"}]}""")
+        val days = PlanItinerary.days(sel)
+        assertEquals(listOf(1, 2), days.map { it.day.dayNumber })
+        assertEquals(listOf("A", "B"), days.flatMap { d -> d.slots.map { it.slot.activity } })
+        val exported = PlanIcs.planItineraryDays(PlanSelectionsSerializer.toJson(sel), null)
+        assertEquals(exported.map { d -> d["slots"]!!.jsonArray.map { it.jsonObject["start_time"]?.jsonPrimitive?.content } }, days.map { d -> d.slots.map { it.startTime } })
+    }
+
+    @Test
     fun `no itinerary at all is empty`() {
         assertTrue(PlanItinerary.days(PlanSelections()).isEmpty())
     }

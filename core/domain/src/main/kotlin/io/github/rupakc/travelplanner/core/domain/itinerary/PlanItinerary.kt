@@ -1,8 +1,6 @@
 package io.github.rupakc.travelplanner.core.domain.itinerary
 
-import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
-import io.github.rupakc.travelplanner.core.model.section.ItineraryData
 import io.github.rupakc.travelplanner.core.model.section.ItineraryDay
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -18,7 +16,7 @@ object PlanItinerary {
     fun days(selections: PlanSelections, live: JsonObject? = null): List<ScheduledDay> {
         val edits = SlotEdit.fromSelections(selections.itineraryEdits)
         val source = live?.takeIf(::hasDays) ?: selections.itinerarySnapshot?.takeIf(::hasDays)
-        val itinerary = source?.let { runCatching { TravelJson.decodeFromJsonElement(ItineraryData.serializer(), it) }.getOrNull() }
+        val itinerary = source?.let(LenientItinerary::decode)
         if (itinerary != null && itinerary.days.isNotEmpty()) {
             val arranged = ItineraryLayouts.arrange(itinerary, selections.itineraryLayout, edits)
             return ItinerarySchedule.scheduleDays(arranged.days, edits)
