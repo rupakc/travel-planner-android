@@ -1,0 +1,178 @@
+package io.github.rupakc.travelplanner.feature.plan.detail
+
+import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
+import io.github.rupakc.travelplanner.core.common.AppError
+import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
+import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
+import io.github.rupakc.travelplanner.core.model.section.Activity
+import io.github.rupakc.travelplanner.core.model.section.Hotel
+import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
+import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
+import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
+import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
+import io.github.rupakc.travelplanner.feature.plan.FixedClock
+import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
+import io.github.rupakc.travelplanner.feature.plan.model.plan
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class PlanDetailViewModelTest {
+    @get:Rule val main = MainDispatcherRule()
+
+    private val saved =
+        plan(
+            7,
+            "Japan",
+            "Tokyo",
+            "2027-04-01",
+            "2027-04-04",
+            "2026-11-01 10:00:00",
+            selections = PlanSelections(hotel = Hotel(name = "Park Hyatt", totalPriceUsd = 1200.0), activities = listOf(Activity(name = "Sushi", priceUsd = 80.0))),
+        )
+
+    private val repo = FakePlansRepository(listOf(saved))
+    private val store = FakeCurrentPlanStore(repo)
+
+    private fun viewModel(id: Long = 7) =
+        PlanDetailViewModel(
+            SavedStateHandle(mapOf(PlanDetailViewModel.PLAN_ID_ARG to id)),
+            repo,
+            store,
+            FakeSettingsRepository(defaultBaseUrl = "https://voyager.example/"),
+            FixedClock(),
+            TestAppDispatchers(main.testDispatcher),
+        )
+
+    @Test
+    fun `shows the cached plan with groups, cost and summary`() =
+        runTest {
+            viewModel().state.test {
+                val c = expectMostRecentItem().content!!
+                assertEquals("Tokyo", c.summary.destination)
+                assertEquals(1280.0, c.summary.totalCostUsd, 0.0)
+                assertEquals(2, c.groups.size)
+            }
+        }
+
+    @Test
+    fun `missing plan shows the not found error`() =
+        runTest {
+            viewModel(id = 99).state.test {
+                val s = expectMostRecentItem()
+                assertNull(s.content)
+                assertTrue(s.error is AppError.NotFound)
+            }
+        }
+
+    @Test
+    fun `share link creates a token and shares the web link`() =
+        runTest {
+            val vm = viewModel()
+            vm.exportRequests.test {
+                vm.onEvent(PlanDetailEvent.ShareLink)
+                assertEquals(ExportRequest.Link("Japan", "https://voyager.example/share/share-token-7"), awaitItem())
+            }
+            assertEquals("share-token-7", repo.plans.first().single().shareToken)
+        }
+
+    @Test
+    fun `revoking needs confirmation and clears the token`() =
+        runTest {
+            repo.share(7)
+            val vm = viewModel()
+            vm.state.test {
+                expectMostRecentItem()
+                vm.onEvent(PlanDetailEvent.RevokeShare)
+                assertEquals(DetailConfirm.REVOKE_SHARE, expectMostRecentItem().confirm)
+                vm.onEvent(PlanDetailEvent.Confirm)
+                val s = expectMostRecentItem()
+                assertNull(s.confirm)
+                assertEquals(DetailMessage.LinkRevoked, s.message)
+                assertNull(s.content!!.summary.shareToken)
+            }
+        }
+
+    @Test
+    fun `export emits an ics file named after the plan`() =
+        runTest {
+            val vm = viewModel()
+            vm.exportRequests.test {
+                vm.onEvent(PlanDetailEvent.ExportCalendar)
+                val ics = awaitItem() as ExportRequest.Ics
+                assertEquals("japan.ics", ics.fileName)
+                assertTrue(ics.content.contains("SUMMARY:🏨 Park Hyatt"))
+                assertTrue(ics.content.contains("UID:plan-7-hotel@voyager-travel-planner"))
+            }
+        }
+
+    @Test
+    fun `calendar sheet lists events and adds one`() =
+        runTest {
+            val vm = viewModel()
+            vm.state.test {
+                expectMostRecentItem()
+                vm.onEvent(PlanDetailEvent.ShowCalendarEvents)
+                val events = expectMostRecentItem().calendarEvents
+                assertNotNull(events)
+                assertEquals(1, events!!.size)
+            }
+        }
+
+    @Test
+    fun `open in results loads the cached plan into the draft without the network`() =
+        runTest {
+            val vm = viewModel()
+            vm.state.test { expectMostRecentItem() }
+            repo.failNext = AppError.Network()
+            vm.navigationRequests.test {
+                vm.onEvent(PlanDetailEvent.OpenInResults)
+                assertEquals(DetailNavigation.OpenResults, awaitItem())
+            }
+            assertEquals(7L, store.draft.value.planId)
+            assertEquals("Park Hyatt", store.draft.value.selections.hotel?.name)
+        }
+
+    @Test
+    fun `open in results asks before discarding an unsaved draft`() =
+        runTest {
+            store.restore(PlanDraft(selections = PlanSelections(activities = listOf(Activity(name = "Unsaved"))), dirty = true))
+            val vm = viewModel()
+            vm.state.test {
+                expectMostRecentItem()
+                vm.onEvent(PlanDetailEvent.OpenInResults)
+                assertEquals(DetailConfirm.DISCARD_DRAFT, expectMostRecentItem().confirm)
+                assertEquals("Unsaved", store.draft.value.selections.activities.single().name)
+                vm.onEvent(PlanDetailEvent.Confirm)
+                expectMostRecentItem()
+            }
+            assertEquals(7L, store.draft.value.planId)
+        }
+
+    @Test
+    fun `delete confirms then removes and navigates away`() =
+        runTest {
+            val vm = viewModel()
+            vm.navigationRequests.test {
+                vm.onEvent(PlanDetailEvent.Delete)
+                vm.onEvent(PlanDetailEvent.Confirm)
+                assertEquals(DetailNavigation.Deleted, awaitItem())
+            }
+            assertTrue(repo.plans.first().isEmpty())
+        }
+
+    @Test
+    fun `share url falls back to the app link without a server`() {
+        assertEquals("travelplanner://share/abc", PlanDetailViewModel.shareUrl("", "abc"))
+        assertEquals("http://10.0.2.2:8001/share/abc", PlanDetailViewModel.shareUrl("http://10.0.2.2:8001", "abc"))
+    }
+}
