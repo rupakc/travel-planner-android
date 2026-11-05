@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -70,6 +71,48 @@ class AppRobot(val rule: AppRule) {
         runCatching { field.performScrollTo() }
         field.performTextClearance()
         field.performTextInput(value)
+    }
+
+    fun hasDescription(text: String, substring: Boolean = false) = androidx.compose.ui.test.hasContentDescription(text, substring = substring)
+
+    fun tapDescription(text: String, substring: Boolean = false) {
+        waitFor(hasDescription(text, substring))
+        rule.onAllNodes(hasDescription(text, substring)).onFirst().performClick()
+        rule.waitForIdle()
+    }
+
+    /**
+     * Scrolls the first scrollable container that can reach a node matching [matcher]; true when found.
+     * Lazy lists only compose what is on screen, so absence must be checked this way.
+     */
+    fun scrollToFind(matcher: SemanticsMatcher): Boolean {
+        if (exists(matcher)) {
+            runCatching { rule.onAllNodes(matcher, useUnmergedTree = true).onFirst().performScrollTo() }
+            return true
+        }
+        val scrollables = rule.onAllNodes(androidx.compose.ui.test.hasScrollToNodeAction())
+        val count = scrollables.fetchSemanticsNodes().size
+        for (i in 0 until count) {
+            val found = runCatching { scrollables[i].performScrollToNode(matcher) }.isSuccess
+            if (found) return true
+        }
+        return false
+    }
+
+    fun back() {
+        device.pressBack()
+        rule.waitForIdle()
+    }
+
+    /** Settings is opened from the top app bar on top-level screens. */
+    fun openSettings() = tapDescription(str(io.github.rupakc.travelplanner.R.string.nav_settings))
+
+    /** A top-level destination from the navigation bar / rail. */
+    fun openTab(@StringRes label: Int) {
+        val text = str(label)
+        waitForText(text)
+        rule.onAllNodes(hasText(text) and hasClickAction()).onFirst().performClick()
+        rule.waitForIdle()
     }
 
     // ---- flows ---------------------------------------------------------------------------------------------
