@@ -9,7 +9,8 @@ import java.util.Locale
  * normalisation (trimmed, case-folded places and nationality; set-like lists sorted; blank entries
  * dropped; empty `must_include` and single-city `destinations` treated as absent).
  * The key is not stable across app versions that add request fields; a draft restored after such an update
- * keeps its old key until the next `attachSearch` (accepted, review R3-M2). Two requests that would run the same search get the same key. Used by `PlanDraft.searchKey`
+ * keeps its old key until the next `attachSearch` (accepted, review R3-M2).
+ * Two requests that would run the same search get the same key. Used by `PlanDraft.searchKey`
  * so Results can tell a stale finished stream from the draft's own search.
  */
 fun TravelSearchRequest.searchKey(): String {
