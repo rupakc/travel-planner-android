@@ -109,6 +109,9 @@ sealed interface SearchFormEvent {
 
     data object Submit : SearchFormEvent
 
+    /** The UI language (per-app locale): budgets are read in it ("1.500" is 1500 in Spanish). */
+    data class SetLocale(val locale: Locale) : SearchFormEvent
+
     data class LoadRecent(val id: String) : SearchFormEvent
 
     data class RerunRecent(val id: String) : SearchFormEvent
@@ -192,6 +195,7 @@ class SearchViewModel
 
         /** Guards against a double tap starting the same search twice. */
         private var lastStartAt: Instant? = null
+        private var locale: Locale = Locale.getDefault()
 
         init {
             combine(featureVisibility.visible(), _state.map { it.mode }.distinctUntilChanged()) { visible, mode -> visibleModes(visible, mode) }
@@ -255,6 +259,10 @@ class SearchViewModel
 
                 SearchFormEvent.Submit -> {
                     submitKnown()
+                }
+
+                is SearchFormEvent.SetLocale -> {
+                    locale = event.locale
                 }
 
                 is SearchFormEvent.LoadRecent -> {
@@ -327,16 +335,16 @@ class SearchViewModel
                     travellers = TravellerCounts.of(request.adults, request.children, request.seniors, request.infants) ?: known.travellers,
                 )
             _state.update { it.copy(form = form, stops = emptyList(), mode = SearchMode.KNOWN, issues = emptyList()) }
-            startSearch(buildSearchRequest(form, emptyList()), form)
+            startSearch(buildSearchRequest(form, emptyList(), locale), form)
         }
 
         /** "From a link" plan: the import's form and stops run as a normal search; preferences keep the known form's interests. */
         fun planImport(form: SearchForm, stops: List<ExtraStop>) {
-            startSearch(buildSearchRequest(form, stops), form, preferenceInterests = _state.value.form.interests)
+            startSearch(buildSearchRequest(form, stops, locale), form, preferenceInterests = _state.value.form.interests)
         }
 
         private fun SearchUiState.revalidated(form: SearchForm, stops: List<ExtraStop>): List<SearchFormIssue> =
-            if (issues.isEmpty()) emptyList() else validateSearchForm(form, stops, clock.today())
+            if (issues.isEmpty()) emptyList() else validateSearchForm(form, stops, clock.today(), locale)
 
         private fun updateStops(transform: (List<ExtraStop>) -> List<ExtraStop>) =
             _state.update { s ->
@@ -350,9 +358,9 @@ class SearchViewModel
         private fun submitKnown() {
             val today = today()
             val s = _state.value
-            val issues = validateSearchForm(s.form, s.stops, today)
+            val issues = validateSearchForm(s.form, s.stops, today, locale)
             _state.update { it.copy(issues = issues) }
-            if (issues.isEmpty()) startSearch(buildSearchRequest(s.form, s.stops), s.form)
+            if (issues.isEmpty()) startSearch(buildSearchRequest(s.form, s.stops, locale), s.form)
         }
 
         /**
@@ -376,10 +384,10 @@ class SearchViewModel
             if (last != null && Duration.between(last, now) < DOUBLE_SUBMIT_WINDOW) return
             lastStartAt = now
             val prefs = _state.value.preferences
-            if (prefs != null && preferencesChanged(prefs, form, preferenceInterests)) {
-                val updated = preferencesFromForm(prefs, form, preferenceInterests)
+            if (prefs != null && preferencesChanged(prefs, form, locale, preferenceInterests)) {
+                val updated = preferencesFromForm(prefs, form, locale, preferenceInterests)
                 _state.update { it.copy(preferences = updated) }
-                viewModelScope.launch { preferencesRepository.update { preferencesFromForm(it, form, preferenceInterests) } }
+                viewModelScope.launch { preferencesRepository.update { preferencesFromForm(it, form, locale, preferenceInterests) } }
             }
             viewModelScope.launch { recentSearchesRepository.add(toRecentSearch(request)) }
             loadedRecent = false
@@ -421,7 +429,7 @@ class SearchViewModel
             if (recentDatesPassed(entry.search, today)) return
             val restored = recentSearchToForm(entry.search, today, _state.value.form)
             _state.update { it.copy(form = restored.form, stops = restored.stops, mode = SearchMode.KNOWN) }
-            startSearch(buildSearchRequest(restored.form, restored.stops), restored.form)
+            startSearch(buildSearchRequest(restored.form, restored.stops, locale), restored.form)
         }
 
         private fun removeRecent(id: String) {

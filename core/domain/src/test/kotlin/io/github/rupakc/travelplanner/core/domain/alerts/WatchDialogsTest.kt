@@ -7,6 +7,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.CreatePriceWatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import java.util.Locale
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import org.junit.Assert.assertEquals
@@ -32,11 +33,11 @@ class WatchDialogsTest {
                 }
             assertEquals("450", c.state.value.target)
             c.setMode(AlertMode.BELOW_TARGET)
-            c.setTarget("abc")
+            c.setTarget("abc", Locale.US)
             assertEquals(TargetError.NOT_A_PRICE, c.state.value.shownTargetError)
             assertNull(c.submit())
             assertTrue(sent.isEmpty())
-            c.setTarget("420")
+            c.setTarget("420", Locale.US)
             c.setFlexible(true)
             val w = c.submit()
             assertNotNull(w)
@@ -124,12 +125,12 @@ class WatchDialogsTest {
                     delete = { AppResult.Success(Unit) },
                 )
             c.setMode(AlertMode.BELOW_TARGET)
-            c.setTarget("100")
+            c.setTarget("100", Locale.US)
             c.submit()
             assertEquals("EUR", c.state.value.currency)
             assertEquals("", c.state.value.target)
             assertEquals(120.0, c.state.value.currencyAsk?.price)
-            c.setTarget("90")
+            c.setTarget("90", Locale.US)
             val outcome = c.submit()!!
             assertFalse(outcome.viaSuggestion)
             assertEquals("EUR", sent.last().targetCurrency)
@@ -199,5 +200,20 @@ class WatchDialogsTest {
             assertEquals(SwapError.KEPT_FIRST, c.state.value.swap.error)
             assertEquals(6L, c.state.value.done?.id)
             assertEquals("Lumen Hotel", requests.last().spec.string("name"))
+        }
+
+    @Test
+    fun `a target typed in Spanish is sent as the number the user meant`() =
+        runTest {
+            val sent = mutableListOf<CreateFareWatchRequest>()
+            val c =
+                FareWatchDialogController(FareWatchDialogState(trip, price = 500.0)) {
+                    sent += it
+                    AppResult.Success(FareWatch(id = 1, baselinePrice = 500.0))
+                }
+            c.setMode(AlertMode.BELOW_TARGET)
+            c.setTarget("450,50", Locale.forLanguageTag("es-ES"))
+            assertNotNull(c.submit())
+            assertEquals(450.5, sent.single().targetPrice)
         }
 }

@@ -55,7 +55,8 @@ import kotlinx.coroutines.launch
 sealed interface WatchSheetEvent {
     data class SetMode(val mode: AlertMode) : WatchSheetEvent
 
-    data class SetTarget(val text: String) : WatchSheetEvent
+    /** [locale] = the UI language the target was typed in ("1.500" is 1500 in Spanish). */
+    data class SetTarget(val text: String, val locale: java.util.Locale) : WatchSheetEvent
 
     data class SetFlexible(val on: Boolean) : WatchSheetEvent
 
@@ -76,7 +77,7 @@ sealed interface WatchSheetEvent {
 fun WatchSheetEvent.applyTo(controller: FareWatchDialogController, scope: CoroutineScope, onWatched: (FareWatch) -> Unit = {}) {
     when (this) {
         is WatchSheetEvent.SetMode -> controller.setMode(mode)
-        is WatchSheetEvent.SetTarget -> controller.setTarget(text)
+        is WatchSheetEvent.SetTarget -> controller.setTarget(text, locale)
         is WatchSheetEvent.SetFlexible -> controller.setFlexible(on)
         is WatchSheetEvent.SetEmail -> controller.setEmail(on)
         WatchSheetEvent.Submit -> scope.launch { controller.submit()?.let(onWatched) }
@@ -165,11 +166,12 @@ private fun FareForm(state: FareWatchDialogState, userEmail: String?, onEvent: (
         }
     }
     val check = state.targetCheck
+    val locale = currentLocale()
     AlertModeGroup(
         mode = state.mode,
         onMode = { onEvent(WatchSheetEvent.SetMode(it)) },
         target = state.target,
-        onTarget = { onEvent(WatchSheetEvent.SetTarget(it)) },
+        onTarget = { onEvent(WatchSheetEvent.SetTarget(it, locale)) },
         currency = "USD",
         anyDropHint = stringResource(R.string.watch_fare_any_drop_hint),
         targetError = targetErrorText(state.shownTargetError),

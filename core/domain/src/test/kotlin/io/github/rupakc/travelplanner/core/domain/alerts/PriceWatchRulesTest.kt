@@ -4,6 +4,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import java.util.Locale
 import kotlinx.serialization.json.JsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -68,9 +69,9 @@ class PriceWatchRulesTest {
         assertEquals("$", currencySymbol("USD"))
         assertEquals("$", currencySymbol(null))
         assertEquals("XYZ1", currencySymbol("XYZ1"))
-        assertEquals(TargetCheck(1250.0, null), checkPriceTarget("€ 1,250"))
-        assertEquals(TargetError.NOT_A_PRICE, checkPriceTarget("").error)
-        assertEquals(TargetError.NOT_A_PRICE, checkPriceTarget("-3").error)
+        assertEquals(TargetCheck(1250.0, null), checkPriceTarget("€ 1,250", Locale.US))
+        assertEquals(TargetError.NOT_A_PRICE, checkPriceTarget("", Locale.US).error)
+        assertEquals(TargetError.NOT_A_PRICE, checkPriceTarget("-3", Locale.US).error)
     }
 
     @Test
@@ -104,10 +105,19 @@ class PriceWatchRulesTest {
         assertEquals(TimeUntil.Hours(1), timeUntil("2026-11-04T13:29:00Z", now))
         assertEquals(TimeUntil.Hours(2), timeUntil("2026-11-04T13:30:00Z", now))
         assertEquals(TimeUntil.Days(2), timeUntil("2026-11-06T00:00:00Z", now))
-        assertEquals(TargetError.NOT_A_PRICE, checkPriceTarget("1.2.3").error)
-        assertEquals(TargetCheck(9.5, null), checkPriceTarget("9.5"))
+        assertEquals(TargetError.NOT_A_PRICE, checkPriceTarget("1.2.3", Locale.US).error)
+        assertEquals(TargetCheck(9.5, null), checkPriceTarget("9.5", Locale.US))
         assertEquals("28 Dec 2026 – 4 Jan 2027", formatDateRange("2026-12-28", "2027-01-04"))
         assertNull(formatDateRange("not a date", null))
         assertEquals("100%", percent(1.0))
+    }
+
+    @Test
+    fun `price targets are read in the user's language`() {
+        val es = Locale.forLanguageTag("es-ES")
+        assertEquals(1200.0, checkPriceTarget("1.200", es).value)
+        assertEquals(450.5, checkPriceTarget("450,50", es).value)
+        assertEquals(1500.5, checkPriceTarget("1.500,50 €", es).value)
+        assertEquals(1500.5, checkPriceTarget("1,500.50", Locale.US).value)
     }
 }

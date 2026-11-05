@@ -1,10 +1,12 @@
 package io.github.rupakc.travelplanner.core.domain.search
 
+import io.github.rupakc.travelplanner.core.domain.format.parseLocalizedAmount
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.search.ImportSource
 import io.github.rupakc.travelplanner.core.model.search.MustIncludePlace
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import java.time.LocalDate
+import java.util.Locale
 
 /** The web's 10 interest ids, in the order the Search form shows them (SearchPage `INTERESTS`). */
 val INTEREST_IDS: List<String> =
@@ -82,9 +84,9 @@ fun budgetCategoryToUsd(category: String?): String =
         else -> ""
     }
 
-/** Web `USD_TO_BUDGET`: blank/unparseable → medium; ≤ 1500 low; ≤ 5000 medium; else high. */
-fun usdToBudgetCategory(usd: String?): String {
-    val n = usd?.trim()?.toDoubleOrNull()
+/** Web `USD_TO_BUDGET`: blank/unparseable → medium; ≤ 1500 low; ≤ 5000 medium; else high. [usd] is read in [locale]. */
+fun usdToBudgetCategory(usd: String?, locale: Locale): String {
+    val n = parseLocalizedAmount(usd, locale)
     return when {
         n == null -> "medium"
         n <= LOW_BUDGET_MAX -> "low"
@@ -96,8 +98,8 @@ fun usdToBudgetCategory(usd: String?): String {
 private const val LOW_BUDGET_MAX = 1500.0
 private const val MEDIUM_BUDGET_MAX = 5000.0
 
-/** Web `budget_usd ? parseFloat(budget_usd) : null` (negative or junk → null). */
-fun parseBudget(text: String?): Double? = text?.trim()?.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0.0 }
+/** Web `budget_usd ? parseFloat(budget_usd) : null` (negative or junk → null), read in [locale] ("1.500" is 1500 in Spanish). */
+fun parseBudget(text: String?, locale: Locale): Double? = parseLocalizedAmount(text, locale)?.takeIf { it > 0.0 }
 
 /** A budget number back as form text, like JS `String(n)`: 3000.0 → "3000", 2500.5 → "2500.5". */
 fun budgetText(value: Double): String = if (value % 1.0 == 0.0) value.toLong().toString() else value.toString()
@@ -109,7 +111,7 @@ fun parseNights(text: String?): Int? = text?.trim()?.toIntOrNull()?.takeIf { it 
  * Web `SearchPage.startSearch`: the form + stops on the way → the TravelSearchRequest.
  * Journey order: stops first, the To city last; `destination_nights` aligned, null last.
  */
-fun buildSearchRequest(form: SearchForm, stops: List<ExtraStop>): TravelSearchRequest {
+fun buildSearchRequest(form: SearchForm, stops: List<ExtraStop>, locale: Locale): TravelSearchRequest {
     val kept = stops.map { it.copy(city = it.city.trim()) }.filter { it.city.isNotEmpty() }
     return TravelSearchRequest(
         origin = form.origin.trim(),
@@ -120,7 +122,7 @@ fun buildSearchRequest(form: SearchForm, stops: List<ExtraStop>): TravelSearchRe
         nationality = form.nationality.trim(),
         residencePermits = form.residencePermits,
         existingVisas = form.existingVisas,
-        budgetUsd = parseBudget(form.budgetUsd),
+        budgetUsd = parseBudget(form.budgetUsd, locale),
         numTravelers = form.travellers.total.coerceAtLeast(1),
         adults = form.travellers.adults,
         children = form.travellers.children,
@@ -141,14 +143,14 @@ fun buildSearchRequest(form: SearchForm, stops: List<ExtraStop>): TravelSearchRe
  * writes back. [interests] defaults to the form's (the import flow writes the known form's instead).
  * Everything else in [current] (username, current residence) is kept: PUT replaces all fields.
  */
-fun preferencesFromForm(current: Preferences, form: SearchForm, interests: List<String> = form.interests): Preferences =
+fun preferencesFromForm(current: Preferences, form: SearchForm, locale: Locale, interests: List<String> = form.interests): Preferences =
     current.copy(
         nationality = form.nationality.trim(),
         residencePermits = form.residencePermits,
         existingVisas = form.existingVisas,
         interests = interests,
         numTravelers = form.travellers.total.coerceAtLeast(1),
-        budgetCategory = usdToBudgetCategory(form.budgetUsd),
+        budgetCategory = usdToBudgetCategory(form.budgetUsd, locale),
         adults = form.travellers.adults,
         children = form.travellers.children,
         seniors = form.travellers.seniors,
@@ -157,8 +159,8 @@ fun preferencesFromForm(current: Preferences, form: SearchForm, interests: List<
     )
 
 /** True when [preferencesFromForm] would change anything (skip the PUT otherwise). */
-fun preferencesChanged(current: Preferences, form: SearchForm, interests: List<String> = form.interests): Boolean =
-    preferencesFromForm(current, form, interests) != current
+fun preferencesChanged(current: Preferences, form: SearchForm, locale: Locale, interests: List<String> = form.interests): Boolean =
+    preferencesFromForm(current, form, locale, interests) != current
 
 /**
  * Web pre-fill from saved preferences: non-empty preference values replace the form's,
@@ -195,7 +197,7 @@ enum class SearchFormIssue {
  * The web form's `required`/`min` rules, as explicit issues (the web relies on the browser's
  * native messages). Empty list = ready to submit.
  */
-fun validateSearchForm(form: SearchForm, stops: List<ExtraStop>, today: LocalDate): List<SearchFormIssue> =
+fun validateSearchForm(form: SearchForm, stops: List<ExtraStop>, today: LocalDate, locale: Locale): List<SearchFormIssue> =
     buildList {
         if (form.origin.isBlank()) add(SearchFormIssue.ORIGIN_REQUIRED)
         if (form.destination.isBlank()) add(SearchFormIssue.DESTINATION_REQUIRED)
@@ -205,7 +207,7 @@ fun validateSearchForm(form: SearchForm, stops: List<ExtraStop>, today: LocalDat
         }
         addAll(validateTripDates(form.departureDate, form.returnDate, today))
         if (form.nationality.isBlank()) add(SearchFormIssue.NATIONALITY_REQUIRED)
-        if (form.budgetUsd.isNotBlank() && form.budgetUsd.trim().toDoubleOrNull()?.takeIf { it >= 0 } == null) {
+        if (form.budgetUsd.isNotBlank() && parseLocalizedAmount(form.budgetUsd, locale)?.takeIf { it >= 0 } == null) {
             add(SearchFormIssue.BUDGET_INVALID)
         }
     }

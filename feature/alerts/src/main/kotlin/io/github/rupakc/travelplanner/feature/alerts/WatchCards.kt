@@ -656,7 +656,13 @@ private fun EditPanel(
     var touched by rememberSaveable(item.key) { mutableStateOf(false) }
     var flexible by rememberSaveable(item.key) { mutableStateOf((fare?.flexibleDays ?: 0) > 0) }
     var email by rememberSaveable(item.key) { mutableStateOf((fare?.emailEnabled ?: price?.emailEnabled) == true) }
-    val check = if (mode == AlertMode.BELOW_TARGET) (if (fare != null) checkTarget(target, fare.lastPrice) else checkPriceTarget(target)) else null
+    val locale = io.github.rupakc.travelplanner.core.ui.watch.currentLocale()
+    val check =
+        if (mode == AlertMode.BELOW_TARGET) {
+            if (fare != null) checkTarget(target, fare.lastPrice, locale) else checkPriceTarget(target, locale)
+        } else {
+            null
+        }
     val error = check?.error?.let { stringResource(R.string.alerts_target_error) }
     val currency = price?.currency ?: "USD"
     Surface(color = TravelTheme.colors.surfaceContainerLow, shape = TravelShape.ItemCard) {

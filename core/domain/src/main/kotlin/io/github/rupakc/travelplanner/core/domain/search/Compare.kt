@@ -18,11 +18,11 @@ const val MAX_COMPARE_DESTINATIONS = 3
  * run the exact compared request). Blank and case-insensitive duplicate destinations are
  * dropped, names are trimmed, multi-city fields are cleared.
  */
-fun buildCompareRequests(shared: SearchForm, destinations: List<String>): List<TravelSearchRequest> {
+fun buildCompareRequests(shared: SearchForm, destinations: List<String>, locale: Locale): List<TravelSearchRequest> {
     val seen = HashSet<String>()
     val unique =
         destinations.map(String::trim).filter { it.isNotEmpty() && seen.add(it.lowercase(Locale.ROOT)) }
-    val base = buildSearchRequest(shared.copy(mustInclude = null, importSource = null), emptyList())
+    val base = buildSearchRequest(shared.copy(mustInclude = null, importSource = null), emptyList(), locale)
     return unique.map { base.copy(destination = it, destinations = null, destinationNights = null) }
 }
 
