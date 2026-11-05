@@ -19,12 +19,11 @@ fun parseFollowUps(text: String): FollowUps {
     var cutAt = lines.size
     for (i in lines.indices.reversed()) {
         val trimmed = lines[i].trim()
-        if (trimmed.isEmpty()) continue
-        if (trimmed.startsWith("— ") || trimmed.startsWith("– ") || trimmed.startsWith("- ")) {
+        val isFollowUp = trimmed.startsWith("— ") || trimmed.startsWith("– ") || trimmed.startsWith("- ")
+        if (trimmed.isNotEmpty() && !isFollowUp) break
+        if (isFollowUp) {
             followUps.addFirst(trimmed.replace(DASH_PREFIX, ""))
             cutAt = i
-        } else {
-            break
         }
     }
     return FollowUps(lines.subList(0, cutAt).joinToString("\n").trimEnd(), followUps.toList())
