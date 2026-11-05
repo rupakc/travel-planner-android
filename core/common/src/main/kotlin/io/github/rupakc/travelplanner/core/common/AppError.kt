@@ -53,3 +53,17 @@ sealed interface AppError {
 
     data class FieldError(val location: List<String>, val message: String, val type: String?)
 }
+
+/**
+ * The backend `detail` when this error came from an HTTP response (Client, RateLimited, Unauthorized,
+ * Forbidden, NotFound, Server), else null. Client-side failures (decoding, unknown, not configured,
+ * network) carry exception text that must never reach the user, so screens show their own copy instead.
+ */
+fun AppError.userFacingDetail(): String? =
+    when (this) {
+        is AppError.Client, is AppError.RateLimited, is AppError.Unauthorized, is AppError.Forbidden,
+        is AppError.NotFound, is AppError.Server,
+        -> message?.takeIf { it.isNotBlank() }
+
+        else -> null
+    }
