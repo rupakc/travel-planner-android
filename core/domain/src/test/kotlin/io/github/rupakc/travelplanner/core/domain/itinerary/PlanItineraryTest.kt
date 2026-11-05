@@ -86,7 +86,12 @@ class PlanItineraryTest {
         assertEquals(listOf(1, 2), days.map { it.day.dayNumber })
         assertEquals(listOf("A", "B"), days.flatMap { d -> d.slots.map { it.slot.activity } })
         val exported = PlanIcs.planItineraryDays(PlanSelectionsSerializer.toJson(sel), null)
-        assertEquals(exported.map { d -> d["slots"]!!.jsonArray.map { it.jsonObject["start_time"]?.jsonPrimitive?.content } }, days.map { d -> d.slots.map { it.startTime } })
+        assertEquals(
+            exported.map { d ->
+                d["slots"]!!.jsonArray.map { it.jsonObject["start_time"]?.jsonPrimitive?.content }
+            },
+            days.map { d -> d.slots.map { it.startTime } },
+        )
     }
 
     @Test
