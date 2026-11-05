@@ -61,6 +61,14 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 Login has a "Server" bottom sheet (review I-2): a signed-out user on a phone or a `prod` build without PROD_BASE_URL could not reach Settings → Server. "Test connection" needs the address in effect, so it is applied temporarily and the previous override is restored if the sheet closes without Save. Validator `ServerUrl.validate` lives in core:domain for Settings to reuse.
 - 2026-11-05 Auth/onboarding show `AppError.message` only for HTTP errors (Client, RateLimited, Unauthorized, Forbidden, NotFound, Server); Decoding/Unknown/NotConfigured carry exception text and get our own copy.
 - 2026-11-05 Feature overrides are replaced in one DataStore write (`ProfileRepository.setFeatureOverrides`), so observers never see type defaults mid-save.
+- 2026-11-05 Search: Compare renders inside the Search tab (web parity: CompareTable lives on SearchPage); `searchGraph(onCompare)` is kept but unused and `CompareRoute` is not used by Search.
+- 2026-11-05 Search: submitting calls `SearchRepository.start(request)` then `onSearchStarted()` → `ResultsRoute`; Results reads `SearchRepository.current` (no request in the route).
+- 2026-11-05 Search: mode-chip visibility uses an optional `FeatureCatalogue` (`@BindsOptionalOf` in feature:search); with no catalogue bound every chip shows.
+- 2026-11-05 Search: Surprise me "Plan this trip" fills the known form and switches to it without submitting — web code does exactly that (brief said "and submits").
+- 2026-11-05 Search: validation copy is new (the web relies on native `required`/`min` messages); traveller total capped at 20 (backend `num_travelers` 1..20).
+- 2026-11-05 Search: preferences are PUT on submit only when a written-back field changed (web PUTs every time); recent-search delete is deferred until the Undo snackbar closes.
+- 2026-11-05 Search: trip `pace` (relaxed/balanced/packed) is a form field on Android (API field exists; the web form only sets it via Remix).
+- 2026-11-05 Import: screenshots are re-encoded as WebP (API 30+) or JPEG q85, long edge ≤ 1568 px, base64 ≤ 5 MB; no preview map and no place rename (gaps vs web ImportPreview).
 
 ## Documentation and tooling
 
