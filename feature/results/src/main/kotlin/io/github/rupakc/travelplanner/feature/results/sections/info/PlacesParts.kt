@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.json.EmptyJsonObject
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
@@ -135,7 +136,7 @@ private fun PlaceCard(
 
 @Composable
 internal fun MetaText(text: String, color: androidx.compose.ui.graphics.Color = TravelTheme.colors.onSurfaceVariant) {
-    Text(text, style = TravelTheme.typography.labelMedium, color = color)
+    Text(text, style = TravelTheme.typography.labelMedium, color = color, modifier = Modifier.readsWithoutEmoji(text))
 }
 
 /** "★ 4.6 (1,234)" read by TalkBack as "Rated 4.6 (1,234)". */

@@ -67,6 +67,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.search.ACCESSIBILITY_IDS
@@ -125,7 +126,7 @@ internal fun FieldGroupLabel(text: String, modifier: Modifier = Modifier) {
         text,
         style = TravelTheme.typography.titleSmall,
         color = TravelTheme.colors.onSurface,
-        modifier = modifier.semantics { heading() },
+        modifier = modifier.semantics { heading() }.readsWithoutEmoji(text),
     )
 }
 
@@ -404,7 +405,9 @@ internal fun TravellersField(
                     ) {
                         Checkbox(checked = checked, onCheckedChange = null)
                         Spacer(Modifier.width(TravelTheme.spacing.sm))
-                        Text(stringResource(accessibilityLabelRes(id)), style = TravelTheme.typography.bodyMedium)
+                        stringResource(accessibilityLabelRes(id)).let {
+                            Text(it, style = TravelTheme.typography.bodyMedium, modifier = Modifier.readsWithoutEmoji(it))
+                        }
                     }
                 }
             }

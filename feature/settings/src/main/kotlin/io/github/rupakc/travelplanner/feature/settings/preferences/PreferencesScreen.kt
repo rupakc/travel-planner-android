@@ -49,6 +49,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
@@ -376,7 +377,7 @@ private fun TravelGroup(prefs: Preferences, onEvent: (PreferencesEvent) -> Unit,
             ) {
                 Checkbox(checked = checked, onCheckedChange = null)
                 Spacer(Modifier.width(TravelTheme.spacing.sm))
-                Text(stringResource(accessibilityLabelRes(id)), style = TravelTheme.typography.bodyMedium)
+                stringResource(accessibilityLabelRes(id)).let { Text(it, style = TravelTheme.typography.bodyMedium, modifier = Modifier.readsWithoutEmoji(it)) }
             }
         }
         SettingsNote(stringResource(R.string.settings_prefs_group_help), Modifier.padding(top = TravelTheme.spacing.xs))
