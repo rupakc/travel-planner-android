@@ -21,7 +21,8 @@ Five Preferences DataStore files: `session` (JWT and user, sealed with Tink), `s
 locale tag, notification toggles), `traveller_profile`, `feature_overrides` and `last_location` (the coarse cell of the last Near me
 lookup, for background suggestions). Traveller profile and feature overrides are device-local because the server Preferences schema has no
 field for them. The session and last-location files, the Room database, the Tink keyset and the notification bookkeeping
-SharedPreferences (`alert_poll`, `trip_reminders`, `nearby_notifications`) are excluded from cloud backup and device transfer
+SharedPreferences (`alert_poll`, `trip_reminders`, `nearby_notifications`, `push_registration`, and `server_capabilities`, the cached
+`/health` capabilities) are excluded from cloud backup and device transfer
 (`data_extraction_rules.xml`, `backup_rules.xml`). Token encryption: [Security](Security.md).
 
 ## Caching rules
