@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- The one user-facing product name (R4 ui M5); app_name in :app matches it. Never translated. -->
+    <string name="brand_name" translatable="false">Voyager</string>
     <!-- Section titles (web SECTION_CONFIG labels) -->
     <string name="section_flights">Flights</string>
     <string name="section_weather">Weather</string>

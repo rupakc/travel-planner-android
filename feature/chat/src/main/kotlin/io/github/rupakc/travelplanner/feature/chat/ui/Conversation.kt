@@ -232,7 +232,7 @@ private fun EmptyConversation(onSend: (String) -> Unit) {
             )
         }
         Text(
-            stringResource(R.string.chat_title),
+            stringResource(R.string.chat_title, stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)),
             style = TravelTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.semantics { heading() },

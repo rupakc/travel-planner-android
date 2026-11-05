@@ -17,7 +17,7 @@
     <string name="plan_refresh">Actualizar</string>
     <string name="plan_empty_title">Aún no hay planes guardados</string>
     <string name="plan_empty_message">Guarda un plan desde tus resultados o un chat y aparecerá aquí, incluso sin conexión.</string>
-    <string name="plan_empty_action">Planear un viaje</string>
+    <string name="plan_empty_action">Planificar un viaje</string>
     <string name="plan_no_match_title">Ningún viaje coincide</string>
     <string name="plan_no_match_message">Prueba otra búsqueda u otro filtro.</string>
     <string name="plan_no_match_action">Ver todos los viajes</string>
@@ -71,7 +71,7 @@
     <string name="plan_more_actions">Más acciones</string>
     <string name="plan_share_hint">Comparte un enlace público. Cualquiera puede ver esta tarjeta del viaje sin iniciar sesión.</string>
     <string name="plan_shared_status">Compartido: cualquiera con el enlace puede ver este viaje.</string>
-    <string name="plan_link_app_only">Se abre en la app Voyager Travel Planner.</string>
+    <string name="plan_link_app_only">Se abre en la app %1$s.</string>
     <string name="plan_needs_connection">Sin conexión. Compartir y eliminar necesitan conexión.</string>
     <string name="plan_detail_stale">Mostramos la copia guardada en este teléfono. Puede no estar actualizada.</string>
     <string name="plan_detail_offline">Sin conexión. Mostramos la copia guardada en este teléfono; compartir y eliminar no están disponibles hasta que vuelvas a conectarte.</string>

@@ -45,7 +45,7 @@ class PlatformExportTest {
                 context,
                 io.github.rupakc.travelplanner.feature.plan.export.ExportRequest.Link("Japan", "travelplanner://share/x", appOnly = true),
             )
-        assertEquals("Japan\ntravelplanner://share/x\nOpens in the Voyager Travel Planner app.", app)
+        assertEquals("Japan\ntravelplanner://share/x\nOpens in the Voyager app.", app)
         val web = PlatformExport.linkText(context, io.github.rupakc.travelplanner.feature.plan.export.ExportRequest.Link("Japan", "https://w.example/share/x"))
         assertEquals("Japan\nhttps://w.example/share/x", web)
     }
