@@ -17,6 +17,7 @@ import io.github.rupakc.travelplanner.core.model.importlink.ImportPreview
 import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
+import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyRequest
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.search.CompareSummary
@@ -24,18 +25,13 @@ import io.github.rupakc.travelplanner.core.model.search.DiscoveryRequest
 import io.github.rupakc.travelplanner.core.model.search.DiscoveryResponse
 import io.github.rupakc.travelplanner.core.model.search.FareCalendar
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.network.HttpErrorMapper
 import io.github.rupakc.travelplanner.core.network.api.HealthApi
 import io.github.rupakc.travelplanner.core.network.api.ImportApi
 import io.github.rupakc.travelplanner.core.network.api.NearbyApi
 import io.github.rupakc.travelplanner.core.network.api.SearchApi
-import io.github.rupakc.travelplanner.core.network.HttpErrorMapper
 import io.github.rupakc.travelplanner.core.network.apiCall
 import io.github.rupakc.travelplanner.core.network.di.DefaultHttp
-import io.github.rupakc.travelplanner.core.model.json.TravelJson
-import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
@@ -46,6 +42,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 @Singleton
 class CompareRepositoryImpl
