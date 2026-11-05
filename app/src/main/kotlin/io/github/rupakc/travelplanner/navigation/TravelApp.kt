@@ -118,7 +118,11 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
             searchGraph(onSearchStarted = {
                 navController.navigate(ResultsRoute)
             }, onCompare = { navController.navigate(io.github.rupakc.travelplanner.core.model.navigation.CompareRoute) })
-            resultsGraph(onBack = { navController.popBackStack() })
+            resultsGraph(
+                onBack = { navController.popBackStack() },
+                onOpenMyPlan = { navController.navigate(MyPlanRoute) },
+                onOpenAlerts = { navController.navigateToTopLevel(TopLevelDestination.ALERTS) },
+            )
             planGraph(
                 onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
                 onBack = { navController.popBackStack() },

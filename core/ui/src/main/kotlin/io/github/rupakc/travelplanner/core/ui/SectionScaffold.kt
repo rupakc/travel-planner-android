@@ -6,13 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,6 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -83,14 +82,17 @@ fun SectionScaffold(
     val accent = TravelTheme.sectionAccents[section]
     val title = stringResource(section.titleRes())
     val stateText = stringResource(if (expanded) R.string.section_collapse else R.string.section_expand, title)
-    Row(
+    val barWidth = TravelTheme.spacing.accentBar
+    // The accent bar is drawn, not measured: an IntrinsicSize.Min row would ask the expanded content for
+    // intrinsic heights, which lazy lists / BoxWithConstraints inside a section cannot answer (crash).
+    Box(
         modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
             .clip(TravelShape.ItemCard)
-            .background(TravelTheme.colors.surface),
+            .background(TravelTheme.colors.surface)
+            .drawBehind { drawRect(accent.bar, size = Size(barWidth.toPx(), size.height)) }
+            .padding(start = barWidth),
     ) {
-        Box(Modifier.width(TravelTheme.spacing.accentBar).fillMaxHeight().background(accent.bar))
         Column(Modifier.fillMaxWidth()) {
             Row(
                 Modifier
