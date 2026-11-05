@@ -66,4 +66,10 @@ interface CurrentPlanStore {
     fun snapshot(): PlanDraft
 
     fun restore(snapshot: PlanDraft)
+
+    /**
+     * The draft's search request without waiting for (or parsing) the stored search snapshot: what a
+     * background worker needs (performance review M3). Correct even before the draft finished restoring.
+     */
+    suspend fun draftRequest(): TravelSearchRequest? = draft.value.searchRequest
 }

@@ -126,7 +126,7 @@ class NearbySuggestionWorker
 
         private suspend fun allowed(): Boolean {
             val s = settings.settings.first()
-            val trips = listOfNotNull(currentPlan.draft.value.searchRequest) + plans.plans.first().mapNotNull { it.searchRequest }
+            val trips = listOfNotNull(currentPlan.draftRequest()) + plans.plans.first().mapNotNull { it.searchRequest }
             val onTrip = NearbyNotificationPolicy.isOnTrip(trips, clock.today())
             return NearbyNotificationPolicy.shouldNotify(s.nearbyNotifications, s.nearbyNotificationsAlways, onTrip, log.lastPostedAt(), clock.now())
         }
