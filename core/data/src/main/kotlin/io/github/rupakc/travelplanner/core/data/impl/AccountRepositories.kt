@@ -8,6 +8,7 @@ import io.github.rupakc.travelplanner.core.data.repository.FeedbackRepository
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
 import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesRepository
+import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.database.RecentSearchDao
 import io.github.rupakc.travelplanner.core.database.RecentSearchEntity
@@ -110,6 +111,8 @@ class SettingsRepositoryImpl
     constructor(
         private val store: SettingsStore,
         private val baseUrlProvider: BaseUrlProvider,
+        private val sessionStore: SessionStore,
+        private val sessionCleaner: SessionCleaner,
     ) : SettingsRepository {
         override val settings: Flow<AppSettings> = store.settings
 
@@ -118,12 +121,12 @@ class SettingsRepositoryImpl
 
         override suspend fun setBaseUrl(url: String?): AppResult<Unit> {
             if (url.isNullOrBlank()) {
-                store.setBaseUrlOverride(null)
+                switchServer(null)
                 return AppResult.Success(Unit)
             }
             return when (val v = baseUrlProvider.validate(url)) {
                 is BaseUrlValidation.Valid -> {
-                    store.setBaseUrlOverride(v.normalized)
+                    switchServer(v.normalized)
                     AppResult.Success(Unit)
                 }
 
@@ -134,6 +137,16 @@ class SettingsRepositoryImpl
                 BaseUrlValidation.HttpsRequired -> {
                     AppResult.Failure(AppError.Client(status = 0, message = null, code = CODE_HTTPS_REQUIRED))
                 }
+            }
+        }
+
+        /** A token belongs to the server that issued it: changing server signs out and clears local user data. */
+        private suspend fun switchServer(override: String?) {
+            val before = baseUrlProvider.current()
+            store.setBaseUrlOverride(override)
+            if (baseUrlProvider.current() != before && sessionStore.current() != null) {
+                sessionStore.clear()
+                sessionCleaner.clearUserData()
             }
         }
 

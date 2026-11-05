@@ -90,6 +90,8 @@ abstract class DataModule {
 
     @Binds abstract fun currentPlan(impl: CurrentPlanStoreImpl): CurrentPlanStore
 
+    @Binds abstract fun sessionCleaner(impl: io.github.rupakc.travelplanner.core.data.impl.SessionCleanerImpl): io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
+
     /** Bound by core:notifications when Firebase is configured. */
     @BindsOptionalOf abstract fun pushTokenSource(): PushTokenSource
 }

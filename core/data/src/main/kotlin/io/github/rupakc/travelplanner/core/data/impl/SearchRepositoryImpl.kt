@@ -58,18 +58,21 @@ class SearchRepositoryImpl
         override val current: StateFlow<SearchResultsState> = state.asStateFlow()
         private var job: Job? = null
 
+        @Synchronized
         override fun start(request: TravelSearchRequest) {
             job?.cancel()
             state.value = SearchResultsState(request = request, phase = StreamPhase.STREAMING)
             job = appScope.launch { results(request).collect { state.value = it } }
         }
 
+        @Synchronized
         override fun cancel() {
             job?.cancel()
             job = null
             if (state.value.phase == StreamPhase.STREAMING) state.value = state.value.copy(phase = StreamPhase.CANCELLED)
         }
 
+        @Synchronized
         override fun clear() {
             job?.cancel()
             job = null
