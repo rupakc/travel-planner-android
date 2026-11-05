@@ -18,7 +18,11 @@ import org.junit.runner.RunWith
 @E2eTest
 @RunWith(AndroidJUnit4::class)
 class GlobalSearchE2eTest {
-    @get:Rule val rule = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0)
+    val rule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule(order = 1)
+    val failureShot = Screenshots.onFailure()
     private val api = BackendApi()
     private lateinit var robot: AppRobot
     private val tripName = "E2E Global Search Lisbon " + System.currentTimeMillis() % 100_000

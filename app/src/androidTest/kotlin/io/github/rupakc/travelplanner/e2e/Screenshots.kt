@@ -20,5 +20,13 @@ object Screenshots {
         bitmap.recycle()
     }
 
+    /** A rule that saves `fail-<test>.png` when a test fails (screenshots enabled only). */
+    fun onFailure(): org.junit.rules.TestWatcher =
+        object : org.junit.rules.TestWatcher() {
+            override fun failed(e: Throwable?, description: org.junit.runner.Description) {
+                runCatching { capture("fail-" + description.methodName) }
+            }
+        }
+
     private const val QUALITY = 100
 }

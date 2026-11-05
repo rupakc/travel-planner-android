@@ -30,7 +30,11 @@ import org.junit.runner.RunWith
 @E2eTest
 @RunWith(AndroidJUnit4::class)
 class TripsE2eTest {
-    @get:Rule val rule = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0)
+    val rule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule(order = 1)
+    val failureShot = Screenshots.onFailure()
     private val api = BackendApi()
     private lateinit var robot: AppRobot
 
@@ -75,8 +79,15 @@ class TripsE2eTest {
         // Add to calendar opens a sheet: per-event inserts or one .ics for everything.
         robot.tap(PlanR.string.plan_action_calendar)
         robot.tap(PlanR.string.plan_calendar_export_all)
-        val icsShare = allOf(hasAction(Intent.ACTION_CHOOSER), hasExtra(equalTo(Intent.EXTRA_INTENT), allOf(hasAction(Intent.ACTION_SEND), hasType("text/calendar"))))
+        val icsShare =
+            allOf(hasAction(Intent.ACTION_CHOOSER), hasExtra(equalTo(Intent.EXTRA_INTENT), allOf(hasAction(Intent.ACTION_SEND), hasType("text/calendar"))))
         val fired = runCatching { rule.waitUntil(AppRobot.DEFAULT_TIMEOUT) { Intents.getIntents().any { icsShare.matches(it) } } }
-        assertTrue("recorded intents: " + Intents.getIntents().map { it.toString() + " " + it.extras?.keySet() + " inner=" + (it.extras?.get(Intent.EXTRA_INTENT)) }, fired.isSuccess)
+        assertTrue(
+            "recorded intents: " +
+                Intents.getIntents().map {
+                    it.toString() + " " + it.extras?.keySet() + " inner=" + (it.extras?.get(Intent.EXTRA_INTENT))
+                },
+            fired.isSuccess,
+        )
     }
 }

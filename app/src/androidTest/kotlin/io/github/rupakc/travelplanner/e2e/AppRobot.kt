@@ -57,7 +57,8 @@ class AppRobot(val rule: AppRule) {
 
     /** Clicks the first clickable node showing [text] (scrolling to it when it sits in a scrollable list). */
     fun tap(text: String, substring: Boolean = false) {
-        waitForText(text, substring)
+        // Lazy lists compose only what is on screen: scroll to the text when it is not composed yet.
+        rule.waitUntil(DEFAULT_TIMEOUT) { exists(hasText(text, substring = substring)) || scrollToFind(hasText(text, substring = substring)) }
         // Never the text field that merely contains the query.
         val clickable = rule.onAllNodes(hasText(text, substring = substring) and hasClickAction() and !hasSetTextAction())
         val target = if (clickable.fetchSemanticsNodes().isNotEmpty()) clickable.onFirst() else node(text, substring)
@@ -119,7 +120,9 @@ class AppRobot(val rule: AppRule) {
         org.junit.Assert.assertTrue("node top $top overlaps the status bar ($statusBar px)", top >= statusBar)
     }
 
+    /** System Back; an open soft keyboard is closed first so Back navigates. */
     fun back() {
+        runCatching { androidx.test.espresso.Espresso.closeSoftKeyboard() }
         device.pressBack()
         rule.waitForIdle()
     }
@@ -274,7 +277,9 @@ class AppRobot(val rule: AppRule) {
             .filter { it.startsWith(prefix) }
 
     /** The text before the first argument of a one-argument format string, e.g. "Move " for "Move %1${'$'}s". */
-    fun prefixOf(@StringRes id: Int): String = str(id, MARK).substringBefore(MARK)
+    fun prefixOf(
+        @StringRes id: Int,
+    ): String = str(id, MARK).substringBefore(MARK)
 
     /** Sends a chat message and waits until its reply has finished streaming (Stop shows, then goes). */
     fun chatSend(text: String, timeoutMs: Long = LONG_TIMEOUT * 2) {

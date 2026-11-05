@@ -22,7 +22,11 @@ import org.junit.runner.RunWith
 @E2eTest
 @RunWith(AndroidJUnit4::class)
 class ChatE2eTest {
-    @get:Rule val rule = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0)
+    val rule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule(order = 1)
+    val failureShot = Screenshots.onFailure()
     private lateinit var robot: AppRobot
     private var sent = 0
 

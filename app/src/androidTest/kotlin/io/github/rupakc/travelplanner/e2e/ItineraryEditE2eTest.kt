@@ -18,7 +18,11 @@ import org.junit.runner.RunWith
 @E2eTest
 @RunWith(AndroidJUnit4::class)
 class ItineraryEditE2eTest {
-    @get:Rule val rule = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0)
+    val rule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule(order = 1)
+    val failureShot = Screenshots.onFailure()
     private val api = BackendApi()
     private lateinit var robot: AppRobot
 
