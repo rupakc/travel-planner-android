@@ -3,10 +3,12 @@
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="file" path="datastore/session.preferences_pb" />
+        <exclude domain="file" path="datastore/last_location.preferences_pb" />
         <exclude domain="database" path="travel-planner.db" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="file" path="datastore/session.preferences_pb" />
+        <exclude domain="file" path="datastore/last_location.preferences_pb" />
         <exclude domain="database" path="travel-planner.db" />
     </device-transfer>
 </data-extraction-rules>

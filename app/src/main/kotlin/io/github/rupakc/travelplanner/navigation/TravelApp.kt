@@ -129,7 +129,13 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
             alertsGraph(
                 onReplan = { navController.navigate(ResultsRoute) },
                 onBack = { navController.popBackStack() },
-                onOpenAlert = { kind, watchId -> navController.navigate(AlertsRoute(kind = kind, watchId = watchId)) },
+                onOpenAlert = { kind, watchId ->
+                    // Replace any Alerts entry above the inbox instead of stacking another.
+                    navController.navigate(AlertsRoute(kind = kind, watchId = watchId)) {
+                        popUpTo<AlertsRoute> { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
                 onSearch = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
             )
             settingsGraph(

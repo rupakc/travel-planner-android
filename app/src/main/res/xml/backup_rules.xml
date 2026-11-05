@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
     <exclude domain="file" path="datastore/session.preferences_pb" />
+    <exclude domain="file" path="datastore/last_location.preferences_pb" />
     <exclude domain="database" path="travel-planner.db" />
 </full-backup-content>
