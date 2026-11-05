@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.core.model.section.Flight
 import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.StressTestData
+import io.github.rupakc.travelplanner.feature.results.sections.info.StressRecheckController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,6 +76,7 @@ interface SectionActions {
      * Read-modify-write of the draft's selections (`currentPlan.setSelections(transform(draft.value.selections))`).
      * Used for itinerary edits (`itinerary_layout`, `itinerary_edits`, `itinerary_notes`, `itinerary_slots`) and
      * `packing_list`, stored exactly as the web stores them.
+     * Apply [transform] synchronously to the latest draft (the itinerary editor computes moves inside it).
      */
     fun onUpdateSelections(transform: (PlanSelections) -> PlanSelections) = Unit
 
@@ -89,6 +91,13 @@ interface SectionActions {
 
     /** `POST /api/stress-test` (`SearchRepository.stressTest`) for "Re-check my edited plan". */
     suspend fun recheckStressTest(payload: StressTestPayload): AppResult<StressTestData> = AppResult.Failure(AppError.NotConfigured())
+
+    /**
+     * Retained re-check owner (create once in the Results ViewModel:
+     * `StressRecheckController(viewModelScope, searchRepository::stressTest)`). Null → the section falls back
+     * to a composition-scoped controller over [recheckStressTest], which does not survive scrolling away.
+     */
+    val stressRecheck: StressRecheckController? get() = null
 }
 
 private val NoSelections: StateFlow<PlanSelections> = MutableStateFlow(PlanSelections.EMPTY).asStateFlow()
