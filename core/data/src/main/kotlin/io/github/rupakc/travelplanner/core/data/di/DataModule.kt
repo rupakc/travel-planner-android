@@ -23,6 +23,7 @@ import io.github.rupakc.travelplanner.core.data.impl.PriceWatchesRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.ProfileRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.RecentSearchesRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.SearchRepositoryImpl
+import io.github.rupakc.travelplanner.core.data.impl.SessionCleanerImpl
 import io.github.rupakc.travelplanner.core.data.impl.SettingsRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStoreImpl
@@ -45,6 +46,7 @@ import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.PushTokenSource
 import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
+import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 
 @Module
@@ -90,7 +92,7 @@ abstract class DataModule {
 
     @Binds abstract fun currentPlan(impl: CurrentPlanStoreImpl): CurrentPlanStore
 
-    @Binds abstract fun sessionCleaner(impl: io.github.rupakc.travelplanner.core.data.impl.SessionCleanerImpl): io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
+    @Binds abstract fun sessionCleaner(impl: SessionCleanerImpl): SessionCleaner
 
     /** Bound by core:notifications when Firebase is configured. */
     @BindsOptionalOf abstract fun pushTokenSource(): PushTokenSource
