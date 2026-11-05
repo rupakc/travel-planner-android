@@ -153,28 +153,30 @@ class EncryptedSessionStore(
     }
 
     /** Never throws (except cancellation): anything unreadable is signed out. */
-    @Suppress("TooGenericExceptionCaught")
     private suspend fun readOrMigrate(p: Preferences): Session? {
-        p[sealed]?.let { value ->
-            return try {
-                val c = cipher ?: return null
-                val plain = c.decrypt(Base64.getDecoder().decode(value), AAD)
-                val record = TravelJson.decodeFromString(Record.serializer(), plain.decodeToString())
-                Session(record.token, record.user, record.baseUrl)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                AppLogger.w(TAG, "Stored session could not be read; signing out", e)
-                safely { store.edit { it.remove(sealed) } }
-                null
-            }
-        }
+        p[sealed]?.let { return readSealed(it) }
         val token = p[legacyToken] ?: return null
         val user = p[legacyUser]?.let { runCatching { TravelJson.decodeFromString(User.serializer(), it) }.getOrNull() } ?: return null
         val legacy = Session(token, user)
         // Migrate; if sealing is impossible, save() keeps it in memory and still removes the plaintext.
         safely { save(legacy) }
         return legacy
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun readSealed(value: String): Session? {
+        val c = cipher ?: return null
+        return try {
+            val plain = c.decrypt(Base64.getDecoder().decode(value), AAD)
+            val record = TravelJson.decodeFromString(Record.serializer(), plain.decodeToString())
+            Session(record.token, record.user, record.baseUrl)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            AppLogger.w(TAG, "Stored session could not be read; signing out", e)
+            safely { store.edit { it.remove(sealed) } }
+            null
+        }
     }
 
     /** Seals [session], or null when no cipher is available or encryption fails (degraded, in-memory mode). */
