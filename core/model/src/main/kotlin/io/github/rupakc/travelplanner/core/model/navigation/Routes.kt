@@ -52,6 +52,12 @@ sealed interface AppRoute
 
 @Serializable data class PlanDetailRoute(val planId: Long) : AppRoute
 
+/**
+ * The My Plan screen for the shared draft (`CurrentPlanStore`): grouped selections, cost, name,
+ * Save / Save as new / New plan and export. Results and Chat open it (web "My Plan" drawer).
+ */
+@Serializable data object MyPlanRoute : AppRoute
+
 /** Chat; null [threadId] = the most recent thread (or a new one). */
 @Serializable data class ChatRoute(val threadId: Long? = null) : AppRoute
 
