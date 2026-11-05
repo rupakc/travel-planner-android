@@ -1,7 +1,9 @@
 package io.github.rupakc.travelplanner.feature.alerts
 
 import android.app.Application
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -126,5 +128,32 @@ class AlertsScreenTest {
         compose.onNodeWithText("9+").assertIsDisplayed()
         compose.onNodeWithContentDescription("Notifications, 12 unread").performClick()
         assertTrue(opened)
+    }
+
+    @Test
+    fun `Save waits, with a reason, while Check now runs`() {
+        val saved = mutableListOf<WatchEdit>()
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                androidx.compose.foundation.layout.Column(
+                    androidx.compose.ui.Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                ) {
+                    WatchCard(
+                        item = io.github.rupakc.travelplanner.core.domain.alerts.AnyWatch.Fare(fare),
+                        busy = CardAction.CHECK,
+                        message = null,
+                        highlighted = false,
+                        emailAvailable = false,
+                        userEmail = null,
+                        now = now,
+                        callbacks = CardCallbacks({}, {}, { saved += it }, {}, {}, {}),
+                    )
+                }
+            }
+        }
+        compose.onNodeWithText("Edit").performScrollTo().performClick()
+        compose.onNodeWithText("Saving is available once the check finishes.").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Save").performScrollTo().assertIsNotEnabled().performClick()
+        assertTrue(saved.isEmpty())
     }
 }

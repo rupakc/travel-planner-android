@@ -187,7 +187,14 @@ internal fun WatchCard(
                         if (message == CardMessage.Saved) editing = false
                     }
                 }
-                EditPanel(item, emailAvailable, userEmail, saving = busy == CardAction.SAVE, onCancel = { editing = false }) { edit ->
+                EditPanel(
+                    item,
+                    emailAvailable,
+                    userEmail,
+                    saving = busy == CardAction.SAVE,
+                    blockedBy = busy?.takeIf { it != CardAction.SAVE },
+                    onCancel = { editing = false },
+                ) { edit ->
                     saveSent = true
                     callbacks.onSave(edit)
                 }
@@ -207,6 +214,17 @@ private fun ProblemBox(problem: String?, fare: Boolean, retrying: Boolean, onRet
         Text(listOfNotNull(problem, hold).joinToString(" "))
         TpButton(stringResource(R.string.alerts_retry), onRetry, loading = retrying, variant = TpButtonVariant.Secondary, leadingIcon = Icons.Filled.Refresh)
     }
+}
+
+/** Another action on this watch is running (e.g. Check now): Save waits, and says why. */
+@Composable
+private fun SaveBlockedNote(blockedBy: CardAction) {
+    Text(
+        stringResource(if (blockedBy == CardAction.CHECK) R.string.alerts_save_wait_check else R.string.alerts_save_wait),
+        style = TravelTheme.typography.bodySmall,
+        color = TravelTheme.colors.onSurfaceVariant,
+        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+    )
 }
 
 /** The latest outcome on a card, read out politely (web sr-only aria-live). */
@@ -623,6 +641,7 @@ private fun EditPanel(
     emailAvailable: Boolean,
     userEmail: String?,
     saving: Boolean,
+    blockedBy: CardAction?,
     onCancel: () -> Unit,
     onSave: (WatchEdit) -> Unit,
 ) {
@@ -658,6 +677,7 @@ private fun EditPanel(
                 FlexibleOption(flexible) { flexible = it }
             }
             if (emailAvailable) EmailOption(email, userEmail, { email = it })
+            blockedBy?.let { SaveBlockedNote(it) }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm, Alignment.End)) {
                 TpButton(stringResource(R.string.alerts_cancel), onCancel, variant = TpButtonVariant.Text)
                 TpButton(
@@ -684,6 +704,7 @@ private fun EditPanel(
                         }
                     },
                     loading = saving,
+                    enabled = blockedBy == null,
                 )
             }
         }

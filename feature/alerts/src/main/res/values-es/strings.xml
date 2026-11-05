@@ -154,6 +154,8 @@
     <string name="alerts_rating">★ %1$s</string>
     <string name="alerts_rating_reviews">★ %1$s (%2$d)</string>
     <string name="alerts_times_travellers">%1$s × %2$s = %3$s</string>
+    <string name="alerts_save_wait_check">Podrás guardar cuando termine la revisión.</string>
+    <string name="alerts_save_wait">Podrás guardar cuando termine el cambio en curso.</string>
     <plurals name="alerts_bell_unread">
         <item quantity="one">Notificaciones, %d sin leer</item>
         <item quantity="many">Notificaciones, %d sin leer</item>
