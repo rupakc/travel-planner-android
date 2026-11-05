@@ -8,6 +8,7 @@ import io.github.rupakc.travelplanner.core.domain.results.with
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.core.model.plan.SelectionKeys
+import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import kotlin.random.Random
 import kotlinx.serialization.json.JsonArray
 import org.junit.Assert.assertEquals
@@ -156,5 +157,14 @@ class PlanHelpersTest {
         assertTrue(name, Regex("^The (Foodie|Culinary|Gourmet|Tasty) Lisbon \\w+$").matches(name))
         val winter = generatePlanName(null, emptyList(), "2026-12-24", Random(2))
         assertTrue(winter, Regex("^The (Frosty|Cozy|Snowbound) Mystery \\w+$").matches(winter))
+    }
+
+    @Test
+    fun `the dates-only overload matches the request form (saved and shared plans)`() {
+        val sel = PlanSelections(hotel = io.github.rupakc.travelplanner.core.model.section.Hotel(name = "H", pricePerNightUsd = 100.0))
+        val req = TravelSearchRequest(origin = "A", destination = "B", departureDate = "2027-04-01", returnDate = "2027-04-05", nationality = "X")
+        assertEquals(computePlanCost(sel, req), computePlanCost(sel, "2027-04-01", "2027-04-05"), 0.0)
+        assertEquals(400.0, computePlanCost(sel, "2027-04-01", "2027-04-05"), 0.0)
+        assertEquals(700.0, computePlanCost(sel, null, null), 0.0)
     }
 }

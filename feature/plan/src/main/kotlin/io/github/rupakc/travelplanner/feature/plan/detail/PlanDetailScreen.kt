@@ -399,9 +399,9 @@ private val previewContent =
         itinerary = emptyList(),
         costParts =
             listOf(
-                io.github.rupakc.travelplanner.feature.plan.model.CostPart(io.github.rupakc.travelplanner.feature.plan.model.CostCategory.HOTEL, 2400.0),
+                io.github.rupakc.travelplanner.core.domain.plan.CostPart(io.github.rupakc.travelplanner.core.domain.plan.CostCategory.HOTEL, 2400.0),
             ),
-        budgetStatus = io.github.rupakc.travelplanner.feature.plan.model.BudgetStatus(over = false, amount = 600),
+        budgetStatus = io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus(over = false, amount = 600),
         hasTransport = false,
     )
 

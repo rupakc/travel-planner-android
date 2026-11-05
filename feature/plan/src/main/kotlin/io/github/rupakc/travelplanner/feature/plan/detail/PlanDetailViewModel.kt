@@ -15,16 +15,17 @@ import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.domain.export.PlanCalendarEvent
 import io.github.rupakc.travelplanner.core.domain.export.PlanExportInput
 import io.github.rupakc.travelplanner.core.domain.export.PlanIcs
+import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
+import io.github.rupakc.travelplanner.core.domain.plan.CostPart
+import io.github.rupakc.travelplanner.core.domain.plan.computePlanCostBreakdown
+import io.github.rupakc.travelplanner.core.domain.plan.getBudgetStatus
 import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
 import io.github.rupakc.travelplanner.feature.plan.export.ShareTextInput
-import io.github.rupakc.travelplanner.feature.plan.model.BudgetStatus
-import io.github.rupakc.travelplanner.feature.plan.model.CostPart
 import io.github.rupakc.travelplanner.feature.plan.model.ItineraryDayUi
 import io.github.rupakc.travelplanner.feature.plan.model.ItineraryUi
-import io.github.rupakc.travelplanner.feature.plan.model.PlanCost
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroup
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroups
 import io.github.rupakc.travelplanner.feature.plan.model.TripSummary
@@ -253,13 +254,13 @@ internal class PlanDetailViewModel
         private fun contentOf(plan: Plan): PlanDetailContent {
             val summary = TripSummary.from(plan, clock.today())
             val sd = plan.searchData
-            val parts = PlanCost.breakdown(plan.selections, sd.str("departure_date"), sd.str("return_date"))
+            val parts = computePlanCostBreakdown(plan.selections, sd.str("departure_date"), sd.str("return_date"))
             return PlanDetailContent(
                 summary = summary,
                 groups = SelectionGroups.of(plan.selections),
                 itinerary = ItineraryUi.of(plan.selections),
                 costParts = parts,
-                budgetStatus = PlanCost.budgetStatus(parts.sumOf { it.amount }, summary.budgetUsd),
+                budgetStatus = getBudgetStatus(parts.sumOf { it.amount }, summary.budgetUsd),
                 hasTransport = plan.selections.gettingAround.isNotEmpty(),
             )
         }

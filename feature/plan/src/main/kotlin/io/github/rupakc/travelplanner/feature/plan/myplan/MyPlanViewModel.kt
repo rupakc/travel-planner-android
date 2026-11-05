@@ -11,17 +11,19 @@ import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.domain.export.PlanExportInput
 import io.github.rupakc.travelplanner.core.domain.export.PlanIcs
+import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
+import io.github.rupakc.travelplanner.core.domain.plan.CostPart
+import io.github.rupakc.travelplanner.core.domain.plan.computePlanCostBreakdown
+import io.github.rupakc.travelplanner.core.domain.plan.generatePlanName
+import io.github.rupakc.travelplanner.core.domain.plan.getBudgetStatus
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
 import io.github.rupakc.travelplanner.feature.plan.export.ShareTextInput
-import io.github.rupakc.travelplanner.feature.plan.model.BudgetStatus
-import io.github.rupakc.travelplanner.feature.plan.model.CostPart
 import io.github.rupakc.travelplanner.feature.plan.model.ItineraryDayUi
 import io.github.rupakc.travelplanner.feature.plan.model.ItineraryUi
-import io.github.rupakc.travelplanner.feature.plan.model.PlanCost
 import io.github.rupakc.travelplanner.feature.plan.model.Removal
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroup
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroups
@@ -159,13 +161,13 @@ internal class MyPlanViewModel
             val request = draft.searchRequest ?: return PlanDraft.DEFAULT_NAME
             val seed = request.destination to request.departureDate
             generatedName?.takeIf { it.first == seed }?.let { return it.second }
-            return PlanCost.generateName(request.destination, request.interests, request.departureDate, Random(clock.now().toEpochMilli()))
+            return generatePlanName(request.destination, request.interests, request.departureDate, Random(clock.now().toEpochMilli()))
                 .also { generatedName = seed to it }
         }
 
         private fun contentOf(draft: PlanDraft): MyPlanContent {
             val request = draft.searchRequest
-            val parts = PlanCost.breakdown(draft.selections, request?.departureDate, request?.returnDate)
+            val parts = computePlanCostBreakdown(draft.selections, request?.departureDate, request?.returnDate)
             val total = parts.sumOf { it.amount }
             return MyPlanContent(
                 planId = draft.planId,
@@ -177,7 +179,7 @@ internal class MyPlanViewModel
                 itinerary = ItineraryUi.of(draft.selections, liveItinerary(draft)),
                 costParts = parts,
                 totalUsd = total,
-                budgetStatus = PlanCost.budgetStatus(total, request?.budgetUsd),
+                budgetStatus = getBudgetStatus(total, request?.budgetUsd),
                 hasTransport = draft.selections.gettingAround.isNotEmpty(),
                 itemCount = draft.selections.count,
                 hasNotes = draft.selections.itineraryNotes.values.any(String::isNotBlank),

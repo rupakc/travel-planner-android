@@ -42,11 +42,11 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
+import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
+import io.github.rupakc.travelplanner.core.domain.plan.CostCategory
+import io.github.rupakc.travelplanner.core.domain.plan.CostPart
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.feature.plan.R
-import io.github.rupakc.travelplanner.feature.plan.model.BudgetStatus
-import io.github.rupakc.travelplanner.feature.plan.model.CostCategory
-import io.github.rupakc.travelplanner.feature.plan.model.CostPart
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionEntry
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroup
