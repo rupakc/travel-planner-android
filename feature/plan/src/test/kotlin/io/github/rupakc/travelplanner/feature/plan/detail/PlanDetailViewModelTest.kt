@@ -152,6 +152,8 @@ class PlanDetailViewModelTest {
             }
             assertEquals(7L, store.draft.value.planId)
             assertEquals("Park Hyatt", store.draft.value.selections.hotel?.name)
+            // Opened from a saved plan: Results locks itinerary editing (web loadedPlanId).
+            assertTrue(store.draft.value.loadedPlan)
         }
 
     @Test

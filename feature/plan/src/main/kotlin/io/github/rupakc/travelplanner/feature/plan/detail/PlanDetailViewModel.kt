@@ -17,7 +17,6 @@ import io.github.rupakc.travelplanner.core.domain.export.PlanExportInput
 import io.github.rupakc.travelplanner.core.domain.export.PlanIcs
 import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
 import io.github.rupakc.travelplanner.core.model.plan.Plan
-import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
 import io.github.rupakc.travelplanner.feature.plan.export.ShareTextInput
@@ -288,10 +287,9 @@ internal class PlanDetailViewModel
                 status.update { it.copy(confirm = DetailConfirm.DISCARD_DRAFT) }
                 return
             }
-            store.restore(PlanDraft(planId = plan.id, name = plan.name, searchRequest = plan.searchRequest, selections = plan.selections))
-            val request = plan.searchRequest
-            val snapshot = plan.selections.itinerarySnapshot
-            if (request != null) store.attachSearch(request, snapshot?.let { JsonObject(mapOf("itinerary" to it)) })
+            // One step (new draft generation, loadedPlan = true): a save still in flight for the previous draft can't
+            // stamp its id on this trip, and Results locks itinerary editing like the web's loaded plan.
+            store.load(plan)
             navigation.trySend(DetailNavigation.OpenResults)
         }
 
