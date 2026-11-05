@@ -60,6 +60,7 @@ class AndroidE2eConventionPlugin : Plugin<Project> {
                 add("androidTestImplementation", libs.lib("androidx-test-core"))
                 add("androidTestImplementation", libs.lib("androidx-test-ext-junit"))
                 add("androidTestImplementation", libs.lib("androidx-test-espresso-core"))
+                add("androidTestImplementation", libs.lib("androidx-test-espresso-intents"))
                 add("androidTestImplementation", libs.lib("androidx-test-uiautomator"))
                 add("androidTestImplementation", libs.lib("androidx-compose-ui-test-junit4"))
                 add("androidTestImplementation", libs.lib("androidx-compose-ui-test-junit4-accessibility"))
