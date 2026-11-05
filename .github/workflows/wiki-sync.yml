@@ -1,0 +1,52 @@
+name: Wiki sync
+
+# Publishes docs/*.md (TitleCase pages) to the GitHub wiki on every push to main that touches docs.
+# One-time setup: the wiki must be initialised by creating any first page in the repository's Wiki tab
+# (Settings -> Features -> Wikis enabled, then "Create the first page"); until then the wiki git repo does not exist.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/wiki-sync.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone wiki
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.wiki.git" wiki
+
+      - name: Copy pages
+        run: |
+          # Wiki pages are flat: copy top-level TitleCase pages only (reference/ and superpowers/ stay in the repo).
+          find wiki -maxdepth 1 -name '*.md' -delete
+          cp docs/[A-Z]*.md wiki/
+          # Page links in docs are relative file links ("Architecture.md"); the wiki wants page names.
+          sed -i -E 's/\]\(([A-Z][A-Za-z-]*)\.md(#[^)]*)?\)/](\1\2)/g' wiki/*.md
+          # Links that leave docs/ (README, MEMORY, reference/...) point at the repository blob instead.
+          sed -i -E "s#\]\(\.\./([A-Za-z_.]+)\)#](https://github.com/${{ github.repository }}/blob/main/\1)#g; s#\]\((reference|superpowers)/([^)]*)\)#](https://github.com/${{ github.repository }}/blob/main/docs/\1/\2)#g" wiki/*.md
+
+      - name: Commit and push
+        working-directory: wiki
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "No wiki changes"; exit 0; fi
+          git commit -m "Sync docs from ${GITHUB_SHA::7}"
+          git push
