@@ -233,6 +233,12 @@ class FakeHealthRepository(initial: Health? = Health(status = "ok")) : HealthRep
 
     override suspend fun refresh(): AppResult<Health> = state.value?.let { AppResult.Success(it) } ?: NotStubbed
 
+    /** Result of [probe]; every probed URL is recorded in [probed]. */
+    var probeResult: AppResult<Health> = AppResult.Success(Health(status = "ok"))
+    val probed = mutableListOf<String>()
+
+    override suspend fun probe(baseUrl: String): AppResult<Health> = probeResult.also { probed += baseUrl }
+
     fun set(health: Health?) {
         state.value = health
     }

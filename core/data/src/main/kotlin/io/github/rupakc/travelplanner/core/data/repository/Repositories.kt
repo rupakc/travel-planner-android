@@ -301,6 +301,13 @@ interface HealthRepository {
     val capabilities: StateFlow<Health?>
 
     suspend fun refresh(): AppResult<Health>
+
+    /**
+     * One-off `GET <baseUrl>/health` of a candidate server (Settings → Server "Test connection"):
+     * no session token, no change to settings or [capabilities]. An unparseable URL fails with
+     * `AppError.Client(code = "invalid_url")`.
+     */
+    suspend fun probe(baseUrl: String): AppResult<Health>
 }
 
 /** Device-only settings. */
