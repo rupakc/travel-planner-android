@@ -67,6 +67,7 @@
     <string name="results_fare_watched">Today’s fare is %1$s (%2$s). We’ll check about twice a day and only speak up when it’s worth it.</string>
     <string name="results_fare_watched_pending">We’ll take today’s price shortly, then check about twice a day and only speak up when it’s worth it.</string>
     <string name="results_fare_yours">Yours</string>
+    <string name="results_fare_cheapest">Cheapest</string>
     <string name="results_filter_activities_title">Activity Filters</string>
     <string name="results_filter_any">Any</string>
     <string name="results_filter_apply">Apply Filters</string>
@@ -281,18 +282,12 @@
         <item quantity="one">Fits %1$d activity (%2$s)</item>
         <item quantity="other">Fits %1$d activities (%2$s)</item>
     </plurals>
-    <plurals name="results_budget_flights_fit">
-        <item quantity="one">%1$d of %2$d flight fits</item>
-        <item quantity="other">%1$d of %2$d flights fit</item>
-    </plurals>
+    <string name="results_budget_flights_fit">Flights within budget: %1$d of %2$d</string>
     <plurals name="results_budget_hidden">
         <item quantity="one">%1$d hidden — show all</item>
         <item quantity="other">%1$d hidden — show all</item>
     </plurals>
-    <plurals name="results_budget_hotels_fit">
-        <item quantity="one">%1$d of %2$d hotel fits</item>
-        <item quantity="other">%1$d of %2$d hotels fit</item>
-    </plurals>
+    <string name="results_budget_hotels_fit">Hotels within budget: %1$d of %2$d</string>
     <plurals name="results_fare_travellers">
         <item quantity="one">total for %1$d traveller</item>
         <item quantity="other">total for %1$d travellers</item>

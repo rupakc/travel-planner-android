@@ -74,7 +74,7 @@ class SettingsScreensTest {
         compose.onNodeWithText("Retake quiz").performClick()
         compose.onNodeWithText("Change password").performClick()
         compose.onNodeWithText("Features").performClick()
-        compose.onNodeWithText("5 of 18 features on").assertExists()
+        compose.onNodeWithText("Features on: 5 of 18").assertExists()
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Sign out"))
         compose.onNodeWithText("Sign out").performClick()
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Contains data from GeoNames (geonames.org), CC BY 4.0"))

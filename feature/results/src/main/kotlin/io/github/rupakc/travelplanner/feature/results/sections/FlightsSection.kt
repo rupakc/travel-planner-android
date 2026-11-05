@@ -19,7 +19,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.domain.results.airlineName
 import io.github.rupakc.travelplanner.core.domain.results.flightNo
 import io.github.rupakc.travelplanner.core.domain.results.outboundMinutes
@@ -33,6 +32,7 @@ import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
 import io.github.rupakc.travelplanner.core.ui.BookingLinkButton
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.ResultsEvent
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.ChipRow
@@ -98,7 +98,7 @@ private fun MultiCityBanner(legs: List<FlightLegGroup>, actions: SectionActions)
     val chosen = selections.flights.filter { f -> legs.any { leg -> leg.results.any { sameFlight(it, f) } } }
     val total = chosen.sumOf { it.priceUsd?.takeIf(Double::isFinite) ?: 0.0 }
     Pill(text = stringResource(R.string.results_flights_multi_banner, chosen.size, legs.size), tone = PillTone.Info)
-    if (total > 0) Text(stringResource(R.string.results_flights_multi_total, formatPrice(total)), style = TravelTheme.typography.titleSmall)
+    if (total > 0) Text(stringResource(R.string.results_flights_multi_total, localPrice(total)), style = TravelTheme.typography.titleSmall)
 }
 
 /** "Leg N" + "From → To · date" heading of a multi-city leg. */
@@ -143,7 +143,7 @@ internal fun FlightCard(
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        formatPrice(flight.priceUsd).ifEmpty { "—" },
+                        localPrice(flight.priceUsd).ifEmpty { "—" },
                         style = TravelTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TravelTheme.colors.primary,

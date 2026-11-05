@@ -42,12 +42,12 @@ import io.github.rupakc.travelplanner.core.domain.alerts.FareWatchDialogState
 import io.github.rupakc.travelplanner.core.domain.alerts.TargetError
 import io.github.rupakc.travelplanner.core.domain.alerts.WatchTrip
 import io.github.rupakc.travelplanner.core.domain.alerts.formatDateRange
-import io.github.rupakc.travelplanner.core.domain.alerts.formatUsd
 import io.github.rupakc.travelplanner.core.domain.alerts.rangePosition
 import io.github.rupakc.travelplanner.core.domain.alerts.routeLabel
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.R
+import io.github.rupakc.travelplanner.core.ui.format.localUsd
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -55,7 +55,8 @@ import kotlinx.coroutines.launch
 sealed interface WatchSheetEvent {
     data class SetMode(val mode: AlertMode) : WatchSheetEvent
 
-    data class SetTarget(val text: String) : WatchSheetEvent
+    /** [locale] = the UI language the target was typed in ("1.500" is 1500 in Spanish). */
+    data class SetTarget(val text: String, val locale: java.util.Locale) : WatchSheetEvent
 
     data class SetFlexible(val on: Boolean) : WatchSheetEvent
 
@@ -76,7 +77,7 @@ sealed interface WatchSheetEvent {
 fun WatchSheetEvent.applyTo(controller: FareWatchDialogController, scope: CoroutineScope, onWatched: (FareWatch) -> Unit = {}) {
     when (this) {
         is WatchSheetEvent.SetMode -> controller.setMode(mode)
-        is WatchSheetEvent.SetTarget -> controller.setTarget(text)
+        is WatchSheetEvent.SetTarget -> controller.setTarget(text, locale)
         is WatchSheetEvent.SetFlexible -> controller.setFlexible(on)
         is WatchSheetEvent.SetEmail -> controller.setEmail(on)
         WatchSheetEvent.Submit -> scope.launch { controller.submit()?.let(onWatched) }
@@ -160,22 +161,23 @@ private fun FareForm(state: FareWatchDialogState, userEmail: String?, onEvent: (
     val price = state.price
     if (price != null) {
         ToneBox(io.github.rupakc.travelplanner.core.domain.alerts.Tone.NEUTRAL) {
-            PriceLead(stringResource(R.string.watch_today), formatUsd(price), travellers)
+            PriceLead(stringResource(R.string.watch_today), localUsd(price), travellers)
             TypicalRangeBar(state.typicalLow, state.typicalHigh, price)
         }
     }
     val check = state.targetCheck
+    val locale = currentLocale()
     AlertModeGroup(
         mode = state.mode,
         onMode = { onEvent(WatchSheetEvent.SetMode(it)) },
         target = state.target,
-        onTarget = { onEvent(WatchSheetEvent.SetTarget(it)) },
+        onTarget = { onEvent(WatchSheetEvent.SetTarget(it, locale)) },
         currency = "USD",
-        anyDropHint = stringResource(R.string.watch_fare_any_drop_hint),
+        anyDropHint = stringResource(R.string.watch_fare_any_drop_hint, localUsd(FARE_ALERT_STEP_USD)),
         targetError = targetErrorText(state.shownTargetError),
         helper =
             when {
-                check.alreadyUnder && price != null -> stringResource(R.string.watch_fare_target_already_under, formatUsd(price))
+                check.alreadyUnder && price != null -> stringResource(R.string.watch_fare_target_already_under, localUsd(price))
                 state.typicalLow != null -> stringResource(R.string.watch_fare_target_prefilled)
                 else -> travellers
             },
@@ -207,7 +209,7 @@ private fun FareDone(watch: FareWatch, fallbackTravellers: Int, onDismiss: () ->
             Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
                 Text(
                     if (price != null) {
-                        stringResource(R.string.watch_fare_done_price, formatUsd(price), pluralStringResource(R.plurals.watch_total_for_travellers, n, n))
+                        stringResource(R.string.watch_fare_done_price, localUsd(price), pluralStringResource(R.plurals.watch_total_for_travellers, n, n))
                     } else {
                         stringResource(R.string.watch_fare_done_pending)
                     },
@@ -237,7 +239,7 @@ internal fun TypicalRangeBar(low: Double?, high: Double?, price: Double) {
             price > high!! -> R.string.watch_range_above
             else -> R.string.watch_range_within
         }
-    val text = stringResource(where, formatUsd(low), formatUsd(high!!))
+    val text = stringResource(where, localUsd(low), localUsd(high!!))
     Column(Modifier.semantics(mergeDescendants = true) { contentDescription = text }) {
         Box(Modifier.fillMaxWidth().padding(top = TravelTheme.spacing.sm)) {
             LinearProgressIndicator(

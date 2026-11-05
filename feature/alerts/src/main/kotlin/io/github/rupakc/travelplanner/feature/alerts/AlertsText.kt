@@ -10,8 +10,8 @@ import io.github.rupakc.travelplanner.core.domain.alerts.TimeUntil
 import io.github.rupakc.travelplanner.core.domain.alerts.TripChange
 import io.github.rupakc.travelplanner.core.domain.alerts.TripGroup
 import io.github.rupakc.travelplanner.core.domain.alerts.WatchStatusKey
-import io.github.rupakc.travelplanner.core.domain.alerts.formatUsd
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.format.localUsd
 import kotlin.math.abs
 
 // Words for the domain's typed values (web copy; strings.xml has en + es).
@@ -143,7 +143,7 @@ internal fun tripChangeText(change: TripChange): String {
                         TripGroup.OTHER -> R.string.alerts_move_other
                     },
                 )
-            "$word ${if (m.delta < 0) "−" else "+"}${formatPrice(abs(m.delta))}"
+            "$word ${if (m.delta < 0) "−" else "+"}${localPrice(abs(m.delta))}"
         }
     var text = if (moves.isEmpty()) stringResource(R.string.alerts_trip_no_move) else stringResource(R.string.alerts_trip_moves, moves.joinToString(", "))
     if (change.missing.isNotEmpty()) text += " " + stringResource(R.string.alerts_trip_missing, change.missing.joinToString(", "))
@@ -172,7 +172,7 @@ private fun checkedText(message: CardMessage.Checked): String {
         }
 
         CheckType.CHECKED_PRICE -> {
-            val price = if (message.fare) formatUsd(o.price ?: 0.0) else formatPrice(o.price, message.currency)
+            val price = if (message.fare) localUsd(o.price ?: 0.0) else localPrice(o.price, message.currency)
             stringResource(R.string.alerts_check_price, price)
         }
 

@@ -46,6 +46,7 @@ import io.github.rupakc.travelplanner.core.domain.search.ImportLimits
 import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.reference.Nationality
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.search.compare.CompareEvent
 import io.github.rupakc.travelplanner.feature.search.compare.CompareForm
 import io.github.rupakc.travelplanner.feature.search.compare.CompareTable
@@ -105,6 +106,13 @@ internal fun SearchFormRoute(
                 override suspend fun nationalities(query: String): List<Nationality> = viewModel.nationalities(query)
             }
         }
+
+    val locale = currentLocale()
+    LaunchedEffect(locale) {
+        viewModel.setLocale(locale)
+        discoverViewModel.onEvent(DiscoverEvent.SetLocale(locale))
+        compareViewModel.onEvent(CompareEvent.SetLocale(locale))
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->

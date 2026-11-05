@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.feature.results.sections.info
 
+import io.github.rupakc.travelplanner.core.domain.format.parseLocalizedAmount
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItineraryLayouts
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItinerarySchedule
 import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledSlot
@@ -45,8 +46,8 @@ internal object ItineraryEdits {
                 selections.itineraryNotes + (key to text),
         )
 
-    /** The cost field's text → stored value: blank or not a number → null (web `Number('')`/NaN → null). */
-    fun costValue(text: String): JsonElement = text.trim().toDoubleOrNull()?.takeIf { it.isFinite() }?.let(::JsonPrimitive) ?: JsonNull
+    /** The cost field's text, read in [locale] ("12,5" in Spanish) → stored value: blank or not a number → null (web `Number('')`/NaN → null). */
+    fun costValue(text: String, locale: java.util.Locale): JsonElement = parseLocalizedAmount(text, locale)?.let(::JsonPrimitive) ?: JsonNull
 
     /**
      * The entry the web stores when a slot is added to the plan:

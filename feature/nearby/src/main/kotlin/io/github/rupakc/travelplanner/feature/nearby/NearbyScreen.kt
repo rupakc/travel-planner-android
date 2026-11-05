@@ -128,7 +128,7 @@ fun NearbyScreen(
 
                 NearbyPhase.Denied -> {
                     Message(
-                        title = stringResource(R.string.nearby_denied_title),
+                        title = stringResource(R.string.nearby_denied_title, stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)),
                         body = stringResource(R.string.nearby_denied_body),
                         primary = stringResource(R.string.nearby_open_settings) to onOpenAppSettings,
                         secondary = stringResource(R.string.nearby_try_again) to onRequestPermission,

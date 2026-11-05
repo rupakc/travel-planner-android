@@ -20,6 +20,7 @@ internal object Palette {
     val Sky300 = Color(0xFF7DD3FC)
     val Sky400 = Color(0xFF38BDF8)
     val Sky600 = Color(0xFF0284C7)
+    val Sky700 = Color(0xFF0369A1)
     val Sky800 = Color(0xFF075985)
     val Sky900 = Color(0xFF0C4A6E)
     val Sky950 = Color(0xFF082F49)
@@ -29,6 +30,7 @@ internal object Palette {
     val Violet300 = Color(0xFFC4B5FD)
     val Violet400 = Color(0xFFA78BFA)
     val Violet600 = Color(0xFF7C3AED)
+    val Violet700 = Color(0xFF6D28D9)
     val Violet800 = Color(0xFF5B21B6)
     val Violet900 = Color(0xFF4C1D95)
     val Violet950 = Color(0xFF2E1065)
@@ -44,11 +46,13 @@ internal object Palette {
     val Lime300 = Color(0xFFBEF264)
     val Lime400 = Color(0xFFA3E635)
     val Lime600 = Color(0xFF65A30D)
+    val Lime700 = Color(0xFF4D7C0F)
 
     val Fuchsia50 = Color(0xFFFDF4FF)
     val Fuchsia300 = Color(0xFFF0ABFC)
     val Fuchsia400 = Color(0xFFE879F9)
     val Fuchsia600 = Color(0xFFC026D3)
+    val Fuchsia700 = Color(0xFFA21CAF)
 
     val Amber50 = Color(0xFFFFFBEB)
     val Amber200 = Color(0xFFFDE68A)
@@ -62,11 +66,13 @@ internal object Palette {
     val Rose300 = Color(0xFFFDA4AF)
     val Rose400 = Color(0xFFFB7185)
     val Rose600 = Color(0xFFE11D48)
+    val Rose700 = Color(0xFFBE123C)
 
     val Cyan50 = Color(0xFFECFEFF)
     val Cyan300 = Color(0xFF67E8F9)
     val Cyan400 = Color(0xFF22D3EE)
     val Cyan600 = Color(0xFF0891B2)
+    val Cyan700 = Color(0xFF0E7490)
 
     val Red50 = Color(0xFFFEF2F2)
     val Red100 = Color(0xFFFEE2E2)
@@ -87,6 +93,7 @@ internal object Palette {
     val Gray200 = Color(0xFFE5E7EB)
     val Gray300 = Color(0xFFD1D5DB)
     val Gray400 = Color(0xFF9CA3AF)
+    val Gray500 = Color(0xFF6B7280)
     val Gray600 = Color(0xFF4B5563)
     val Gray900 = Color(0xFF111827)
 

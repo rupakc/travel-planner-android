@@ -28,9 +28,11 @@ import androidx.compose.ui.semantics.semantics
 import io.github.rupakc.travelplanner.core.designsystem.component.LoadingIndicator
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.ui.PriceText
+import io.github.rupakc.travelplanner.core.ui.verificationLabel
 import io.github.rupakc.travelplanner.feature.results.LayoverUi
 import io.github.rupakc.travelplanner.feature.results.LoadStatus
 import io.github.rupakc.travelplanner.feature.results.R
@@ -53,7 +55,7 @@ private fun Sheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun Title(text: String) = Text(text, style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+private fun Title(text: String) = Text(text, style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() }.readsWithoutEmoji(text))
 
 /** Web LayoverModal: can you leave the airport, transit visa, a mini-plan, buffers, airside alternative. */
 @Suppress("CyclomaticComplexMethod")
@@ -134,7 +136,7 @@ internal fun LayoverSheet(ui: LayoverUi, onDismiss: () -> Unit) {
 internal fun VerificationSheet(detail: VerificationDetail, onOpenLink: (String) -> Unit, onDismiss: () -> Unit) {
     val v = detail.verification
     Sheet(onDismiss) {
-        Title(stringResource(R.string.results_verification_title, v.label.orEmpty()))
+        Title(stringResource(R.string.results_verification_title, verificationLabel(v)))
         v.summary?.let { Text(it, style = TravelTheme.typography.bodyMedium) }
         v.checks.forEachIndexed { i, check ->
             if (i > 0) HorizontalDivider(color = TravelTheme.colors.outlineVariant)

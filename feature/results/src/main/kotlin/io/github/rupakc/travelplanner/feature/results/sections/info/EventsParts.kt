@@ -32,6 +32,7 @@ import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.TravelEvent
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.results.R
 
 /** Web EVENT_CATEGORY_STYLE emoji (unknown → "other" ✨). */
@@ -111,7 +112,7 @@ private fun EventCard(event: TravelEvent, selected: Boolean, onToggle: () -> Uni
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), itemVerticalAlignment = Alignment.CenterVertically) {
                 InfoPill("${eventEmoji(event.category)} ${event.category.orEmpty()}".trim(), tone = Tone.Accent, section = SectionId.EVENTS)
-                EventDates(event, accent.icon)
+                EventDates(event, accent.text)
             }
             Text(event.name.orEmpty(), style = TravelTheme.typography.titleMedium)
             event.description?.let { Text(it, style = TravelTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis) }

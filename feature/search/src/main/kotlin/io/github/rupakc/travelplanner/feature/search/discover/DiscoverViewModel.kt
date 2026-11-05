@@ -18,6 +18,7 @@ import io.github.rupakc.travelplanner.core.domain.search.toDiscoveryRequest
 import io.github.rupakc.travelplanner.core.domain.search.validateTripDates
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
 import java.time.LocalDate
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +47,9 @@ sealed interface DiscoverEvent {
     data class UpdateForm(val form: SearchForm) : DiscoverEvent
 
     data object Submit : DiscoverEvent
+
+    /** The UI language (per-app locale): budgets are read in it ("1.500" is 1500 in Spanish). */
+    data class SetLocale(val locale: Locale) : DiscoverEvent
 }
 
 /** Web Surprise me (`POST /api/discover`), pre-filled from preferences like the web. */
@@ -60,6 +64,7 @@ class DiscoverViewModel
         private val _state = MutableStateFlow(DiscoverUiState(today = clock.today()))
         val state: StateFlow<DiscoverUiState> = _state.asStateFlow()
         private var job: Job? = null
+        private var locale: Locale = Locale.getDefault()
 
         init {
             viewModelScope.launch {
@@ -81,6 +86,7 @@ class DiscoverViewModel
             when (event) {
                 is DiscoverEvent.UpdateForm -> _state.update { it.copy(form = event.form, dateIssues = emptyList()) }
                 DiscoverEvent.Submit -> submit()
+                is DiscoverEvent.SetLocale -> locale = event.locale
             }
         }
 
@@ -96,7 +102,7 @@ class DiscoverViewModel
             _state.update { it.copy(loading = true, error = null, destinations = null) }
             job =
                 viewModelScope.launch {
-                    when (val result = discoverRepository.discover(toDiscoveryRequest(s.form))) {
+                    when (val result = discoverRepository.discover(toDiscoveryRequest(s.form, locale))) {
                         is AppResult.Success -> _state.update { it.copy(loading = false, destinations = result.value.destinations) }
                         is AppResult.Failure -> _state.update { it.copy(loading = false, error = result.error) }
                     }

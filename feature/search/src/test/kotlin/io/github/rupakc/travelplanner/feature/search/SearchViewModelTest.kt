@@ -118,6 +118,20 @@ class SearchViewModelTest {
         }
 
     @Test
+    fun `the budget is read in the UI language`() =
+        runTest {
+            val vm = vm()
+            vm.setLocale(java.util.Locale.forLanguageTag("es-ES"))
+            vm.effect.test {
+                vm.onEvent(SearchFormEvent.UpdateForm(vm.state.value.form.copy(origin = "JFK", destination = "HND", budgetUsd = "1.500,50")))
+                vm.onEvent(SearchFormEvent.Submit)
+                assertEquals(SearchEffect.SearchStarted, awaitItem())
+            }
+            assertEquals(1500.5, search.started.single().budgetUsd)
+            assertEquals("medium", prefs.current.value.budgetCategory)
+        }
+
+    @Test
     fun `a search over unsaved picks asks first, then starts a new plan for the new search`() {
         plan.attachSearch(TravelSearchRequest(origin = "NYC", destination = "Paris", departureDate = "2026-12-01", nationality = "Indian"), null)
         plan.toggle(PlanItem.HotelItem(Hotel(name = "Paris hotel")))

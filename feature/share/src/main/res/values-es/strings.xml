@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="share_title">Viaje compartido</string>
-    <string name="share_brand">✈ Viaje de Voyager</string>
+    <string name="share_brand">✈ Viaje de %1$s</string>
     <string name="share_unavailable_title">Este viaje compartido no está disponible</string>
     <string name="share_unavailable_message">Puede que el enlace se haya revocado o esté mal escrito.</string>
-    <string name="share_plan_own">Planea tu propio viaje</string>
+    <string name="share_plan_own">Planifica tu propio viaje</string>
     <string name="share_destination_fallback">Un lugar maravilloso</string>
     <string name="share_from">desde %1$s</string>
     <string name="share_dates">%1$s → %2$s</string>

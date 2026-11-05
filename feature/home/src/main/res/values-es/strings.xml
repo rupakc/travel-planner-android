@@ -21,9 +21,9 @@
         <item quantity="many">Dentro de %d días</item>
         <item quantity="other">Dentro de %d días</item>
     </plurals>
-    <string name="home_plan_next_title">Planea tu próximo viaje</string>
+    <string name="home_plan_next_title">Planifica tu próximo viaje</string>
     <string name="home_plan_next_message">Vuelos, hoteles, visado, tiempo y más, planificados juntos en una sola búsqueda.</string>
-    <string name="home_plan_trip">Planear un viaje</string>
+    <string name="home_plan_trip">Planificar un viaje</string>
     <string name="home_tools_heading">Tus herramientas</string>
     <string name="home_tools_empty_title">No hay herramientas activadas</string>
     <string name="home_tools_empty_message">Activa funciones en Ajustes o repite el cuestionario de viajero.</string>
@@ -51,7 +51,7 @@
     <string name="home_search_clear_filters">Mostrar todos los resultados</string>
     <string name="home_search_empty_title">Busca en todo</string>
     <string name="home_search_empty_message">Encuentra viajes guardados, chats, búsquedas recientes, funciones y ajustes. Funciona sin conexión.</string>
-    <string name="home_search_none_title">Sin resultados para “%1$s”</string>
+    <string name="home_search_none_title">Sin resultados para «%1$s»</string>
     <string name="home_search_none_message">Prueba con otra palabra o revisa la ortografía.</string>
     <string name="home_search_feature_off">Desactivada: al abrirla se activa</string>
     <string name="home_search_open_result">Abrir</string>

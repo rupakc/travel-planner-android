@@ -55,6 +55,7 @@ import io.github.rupakc.travelplanner.core.model.search.CompareHotel
 import io.github.rupakc.travelplanner.core.model.search.CompareSummary
 import io.github.rupakc.travelplanner.core.model.search.CompareVisa
 import io.github.rupakc.travelplanner.core.model.search.CompareWeather
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.search.R
 import io.github.rupakc.travelplanner.feature.search.components.AirportField
 import io.github.rupakc.travelplanner.feature.search.components.BudgetField
@@ -393,14 +394,14 @@ private fun rowValue(s: CompareSummary, row: CompareRow): CellValue? =
 private fun scoreValue(score: Int?): CellValue? = score?.let { CellValue(stringResource(R.string.search_compare_out_of_20, it)) }
 
 @Composable
-private fun dailyValue(usd: Double?): CellValue? = usd?.let { CellValue(stringResource(R.string.search_compare_per_day, fmtUsd(it))) }
+private fun dailyValue(usd: Double?): CellValue? = usd?.let { CellValue(stringResource(R.string.search_compare_per_day, fmtUsd(it, currentLocale()))) }
 
 @Composable
 private fun estimateValue(e: CompareEstimate?): CellValue? {
     if (e == null) return null
     val total = e.totalUsd ?: return null
     return CellValue(
-        fmtUsd(total),
+        fmtUsd(total, currentLocale()),
         listOfNotNull(
             Badge(stringResource(R.string.search_compare_estimate), Tone.NEUTRAL),
             Badge(stringResource(R.string.search_compare_under_budget), Tone.GOOD).takeIf { e.budgetStatus == "under" },
@@ -424,7 +425,7 @@ private fun flightValue(f: CompareFlight?): CellValue? {
             }
         }
     return CellValue(
-        fmtUsd(f.priceUsd),
+        fmtUsd(f.priceUsd, currentLocale()),
         listOfNotNull(Badge(stringResource(R.string.search_compare_estimate), Tone.WARN).takeIf { f.source == "estimate" }),
         listOfNotNull(stops, fmtDuration(f.durationMinutes), f.airline).joinToString(" · ").ifEmpty { null },
     )
@@ -434,8 +435,8 @@ private fun flightValue(f: CompareFlight?): CellValue? {
 private fun hotelValue(h: CompareHotel?): CellValue? {
     if (h == null) return null
     return CellValue(
-        stringResource(R.string.search_compare_typical, fmtUsd(h.typicalNightlyUsd)),
-        sub = h.cheapestGoodNightlyUsd?.let { stringResource(R.string.search_compare_from_reviewed, fmtUsd(it)) },
+        stringResource(R.string.search_compare_typical, fmtUsd(h.typicalNightlyUsd, currentLocale())),
+        sub = h.cheapestGoodNightlyUsd?.let { stringResource(R.string.search_compare_from_reviewed, fmtUsd(it, currentLocale())) },
     )
 }
 
@@ -454,7 +455,16 @@ private fun weatherValue(w: CompareWeather?): CellValue? {
 @Composable
 private fun visaValue(v: CompareVisa?): CellValue? {
     if (v == null) return null
-    val fee = v.feeUsd?.let { if (it == 0.0) stringResource(R.string.search_compare_no_fee) else stringResource(R.string.search_compare_fee, fmtUsd(it)) }
+    val fee =
+        v.feeUsd?.let {
+            if (it ==
+                0.0
+            ) {
+                stringResource(R.string.search_compare_no_fee)
+            } else {
+                stringResource(R.string.search_compare_fee, fmtUsd(it, currentLocale()))
+            }
+        }
     val stay = v.maxStayDays?.let { pluralStringResource(R.plurals.search_compare_max_stay, it, it) }
     val badge =
         if (v.verified == true) {

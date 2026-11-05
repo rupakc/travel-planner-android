@@ -12,12 +12,12 @@ primary, Sora for display and headlines, Inter for body, an accent colour per se
 | Typography | `TravelTheme.typography` | Sora display/headline, Inter title/body/label via Google downloadable fonts, system fallback (`theme/Type.kt`) |
 | Shapes | `TravelTheme.shapes`, `TravelShape` | Input 8, ItemCard 12, LargeCard 24, Pill |
 | Spacing | `TravelTheme.spacing` | xxs 2, xs 4, sm 8, md 12, lg 16, xl 24, xxl 32, gutter 16, minTouchTarget 48, accentBar 4 (dp) |
-| Section accents | `TravelTheme.sectionAccents[SectionId]` | `SectionAccent(bar, icon, tint)` |
+| Section accents | `TravelTheme.sectionAccents[SectionId]` | `SectionAccent(bar, icon, tint, text)`: `text` (light `-700`, dark `-300`) for words in the accent colour |
 
 ## Changing the brand
 
 - Colours: edit the constants in `theme/Palette.kt` and the two schemes in `theme/Color.kt`; section accents are in `theme/SectionAccent.kt`.
-  Check contrast (AA) in both themes.
+  Run `:core:designsystem:testLocalDebugUnitTest`: `ContrastTest` fails on any text pair under 4.5:1 or border under 3:1.
 - Typography: change the font families in `theme/Type.kt`. Fonts come from the Google Fonts provider; the certificates ship under our own
   names (`tp_google_fonts_certs`). For a bundled font, add it under `res/font` and swap the `FontFamily`.
 - Never reference colours by literal in features; add a token instead.

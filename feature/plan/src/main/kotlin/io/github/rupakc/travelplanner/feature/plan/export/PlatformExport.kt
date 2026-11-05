@@ -37,7 +37,13 @@ internal object PlatformExport {
 
     /** "Name\nURL", plus a note when the link opens only in the app. */
     fun linkText(context: Context, link: ExportRequest.Link): String =
-        listOfNotNull(link.planName, link.url, context.getString(R.string.plan_link_app_only).takeIf { link.appOnly }).joinToString("\n")
+        listOfNotNull(
+            link.planName,
+            link.url,
+            context.getString(R.string.plan_link_app_only, context.getString(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)).takeIf {
+                link.appOnly
+            },
+        ).joinToString("\n")
 
     private suspend fun shareIcs(context: Context, ics: ExportRequest.Ics): Boolean {
         val uri =

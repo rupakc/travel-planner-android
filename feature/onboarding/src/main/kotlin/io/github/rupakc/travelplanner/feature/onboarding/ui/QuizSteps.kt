@@ -60,7 +60,10 @@ internal fun WelcomeStep(state: OnboardingUiState, onEvent: (OnboardingEvent) ->
             verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.lg),
         ) {
             Text(
-                stringResource(if (state.fromSettings) R.string.onboarding_retake_title else R.string.onboarding_title),
+                stringResource(
+                    if (state.fromSettings) R.string.onboarding_retake_title else R.string.onboarding_title,
+                    stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name),
+                ),
                 style = TravelTheme.typography.displaySmall,
                 color = TravelTheme.colors.onBackground,
                 modifier = Modifier.semantics { heading() },

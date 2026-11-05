@@ -55,7 +55,11 @@ internal fun ServerContent(state: ServerUiState, onEvent: (ServerEvent) -> Unit,
         verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
     ) {
         Text(stringResource(R.string.auth_server_title), style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
-        Text(stringResource(R.string.auth_server_message), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
+        Text(
+            stringResource(R.string.auth_server_message, stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)),
+            style = TravelTheme.typography.bodyMedium,
+            color = TravelTheme.colors.onSurfaceVariant,
+        )
         OutlinedTextField(
             value = state.input,
             onValueChange = { onEvent(ServerEvent.InputChanged(it)) },

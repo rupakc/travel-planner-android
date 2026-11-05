@@ -59,6 +59,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
+import io.github.rupakc.travelplanner.core.ui.format.localUsd
 import io.github.rupakc.travelplanner.feature.chat.ChatUiEvent
 import io.github.rupakc.travelplanner.feature.chat.ChatUiState
 import io.github.rupakc.travelplanner.feature.chat.R
@@ -209,7 +210,7 @@ private fun ReplyAnnouncer(announcement: ReplyAnnouncement?, onShown: (Int) -> U
 private fun EmptyConversation(onSend: (String) -> Unit) {
     val starters =
         listOf(
-            stringResource(R.string.chat_starter_1),
+            stringResource(R.string.chat_starter_1, localUsd(STARTER_BUDGET_USD)),
             stringResource(R.string.chat_starter_2),
             stringResource(R.string.chat_starter_3),
             stringResource(R.string.chat_starter_4),
@@ -231,7 +232,7 @@ private fun EmptyConversation(onSend: (String) -> Unit) {
             )
         }
         Text(
-            stringResource(R.string.chat_title),
+            stringResource(R.string.chat_title, stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)),
             style = TravelTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
             modifier = Modifier.semantics { heading() },
@@ -313,3 +314,6 @@ internal fun Composer(isStreaming: Boolean, onSend: (String) -> Unit, onStop: ()
 private const val SKELETON_LINES = 4
 private const val ANNOUNCE_CLEAR_MILLIS = 5_000L
 private const val COMPOSER_MAX_LINES = 6
+
+/** The budget in the first starter prompt (web copy: "$2000"). */
+private const val STARTER_BUDGET_USD = 2000.0

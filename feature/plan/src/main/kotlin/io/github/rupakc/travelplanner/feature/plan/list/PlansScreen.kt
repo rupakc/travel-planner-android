@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
@@ -40,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -50,6 +53,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.common.AppError
@@ -60,8 +64,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.model.TripFilter
 import io.github.rupakc.travelplanner.feature.plan.model.TripSort
@@ -131,6 +135,7 @@ internal fun PlansScreen(
 
 @Composable
 private fun SearchField(query: String, onEvent: (PlansEvent) -> Unit) {
+    val keyboard = LocalSoftwareKeyboardController.current
     OutlinedTextField(
         value = query,
         onValueChange = { onEvent(PlansEvent.QueryChanged(it)) },
@@ -146,6 +151,9 @@ private fun SearchField(query: String, onEvent: (PlansEvent) -> Unit) {
             }
         },
         singleLine = true,
+        // The list filters as you type; Search on the keyboard just puts the keyboard away so the results show.
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
         shape = TravelShape.Input,
     )
 }
@@ -306,7 +314,7 @@ internal fun TripRow(trip: TripSummary, selected: Boolean, onOpen: () -> Unit, m
                     Text(timingLabel(trip.timing), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.primary)
                     Text(pluralStringResource(R.plurals.plan_items, trip.itemCount, trip.itemCount), style = TravelTheme.typography.labelMedium)
                     if (trip.totalCostUsd > 0) {
-                        Text(stringResource(R.string.plan_planned_spend, formatPrice(trip.totalCostUsd)), style = TravelTheme.typography.labelMedium)
+                        Text(stringResource(R.string.plan_planned_spend, localPrice(trip.totalCostUsd)), style = TravelTheme.typography.labelMedium)
                     }
                     travellersLabel(trip.travellers)?.let { Text(it, style = TravelTheme.typography.labelMedium) }
                 }

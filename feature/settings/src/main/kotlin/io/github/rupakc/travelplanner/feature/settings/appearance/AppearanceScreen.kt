@@ -84,7 +84,7 @@ fun AppearanceScreen(
                 highlighted = highlightKey == SettingsEntry.DYNAMIC_COLOR.key,
                 onCheckedChange = { onEvent(AppearanceEvent.SetDynamicColor(it)) },
             )
-            SettingsNote(stringResource(R.string.settings_dynamic_color_note))
+            SettingsNote(stringResource(R.string.settings_dynamic_color_note, stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)))
         }
     }
 }

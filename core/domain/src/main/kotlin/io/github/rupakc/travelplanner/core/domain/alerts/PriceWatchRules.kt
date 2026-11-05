@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.core.domain.alerts
 
+import io.github.rupakc.travelplanner.core.domain.format.parseLocalizedAmount
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
@@ -14,10 +15,10 @@ import kotlinx.serialization.json.intOrNull
 
 // Port of frontend/src/utils/priceWatch.js and components/alerts/alertKinds.js.
 
-/** A typed price target (web `checkPriceTarget`): symbols, commas and spaces allowed. */
-fun checkPriceTarget(raw: String?): TargetCheck {
+/** A typed price target (web `checkPriceTarget`): symbols and spaces allowed; separators read in [locale]. */
+fun checkPriceTarget(raw: String?, locale: Locale): TargetCheck {
     val text = raw.orEmpty()
-    val value = text.replace(Regex("[^\\d.-]"), "").toDoubleOrNull()?.takeIf { it.isFinite() && it > 0 }
+    val value = parseLocalizedAmount(text, locale)?.takeIf { it > 0 }
     if (text.isBlank() || value == null) return TargetCheck(null, TargetError.NOT_A_PRICE)
     return TargetCheck(value, null)
 }

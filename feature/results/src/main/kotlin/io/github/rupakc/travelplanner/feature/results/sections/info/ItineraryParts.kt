@@ -47,7 +47,6 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.domain.itinerary.ArrangedItinerary
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItineraryLayouts
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItinerarySchedule
@@ -64,9 +63,11 @@ import io.github.rupakc.travelplanner.core.model.section.ItineraryDay
 import io.github.rupakc.travelplanner.core.model.section.ItinerarySlot
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.core.ui.itinerary.ItineraryDayCard
 import io.github.rupakc.travelplanner.core.ui.itinerary.ItinerarySlotRow
 import io.github.rupakc.travelplanner.core.ui.itinerary.timeOfDayLabel
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.results.R
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -244,7 +245,7 @@ private fun moveTargetsByKey(data: ItineraryData, layout: ItineraryLayout?, arra
 private fun ItineraryHeader(locked: Boolean, total: Double?, template: Boolean, timed: Boolean) {
     if (locked) MetaText(stringResource(R.string.itin_editing_locked))
     FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
-        total?.takeIf { it > 0 }?.let { InfoPill(stringResource(R.string.itin_total_cost, formatPrice(it)), tone = Tone.Accent, section = SectionId.ITINERARY) }
+        total?.takeIf { it > 0 }?.let { InfoPill(stringResource(R.string.itin_total_cost, localPrice(it)), tone = Tone.Accent, section = SectionId.ITINERARY) }
         if (template) InfoPill(stringResource(R.string.itin_template), tone = Tone.Warning)
     }
     if (timed) MetaText(stringResource(R.string.itin_times_note))
@@ -487,11 +488,12 @@ private fun SlotEditor(slot: ItinerarySlot, key: String, edit: SlotEdit, note: S
                 label = { Text(stringResource(R.string.itin_field_location)) },
                 modifier = Modifier.weight(1f),
             )
+            val locale = currentLocale()
             OutlinedTextField(
                 value = costText,
                 onValueChange = { v ->
                     costText = v
-                    host.onUpdateSelections { ItineraryEdits.setEdit(it, key, SlotEditFields.COST, ItineraryEdits.costValue(v)) }
+                    host.onUpdateSelections { ItineraryEdits.setEdit(it, key, SlotEditFields.COST, ItineraryEdits.costValue(v, locale)) }
                 },
                 label = { Text(stringResource(R.string.itin_field_cost)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),

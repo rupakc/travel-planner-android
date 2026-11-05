@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="section_flights">Vuelos</string>
-    <string name="section_weather">Clima</string>
+    <string name="section_weather">Tiempo</string>
     <string name="section_hotels">Hoteles</string>
     <string name="section_activities">Actividades</string>
     <string name="section_places_to_see">Lugares para ver</string>
@@ -58,16 +58,16 @@
     <string name="watch_cancel">Cancelar</string>
     <string name="watch_done">Listo</string>
     <string name="watch_see_alerts">Ver tus alertas</string>
-    <string name="watch_expanded">Desplegado</string>
-    <string name="watch_collapsed">Plegado</string>
+    <string name="watch_expanded">Expandido</string>
+    <string name="watch_collapsed">Contraído</string>
     <string name="watch_fare_title">Vigilar esta tarifa</string>
     <string name="watch_fare_title_done">Vigilando esta tarifa</string>
     <string name="watch_fare_title_already">Ya estás vigilando esta tarifa</string>
-    <string name="watch_fare_any_drop_hint">Solo bajadas importantes: al menos 15 $ y un 5 %. Nunca más de una vez al día.</string>
+    <string name="watch_fare_any_drop_hint">Solo bajadas importantes: al menos %1$s y un 5 %%. Nunca más de una vez al día.</string>
     <string name="watch_fare_target_already_under">La tarifa de hoy (%1$s) ya está por debajo; te avisaremos cuando baje del precio de hoy.</string>
     <string name="watch_fare_target_prefilled">Rellenado con el extremo bajo del precio habitual.</string>
     <string name="watch_flexible">Incluir fechas cercanas (±3 días)</string>
-    <string name="watch_flexible_hint">También te avisaremos si salir unos días antes o después ahorra al menos 25 $, con la misma duración del viaje.</string>
+    <string name="watch_flexible_hint">También te avisaremos si salir unos días antes o después ahorra al menos %1$s, con la misma duración del viaje.</string>
     <string name="watch_fare_saving">Comprobando el precio de hoy…</string>
     <string name="watch_fare_error">No se pudo empezar a vigilar esta tarifa. Inténtalo de nuevo en un momento.</string>
     <string name="watch_fare_done_price">La tarifa de hoy es %1$s (%2$s). La revisaremos unas dos veces al día y solo te avisaremos cuando merezca la pena.</string>
@@ -86,18 +86,18 @@
     <string name="watch_price_title_already">Ya lo estás vigilando (%1$s)</string>
     <string name="watch_price_any_drop_hint">Solo bajadas importantes. Nunca más de una vez al día.</string>
     <string name="watch_price_target_hint">El precio total, en %1$s.</string>
-    <string name="watch_price_saving">Buscando el precio en vivo…</string>
+    <string name="watch_price_saving">Buscando el precio en directo…</string>
     <string name="watch_price_error">No se pudo empezar a vigilar (%1$s). Inténtalo de nuevo en un momento.</string>
-    <string name="watch_price_done_price">El precio en vivo es %1$s. Lo revisaremos unas dos veces al día y solo te avisaremos cuando merezca la pena.</string>
-    <string name="watch_price_done_pending">Tomaremos el precio en vivo en breve; después lo revisaremos unas dos veces al día y solo te avisaremos cuando merezca la pena.</string>
-    <string name="watch_no_live_estimate">Nuestra estimación de IA era %1$s%2$s: es una estimación, no un precio en vivo, así que no podemos vigilarla.</string>
-    <string name="watch_suggestions_heading">Precios en vivo que sí encontramos:</string>
+    <string name="watch_price_done_price">El precio en directo es %1$s. Lo revisaremos unas dos veces al día y solo te avisaremos cuando merezca la pena.</string>
+    <string name="watch_price_done_pending">Tomaremos el precio en directo en breve; después lo revisaremos unas dos veces al día y solo te avisaremos cuando merezca la pena.</string>
+    <string name="watch_no_live_estimate">Nuestra estimación de IA era %1$s%2$s: es una estimación, no un precio en directo, así que no podemos vigilarla.</string>
+    <string name="watch_suggestions_heading">Precios en directo que sí encontramos:</string>
     <string name="watch_this_instead">Vigilar este en su lugar</string>
-    <string name="watch_generic_lookup">Buscaremos el precio en vivo cuando empieces a vigilar.</string>
+    <string name="watch_generic_lookup">Buscaremos el precio en directo cuando empieces a vigilar.</string>
     <string name="watch_tracking">Vigilando %1$s</string>
     <string name="watch_hotel_estimate_one_room">Estimación de IA para 1 habitación, toda la estancia</string>
-    <string name="watch_hotel_find">Buscaremos %1$s en Google Hotels en %2$s y vigilaremos su precio en vivo para %3$s.</string>
-    <string name="watch_hotel_find_no_city">Buscaremos %1$s en Google Hotels y vigilaremos su precio en vivo para %2$s.</string>
+    <string name="watch_hotel_find">Buscaremos %1$s en Google Hotels en %2$s y vigilaremos su precio en directo para %3$s.</string>
+    <string name="watch_hotel_find_no_city">Buscaremos %1$s en Google Hotels y vigilaremos su precio en directo para %2$s.</string>
     <string name="watch_hotel_your_stay">tu estancia</string>
     <string name="watch_hotel_tracking">Vigilando: %1$s en Google Hotels</string>
     <string name="watch_hotel_nightly">%1$s la noche</string>
@@ -108,7 +108,7 @@
     <string name="watch_activity_find">Buscaremos %1$s en %2$s en GetYourGuide y Viator y vigilaremos su precio «desde» por persona%3$s.</string>
     <string name="watch_activity_listing">Vigilaremos el anuncio que elegiste para %1$s%2$s.</string>
     <string name="watch_activity_date">Para el %1$s; dejaremos de revisarlo después de ese día.</string>
-    <string name="watch_activity_estimate">Estimación de IA: %1$s por persona; es una estimación, no un precio en vivo.</string>
+    <string name="watch_activity_estimate">Estimación de IA: %1$s por persona; es una estimación, no un precio en directo.</string>
     <string name="watch_activity_the_listing">el anuncio</string>
     <string name="watch_activity_rating">Valoración %1$s</string>
     <string name="watch_activity_from_pp">desde %1$s por persona</string>
@@ -123,28 +123,28 @@
     <string name="watch_trip_part_sim">SIM / eSIM</string>
     <string name="watch_trip_note_cheapest">se sigue como la tarifa más barata en tus fechas</string>
     <string name="watch_trip_note_per_person">por persona × %1$d</string>
-    <string name="watch_trip_how">Al empezar, buscamos precios en vivo de tu vuelo (la tarifa más barata en tus fechas, no un vuelo concreto), tu hotel y hasta 5 actividades, y mostramos el total en vivo. Lo que no tenga precio en vivo se queda en su estimación.</string>
+    <string name="watch_trip_how">Al empezar, buscamos precios en directo de tu vuelo (la tarifa más barata en tus fechas, no un vuelo concreto), tu hotel y hasta 5 actividades, y mostramos el total en directo. Lo que no tenga precio en directo se queda en su estimación.</string>
     <string name="watch_trip_estimates_fixed">Las estimaciones son fijas y nunca generan alertas.</string>
-    <string name="watch_trip_alert_rule">Las alertas solo llegan cuando los precios en vivo mueven el total al menos 25 $ o un 4 %.</string>
+    <string name="watch_trip_alert_rule">Las alertas solo llegan cuando los precios en directo mueven el total al menos %1$s o un 4 %%.</string>
     <string name="watch_trip_watching_caption">Lo que vigilamos · %1$s, %2$s</string>
     <string name="watch_trip_total">Total</string>
     <string name="watch_trip_not_in_total">no incluido en el total</string>
     <string name="watch_trip_diff_less">Son %1$s menos que el total de Mi plan (%2$s)</string>
     <string name="watch_trip_diff_more">Son %1$s más que el total de Mi plan (%2$s)</string>
-    <string name="watch_trip_reason_fare">los vuelos son la tarifa en vivo más barata en tus fechas, no el vuelo que elegiste</string>
-    <string name="watch_trip_reason_hotel">el hotel es su precio en vivo de Google Hotels</string>
+    <string name="watch_trip_reason_fare">los vuelos son la tarifa en directo más barata en tus fechas, no el vuelo que elegiste</string>
+    <string name="watch_trip_reason_hotel">el hotel es su precio en directo de Google Hotels</string>
     <string name="watch_trip_reason_per_person">las actividades se cuentan por persona × %1$d</string>
-    <string name="watch_trip_reason_activities">las actividades usan sus precios «desde» en vivo</string>
+    <string name="watch_trip_reason_activities">las actividades usan sus precios «desde» en directo</string>
     <string name="watch_badge_estimate">Estimación</string>
     <string name="watch_badge_estimate_hint">Una estimación de IA de tu búsqueda, fija. Las estimaciones nunca generan alertas.</string>
     <string name="watch_badge_unavailable">No disponible</string>
-    <string name="watch_badge_unavailable_hint">No disponible en la última revisión; se muestra el último precio en vivo que vimos.</string>
+    <string name="watch_badge_unavailable_hint">No disponible en la última revisión; se muestra el último precio en directo que vimos.</string>
     <string name="watch_badge_not_checked">Sin revisar</string>
-    <string name="watch_badge_not_checked_hint">La última revisión de esta parte falló; se muestra el último precio en vivo que vimos.</string>
-    <string name="watch_badge_live_earlier">En vivo · revisión anterior</string>
+    <string name="watch_badge_not_checked_hint">La última revisión de esta parte falló; se muestra el último precio en directo que vimos.</string>
+    <string name="watch_badge_live_earlier">En directo · revisión anterior</string>
     <string name="watch_badge_live_earlier_hint">Revisado en una ronda anterior (revisamos hasta 5 actividades cada vez).</string>
-    <string name="watch_badge_live">En vivo</string>
-    <string name="watch_badge_live_hint">Precio en vivo de la última revisión.</string>
+    <string name="watch_badge_live">En directo</string>
+    <string name="watch_badge_live_hint">Precio en directo de la última revisión.</string>
     <plurals name="watch_total_for_travellers">
         <item quantity="one">total para %d viajero</item>
         <item quantity="many">total para %d viajeros</item>
@@ -181,8 +181,8 @@
         <item quantity="other">Estimación de IA: %1$d habitaciones × %2$s, toda la estancia</item>
     </plurals>
     <plurals name="watch_live_count">
-        <item quantity="one">%d en vivo</item>
-        <item quantity="many">%d en vivo</item>
-        <item quantity="other">%d en vivo</item>
+        <item quantity="one">%d en directo</item>
+        <item quantity="many">%d en directo</item>
+        <item quantity="other">%d en directo</item>
     </plurals>
 </resources>

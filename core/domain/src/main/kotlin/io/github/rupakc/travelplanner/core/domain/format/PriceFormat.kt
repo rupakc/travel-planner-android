@@ -4,6 +4,7 @@ import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.floor
 import kotlin.math.roundToLong
 
 /**
@@ -13,8 +14,11 @@ import kotlin.math.roundToLong
  * whole (or always with [cents]); zero-decimal currencies (JPY) never show cents.
  * A code the platform doesn't know falls back to "CODE 5" / "CODE 5.50".
  * Returns "" for null/NaN/infinite.
+ *
+ * [locale] picks separators and symbol placement: the UI passes the app language ("1480 US$" in
+ * Spanish); the default en-US is for exports and web-parity tests (recorded in MEMORY).
  */
-fun formatPrice(amount: Double?, currency: String? = "USD", cents: Boolean = false): String {
+fun formatPrice(amount: Double?, currency: String? = "USD", cents: Boolean = false, locale: Locale = Locale.US): String {
     if (amount == null || !amount.isFinite()) return ""
     val code = currency?.trim()?.takeIf(String::isNotEmpty)?.uppercase(Locale.ROOT) ?: "USD"
     val rounded = (amount * CENTS).roundToLong() / CENTS
@@ -23,14 +27,14 @@ fun formatPrice(amount: Double?, currency: String? = "USD", cents: Boolean = fal
     val currencyDigits = platformCurrency?.defaultFractionDigits?.takeIf { it >= 0 } ?: CENT_DIGITS
     val digits = if ((cents || fractional) && currencyDigits > 0) CENT_DIGITS else 0
     return if (platformCurrency != null) {
-        NumberFormat.getCurrencyInstance(Locale.US).apply {
+        NumberFormat.getCurrencyInstance(locale).apply {
             this.currency = platformCurrency
             minimumFractionDigits = digits
             maximumFractionDigits = digits
         }.format(amount)
     } else {
         val number =
-            NumberFormat.getNumberInstance(Locale.US).apply {
+            NumberFormat.getNumberInstance(locale).apply {
                 minimumFractionDigits = digits
                 maximumFractionDigits = digits
             }.format(amount)
@@ -38,6 +42,18 @@ fun formatPrice(amount: Double?, currency: String? = "USD", cents: Boolean = fal
     }
 }
 
+/**
+ * Whole US dollars (web `formatUsd`): "$1,234" in en-US, "1234 US$" in Spanish. Rounds half up like JS
+ * `Math.round`. [locale] as in [formatPrice].
+ */
+fun formatWholeUsd(amount: Double, locale: Locale = Locale.US): String =
+    NumberFormat.getCurrencyInstance(locale).apply {
+        currency = Currency.getInstance("USD")
+        minimumFractionDigits = 0
+        maximumFractionDigits = 0
+    }.format(floor(amount + HALF).toLong())
+
+private const val HALF = 0.5
 private const val CENTS = 100.0
 private const val CENTS_BELOW = 100.0
 private const val CENT_DIGITS = 2

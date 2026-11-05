@@ -10,7 +10,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.WatchState
 
@@ -49,7 +49,7 @@ fun WatchPriceAction(available: Boolean, itemName: String, state: WatchState?, o
 @Composable
 private fun WatchButton(idle: String, idleA11y: String, state: WatchState?, onWatch: () -> Unit, modifier: Modifier) {
     val watching = state != null && !state.busy && state.watchId != null
-    val price = state?.price?.let { formatPrice(it, state.currency ?: "USD") }?.takeIf(String::isNotEmpty)
+    val price = state?.price?.let { localPrice(it, state.currency ?: "USD") }?.takeIf(String::isNotEmpty)
     val label =
         when {
             watching && price != null -> stringResource(R.string.results_watching_price, price)

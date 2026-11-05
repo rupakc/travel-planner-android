@@ -90,7 +90,7 @@ internal fun LoginScreen(
     val focus = LocalFocusManager.current
     AuthBackdrop(modifier) {
         AuthHeader(
-            title = stringResource(R.string.auth_app_name),
+            title = stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name),
             subtitle = stringResource(R.string.auth_tagline),
             icon = painterResource(R.drawable.ic_flight),
         )

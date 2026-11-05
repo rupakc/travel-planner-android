@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,7 +40,7 @@ fun FeaturesScreen(state: FeaturesUiState, onEvent: (FeaturesEvent) -> Unit, onB
         }
         KeyedSettingsList(keys = emptyList(), highlightKey = null, contentPadding = padding) {
             item(key = "intro", contentType = "note") {
-                SettingsNote(pluralStringResource(R.plurals.settings_features_on, state.onCount, state.onCount, state.rows.size))
+                SettingsNote(stringResource(R.string.settings_features_on, state.onCount, state.rows.size))
                 SettingsNote(stringResource(R.string.settings_features_intro))
             }
             FeatureGroup.entries.forEach { group ->
