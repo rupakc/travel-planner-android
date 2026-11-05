@@ -5,11 +5,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -32,11 +37,17 @@ import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.feature.results.sections.ItinerarySectionContent
 import io.github.rupakc.travelplanner.feature.results.sections.PackingListSectionContent
 import io.github.rupakc.travelplanner.feature.results.sections.StressTestSectionContent
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -74,7 +85,63 @@ class PlanEditingUiTest {
             totalEstimatedCostUsd = 10.0,
         )
 
+    /** The announcement is a visible line with real bounds and a polite live region (TalkBack-reachable). */
+    private fun assertStatus(text: String) {
+        val node = compose.onNodeWithText(text)
+        node.performScrollTo().assertIsDisplayed()
+        node.assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+        val bounds = node.fetchSemanticsNode().boundsInRoot
+        assertTrue(bounds.width > 0f && bounds.height > 0f)
+    }
+
     // ---- itinerary --------------------------------------------------------------------------
+
+    @Test
+    fun `fast typing keeps every character even when the plan flow lags`() {
+        val actions = FakeSectionActions(laggingFlow = true)
+        show { ItinerarySectionContent(itinerary, actions) }
+        compose.onNodeWithContentDescription("Edit Tram").performScrollTo().performClick()
+        "Graça".forEach { compose.onNodeWithText("Location").performTextInput(it.toString()) }
+        compose.onNodeWithText("Graça").assertExists()
+        assertEquals("Graça", actions.value.itineraryEdits["1-afternoon"]!!["location"]!!.jsonPrimitive.content)
+        "Café".forEach { compose.onNodeWithText("Personal note").performTextInput(it.toString()) }
+        assertEquals("Café", actions.value.itineraryNotes["1-afternoon"])
+    }
+
+    @Test
+    fun `successive edits build on the latest layout, not a stale one`() {
+        val actions = FakeSectionActions(laggingFlow = true)
+        show { ItinerarySectionContent(itinerary, actions) }
+        compose.onNodeWithContentDescription("Move Castle").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Move to Day 1 · Evening (swap with Fado)").performClick()
+        // the screen still shows the old layout (flow lags) — the next action must not undo the first
+        compose.onNodeWithContentDescription("Move Tram").performScrollTo().performClick()
+        compose.onNodeWithText("Remove from day").performClick()
+        val moved = ItineraryLayouts.moveSlot(itinerary, null, "1-morning", 1, "evening")
+        assertEquals(ItineraryLayouts.removeSlot(itinerary, moved, "1-afternoon"), actions.value.itineraryLayout)
+    }
+
+    @Test
+    fun `a layout changed outside the editor clears undo`() {
+        val actions = FakeSectionActions()
+        show { ItinerarySectionContent(itinerary, actions) }
+        compose.onNodeWithContentDescription("Move Castle").performScrollTo().performClick()
+        compose.onNodeWithText("Remove from day").performClick()
+        compose.onNodeWithText("Undo").assertExists()
+        compose.runOnIdle { actions.onUpdateSelections { PlanSelections.EMPTY } } // e.g. "clear selections" / plan load
+        compose.waitForIdle()
+        compose.onNodeWithText("Undo").assertDoesNotExist()
+    }
+
+    @Test
+    fun `move menu reports expanded state and lists remove last`() {
+        show { ItinerarySectionContent(itinerary, FakeSectionActions()) }
+        val move = compose.onNodeWithContentDescription("Move Castle")
+        move.assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Collapsed"))
+        move.performScrollTo().performClick()
+        move.assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Expanded"))
+        compose.onNodeWithText("Remove from day").assertExists()
+    }
 
     @Test
     fun `itinerary renders derived times and the fixture`() {
@@ -94,12 +161,12 @@ class PlanEditingUiTest {
         val layout = actions.value.itineraryLayout
         assertEquals(ItineraryLayouts.moveSlot(itinerary, null, "1-morning", 1, "evening"), layout)
         compose.onNodeWithText("2 changes").assertExists()
-        compose.onNodeWithContentDescription("Moved Castle to Day 1 · Evening (swapped with Fado)").assertExists()
+        assertStatus("Moved Castle to Day 1 · Evening (swapped with Fado)")
         compose.onNodeWithText("09:00–11:00").assertExists() // Fado now in the morning
 
         compose.onNodeWithText("Undo").performScrollTo().performClick()
         assertNull(actions.value.itineraryLayout)
-        compose.onNodeWithContentDescription("Undid the last change").assertExists()
+        assertStatus("Undid the last change")
 
         compose.onNodeWithContentDescription("Move Tram").performScrollTo().performClick()
         compose.onNodeWithText("Remove from day").performClick()
@@ -111,7 +178,7 @@ class PlanEditingUiTest {
         compose.onNodeWithText("Remove from day").performClick()
         compose.onNodeWithText("Reset").performScrollTo().performClick()
         assertNull(actions.value.itineraryLayout)
-        compose.onNodeWithContentDescription("Itinerary reset to the original order").assertExists()
+        assertStatus("Itinerary reset to the original order")
     }
 
     @Test
@@ -193,6 +260,30 @@ class PlanEditingUiTest {
         compose.onNodeWithText("Re-check my edited plan").performScrollTo().performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Too many requests — please wait 30 seconds").assertExists()
+    }
+
+    @Test
+    fun `a running re-check survives the card leaving the composition`() {
+        val layout = ItineraryLayouts.moveSlot(itinerary, null, "1-morning", 1, "evening")
+        val gate = CompletableDeferred<AppResult<StressTestData>>()
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        val controller = StressRecheckController(scope) { gate.await() }
+        val actions =
+            FakeSectionActions(
+                initial = PlanSelections(itineraryLayout = layout),
+                sections = mapOf(SectionId.ITINERARY to sectionResult(SectionId.ITINERARY, itinerary)),
+                stressRecheck = controller,
+            )
+        var visible by mutableStateOf(true)
+        show { if (visible) StressTestSectionContent(StressTestData(overall = "amber", score = 60), actions) }
+        compose.onNodeWithText("Re-check my edited plan").performScrollTo().performClick()
+        compose.onNodeWithText("Re-checking…").assertExists()
+        compose.runOnIdle { visible = false } // scrolled away: section disposed
+        compose.runOnIdle { gate.complete(AppResult.Success(StressTestData(overall = "green", score = 95))) }
+        compose.runOnIdle { visible = true }
+        compose.onNodeWithText("Checked against your edited itinerary").assertExists()
+        compose.onNodeWithContentDescription("Health score: 95/100, Looking solid").assertExists()
+        scope.cancel()
     }
 
     @Test

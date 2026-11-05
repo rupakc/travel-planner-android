@@ -202,6 +202,8 @@
     <string name="itin_menu_target_swap">%1$s (intercambiar con %2$s)</string>
     <string name="itin_move_to_a11y">Mover al día %1$d · %2$s</string>
     <string name="itin_move_to_swap_a11y">Mover al día %1$d · %2$s (intercambiar con %3$s)</string>
+    <string name="itin_menu_expanded">Desplegado</string>
+    <string name="itin_menu_collapsed">Plegado</string>
     <string name="itin_removed">Quitadas</string>
     <string name="itin_restore">Restaurar</string>
     <string name="itin_restore_a11y">Restaurar %1$s</string>

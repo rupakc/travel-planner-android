@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
@@ -98,16 +100,46 @@ internal fun ItineraryBody(data: ItineraryData, host: ItineraryHost, modifier: M
     val targets = remember(editable, arranged, data, layout) { if (editable) moveTargetsByKey(data, layout, arranged) else emptyMap() }
     val changeCount = if (editable) remember(data, layout) { ItineraryLayouts.layoutChangeCount(data, layout) } else 0
 
-    var undo by rememberSaveable { mutableStateOf(listOf<String>()) }
-    var status by remember { mutableStateOf("") }
+    // Undo history belongs to this itinerary (a new search starts empty) and to layouts this editor wrote:
+    // a layout changed from outside (plan loaded, selections cleared) drops it, like the web.
+    val itineraryKey = remember(data) { ItineraryLayouts.fingerprint(data) }
+    var undo by rememberSaveable(itineraryKey) { mutableStateOf(listOf<String>()) }
+    var pending by rememberSaveable(itineraryKey) { mutableStateOf(listOf<String>()) }
+    var lastSeen by rememberSaveable(itineraryKey) { mutableStateOf(ItineraryEdits.encodeLayout(layout)) }
+    var status by rememberSaveable(itineraryKey) { mutableStateOf("") }
     var editing by rememberSaveable { mutableStateOf<String?>(null) }
     var noteOpen by rememberSaveable { mutableStateOf<String?>(null) }
+    val layoutText = ItineraryEdits.encodeLayout(layout)
+    LaunchedEffect(layoutText) {
+        if (layoutText == lastSeen) return@LaunchedEffect
+        val mine = pending.indexOf(layoutText)
+        if (mine >= 0) {
+            pending = pending.drop(mine + 1) // our own write arrived (possibly conflated)
+        } else {
+            undo = emptyList()
+            pending = emptyList()
+        }
+        lastSeen = layoutText
+    }
 
-    fun commit(next: ItineraryLayout?, undoable: Boolean = true): Boolean {
-        if (!editable || next == layout) return false
-        if (undoable) undo = (undo + ItineraryEdits.encodeLayout(layout)).takeLast(ItineraryEdits.UNDO_LIMIT)
-        host.onUpdateSelections { ItineraryEdits.commitLayout(data, it, next) }
-        return true
+    // Computed from the latest draft inside the update (web layoutRef), so quick successive taps never
+    // work from a stale layout. Returns whether the layout changed.
+    fun commit(undoable: Boolean = true, next: (ItineraryLayout?) -> ItineraryLayout?): Boolean {
+        if (!editable) return false
+        var changed = false
+        host.onUpdateSelections { current ->
+            val prev = current.itineraryLayout
+            val target = next(prev)
+            if (target == prev) {
+                current
+            } else {
+                changed = true
+                if (undoable) undo = (undo + ItineraryEdits.encodeLayout(prev)).takeLast(ItineraryEdits.UNDO_LIMIT)
+                pending = (pending + ItineraryEdits.encodeLayout(target)).takeLast(ItineraryEdits.UNDO_LIMIT + 1)
+                ItineraryEdits.commitLayout(data, current, target)
+            }
+        }
+        return changed
     }
 
     val nameOf = { key: String?, fallback: String? -> edits[key]?.activityOr(fallback) ?: fallback.orEmpty() }
@@ -121,14 +153,26 @@ internal fun ItineraryBody(data: ItineraryData, host: ItineraryHost, modifier: M
                 changeCount = changeCount,
                 canUndo = undo.isNotEmpty(),
                 onUndo = {
-                    val prev = ItineraryEdits.decodeLayout(undo.last())
-                    undo = undo.dropLast(1)
-                    commit(prev, undoable = false)
-                    status = texts.undone
+                    undo.lastOrNull()?.let { last ->
+                        undo = undo.dropLast(1)
+                        commit(undoable = false) { ItineraryEdits.decodeLayout(last) }
+                        status = texts.undone
+                    }
                 },
                 onReset = {
-                    if (commit(null)) status = texts.reset
+                    if (commit { null }) status = texts.reset
                 },
+            )
+        }
+
+        // Visible status line with real bounds (an empty Box has none and TalkBack would skip it); polite live
+        // region like the web's aria-live text. It sits under the change bar and stays in place (one line high) so changes are announced.
+        if (editable) {
+            Text(
+                status,
+                style = TravelTheme.typography.labelMedium,
+                color = TravelTheme.colors.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
             )
         }
 
@@ -165,13 +209,13 @@ internal fun ItineraryBody(data: ItineraryData, host: ItineraryHost, modifier: M
                         },
                         onMove = { target ->
                             val name = nameOf(key, slot.slot.activity)
-                            if (commit(ItineraryLayouts.moveSlot(data, layout, key, target.dayNumber, target.timeOfDay))) {
+                            if (commit { ItineraryLayouts.moveSlot(data, it, key, target.dayNumber, target.timeOfDay) }) {
                                 status = texts.moved(name, target, target.swapWith?.let { nameOf(it.key, it.activity) })
                             }
                         },
                         onRemove = {
                             val name = nameOf(key, slot.slot.activity)
-                            if (commit(ItineraryLayouts.removeSlot(data, layout, key))) status = texts.removed(name, day.day.dayNumber)
+                            if (commit { ItineraryLayouts.removeSlot(data, it, key) }) status = texts.removed(name, day.day.dayNumber)
                         },
                     )
                 },
@@ -185,17 +229,8 @@ internal fun ItineraryBody(data: ItineraryData, host: ItineraryHost, modifier: M
                 originalDay = { key ->
                     data.days.firstOrNull { d -> ItineraryLayouts.TIMES.any { ItineraryLayouts.slotKey(d.dayNumber, it) == key } }?.dayNumber
                 },
-                onRestore = { key, name -> if (commit(ItineraryLayouts.restoreSlot(data, layout, key))) status = texts.restored(name) },
+                onRestore = { key, name -> if (commit { ItineraryLayouts.restoreSlot(data, it, key) }) status = texts.restored(name) },
                 showRestore = editable,
-            )
-        }
-        // polite announcement of the last change (web sr-only aria-live)
-        if (editable) {
-            Box(
-                Modifier.semantics {
-                    liveRegion = LiveRegionMode.Polite
-                    contentDescription = status
-                },
             )
         }
     }
@@ -332,9 +367,14 @@ private fun EditableSlot(
             )
         }
         if (noteOpen) {
+            // Local text (cursor-stable, no dropped characters); every change is pushed to the plan draft.
+            var noteText by rememberSaveable(key) { mutableStateOf(note) }
             OutlinedTextField(
-                value = note,
-                onValueChange = { text -> host.onUpdateSelections { ItineraryEdits.setNote(it, key, text) } },
+                value = noteText,
+                onValueChange = { text ->
+                    noteText = text
+                    host.onUpdateSelections { ItineraryEdits.setNote(it, key, text) }
+                },
                 placeholder = { Text(stringResource(R.string.itin_note_placeholder_personal)) },
                 label = { Text(stringResource(R.string.itin_field_note)) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = TravelTheme.spacing.lg, vertical = TravelTheme.spacing.sm),
@@ -365,23 +405,20 @@ private fun MoveMenu(
 ) {
     var open by remember { mutableStateOf(false) }
     val label = stringResource(R.string.itin_move_a11y, activity)
+    val menuState = stringResource(if (open) R.string.itin_menu_expanded else R.string.itin_menu_collapsed)
     Box {
         TpButton(
             stringResource(R.string.itin_move),
             onClick = { open = !open },
             variant = TpButtonVariant.Text,
             leadingIcon = Icons.Filled.MoreVert,
-            modifier = Modifier.semantics { contentDescription = label },
+            modifier =
+                Modifier.semantics {
+                    contentDescription = label
+                    stateDescription = menuState
+                },
         )
         DropdownMenu(expanded = open, onDismissRequest = { open = false }, modifier = Modifier.semantics { paneTitle = label }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.itin_remove_from_day), color = TravelTheme.colors.error) },
-                onClick = {
-                    open = false
-                    onRemove()
-                },
-            )
-            HorizontalDivider()
             targets.groupBy { it.dayNumber }.forEach { (day, items) ->
                 val city = cityOfDay(day)
                 Text(
@@ -410,24 +447,43 @@ private fun MoveMenu(
                     )
                 }
             }
+            // destructive action last, as on the web
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.itin_remove_from_day), color = TravelTheme.colors.error) },
+                onClick = {
+                    open = false
+                    onRemove()
+                },
+            )
         }
     }
 }
 
 @Composable
 private fun SlotEditor(slot: ItinerarySlot, key: String, edit: SlotEdit, note: String, host: ItineraryHost, onDone: () -> Unit) {
+    // Local field state: the draft round-trips through a StateFlow, so fields never read their value back from it.
+    var activityText by rememberSaveable(key) { mutableStateOf(edit.activity ?: slot.activity.orEmpty()) }
+    var locationText by rememberSaveable(key) { mutableStateOf(edit.location ?: slot.location.orEmpty()) }
+    var noteText by rememberSaveable(key) { mutableStateOf(note) }
     var costText by rememberSaveable(key) { mutableStateOf((edit.cost ?: slot.estimatedCostUsd)?.plain().orEmpty()) }
     Column(Modifier.fillMaxWidth().padding(TravelTheme.spacing.lg), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
         OutlinedTextField(
-            value = edit.activity ?: slot.activity.orEmpty(),
-            onValueChange = { v -> host.onUpdateSelections { ItineraryEdits.setEdit(it, key, SlotEditFields.ACTIVITY, JsonPrimitive(v)) } },
+            value = activityText,
+            onValueChange = { v ->
+                activityText = v
+                host.onUpdateSelections { ItineraryEdits.setEdit(it, key, SlotEditFields.ACTIVITY, JsonPrimitive(v)) }
+            },
             label = { Text(stringResource(R.string.itin_field_activity)) },
             modifier = Modifier.fillMaxWidth(),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             OutlinedTextField(
-                value = edit.location ?: slot.location.orEmpty(),
-                onValueChange = { v -> host.onUpdateSelections { ItineraryEdits.setEdit(it, key, SlotEditFields.LOCATION, JsonPrimitive(v)) } },
+                value = locationText,
+                onValueChange = { v ->
+                    locationText = v
+                    host.onUpdateSelections { ItineraryEdits.setEdit(it, key, SlotEditFields.LOCATION, JsonPrimitive(v)) }
+                },
                 label = { Text(stringResource(R.string.itin_field_location)) },
                 modifier = Modifier.weight(1f),
             )
@@ -443,8 +499,11 @@ private fun SlotEditor(slot: ItinerarySlot, key: String, edit: SlotEdit, note: S
             )
         }
         OutlinedTextField(
-            value = note,
-            onValueChange = { v -> host.onUpdateSelections { ItineraryEdits.setNote(it, key, v) } },
+            value = noteText,
+            onValueChange = { v ->
+                noteText = v
+                host.onUpdateSelections { ItineraryEdits.setNote(it, key, v) }
+            },
             label = { Text(stringResource(R.string.itin_field_note)) },
             placeholder = { Text(stringResource(R.string.itin_note_placeholder)) },
             minLines = 2,

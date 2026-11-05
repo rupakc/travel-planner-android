@@ -210,6 +210,8 @@
     <string name="itin_menu_target_swap">%1$s (swap with %2$s)</string>
     <string name="itin_move_to_a11y">Move to Day %1$d · %2$s</string>
     <string name="itin_move_to_swap_a11y">Move to Day %1$d · %2$s (swap with %3$s)</string>
+    <string name="itin_menu_expanded">Expanded</string>
+    <string name="itin_menu_collapsed">Collapsed</string>
     <string name="itin_removed">Removed</string>
     <string name="itin_restore">Restore</string>
     <string name="itin_restore_a11y">Restore %1$s</string>
