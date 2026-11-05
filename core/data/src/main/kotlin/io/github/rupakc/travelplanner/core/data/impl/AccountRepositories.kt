@@ -187,6 +187,8 @@ class ProfileRepositoryImpl
         override suspend fun setFeature(featureId: String, enabled: Boolean?) = overridesStore.set(featureId, enabled)
 
         override suspend fun resetFeatures() = overridesStore.clear()
+
+        override suspend fun setFeatureOverrides(overrides: FeatureOverrides) = overridesStore.replace(overrides)
     }
 
 @Singleton

@@ -2,5 +2,99 @@
 <resources>
     <string name="onboarding_title">Te damos la bienvenida a Voyager</string>
     <string name="onboarding_message">Seis preguntas rápidas adaptan tu inicio y tus funciones a tu forma de viajar.</string>
+    <string name="onboarding_retake_title">Repite el cuestionario</string>
+    <string name="onboarding_retake_message">Tus respuestas actuales ya están marcadas. Cambia lo que sea distinto y actualizaremos tu tipo de viajero y tus funciones.</string>
+    <string name="onboarding_get_started">Empezar</string>
+    <string name="onboarding_welcome_note">Puedes saltarte cualquier pregunta. Repite el cuestionario cuando quieras en Ajustes.</string>
+    <string name="onboarding_close">Cerrar cuestionario</string>
+
+    <string name="onboarding_step">Paso %1$d de %2$d</string>
+    <string name="onboarding_choose_one">Elige una opción</string>
+    <string name="onboarding_choose_many">Elige todas las que quieras</string>
+    <string name="onboarding_back">Atrás</string>
+    <string name="onboarding_skip">Saltar</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_see_result">Ver mi tipo</string>
+    <string name="onboarding_selected">Seleccionado</string>
+    <string name="onboarding_not_selected">No seleccionado</string>
+
+    <string name="onboarding_q_companions">¿Con quién sueles viajar?</string>
+    <string name="onboarding_opt_companions_solo">Solo</string>
+    <string name="onboarding_opt_companions_partner">En pareja</string>
+    <string name="onboarding_opt_companions_family_kids">En familia con niños</string>
+    <string name="onboarding_opt_companions_friends">Con amigos</string>
+    <string name="onboarding_opt_companions_work">Por trabajo</string>
+
+    <string name="onboarding_q_budget">¿Cuál es tu presupuesto habitual?</string>
+    <string name="onboarding_opt_budget_shoestring">Muy ajustado</string>
+    <string name="onboarding_opt_budget_shoestring_hint">Albergues, comida callejera, transporte público</string>
+    <string name="onboarding_opt_budget_mid_range">Intermedio</string>
+    <string name="onboarding_opt_budget_mid_range_hint">Hoteles cómodos, buenos restaurantes</string>
+    <string name="onboarding_opt_budget_comfort">Cómodo</string>
+    <string name="onboarding_opt_budget_comfort_hint">Buenos hoteles y algún capricho</string>
+    <string name="onboarding_opt_budget_luxury">Lujo</string>
+    <string name="onboarding_opt_budget_luxury_hint">Hoteles premium, alta cocina, tours privados</string>
+
+    <string name="onboarding_q_interests">¿Qué te encanta hacer?</string>
+    <string name="onboarding_opt_interests_food">Gastronomía</string>
+    <string name="onboarding_opt_interests_history_culture">Historia y cultura</string>
+    <string name="onboarding_opt_interests_nature">Naturaleza y aire libre</string>
+    <string name="onboarding_opt_interests_adventure">Aventura y deporte</string>
+    <string name="onboarding_opt_interests_nightlife">Vida nocturna</string>
+    <string name="onboarding_opt_interests_shopping">Compras</string>
+    <string name="onboarding_opt_interests_art_museums">Arte y museos</string>
+    <string name="onboarding_opt_interests_beaches">Playas y descanso</string>
+    <string name="onboarding_opt_interests_photography">Fotografía</string>
+    <string name="onboarding_opt_interests_wellness">Bienestar</string>
+
+    <string name="onboarding_q_pace">¿Qué ritmo prefieres?</string>
+    <string name="onboarding_opt_pace_relaxed">Tranquilo</string>
+    <string name="onboarding_opt_pace_relaxed_hint">Mucho tiempo libre</string>
+    <string name="onboarding_opt_pace_balanced">Equilibrado</string>
+    <string name="onboarding_opt_pace_balanced_hint">Visitas y tiempo libre a partes iguales</string>
+    <string name="onboarding_opt_pace_packed">Intenso</string>
+    <string name="onboarding_opt_pace_packed_hint">Ver todo lo posible</string>
+
+    <string name="onboarding_q_planning">¿Cómo planificas?</string>
+    <string name="onboarding_opt_planning_ahead_deals">Reservo con antelación y busco ofertas</string>
+    <string name="onboarding_opt_planning_loose">Planifico a grandes rasgos</string>
+    <string name="onboarding_opt_planning_spontaneous">Espontáneo, a última hora</string>
+
+    <string name="onboarding_q_needs">¿Hay algo que debamos tener en cuenta?</string>
+    <string name="onboarding_opt_needs_wheelchair">Silla de ruedas / Ayuda a la movilidad</string>
+    <string name="onboarding_opt_needs_visual_impairment">Discapacidad visual</string>
+    <string name="onboarding_opt_needs_hearing_impairment">Discapacidad auditiva</string>
+    <string name="onboarding_opt_needs_cognitive_disability">Cognitiva / Neurodivergente</string>
+    <string name="onboarding_opt_needs_infants">Viajo con bebés</string>
+    <string name="onboarding_opt_needs_dietary">Necesidades alimentarias</string>
+
+    <string name="onboarding_result_heading">Eres</string>
+    <string name="onboarding_result_a11y">Eres %1$s</string>
+    <string name="onboarding_result_also">También un poco de</string>
+    <string name="onboarding_result_skipped">Te has saltado todas las preguntas, así que empezamos con una mezcla amplia. Repite el cuestionario cuando quieras en Ajustes.</string>
+    <string name="onboarding_change_answers">¿No eres tú? Cambia tus respuestas</string>
+    <string name="onboarding_continue">Continuar</string>
+
+    <string name="onboarding_features_title">Elige tus funciones</string>
+    <string name="onboarding_features_message">Puedes cambiarlas cuando quieras en Ajustes.</string>
+    <string name="onboarding_features_recommended">Recomendadas para ti</string>
+    <string name="onboarding_features_more">Más funciones</string>
+    <string name="onboarding_features_always">La búsqueda, los resultados, Mi plan y Ajustes siempre están activos.</string>
+    <plurals name="onboarding_features_count">
+        <item quantity="one">%d función activa</item>
+        <item quantity="many">%d funciones activas</item>
+        <item quantity="other">%d funciones activas</item>
+    </plurals>
     <string name="onboarding_finish">Terminar</string>
+    <string name="onboarding_save_changes">Guardar cambios</string>
+    <string name="onboarding_saving">Guardando…</string>
+    <string name="onboarding_sync_failed_title">No se pudieron guardar tus preferencias en tu cuenta</string>
+    <string name="onboarding_sync_failed_message">Tu tipo de viajero y tus funciones están guardados en este dispositivo. Tus intereses, presupuesto y grupo de viaje no llegaron a tu cuenta.</string>
+    <string name="onboarding_retry">Reintentar</string>
+    <string name="onboarding_continue_anyway">Continuar sin sincronizar</string>
+
+    <string name="onboarding_notifications_title">Mantente al día de tus viajes</string>
+    <string name="onboarding_notifications_message">Recibe recordatorios antes de salir, alertas de bajadas de precio de lo que vigilas y sugerencias cercanas durante el viaje. Puedes desactivar cada una en Ajustes.</string>
+    <string name="onboarding_notifications_allow">Permitir notificaciones</string>
+    <string name="onboarding_notifications_later">Ahora no</string>
 </resources>
