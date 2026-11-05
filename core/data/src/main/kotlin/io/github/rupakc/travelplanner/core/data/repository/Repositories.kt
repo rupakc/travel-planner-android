@@ -21,6 +21,7 @@ import io.github.rupakc.travelplanner.core.model.importlink.ImportPreview
 import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
+import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
@@ -284,6 +285,15 @@ interface DevicesRepository {
 /** Near-me recommendations, cached 1 h per ~5 km cell (spec §8). */
 interface NearbyRepository {
     suspend fun nearby(lat: Double, lng: Double, interests: List<String>? = null, limit: Int = 10): AppResult<NearbyResponse>
+
+    /** Remembers a foreground fix, rounded to its ~5 km cell, with the time (device-only). */
+    suspend fun rememberLocation(lat: Double, lng: Double)
+
+    /** The last remembered cell, or null (never set, or cleared on sign-out). */
+    suspend fun lastLocation(): LocationCell?
+
+    /** Deletes the remembered cell (nearby suggestions turned off). */
+    suspend fun forgetLocation()
 }
 
 interface CompareRepository {

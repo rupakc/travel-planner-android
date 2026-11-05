@@ -1,10 +1,12 @@
 package io.github.rupakc.travelplanner.core.testing.fake
 
 import io.github.rupakc.travelplanner.core.datastore.FeatureOverridesStore
+import io.github.rupakc.travelplanner.core.datastore.LastLocationStore
 import io.github.rupakc.travelplanner.core.datastore.SessionStore
 import io.github.rupakc.travelplanner.core.datastore.SettingsStore
 import io.github.rupakc.travelplanner.core.datastore.TravellerProfileStore
 import io.github.rupakc.travelplanner.core.model.auth.User
+import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.FeatureOverrides
 import io.github.rupakc.travelplanner.core.model.settings.Session
@@ -101,5 +103,19 @@ class FakeFeatureOverridesStore : FeatureOverridesStore {
 
     override suspend fun replace(overrides: FeatureOverrides) {
         state.value = FeatureOverrides(overrides.enabled, overrides.disabled - overrides.enabled)
+    }
+}
+
+class FakeLastLocationStore : LastLocationStore {
+    var cell: LocationCell? = null
+
+    override suspend fun get() = cell
+
+    override suspend fun set(cell: LocationCell) {
+        this.cell = cell
+    }
+
+    override suspend fun clear() {
+        cell = null
     }
 }

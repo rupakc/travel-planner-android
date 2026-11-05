@@ -40,3 +40,9 @@ data class NearbyPlace(
     val lng: LenientDouble = null,
     @SerialName("distance_km") val distanceKm: LenientDouble = null,
 )
+
+/**
+ * The last foreground location fix, rounded to the ~5 km nearby cell (0.05°), with when it was
+ * taken. Device-only; used by background nearby suggestions instead of background location.
+ */
+data class LocationCell(val lat: Double, val lng: Double, val atEpochMillis: Long)
