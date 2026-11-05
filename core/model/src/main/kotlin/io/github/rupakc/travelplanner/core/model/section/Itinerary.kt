@@ -17,6 +17,8 @@ import kotlinx.serialization.json.JsonObject
 data class ItineraryData(
     val days: List<ItineraryDay> = emptyList(),
     @SerialName("total_estimated_cost_usd") val totalEstimatedCostUsd: LenientDouble = null,
+    /** "template" for the client-side fallback itinerary (web `buildClientItinerary`); absent from the server. */
+    val source: String? = null,
     override val error: String? = null,
     override val verification: Verification? = null,
 ) : SectionData
@@ -29,7 +31,13 @@ data class ItineraryDay(
     val city: String? = null,
     @Serializable(with = ItinerarySlotListSerializer::class) val slots: List<ItinerarySlot> = emptyList(),
     @SerialName("daily_estimated_cost_usd") val dailyEstimatedCostUsd: LenientDouble = null,
+    /** Places from an imported link that could not be scheduled (`services/must_include.py`). */
+    @SerialName("link_extras") val linkExtras: List<LinkExtra> = emptyList(),
 )
+
+/** One `link_extras` entry: `{name, note, quote}`. */
+@Serializable
+data class LinkExtra(val name: String? = null, val note: LenientString = null, val quote: LenientString = null)
 
 /**
  * One itinerary slot. Also the element of `selections.itinerary_slots`, where
@@ -49,6 +57,7 @@ data class ItinerarySlot(
     @SerialName("estimated_cost_usd") val estimatedCostUsd: LenientDouble = null,
     @SerialName("from_link") val fromLink: LenientBoolean = null,
     @SerialName("link_quote") val linkQuote: String? = null,
+    @SerialName("link_note") val linkNote: LenientString = null,
     @SerialName("start_time") val startTime: String? = null,
     @SerialName("end_time") val endTime: String? = null,
     val key: String? = null,
