@@ -1,0 +1,208 @@
+package io.github.rupakc.travelplanner.core.notifications.nearby
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import androidx.hilt.work.HiltWorker
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
+import com.google.android.gms.location.LocationServices
+import dagger.Binds
+import dagger.Module
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import io.github.rupakc.travelplanner.core.common.AppClock
+import io.github.rupakc.travelplanner.core.common.AppLogger
+import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
+import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
+import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
+import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.domain.alerts.parseIsoDate
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
+import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.notifications.NotificationIds
+import io.github.rupakc.travelplanner.core.notifications.NotificationLinks
+import io.github.rupakc.travelplanner.core.notifications.Notifier
+import io.github.rupakc.travelplanner.core.notifications.R
+import io.github.rupakc.travelplanner.core.notifications.TravelChannel
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.tasks.await
+
+/** When a nearby suggestion may be posted (spec §7/§8): opt-in, during a trip unless "always", at most 1 per 4 h. */
+object NearbyNotificationPolicy {
+    val MIN_GAP: Duration = Duration.ofHours(4)
+
+    fun shouldNotify(enabled: Boolean, always: Boolean, onTrip: Boolean, lastPostedAt: Instant?, now: Instant): Boolean {
+        if (!enabled) return false
+        if (!always && !onTrip) return false
+        return lastPostedAt == null || Duration.between(lastPostedAt, now) >= MIN_GAP
+    }
+
+    /** [today] falls within a trip's dates (departure..return, one-way = the departure day). */
+    fun isOnTrip(trips: List<TravelSearchRequest>, today: LocalDate): Boolean =
+        trips.any { r ->
+            val dep = parseIsoDate(r.departureDate) ?: return@any false
+            val ret = parseIsoDate(r.returnDate) ?: dep
+            !today.isBefore(dep) && !today.isAfter(ret)
+        }
+}
+
+/** A coarse fix for background suggestions: the last known location only (never turns on GPS). */
+fun interface LastLocationSource {
+    /** `lat to lng`, or null without permission or a cached fix. */
+    suspend fun lastLocation(): Pair<Double, Double>?
+}
+
+@Singleton
+class FusedLastLocationSource
+    @Inject
+    constructor(
+        @param:ApplicationContext private val context: Context,
+    ) : LastLocationSource {
+        @SuppressLint("MissingPermission") // checked just below
+        @Suppress("TooGenericExceptionCaught") // Play services may be missing or throw on any device
+        override suspend fun lastLocation(): Pair<Double, Double>? {
+            val granted =
+                listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION).any {
+                    ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                }
+            if (!granted) return null
+            return try {
+                LocationServices.getFusedLocationProviderClient(context).lastLocation.await()?.let { it.latitude to it.longitude }
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "No last location", e)
+                null
+            }
+        }
+
+        private companion object {
+            const val TAG = "NearbyLocation"
+        }
+    }
+
+/** Remembers when the last nearby suggestion was posted (device-local, survives restarts). */
+interface NearbyPostLog {
+    fun lastPostedAt(): Instant?
+
+    fun markPosted(at: Instant)
+}
+
+@Singleton
+class SharedPrefsNearbyPostLog
+    @Inject
+    constructor(
+        @param:ApplicationContext private val context: Context,
+    ) : NearbyPostLog {
+        private val prefs by lazy { context.getSharedPreferences(FILE, Context.MODE_PRIVATE) }
+
+        override fun lastPostedAt(): Instant? = prefs.getLong(KEY, -1).takeIf { it >= 0 }?.let(Instant::ofEpochMilli)
+
+        override fun markPosted(at: Instant) = prefs.edit().putLong(KEY, at.toEpochMilli()).apply()
+
+        private companion object {
+            const val FILE = "nearby_notifications"
+            const val KEY = "last_posted_at"
+        }
+    }
+
+/** Posts one "near you" suggestion from `/api/nearby` when [NearbyNotificationPolicy] allows; opens Near me. */
+@HiltWorker
+class NearbySuggestionWorker
+    @AssistedInject
+    constructor(
+        @Assisted context: Context,
+        @Assisted params: WorkerParameters,
+        private val settings: SettingsRepository,
+        private val currentPlan: CurrentPlanStore,
+        private val plans: PlansRepository,
+        private val nearby: NearbyRepository,
+        private val location: LastLocationSource,
+        private val log: NearbyPostLog,
+        private val notifier: Notifier,
+        private val clock: AppClock,
+    ) : CoroutineWorker(context, params) {
+        override suspend fun doWork(): Result {
+            if (!allowed() || !notifier.canPost()) return Result.success()
+            val response = suggestions() ?: return Result.success()
+            val top = response.items.firstOrNull { !it.name.isNullOrBlank() } ?: return Result.success()
+            val res = applicationContext.resources
+            val place = response.place?.name
+            val title = if (place != null) res.getString(R.string.nearby_notification_title_place, place) else res.getString(R.string.nearby_notification_title)
+            val body = listOfNotNull(top.name, top.description?.takeIf(String::isNotBlank)).joinToString(" — ")
+            notifier.post(TravelChannel.NEARBY, NotificationIds.NEARBY, title, body, NotificationLinks.NEARBY)
+            log.markPosted(clock.now())
+            return Result.success()
+        }
+
+        private suspend fun allowed(): Boolean {
+            val s = settings.settings.first()
+            val trips = listOfNotNull(currentPlan.draft.value.searchRequest) + plans.plans.first().mapNotNull { it.searchRequest }
+            val onTrip = NearbyNotificationPolicy.isOnTrip(trips, clock.today())
+            return NearbyNotificationPolicy.shouldNotify(s.nearbyNotifications, s.nearbyNotificationsAlways, onTrip, log.lastPostedAt(), clock.now())
+        }
+
+        private suspend fun suggestions(): NearbyResponse? {
+            val (lat, lng) = location.lastLocation() ?: return null
+            return (nearby.nearby(lat, lng, limit = SUGGESTIONS) as? AppResult.Success)?.value
+        }
+
+        private companion object {
+            const val SUGGESTIONS = 3
+        }
+    }
+
+/** Runs the nearby worker every 4 h while the toggle is on. */
+interface NearbySuggestionScheduler {
+    fun setEnabled(enabled: Boolean)
+}
+
+@Singleton
+class WorkManagerNearbySuggestionScheduler
+    @Inject
+    constructor(
+        @param:ApplicationContext private val context: Context,
+    ) : NearbySuggestionScheduler {
+        override fun setEnabled(enabled: Boolean) {
+            val workManager = WorkManager.getInstance(context)
+            if (!enabled) {
+                workManager.cancelUniqueWork(UNIQUE)
+                return
+            }
+            val request =
+                PeriodicWorkRequestBuilder<NearbySuggestionWorker>(NearbyNotificationPolicy.MIN_GAP.toHours(), TimeUnit.HOURS)
+                    .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).setRequiresBatteryNotLow(true).build())
+                    .build()
+            workManager.enqueueUniquePeriodicWork(UNIQUE, ExistingPeriodicWorkPolicy.KEEP, request)
+        }
+
+        companion object {
+            const val UNIQUE = "nearby-suggestions"
+        }
+    }
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class NearbyNotificationsModule {
+    @Binds abstract fun location(impl: FusedLastLocationSource): LastLocationSource
+
+    @Binds abstract fun log(impl: SharedPrefsNearbyPostLog): NearbyPostLog
+
+    @Binds abstract fun scheduler(impl: WorkManagerNearbySuggestionScheduler): NearbySuggestionScheduler
+}

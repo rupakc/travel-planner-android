@@ -8,4 +8,21 @@
     <string name="channel_nearby_desc">Things to do near you during a trip.</string>
     <string name="channel_account">Account</string>
     <string name="channel_account_desc">Sign-in and account messages.</string>
+    <!-- Trip reminders (spec 7). %1$s = destination city. -->
+    <string name="reminder_week_title">%1$s in a week</string>
+    <string name="reminder_week_body">Time to check your visa and start your packing list.</string>
+    <string name="reminder_day_before_title">%1$s tomorrow</string>
+    <string name="reminder_day_before_body">Check your flight and the weather before you go.</string>
+    <string name="reminder_start_title">Your %1$s trip starts today</string>
+    <string name="reminder_start_body">Today\'s itinerary, your emergency card and things to do near you are one tap away.</string>
+    <string name="reminder_day_title">Day %1$d in %2$s</string>
+    <string name="reminder_day_body">See today\'s itinerary.</string>
+    <string name="reminder_last_title">Last day in %1$s</string>
+    <string name="reminder_last_body">Check your checkout time and your way back.</string>
+    <string name="reminder_action_itinerary">Itinerary</string>
+    <string name="reminder_action_emergency">Emergency card</string>
+    <string name="reminder_action_nearby">Near me</string>
+    <!-- Nearby suggestions -->
+    <string name="nearby_notification_title">Something to do near you</string>
+    <string name="nearby_notification_title_place">Something to do near you in %1$s</string>
 </resources>

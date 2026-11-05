@@ -13,16 +13,21 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
+import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.DevicesRepository
 import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PushTokenSource
-import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
+import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.domain.alerts.AlertLink
+import io.github.rupakc.travelplanner.core.domain.alerts.parseAlertsPath
 import io.github.rupakc.travelplanner.core.model.devices.PushDataKeys
-import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -59,14 +64,50 @@ abstract class PushModule {
 }
 
 /**
- * FCM entry point. Disabled in the manifest unless Firebase is configured; even
- * when enabled it only registers tokens and posts alerts (deduped by id with the poller).
+ * Registers this device's FCM token after every sign-in (and app start while signed in);
+ * `POST /api/devices` is an idempotent upsert. Sign-out unregisters in `AuthRepository.logout`.
+ * Inert without Firebase: [PushTokenSource.token] returns null.
+ */
+@Singleton
+class PushRegistrar
+    @Inject
+    constructor(
+        private val auth: AuthRepository,
+        private val tokens: PushTokenSource,
+        private val devices: DevicesRepository,
+    ) {
+        /** Suspends for the lifetime of [auth]'s session flow. */
+        suspend fun run() {
+            auth.session.map { it?.user?.username }.distinctUntilChanged().collect { username ->
+                if (username != null) register()
+            }
+        }
+
+        suspend fun register() {
+            val token = tokens.token() ?: return
+            devices.register(token, Locale.getDefault().toLanguageTag())
+        }
+    }
+
+/** The Alerts link of a push `data` payload: the server's web `link`, else watch id/kind. */
+fun pushAlertLink(data: Map<String, String>): AlertLink =
+    parseAlertsPath(data[PushDataKeys.LINK])
+        ?: AlertLink(data[PushDataKeys.WATCH_KIND], data[PushDataKeys.WATCH_ID]?.toLongOrNull())
+
+/**
+ * FCM entry point. Disabled in the manifest unless Firebase is configured. In the background
+ * Android shows the message itself; in the foreground we post it (if Price alerts are on) and
+ * mark the id seen so [io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollWorker] won't post it again.
  */
 @AndroidEntryPoint
 class TravelMessagingService : FirebaseMessagingService() {
     @Inject lateinit var devices: DevicesRepository
 
+    @Inject lateinit var auth: AuthRepository
+
     @Inject lateinit var notifications: NotificationsRepository
+
+    @Inject lateinit var settings: SettingsRepository
 
     @Inject lateinit var notifier: Notifier
 
@@ -74,37 +115,25 @@ class TravelMessagingService : FirebaseMessagingService() {
     lateinit var scope: CoroutineScope
 
     override fun onNewToken(token: String) {
-        scope.launch { devices.register(token, Locale.getDefault().toLanguageTag()) }
+        scope.launch {
+            // The token is tied to a user server-side: register only while signed in.
+            if (auth.session.first() != null) devices.register(token, Locale.getDefault().toLanguageTag())
+        }
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
         val data = message.data
         val id = data[PushDataKeys.NOTIFICATION_ID]?.toLongOrNull() ?: return
-        val alert =
-            AppNotification(
-                id = id,
-                kind = data[PushDataKeys.KIND],
-                title = message.notification?.title,
-                body = message.notification?.body,
-            )
         scope.launch {
             notifications.markSeen(listOf(id))
-            val watchLink =
-                data[PushDataKeys.WATCH_ID]?.let { watch ->
-                    "${DeepLinks.SCHEME}://alerts?" +
-                        listOfNotNull(data[PushDataKeys.WATCH_KIND]?.let { "kind=$it" }, "watch=$watch").joinToString("&")
-                }
-            if (watchLink != null) {
-                notifier.post(
-                    TravelChannel.PRICE_ALERTS,
-                    (id % Int.MAX_VALUE).toInt(),
-                    alert.title.orEmpty(),
-                    alert.body.orEmpty(),
-                    watchLink,
-                )
-            } else {
-                notifier.postPriceAlert(alert)
-            }
+            if (!settings.settings.first().priceAlertNotifications) return@launch
+            notifier.post(
+                TravelChannel.PRICE_ALERTS,
+                NotificationIds.priceAlert(id),
+                message.notification?.title.orEmpty(),
+                message.notification?.body.orEmpty(),
+                pushAlertLink(data).toDeepLink(),
+            )
         }
     }
 }

@@ -12,8 +12,16 @@ dependencies {
     api(projects.core.model)
     implementation(projects.core.common)
     implementation(projects.core.data)
+    implementation(projects.core.domain)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
+    implementation(libs.play.services.location)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
+
+    testImplementation(projects.core.testing)
+    testImplementation(libs.androidx.work.testing)
 }
