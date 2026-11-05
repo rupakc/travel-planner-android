@@ -459,7 +459,9 @@ sealed interface AppRoute
 // --- auth ---------------------------------------------------------------
 @Serializable data object LoginRoute : AppRoute
 
-@Serializable data object ChangePasswordRoute : AppRoute
+@Serializable data object ChangePasswordRoute : AppRoute          // forced (gate screen)
+
+@Serializable data object AccountChangePasswordRoute : AppRoute   // voluntary, from Settings → Account (not a gate screen)
 
 // --- onboarding ---------------------------------------------------------
 
@@ -538,7 +540,7 @@ Graphs (each feature exports exactly one; `app` calls them in `TravelApp.kt`):
 
 | Feature | Function | Routes |
 |---|---|---|
-| auth | `authGraph(onLoggedIn: () -> Unit, onPasswordChanged: () -> Unit)` | `LoginRoute`, `ChangePasswordRoute` |
+| auth | `authGraph(onLoggedIn: () -> Unit, onPasswordChanged: () -> Unit, onBack: () -> Unit = {})` | `LoginRoute`, `ChangePasswordRoute`, `AccountChangePasswordRoute` |
 | onboarding | `onboardingGraph(onFinished: (fromSettings: Boolean) -> Unit)` | `OnboardingRoute` |
 | home | `homeGraph(onPlanTrip, onOpenNearby, onOpenPlan: (Long) -> Unit)` | `HomeRoute` |
 | search | `searchGraph(onSearchStarted, onCompare)` | `SearchRoute` |
@@ -677,8 +679,13 @@ interface FeatureCatalogue {
 }
 ```
 
-The onboarding/settings team owns the implementations (and a Hilt `@Binds` for them in `core:domain`'s
-consumer — add a small Hilt module in your feature or ask to add one in `core:data`).
+Implementations (`….core.domain.profile`): `DefaultTravellerClassifier`, `DefaultFeatureCatalogue`, the quiz
+table `TravellerQuiz`, helpers `TravellerProfile.types()`, `FeatureCatalogue.visibleFeatures(profile, overrides)`,
+`overridesFor(types, wanted)`, `Preferences.mergeQuizAnswers(answers)`, `quizPace(answers)`. Hilt provides
+`FeatureCatalogue` and `TravellerClassifier` app-wide from `feature/onboarding/…/di/ProfileDomainModule.kt` — inject
+the interfaces; don't bind them again. Display copy/icons: `TravellerType.titleRes()/descriptionRes()`,
+`FeatureId.titleRes()/descriptionRes()`, `FeatureDescriptor.icon()` in `….core.ui.profile`.
+Details and the weight table: `docs/Onboarding-and-Traveller-Types.md`.
 
 ## 10. Testing (`core:testing`, already a `testImplementation` of every feature)
 
