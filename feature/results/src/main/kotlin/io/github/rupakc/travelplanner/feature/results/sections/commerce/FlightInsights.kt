@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CardDefaults
@@ -259,7 +260,7 @@ private fun FareCells(dates: List<FareCalendarDate>, onPick: (FareCalendarDate) 
             OutlinedCard(
                 onClick = { if (!isSelected) onPick(entry) },
                 modifier =
-                    Modifier.width(FARE_CELL_WIDTH).heightIn(min = TravelTheme.spacing.minTouchTarget).semantics {
+                    Modifier.widthIn(min = FARE_CELL_WIDTH).heightIn(min = TravelTheme.spacing.minTouchTarget).semantics {
                         contentDescription = a11y
                         this.selected = isSelected
                     },

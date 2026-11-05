@@ -11,7 +11,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
@@ -31,6 +34,7 @@ import io.github.rupakc.travelplanner.feature.results.ResultsUiState
 import io.github.rupakc.travelplanner.feature.results.ResultsViewModel
 import io.github.rupakc.travelplanner.feature.results.sections.ResultsSection
 import io.github.rupakc.travelplanner.feature.results.sections.SectionActions
+import io.github.rupakc.travelplanner.feature.results.sections.SelectionsSource
 
 /**
  * Streamed results + compare table.
@@ -62,18 +66,22 @@ internal fun ResultsRoute(onBack: () -> Unit, onOpenMyPlan: () -> Unit, onOpenAl
     val context = LocalContext.current
     val seeAlerts = stringResource(R.string.results_see_alerts)
     val undo = stringResource(R.string.results_undo)
-    LaunchedEffect(viewModel) {
-        viewModel.messages.collect { message ->
-            val text = messageText(context, message)
-            val action =
-                when (message) {
-                    is ResultsMessage.FareWatched, is ResultsMessage.PriceWatched -> seeAlerts
-                    ResultsMessage.NewPlanStarted -> undo
-                    else -> null
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(viewModel, lifecycle) {
+        // Only while visible (M8): messages that arrive in the background wait in the channel.
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.messages.collect { message ->
+                val text = messageText(context, message)
+                val action =
+                    when (message) {
+                        is ResultsMessage.FareWatched, is ResultsMessage.PriceWatched -> seeAlerts
+                        ResultsMessage.NewPlanStarted -> undo
+                        else -> null
+                    }
+                val result = snackbar.showSnackbar(text, actionLabel = action, withDismissAction = action == null, duration = SnackbarDuration.Long)
+                if (result == SnackbarResult.ActionPerformed) {
+                    if (message == ResultsMessage.NewPlanStarted) viewModel.onEvent(ResultsEvent.UndoNewPlan) else onOpenAlerts()
                 }
-            val result = snackbar.showSnackbar(text, actionLabel = action, withDismissAction = action == null, duration = SnackbarDuration.Long)
-            if (result == SnackbarResult.ActionPerformed) {
-                if (message == ResultsMessage.NewPlanStarted) viewModel.onEvent(ResultsEvent.UndoNewPlan) else onOpenAlerts()
             }
         }
     }
@@ -92,7 +100,9 @@ internal class ResultsSectionActions(
     private val onEvent: (ResultsEvent) -> Unit,
     private val openLink: (String) -> Unit,
     private val state: () -> ResultsUiState,
-) : SectionActions {
+) : SectionActions, SelectionsSource {
+    override val selections: io.github.rupakc.travelplanner.core.model.plan.PlanSelections get() = state().selections
+
     override fun onToggle(item: PlanItem) = onEvent(ResultsEvent.Toggle(item))
 
     override fun isSelected(item: PlanItem): Boolean = io.github.rupakc.travelplanner.core.model.plan.PlanSelectionRules.isSelected(state().selections, item)

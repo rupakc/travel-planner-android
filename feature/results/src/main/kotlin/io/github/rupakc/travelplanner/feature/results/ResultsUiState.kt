@@ -65,6 +65,7 @@ data class ResultsUiState(
     val flightFilters: FlightFilters? = null,
     val hotelFilters: HotelFilters? = null,
     val activityFilters: ActivityFilters? = null,
+    val source: ResultsSource = ResultsSource.NONE,
 ) {
     val isDone: Boolean get() = phase == StreamPhase.DONE
     val isStreaming: Boolean get() = phase == StreamPhase.STREAMING
@@ -85,6 +86,8 @@ data class SectionUi(
     /** Message from a failed filter/retry call (backend detail or null → our copy). */
     val filterError: FilterError? = null,
     val activeFilterCount: Int = 0,
+    /** Stored/saved results without this section: "not loaded" with Run search, never "No results". */
+    val notLoaded: Boolean = false,
 ) {
     val id: SectionId get() = section.id
     val verification: Verification? get() = data?.verification

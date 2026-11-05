@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.feature.results
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
@@ -92,6 +93,7 @@ class ResultsViewModelTest {
             catalogue = Optional.ofNullable(catalogue),
             clock = clock,
             dispatchers = TestAppDispatchers(main.testDispatcher),
+            savedState = SavedStateHandle(),
         )
 
     private fun ResultsUiState.section(id: SectionId) = sections.first { it.id == id }
@@ -175,35 +177,22 @@ class ResultsViewModelTest {
         }
 
     @Test
-    fun `unsaved draft request without results starts the stream, a saved plan does not`() =
+    fun `a draft request without results shows Run this search and never streams on its own`() =
         runTest {
-            plan.restore(PlanDraft(searchRequest = request))
-            vm()
-            assertEquals(listOf(request), search.started)
-
-            val other = FakeSearchRepository()
-            val planStore = FakeCurrentPlanStore().apply { restore(PlanDraft(planId = 7, searchRequest = request)) }
-            val saved =
-                ResultsViewModel(
-                    other,
-                    planStore,
-                    health,
-                    FakeFareCalendarRepository(),
-                    fareWatches,
-                    priceWatches,
-                    profile,
-                    Optional.empty(),
-                    clock,
-                    TestAppDispatchers(main.testDispatcher),
-                )
-            saved.state.test {
-                assertTrue(expectMostRecentItem().canRunSavedSearch)
-                assertTrue(other.started.isEmpty())
-                saved.onEvent(ResultsEvent.RunSavedSearch)
-                assertEquals(listOf(request), other.started)
+            plan.restore(PlanDraft(planId = 7, searchRequest = request))
+            val vm = vm()
+            vm.state.test {
+                val s = expectMostRecentItem()
+                assertTrue(s.canRunSavedSearch)
+                assertEquals(ResultsSource.RUN_SAVED, s.source)
+                assertTrue(s.sections.all { it.notLoaded })
+                assertTrue(search.started.isEmpty())
+                vm.onEvent(ResultsEvent.RunSavedSearch)
+                assertEquals(listOf(request), search.started)
                 val after = expectMostRecentItem()
                 assertFalse(after.canRunSavedSearch)
                 assertEquals(StreamPhase.DONE, after.phase)
+                assertEquals(ResultsSource.LIVE, after.source)
             }
         }
 
@@ -240,24 +229,163 @@ class ResultsViewModelTest {
 
     @Test
     fun `source selection rules`() {
-        val draftWithData =
-            PlanDraft(
-                planId = 1,
-                searchRequest = request.copy(destination = "Rome"),
-                searchData =
-                    kotlinx.serialization.json.JsonObject(
-                        mapOf("hotels" to kotlinx.serialization.json.JsonObject(emptyMap())),
-                    ),
-            )
+        val hotels = kotlinx.serialization.json.JsonObject(mapOf("hotels" to kotlinx.serialization.json.JsonObject(emptyMap())))
+        val other = request.copy(destination = "Rome")
         val idle = io.github.rupakc.travelplanner.core.model.search.SearchResultsState()
         val streaming = idle.copy(request = request, phase = StreamPhase.STREAMING)
         val done = streaming.copy(phase = StreamPhase.DONE)
-        assertFalse(ResultsStateBuilder.useLiveStream(idle, draftWithData))
-        assertTrue(ResultsStateBuilder.useLiveStream(streaming, draftWithData))
-        assertFalse(ResultsStateBuilder.useLiveStream(done, draftWithData))
-        assertTrue(ResultsStateBuilder.useLiveStream(done, draftWithData.copy(searchRequest = request)))
-        assertTrue(ResultsStateBuilder.useLiveStream(done, PlanDraft()))
+        assertEquals(ResultsSource.NONE, ResultsStateBuilder.selectSource(idle, PlanDraft()))
+        assertEquals(ResultsSource.LIVE, ResultsStateBuilder.selectSource(streaming, PlanDraft()))
+        assertEquals(ResultsSource.LIVE, ResultsStateBuilder.selectSource(done, PlanDraft(searchRequest = request)))
+        assertEquals(ResultsSource.LIVE, ResultsStateBuilder.selectSource(streaming, PlanDraft(planId = 1, searchRequest = request, searchData = hotels)))
+        assertEquals(ResultsSource.SNAPSHOT, ResultsStateBuilder.selectSource(done, PlanDraft(planId = 1, searchRequest = other, searchData = hotels)))
+        assertEquals(ResultsSource.SNAPSHOT, ResultsStateBuilder.selectSource(streaming, PlanDraft(searchRequest = other, searchData = hotels)))
+        assertEquals(ResultsSource.SNAPSHOT, ResultsStateBuilder.selectSource(idle, PlanDraft(searchRequest = request, searchData = hotels)))
+        assertEquals(ResultsSource.RUN_SAVED, ResultsStateBuilder.selectSource(done, PlanDraft(planId = 1, searchRequest = other)))
+        assertEquals(ResultsSource.RUN_SAVED, ResultsStateBuilder.selectSource(idle, PlanDraft(searchRequest = request)))
     }
+
+    @Test
+    fun `finished stream A then open saved plan B without stored results shows B and never writes A into it`() =
+        runTest {
+            search.start(request)
+            val b = request.copy(destination = "Lisbon")
+            val vm = vm()
+            vm.state.test {
+                expectMostRecentItem()
+                plan.restore(PlanDraft(planId = 11, name = "Lisbon trip", searchRequest = b))
+                val s = expectMostRecentItem()
+                assertEquals("Lisbon", s.request?.destination)
+                assertTrue(s.canRunSavedSearch)
+                assertNull(s.section(SectionId.HOTELS).data)
+                assertEquals(b, plan.draft.value.searchRequest)
+                assertNull(plan.draft.value.searchData)
+                assertEquals(1, search.started.size)
+            }
+        }
+
+    @Test
+    fun `plan saved from chat with a request only after another trip streamed shows Run this search`() =
+        runTest {
+            search.start(request)
+            val chat = request.copy(destination = "Kyoto")
+            plan.attachSearch(chat, null)
+            plan.save("Kyoto from chat")
+            val vm = vm()
+            vm.state.test {
+                val s = expectMostRecentItem()
+                assertEquals(ResultsSource.RUN_SAVED, s.source)
+                assertEquals("Kyoto", s.request?.destination)
+                assertEquals(chat, plan.draft.value.searchRequest)
+                assertNull(plan.draft.value.searchData)
+            }
+        }
+
+    @Test
+    fun `process death mid-stream restores the stored sections and marks the rest not loaded`() =
+        runTest {
+            val partial =
+                Fixtures.searchEvents(Fixtures.SEARCH_FULL).filterIsInstance<SearchEvent.Section>().filter {
+                    it.id == SectionId.FLIGHTS ||
+                        it.id == SectionId.VISA
+                }
+            val data = kotlinx.serialization.json.JsonObject(partial.associate { it.id.wire to it.raw })
+            plan.restore(PlanDraft(searchRequest = request, searchData = data))
+            val vm = vm()
+            vm.state.test {
+                val s = expectMostRecentItem()
+                assertEquals(ResultsSource.SNAPSHOT, s.source)
+                assertNotNull(s.section(SectionId.FLIGHTS).data)
+                assertFalse(s.section(SectionId.FLIGHTS).notLoaded)
+                assertTrue(s.section(SectionId.HOTELS).notLoaded)
+                assertTrue(search.started.isEmpty())
+            }
+        }
+
+    @Test
+    fun `a filter result for the previous search is dropped after a remix`() =
+        runTest {
+            val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+            val slow =
+                object : io.github.rupakc.travelplanner.core.data.repository.SearchRepository by search {
+                    override suspend fun hotelsFiltered(request: TravelSearchRequest, filters: HotelFilters): AppResult<HotelsData> {
+                        gate.await()
+                        return AppResult.Success(HotelsData(results = listOf(io.github.rupakc.travelplanner.core.model.section.Hotel(name = "Stale Inn"))))
+                    }
+                }
+            val vm =
+                ResultsViewModel(
+                    slow,
+                    plan,
+                    health,
+                    FakeFareCalendarRepository(),
+                    fareWatches,
+                    priceWatches,
+                    profile,
+                    Optional.empty(),
+                    clock,
+                    TestAppDispatchers(main.testDispatcher),
+                    SavedStateHandle(),
+                )
+            vm.state.test {
+                search.start(request)
+                vm.onEvent(ResultsEvent.ApplyHotelFilters(HotelFilters(numBeds = 2)))
+                assertTrue(expectMostRecentItem().section(SectionId.HOTELS).filterLoading)
+                vm.onEvent(ResultsEvent.Remix(RemixPreset.WEEK_LATER))
+                gate.complete(Unit)
+                val s = expectMostRecentItem()
+                assertEquals("2026-12-08", s.request?.departureDate)
+                assertFalse((s.section(SectionId.HOTELS).data as HotelsData).results.any { it.name == "Stale Inn" })
+                assertFalse(s.section(SectionId.HOTELS).filterLoading)
+            }
+        }
+
+    @Test
+    fun `Travel Ease and the pricing advisor survive process death via saved state`() =
+        runTest {
+            val saved = SavedStateHandle()
+            val first =
+                ResultsViewModel(
+                    search,
+                    plan,
+                    health,
+                    FakeFareCalendarRepository(),
+                    fareWatches,
+                    priceWatches,
+                    profile,
+                    Optional.empty(),
+                    clock,
+                    TestAppDispatchers(main.testDispatcher),
+                    saved,
+                )
+            first.state.test {
+                search.start(request)
+                assertEquals(82, expectMostRecentItem().confidence?.total)
+            }
+            // New process: the stream is gone, the draft and the saved state remain.
+            val draft = plan.draft.value
+            val newPlan = FakeCurrentPlanStore().apply { restore(draft) }
+            val restored =
+                ResultsViewModel(
+                    FakeSearchRepository(),
+                    newPlan,
+                    health,
+                    FakeFareCalendarRepository(),
+                    fareWatches,
+                    priceWatches,
+                    profile,
+                    Optional.empty(),
+                    clock,
+                    TestAppDispatchers(main.testDispatcher),
+                    saved,
+                )
+            restored.state.test {
+                val s = expectMostRecentItem()
+                assertEquals(ResultsSource.SNAPSHOT, s.source)
+                assertEquals(82, s.confidence?.total)
+                assertNotNull(s.pricingAdvisor)
+            }
+        }
 
     @Test
     fun `toggle adds to the plan and the plan bar sums the cost`() =

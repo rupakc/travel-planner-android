@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.feature.results
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +25,7 @@ import io.github.rupakc.travelplanner.core.domain.results.FareCalendarRules
 import io.github.rupakc.travelplanner.core.domain.results.Remix
 import io.github.rupakc.travelplanner.core.domain.results.RemixPreset
 import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
+import io.github.rupakc.travelplanner.core.domain.results.searchKey
 import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.alerts.ALERT_ANY_DROP
 import io.github.rupakc.travelplanner.core.model.alerts.ActivityWatchSpec
@@ -34,6 +36,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.PriceSuggestion
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatchKinds
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
 import io.github.rupakc.travelplanner.core.model.search.HotelFilters
 import io.github.rupakc.travelplanner.core.model.search.LayoverRequest
 import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
@@ -42,17 +45,20 @@ import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.Activity
+import io.github.rupakc.travelplanner.core.model.section.ConfidenceData
 import io.github.rupakc.travelplanner.core.model.section.FlightLayover
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.ItineraryData
+import io.github.rupakc.travelplanner.core.model.section.PricingAdvisorData
 import io.github.rupakc.travelplanner.core.model.section.SectionData
 import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
 import java.util.Optional
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,16 +100,26 @@ class ResultsViewModel
         catalogue: Optional<FeatureCatalogue>,
         private val clock: AppClock,
         dispatchers: AppDispatchers,
+        private val savedState: SavedStateHandle,
     ) : ViewModel() {
         private val local = MutableStateFlow(LocalState())
         private val builder = ResultsStateBuilder()
         private val messageChannel = Channel<ResultsMessage>(Channel.BUFFERED)
 
+        /** One job per section (filter / retry); a new call or a new search cancels the previous one. */
+        private val jobs = mutableMapOf<SectionId, Job>()
+
         /** One-shot snackbar messages. */
         val messages: Flow<ResultsMessage> = messageChannel.receiveAsFlow()
 
-        private val snapshot: Flow<SearchResultsState?> =
-            plan.draft.map { it.searchRequest to it.searchData }.distinctUntilChanged().map { (_, _) -> ResultsStateBuilder.snapshot(plan.draft.value) }
+        /** Last decoded snapshot, keyed by the draft's searchData identity (decoded only when shown). */
+        @Volatile private var snapshotMemo: Pair<Any?, SearchResultsState?> = null to null
+
+        private fun snapshotOf(draft: PlanDraft): SearchResultsState? {
+            val memo = snapshotMemo
+            if (memo.first === draft.searchData && memo.second?.request == draft.searchRequest) return memo.second
+            return ResultsStateBuilder.snapshot(draft)?.let(::withSavedExtras).also { snapshotMemo = draft.searchData to it }
+        }
 
         private val visibleFeatures: Flow<Set<FeatureId>?> =
             if (catalogue.isPresent) {
@@ -115,49 +131,98 @@ class ResultsViewModel
                 flowOf(null)
             }
 
-        private val source: Flow<Pair<SearchResultsState, Boolean>> =
-            combine(search.current, snapshot, plan.draft) { live, saved, draft ->
-                if (saved == null || ResultsStateBuilder.useLiveStream(live, draft)) live to false else saved to true
+        private val source: Flow<SourcedResults> =
+            combine(search.current, plan.draft) { live, draft -> sourceOf(live, draft) }.flowOn(dispatchers.default)
+
+        private fun sourceOf(live: SearchResultsState, draft: PlanDraft): SourcedResults =
+            when (val chosen = ResultsStateBuilder.selectSource(live, draft)) {
+                ResultsSource.LIVE -> SourcedResults(live, chosen)
+                ResultsSource.SNAPSHOT -> SourcedResults(snapshotOf(draft) ?: SearchResultsState(request = draft.searchRequest), chosen)
+                ResultsSource.RUN_SAVED -> SourcedResults(SearchResultsState(request = draft.searchRequest), chosen)
+                ResultsSource.NONE -> SourcedResults(SearchResultsState(), chosen)
             }
 
         val state: StateFlow<ResultsUiState> =
-            combine(source, plan.draft, local, health.capabilities, visibleFeatures) { (results, fromSnapshot), draft, l, caps, visible ->
-                builder.build(results, fromSnapshot, draft, l, caps, visible, clock.today())
+            combine(source, plan.draft, local, health.capabilities, visibleFeatures) { sourced, draft, l, caps, visible ->
+                builder.build(sourced, draft, l, caps, visible, clock.today())
             }.flowOn(dispatchers.default)
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ResultsUiState())
 
         init {
             viewModelScope.launch { if (health.capabilities.value == null) health.refresh() }
-            viewModelScope.launch { autoStart() }
             viewModelScope.launch { resetOnNewSearch() }
             viewModelScope.launch { attachToDraft() }
+            viewModelScope.launch { rememberExtras() }
         }
 
-        /** Search handed over through the draft (unsaved) but not streaming yet → start it. Saved plans never re-stream. */
-        private suspend fun autoStart() {
-            if (search.current.value.phase != StreamPhase.IDLE) return
-            val draft = plan.draft.first { it.searchRequest != null }
-            val request = draft.searchRequest ?: return
-            if (search.current.value.phase == StreamPhase.IDLE && draft.searchData.isNullOrEmpty() && draft.planId == null) search.start(request)
-        }
-
+        /** A different search on screen: cancel its filter/retry jobs and reset the per-search state. */
         private suspend fun resetOnNewSearch() {
-            search.current.map { it.request }.distinctUntilChanged().collect { request ->
-                if (request != null && request != local.value.request) local.update { it.forNewSearch(request) }
+            source.map { searchKey(it.results.request) }.distinctUntilChanged().collect { key ->
+                if (key != local.value.key) {
+                    jobs.values.forEach { it.cancel() }
+                    jobs.clear()
+                    local.update { it.forNewSearch(key) }
+                }
             }
         }
 
-        /** Keeps the draft's `searchData` = the latest sections (plan snapshot, chat context, process death). */
+        /**
+         * Keeps the draft's `searchData` = the sections on screen (plan snapshot, chat context,
+         * process death). Only for the draft's own search: a stream for another trip is never written.
+         */
         private suspend fun attachToDraft() {
-            combine(search.current, local) { s, l -> Triple(s.request, s.sections + l.overrides, s.phase) }
-                .distinctUntilChanged()
-                .collect { (request, sections, phase) ->
-                    // Never overwrite a saved plan's stored results with a stale stream.
-                    val live = ResultsStateBuilder.useLiveStream(search.current.value, plan.draft.value)
-                    if (live && request != null && phase != StreamPhase.FAILED) {
-                        plan.attachSearch(request, SearchResultsReducer.sectionsJson(SearchResultsState(request = request, sections = sections)))
-                    }
+            combine(search.current, plan.draft, local) { live, draft, l -> Triple(live, draft, l.overrides) }
+                .collect { (live, draft, overrides) ->
+                    val target =
+                        when (ResultsStateBuilder.selectSource(live, draft)) {
+                            ResultsSource.LIVE -> {
+                                if (live.phase == StreamPhase.FAILED) return@collect
+                                SearchResultsReducer.sectionsJson(SearchResultsState(request = live.request, sections = live.sections + overrides))
+                            }
+
+                            ResultsSource.SNAPSHOT -> {
+                                if (overrides.isEmpty()) return@collect
+                                JsonObject(draft.searchData.orEmpty() + overrides.map { (id, r) -> id.wire to r.raw })
+                            }
+
+                            else -> {
+                                return@collect
+                            }
+                        }
+                    val request =
+                        (if (live.request != null && searchKey(live.request) == searchKey(draft.searchRequest)) live.request else null)
+                            ?: draft.searchRequest ?: live.request ?: return@collect
+                    if (draft.searchData != target || draft.searchRequest != request) plan.attachSearch(request, target)
                 }
+        }
+
+        /** Travel Ease and the pricing advisor are not sections; keep them across process death (M1). */
+        private suspend fun rememberExtras() {
+            search.current.map {
+                Triple(
+                    searchKey(it.request),
+                    it.confidence,
+                    it.pricingAdvisor,
+                )
+            }.distinctUntilChanged().collect { (key, confidence, advisor) ->
+                if (key == null || key != searchKey(plan.draft.value.searchRequest)) return@collect
+                savedState[KEY_EXTRAS_SEARCH] = key
+                savedState[KEY_CONFIDENCE] = confidence?.let { TravelJson.encodeToString(ConfidenceData.serializer(), it) }
+                savedState[KEY_ADVISOR] = advisor?.let { TravelJson.encodeToString(PricingAdvisorData.serializer(), it) }
+            }
+        }
+
+        private fun withSavedExtras(snapshot: SearchResultsState): SearchResultsState {
+            if (savedState.get<String>(KEY_EXTRAS_SEARCH) != searchKey(snapshot.request)) return snapshot
+            val confidence =
+                savedState.get<String>(KEY_CONFIDENCE)?.let {
+                    runCatching { TravelJson.decodeFromString(ConfidenceData.serializer(), it) }.getOrNull()
+                }
+            val advisor =
+                savedState.get<String>(KEY_ADVISOR)?.let {
+                    runCatching { TravelJson.decodeFromString(PricingAdvisorData.serializer(), it) }.getOrNull()
+                }
+            return snapshot.copy(confidence = confidence, pricingAdvisor = advisor)
         }
 
         private val request: TravelSearchRequest? get() = state.value.request ?: search.current.value.request ?: plan.draft.value.searchRequest
@@ -340,6 +405,8 @@ class ResultsViewModel
         private fun rerun(next: TravelSearchRequest) {
             val previous = plan.snapshot()
             plan.newPlan()
+            // The new plan is for the new search, so its stream is the one shown and stored.
+            plan.attachSearch(next, null)
             local.update { it.copy(newPlanUndo = previous.takeUnless { p -> p.selections.isEmpty }) }
             if (!previous.selections.isEmpty) messageChannel.trySend(ResultsMessage.NewPlanStarted)
             search.start(next)
@@ -370,45 +437,65 @@ class ResultsViewModel
                 search.start(req)
                 return
             }
-            local.update { it.copy(loading = it.loading + id, errors = it.errors - id) }
-            viewModelScope.launch {
-                when (val result = search.section(id, req)) {
-                    is AppResult.Success -> {
-                        val raw = encode(result.value)
-                        local.update { it.copy(loading = it.loading - id, overrides = it.overrides + (id to SectionResult(id, result.value, raw, null))) }
-                    }
-
-                    is AppResult.Failure -> {
-                        local.update { it.copy(loading = it.loading - id) }
-                        messageChannel.trySend(ResultsMessage.RetryFailed(result.error.message))
-                    }
+            runSectionJob(id, req, onFailure = { error -> messageChannel.trySend(ResultsMessage.RetryFailed(error.message)) }) { r ->
+                when (val result = search.section(id, r)) {
+                    is AppResult.Success -> AppResult.Success(result.value to encode(result.value))
+                    is AppResult.Failure -> result
                 }
             }
         }
 
         private fun <T : SectionData> filter(id: SectionId, serializer: KSerializer<T>, call: suspend (TravelSearchRequest) -> AppResult<T>) {
             val req = request ?: return
-            local.update { it.copy(loading = it.loading + id, errors = it.errors - id, expanded = it.expanded + (id to true)) }
-            viewModelScope.launch {
-                when (val result = call(req)) {
-                    is AppResult.Success -> {
-                        val raw = TravelJson.encodeToJsonElement(serializer, result.value) as JsonObject
-                        local.update {
-                            it.copy(
-                                loading = it.loading - id,
-                                overrides = it.overrides + (id to SectionResult(id, result.value, raw, null)),
-                                findingCheaperHotels = false,
-                            )
-                        }
-                    }
-
-                    is AppResult.Failure -> {
-                        local.update {
-                            it.copy(loading = it.loading - id, errors = it.errors + (id to FilterError(result.error.message)), findingCheaperHotels = false)
-                        }
-                    }
+            local.update { it.copy(expanded = it.expanded + (id to true)) }
+            runSectionJob(id, req, onFailure = { error -> local.update { it.copy(errors = it.errors + (id to FilterError(error.message))) } }) { r ->
+                when (val result = call(r)) {
+                    is AppResult.Success -> AppResult.Success(result.value to (TravelJson.encodeToJsonElement(serializer, result.value) as JsonObject))
+                    is AppResult.Failure -> result
                 }
             }
+        }
+
+        /**
+         * One job per section: a newer filter/retry cancels the older one, a new search cancels all
+         * (I1), and a result is dropped when the search on screen is no longer the one it was for.
+         */
+        private fun runSectionJob(
+            id: SectionId,
+            req: TravelSearchRequest,
+            onFailure: (AppError) -> Unit,
+            call: suspend (TravelSearchRequest) -> AppResult<Pair<SectionData, JsonObject>>,
+        ) {
+            val key = searchKey(req)
+            jobs.remove(id)?.cancel()
+            local.update { it.copy(loading = it.loading + id, errors = it.errors - id) }
+            jobs[id] =
+                viewModelScope.launch {
+                    val result = call(req)
+                    if (local.value.key != key) return@launch
+                    when (result) {
+                        is AppResult.Success -> {
+                            val (data, raw) = result.value
+                            local.update {
+                                if (it.key != key) {
+                                    it
+                                } else {
+                                    it.copy(
+                                        loading = it.loading - id,
+                                        overrides = it.overrides + (id to SectionResult(id, data, raw, null)),
+                                        findingCheaperHotels = false,
+                                    )
+                                }
+                            }
+                        }
+
+                        is AppResult.Failure -> {
+                            local.update { if (it.key != key) it else it.copy(loading = it.loading - id, findingCheaperHotels = false) }
+                            onFailure(result.error)
+                        }
+                    }
+                    jobs.remove(id)
+                }
         }
 
         private fun encode(data: SectionData): JsonObject = ResultsStateBuilder.encode(data)
@@ -582,6 +669,9 @@ class ResultsViewModel
             const val AIRPORT_LOOKUP_LIMIT = 5
             const val KIND_FARE = "fare"
             const val NO_LIVE_PRICE = "no_live_price"
+            const val KEY_EXTRAS_SEARCH = "results_extras_search"
+            const val KEY_CONFIDENCE = "results_confidence"
+            const val KEY_ADVISOR = "results_pricing_advisor"
 
             /** Sections with a single-agent route (`SearchRepository.section`); others retry by re-running the search. */
             val SINGLE_AGENT =

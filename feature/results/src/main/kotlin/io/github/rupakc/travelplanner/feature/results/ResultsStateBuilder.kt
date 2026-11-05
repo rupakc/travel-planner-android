@@ -16,6 +16,7 @@ import io.github.rupakc.travelplanner.core.domain.results.TripResults
 import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
 import io.github.rupakc.travelplanner.core.domain.results.clearPendingVerification
 import io.github.rupakc.travelplanner.core.domain.results.orderSectionByCity
+import io.github.rupakc.travelplanner.core.domain.results.searchKey
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
@@ -47,10 +48,20 @@ import io.github.rupakc.travelplanner.feature.results.sections.ResultsSection
 import java.time.LocalDate
 import kotlinx.serialization.json.JsonObject
 
+/**
+ * Where the results on screen come from (explicit source selection, see [ResultsStateBuilder.selectSource]).
+ * [LIVE] = the app-wide stream for this draft's search; [SNAPSHOT] = the draft's stored sections;
+ * [RUN_SAVED] = a search without stored results ("Run this search"); [NONE] = nothing to show.
+ */
+enum class ResultsSource { LIVE, SNAPSHOT, RUN_SAVED, NONE }
+
+/** The results to render and where they came from. */
+internal data class SourcedResults(val results: SearchResultsState, val source: ResultsSource)
+
 /** Per-search local state of the results screen (owned by the ViewModel). */
 internal data class LocalState(
-    /** The search these fields belong to; a new search resets them. */
-    val request: TravelSearchRequest? = null,
+    /** [searchKey] of the search these fields belong to; a new search resets them. */
+    val key: String? = null,
     /** Section data replaced by a filter / single-section retry (web `setResults`). */
     val overrides: Map<SectionId, SectionResult> = emptyMap(),
     val loading: Set<SectionId> = emptySet(),
@@ -76,8 +87,8 @@ internal data class LocalState(
     val selected: SectionId? = null,
 ) {
     /** Keeps what outlives a new search (filters text, expand choices, remix banner, undo). */
-    fun forNewSearch(request: TravelSearchRequest?): LocalState =
-        LocalState(request = request, query = query, expanded = expanded, remix = remix, newPlanUndo = newPlanUndo, watches = WatchesUi())
+    fun forNewSearch(key: String?): LocalState =
+        LocalState(key = key, query = query, expanded = expanded, remix = remix, newPlanUndo = newPlanUndo, watches = WatchesUi())
 }
 
 /**
@@ -85,39 +96,51 @@ internal data class LocalState(
  * state. Runs off the main thread; decodes only sections whose JSON changed.
  */
 internal class ResultsStateBuilder {
-    private val decoded =
-        object : LinkedHashMap<JsonObject, SectionData>(CACHE_SIZE, LOAD_FACTOR, true) {
-            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<JsonObject, SectionData>?) = size > CACHE_SIZE
+    /** Cache key: the section's original JSON by identity (no deep hashing), its trip order and stream state. */
+    private class CacheKey(val id: SectionId, val raw: JsonObject, val destinations: List<String>?, val streaming: Boolean) {
+        override fun equals(other: Any?): Boolean =
+            other is CacheKey && other.id == id && other.raw === raw && other.destinations == destinations && other.streaming == streaming
+
+        override fun hashCode(): Int = (id.hashCode() * HASH_PRIME + System.identityHashCode(raw)) * HASH_PRIME + streaming.hashCode()
+    }
+
+    private val effective =
+        object : LinkedHashMap<CacheKey, Pair<SectionData, JsonObject>>(CACHE_SIZE, LOAD_FACTOR, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<CacheKey, Pair<SectionData, JsonObject>>?) = size > CACHE_SIZE
         }
 
-    private fun decode(id: SectionId, raw: JsonObject, fallback: SectionData?): SectionData =
-        synchronized(decoded) { decoded[raw] } ?: (fallback ?: SectionDecoder.decode(id, raw)).also { synchronized(decoded) { decoded[raw] = it } }
-
-    /** Effective section data: overrides, journey order (not flights/weather, web parity), resolved pending chips. */
+    /**
+     * Effective section data: overrides, journey order (not flights/weather, web parity), resolved
+     * pending chips. Each section is ordered and decoded once per original JSON object (M5).
+     */
     fun effectiveSections(results: SearchResultsState, local: LocalState): Map<SectionId, Pair<SectionData, JsonObject>> {
         val merged = results.sections + local.overrides
         val destinations = results.request?.destinations
-        val ordered =
-            merged.mapValues { (id, r) ->
-                if (id == SectionId.FLIGHTS || id == SectionId.WEATHER) r.raw else orderSectionByCity(r.raw, destinations)
-            }
-        val resolved = if (results.phase == StreamPhase.STREAMING) ordered else clearPendingVerification(ordered)
-        return resolved.mapValues { (id, raw) ->
-            val original = merged.getValue(id)
-            decode(id, raw, original.data.takeIf { raw === original.raw }) to raw
+        val streaming = results.phase == StreamPhase.STREAMING
+        return merged.mapValues { (id, r) ->
+            val key = CacheKey(id, r.raw, destinations, streaming)
+            synchronized(effective) { effective[key] } ?: compute(id, r, destinations, streaming).also { synchronized(effective) { effective[key] = it } }
         }
+    }
+
+    private fun compute(id: SectionId, r: SectionResult, destinations: List<String>?, streaming: Boolean): Pair<SectionData, JsonObject> {
+        val ordered = if (id == SectionId.FLIGHTS || id == SectionId.WEATHER) r.raw else orderSectionByCity(r.raw, destinations)
+        val resolved = if (streaming) ordered else clearPendingVerification(mapOf(id to ordered)).getValue(id)
+        return (if (resolved === r.raw) r.data else SectionDecoder.decode(id, resolved)) to resolved
     }
 
     @Suppress("LongParameterList", "CyclomaticComplexMethod")
     fun build(
-        results: SearchResultsState,
-        fromSnapshot: Boolean,
+        sourced: SourcedResults,
         draft: PlanDraft,
         local: LocalState,
         health: Health?,
         visible: Set<FeatureId>?,
         today: LocalDate,
     ): ResultsUiState {
+        val results = sourced.results
+        val fromSnapshot = sourced.source == ResultsSource.SNAPSHOT
+        val stored = sourced.source == ResultsSource.SNAPSHOT || sourced.source == ResultsSource.RUN_SAVED
         val request = results.request
         val effective = effectiveSections(results, local)
         val done = results.phase == StreamPhase.DONE || fromSnapshot
@@ -137,6 +160,7 @@ internal class ResultsStateBuilder {
                     expanded = local.expanded[id] ?: (arranged.relevant || (filtering && count > 0)),
                     matchCount = if (entry == null && filtering) 0 else count,
                     filterLoading = id in local.loading,
+                    notLoaded = stored && entry == null && id !in local.loading,
                     filterError = local.errors[id],
                     activeFilterCount = activeFilters(id, local),
                 )
@@ -149,7 +173,8 @@ internal class ResultsStateBuilder {
             phase = if (fromSnapshot) StreamPhase.DONE else results.phase,
             error = results.error,
             fromSnapshot = fromSnapshot,
-            canRunSavedSearch = results.phase == StreamPhase.IDLE && !fromSnapshot && draft.searchRequest != null,
+            canRunSavedSearch = sourced.source == ResultsSource.RUN_SAVED,
+            source = sourced.source,
             sections = visibleSections,
             readyCount = results.readyCount,
             confidence = results.confidence,
@@ -254,6 +279,7 @@ internal class ResultsStateBuilder {
     companion object {
         private const val CACHE_SIZE = 64
         private const val LOAD_FACTOR = 0.75f
+        private const val HASH_PRIME = 31
 
         /** The typed sections the pure utilities read. */
         fun tripResults(effective: Map<SectionId, Pair<SectionData, JsonObject>>): TripResults =
@@ -269,18 +295,25 @@ internal class ResultsStateBuilder {
             )
 
         /**
-         * Which results to show (explicit source selection):
-         * 1. an in-flight stream (Search started it, or Remix/Retry) → attach to it, never start another;
-         * 2. the draft carries stored results and the stream is idle, or a saved plan opened after a
-         *    finished stream for another trip ("Open in results") → render the draft, no stream;
-         * 3. otherwise the live state (the ViewModel starts a stream only for an unsaved draft request).
+         * Which results to show (explicit source selection by search identity, [searchKey]):
+         * - the live stream only when its request has the draft's key (or the draft has no search yet,
+         *   e.g. right after New plan / Remix); a stream is never written into a draft with another key;
+         * - else the draft's stored sections when it has some (saved plan, process death);
+         * - else, when the draft has a request, "Run this search" (no automatic stream);
+         * - else nothing.
          */
-        fun useLiveStream(live: SearchResultsState, draft: PlanDraft): Boolean {
-            if (live.phase == StreamPhase.IDLE) return false
-            if (live.phase == StreamPhase.STREAMING) return true
-            val savedOther = draft.planId != null && !draft.searchData.isNullOrEmpty() && draft.searchRequest != live.request
-            return !savedOther
+        fun selectSource(live: SearchResultsState, draft: PlanDraft): ResultsSource {
+            val liveActive = live.phase != StreamPhase.IDLE && live.request != null
+            val draftKey = searchKey(draft.searchRequest)
+            return when {
+                draftKey == null -> if (liveActive) ResultsSource.LIVE else ResultsSource.NONE
+                liveActive && searchKey(live.request) == draftKey -> ResultsSource.LIVE
+                hasStoredSections(draft) -> ResultsSource.SNAPSHOT
+                else -> ResultsSource.RUN_SAVED
+            }
         }
+
+        private fun hasStoredSections(draft: PlanDraft): Boolean = draft.searchData?.keys?.any { SectionId.fromWire(it) != null } == true
 
         /** Results restored from the plan draft's `searchData` (no re-stream after process death / for a saved plan). */
         fun snapshot(draft: PlanDraft): SearchResultsState? {
@@ -296,7 +329,8 @@ internal class ResultsStateBuilder {
             return SearchResultsState(
                 request = request,
                 sections = sections,
-                statuses = SectionId.entries.associateWith { SectionStatus.DONE },
+                // Only what was stored is done; the rest is "not loaded" (never "No results").
+                statuses = SectionId.entries.associateWith { if (it in sections) SectionStatus.DONE else SectionStatus.WAITING },
                 phase = StreamPhase.DONE,
             )
         }

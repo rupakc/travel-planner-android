@@ -44,7 +44,11 @@ object WatchSpecs {
             numTravelers = search.numTravelers.takeIf { it > 0 } ?: 1,
         )
 
-    /** Single-destination trip with both ends and a departure after [today] (web `isWatchableTrip`). */
+    /**
+     * Single-destination trip with both ends and a departure after [today] (web `isWatchableTrip`).
+     * [today] is the device's local date; the web compares with the UTC date, so the two can differ
+     * only around midnight (the server re-validates in UTC).
+     */
     fun isWatchableTrip(search: TravelSearchRequest?, today: LocalDate): Boolean {
         if (search == null) return false
         if (listOf(search.origin, search.destination, search.departureDate).any(String::isBlank)) return false

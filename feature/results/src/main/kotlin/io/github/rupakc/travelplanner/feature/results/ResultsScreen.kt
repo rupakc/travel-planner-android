@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -42,10 +43,14 @@ import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.WeatherData
 import io.github.rupakc.travelplanner.core.ui.StreamingStatusAnnouncer
+import io.github.rupakc.travelplanner.feature.results.sections.CommerceRow
+import io.github.rupakc.travelplanner.feature.results.sections.CommerceRowContent
+import io.github.rupakc.travelplanner.feature.results.sections.LocalSelections
 import io.github.rupakc.travelplanner.feature.results.sections.ResultsSectionCard
 import io.github.rupakc.travelplanner.feature.results.sections.SectionActions
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.CommerceContext
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.LocalCommerceContext
+import io.github.rupakc.travelplanner.feature.results.sections.commerceRows
 import io.github.rupakc.travelplanner.feature.results.ui.ActivityFilterSheet
 import io.github.rupakc.travelplanner.feature.results.ui.BestValueCard
 import io.github.rupakc.travelplanner.feature.results.ui.BudgetPlannerCard
@@ -109,7 +114,8 @@ fun ResultsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         StreamingStatusAnnouncer(state.sectionStatuses)
-        CompositionLocalProvider(LocalCommerceContext provides commerce) {
+        val selections = rememberUpdatedState(state.selections)
+        CompositionLocalProvider(LocalCommerceContext provides commerce, LocalSelections provides selections) {
             BoxWithConstraints(Modifier.padding(padding).fillMaxSize()) {
                 when {
                     state.request == null -> NoSearch(onBack)
@@ -136,6 +142,7 @@ private fun NoSearch(onBack: () -> Unit) {
 private fun CompactLayout(state: ResultsUiState, onEvent: (ResultsEvent) -> Unit, actions: SectionActions, onOpenFilters: (FilterSheet) -> Unit) {
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val rows = rememberRows(state)
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize().testTag("results_list"),
@@ -143,18 +150,50 @@ private fun CompactLayout(state: ResultsUiState, onEvent: (ResultsEvent) -> Unit
         verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
     ) {
         headerItems(state, onEvent, actions, onJump = { id ->
-            val index = state.sections.indexOfFirst { it.id == id }
-            if (index >= 0) scope.launch { listState.animateScrollToItem(HEADER_ITEMS + index) }
+            var index = HEADER_ITEMS
+            for (s in state.sections) {
+                if (s.id == id) break
+                index += 1 + rows[s.id].orEmpty().size
+            }
+            scope.launch { listState.animateScrollToItem(index) }
         })
-        items(state.sections, key = { it.id.name }, contentType = { "section" }) { section ->
-            ResultsSectionCard(
-                section = section,
-                actions = actions,
-                onToggleExpanded = { onEvent(ResultsEvent.ToggleSection(section.id)) },
-                onShowVerification = { onEvent(ResultsEvent.ShowVerification(section.id)) },
-                headerActions = { SectionHeaderActions(section.id, state, onEvent, onOpenFilters) },
-            )
+        state.sections.forEach { section -> sectionItems(section, rows[section.id].orEmpty(), state, onEvent, actions, onOpenFilters) }
+    }
+}
+
+/** Card rows per section, recomputed only when data, budget or selections change. */
+@Composable
+private fun rememberRows(state: ResultsUiState, expandAll: Boolean = false): Map<SectionId, List<CommerceRow>> =
+    remember(state.sections, state.budget, state.selections, expandAll) {
+        state.sections.associate { s ->
+            val show = (s.expanded || expandAll) && !s.filterLoading && !s.notLoaded
+            s.id to if (show) commerceRows(s.id, s.data, state.budget, state.selections) else emptyList()
         }
+    }
+
+/** A section header item followed by one lazy item per card (stable keys, content type per card kind). */
+private fun LazyListScope.sectionItems(
+    section: SectionUi,
+    rows: List<CommerceRow>,
+    state: ResultsUiState,
+    onEvent: (ResultsEvent) -> Unit,
+    actions: SectionActions,
+    onOpenFilters: (FilterSheet) -> Unit,
+    expandedPane: Boolean = false,
+) {
+    item(key = section.id.name, contentType = "section") {
+        ResultsSectionCard(
+            section = if (expandedPane) section.copy(expanded = true) else section,
+            actions = actions,
+            onToggleExpanded = { if (!expandedPane) onEvent(ResultsEvent.ToggleSection(section.id)) },
+            onShowVerification = { onEvent(ResultsEvent.ShowVerification(section.id)) },
+            onRunSearch = { onEvent(ResultsEvent.RetryStream) },
+            cardsOutside = true,
+            headerActions = { SectionHeaderActions(section.id, state, onEvent, onOpenFilters) },
+        )
+    }
+    items(rows, key = { it.key }, contentType = { it.contentType }) { row ->
+        CommerceRowContent(row, actions, Modifier.padding(start = TravelTheme.spacing.md))
     }
 }
 
@@ -180,6 +219,7 @@ private fun LazyListScope.headerItems(state: ResultsUiState, onEvent: (ResultsEv
 @Composable
 private fun ExpandedLayout(state: ResultsUiState, onEvent: (ResultsEvent) -> Unit, actions: SectionActions, onOpenFilters: (FilterSheet) -> Unit) {
     val selectedId = state.selectedSection ?: state.sections.firstOrNull()?.id
+    val rows = rememberRows(state, expandAll = true)
     Row(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.width(LIST_PANE_WIDTH).fillMaxHeight().testTag("results_list_pane"),
@@ -197,15 +237,7 @@ private fun ExpandedLayout(state: ResultsUiState, onEvent: (ResultsEvent) -> Uni
             contentPadding = PaddingValues(TravelTheme.spacing.gutter),
         ) {
             if (section != null) {
-                item(key = section.id.name, contentType = "section") {
-                    ResultsSectionCard(
-                        section = section.copy(expanded = true),
-                        actions = actions,
-                        onToggleExpanded = {},
-                        onShowVerification = { onEvent(ResultsEvent.ShowVerification(section.id)) },
-                        headerActions = { SectionHeaderActions(section.id, state, onEvent, onOpenFilters) },
-                    )
-                }
+                sectionItems(section, rows[section.id].orEmpty(), state, onEvent, actions, onOpenFilters, expandedPane = true)
             }
         }
     }

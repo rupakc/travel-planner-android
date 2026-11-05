@@ -10,16 +10,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,6 +56,10 @@ import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.ChipRow
+import io.github.rupakc.travelplanner.feature.results.sections.commerce.formatDate
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -74,7 +88,15 @@ private fun hour(h: Float): String = "%02d:00".format(h.roundToInt())
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SheetScaffold(title: String, activeCount: Int, onDismiss: () -> Unit, onClear: () -> Unit, onApply: () -> Unit, content: @Composable () -> Unit) {
+private fun SheetScaffold(
+    title: String,
+    activeCount: Int,
+    onDismiss: () -> Unit,
+    onClear: () -> Unit,
+    onApply: () -> Unit,
+    applyEnabled: Boolean = true,
+    content: @Composable () -> Unit,
+) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             Modifier
@@ -99,6 +121,7 @@ private fun SheetScaffold(title: String, activeCount: Int, onDismiss: () -> Unit
                             stringResource(R.string.results_filter_apply)
                         },
                     onClick = onApply,
+                    enabled = applyEnabled,
                     modifier = Modifier.testTag("apply_filters"),
                 )
             }
@@ -284,11 +307,14 @@ internal fun ActivityFilterSheet(
     var to by rememberSaveable { mutableStateOf(current?.availableTo ?: request?.returnDate.orEmpty()) }
     var rating by rememberSaveable { mutableStateOf(current?.minRating) }
     val active = listOf(interests.isNotEmpty(), maxPrice != null, from.isNotBlank() || to.isNotBlank(), rating != null).count { it }
+    val today = remember { LocalDate.now() }
+    val datesValid = availabilityValid(from, to)
     SheetScaffold(
         title = stringResource(R.string.results_filter_activities_title),
         activeCount = active,
         onDismiss = onDismiss,
         onClear = { onApply(ActivityFilters()) },
+        applyEnabled = datesValid,
         onApply = {
             onApply(
                 ActivityFilters(
@@ -312,8 +338,12 @@ internal fun ActivityFilterSheet(
         PriceSlider(stringResource(R.string.results_filter_max_cost_pp), maxPrice, 0f, ceilPrice) { maxPrice = it }
         Label(stringResource(R.string.results_filter_dates))
         Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-            DateField(stringResource(R.string.results_filter_from), from, Modifier.weight(1f)) { from = it }
-            DateField(stringResource(R.string.results_filter_to), to, Modifier.weight(1f)) { to = it }
+            val fromDate = parseIso(from)
+            DateField(stringResource(R.string.results_filter_from), from, today, parseIso(to), Modifier.weight(1f)) { from = it }
+            DateField(stringResource(R.string.results_filter_to), to, maxOf(today, fromDate ?: today), null, Modifier.weight(1f)) { to = it }
+        }
+        if (!datesValid) {
+            Text(stringResource(R.string.results_filter_dates_invalid), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.error)
         }
         Label(stringResource(R.string.results_filter_rating))
         ChipRow {
@@ -329,23 +359,61 @@ internal fun ActivityFilterSheet(
     }
 }
 
-/** ISO date entry (YYYY-MM-DD), validated before apply; keeps the web's field semantics. */
+internal fun parseIso(value: String): LocalDate? = value.takeIf(String::isNotBlank)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+
+/** Web parity: both dates optional, each a real date, and "to" never before "from". */
+internal fun availabilityValid(from: String, to: String): Boolean {
+    val f = parseIso(from)
+    val t = parseIso(to)
+    if (from.isNotBlank() && f == null) return false
+    if (to.isNotBlank() && t == null) return false
+    return f == null || t == null || !t.isBefore(f)
+}
+
+/** Read-only date field; the Material 3 date picker (locale-aware, accessible) keeps dates within [min]..[max]. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DateField(label: String, value: String, modifier: Modifier, onChange: (String) -> Unit) {
-    val valid = value.isBlank() || Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(value)
+private fun DateField(label: String, value: String, min: LocalDate, max: LocalDate?, modifier: Modifier, onChange: (String) -> Unit) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    val pick = stringResource(R.string.results_filter_pick_date, label)
     OutlinedTextField(
-        value = value,
-        onValueChange = { onChange(it.filter { c -> c.isDigit() || c == '-' }.take(ISO_DATE_LENGTH)) },
+        value = formatDate(value.takeIf(String::isNotBlank)).orEmpty(),
+        onValueChange = {},
+        readOnly = true,
         modifier = modifier,
         singleLine = true,
         shape = TravelShape.Input,
         label = { Text(label) },
-        isError = !valid,
-        supportingText = { Text(stringResource(R.string.results_filter_date_hint)) },
+        trailingIcon = { IconButton(onClick = { open = true }) { Icon(Icons.Filled.DateRange, contentDescription = pick) } },
     )
-}
+    if (!open) return
+    val state =
+        rememberDatePickerState(
+            initialSelectedDateMillis = parseIso(value)?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli(),
+            selectableDates =
+                object : SelectableDates {
+                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                        val d = Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC).toLocalDate()
+                        return !d.isBefore(min) && (max == null || !d.isAfter(max))
+                    }
 
-private const val ISO_DATE_LENGTH = 10
+                    override fun isSelectableYear(year: Int): Boolean = year >= min.year
+                },
+        )
+    DatePickerDialog(
+        onDismissRequest = { open = false },
+        confirmButton = {
+            TextButton(
+                enabled = state.selectedDateMillis != null,
+                onClick = {
+                    state.selectedDateMillis?.let { onChange(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate().toString()) }
+                    open = false
+                },
+            ) { Text(stringResource(R.string.results_ok)) }
+        },
+        dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.results_cancel)) } },
+    ) { DatePicker(state) }
+}
 
 @Composable
 internal fun interestLabel(id: String): String =

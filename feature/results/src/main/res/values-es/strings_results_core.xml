@@ -20,6 +20,7 @@
     <string name="results_badge_hidden_gem">💎 Joya escondida</string>
     <string name="results_best_value">Paquete con mejor relación calidad-precio</string>
     <string name="results_best_value_sub">Nuestra selección con el mejor equilibrio entre precio y calidad de tus resultados</string>
+    <string name="results_book_a11y">Ver y reservar %1$s</string>
     <string name="results_budget_activities">Actividades</string>
     <string name="results_budget_fits">Cabe en tu presupuesto</string>
     <string name="results_budget_flights">Vuelos</string>
@@ -74,8 +75,8 @@
     <string name="results_filter_beds">Número de camas</string>
     <string name="results_filter_beds_plus">%1$d+</string>
     <string name="results_filter_clear">Borrar todo</string>
-    <string name="results_filter_date_hint">AAAA-MM-DD</string>
     <string name="results_filter_dates">Fechas de disponibilidad</string>
+    <string name="results_filter_dates_invalid">La fecha final no puede ser anterior a la inicial.</string>
     <string name="results_filter_departure">Hora de salida</string>
     <string name="results_filter_distance">Distancia al centro</string>
     <string name="results_filter_error">No se pudieron aplicar los filtros — inténtalo de nuevo</string>
@@ -89,6 +90,7 @@
     <string name="results_filter_max_price_pp">Precio máximo (por persona)</string>
     <string name="results_filter_nonstop">Directo</string>
     <string name="results_filter_one_stop">1 escala</string>
+    <string name="results_filter_pick_date">Elegir la fecha: %1$s</string>
     <string name="results_filter_rating">Valoración mínima</string>
     <string name="results_filter_rating_plus">%1$s+</string>
     <string name="results_filter_required">Obligatorio</string>
@@ -193,6 +195,7 @@
     <string name="results_new_plan_started">Nueva búsqueda, nuevo plan — se quitaron tus elecciones anteriores.</string>
     <string name="results_no_live_price">No encontramos un precio en vivo para esto.</string>
     <string name="results_no_results">Sin resultados</string>
+    <string name="results_ok">Aceptar</string>
     <string name="results_open_link">Abrir</string>
     <string name="results_open_my_plan">Abrir mi plan</string>
     <string name="results_over_budget">%1$s por encima del presupuesto</string>
@@ -250,6 +253,7 @@
     <string name="results_search_clear">Borrar búsqueda</string>
     <string name="results_search_label">Buscar en tus resultados</string>
     <string name="results_section_more">Más</string>
+    <string name="results_section_not_loaded">Aún no se ha cargado para este viaje.</string>
     <string name="results_section_waiting">Empieza cuando estén listas las secciones que necesita.</string>
     <string name="results_see_alerts">Ver tus alertas</string>
     <string name="results_show_only_fits">Mostrar solo lo que encaja</string>

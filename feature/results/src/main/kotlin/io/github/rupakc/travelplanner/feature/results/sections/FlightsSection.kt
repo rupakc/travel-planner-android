@@ -21,10 +21,10 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.domain.results.airlineName
-import io.github.rupakc.travelplanner.core.domain.results.flightKey
 import io.github.rupakc.travelplanner.core.domain.results.flightNo
 import io.github.rupakc.travelplanner.core.domain.results.outboundMinutes
 import io.github.rupakc.travelplanner.core.domain.results.outboundStops
+import io.github.rupakc.travelplanner.core.domain.results.sameFlight
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.section.Flight
 import io.github.rupakc.travelplanner.core.model.section.FlightLeg
@@ -37,7 +37,6 @@ import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.ResultsEvent
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.ChipRow
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.FareCalendarStrip
-import io.github.rupakc.travelplanner.feature.results.sections.commerce.HiddenByBudgetRow
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.LocalCommerceContext
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.Pill
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.PillTone
@@ -56,98 +55,84 @@ private const val DIM_ALPHA = 0.6f
  * Flights section body: pricing advisor, Google price verdict, fare calendar,
  * then round-trip/one-way cards (or one group per leg on a multi-city trip).
  * Budget-planner dimming/hiding follows the web: a selected card always stays visible.
+ * The results screen renders the cards as separate lazy items ([commerceRows]); this
+ * function renders the same rows in a column for other callers.
  */
 @Composable
 internal fun FlightsSectionContent(data: FlightsData, actions: SectionActions, modifier: Modifier = Modifier) {
     val ctx = LocalCommerceContext.current
+    val rows = commerceRows(SectionId.FLIGHTS, data, ctx.budget, currentSelections(actions))
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
-        ctx.pricingAdvisor?.let { PricingAdvisorBanner(it, ctx.daysUntilDeparture) }
-        if (!data.isMultiCity) PriceInsightsChip(data.priceInsights)
-        if (ctx.fareCalendar.open && ctx.fareCalendar.available) FareCalendarStrip(ctx.fareCalendar, ctx.onEvent)
-        if (data.legs.isNotEmpty()) {
-            MultiCityFlights(data.legs, actions)
-        } else if (data.results.isEmpty()) {
-            Text(stringResource(R.string.results_flights_empty), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
-        } else {
-            FlightList(data.results, perLeg = false, actions = actions)
-        }
+        FlightsLead(data, actions)
+        rows.forEach { row -> key(row.key) { CommerceRowContent(row, actions) } }
     }
 }
 
+/** Everything above the flight cards (stays inside the section card). */
 @Composable
-private fun FlightList(flights: List<Flight>, perLeg: Boolean, actions: SectionActions) {
+internal fun FlightsLead(data: FlightsData, actions: SectionActions) {
     val ctx = LocalCommerceContext.current
-    val budget = ctx.budget?.takeIf { it.cardsReact }
-    var hidden = 0
-    flights.forEachIndexed { index, flight ->
-        val item = PlanItem.FlightItem(flight)
-        val selected = actions.isSelected(item)
-        val over = budget?.fit?.flights?.over?.contains(flightKey(flight)) == true
-        if (over && budget.showOnlyFits && !selected) {
-            hidden++
-        } else {
-            key(flightKey(flight), index) {
-                FlightCard(
-                    flight = flight,
-                    selected = selected,
-                    over = over,
-                    perLeg = perLeg,
-                    onToggle = { actions.onToggle(item) },
-                    onLayover = { ctx.onEvent(ResultsEvent.OpenLayover(it)) },
+    Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
+        ctx.pricingAdvisor?.let { PricingAdvisorBanner(it, ctx.daysUntilDeparture) }
+        if (!data.isMultiCity) PriceInsightsChip(data.priceInsights)
+        if (ctx.fareCalendar.open && ctx.fareCalendar.available) FareCalendarStrip(ctx.fareCalendar, ctx.onEvent)
+        when {
+            data.legs.isNotEmpty() -> {
+                MultiCityBanner(data.legs, actions)
+            }
+
+            data.results.isEmpty() -> {
+                Text(
+                    stringResource(R.string.results_flights_empty),
+                    style = TravelTheme.typography.bodyMedium,
+                    color = TravelTheme.colors.onSurfaceVariant,
                 )
             }
         }
     }
-    HiddenByBudgetRow(hidden, onShowAll = { ctx.onEvent(ResultsEvent.ShowOnlyFits(false)) })
 }
 
 @Composable
-private fun MultiCityFlights(legs: List<FlightLegGroup>, actions: SectionActions) {
-    val chosen = legs.flatMap { it.results }.filter { actions.isSelected(PlanItem.FlightItem(it)) }
+private fun MultiCityBanner(legs: List<FlightLegGroup>, actions: SectionActions) {
+    val selections = currentSelections(actions)
+    val chosen = selections.flights.filter { f -> legs.any { leg -> leg.results.any { sameFlight(it, f) } } }
     val total = chosen.sumOf { it.priceUsd?.takeIf(Double::isFinite) ?: 0.0 }
-    Pill(
-        text = stringResource(R.string.results_flights_multi_banner, chosen.size, legs.size),
-        tone = PillTone.Info,
-    )
+    Pill(text = stringResource(R.string.results_flights_multi_banner, chosen.size, legs.size), tone = PillTone.Info)
     if (total > 0) Text(stringResource(R.string.results_flights_multi_total, formatPrice(total)), style = TravelTheme.typography.titleSmall)
-    legs.forEachIndexed { i, leg ->
-        key(leg.legIndex ?: i) {
-            Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                    Pill(stringResource(R.string.results_flights_leg, (leg.legIndex ?: i) + 1), tone = PillTone.Info)
-                    Text(
-                        listOfNotNull("${shortCity(leg.from)} → ${shortCity(leg.to)}", leg.date).joinToString(" · "),
-                        style = TravelTheme.typography.titleSmall,
-                        modifier = Modifier.semantics { heading() },
-                    )
-                }
-                if (leg.results.isEmpty()) {
-                    Text(
-                        stringResource(R.string.results_flights_leg_empty),
-                        style = TravelTheme.typography.bodySmall,
-                        color = TravelTheme.colors.onSurfaceVariant,
-                    )
-                } else {
-                    FlightList(leg.results, perLeg = true, actions = actions)
-                }
-            }
-        }
+}
+
+/** "Leg N" + "From → To · date" heading of a multi-city leg. */
+@Composable
+internal fun LegHeader(leg: FlightLegGroup, number: Int, modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+        Pill(stringResource(R.string.results_flights_leg, number), tone = PillTone.Info)
+        Text(
+            listOfNotNull("${shortCity(leg.from)} → ${shortCity(leg.to)}", leg.date).joinToString(" · "),
+            style = TravelTheme.typography.titleSmall,
+            modifier = Modifier.semantics { heading() },
+        )
     }
 }
 
 @Composable
-private fun FlightCard(
+internal fun LegEmpty(modifier: Modifier = Modifier) {
+    Text(stringResource(R.string.results_flights_leg_empty), modifier, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+}
+
+@Composable
+internal fun FlightCard(
     flight: Flight,
     selected: Boolean,
     over: Boolean,
     perLeg: Boolean,
     onToggle: () -> Unit,
     onLayover: (io.github.rupakc.travelplanner.core.model.section.FlightLayover) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val accent = TravelTheme.sectionAccents[SectionId.FLIGHTS].bar
     val oneWay = flight.tripType == "one_way" || flight.returnLeg == null
     val name = listOfNotNull(flight.airlineName, flight.flightNo).joinToString(" ").ifBlank { stringResource(R.string.results_flight_fallback_name) }
-    TpCard(selected = selected, accent = accent, onClick = onToggle) {
+    TpCard(modifier, selected = selected, accent = accent, onClick = onToggle) {
         if (over) Pill(stringResource(R.string.results_budget_over_flight), tone = PillTone.Warning)
         Column(Modifier.alpha(if (over && !selected) DIM_ALPHA else 1f), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             Row(verticalAlignment = Alignment.Top) {
@@ -176,7 +161,7 @@ private fun FlightCard(
                 FlightLegRow(it, outbound = false, onLayover = onLayover)
             }
             ChipRow {
-                BookingLinkButton(flight.bookingUrl)
+                BookingLinkButton(flight.bookingUrl, accessibilityLabel = stringResource(R.string.results_book_a11y, name))
                 AddToPlanButton(selected = selected, itemName = name, onToggle = onToggle)
             }
         }

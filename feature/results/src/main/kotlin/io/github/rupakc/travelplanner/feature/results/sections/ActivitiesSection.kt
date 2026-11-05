@@ -42,19 +42,18 @@ private const val DESCRIPTION_LINES = 2
 @Composable
 internal fun ActivitiesSectionContent(data: ActivitiesData, actions: SectionActions, modifier: Modifier = Modifier) {
     if (data.results.isEmpty()) {
-        Text(
-            stringResource(R.string.results_activities_empty),
-            modifier,
-            style = TravelTheme.typography.bodyMedium,
-            color = TravelTheme.colors.onSurfaceVariant,
-        )
+        ActivitiesEmpty(modifier)
         return
     }
+    val rows = commerceRows(SectionId.ACTIVITIES, data, LocalCommerceContext.current.budget, currentSelections(actions))
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
-        data.results.forEachIndexed { index, activity ->
-            key(activity.name, index) { ActivityCard(activity, actions) }
-        }
+        rows.forEach { row -> key(row.key) { CommerceRowContent(row, actions) } }
     }
+}
+
+@Composable
+internal fun ActivitiesEmpty(modifier: Modifier = Modifier) {
+    Text(stringResource(R.string.results_activities_empty), modifier, style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
 }
 
 private fun Activity.rawBool(key: String): Boolean? = (raw[key] as? JsonPrimitive)?.booleanOrNull
@@ -63,18 +62,16 @@ private fun Activity.rawString(key: String): String? = (raw[key] as? JsonPrimiti
 
 @Suppress("CyclomaticComplexMethod")
 @Composable
-private fun ActivityCard(activity: Activity, actions: SectionActions) {
+internal fun ActivityCard(activity: Activity, selected: Boolean, fits: Boolean, actions: SectionActions, modifier: Modifier = Modifier) {
     val ctx = LocalCommerceContext.current
     val item = PlanItem.ActivityItem(activity)
-    val selected = actions.isSelected(item)
     val name = activity.name.orEmpty()
     val toggle = { actions.onToggle(item) }
     val fromLink = activity.fromLink == true
     val outdoor = OUTDOOR.any { activity.category.orEmpty().lowercase().contains(it) }
     val poorDays = ctx.weather?.poorWeatherDayCount ?: 0
     val weatherLoaded = ctx.weather?.days?.isNotEmpty() == true
-    val fits = ctx.budget?.takeIf { it.cardsReact }?.fit?.activities?.picked?.contains(name) == true
-    TpCard(selected = selected, accent = TravelTheme.sectionAccents[SectionId.ACTIVITIES].bar, onClick = toggle) {
+    TpCard(modifier, selected = selected, accent = TravelTheme.sectionAccents[SectionId.ACTIVITIES].bar, onClick = toggle) {
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ChipRow(Modifier.weight(1f)) {
@@ -130,7 +127,7 @@ private fun ActivityCard(activity: Activity, actions: SectionActions) {
                 if (outdoor && poorDays == 0 && weatherLoaded) Pill(stringResource(R.string.results_badge_good_weather), tone = PillTone.Positive)
             }
             ChipRow {
-                BookingLinkButton(activity.bookingUrl)
+                BookingLinkButton(activity.bookingUrl, accessibilityLabel = stringResource(R.string.results_book_a11y, name))
                 WatchPriceAction(
                     available = ctx.watches.priceAvailable,
                     itemName = name,

@@ -18,6 +18,8 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
+import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
@@ -53,6 +55,7 @@ private const val LOADING_ROTATE_MS = 3_000L
  * actions (filters, fare calendar, watch), rotating loading skeleton, error with
  * retry, the "No results" fallback, and the section body.
  */
+@Suppress("CyclomaticComplexMethod") // one branch per section state, kept together on purpose
 @Composable
 internal fun ResultsSectionCard(
     section: SectionUi,
@@ -60,6 +63,9 @@ internal fun ResultsSectionCard(
     onToggleExpanded: () -> Unit,
     onShowVerification: () -> Unit,
     modifier: Modifier = Modifier,
+    onRunSearch: () -> Unit = {},
+    /** The cards of flights/hotels/activities are emitted as separate lazy items ([commerceRows]); render only their lead here. */
+    cardsOutside: Boolean = false,
     headerActions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
 ) {
     val data = section.data
@@ -85,6 +91,15 @@ internal fun ResultsSectionCard(
                 Pill(pluralStringResource(R.plurals.results_filters_active, section.activeFilterCount, section.activeFilterCount), tone = PillTone.Info)
             }
             when {
+                section.notLoaded -> {
+                    Text(
+                        stringResource(R.string.results_section_not_loaded),
+                        style = TravelTheme.typography.bodyMedium,
+                        color = TravelTheme.colors.onSurfaceVariant,
+                    )
+                    TpButton(stringResource(R.string.results_run_search), onClick = onRunSearch, variant = TpButtonVariant.Tonal)
+                }
+
                 data == null && section.status == SectionStatus.DONE -> {
                     Text(stringResource(R.string.results_no_results), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
                 }
@@ -103,6 +118,18 @@ internal fun ResultsSectionCard(
 
                 data.isError -> {
                     ErrorState(message = stringResource(R.string.results_section_error), onRetry = { actions.onRetry(section.section) })
+                }
+
+                cardsOutside && data is FlightsData -> {
+                    FlightsLead(data, actions)
+                }
+
+                cardsOutside && data is HotelsData -> {
+                    if (data.results.isEmpty()) HotelsEmpty()
+                }
+
+                cardsOutside && data is ActivitiesData -> {
+                    if (data.results.isEmpty()) ActivitiesEmpty()
                 }
 
                 else -> {

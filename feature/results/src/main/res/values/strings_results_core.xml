@@ -20,6 +20,7 @@
     <string name="results_badge_hidden_gem">💎 Hidden gem</string>
     <string name="results_best_value">Best-value package</string>
     <string name="results_best_value_sub">Our picks for the best price-to-quality balance from your results</string>
+    <string name="results_book_a11y">View and book %1$s</string>
     <string name="results_budget_activities">Activities</string>
     <string name="results_budget_fits">Fits your budget</string>
     <string name="results_budget_flights">Flights</string>
@@ -74,8 +75,8 @@
     <string name="results_filter_beds">Number of Beds</string>
     <string name="results_filter_beds_plus">%1$d+</string>
     <string name="results_filter_clear">Clear All</string>
-    <string name="results_filter_date_hint">YYYY-MM-DD</string>
     <string name="results_filter_dates">Availability Dates</string>
+    <string name="results_filter_dates_invalid">The end date can’t be before the start date.</string>
     <string name="results_filter_departure">Departure Time</string>
     <string name="results_filter_distance">Distance from Center</string>
     <string name="results_filter_error">Couldn’t apply filters — try again</string>
@@ -89,6 +90,7 @@
     <string name="results_filter_max_price_pp">Max Price (per person)</string>
     <string name="results_filter_nonstop">Non-stop</string>
     <string name="results_filter_one_stop">1 Stop</string>
+    <string name="results_filter_pick_date">Pick the %1$s date</string>
     <string name="results_filter_rating">Minimum Rating</string>
     <string name="results_filter_rating_plus">%1$s+</string>
     <string name="results_filter_required">Required</string>
@@ -193,6 +195,7 @@
     <string name="results_new_plan_started">New search, new plan — your previous picks were cleared.</string>
     <string name="results_no_live_price">We couldn’t find a live price for this.</string>
     <string name="results_no_results">No results</string>
+    <string name="results_ok">OK</string>
     <string name="results_open_link">Open</string>
     <string name="results_open_my_plan">Open My Plan</string>
     <string name="results_over_budget">%1$s over budget</string>
@@ -250,6 +253,7 @@
     <string name="results_search_clear">Clear search</string>
     <string name="results_search_label">Search your results</string>
     <string name="results_section_more">More</string>
+    <string name="results_section_not_loaded">Not loaded for this trip yet.</string>
     <string name="results_section_waiting">Starts when the sections it needs are ready.</string>
     <string name="results_see_alerts">See your alerts</string>
     <string name="results_show_only_fits">Show only what fits</string>

@@ -87,6 +87,7 @@ class ResultsScreenTest {
                 Optional.empty(),
                 clock,
                 TestAppDispatchers(Dispatchers.Unconfined),
+                androidx.lifecycle.SavedStateHandle(),
             )
         search.start(request)
         compose.setContent {

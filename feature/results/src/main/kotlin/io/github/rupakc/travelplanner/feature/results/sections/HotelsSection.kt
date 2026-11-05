@@ -35,7 +35,6 @@ import io.github.rupakc.travelplanner.feature.results.ResultsEvent
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.ChipRow
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.CityChip
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.FoundOnlineBadge
-import io.github.rupakc.travelplanner.feature.results.sections.commerce.HiddenByBudgetRow
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.LocalCommerceContext
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.Pill
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.PillTone
@@ -50,34 +49,26 @@ private val STAR_SIZE = 14.dp
 internal fun HotelsSectionContent(data: HotelsData, actions: SectionActions, modifier: Modifier = Modifier) {
     val ctx = LocalCommerceContext.current
     if (data.results.isEmpty()) {
-        Text(stringResource(R.string.results_hotels_empty), modifier, style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
+        HotelsEmpty(modifier)
         return
     }
-    val budget = ctx.budget?.takeIf { it.cardsReact }
+    val rows = commerceRows(SectionId.HOTELS, data, ctx.budget, currentSelections(actions))
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
-        var hidden = 0
-        data.results.forEachIndexed { index, hotel ->
-            val item = PlanItem.HotelItem(hotel)
-            val selected = actions.isSelected(item)
-            val over = hotel.name != null && budget?.fit?.hotels?.over?.contains(hotel.name) == true
-            if (over && budget.showOnlyFits && !selected) {
-                hidden++
-            } else {
-                key(hotel.name, index) {
-                    HotelCard(hotel, selected, over, actions)
-                }
-            }
-        }
-        HiddenByBudgetRow(hidden, onShowAll = { ctx.onEvent(ResultsEvent.ShowOnlyFits(false)) })
+        rows.forEach { row -> key(row.key) { CommerceRowContent(row, actions) } }
     }
 }
 
 @Composable
-private fun HotelCard(hotel: Hotel, selected: Boolean, over: Boolean, actions: SectionActions) {
+internal fun HotelsEmpty(modifier: Modifier = Modifier) {
+    Text(stringResource(R.string.results_hotels_empty), modifier, style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
+}
+
+@Composable
+internal fun HotelCard(hotel: Hotel, selected: Boolean, over: Boolean, actions: SectionActions, modifier: Modifier = Modifier) {
     val ctx = LocalCommerceContext.current
     val name = hotel.name.orEmpty()
     val toggle = { actions.onToggle(PlanItem.HotelItem(hotel)) }
-    TpCard(selected = selected, accent = TravelTheme.sectionAccents[SectionId.HOTELS].bar, onClick = toggle) {
+    TpCard(modifier, selected = selected, accent = TravelTheme.sectionAccents[SectionId.HOTELS].bar, onClick = toggle) {
         if (over) Pill(stringResource(R.string.results_budget_over_stay), tone = PillTone.Warning)
         Column(Modifier.alpha(if (over && !selected) DIM else 1f), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             Row(verticalAlignment = Alignment.Top) {
@@ -118,7 +109,7 @@ private fun HotelCard(hotel: Hotel, selected: Boolean, over: Boolean, actions: S
                 FoundOnlineBadge(hotel.linkVerified)
             }
             ChipRow {
-                BookingLinkButton(hotel.bookingUrl)
+                BookingLinkButton(hotel.bookingUrl, accessibilityLabel = stringResource(R.string.results_book_a11y, name))
                 WatchPriceAction(
                     available = ctx.watches.priceAvailable && ctx.request?.returnDate != null,
                     itemName = name,
