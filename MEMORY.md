@@ -29,3 +29,5 @@ One line per decision: what, and why. Newest last. Builders add to this file for
 - 2026-11-05 Release signing: none yet; `prodRelease` is debug-signed so CI can assemble it (docs/Release.md). Never publish that APK.
 - 2026-11-05 Devices API per backend review: `GET /api/devices` → `{items}`, `DELETE /api/devices/{id}`, `POST /api/devices/unregister {token}` (used on sign-out).
 - 2026-11-05 Admin wire models + `AdminApi` exist (contract completeness) but no admin UI (spec non-goal).
+- 2026-11-05 Auth gate re-evaluates on every destination change (not only on session change): Back from a deep-linked share screen popped to the synthetic Home entry while signed out. Share is always allowed; Onboarding with `fromSettings=true` is allowed when signed in.
+- 2026-11-05 MainActivity is `singleTask`; deep links arriving while running are forwarded with `addOnNewIntentListener { navController.handleDeepLink(it) }` (verified on the emulator, cold and warm).
