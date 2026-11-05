@@ -1,7 +1,6 @@
 package io.github.rupakc.travelplanner.e2e
 
 import android.os.ParcelFileDescriptor
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -97,7 +96,7 @@ class ScreenshotTourE2eTest {
         shot("home")
 
         robot.openTab(AppR.string.nav_search)
-        robot.waitFor(hasTestTag("search_submit"))
+        robot.waitForText(robot.str(SearchR.string.search_mode_known))
         shot("search")
 
         robot.searchTrip(AppRobot.Trip())

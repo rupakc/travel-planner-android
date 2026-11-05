@@ -72,7 +72,10 @@ class AppRobot(val rule: AppRule) {
     ) = tap(str(id))
 
     fun type(label: String, value: String) {
-        val field = rule.onAllNodes(hasSetTextAction() and hasText(label, substring = true)).onFirst()
+        val matcher = hasSetTextAction() and hasText(label, substring = true)
+        // Lazy forms compose only what is on screen: bring the field in first.
+        rule.waitUntil(DEFAULT_TIMEOUT) { existsMerged(matcher) || scrollToFind(matcher) }
+        val field = rule.onAllNodes(matcher).onFirst()
         runCatching { field.performScrollTo() }
         field.performTextClearance()
         field.performTextInput(value)
@@ -231,7 +234,7 @@ class AppRobot(val rule: AppRule) {
      */
     fun searchTrip(trip: Trip) {
         openTab(io.github.rupakc.travelplanner.R.string.nav_search)
-        waitFor(androidx.compose.ui.test.hasTestTag("search_submit"))
+        waitForText(str(SearchR.string.search_mode_known))
         pickSuggestion(str(SearchR.string.search_from), trip.originQuery, trip.originCode)
         pickSuggestion(str(SearchR.string.search_to), trip.destinationQuery, trip.destinationCode)
         tap(SearchR.string.search_departure)
@@ -257,6 +260,7 @@ class AppRobot(val rule: AppRule) {
         repeat(kotlin.math.abs(trip.adults - current)) { tapDescription(str(step, adults)) }
         waitFor(hasDescription("$adults ${trip.adults}"))
         val submit = androidx.compose.ui.test.hasTestTag("search_submit")
+        rule.waitUntil(DEFAULT_TIMEOUT) { existsMerged(submit) || scrollToFind(submit) }
         rule.onNode(submit).performScrollTo().performClick()
         rule.waitForIdle()
     }
