@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="traveller_type_budget_backpacker">Mochilero low cost</string>
+    <string name="traveller_type_budget_backpacker_description">Aprovechas cada euro: albergues, comida callejera, free tours y alertas de ofertas.</string>
+    <string name="traveller_type_family">Viajero en familia</string>
+    <string name="traveller_type_family_description">Viajes que funcionan para todos, con ritmo tranquilo, listas de equipaje e información de seguridad.</string>
+    <string name="traveller_type_luxury">Viajero de lujo</string>
+    <string name="traveller_type_luxury_description">Hoteles premium, alta cocina y tours privados.</string>
+    <string name="traveller_type_adventure">Aventurero</string>
+    <string name="traveller_type_adventure_description">Aire libre, días activos y espacio para lo inesperado.</string>
+    <string name="traveller_type_culture_foodie">Amante de la cultura y la gastronomía</string>
+    <string name="traveller_type_culture_foodie_description">Historia, arte, comida local y lo que pasa en la ciudad.</string>
+    <string name="traveller_type_business">Viajero de negocios</string>
+    <string name="traveller_type_business_description">Viajes eficientes con vuelos, conexión y dinero resueltos.</string>
+    <string name="traveller_type_relaxation">Buscador de descanso</string>
+    <string name="traveller_type_relaxation_description">Playas, bienestar y días tranquilos.</string>
+    <string name="traveller_type_accessible">Viajero con necesidades de accesibilidad</string>
+    <string name="traveller_type_accessible_description">Planes que tienen en cuenta tus necesidades de accesibilidad.</string>
+
+    <string name="feature_deal_alerts_title">Alertas de ofertas</string>
+    <string name="feature_deal_alerts_description">Vigila vuelos, hoteles, actividades y viajes, y entérate cuando bajen los precios.</string>
+    <string name="feature_best_value_title">Paquete con mejor relación calidad-precio</string>
+    <string name="feature_best_value_description">Añade a tu plan el vuelo, el hotel y las actividades con mejor relación calidad-precio en un toque.</string>
+    <string name="feature_budget_planner_title">Planificador de presupuesto</string>
+    <string name="feature_budget_planner_description">Divide tu presupuesto por persona y mira qué encaja en tus resultados.</string>
+    <string name="feature_compare_title">Comparar</string>
+    <string name="feature_compare_description">Compara 2–3 destinos: coste, vuelo, hotel, clima y visado.</string>
+    <string name="feature_surprise_me_title">Sorpréndeme</string>
+    <string name="feature_surprise_me_description">Cinco ideas de destino cuando aún no sabes adónde ir.</string>
+    <string name="feature_import_link_title">Desde un enlace</string>
+    <string name="feature_import_link_description">Planifica un viaje a partir de un enlace, texto pegado o capturas.</string>
+    <string name="feature_chat_title">Chat</string>
+    <string name="feature_chat_description">Haz preguntas de viaje y crea un plan conversando.</string>
+    <string name="feature_near_me_title">Cerca de mí</string>
+    <string name="feature_near_me_description">Cosas que hacer cerca de donde estás ahora.</string>
+    <string name="feature_packing_list_title">Lista de equipaje</string>
+    <string name="feature_packing_list_description">Una lista de equipaje según tus actividades y el clima.</string>
+    <string name="feature_emergency_card_title">Tarjeta de emergencia</string>
+    <string name="feature_emergency_card_description">Números de emergencia y contactos clave de tu destino.</string>
+    <string name="feature_walking_tours_title">Free tours a pie</string>
+    <string name="feature_walking_tours_description">Visitas a pie con propina en tu destino.</string>
+    <string name="feature_events_title">Eventos</string>
+    <string name="feature_events_description">Qué hay durante tus fechas de viaje.</string>
+    <string name="feature_visa_checker_title">Visado</string>
+    <string name="feature_visa_checker_description">Requisitos de visado para tu nacionalidad y destino.</string>
+    <string name="feature_forex_title">Divisas</string>
+    <string name="feature_forex_description">Tipos de cambio y consejos de dinero para tu destino.</string>
+    <string name="feature_sim_title">Tarjetas SIM</string>
+    <string name="feature_sim_description">Opciones de SIM local y eSIM para estar conectado.</string>
+    <string name="feature_trip_health_check_title">Revisión del viaje</string>
+    <string name="feature_trip_health_check_description">Una auditoría de tu itinerario: ritmo, horarios, plazos de visado y choques con el clima.</string>
+    <string name="feature_itinerary_editor_title">Editor de itinerario</string>
+    <string name="feature_itinerary_editor_description">Mueve, quita y anota actividades del itinerario.</string>
+    <string name="feature_accessibility_info_title">Información de accesibilidad</string>
+    <string name="feature_accessibility_info_description">Planes y consejos que tienen en cuenta tus necesidades de accesibilidad.</string>
+</resources>
