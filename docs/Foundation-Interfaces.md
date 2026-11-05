@@ -348,6 +348,9 @@ interface ProfileRepository {
     suspend fun setFeature(featureId: String, enabled: Boolean?)
 
     suspend fun resetFeatures()
+
+    /** Replaces all overrides in one write (atomic in the real store). */
+    suspend fun setFeatureOverrides(overrides: FeatureOverrides)
 }
 
 interface FeedbackRepository {
@@ -686,6 +689,24 @@ table `TravellerQuiz`, helpers `TravellerProfile.types()`, `FeatureCatalogue.vis
 the interfaces; don't bind them again. Display copy/icons: `TravellerType.titleRes()/descriptionRes()`,
 `FeatureId.titleRes()/descriptionRes()`, `FeatureDescriptor.icon()` in `….core.ui.profile`.
 Details and the weight table: `docs/Onboarding-and-Traveller-Types.md`.
+
+### Server URL validator (`….core.domain.server`)
+
+```kotlin
+sealed interface ServerUrlResult {
+    data class Valid(val url: String) : ServerUrlResult   // normalised: lower-case scheme/host, no trailing slash, path kept
+    data object Blank : ServerUrlResult
+    data object Malformed : ServerUrlResult                // no "://", bad syntax, query, fragment or user info
+    data object UnsupportedScheme : ServerUrlResult        // not http/https
+    data object MissingHost : ServerUrlResult
+    data object HttpsRequired : ServerUrlResult            // http while allowHttp = false
+}
+object ServerUrl { fun validate(raw: String, allowHttp: Boolean = true): ServerUrlResult }
+```
+
+Pass `allowHttp = AppBuildInfo.cleartextAllowed` (false in `prod`). Used by Login → Server (feature:auth, signed out) and
+Settings → Server; both then save with `SettingsRepository.setBaseUrl(valid.url)` and test with `HealthRepository.refresh()`.
+Login's sheet applies a tested address temporarily and restores the previous override if closed without Save.
 
 ## 10. Testing (`core:testing`, already a `testImplementation` of every feature)
 
