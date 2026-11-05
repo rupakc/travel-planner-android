@@ -57,6 +57,7 @@ import io.github.rupakc.travelplanner.core.model.section.SectionStatus
 import io.github.rupakc.travelplanner.core.ui.SectionStatusIndicator
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.core.ui.titleRes
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.ResultsUiState
 import io.github.rupakc.travelplanner.feature.results.SectionUi
@@ -97,7 +98,8 @@ internal fun TripSummary(state: ResultsUiState, modifier: Modifier = Modifier) {
             style = TravelTheme.typography.titleMedium,
         )
         val travellers = request.numTravelers.coerceAtLeast(1)
-        val dates = listOfNotNull(formatDate(request.departureDate), formatDate(request.returnDate)).joinToString(" – ")
+        val locale = currentLocale()
+        val dates = listOfNotNull(formatDate(request.departureDate, locale), formatDate(request.returnDate, locale)).joinToString(" – ")
         Text(
             listOfNotNull(
                 dates,

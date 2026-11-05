@@ -32,6 +32,7 @@ import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.TravelEvent
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.results.R
 
 /** Web EVENT_CATEGORY_STYLE emoji (unknown → "other" ✨). */

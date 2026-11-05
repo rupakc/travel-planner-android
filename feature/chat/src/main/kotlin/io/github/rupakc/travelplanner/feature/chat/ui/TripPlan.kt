@@ -63,6 +63,7 @@ import io.github.rupakc.travelplanner.core.model.chat.ChatItineraryDay
 import io.github.rupakc.travelplanner.core.model.chat.ChatSlot
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.chat.R
 import io.github.rupakc.travelplanner.feature.chat.model.ChatTripMap
 import java.time.LocalDate
@@ -159,7 +160,7 @@ private fun RouteCard(tripMap: ChatTripMap, itinerary: ChatItinerary?, generatin
 private fun TripFacts(tripMap: ChatTripMap, itinerary: ChatItinerary?) {
     val facts =
         buildList {
-            val dates = listOfNotNull(formatDay(tripMap.departureDate), formatDay(tripMap.returnDate)).joinToString(" – ")
+            val dates = listOfNotNull(formatDay(tripMap.departureDate, currentLocale()), formatDay(tripMap.returnDate, currentLocale())).joinToString(" – ")
             if (dates.isNotEmpty()) add(dates)
             itinerary?.tripSummary?.totalNights?.takeIf { it > 0 }?.let { add(pluralStringResource(R.plurals.chat_trip_nights, it, it)) }
             val days = itinerary?.days.orEmpty()
@@ -287,7 +288,7 @@ private fun DayCard(day: ChatItineraryDay, number: Int, open: Boolean, cityIndex
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        listOfNotNull(stringResource(R.string.chat_day, number), formatDay(day.date)).joinToString(" · "),
+                        listOfNotNull(stringResource(R.string.chat_day, number), formatDay(day.date, currentLocale())).joinToString(" · "),
                         style = TravelTheme.typography.titleSmall,
                         modifier = Modifier.semantics { heading() },
                     )
@@ -411,10 +412,11 @@ private fun DayCardSkeleton() {
     }
 }
 
-/** "2026-04-01" → "Wed, Apr 1" in the device locale; unparseable dates are shown as received. */
-internal fun formatDay(date: String?): String? {
+/** "2026-04-01" → "Wed, Apr 1" / "mié, 1 abr" in [locale] (best pattern for it); unparseable dates are shown as received. */
+internal fun formatDay(date: String?, locale: Locale): String? {
     if (date.isNullOrBlank()) return null
-    return runCatching { LocalDate.parse(date).format(DateTimeFormatter.ofPattern("EEE, MMM d", Locale.getDefault())) }.getOrDefault(date)
+    val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, "EEEMMMd")
+    return runCatching { LocalDate.parse(date).format(DateTimeFormatter.ofPattern(pattern, locale)) }.getOrDefault(date)
 }
 
 /** Opens [label] in the Maps app (geo: intent); coordinates when the API gave them, else a place search. */
