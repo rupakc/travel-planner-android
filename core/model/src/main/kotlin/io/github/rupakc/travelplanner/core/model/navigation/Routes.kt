@@ -12,7 +12,14 @@ sealed interface AppRoute
 // --- auth ---------------------------------------------------------------
 @Serializable data object LoginRoute : AppRoute
 
+/** Forced password change (temporary password, `requires_password_change`); a gate screen. */
 @Serializable data object ChangePasswordRoute : AppRoute
+
+/**
+ * Voluntary password change from Settings → Account (not a gate screen: it stays put while
+ * signed in and ends with back). Same form and rules as [ChangePasswordRoute].
+ */
+@Serializable data object AccountChangePasswordRoute : AppRoute
 
 // --- onboarding ---------------------------------------------------------
 
