@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_trip_reminders">Trip reminders</string>
+    <string name="channel_trip_reminders_desc">Visa and packing checks, flight-day and daily itinerary reminders for saved trips.</string>
+    <string name="channel_price_alerts">Price alerts</string>
+    <string name="channel_price_alerts_desc">When a watched fare, hotel, activity or trip price drops or hits your target.</string>
+    <string name="channel_nearby">Nearby suggestions</string>
+    <string name="channel_nearby_desc">Things to do near you during a trip.</string>
+    <string name="channel_account">Account</string>
+    <string name="channel_account_desc">Sign-in and account messages.</string>
+</resources>

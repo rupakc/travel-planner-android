@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ds_retry">Try again</string>
+    <string name="ds_loading">Loading</string>
+    <string name="ds_back">Back</string>
+    <string name="ds_close">Close</string>
+    <string name="ds_error_generic">Something went wrong. Please try again.</string>
+</resources>

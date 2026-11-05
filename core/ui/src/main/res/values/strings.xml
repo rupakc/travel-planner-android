@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Section titles (web SECTION_CONFIG labels) -->
+    <string name="section_flights">Flights</string>
+    <string name="section_weather">Weather</string>
+    <string name="section_hotels">Hotels</string>
+    <string name="section_activities">Activities</string>
+    <string name="section_places_to_see">Places to See</string>
+    <string name="section_walking_tours">Free Walking Tours</string>
+    <string name="section_events">What\'s On</string>
+    <string name="section_visa">Visa &amp; Entry</string>
+    <string name="section_sim">SIM &amp; eSIM</string>
+    <string name="section_tips">Travel Tips</string>
+    <string name="section_emergency_card">Emergency Card</string>
+    <string name="section_getting_around">Getting Around</string>
+    <string name="section_forex">Money &amp; Forex</string>
+    <string name="section_itinerary">Itinerary</string>
+    <string name="section_stress_test">Trip Health Check</string>
+    <string name="section_packing_list">Packing List</string>
+
+    <string name="section_status_loading">Loading</string>
+    <string name="section_status_enhancing">Enhancing</string>
+    <string name="section_status_enhancing_hint">AI is refining this with additional data</string>
+    <string name="section_status_done">Ready</string>
+    <string name="section_status_waiting">Waiting</string>
+    <string name="section_expand">Expand %1$s</string>
+    <string name="section_collapse">Collapse %1$s</string>
+    <string name="section_ready_announcement">%1$s ready</string>
+
+    <string name="verification_verified">Verified</string>
+    <string name="verification_partial">Partly verified</string>
+    <string name="verification_unverified">AI-generated</string>
+    <string name="verification_conflict">Check details</string>
+    <string name="verification_pending">Checking links…</string>
+
+    <string name="price_estimate">Estimate</string>
+    <string name="price_unknown">Price not available</string>
+    <string name="price_estimate_a11y">%1$s, estimate</string>
+
+    <string name="booking_open">Open %1$s</string>
+    <string name="booking_open_generic">View &amp; book</string>
+    <string name="plan_add">Add to plan</string>
+    <string name="plan_added">In your plan</string>
+    <string name="plan_add_a11y">Add %1$s to My Plan</string>
+    <string name="plan_remove_a11y">Remove %1$s from My Plan</string>
+</resources>

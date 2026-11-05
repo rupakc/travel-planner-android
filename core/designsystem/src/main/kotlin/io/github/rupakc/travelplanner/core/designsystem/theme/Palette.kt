@@ -1,0 +1,105 @@
+package io.github.rupakc.travelplanner.core.designsystem.theme
+
+import androidx.compose.ui.graphics.Color
+
+/** Tailwind 3.4 stock hexes used by the web (web-ui-inventory §1). Internal: features use theme roles only. */
+internal object Palette {
+    val Teal50 = Color(0xFFF0FDFA)
+    val Teal100 = Color(0xFFCCFBF1)
+    val Teal300 = Color(0xFF5EEAD4)
+    val Teal400 = Color(0xFF2DD4BF)
+    val Teal500 = Color(0xFF14B8A6)
+    val Teal600 = Color(0xFF0D9488)
+    val Teal700 = Color(0xFF0F766E)
+    val Teal800 = Color(0xFF115E59)
+    val Teal900 = Color(0xFF134E4A)
+    val Teal950 = Color(0xFF042F2E)
+
+    val Sky50 = Color(0xFFF0F9FF)
+    val Sky100 = Color(0xFFE0F2FE)
+    val Sky300 = Color(0xFF7DD3FC)
+    val Sky400 = Color(0xFF38BDF8)
+    val Sky600 = Color(0xFF0284C7)
+    val Sky800 = Color(0xFF075985)
+    val Sky900 = Color(0xFF0C4A6E)
+    val Sky950 = Color(0xFF082F49)
+
+    val Violet50 = Color(0xFFF5F3FF)
+    val Violet100 = Color(0xFFEDE9FE)
+    val Violet300 = Color(0xFFC4B5FD)
+    val Violet400 = Color(0xFFA78BFA)
+    val Violet600 = Color(0xFF7C3AED)
+    val Violet800 = Color(0xFF5B21B6)
+    val Violet900 = Color(0xFF4C1D95)
+    val Violet950 = Color(0xFF2E1065)
+
+    val Emerald50 = Color(0xFFECFDF5)
+    val Emerald300 = Color(0xFF6EE7B7)
+    val Emerald400 = Color(0xFF34D399)
+    val Emerald600 = Color(0xFF059669)
+    val Emerald700 = Color(0xFF047857)
+    val Emerald900 = Color(0xFF064E3B)
+
+    val Lime50 = Color(0xFFF7FEE7)
+    val Lime300 = Color(0xFFBEF264)
+    val Lime400 = Color(0xFFA3E635)
+    val Lime600 = Color(0xFF65A30D)
+
+    val Fuchsia50 = Color(0xFFFDF4FF)
+    val Fuchsia300 = Color(0xFFF0ABFC)
+    val Fuchsia400 = Color(0xFFE879F9)
+    val Fuchsia600 = Color(0xFFC026D3)
+
+    val Amber50 = Color(0xFFFFFBEB)
+    val Amber200 = Color(0xFFFDE68A)
+    val Amber300 = Color(0xFFFCD34D)
+    val Amber400 = Color(0xFFFBBF24)
+    val Amber600 = Color(0xFFD97706)
+    val Amber700 = Color(0xFFB45309)
+    val Amber900 = Color(0xFF78350F)
+
+    val Rose50 = Color(0xFFFFF1F2)
+    val Rose300 = Color(0xFFFDA4AF)
+    val Rose400 = Color(0xFFFB7185)
+    val Rose600 = Color(0xFFE11D48)
+
+    val Cyan50 = Color(0xFFECFEFF)
+    val Cyan300 = Color(0xFF67E8F9)
+    val Cyan400 = Color(0xFF22D3EE)
+    val Cyan600 = Color(0xFF0891B2)
+
+    val Red50 = Color(0xFFFEF2F2)
+    val Red100 = Color(0xFFFEE2E2)
+    val Red200 = Color(0xFFFECACA)
+    val Red300 = Color(0xFFFCA5A5)
+    val Red400 = Color(0xFFF87171)
+    val Red600 = Color(0xFFDC2626)
+    val Red700 = Color(0xFFB91C1C)
+    val Red900 = Color(0xFF7F1D1D)
+    val Red950 = Color(0xFF450A0A)
+
+    val Green50 = Color(0xFFF0FDF4)
+    val Green200 = Color(0xFFBBF7D0)
+    val Green600 = Color(0xFF16A34A)
+
+    val Gray50 = Color(0xFFF9FAFB)
+    val Gray100 = Color(0xFFF3F4F6)
+    val Gray200 = Color(0xFFE5E7EB)
+    val Gray300 = Color(0xFFD1D5DB)
+    val Gray400 = Color(0xFF9CA3AF)
+    val Gray600 = Color(0xFF4B5563)
+    val Gray900 = Color(0xFF111827)
+
+    val Slate100 = Color(0xFFF1F5F9)
+    val Slate200 = Color(0xFFE2E8F0)
+    val Slate300 = Color(0xFFCBD5E1)
+    val Slate400 = Color(0xFF94A3B8)
+    val Slate500 = Color(0xFF64748B)
+    val Slate600 = Color(0xFF475569)
+    val Slate700 = Color(0xFF334155)
+    val Slate800 = Color(0xFF1E293B)
+    val Slate900 = Color(0xFF0F172A)
+    val Slate950 = Color(0xFF020617)
+
+    val White = Color(0xFFFFFFFF)
+}

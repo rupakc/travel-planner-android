@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_trip_reminders">Recordatorios de viaje</string>
+    <string name="channel_trip_reminders_desc">Revisión de visado y equipaje, recordatorios del día del vuelo y del itinerario diario de viajes guardados.</string>
+    <string name="channel_price_alerts">Alertas de precio</string>
+    <string name="channel_price_alerts_desc">Cuando baja o alcanza tu objetivo el precio de un vuelo, hotel, actividad o viaje vigilado.</string>
+    <string name="channel_nearby">Sugerencias cercanas</string>
+    <string name="channel_nearby_desc">Cosas que hacer cerca de ti durante un viaje.</string>
+    <string name="channel_account">Cuenta</string>
+    <string name="channel_account_desc">Mensajes de inicio de sesión y de la cuenta.</string>
+</resources>

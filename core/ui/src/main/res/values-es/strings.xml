@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_flights">Vuelos</string>
+    <string name="section_weather">Clima</string>
+    <string name="section_hotels">Hoteles</string>
+    <string name="section_activities">Actividades</string>
+    <string name="section_places_to_see">Lugares para ver</string>
+    <string name="section_walking_tours">Free tours a pie</string>
+    <string name="section_events">Qué hay</string>
+    <string name="section_visa">Visado y entrada</string>
+    <string name="section_sim">SIM y eSIM</string>
+    <string name="section_tips">Consejos de viaje</string>
+    <string name="section_emergency_card">Tarjeta de emergencia</string>
+    <string name="section_getting_around">Cómo moverse</string>
+    <string name="section_forex">Dinero y divisas</string>
+    <string name="section_itinerary">Itinerario</string>
+    <string name="section_stress_test">Revisión del viaje</string>
+    <string name="section_packing_list">Lista de equipaje</string>
+
+    <string name="section_status_loading">Cargando</string>
+    <string name="section_status_enhancing">Mejorando</string>
+    <string name="section_status_enhancing_hint">La IA está afinando esto con más datos</string>
+    <string name="section_status_done">Listo</string>
+    <string name="section_status_waiting">En espera</string>
+    <string name="section_expand">Expandir %1$s</string>
+    <string name="section_collapse">Contraer %1$s</string>
+    <string name="section_ready_announcement">%1$s listo</string>
+
+    <string name="verification_verified">Verificado</string>
+    <string name="verification_partial">Verificado en parte</string>
+    <string name="verification_unverified">Generado por IA</string>
+    <string name="verification_conflict">Revisa los detalles</string>
+    <string name="verification_pending">Comprobando enlaces…</string>
+
+    <string name="price_estimate">Estimación</string>
+    <string name="price_unknown">Precio no disponible</string>
+    <string name="price_estimate_a11y">%1$s, estimación</string>
+
+    <string name="booking_open">Abrir %1$s</string>
+    <string name="booking_open_generic">Ver y reservar</string>
+    <string name="plan_add">Añadir al plan</string>
+    <string name="plan_added">En tu plan</string>
+    <string name="plan_add_a11y">Añadir %1$s a Mi plan</string>
+    <string name="plan_remove_a11y">Quitar %1$s de Mi plan</string>
+</resources>

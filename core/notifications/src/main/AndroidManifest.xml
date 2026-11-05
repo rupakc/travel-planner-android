@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Inert unless the app was built with google-services.json (app sets fcm_enabled=true then). -->
+        <service
+            android:name=".TravelMessagingService"
+            android:enabled="@bool/fcm_enabled"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>
