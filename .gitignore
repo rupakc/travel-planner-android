@@ -1,0 +1,29 @@
+# Gradle / build
+.gradle/
+build/
+**/build/
+.kotlin/
+captures/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Local config (SDK path, secrets)
+local.properties
+*.keystore
+*.jks
+keystore.properties
+
+# Firebase (optional, supplied per developer / CI secret)
+app/google-services.json
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+.externalNativeBuild/
+.cxx/
+
+# Logs
+*.log
