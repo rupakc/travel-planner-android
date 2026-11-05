@@ -12,6 +12,7 @@ import io.github.rupakc.travelplanner.core.model.settings.FeatureOverrides
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -244,10 +245,59 @@ class OnboardingViewModelTest {
         first.onEvent(OnboardingEvent.Next)
         first.onEvent(OnboardingEvent.Select("shoestring"))
 
-        val restored = onboardingViewModel(profile, preferences, saved).state.value
+        val restored = onboardingViewModel(profile, preferences, saved.afterProcessDeath()).state.value
         assertEquals(OnboardingStage.QUESTION, restored.stage)
         assertEquals(1, restored.questionIndex)
         assertEquals(listOf("shoestring"), restored.currentAnswer)
         assertEquals(listOf("friends"), restored.answers[TravellerQuiz.COMPANIONS])
+    }
+
+    @Test
+    fun `feature toggles and the notification step survive process death`() {
+        val saved = SavedStateHandle()
+        val first = onboardingViewModel(profile, preferences, saved)
+        first.answerAll(TravellerQuiz.COMPANIONS to listOf("work"))
+        first.onEvent(OnboardingEvent.ConfirmResult)
+        first.onEvent(OnboardingEvent.ToggleFeature(FeatureId.WALKING_TOURS))
+
+        val secondHandle = saved.afterProcessDeath()
+        val second = onboardingViewModel(profile, preferences, secondHandle)
+        assertEquals(OnboardingStage.FEATURES, second.state.value.stage)
+        assertTrue(FeatureId.WALKING_TOURS in second.state.value.selectedFeatures)
+        second.onEvent(OnboardingEvent.Finish(askNotifications = true))
+        assertEquals(OnboardingStage.NOTIFICATIONS, second.state.value.stage)
+
+        val third = onboardingViewModel(profile, preferences, secondHandle.afterProcessDeath())
+        assertEquals(OnboardingStage.NOTIFICATIONS, third.state.value.stage)
+        third.onEvent(OnboardingEvent.NotificationsDone)
+        assertTrue(third.state.value.finished)
+        assertTrue(profile.profileState.value.onboardingCompleted)
+    }
+
+    @Test
+    fun `a permission result that arrives while restoring is replayed`() {
+        val saved = SavedStateHandle()
+        val first = onboardingViewModel(profile, preferences, saved)
+        first.answerAll()
+        first.onEvent(OnboardingEvent.ConfirmResult)
+        first.onEvent(OnboardingEvent.Finish(askNotifications = true))
+
+        val gate = CompletableDeferred<Unit>()
+        val restoring = onboardingViewModel(GatedProfileRepository(profile, gate), preferences, saved.afterProcessDeath())
+        assertEquals(OnboardingStage.LOADING, restoring.state.value.stage)
+        restoring.onEvent(OnboardingEvent.NotificationsDone)
+        gate.complete(Unit)
+        assertTrue(restoring.state.value.finished)
+        assertTrue(profile.profileState.value.onboardingCompleted)
+    }
+
+    @Test
+    fun `sync error never shows client-side exception text`() {
+        preferences.saveFailure = AppError.Decoding("Unexpected JSON token at offset 0")
+        val vm = onboardingViewModel(profile, preferences)
+        vm.answerAll()
+        vm.onEvent(OnboardingEvent.ConfirmResult)
+        vm.onEvent(OnboardingEvent.Finish(askNotifications = false))
+        assertEquals(SyncError(null), vm.state.value.syncError)
     }
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppClock
+import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
 import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
@@ -114,6 +115,8 @@ class OnboardingViewModel
         private var existingOverrides = FeatureOverrides()
         private var askNotifications = savedState[KEY_ASK] ?: false
 
+        private var pendingNotificationsDone = false
+
         /** Classification the feature toggles were seeded for (null = not seeded yet). */
         private var featuresBasis: String? = savedState[KEY_BASIS]
 
@@ -123,7 +126,12 @@ class OnboardingViewModel
 
         fun onEvent(event: OnboardingEvent) {
             val s = mutableState.value
-            if (s.stage == OnboardingStage.LOADING || s.saving || s.finished) return
+            if (s.stage == OnboardingStage.LOADING) {
+                // A permission result can arrive before restore() finishes after process death: replay it then.
+                if (event == OnboardingEvent.NotificationsDone) pendingNotificationsDone = true
+                return
+            }
+            if (s.saving || s.finished) return
             when (event) {
                 OnboardingEvent.Start -> go(OnboardingStage.QUESTION, 0)
                 is OnboardingEvent.Select -> select(event.optionId)
@@ -157,6 +165,10 @@ class OnboardingViewModel
                 )
             }
             persist()
+            if (pendingNotificationsDone) {
+                pendingNotificationsDone = false
+                if (stage == OnboardingStage.NOTIFICATIONS) complete()
+            }
         }
 
         private fun go(stage: OnboardingStage, index: Int = mutableState.value.questionIndex) {
@@ -270,7 +282,7 @@ class OnboardingViewModel
             val answers = mutableState.value.answers
             when (val result = preferencesRepository.update { it.mergeQuizAnswers(answers) }) {
                 is AppResult.Success -> proceed()
-                is AppResult.Failure -> mutableState.update { it.copy(saving = false, syncError = SyncError(result.error.message)) }
+                is AppResult.Failure -> mutableState.update { it.copy(saving = false, syncError = SyncError(result.error.serverDetail())) }
             }
         }
 
@@ -322,6 +334,16 @@ class OnboardingViewModel
     }
 
 private fun TravellerClassification.key(): String = types().joinToString(",") { it.name }
+
+/** Backend `detail` for HTTP errors only; client-side exception text never reaches the UI. */
+private fun AppError.serverDetail(): String? =
+    when (this) {
+        is AppError.Client, is AppError.RateLimited, is AppError.Unauthorized, is AppError.Forbidden,
+        is AppError.NotFound, is AppError.Server,
+        -> message?.takeIf { it.isNotBlank() }
+
+        else -> null
+    }
 
 /** Primary first, then secondaries. */
 internal fun TravellerClassification.types() = listOf(primary) + secondary

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
@@ -26,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -126,6 +128,9 @@ private fun ResultHero(primary: TravellerType) {
 
 private const val HERO_INITIAL_SCALE = 0.85f
 
+/** Index of the sync-error item (right after the intro). */
+private const val SYNC_ERROR_INDEX = 1
+
 @Composable
 private fun SecondaryType(type: TravellerType) {
     TpCard(Modifier.fillMaxWidth()) {
@@ -148,6 +153,14 @@ internal fun FeaturesStep(
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val listState = rememberLazyListState()
+    val reduceMotion = rememberReduceMotion()
+    // The sync error sits at the top of the list; bring it into view (and so announce it) when it appears.
+    LaunchedEffect(state.syncError) {
+        if (state.syncError != null) {
+            if (reduceMotion) listState.scrollToItem(SYNC_ERROR_INDEX) else listState.animateScrollToItem(SYNC_ERROR_INDEX)
+        }
+    }
     OnboardingFrame(
         modifier = modifier,
         onBack = { onEvent(OnboardingEvent.Back) }.takeUnless { state.saving },
@@ -173,6 +186,7 @@ internal fun FeaturesStep(
         },
     ) {
         LazyColumn(
+            state = listState,
             contentPadding = PaddingValues(TravelTheme.spacing.gutter),
             verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
             modifier = Modifier.fillMaxWidth(),

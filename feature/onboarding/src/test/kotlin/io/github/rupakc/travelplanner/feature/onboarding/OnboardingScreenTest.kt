@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -137,6 +138,20 @@ class OnboardingScreenTest {
         assertEquals(1, finished)
         assertTrue(profile.profileState.value.onboardingCompleted)
         assertTrue("sim" in profile.overridesState.value.disabled)
+    }
+
+    @Test
+    fun `sync failure scrolls its card into view`() {
+        preferences.saveFailure = io.github.rupakc.travelplanner.core.common.AppError.Server(503, "Service unavailable")
+        val vm = launch()
+        vm.onEvent(OnboardingEvent.Start)
+        repeat(6) { vm.onEvent(OnboardingEvent.Skip) }
+        click("Continue")
+        reveal(hasText("Search, results, My Plan and Settings are always on."))
+        compose.onNodeWithText("Finish").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Couldn't save your preferences to your account").assertIsDisplayed()
+        compose.onNodeWithText("Service unavailable").assertIsDisplayed()
     }
 
     private fun isToggleable() = SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)

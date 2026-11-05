@@ -13,6 +13,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
+import kotlinx.coroutines.flow.emitAll
 
 /** Preferences fake that can fail the PUT ([saveFailure]) and records what was sent. */
 class ScriptedPreferencesRepository(var current: Preferences = Preferences(username = "alice")) : PreferencesRepository {
@@ -38,7 +39,7 @@ class ScriptedPreferencesRepository(var current: Preferences = Preferences(usern
 val FIXED_NOW: Instant = Instant.parse("2026-11-05T10:00:00Z")
 
 fun onboardingViewModel(
-    profile: FakeProfileRepository = FakeProfileRepository(),
+    profile: io.github.rupakc.travelplanner.core.data.repository.ProfileRepository = FakeProfileRepository(),
     preferences: ScriptedPreferencesRepository = ScriptedPreferencesRepository(),
     saved: SavedStateHandle = SavedStateHandle(),
 ) = OnboardingViewModel(
@@ -49,3 +50,18 @@ fun onboardingViewModel(
     classifier = DefaultTravellerClassifier,
     clock = SystemAppClock(Clock.fixed(FIXED_NOW, ZoneOffset.UTC)),
 )
+
+/** Profile repository whose reads wait for [gate] (keeps the ViewModel in LOADING). */
+class GatedProfileRepository(
+    private val delegate: FakeProfileRepository,
+    private val gate: kotlinx.coroutines.CompletableDeferred<Unit>,
+) : io.github.rupakc.travelplanner.core.data.repository.ProfileRepository by delegate {
+    override val profile =
+        kotlinx.coroutines.flow.flow {
+            gate.await()
+            emitAll(delegate.profile)
+        }
+}
+
+/** Simulates process death: a fresh handle holding only what was saved (as Android restores it). */
+fun SavedStateHandle.afterProcessDeath(): SavedStateHandle = SavedStateHandle(keys().associateWith { get<Any?>(it) })

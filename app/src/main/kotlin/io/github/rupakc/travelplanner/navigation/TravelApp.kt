@@ -104,9 +104,8 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
     ) {
         NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.fillMaxSize()) {
             authGraph(onLoggedIn = {}, onPasswordChanged = {}, onBack = { navController.popBackStack() })
-            onboardingGraph(onFinished = { fromSettings ->
-                if (fromSettings) navController.popBackStack() else shellViewModel.completeOnboarding()
-            })
+            // First run: onboarding marks itself complete and the gate opens Home; a Settings re-run pops back.
+            onboardingGraph(onFinished = { fromSettings -> if (fromSettings) navController.popBackStack() })
             homeGraph(
                 onPlanTrip = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
                 onOpenNearby = { navController.navigate(NearbyRoute) },
