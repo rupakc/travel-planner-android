@@ -118,7 +118,13 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 navController.navigate(ResultsRoute)
             }, onCompare = { navController.navigate(io.github.rupakc.travelplanner.core.model.navigation.CompareRoute) })
             resultsGraph(onBack = { navController.popBackStack() })
-            planGraph(onOpenPlan = { navController.navigate(PlanDetailRoute(it)) }, onBack = { navController.popBackStack() })
+            planGraph(
+                onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
+                onBack = { navController.popBackStack() },
+                onOpenResults = { navController.navigate(ResultsRoute) },
+                onPlanTrip = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
+                onOpenTrips = { navController.navigateToTopLevel(TopLevelDestination.PLANS) },
+            )
             chatGraph(onOpenImport = { url ->
                 navController.navigate(
                     SearchRoute(mode = io.github.rupakc.travelplanner.core.model.navigation.SearchModes.IMPORT, importUrl = url),
@@ -137,11 +143,21 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 onNavigate = { route -> navController.navigateTo(route) },
             )
             nearbyGraph(onBack = { navController.popBackStack() })
-            shareGraph(onBack = {
-                if (!navController.popBackStack()) {
-                    navController.navigate(if (gate == AuthGate.READY) HomeRoute else LoginRoute) { popUpTo(0) { inclusive = true } }
-                }
-            })
+            shareGraph(
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(if (gate == AuthGate.READY) HomeRoute else LoginRoute) { popUpTo(0) { inclusive = true } }
+                    }
+                },
+                onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
+                onPlanTrip = {
+                    if (gate == AuthGate.READY) {
+                        navController.navigateToTopLevel(TopLevelDestination.SEARCH)
+                    } else {
+                        navController.navigate(LoginRoute) { popUpTo(0) { inclusive = true } }
+                    }
+                },
+            )
         }
     }
 }

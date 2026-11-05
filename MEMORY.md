@@ -69,6 +69,15 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 Search: preferences are PUT on submit only when a written-back field changed (web PUTs every time); recent-search delete is deferred until the Undo snackbar closes.
 - 2026-11-05 Search: trip `pace` (relaxed/balanced/packed) is a form field on Android (API field exists; the web form only sets it via Remix).
 - 2026-11-05 Import: screenshots are re-encoded as WebP (API 30+) or JPEG q85, long edge ≤ 1568 px, base64 ≤ 5 MB; no preview map and no place rename (gaps vs web ImportPreview).
+- 2026-11-05 (Team D) `MyPlanRoute` (core:model) is the My Plan screen for the shared draft; Results/Chat open it through an `app` lambda. My trips is the saved-plans list; trip detail is `PlanDetailRoute` (+ `travelplanner://plan/{planId}`).
+- 2026-11-05 (Team D) Share link URL = `AppBuildInfo.webBaseUrl` + `/share/{token}` (the web page; never the API server). When it is blank the app shares `travelplanner://share/{token}` and the text says it opens in the app. The token is always re-requested from the server (idempotent) so a link revoked on the web is never re-shared; the cached token is used only offline.
+- 2026-11-05 (Team D) "Open in results" restores the draft from the cached plan (works offline, no re-stream) and attaches `selections.itinerary` as the itinerary section; asks before replacing an unsaved, non-empty draft.
+- 2026-11-05 (Team D) Swipe-delete in My trips hides the row and deletes on the server when the Undo snackbar ends (or the screen closes); detail-screen delete uses a confirmation dialog instead.
+- 2026-11-05 (Team D) Share viewer "Save a copy" (signed in only) = `POST /api/plans` with the shared name, stripped search data and selections; the web has no such button but the API accepts it.
+- 2026-11-05 (Team D) Print / PDF is replaced on Android by "Share as text" (localised plain text, links through `safeUrl`); `.ics` export goes through a FileProvider (`${applicationId}.plan.exports`, cache/plan-exports only) plus per-event CalendarContract inserts (floating times → device zone; all-day → UTC midnights).
+- 2026-11-05 (Team D) Generated plan names stay English ("The Foodie Tokyo Journey", web parity): they are plan data saved to the server, not UI copy.
+- 2026-11-05 (Team D) Trip detail shows only the signed-in user's cached plan (`PlanDao.observeFor`); a 404 evicts the cache row and shows not-found; a failed refresh shows the cached copy with a banner, and while offline the server actions (share link, stop sharing, delete) are disabled with the reason.
+- 2026-11-05 (Team D) A swipe-delete waiting for Undo is kept in SavedStateHandle and completed after process death (the user never undid it).
 
 ## Documentation and tooling
 
