@@ -8,7 +8,11 @@
 - State descriptions on toggles and selection (expand/collapse, "Added to plan").
 - Live-region announcements for async results: `ErrorState` is a polite live region; `StreamingStatusAnnouncer` says "Hotels ready" as sections finish.
 - Works at 200 % font scale: no fixed heights on text containers; lists scroll.
-- No colour-only meaning: verification and status chips carry text or icons, not just colour.
+- No colour-only meaning: verification and status chips carry text or icons, not just colour; the cheapest fare-calendar
+  date says "Cheapest" in words.
+- Decorative emoji at the start of a label ("🍜 Food") are shown but not read: `Modifier.readsWithoutEmoji(text)` from
+  core:designsystem (built into `TpChip` and `TpButton`).
+- Search boxes use the Search IME action and hide the keyboard on it.
 - Reduce-motion: `rememberReduceMotion()`; shimmer becomes static.
 - Contrast: `ContrastTest` (core:designsystem unit test) checks every colour-token pair the app draws text or a
   border with, in the light and the dark brand scheme: text pairs ≥ 4.5:1, input borders (`outline`) and section

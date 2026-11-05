@@ -117,6 +117,9 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 (R4 FP2, ui I2) Every typed amount goes through core:domain `parseLocalizedAmount(text, locale)` with the UI locale; ViewModels get it from the route (`SetLocale` events), sheets/edit panels from `currentLocale()`.
 - 2026-11-05 (R4 FP2, ui I3) On-screen prices use the app language (core:ui `localPrice`/`localUsd`, "1.480 US$" in Spanish); share text, .ics and other exports stay en-US ("$1,480") on purpose (same text as the web, read by other apps). Amounts in copy are `%1$s` placeholders.
 - 2026-11-05 (R4 FP2, ui I4) Alerts delete commits when the Undo snackbar closes without Undo, on the next delete, or in onCleared; no fixed timer. Supersedes "Alerts delete = … Undo snackbar (6 s)": TalkBack's accessibility timeout can keep the snackbar up for minutes.
+- 2026-11-05 (R4 FP2, ui M5) One user-facing name, **Voyager**: core:ui `brand_name` (not translated) fills `%1$s` wherever copy names the app; "Travel Planner" is gone from the UI (it stays the repo/backend name). The launcher label `app_name` is also Voyager.
+- 2026-11-05 (R4 FP2, ui M4) Spanish glossary (Tiempo, en directo, Planificar, Expandido/Contraído, Confianza, «», colons not dashes) lives in docs/Localization.md; new es copy follows it.
+- 2026-11-05 (R4 FP2, ui M8) Leading decorative emoji stay visible but are dropped from what TalkBack reads (`readsWithoutEmoji` in TpChip, TpButton and the results pills/headings); ★ and ✓ are kept because they carry meaning.
 
 ## Documentation and tooling
 
