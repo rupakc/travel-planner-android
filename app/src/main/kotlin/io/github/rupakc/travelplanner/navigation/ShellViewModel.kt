@@ -18,7 +18,8 @@ class ShellViewModel
     constructor(
         authEvents: AuthEvents,
         private val savedState: SavedStateHandle,
-    ) : ViewModel() {
+    ) : ViewModel(),
+        PendingDeepLinks {
         /** Emits when a 401 cleared the session (shown as a snackbar). */
         val sessionExpired: Flow<AuthEvent> = authEvents.flow
 
@@ -26,12 +27,16 @@ class ShellViewModel
          * Keeps the deep link (`travelplanner://…`) the gate redirected away from (e.g. a trip-reminder tap
          * after the 24 h JWT expired), so it opens once the gate is READY. Survives process death.
          */
-        fun keepPendingDeepLink(link: String) {
+        override fun keep(link: String) {
             savedState[KEY_PENDING] = link
         }
 
         /** The kept deep link, cleared on read (replayed exactly once). */
-        fun takePendingDeepLink(): String? = savedState.remove<String>(KEY_PENDING)
+        override fun take(): String? = savedState.remove<String>(KEY_PENDING)
+
+        override fun clear() {
+            savedState.remove<String>(KEY_PENDING)
+        }
 
         private companion object {
             const val KEY_PENDING = "pending_deep_link"

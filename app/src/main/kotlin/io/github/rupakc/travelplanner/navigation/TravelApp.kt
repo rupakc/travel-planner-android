@@ -21,7 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,13 +79,15 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
     val destination = backStack?.destination
     // singleTask activity: deep links that arrive while running come through onNewIntent.
     val activity = LocalActivity.current as? ComponentActivity
-    // The latest app deep link (launch intent, then each new intent): kept if the gate redirects away from it.
-    val lastDeepLink = remember { mutableStateOf(DeepLinkIntents.appLink(activity?.intent)) }
+    // Deep links held behind the auth gate (kept on Login, replayed once READY; see DeepLinkHold).
+    val deepLinks = remember(shellViewModel) { DeepLinkHold(shellViewModel, DeepLinkIntents.appLink(activity?.intent)) }
+    val currentGate by rememberUpdatedState(gate)
     DisposableEffect(activity, navController) {
         val listener =
             Consumer<Intent> { intent ->
-                lastDeepLink.value = DeepLinkIntents.appLink(intent)
+                deepLinks.onIntent(DeepLinkIntents.appLink(intent))
                 navController.handleDeepLink(intent)
+                deepLinks.afterHandled(currentGate)
             }
         activity?.addOnNewIntentListener(listener)
         onDispose { activity?.removeOnNewIntentListener(listener) }
@@ -103,18 +105,10 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
         val entry = navController.currentBackStackEntry
         val retakingQuiz = current.hasRoute(OnboardingRoute::class) && entry?.toRoute<OnboardingRoute>()?.fromSettings == true
         val target = gateTarget(gate, current, retakingQuiz)
-        if (target == null) {
-            // Signed in and the link was opened directly: nothing to keep.
-            if (gate == AuthGate.READY) lastDeepLink.value = null
-            return@LaunchedEffect
-        }
-        // Signed out (or a gate step) on top of a deep link: keep it and open it once the gate is READY.
-        if (gate != AuthGate.READY) lastDeepLink.value?.let(shellViewModel::keepPendingDeepLink)
-        lastDeepLink.value = null
+        val replay = deepLinks.onGateCheck(gate, target, current.isGateScreen())
+        target ?: return@LaunchedEffect
         navController.navigate(target) { popUpTo(0) { inclusive = true } }
-        if (target == HomeRoute) {
-            shellViewModel.takePendingDeepLink()?.let { link -> navController.handleDeepLink(Intent(Intent.ACTION_VIEW, link.toUri())) }
-        }
+        replay?.let { link -> navController.handleDeepLink(Intent(Intent.ACTION_VIEW, link.toUri())) }
     }
 
     val topLevel = TopLevelDestination.entries.firstOrNull { destination.isOn(it) }

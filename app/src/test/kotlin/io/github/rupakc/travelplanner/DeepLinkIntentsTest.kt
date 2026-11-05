@@ -36,6 +36,9 @@ class DeepLinkIntentsTest {
         assertEquals("travelplanner://plan/7", app.dataString)
         val web = DeepLinkIntents.sanitize(Intent(Intent.ACTION_VIEW, Uri.parse("https://evil.example/share/abc")))
         assertNull(web.data)
+        // App-scheme data on any other action would route through handleDeepLink without being held by the gate.
+        val send = DeepLinkIntents.sanitize(Intent(Intent.ACTION_SEND, Uri.parse("travelplanner://plan/7")))
+        assertNull(send.data)
         assertEquals(
             "travelplanner://alerts?kind=fare&watch=3",
             DeepLinkIntents.appLink(Intent(Intent.ACTION_VIEW, Uri.parse("travelplanner://alerts?kind=fare&watch=3"))),
@@ -47,11 +50,14 @@ class DeepLinkIntentsTest {
     fun `a deep link that hit the login gate is kept across recreation and replayed once`() {
         val handle = SavedStateHandle()
         val shell = ShellViewModel(AuthEvents(), handle)
-        assertNull(shell.takePendingDeepLink())
-        shell.keepPendingDeepLink("travelplanner://plan/7")
+        assertNull(shell.take())
+        shell.keep("travelplanner://plan/7")
         // Process death / recreation: a new ViewModel on the same saved state still has it.
         val restored = ShellViewModel(AuthEvents(), handle)
-        assertEquals("travelplanner://plan/7", restored.takePendingDeepLink())
-        assertNull(restored.takePendingDeepLink())
+        assertEquals("travelplanner://plan/7", restored.take())
+        assertNull(restored.take())
+        restored.keep("travelplanner://chat")
+        restored.clear()
+        assertNull(restored.take())
     }
 }
