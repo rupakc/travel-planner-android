@@ -152,7 +152,7 @@ private fun TripBody(
 ) {
     val sel = trip.selections
     LazyColumn(
-        Modifier.fillMaxSize().widthIn(max = MaxContentWidth),
+        Modifier.widthIn(max = MaxContentWidth).fillMaxSize(),
         contentPadding = PaddingValues(horizontal = TravelTheme.spacing.gutter, vertical = TravelTheme.spacing.md),
         verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
     ) {

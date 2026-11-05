@@ -29,6 +29,7 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.section.WeatherData
 import io.github.rupakc.travelplanner.core.model.section.WeatherDay
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.results.R
 import kotlin.math.roundToInt
 

@@ -228,8 +228,3 @@ internal fun PreviewSurface(mode: ThemeMode, content: @Composable () -> Unit) {
         Surface(color = TravelTheme.colors.surface) { Box(Modifier.padding(TravelTheme.spacing.lg)) { content() } }
     }
 }
-
-/** The UI locale, observed (recomposes on a locale change). */
-@Composable
-@ReadOnlyComposable
-internal fun currentLocale(): java.util.Locale = LocalConfiguration.current.locales[0]

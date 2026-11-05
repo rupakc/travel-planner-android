@@ -67,6 +67,7 @@
     <string name="results_fare_watched">Today’s fare is %1$s (%2$s). We’ll check about twice a day and only speak up when it’s worth it.</string>
     <string name="results_fare_watched_pending">We’ll take today’s price shortly, then check about twice a day and only speak up when it’s worth it.</string>
     <string name="results_fare_yours">Yours</string>
+    <string name="results_fare_cheapest">Cheapest</string>
     <string name="results_filter_activities_title">Activity Filters</string>
     <string name="results_filter_any">Any</string>
     <string name="results_filter_apply">Apply Filters</string>

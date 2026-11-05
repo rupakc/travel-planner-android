@@ -54,6 +54,7 @@ import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.ChipRow
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.formatDate
@@ -377,7 +378,7 @@ private fun DateField(label: String, value: String, min: LocalDate, max: LocalDa
     var open by rememberSaveable { mutableStateOf(false) }
     val pick = stringResource(R.string.results_filter_pick_date, label)
     OutlinedTextField(
-        value = formatDate(value.takeIf(String::isNotBlank)).orEmpty(),
+        value = formatDate(value.takeIf(String::isNotBlank), currentLocale()).orEmpty(),
         onValueChange = {},
         readOnly = true,
         modifier = modifier,

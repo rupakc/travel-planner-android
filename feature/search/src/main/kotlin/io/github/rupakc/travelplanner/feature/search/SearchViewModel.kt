@@ -66,6 +66,7 @@ import kotlinx.coroutines.launch
 
 /** A recent search as its card shows it. */
 @Immutable
+/** [summary] dates are en-US; the card formats them again in the UI locale (a ViewModel outlives a language switch). */
 data class RecentSearchCard(val entry: RecentSearch, val summary: RecentSearchSummary, val datesPassed: Boolean) {
     val id: String get() = entry.id
 }
@@ -461,7 +462,7 @@ class SearchViewModel
         }
 
         private fun card(entry: RecentSearch): RecentSearchCard =
-            RecentSearchCard(entry, describeRecentSearch(entry.search, Locale.getDefault()), recentDatesPassed(entry.search, clock.today()))
+            RecentSearchCard(entry, describeRecentSearch(entry.search), recentDatesPassed(entry.search, clock.today()))
 
         private companion object {
             const val SAVED_FORM_KEY = "search_form"

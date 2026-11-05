@@ -67,6 +67,7 @@
     <string name="results_fare_watched">La tarifa de hoy es %1$s (%2$s). La revisaremos unas dos veces al día y solo te avisaremos cuando valga la pena.</string>
     <string name="results_fare_watched_pending">Tomaremos el precio de hoy en breve y lo revisaremos unas dos veces al día; solo te avisaremos cuando valga la pena.</string>
     <string name="results_fare_yours">Tus fechas</string>
+    <string name="results_fare_cheapest">La más barata</string>
     <string name="results_filter_activities_title">Filtros de actividades</string>
     <string name="results_filter_any">Cualquiera</string>
     <string name="results_filter_apply">Aplicar filtros</string>
