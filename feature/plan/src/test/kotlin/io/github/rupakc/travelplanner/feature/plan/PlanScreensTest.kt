@@ -136,7 +136,15 @@ class PlanScreensTest {
         val state =
             PlanDetailUiState(
                 isLoading = false,
-                content = PlanDetailContent(TripSummary.from(p, today), SelectionGroups.of(selections), PlanItineraryUi.of(selections), emptyList(), null, false),
+                content =
+                    PlanDetailContent(
+                        TripSummary.from(p, today),
+                        SelectionGroups.of(selections),
+                        PlanItineraryUi.of(selections),
+                        emptyList(),
+                        null,
+                        false,
+                    ),
             )
         compose.setContent { TravelTheme(themeMode = ThemeMode.LIGHT) { PlanDetailScreen(state, {}, {}, onBack = {}) } }
         compose.onNode(androidx.compose.ui.test.hasScrollAction()).performScrollToNode(hasText("Toyosu"))

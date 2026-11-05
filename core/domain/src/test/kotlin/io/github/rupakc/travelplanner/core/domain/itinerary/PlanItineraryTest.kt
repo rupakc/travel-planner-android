@@ -42,7 +42,9 @@ class PlanItineraryTest {
         // Same days, same order and times as the .ics export's planItineraryDays.
         val exported = PlanIcs.planItineraryDays(PlanSelectionsSerializer.toJson(sel), null)
         assertEquals(
-            exported.map { d -> d["slots"]!!.jsonArray.map { it.jsonObject["key"]!!.jsonPrimitive.content to it.jsonObject["start_time"]?.jsonPrimitive?.content } },
+            exported.map { d ->
+                d["slots"]!!.jsonArray.map { it.jsonObject["key"]!!.jsonPrimitive.content to it.jsonObject["start_time"]?.jsonPrimitive?.content }
+            },
             days.map { d -> d.slots.map { it.key to it.startTime } },
         )
     }
