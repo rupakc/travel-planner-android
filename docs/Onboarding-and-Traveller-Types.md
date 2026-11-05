@@ -52,7 +52,7 @@ once, and a single-choice question only counts its first valid answer.
 
 | # | Question id (choice) | Option id | Weights | Preferences / search |
 |---|---|---|---|---|
-| 1 | `companions` (single) "Who do you usually travel with?" | `solo` | BUDGET_BACKPACKER 2, ADVENTURE 1 | adults 1, children 0 |
+| 1 | `companions` (single; counts apply only to the default party) "Who do you usually travel with?" | `solo` | BUDGET_BACKPACKER 2, ADVENTURE 1 | adults 1, children 0 |
 | | | `partner` | RELAXATION 2, LUXURY 1, CULTURE_FOODIE 1 | adults 2, children 0 |
 | | | `family_kids` | FAMILY 4 | adults 2, children 1, interest `family` |
 | | | `friends` | ADVENTURE 2, BUDGET_BACKPACKER 1 | adults 3, children 0 |
@@ -108,7 +108,9 @@ raw `answers` (question id → option ids); `TravellerProfile.types()` reads the
   (interests `food, history, adventure, culture, nature, shopping, nightlife, wellness, art, family`;
   accessibility `wheelchair, visual_impairment, hearing_impairment, cognitive_disability`). Nothing is removed.
 - `budget_category`: set when question 2 is answered (`shoestring` → low, `mid_range`/`comfort` → medium, `luxury` → high).
-- `adults`/`children`: set from question 1 when answered; `seniors` untouched; `infants` raised to 1 for "Travelling with infants".
+- `adults`/`children`: filled from question 1 **only while the server still has the default party** (1 adult, 0 children/seniors/infants);
+  a party the user already set (e.g. 2 adults + 3 children, or solo + 1 senior) is left untouched. `seniors` is never changed.
+- `infants`: raised to at least 1 for "Travelling with infants" (a minimum, on any party).
 - `num_travelers` = adults + children + seniors + infants, clamped 1…20, only when a count changed.
 - Everything else (nationality, residence, permits, visas, email) is kept. There is no nationality question.
 - Pace has no Preferences field: it stays in `TravellerProfile.answers["pace"]` (`quizPace(answers)`) for the search form.

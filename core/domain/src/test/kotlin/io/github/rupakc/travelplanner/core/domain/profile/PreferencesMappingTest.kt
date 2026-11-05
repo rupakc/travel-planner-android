@@ -65,18 +65,41 @@ class PreferencesMappingTest {
     }
 
     @Test
-    fun `companions set adults and children, keep seniors and recount`() {
-        val existing = Preferences(adults = 1, seniors = 1, numTravelers = 2)
-        val family = existing.mergeQuizAnswers(mapOf(COMPANIONS to listOf("family_kids")))
+    fun `companions fill the default party and recount`() {
+        val family = Preferences().mergeQuizAnswers(mapOf(COMPANIONS to listOf("family_kids")))
         assertEquals(2, family.adults)
         assertEquals(1, family.children)
-        assertEquals(1, family.seniors)
-        assertEquals(4, family.numTravelers)
+        assertEquals(3, family.numTravelers)
         assertTrue("family" in family.interests)
 
         val partner = Preferences().mergeQuizAnswers(mapOf(COMPANIONS to listOf("partner")))
         assertEquals(2, partner.adults)
         assertEquals(2, partner.numTravelers)
+    }
+
+    @Test
+    fun `a party the user already set is never overwritten`() {
+        val bigFamily = Preferences(adults = 2, children = 3, numTravelers = 5)
+        assertEquals(bigFamily.copy(interests = listOf("family")), bigFamily.mergeQuizAnswers(mapOf(COMPANIONS to listOf("family_kids"))))
+
+        val soloWithSenior = Preferences(adults = 1, seniors = 1, numTravelers = 2)
+        assertEquals(soloWithSenior, soloWithSenior.mergeQuizAnswers(mapOf(COMPANIONS to listOf("solo"))))
+        assertEquals(soloWithSenior, soloWithSenior.mergeQuizAnswers(mapOf(COMPANIONS to listOf("work"))))
+    }
+
+    @Test
+    fun `infants stay a minimum on a custom party`() {
+        val merged =
+            Preferences(adults = 2, children = 3, numTravelers = 5).mergeQuizAnswers(
+                mapOf(
+                    COMPANIONS to listOf("family_kids"),
+                    NEEDS to listOf("infants"),
+                ),
+            )
+        assertEquals(2, merged.adults)
+        assertEquals(3, merged.children)
+        assertEquals(1, merged.infants)
+        assertEquals(6, merged.numTravelers)
     }
 
     @Test
@@ -88,7 +111,7 @@ class PreferencesMappingTest {
 
     @Test
     fun `traveller total is clamped to the server range`() {
-        val merged = Preferences(seniors = 20).mergeQuizAnswers(mapOf(COMPANIONS to listOf("friends")))
+        val merged = Preferences(adults = 20, children = 20, numTravelers = 20).mergeQuizAnswers(mapOf(NEEDS to listOf("infants")))
         assertEquals(20, merged.numTravelers)
     }
 
