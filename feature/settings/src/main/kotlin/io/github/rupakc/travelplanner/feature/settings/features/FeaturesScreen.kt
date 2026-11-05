@@ -43,7 +43,6 @@ fun FeaturesScreen(state: FeaturesUiState, onEvent: (FeaturesEvent) -> Unit, onB
             item(key = "intro", contentType = "note") {
                 SettingsNote(pluralStringResource(R.plurals.settings_features_on, state.onCount, state.onCount, state.rows.size))
                 SettingsNote(stringResource(R.string.settings_features_intro))
-                if (!state.catalogueAvailable) SettingsNote(stringResource(R.string.settings_features_no_defaults))
             }
             FeatureGroup.entries.forEach { group ->
                 item(key = "h-${group.name}", contentType = "heading") { SettingsHeading(stringResource(group.titleRes())) }
@@ -96,5 +95,5 @@ private fun FeaturesPreviewLight() {
 @Preview(name = "Features dark", widthDp = 380, heightDp = 900, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun FeaturesPreviewDark() {
-    TravelTheme(themeMode = ThemeMode.DARK) { FeaturesScreen(previewFeatures.copy(catalogueAvailable = false), onEvent = {}, onBack = {}) }
+    TravelTheme(themeMode = ThemeMode.DARK) { FeaturesScreen(previewFeatures, onEvent = {}, onBack = {}) }
 }

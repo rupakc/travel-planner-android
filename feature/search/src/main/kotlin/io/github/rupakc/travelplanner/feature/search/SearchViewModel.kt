@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.getOrNull
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
+import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
 import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesRepository
@@ -40,7 +41,6 @@ import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.reference.Nationality
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
-import io.github.rupakc.travelplanner.feature.search.di.FeatureVisibility
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate

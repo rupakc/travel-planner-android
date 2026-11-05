@@ -34,7 +34,6 @@
     <string name="settings_retake_quiz">Retake quiz</string>
     <string name="settings_features">Features</string>
     <string name="settings_features_intro">Turn any feature on or off. Search, results, My Plan and Settings are always available.</string>
-    <string name="settings_features_no_defaults">Traveller-type defaults aren\'t available in this build, so only the features you turn on are shown.</string>
     <string name="settings_features_default_on">On for your type. %1$s</string>
     <string name="settings_features_reset">Reset to my type\'s defaults</string>
     <string name="settings_features_group_plan">Plan and discover</string>

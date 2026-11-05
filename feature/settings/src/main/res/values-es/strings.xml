@@ -34,7 +34,6 @@
     <string name="settings_retake_quiz">Repetir cuestionario</string>
     <string name="settings_features">Funciones</string>
     <string name="settings_features_intro">Activa o desactiva cualquier función. Búsqueda, resultados, Mi plan y Ajustes siempre están disponibles.</string>
-    <string name="settings_features_no_defaults">Los valores por defecto del tipo de viajero no están disponibles en esta versión: solo se muestran las funciones que actives.</string>
     <string name="settings_features_default_on">Activada para tu tipo. %1$s</string>
     <string name="settings_features_reset">Restablecer los valores de mi tipo</string>
     <string name="settings_features_group_plan">Planear y descubrir</string>

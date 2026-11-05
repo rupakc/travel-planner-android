@@ -10,14 +10,13 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.impl.SearchResultsReducer
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
+import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.FareCalendarRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PriceWatchesRepository
-import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
 import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
-import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.results.BestValuePackage
 import io.github.rupakc.travelplanner.core.domain.results.BudgetAllocation
@@ -26,7 +25,6 @@ import io.github.rupakc.travelplanner.core.domain.results.FareCalendarRules
 import io.github.rupakc.travelplanner.core.domain.results.Remix
 import io.github.rupakc.travelplanner.core.domain.results.RemixPreset
 import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
-import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.alerts.ALERT_ANY_DROP
 import io.github.rupakc.travelplanner.core.model.alerts.ActivityWatchSpec
 import io.github.rupakc.travelplanner.core.model.alerts.CreatePriceWatchRequest
@@ -57,7 +55,6 @@ import io.github.rupakc.travelplanner.core.model.section.SectionData
 import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
-import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -68,7 +65,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -98,8 +94,7 @@ class ResultsViewModel
         private val fareCalendar: FareCalendarRepository,
         private val fareWatches: FareWatchesRepository,
         private val priceWatches: PriceWatchesRepository,
-        profile: ProfileRepository,
-        catalogue: Optional<FeatureCatalogue>,
+        featureVisibility: FeatureVisibility,
         private val clock: AppClock,
         dispatchers: AppDispatchers,
         private val savedState: SavedStateHandle,
@@ -123,15 +118,8 @@ class ResultsViewModel
             return ResultsStateBuilder.snapshot(draft)?.let(::withSavedExtras).also { snapshotMemo = draft.searchData to it }
         }
 
-        private val visibleFeatures: Flow<Set<FeatureId>?> =
-            if (catalogue.isPresent) {
-                combine(profile.profile, profile.featureOverrides) { p, overrides ->
-                    val types = (listOfNotNull(p.primaryType) + p.secondaryTypes).mapNotNull { name -> TravellerType.entries.firstOrNull { it.name == name } }
-                    if (!p.onboardingCompleted || types.isEmpty()) null else catalogue.get().visible(types, overrides)
-                }
-            } else {
-                flowOf(null)
-            }
+        /** The shared visibility rule (core:data): hidden features' sections drop down the order, as on Home and Search. */
+        private val visibleFeatures: Flow<Set<FeatureId>?> = featureVisibility.visible()
 
         private val source: Flow<SourcedResults> =
             combine(search.current, plan.draft) { live, draft -> sourceOf(live, draft) }.flowOn(dispatchers.default)

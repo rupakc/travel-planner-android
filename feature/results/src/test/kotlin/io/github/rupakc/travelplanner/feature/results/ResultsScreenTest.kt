@@ -29,6 +29,7 @@ import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareCalendarRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeFeatureVisibility
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
@@ -85,8 +86,7 @@ class ResultsScreenTest {
                 FakeFareCalendarRepository(),
                 FakeFareWatchesRepository(),
                 FakePriceWatchesRepository(),
-                FakeProfileRepository(),
-                Optional.empty(),
+                FakeFeatureVisibility(),
                 clock,
                 TestAppDispatchers(Dispatchers.Unconfined),
                 androidx.lifecycle.SavedStateHandle(),

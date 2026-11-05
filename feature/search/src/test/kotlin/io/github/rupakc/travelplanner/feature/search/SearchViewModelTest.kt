@@ -26,6 +26,7 @@ import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
+import io.github.rupakc.travelplanner.core.testing.fake.FakeFeatureVisibility
 import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeRecentSearchesRepository
@@ -179,7 +180,7 @@ class SearchViewModelTest {
         assertEquals(listOf(SearchMode.KNOWN, SearchMode.SURPRISE, SearchMode.COMPARE), vm.state.value.visibleModes)
         vm.onEvent(SearchFormEvent.SelectMode(SearchMode.KNOWN))
         assertEquals(listOf(SearchMode.KNOWN, SearchMode.SURPRISE), vm.state.value.visibleModes)
-        visibility.state.value = null
+        visibility.state.value = FeatureId.entries.toSet()
         assertEquals(SearchMode.entries, vm.state.value.visibleModes)
     }
 

@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.feature.home.search
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import io.github.rupakc.travelplanner.core.data.profile.ProfileFeatureVisibility
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.globalsearch.GlobalSearchKind
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
@@ -19,7 +20,6 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeRecentSearchesReposi
 import io.github.rupakc.travelplanner.feature.home.FakeFeatureCatalogue
 import io.github.rupakc.travelplanner.feature.home.plan
 import io.github.rupakc.travelplanner.feature.home.recent
-import java.util.Optional
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -63,7 +63,7 @@ class GlobalSearchViewModelTest {
             chat,
             recentRepo,
             profile,
-            Optional.of(FakeFeatureCatalogue(setOf(FeatureId.CHAT))),
+            ProfileFeatureVisibility(profile, FakeFeatureCatalogue(setOf(FeatureId.CHAT))),
             FakeLabels,
             TestAppDispatchers(main.testDispatcher),
         )

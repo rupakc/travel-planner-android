@@ -31,6 +31,7 @@ import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareCalendarRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeFeatureVisibility
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
@@ -80,9 +81,9 @@ class ResultsViewModelTest {
     private val health = FakeHealthRepository(Health(status = "ok", serpapiConfigured = true, fareWatchAvailable = true))
     private val fareWatches = FakeFareWatchesRepository()
     private val priceWatches = FakePriceWatchesRepository()
-    private val profile = FakeProfileRepository()
+    private val visibility = FakeFeatureVisibility()
 
-    private fun vm(catalogue: FeatureCatalogue? = null) =
+    private fun vm() =
         ResultsViewModel(
             search = search,
             searchLauncher = FakeSearchLauncher(plan, search),
@@ -91,8 +92,7 @@ class ResultsViewModelTest {
             fareCalendar = FakeFareCalendarRepository(),
             fareWatches = fareWatches,
             priceWatches = priceWatches,
-            profile = profile,
-            catalogue = Optional.ofNullable(catalogue),
+            featureVisibility = visibility,
             clock = clock,
             dispatchers = TestAppDispatchers(main.testDispatcher),
             savedState = SavedStateHandle(),
@@ -324,8 +324,7 @@ class ResultsViewModelTest {
                     FakeFareCalendarRepository(),
                     fareWatches,
                     priceWatches,
-                    profile,
-                    Optional.empty(),
+                    FakeFeatureVisibility(),
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     SavedStateHandle(),
@@ -356,8 +355,7 @@ class ResultsViewModelTest {
                     FakeFareCalendarRepository(),
                     fareWatches,
                     priceWatches,
-                    profile,
-                    Optional.empty(),
+                    FakeFeatureVisibility(),
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     saved,
@@ -378,8 +376,7 @@ class ResultsViewModelTest {
                     FakeFareCalendarRepository(),
                     fareWatches,
                     priceWatches,
-                    profile,
-                    Optional.empty(),
+                    FakeFeatureVisibility(),
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     saved,
@@ -552,14 +549,8 @@ class ResultsViewModelTest {
     @Test
     fun `traveller type puts hidden features last and collapsed`() =
         runTest {
-            profile.profileState.value = TravellerProfile(onboardingCompleted = true, primaryType = TravellerType.LUXURY.name)
-            val catalogue =
-                object : FeatureCatalogue {
-                    override val all: List<FeatureDescriptor> = emptyList()
-
-                    override fun defaultsFor(types: Collection<TravellerType>): Set<FeatureId> = setOf(FeatureId.VISA_CHECKER)
-                }
-            val vm = vm(catalogue)
+            visibility.state.value = setOf(FeatureId.VISA_CHECKER)
+            val vm = vm()
             vm.state.test {
                 search.start(request)
                 val s = expectMostRecentItem()
@@ -570,6 +561,20 @@ class ResultsViewModelTest {
                 assertTrue(s.sections.indexOfFirst { !it.relevant } > s.sections.indexOfFirst { it.id == SectionId.VISA })
                 vm.onEvent(ResultsEvent.ToggleSection(SectionId.EVENTS))
                 assertTrue(expectMostRecentItem().section(SectionId.EVENTS).expanded)
+            }
+        }
+
+    @Test
+    fun `a skipped-quiz user who turned Events off gets Events collapsed and last, everything else relevant`() =
+        runTest {
+            // The shared rule (core:data) for no traveller type: every feature minus explicit disables.
+            visibility.state.value = FeatureId.entries.toSet() - FeatureId.EVENTS
+            val vm = vm()
+            vm.state.test {
+                search.start(request)
+                val s = expectMostRecentItem()
+                assertFalse(s.section(SectionId.EVENTS).relevant)
+                assertTrue(s.sections.filter { it.id != SectionId.EVENTS }.all { it.relevant })
             }
         }
 
