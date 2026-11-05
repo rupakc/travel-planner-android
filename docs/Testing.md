@@ -50,11 +50,13 @@ WEB=~/travel-planner; ANDROID=$PWD
 echo 1.0 > /tmp/tp-e2e-scale
 python3 -I tools/e2e/fake_serpapi.py $WEB/backend/tests/fixtures/serpapi /tmp/tp-e2e-scale 9100 &   # fake SerpAPI
 cd $WEB/backend
-DATA_DIR=/tmp/tp-e2e ADMIN_PASSWORD='e2e-Test-Pass1' SERPAPI_KEY=fake RATE_LIMIT_ENABLED=false \
+DATA_DIR=/tmp/tp-e2e ADMIN_PASSWORD='e2e-Test-Pass1' SERPAPI_KEY=fake RATE_LIMIT_ENABLED=false CACHE_TTL_SECONDS=5 \
   python3 $ANDROID/tools/e2e/run_backend.py http://127.0.0.1:9100/search 8001 &                    # backend on 8001
 curl -s localhost:8001/health      # expect serpapi_configured: true
 ```
 
+- `CACHE_TTL_SECONDS=5`: the backend caches SerpAPI answers (30 min by default), so a second "Check now" would
+  otherwise never see the fake's lowered prices.
 - `DATA_DIR` isolates the SQLite file from real data; `ADMIN_PASSWORD` is a throwaway test value that creates the `admin` user (username `admin`); create a normal user through the admin endpoints
   (`POST /api/admin/users`, see the web repo's API-Reference) and sign in with it.
 - The emulator reaches the host's loopback backend at `http://10.0.2.2:8001` (the `local` flavour default). A physical phone cannot: `run_backend.py` binds 127.0.0.1, so use the emulator for E2E.

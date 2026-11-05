@@ -133,5 +133,45 @@ class BackendApi(private val baseUrl: String = E2eConfig.baseUrl) {
         call("DELETE", "/api/plans/$id", token)
     }
 
+    fun priceWatches(token: String): JsonArray {
+        val body = call("GET", "/api/price-watches", token).json()
+        return (body as? JsonArray) ?: (body.jsonObject["watches"] as JsonArray)
+    }
+
+    fun deletePriceWatch(token: String, id: String) {
+        call("DELETE", "/api/price-watches/$id", token)
+    }
+
+    /** A hotel watch on a hotel the fake SerpAPI's Lisbon fixtures know (Lumen, whose property-details fixture the fake replays for every token). */
+    fun createFixtureHotelWatch(token: String): Response =
+        call(
+            "POST",
+            "/api/price-watches",
+            token,
+            buildJsonObject {
+                put("kind", "hotel")
+                put(
+                    "hotel",
+                    buildJsonObject {
+                        put("name", "Lumen Hotel & The Lisbon Light Show")
+                        put("city", "Lisbon")
+                        put("check_in", "2026-12-01")
+                        put("check_out", "2026-12-04")
+                        put("adults", 2)
+                        put("rooms", 1)
+                        put("property_token", "ChoIkamS5OLO9d2QARoNL2cvMTFrODM4N24zORAB")
+                    },
+                )
+            },
+        )
+
+    fun notifications(token: String): JsonElement = call("GET", "/api/notifications", token).json()
+
+    /** Sets the fake SerpAPI's price multiplier (tools/e2e/fake_serpapi.py `/__scale`). */
+    fun setFakePriceScale(scale: Double) {
+        val request = Request.Builder().url(E2eConfig.fakeSerpUrl.trimEnd('/') + "/__scale?value=$scale").build()
+        client.newCall(request).execute().use { check(it.code == 200) { "fake scale -> ${it.code}" } }
+    }
+
     fun parse(text: String): JsonElement = json.parseToJsonElement(text)
 }
