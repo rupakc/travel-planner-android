@@ -5,6 +5,8 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.rupakc.travelplanner.MainActivity
+import io.github.rupakc.travelplanner.core.ui.R as UiR
+import io.github.rupakc.travelplanner.feature.results.R as ResultsR
 import io.github.rupakc.travelplanner.feature.search.R as SearchR
 import org.junit.After
 import org.junit.Assert.assertTrue
@@ -29,6 +31,53 @@ class StateRestorationE2eTest {
 
     @After fun portrait() {
         if (::robot.isInitialized) robot.device.setOrientationNatural()
+    }
+
+    @Test fun rotation_keepsResults() {
+        BackendApi().resetPreferences(BackendApi().adminToken())
+        robot = AppRobot(rule)
+        robot.signInToHome()
+        robot.searchTrip(AppRobot.Trip())
+        val flows = PlanFlows(robot)
+        robot.waitForText(robot.str(ResultsR.string.results_ease_title), timeoutMs = PlanFlows.STREAM_TIMEOUT)
+        flows.awaitTerminal(UiR.string.section_hotels)
+
+        robot.device.setOrientationLeft()
+        rule.waitForIdle()
+        // Landscape on this phone is an expanded width: Results switches to list-detail. The same results are
+        // shown (no new stream): the Travel Ease banner and the Hotels entry are there straight away.
+        robot.waitFor(hasTestTag("results_list_pane"))
+        assertTrue(robot.scrollToFind(hasText(robot.str(UiR.string.section_hotels))))
+        Screenshots.capture("results-landscape")
+        robot.device.setOrientationNatural()
+        rule.waitForIdle()
+        flows.awaitTerminal(UiR.string.section_hotels, timeoutMs = AppRobot.DEFAULT_TIMEOUT)
+    }
+
+    /**
+     * First half of the process-death check driven by `tools/e2e/process_death.sh`: fills the Search form, then
+     * leaves the app in the background. The script kills the process and relaunches it from the launcher.
+     */
+    @Test fun processDeath_prepareSearchForm() {
+        BackendApi().resetPreferences(BackendApi().adminToken())
+        robot = AppRobot(rule)
+        robot.signInToHome()
+        robot.openTab(io.github.rupakc.travelplanner.R.string.nav_search)
+        robot.waitFor(hasTestTag("search_submit"))
+        robot.pickSuggestion(robot.str(SearchR.string.search_from), "New York", "JFK")
+        robot.pickSuggestion(robot.str(SearchR.string.search_to), "Lisbon", "LIS")
+        robot.device.pressHome()
+    }
+
+    /** Same, on Results after a search has finished streaming its first sections. */
+    @Test fun processDeath_prepareResults() {
+        BackendApi().resetPreferences(BackendApi().adminToken())
+        robot = AppRobot(rule)
+        robot.signInToHome()
+        robot.searchTrip(AppRobot.Trip())
+        robot.waitForText(robot.str(ResultsR.string.results_ease_title), timeoutMs = PlanFlows.STREAM_TIMEOUT)
+        PlanFlows(robot).awaitTerminal(UiR.string.section_hotels)
+        robot.device.pressHome()
     }
 
     @Test fun rotation_keepsSearchForm() {
