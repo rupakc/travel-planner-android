@@ -29,6 +29,7 @@ import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollIntervals
 import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollWorker
 import io.github.rupakc.travelplanner.core.notifications.alerts.PollBaseline
+import io.github.rupakc.travelplanner.core.notifications.alerts.PollBaselineCleaner
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbyNotificationPolicy
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbyPostLog
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionWorker
@@ -139,6 +140,18 @@ class WorkersTest {
             worker().doWork()
             assertEquals(2, notifier.priceAlerts.size)
             assertEquals("travelplanner://alerts?kind=hotel&watch=9", notificationLinkOf(alert(1)))
+        }
+
+    @Test
+    fun `after the session wipe the next poll marks alerts seen instead of posting them all`() =
+        runBlocking {
+            val repo = FakeNotificationsRepository(listOf(alert(1), alert(2)))
+            PollBaselineCleaner(baseline).clear() // what SessionCleaner runs on sign-out (security S-M5)
+            assertNull(baseline.user)
+            build({ c, p -> AlertPollWorker(c, p, signedIn, repo, FakeSettingsRepository(), notifier, baseline) }).doWork()
+            assertTrue(notifier.priceAlerts.isEmpty())
+            assertEquals(setOf(1L, 2L), repo.seen)
+            assertEquals(TestUser.username, baseline.user)
         }
 
     @Test

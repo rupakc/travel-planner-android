@@ -8,6 +8,9 @@
         <exclude domain="database" path="travel-planner.db-wal" />
         <exclude domain="database" path="travel-planner.db-shm" />
         <exclude domain="sharedpref" path="tp_keys.xml" />
+        <exclude domain="sharedpref" path="alert_poll.xml" />
+        <exclude domain="sharedpref" path="trip_reminders.xml" />
+        <exclude domain="sharedpref" path="nearby_notifications.xml" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="file" path="datastore/session.preferences_pb" />
@@ -16,5 +19,8 @@
         <exclude domain="database" path="travel-planner.db-wal" />
         <exclude domain="database" path="travel-planner.db-shm" />
         <exclude domain="sharedpref" path="tp_keys.xml" />
+        <exclude domain="sharedpref" path="alert_poll.xml" />
+        <exclude domain="sharedpref" path="trip_reminders.xml" />
+        <exclude domain="sharedpref" path="nearby_notifications.xml" />
     </device-transfer>
 </data-extraction-rules>

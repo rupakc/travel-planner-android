@@ -16,11 +16,13 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoSet
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.data.repository.UserStateCleaner
 import io.github.rupakc.travelplanner.core.notifications.Notifier
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -154,4 +156,19 @@ abstract class AlertPollModule {
     @Binds abstract fun scheduler(impl: WorkManagerAlertPollScheduler): AlertPollScheduler
 
     @Binds abstract fun baseline(impl: SharedPrefsPollBaseline): PollBaseline
+
+    @Binds @IntoSet
+    abstract fun baselineCleaner(impl: PollBaselineCleaner): UserStateCleaner
 }
+
+/**
+ * Forgets the poll baseline in the session wipe, so the next sign-in (same user included: the seen
+ * table was cleared too) marks current unread alerts seen instead of posting them all (security S-M5).
+ */
+class PollBaselineCleaner
+    @Inject
+    constructor(
+        private val baseline: PollBaseline,
+    ) : UserStateCleaner {
+        override suspend fun clear() = baseline.set(null)
+    }

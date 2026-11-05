@@ -6,4 +6,7 @@
     <exclude domain="database" path="travel-planner.db-wal" />
     <exclude domain="database" path="travel-planner.db-shm" />
     <exclude domain="sharedpref" path="tp_keys.xml" />
+    <exclude domain="sharedpref" path="alert_poll.xml" />
+    <exclude domain="sharedpref" path="trip_reminders.xml" />
+    <exclude domain="sharedpref" path="nearby_notifications.xml" />
 </full-backup-content>
