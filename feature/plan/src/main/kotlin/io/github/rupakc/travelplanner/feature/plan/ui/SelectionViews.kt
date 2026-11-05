@@ -122,7 +122,7 @@ private fun GroupHeader(group: SelectionGroup) {
         Text(
             stringResource(R.string.plan_category_heading, group.category.title(), group.entries.size),
             style = TravelTheme.typography.titleSmall,
-            color = accent.icon,
+            color = accent.text,
         )
     }
 }

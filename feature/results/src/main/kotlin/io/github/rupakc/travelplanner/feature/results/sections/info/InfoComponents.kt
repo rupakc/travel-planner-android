@@ -90,11 +90,11 @@ internal fun toneColors(tone: Tone, section: SectionId? = null): ToneColors {
         }
 
         Tone.Violet -> {
-            TravelTheme.sectionAccents[SectionId.HOTELS].let { ToneColors(it.tint, it.icon) }
+            TravelTheme.sectionAccents[SectionId.HOTELS].let { ToneColors(it.tint, it.text) }
         }
 
         Tone.Accent -> {
-            section?.let { TravelTheme.sectionAccents[it] }?.let { ToneColors(it.tint, it.icon) }
+            section?.let { TravelTheme.sectionAccents[it] }?.let { ToneColors(it.tint, it.text) }
                 ?: ToneColors(c.primaryContainer, c.onPrimaryContainer)
         }
     }

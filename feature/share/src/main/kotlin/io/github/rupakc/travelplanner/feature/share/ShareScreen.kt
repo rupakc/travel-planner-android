@@ -260,7 +260,7 @@ private fun DetailCard(title: String, section: SectionId, content: @Composable (
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.semantics { heading() }) {
             Box(Modifier.width(TravelTheme.spacing.accentBar).height(TravelTheme.spacing.lg).background(accent.bar))
             Spacer(Modifier.width(TravelTheme.spacing.sm))
-            Text(title, style = TravelTheme.typography.titleMedium, color = accent.icon)
+            Text(title, style = TravelTheme.typography.titleMedium, color = accent.text)
         }
         Spacer(Modifier.height(TravelTheme.spacing.sm))
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) { content() }

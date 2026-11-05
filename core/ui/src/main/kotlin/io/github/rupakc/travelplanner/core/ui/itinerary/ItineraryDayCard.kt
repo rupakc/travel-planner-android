@@ -128,7 +128,7 @@ private fun DayHeader(day: ItineraryDay) {
         Text(
             day.dayNumber?.let { stringResource(R.string.itinerary_day, it) } ?: stringResource(R.string.itinerary_day_unknown),
             style = TravelTheme.typography.headlineSmall,
-            color = accent.icon,
+            color = accent.text,
             modifier = Modifier.semantics { heading() },
         )
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xxs)) {
