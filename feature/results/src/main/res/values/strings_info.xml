@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Info sections, itinerary editor, Trip Health Check and packing list (Team E). English copy from the web (inventory §5). -->
+<resources>
+    <!-- Shared -->
+    <string name="info_view_details">View details</string>
+    <string name="info_source">Source</string>
+    <string name="info_source_n">Source %1$d</string>
+    <string name="info_found_online">Found online</string>
+    <string name="info_found_online_a11y">This listing was found online by name</string>
+    <string name="info_hidden_gem">💎 Hidden gem</string>
+    <string name="info_family">👨‍👩‍👧 Family</string>
+    <string name="info_accessible">♿ Accessible</string>
+    <string name="info_check_weather">⚠️ Check weather</string>
+    <string name="info_good_weather">☀️ Good weather</string>
+    <string name="info_rating">★ %1$s</string>
+    <string name="info_rating_reviews">★ %1$s (%2$s)</string>
+    <string name="info_rating_a11y">Rated %1$s</string>
+
+    <!-- Weather -->
+    <string name="weather_estimate">Historical climate estimate — actual conditions may vary</string>
+    <plurals name="weather_poor_days">
+        <item quantity="one">%1$d day with poor weather — outdoor activities may be affected</item>
+        <item quantity="other">%1$d days with poor weather — outdoor activities may be affected</item>
+    </plurals>
+    <plurals name="weather_group_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <string name="weather_en_route">En route</string>
+    <string name="weather_city">📍 %1$s</string>
+    <string name="weather_high_low">%1$d°/%2$d°C</string>
+    <string name="weather_rain">💧%1$s mm</string>
+    <string name="weather_poor_marker">Poor weather</string>
+
+    <!-- Places to See -->
+    <string name="places_empty">No places found</string>
+    <string name="places_default_category">Landmark</string>
+    <string name="places_duration">~%1$sh</string>
+    <string name="places_free_entry">Free entry</string>
+    <string name="places_fee">~%1$s</string>
+
+    <!-- Free walking tours -->
+    <string name="tours_error">Couldn\'t reach the walking-tour sites this time — the rest of your plan is unaffected.</string>
+    <string name="tours_empty">No free walking tours listed for this destination on GuruWalk, FreeTour.com, SANDEMANs or FreeWalkingTour.com.</string>
+    <string name="tours_top_pick">Top pick</string>
+    <string name="tours_reviews">★ %1$s (%2$s reviews)</string>
+    <string name="tours_view_on">View on %1$s ↗</string>
+    <string name="tours_searched">Searched:</string>
+    <string name="tours_source_unavailable">%1$s (unavailable)</string>
+    <string name="tours_source_count">%1$s (%2$d)</string>
+
+    <!-- Events -->
+    <string name="events_error">Couldn\'t check local events this time — the rest of your plan is unaffected.</string>
+    <string name="events_empty">No notable events found during your dates.</string>
+    <string name="events_plan_around">Plan around these</string>
+    <string name="events_dates_typical_a11y">%1$s, typical season — exact dates may vary</string>
+    <string name="events_date_range">%1$s – %2$s</string>
+    <string name="interest_food">🍜 Food</string>
+    <string name="interest_history">🏛️ History</string>
+    <string name="interest_adventure">🧗 Adventure</string>
+    <string name="interest_culture">🎭 Culture</string>
+    <string name="interest_nature">🌿 Nature</string>
+    <string name="interest_shopping">🛍️ Shopping</string>
+    <string name="interest_nightlife">🌙 Nightlife</string>
+    <string name="interest_wellness">🧘 Wellness</string>
+    <string name="interest_art">🎨 Art</string>
+    <string name="interest_family">👨‍👩‍👧 Family</string>
+
+    <!-- Visa -->
+    <string name="visa_unavailable">Visa info unavailable — check your government\'s official travel portal</string>
+    <string name="visa_unknown_type">UNKNOWN</string>
+    <string name="visa_confidence">Confidence: %1$s</string>
+    <string name="visa_max_stay">Max Stay</string>
+    <plurals name="visa_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <string name="visa_processing">Processing</string>
+    <string name="visa_fee">Fee</string>
+    <string name="visa_fee_free">Free</string>
+    <string name="visa_official_source">Official Source</string>
+    <string name="visa_official_site">Official site</string>
+    <string name="visa_health">Vaccination &amp; Health</string>
+    <string name="visa_required">Required</string>
+    <string name="visa_recommended">Recommended</string>
+    <string name="visa_health_source">Health Source</string>
+    <string name="visa_customs">Customs &amp; Import Regulations</string>
+    <string name="visa_duty_free">Duty-Free Allowances</string>
+    <string name="visa_alcohol">Alcohol</string>
+    <string name="visa_tobacco">Tobacco</string>
+    <string name="visa_currency">Currency</string>
+    <string name="visa_gifts">Gifts</string>
+    <string name="visa_prohibited">Prohibited Items</string>
+    <string name="visa_must_declare">Must Declare</string>
+    <string name="visa_customs_source">Customs Source</string>
+
+    <!-- SIM -->
+    <string name="sim_empty">No SIM plans found — check local carriers on arrival</string>
+    <string name="sim_data">%1$sGB data</string>
+    <string name="sim_unlimited">Unlimited data</string>
+    <plurals name="sim_validity">
+        <item quantity="one">%1$d day validity</item>
+        <item quantity="other">%1$d days validity</item>
+    </plurals>
+    <string name="sim_get_plan">Get Plan</string>
+
+    <!-- Tips -->
+    <string name="tips_empty">No travel tips available yet</string>
+    <string name="tips_severity_danger">Danger</string>
+    <string name="tips_severity_warning">Warning</string>
+    <string name="tips_severity_info">Info</string>
+
+    <!-- Emergency card -->
+    <string name="emergency_unavailable">Emergency information unavailable</string>
+    <string name="emergency_offline">Offline reference you can share or save</string>
+    <string name="emergency_share">Share card</string>
+    <string name="emergency_share_title">Emergency card</string>
+    <string name="emergency_disclaimer">⚠️ Verify all details before travel — information may be outdated. Confirm with hotel concierge on arrival.</string>
+    <string name="emergency_police">Police</string>
+    <string name="emergency_ambulance">Ambulance</string>
+    <string name="emergency_fire">Fire</string>
+    <string name="emergency_tourist_police">Tourist Police</string>
+    <string name="emergency_no_number">—</string>
+    <string name="emergency_call_a11y">Call %1$s, %2$s</string>
+    <string name="emergency_no_number_a11y">%1$s, no number listed</string>
+    <string name="emergency_phone">📞 %1$s</string>
+    <string name="emergency_after_hours">After hours: %1$s</string>
+    <string name="emergency_hospitals">🏥 Hospitals</string>
+    <string name="emergency_phrases">💬 Essential Phrases</string>
+    <string name="emergency_phrase_english">English</string>
+    <string name="emergency_phrase_local">Local</string>
+    <string name="emergency_phrase_phonetic">Phonetic</string>
+    <string name="emergency_laws">⚖️ Laws to Know</string>
+    <string name="emergency_embassy">🏛️ %1$s</string>
+    <string name="emergency_home_note">🏠 %1$s</string>
+    <string name="emergency_city">📍 %1$s</string>
+    <string name="emergency_share_footer">Information provided for general guidance only. Always verify current details with official sources.</string>
+
+    <!-- Getting around -->
+    <string name="transport_empty">No transport info available — check local transit apps on arrival</string>
+    <string name="transport_in_city">In the City</string>
+    <string name="transport_between_cities">Between Cities</string>
+    <string name="transport_other">Other</string>
+    <string name="transport_coverage">Coverage:</string>
+    <string name="transport_price">Price:</string>
+    <string name="transport_hours">Hours:</string>
+    <string name="transport_tourist_pass">Tourist Pass:</string>
+    <string name="transport_more_info">More Info</string>
+
+    <!-- Forex -->
+    <string name="forex_unavailable">Currency info unavailable — check xe.com for live rates</string>
+    <string name="forex_your_currency">Your Currency</string>
+    <string name="forex_rate_loading">Live rate loading…</string>
+    <string name="forex_where">Where to Exchange</string>
+    <string name="forex_fees">Fees:</string>
+    <string name="forex_cards">Card Acceptance</string>
+    <string name="forex_visa_mc">Visa/MC:</string>
+    <string name="forex_amex">Amex:</string>
+    <string name="forex_contactless">Contactless:</string>
+    <string name="forex_digital">Digital:</string>
+    <string name="forex_surcharges">Surcharges:</string>
+    <string name="forex_cash">Cash Advice</string>
+    <string name="forex_cash_dependency">Cash dependency: %1$s</string>
+    <string name="forex_denominations">Denominations:</string>
+    <string name="forex_bring_usd_eur">Bring USD/EUR?</string>
+    <string name="forex_atm">ATM Information</string>
+    <string name="forex_availability">Availability:</string>
+    <string name="forex_networks">Networks:</string>
+    <string name="forex_limit">Limit:</string>
+    <string name="forex_tipping_expected">💵 Tipping expected</string>
+    <string name="forex_tipping_not_expected">✅ Tipping not expected</string>
+    <string name="forex_money_tips">Money Tips</string>
+
+    <!-- Itinerary -->
+    <string name="itin_empty">No itinerary available</string>
+    <string name="itin_total_cost">Est. itinerary cost: %1$s</string>
+    <string name="itin_template">Auto-generated — tap any slot to edit</string>
+    <string name="itin_times_note">Times are estimates based on typical durations and distances.</string>
+    <string name="itin_editing_locked">Editing is off while a saved plan is open. Tap New in My Plan to edit this itinerary.</string>
+    <string name="itin_changes_group">Itinerary changes</string>
+    <plurals name="itin_change_count">
+        <item quantity="one">%1$d change</item>
+        <item quantity="other">%1$d changes</item>
+    </plurals>
+    <string name="itin_undo">Undo</string>
+    <string name="itin_reset">Reset</string>
+    <string name="itin_edit">Edit</string>
+    <string name="itin_edited">Edited</string>
+    <string name="itin_edit_a11y">Edit %1$s</string>
+    <string name="itin_note">Note</string>
+    <string name="itin_note_set">Note ✓</string>
+    <string name="itin_note_add_a11y">Add note to %1$s</string>
+    <string name="itin_note_edit_a11y">Edit note for %1$s</string>
+    <string name="itin_move">Move</string>
+    <string name="itin_move_a11y">Move %1$s</string>
+    <string name="itin_plan">Plan</string>
+    <string name="itin_in_plan">In Plan</string>
+    <string name="itin_plan_add_a11y">Add %1$s to plan</string>
+    <string name="itin_plan_remove_a11y">Remove %1$s from plan</string>
+    <string name="itin_field_activity">Activity</string>
+    <string name="itin_field_location">Location</string>
+    <string name="itin_field_cost">Est. cost ($)</string>
+    <string name="itin_field_note">Personal note</string>
+    <string name="itin_note_placeholder">Add your note…</string>
+    <string name="itin_note_placeholder_personal">Add your personal note…</string>
+    <string name="itin_done">Done</string>
+    <string name="itin_remove_from_day">Remove from day</string>
+    <string name="itin_menu_day">Day %1$d</string>
+    <string name="itin_menu_day_city">Day %1$d · %2$s</string>
+    <string name="itin_menu_target_swap">%1$s (swap with %2$s)</string>
+    <string name="itin_move_to_a11y">Move to Day %1$d · %2$s</string>
+    <string name="itin_move_to_swap_a11y">Move to Day %1$d · %2$s (swap with %3$s)</string>
+    <string name="itin_removed">Removed</string>
+    <string name="itin_restore">Restore</string>
+    <string name="itin_restore_a11y">Restore %1$s</string>
+    <string name="itin_restore_blocked">No free time left on Day %1$d — move or remove something there first</string>
+    <string name="itin_status_moved">Moved %1$s to Day %2$d · %3$s</string>
+    <string name="itin_status_moved_swap">Moved %1$s to Day %2$d · %3$s (swapped with %4$s)</string>
+    <string name="itin_status_removed">Removed %1$s from Day %2$d</string>
+    <string name="itin_status_restored">Restored %1$s</string>
+    <string name="itin_status_undo">Undid the last change</string>
+    <string name="itin_status_reset">Itinerary reset to the original order</string>
+
+    <!-- Trip Health Check -->
+    <string name="health_unavailable">Health check unavailable for this plan — try re-running the search.</string>
+    <string name="health_green">Looking solid</string>
+    <string name="health_amber">Needs attention</string>
+    <string name="health_red">At risk</string>
+    <string name="health_score_a11y">Health score: %1$d/100, %2$s</string>
+    <string name="health_caption">Adversarial review of your itinerary, flights, visa timeline, weather and budget.</string>
+    <string name="health_original">Checked against the original itinerary — your moves aren\'t re-checked.</string>
+    <string name="health_edited">Checked against your edited itinerary</string>
+    <string name="health_stale">Your plan changed since this check — re-check again</string>
+    <string name="health_recheck">Re-check my edited plan</string>
+    <string name="health_rechecking">Re-checking…</string>
+    <string name="health_recheck_error">Couldn\'t re-check — try again</string>
+    <string name="health_no_issues">No issues found — this plan held up under scrutiny.</string>
+    <string name="health_high">High</string>
+    <string name="health_medium">Medium</string>
+    <string name="health_low">Low</string>
+    <string name="health_day">Day %1$d</string>
+    <string name="health_suggestion">💡 %1$s</string>
+
+    <!-- Packing list -->
+    <string name="packing_unavailable">Packing list unavailable — try re-running the search.</string>
+    <plurals name="packing_counter">
+        <item quantity="one">%1$d/%2$d item packed</item>
+        <item quantity="other">%1$d/%2$d items packed</item>
+    </plurals>
+    <string name="packing_save">Save to Plan</string>
+    <string name="packing_saved">Saved to Plan · Remove</string>
+    <string name="packing_saved_a11y">Saved to Plan. Remove the packing list from My Plan</string>
+    <string name="packing_add_item">Add item…</string>
+    <string name="packing_add_item_a11y">Add item to %1$s</string>
+    <string name="packing_essential_footnote">* = essential items</string>
+    <string name="packing_essential_a11y">%1$s, essential</string>
+    <string name="packing_luggage">🧳 %1$s</string>
+</resources>
