@@ -47,7 +47,7 @@ annotation class DefaultHttp
 @Retention(AnnotationRetention.BINARY)
 annotation class AiHttp
 
-/** SSE: no read or call timeout. */
+/** SSE: 300 s idle read timeout ([NetworkModule.STREAM_IDLE_SECONDS]), no call timeout. */
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class StreamingHttp
@@ -58,6 +58,12 @@ object NetworkModule {
     private const val CONNECT_SECONDS = 15L
     private const val READ_SECONDS = 30L
     private const val AI_READ_SECONDS = 300L
+
+    /**
+     * SSE idle read timeout: above the backend's longest silent phase (240 s per agent, no keepalives in
+     * Phase 1), so a half-open connection ends as Interrupted (retried once) instead of hanging (review I2).
+     */
+    const val STREAM_IDLE_SECONDS = 300L
 
     @Provides @Singleton
     fun json(): Json = TravelJson
@@ -97,7 +103,7 @@ object NetworkModule {
     fun streamingOkHttp(
         @DefaultHttp base: OkHttpClient,
     ): OkHttpClient =
-        base.newBuilder().readTimeout(Duration.ZERO).callTimeout(Duration.ZERO).build()
+        base.newBuilder().readTimeout(Duration.ofSeconds(STREAM_IDLE_SECONDS)).callTimeout(Duration.ZERO).build()
 
     private fun retrofit(client: OkHttpClient, json: Json): Retrofit =
         Retrofit.Builder()
