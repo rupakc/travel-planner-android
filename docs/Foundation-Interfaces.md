@@ -408,7 +408,7 @@ interface CurrentPlanStore {
 
     fun rename(name: String)
 
-    /** Records the search behind the draft and the latest sections (`{"flights":{…}}`). */
+    /** Records the search behind the draft and the latest sections (`{"flights":{…}}`); sets `searchKey`. */
     fun attachSearch(request: TravelSearchRequest, data: JsonObject?)
 
     /** Empties the draft (new, unsaved plan). */
@@ -417,7 +417,11 @@ interface CurrentPlanStore {
     /** Empties the draft and deletes it from storage (sign-out / user change; called by `SessionCleaner`). */
     suspend fun reset()
 
-    /** Loads a saved plan into the draft (via PlansRepository). */
+    /**
+     * Loads a saved plan into the draft (via PlansRepository): `searchRequest` and `searchKey` from the plan's
+     * `search_data`, and `searchData` with whatever sections the plan holds (normally just the `itinerary`
+     * snapshot) so Results can render it without a stream.
+     */
     suspend fun load(planId: Long): AppResult<PlanDraft>
 
     /**
@@ -434,7 +438,8 @@ interface CurrentPlanStore {
 ```
 
 `PlanDraft` (`….core.model.plan`): `planId: Long?`, `name: String?`, `searchRequest: TravelSearchRequest?`,
-`searchData: JsonObject?` (sections keyed by wire name), `selections: PlanSelections`, `dirty: Boolean`;
+`searchData: JsonObject?` (sections keyed by wire name), `selections: PlanSelections`, `dirty: Boolean`,
+`searchKey: String?` (= `searchRequest.searchKey()`; set by `attachSearch`/`load`, null after `newPlan`);
 `PlanDraft.DEFAULT_NAME = "My Trip Plan"`.
 
 `PlanItem` (sealed, `….core.model.plan`): `FlightItem(flight)` (with `leg_index` → one per leg in `flights`),
@@ -483,6 +488,18 @@ gives the `{"flights":{…}}` object for chat `search_results` and `CurrentPlanS
   `TasteProfile`, `RecentSearch`, `AppSettings`, `ThemeMode`, `TravellerProfile`, `FeatureOverrides`, `Session`.
 
 ## 4b. API additions in fix round 1 (all additive)
+
+- `TravelSearchRequest.searchKey(): String` (`….core.model.search`) — stable id of a search (normalised request hash).
+  Results: the stream belongs to the draft when `state.request?.searchKey() == draft.searchKey`.
+- `PlanDraft.searchKey: String? = null`. `CurrentPlanStore.load(id)` now also fills `searchRequest`, `searchKey` and
+  `searchData`. A saved plan's `search_data` is the request (web parity), so `searchData` normally holds only
+  `itinerary` (from `selections.itinerary`, written on save) — other sections are not stored with plans; any section
+  objects found in `search_data` are restored too. `searchData` is null when nothing is recoverable.
+- `SessionStore.lastServer()` (core-internal): local data is wiped when a login's user **or** server differs from the
+  last session's, and on every Settings → Server change (signed in or not).
+- Session storage never crashes: a broken Keystore keeps the session in memory for the process (signed in until the
+  app is killed); unreadable data reads as signed out; storage failures in `login`/`changePassword` return `Failure`.
+  Expiry is re-checked against the wall clock at least every 30 s of awake time (`EncryptedSessionStore.EXPIRY_TICK_MS`).
 
 - `Session(token, user, baseUrl: String? = null)` — issuing backend.
 - `CurrentPlanStore.reset()` (suspend) — empty the draft and its storage.

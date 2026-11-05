@@ -12,6 +12,7 @@ import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionRules
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.plan.SharedPlan
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -104,7 +105,7 @@ class FakeCurrentPlanStore(private val plans: PlansRepository = FakePlansReposit
     override fun rename(name: String) = state.update { it.copy(name = name, dirty = true) }
 
     override fun attachSearch(request: TravelSearchRequest, data: JsonObject?) =
-        state.update { it.copy(searchRequest = request, searchData = data) }
+        state.update { it.copy(searchRequest = request, searchData = data, searchKey = request.searchKey()) }
 
     override fun newPlan() {
         state.value = PlanDraft()
@@ -116,7 +117,13 @@ class FakeCurrentPlanStore(private val plans: PlansRepository = FakePlansReposit
 
     override suspend fun load(planId: Long): AppResult<PlanDraft> =
         plans.get(planId).map {
-            PlanDraft(planId = it.id, name = it.name, searchRequest = it.searchRequest, selections = it.selections).also { d ->
+            PlanDraft(
+                planId = it.id,
+                name = it.name,
+                searchRequest = it.searchRequest,
+                selections = it.selections,
+                searchKey = it.searchRequest?.searchKey(),
+            ).also { d ->
                 state.value = d
             }
         }

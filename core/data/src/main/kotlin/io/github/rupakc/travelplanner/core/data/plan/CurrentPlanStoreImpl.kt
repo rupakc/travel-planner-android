@@ -17,6 +17,8 @@ import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionRules
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.plan.SelectionKeys
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
+import io.github.rupakc.travelplanner.core.model.section.SectionId
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
@@ -83,10 +85,10 @@ class CurrentPlanStoreImpl
         override fun rename(name: String) = state.update { it.copy(name = name, dirty = true) }
 
         override fun attachSearch(request: TravelSearchRequest, data: JsonObject?) =
-            state.update { it.copy(searchRequest = request, searchData = data) }
+            state.update { it.copy(searchRequest = request, searchData = data, searchKey = request.searchKey()) }
 
         override fun newPlan() {
-            state.value = PlanDraft()
+            state.value = PlanDraft() // searchKey = null
         }
 
         override suspend fun reset() {
@@ -101,7 +103,16 @@ class CurrentPlanStoreImpl
             restoreJob.join()
             return mutex.withLock {
                 plansRepository.get(planId).map { plan ->
-                    PlanDraft(planId = plan.id, name = plan.name, searchRequest = plan.searchRequest, selections = plan.selections, dirty = false)
+                    val request = plan.searchRequest
+                    PlanDraft(
+                        planId = plan.id,
+                        name = plan.name,
+                        searchRequest = request,
+                        searchData = sectionsOf(plan),
+                        selections = plan.selections,
+                        dirty = false,
+                        searchKey = request?.searchKey(),
+                    )
                 }.onSuccess { loaded -> state.value = loaded }
             }
         }
@@ -140,6 +151,22 @@ class CurrentPlanStoreImpl
 
         override fun restore(snapshot: PlanDraft) {
             state.value = snapshot
+        }
+
+        /**
+         * Sections recoverable from a saved plan, in the stream-snapshot shape (`{"itinerary":{…},…}`).
+         * A saved plan's `search_data` is the request (web parity), so normally only the itinerary snapshot
+         * (`selections.itinerary`, written on save) is available; any section objects found in `search_data`
+         * (keys that are section wire names) are taken too. Null when nothing is recoverable.
+         */
+        private fun sectionsOf(plan: Plan): JsonObject? {
+            val sections =
+                buildJsonObject {
+                    plan.searchData.forEach { (key, value) -> if (SectionId.fromWire(key) != null && value is JsonObject) put(key, value) }
+                    val itinerary = plan.selections.itinerarySnapshot
+                    if (itinerary != null && SelectionKeys.ITINERARY !in plan.searchData) put(SelectionKeys.ITINERARY, itinerary)
+                }
+            return sections.takeIf { it.isNotEmpty() }
         }
 
         /** Web parity: on save the live itinerary is snapshotted into `selections.itinerary` so a saved plan is self-contained. */

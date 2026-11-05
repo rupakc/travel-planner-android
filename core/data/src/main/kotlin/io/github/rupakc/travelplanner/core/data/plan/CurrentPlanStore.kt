@@ -25,7 +25,7 @@ interface CurrentPlanStore {
 
     fun rename(name: String)
 
-    /** Records the search behind the draft and the latest sections (`{"flights":{…}}`). */
+    /** Records the search behind the draft and the latest sections (`{"flights":{…}}`); sets `searchKey`. */
     fun attachSearch(request: TravelSearchRequest, data: JsonObject?)
 
     /** Empties the draft (new, unsaved plan). */
@@ -34,7 +34,11 @@ interface CurrentPlanStore {
     /** Empties the draft and deletes it from storage (sign-out / user change; called by `SessionCleaner`). */
     suspend fun reset()
 
-    /** Loads a saved plan into the draft (via PlansRepository). */
+    /**
+     * Loads a saved plan into the draft (via PlansRepository): `searchRequest` and `searchKey` from the plan's
+     * `search_data`, and `searchData` with whatever sections the plan holds (normally just the `itinerary`
+     * snapshot) so Results can render it without a stream.
+     */
     suspend fun load(planId: Long): AppResult<PlanDraft>
 
     /**
