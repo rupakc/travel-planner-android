@@ -120,6 +120,12 @@ data class PriceSuggestion(
     val title: String? = null,
     val subtitle: String? = null,
     val price: LenientDouble = null,
+    /** Currency of [price] (the listing's own; backend `_suggestion` in the hotel and activity price sources). */
+    val currency: String? = null,
+    /** Wording after the price, e.g. "per person" (activities). */
+    @SerialName("price_label") val priceLabel: String? = null,
+    /** Hotels: nightly rate next to the whole-stay [price]. */
+    val nightly: LenientDouble = null,
     val link: String? = null,
     /** Send back as-is to watch this one instead. */
     val spec: JsonObject? = null,

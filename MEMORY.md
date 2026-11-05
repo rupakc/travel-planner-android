@@ -91,6 +91,19 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 (Team E) Sections inside the results LazyColumn lay items out with Column/FlowRow + a 1/2-column adaptive grid (nested vertical lazy lists are not allowed); Weather uses LazyRow with keys.
 - 2026-11-05 (Team E) Emergency card "Print Card" becomes "Share card" (plain text via the share sheet) — works offline and on every device; numbers are tap-to-dial with ACTION_DIAL (no CALL_PHONE permission).
 - 2026-11-05 (Team E) Itinerary reorder is menu-only (Move → day/time, swaps); no long-press drag and no trip map yet (no map library in the app).
+- 2026-11-05 Watch utils ported to `core:domain/alerts` return typed values (enums/sealed) and the UI words them from strings.xml — web copy, translatable; tests mirror the web suites.
+- 2026-11-05 Watch dialogs: UI-free controllers in `core:domain` (repository calls passed as lambdas) + stateless bottom sheets in `core:ui/watch` — core:ui has no core:data dependency, and Results / My Plan host them from their own ViewModels.
+- 2026-11-05 Alerts delete = hide at once + Undo snackbar (6 s); the DELETE goes out on the application scope when the snackbar closes or the screen goes, so it is never lost.
+- 2026-11-05 Alerts "Re-plan" starts the search directly (`SearchRepository.start`) and opens Results; the web pre-fills the form instead (the app has no shared pending-form state).
+- 2026-11-05 Trip reminders use the device's zone wall clock: 09:00 a week before, 18:00 the day before, 08:00 each trip morning (first = "trip starts today" with Itinerary / Emergency card / Near me actions, both plan links open the plan), 08:00 return day; up to 31 days. Rescheduled from the cached plans flow (every save/delete) and on BOOT_COMPLETED / MY_PACKAGE_REPLACED.
+- 2026-11-05 Notification toggles off = alerts are still marked seen (no flood when turned back on); nearby suggestions need `notify_nearby`, and outside trip dates also `notify_nearby_always` (new key).
+- 2026-11-05 Nearby worker uses the last known location only (never turns GPS on in the background), every 4 h with battery-not-low; trip dates from the current plan draft or any saved plan.
+- 2026-11-05 Near me sends profile-derived interests (quiz answers that are web interest ids) only when server Preferences have none; "Why this?" lists only interests named by the item's category/name/description.
+- 2026-11-05 Push is data-only (backend push.py ruling): the app always builds the notification (`PushAlertHandler`): mark seen first, honour the Price alerts toggle, Price alerts channel, tap → `travelplanner://alerts?…` from `link`. MainActivity also maps a `link` extra (older servers).
+- 2026-11-05 Poll baseline per user (SharedPreferences, cleared on sign-out): the first poll after sign-in marks existing unread alerts seen without posting them. Check now and the inbox mark what they show as seen.
+- 2026-11-05 Trip reminders: diff, don't cancel-all (KEEP unchanged unique names, cancel removed ones); a reminder overdue by ≤ 2 h today still fires (zero delay); a posted-names log stops repeats; TIMEZONE_CHANGED / TIME_SET re-time all (REPLACE) using the zone at call time.
+- 2026-11-05 No background location: Near me stores its last fix as a 0.05° cell centre with a timestamp (DataStore `last_location`, excluded from backup, cleared on sign-out); the nearby worker uses it only if under 24 h old. The nearby channel description and Near me screen say so.
+- 2026-11-05 (integration, security S-I1/S-M5) SessionCleaner also forgets the last Near me location and runs every `@IntoSet UserStateCleaner` (core:notifications contributes the alert-poll baseline reset). G's per-DAO logout list was dropped in favour of SessionCleaner; chat stays per user. `alert_poll`, `trip_reminders` and `nearby_notifications` prefs are excluded from backup and device transfer.
 
 ## Documentation and tooling
 

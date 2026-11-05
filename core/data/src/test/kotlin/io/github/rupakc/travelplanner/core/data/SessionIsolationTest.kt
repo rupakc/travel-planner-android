@@ -9,11 +9,13 @@ import io.github.rupakc.travelplanner.core.data.impl.SessionCleanerImpl
 import io.github.rupakc.travelplanner.core.data.impl.SettingsRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.repository.PushTokenSource
 import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
+import io.github.rupakc.travelplanner.core.data.repository.UserStateCleaner
 import io.github.rupakc.travelplanner.core.database.PlanDao
 import io.github.rupakc.travelplanner.core.database.RecentSearchDao
 import io.github.rupakc.travelplanner.core.database.SeenNotificationDao
 import io.github.rupakc.travelplanner.core.model.auth.LoginResponse
 import io.github.rupakc.travelplanner.core.model.auth.User
+import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
@@ -28,6 +30,7 @@ import io.github.rupakc.travelplanner.core.network.BaseUrlProvider
 import io.github.rupakc.travelplanner.core.network.api.AuthApi
 import io.github.rupakc.travelplanner.core.network.api.DevicesApi
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
+import io.github.rupakc.travelplanner.core.testing.fake.FakeLastLocationStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSessionStore
@@ -84,7 +87,17 @@ class SessionIsolationTest {
             val planDao = mockk<PlanDao>(relaxed = true)
             val recent = mockk<RecentSearchDao>(relaxed = true)
             val seen = mockk<SeenNotificationDao>(relaxed = true)
-            val cleaner = SessionCleanerImpl(plan, search, NearbyRepositoryImpl(mockk(), SystemAppClock()), planDao, recent, seen, FakeProfileRepository())
+            val cleaner =
+                SessionCleanerImpl(
+                    plan,
+                    search,
+                    NearbyRepositoryImpl(mockk(), SystemAppClock(), FakeLastLocationStore()),
+                    planDao,
+                    recent,
+                    seen,
+                    emptySet(),
+                    FakeProfileRepository(),
+                )
             cleaner.clearUserData()
             assertNull(plan.draft.value.selections.hotel)
             assertEquals(StreamPhase.IDLE, search.current.value.phase)
@@ -108,10 +121,11 @@ class SessionIsolationTest {
             SessionCleanerImpl(
                 FakeCurrentPlanStore(),
                 FakeSearchRepository(),
-                NearbyRepositoryImpl(mockk(), SystemAppClock()),
+                NearbyRepositoryImpl(mockk(), SystemAppClock(), FakeLastLocationStore()),
                 mockk(relaxed = true),
                 mockk(relaxed = true),
                 mockk(relaxed = true),
+                emptySet(),
                 profile,
             ).clearUserData()
             assertEquals(TravellerProfile(), profile.profileState.value)
@@ -129,10 +143,11 @@ class SessionIsolationTest {
             SessionCleanerImpl(
                 plan,
                 FakeSearchRepository(),
-                NearbyRepositoryImpl(mockk(), SystemAppClock()),
+                NearbyRepositoryImpl(mockk(), SystemAppClock(), FakeLastLocationStore()),
                 planDao,
                 mockk(relaxed = true),
                 seen,
+                emptySet(),
                 FakeProfileRepository(),
             )
                 .clearUserData()
@@ -166,16 +181,68 @@ class SessionIsolationTest {
             assertEquals(0, cleaner.calls)
         }
 
-    private fun cleanerFor(plan: FakeCurrentPlanStore) =
-        SessionCleanerImpl(
-            plan,
-            FakeSearchRepository(),
-            NearbyRepositoryImpl(mockk(), SystemAppClock()),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            FakeProfileRepository(),
-        )
+    private fun cleanerFor(
+        plan: FakeCurrentPlanStore,
+        location: FakeLastLocationStore = FakeLastLocationStore(),
+        extra: Set<UserStateCleaner> = emptySet(),
+    ) = SessionCleanerImpl(
+        plan,
+        FakeSearchRepository(),
+        NearbyRepositoryImpl(mockk(), SystemAppClock(), location),
+        mockk(relaxed = true),
+        mockk(relaxed = true),
+        mockk(relaxed = true),
+        extra,
+        FakeProfileRepository(),
+    )
+
+    private fun lisbon() = FakeLastLocationStore().apply { cell = LocationCell(38.725, -9.125, 0L) }
+
+    @Test
+    fun `cleaner forgets the last Near me location and runs contributed cleaners`() =
+        runTest {
+            val location = lisbon()
+            var baselineCleared = 0
+            cleanerFor(FakeCurrentPlanStore(), location, setOf(UserStateCleaner { baselineCleared++ })).clearUserData()
+            assertNull(location.cell)
+            assertEquals(1, baselineCleared)
+        }
+
+    @Test
+    fun `logout, a different-user login and a server switch all forget the last location`() =
+        runTest {
+            // Logout.
+            val onLogout = lisbon()
+            auth(FakeSessionStore(Session("t", User("alice"))), cleanerFor(FakeCurrentPlanStore(), onLogout)).logout()
+            assertNull(onLogout.cell)
+
+            // Login as somebody else after a token expiry.
+            val onOtherUser = lisbon()
+            val expired = FakeSessionStore(Session("expired", User("alice")))
+            val repo = auth(expired, cleanerFor(FakeCurrentPlanStore(), onOtherUser), authApi = loginApi())
+            expired.state.value = null
+            repo.login("bob", "pw")
+            assertNull(onOtherUser.cell)
+
+            // Same user again keeps it (nothing to protect against).
+            val sameUser = lisbon()
+            val again = FakeSessionStore(Session("expired", User("alice")))
+            val repoAgain = auth(again, cleanerFor(FakeCurrentPlanStore(), sameUser), authApi = loginApi())
+            again.state.value = null
+            repoAgain.login("alice", "pw")
+            assertEquals(38.725, sameUser.cell?.lat ?: 0.0, 0.0)
+
+            // Server switch.
+            val onServer = lisbon()
+            val settings = FakeSettingsStore(AppSettings())
+            SettingsRepositoryImpl(
+                settings,
+                BaseUrlProvider(settings, buildInfo),
+                FakeSessionStore(Session("t", User("alice"))),
+                cleanerFor(FakeCurrentPlanStore(), onServer),
+            ).setBaseUrl("http://192.168.1.10:8001")
+            assertNull(onServer.cell)
+        }
 
     private fun loginApi(): AuthApi =
         mockk<AuthApi>().also { api ->

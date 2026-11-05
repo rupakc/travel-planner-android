@@ -8,6 +8,7 @@ import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.notifications.NotificationChannels
+import io.github.rupakc.travelplanner.core.notifications.NotificationsInitializer
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -15,6 +16,8 @@ class TravelPlannerApplication :
     Application(),
     Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject lateinit var notifications: NotificationsInitializer
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
@@ -37,5 +40,7 @@ class TravelPlannerApplication :
             StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectLeakedClosableObjects().detectActivityLeaks().penaltyLog().build())
         }
         NotificationChannels.createAll(this)
+        // Alert poll, trip reminders, nearby worker and FCM registration (all off the main thread).
+        notifications.start()
     }
 }
