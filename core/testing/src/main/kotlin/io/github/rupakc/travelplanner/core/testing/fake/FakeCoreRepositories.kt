@@ -186,6 +186,11 @@ class FakeChatRepository(var replies: List<ChatEvent> = Fixtures.chatEvents(Fixt
             all.filter { it.threadId == threadId }
         }
 
+    override fun threadIdsMatching(query: String): Flow<Set<Long>> =
+        messageState.map { all ->
+            if (query.isBlank()) emptySet() else all.filter { it.content.contains(query.trim(), ignoreCase = true) }.map { it.threadId }.toSet()
+        }
+
     override suspend fun createThread(title: String): Long {
         val id = nextId++
         threadState.value = listOf(ChatThread(id, title, 0, 0)) + threadState.value

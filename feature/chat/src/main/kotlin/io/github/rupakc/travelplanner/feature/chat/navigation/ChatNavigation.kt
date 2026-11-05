@@ -1,27 +1,29 @@
 package io.github.rupakc.travelplanner.feature.chat.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import io.github.rupakc.travelplanner.core.model.navigation.ChatRoute
-import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
-import io.github.rupakc.travelplanner.core.ui.PlaceholderAction
-import io.github.rupakc.travelplanner.feature.chat.R
+import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ChatRoute as ChatDestination
+import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
+import io.github.rupakc.travelplanner.feature.chat.ChatRoute
 
-/** [onOpenImport] handles the `import_link` event (route to Search "From a link"). */
-@Suppress("UnusedParameter", "UNUSED_PARAMETER") // callbacks reserved for the feature team
-fun NavGraphBuilder.chatGraph(onOpenImport: (url: String) -> Unit) {
-    composable<ChatRoute> { ChatScreen() }
-}
-
-@Composable
-internal fun ChatScreen(modifier: Modifier = Modifier) {
-    FeaturePlaceholder(
-        title = stringResource(R.string.chat_title),
-        message = stringResource(R.string.chat_message),
-        modifier = modifier,
-        showTopBar = false,
-    )
+/**
+ * Chat graph. [onOpenImport] handles `import_link` (Search "From a link" with the URL),
+ * [onOpenMyPlan] opens the shared My Plan (owned by the plan feature) and [onOpenPlan]
+ * opens a plan just saved from a chat itinerary.
+ */
+fun NavGraphBuilder.chatGraph(
+    onOpenImport: (url: String) -> Unit,
+    onOpenMyPlan: () -> Unit = {},
+    onOpenPlan: (planId: Long) -> Unit = {},
+) {
+    composable<ChatDestination>(deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.CHAT_PATTERN })) { entry ->
+        ChatRoute(
+            threadId = entry.toRoute<ChatDestination>().threadId,
+            onOpenImport = onOpenImport,
+            onOpenMyPlan = onOpenMyPlan,
+            onOpenPlan = onOpenPlan,
+        )
+    }
 }

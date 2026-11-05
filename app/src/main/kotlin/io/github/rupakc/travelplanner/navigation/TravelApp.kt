@@ -46,6 +46,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
+import io.github.rupakc.travelplanner.core.model.navigation.MyPlanRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
 import io.github.rupakc.travelplanner.core.model.navigation.OnboardingRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlanDetailRoute
@@ -125,11 +126,15 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 onPlanTrip = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
                 onOpenTrips = { navController.navigateToTopLevel(TopLevelDestination.PLANS) },
             )
-            chatGraph(onOpenImport = { url ->
-                navController.navigate(
-                    SearchRoute(mode = io.github.rupakc.travelplanner.core.model.navigation.SearchModes.IMPORT, importUrl = url),
-                )
-            })
+            chatGraph(
+                onOpenImport = { url ->
+                    navController.navigate(
+                        SearchRoute(mode = io.github.rupakc.travelplanner.core.model.navigation.SearchModes.IMPORT, importUrl = url),
+                    )
+                },
+                onOpenMyPlan = { navController.navigate(MyPlanRoute) },
+                onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
+            )
             alertsGraph(onReplan = {
                 navController.navigateToTopLevel(TopLevelDestination.SEARCH)
             }, onBack = { navController.popBackStack() })
