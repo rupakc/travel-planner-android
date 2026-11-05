@@ -21,9 +21,9 @@
       "Bash(adb shell pm list packages:*)",
       "Bash(adb shell dumpsys:*)",
       "Bash(git status:*)",
-      "Bash(git diff:*)",
       "Bash(git log:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch --list:*)",
+      "Bash(git branch --show-current)"
     ],
     "deny": [
       "Bash(./gradlew --stop:*)",

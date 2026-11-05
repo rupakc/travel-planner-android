@@ -34,7 +34,7 @@ jobs:
       - name: Copy pages
         run: |
           # Wiki pages are flat: copy top-level TitleCase pages only (reference/ and superpowers/ stay in the repo).
-          find wiki -maxdepth 1 -name '*.md' -delete
+          find wiki -maxdepth 1 -name '*.md' ! -name '_*' -delete  # keep wiki-only _Sidebar/_Footer
           cp docs/[A-Z]*.md wiki/
           # Page links in docs are relative file links ("Architecture.md"); the wiki wants page names.
           sed -i -E 's/\]\(([A-Z][A-Za-z-]*)\.md(#[^)]*)?\)/](\1\2)/g' wiki/*.md

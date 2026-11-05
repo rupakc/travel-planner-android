@@ -29,8 +29,22 @@ Failures: reports are under `*/build/reports/` (tests, lint, detekt). Robolectri
 
 ## 3. Emulator smoke run against the local backend (optional, for UI changes)
 
-1. Backend: in `~/travel-planner` run `./start.sh` (port 8001); confirm `curl -s localhost:8001/health`. Use an isolated `DATA_DIR` and the fake SerpAPI; do not spend the real SerpAPI quota.
-2. Emulator: `$ANDROID_HOME/emulator/emulator -list-avds`, start one, `adb wait-for-device`.
-3. `$G installLocalDebug && adb shell am start -n io.github.rupakc.travelplanner.local/io.github.rupakc.travelplanner.MainActivity` (check the exact id with `adb shell pm list packages | grep travelplanner`).
-4. Sign in with a test user, run a search, watch sections stream, add an item to My Plan, save, open `adb shell am start -a android.intent.action.VIEW -d "travelplanner://nearby"` to check deep links.
-5. `adb logcat -s AndroidRuntime StrictMode` for crashes; `adb exec-out screencap -p > shot.png` for screenshots (light and dark: `adb shell cmd uimode night yes|no`).
+Full explanation: `docs/Testing.md` ("End to end"). Scripts: `tools/e2e/fake_serpapi.py`, `tools/e2e/run_backend.py`. `$WEB` = the travel-planner web repo.
+
+1. Fake SerpAPI and backend (never the real key):
+   ```bash
+   WEB=~/travel-planner; ANDROID=$PWD; echo 1.0 > /tmp/tp-e2e-scale
+   python3 -I tools/e2e/fake_serpapi.py $WEB/backend/tests/fixtures/serpapi /tmp/tp-e2e-scale 9100 &
+   (cd $WEB/backend && DATA_DIR=/tmp/tp-e2e ADMIN_PASSWORD='e2e-Test-Pass1' SERPAPI_KEY=fake RATE_LIMIT_ENABLED=false \
+      python3 $ANDROID/tools/e2e/run_backend.py http://127.0.0.1:9100/search 8001) &
+   curl -s localhost:8001/health
+   ```
+2. Create a test user with the admin account (`admin` / the ADMIN_PASSWORD above) via `POST /api/admin/users`.
+3. Emulator: `$ANDROID_HOME/emulator/emulator -list-avds`, start one, `adb wait-for-device`; it reaches the backend at `http://10.0.2.2:8001` (the `local` default).
+4. `$G installLocalDebug && adb shell am start -n io.github.rupakc.travelplanner.local.debug/io.github.rupakc.travelplanner.MainActivity`
+   (application id = `io.github.rupakc.travelplanner` + `.local` flavour suffix + `.debug` build-type suffix).
+5. Sign in, run a search, watch sections stream, add an item to My Plan, save. Deep link check: `adb shell am start -a android.intent.action.VIEW -d "travelplanner://nearby"`.
+6. `adb logcat -d -s AndroidRuntime StrictMode` for crashes; `adb exec-out screencap -p > shot.png`; dark mode `adb shell cmd uimode night yes|no`.
+7. Clean up: stop the two background processes and remove `/tmp/tp-e2e`, `/tmp/tp-e2e-scale`.
+
+Note: `$G ...` commands in this skill do not match the settings.json allow-list patterns, so they prompt; that is intended for builds.

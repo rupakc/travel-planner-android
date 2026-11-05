@@ -52,7 +52,7 @@ Implemented by `SseParser` (pure, unit-tested) over `data:` lines as the backend
 | `NotFound`, `Forbidden`, `Server` | 404, 403, 5xx | message or own string with Retry |
 | `Network`, `Interrupted`, `Decoding`, `NotConfigured` | I/O, cut stream, bad JSON, no base URL | own strings |
 
-Rate limits are per user (or IP when anonymous) in 10-minute windows; defaults are in [Scaling](Scaling.md) and the backend's `docs/Configuration.md`.
+Rate limits are per user (or IP when anonymous) in 10-minute windows; defaults (search 10, chat 30, compare 30, discover 10, light_ai 60) are in [Scaling](Scaling.md) and the backend's `docs/Configuration.md`.
 Chat-triggered full plans over the search limit produce an in-stream message, not a 429.
 
 ## Retries

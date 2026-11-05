@@ -25,7 +25,5 @@ Shipped locales: `en` (default) and `es`. The per-app language list is `app/src/
 
 - Per-app language: Android 13+ Settings -> System -> Languages -> App languages -> Voyager; Settings -> Appearance in the app stores the tag
   (`SettingsRepository.setLocaleTag`).
-- Pseudo-locales: not enabled in the shipped build (they would need `pseudoLocalesEnabled` in a debug build type). To try one locally add
-  `isPseudoLocalesEnabled = true` to the debug build type, then pick "English (XA)" or "Arabic (XB)" in system language settings to see
-  expansion and RTL. Planned as a permanent debug option; not yet configured.
+- Pseudo-locales: enabled on the debug build type (`isPseudoLocalesEnabled = true` in `AndroidApplicationConventionPlugin`). In a debug build pick "English (XA)" (accented, expanded text) or "Arabic (XB)" (RTL) in system language settings.
 - Font scale: set to 200 % and walk the screen ([Accessibility](Accessibility.md)).

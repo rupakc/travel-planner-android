@@ -27,7 +27,7 @@ The token is stored unencrypted in the app-private directory (decision in [MEMOR
 - Plans are offline-first: `PlansRepository.plans` / `plan(id)` read Room; network calls refresh it.
 - Result items and plan selections keep their original JSON (`RawBacked`, `extras` for unknown keys), so a plan saved on the web and re-saved on the phone loses nothing.
 - Logout clears plans, recent searches, seen notifications, the draft and chat caches.
-- Near-me results are cached for 1 hour per roughly 5 km cell (spec section 8; lands with the Near me team).
+- Near-me results are cached in memory (not Room) for 1 hour per roughly 5 km cell (0.05 degree grid) in `NearbyRepository`; the cache is lost with the process.
 - Search results are held in memory (`SearchRepository.current`), not persisted; the 30-minute server cache makes a repeat search cheap.
 
 ## CurrentPlanStore

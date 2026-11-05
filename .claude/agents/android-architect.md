@@ -1,7 +1,7 @@
 ---
 name: android-architect
 description: Designs module boundaries, repositories, navigation and data flow for new Android features in this repo. Use before building a feature or when a change crosses modules.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 model: opus
 ---
 

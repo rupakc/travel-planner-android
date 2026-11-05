@@ -22,7 +22,7 @@ Parity with the traveller-facing web flows, plus what a phone is good at (design
 - Chat with plan commands, streamed.
 - Alerts: fare and hotel/activity/trip price watches, notification inbox.
 - Traveller-type onboarding, a personalised Home and per-feature visibility (device-local).
-- Notifications: local WorkManager polling now, Firebase Cloud Messaging wired but inert until configured.
+- Notifications: channels and an in-app inbox now; WorkManager polling and trip reminders are planned; Firebase Cloud Messaging is wired but inert until configured.
 - Near me recommendations, public share-link viewer (deep link), English and Spanish, dark theme, dynamic colour.
 - Booking is always "open the provider's page in a Custom Tab"; there are no in-app payments.
 
@@ -67,7 +67,7 @@ Requirements: JDK 21 (Temurin), Android SDK with platforms 36 and 37 (compileSdk
 
 ```bash
 export JAVA_HOME=/path/to/jdk-21 ANDROID_HOME=$HOME/Library/Android/sdk
-echo "sdk.dir=$ANDROID_HOME" > local.properties
+test -f local.properties || echo "sdk.dir=$ANDROID_HOME" > local.properties
 ./gradlew assembleLocalDebug
 ```
 
@@ -75,6 +75,8 @@ echo "sdk.dir=$ANDROID_HOME" > local.properties
 2. Emulator: the `local` flavour already points at `http://10.0.2.2:8001` (the emulator's alias for the host).
 3. Physical phone on your LAN: open Settings -> Server and enter `http://<your-computer-LAN-IP>:8001`.
 4. Sign in with an account an admin created on the backend.
+
+Installed application ids: `io.github.rupakc.travelplanner.local.debug` (`localDebug`), `io.github.rupakc.travelplanner` (`prodRelease`).
 
 Push notifications are optional: they need `app/google-services.json` ([Firebase-Setup](docs/Firebase-Setup.md), written by the push team).
 

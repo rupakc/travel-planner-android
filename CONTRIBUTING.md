@@ -11,7 +11,7 @@ Follow the quick start in [README.md](README.md). You need JDK 21 and the Androi
 1. Branch from `main` (`feat/<topic>` or `fix/<topic>`). Keep PRs small and focused.
 2. Write the test first, then the code. No network in tests; use the fakes in `core:testing` ([Testing](docs/Testing.md)).
 3. Run the full check before pushing (same as CI):
-   `./gradlew spotlessApply && ./gradlew spotlessCheck detekt lintLocalDebug testLocalDebugUnitTest assembleLocalDebug`
+   `./gradlew spotlessApply && ./gradlew spotlessCheck detekt lintLocalDebug testLocalDebugUnitTest assembleLocalDebug assembleProdRelease`
    and `scripts/check-doc-links.sh` if you touched docs.
 4. Open a PR using the template; attach light and dark screenshots for UI changes.
 
