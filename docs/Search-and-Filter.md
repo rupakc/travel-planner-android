@@ -18,5 +18,12 @@ The budget planner is client-side and checks already-loaded results; only "Find 
 
 ## Searching lists in the app
 
-Saved plans (My trips) and watches support text search and filters over the locally cached lists (Room for plans), so they work offline.
-Planned - lands with the plan and alerts teams; this page is updated in the accuracy pass.
+All of these search the lists already on the device, so they work offline and never call the API:
+
+- **Global search** (top bar, `GlobalSearchRoute`; logic in `core:domain` `globalsearch/GlobalSearch.kt`): one box over saved trips,
+  chat threads, recent searches, features and Settings entries, ranked and grouped by kind, with filter chips that show each kind's count.
+- **My trips** (`feature:plan`, `TripQuery`): text search over name and destination (accent- and case-insensitive), Upcoming / Past / All,
+  "Shared only", and sort by trip date or last update, over the Room-cached plans.
+- **Alerts** (`feature:alerts`): kind tabs (`AlertTab`: All, Flights, Hotels, Activities, Trips) plus text search over each watch's
+  route, airport codes, title and subtitle, over the loaded watches.
+- **Chat threads** (`feature:chat`): search by title and by message text (Room `LIKE` over the user's own threads).

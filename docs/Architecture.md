@@ -45,9 +45,10 @@ feature goes through lambdas the feature's graph function receives; `app` turns 
 
 ## Dependency injection
 
-Hilt (KSP). `app` is the graph root. Modules: `NetworkModule` (three OkHttp clients and the Retrofit APIs),
-`DataModule` (repository bindings), `DataStoreModule`, the Room module, `NotifierModule` and `PushModule`, `AppModule`.
-`@ApplicationScope` provides the long-lived coroutine scope (draft writes, push registration).
+Hilt (KSP). `app` is the graph root. Modules: `NetworkModule` (three OkHttp clients and the Retrofit APIs, built lazily),
+`DataModule` (repository bindings), `ProfileDomainModule` (feature catalogue), `DataStoreModule`, `DatabaseModule`,
+`ApplicationScopeModule`, `NotifierModule`, `PushModule`, `AlertPollModule`, `TripReminderModule`, `NearbyNotificationsModule`, `AppModule`.
+`@ApplicationScope` provides the long-lived coroutine scope (draft writes, push registration, the notifications start-up).
 
 ```mermaid
 flowchart TD
@@ -74,7 +75,7 @@ sequenceDiagram
     participant API as POST /api/search
     UI->>VM: onEvent(Submit)
     VM->>Repo: start(request)
-    Repo->>SSE: open stream (no read timeout)
+    Repo->>SSE: open stream (300 s idle read timeout, no call timeout)
     SSE->>API: POST TravelSearchRequest
     API-->>SSE: data: {"type":"visa",...} (static, instant)
     API-->>SSE: data: {"type":"flights",...} as each agent completes
@@ -94,6 +95,8 @@ replace-by-type, keeps old data when a later AI result is an error, and retries 
 | Concern | Location |
 |---|---|
 | Interfaces features build on | [Foundation-Interfaces](Foundation-Interfaces.md) |
-| Errors | `AppError` sealed hierarchy in `core:common`; backend `detail` is shown as-is |
+| Errors | `AppError` sealed hierarchy in `core:common`; backend `detail` is shown as-is; client-side failures carry no text (screens use their own strings) |
+| Itinerary arrange + schedule (web `itineraryLayout.js`, `schedule.js`) | One typed port in `core:domain` `itinerary/` (`ItineraryLayouts`, `ItinerarySchedule`, `PlanItinerary`), used by Results, My Plan, plan detail, the share viewer and the .ics export; rendered by `core:ui` `ItineraryDayCard` / `ItinerarySlotRow` |
+| Deep-link intake | `MainActivity` + `DeepLinkIntents` (sanitise) + `ShellViewModel` (replay after sign-in) in `app` |
 | Plan draft shared by results, chat and plan screens | `CurrentPlanStore` (`core:data`), persisted to Room |
 | Tolerant JSON | `TravelJson` in `core:model`; `RawBacked` keeps original JSON for lossless web round trips |

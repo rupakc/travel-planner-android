@@ -62,7 +62,10 @@ Never run `./gradlew --stop` or kill other Java processes. Run the backend with 
 - Search/chat SSE: do not throw inside the upstream flow (events get dropped); failures travel as values. Search retries once without `done`; chat ends on `done` or `planning_done`.
 - Icons: `material-icons-core` only.
 - Plan JSON round-trips losslessly with the web (`RawBacked`, `extras`): build items from the objects you received.
-- Admin API models exist but there is no admin UI (non-goal).
+- Admin API models exist but there is no admin UI (non-goal); R8 drops `AdminApi` from release (`verifyReleaseKeepRules` checks it).
+- `AppError.message` is backend text or null; client-side failures (`Decoding`, `Unknown`, `Network`) never carry exception text, so show your own string.
+- Itinerary logic has one port (`core:domain` `itinerary/`: `ItineraryLayouts`, `ItinerarySchedule`, `PlanItinerary`) and one renderer (`core:ui` `ItineraryDayCard`); the .ics export bridges to it and `PlanIcsParityTest` golden files must stay byte-identical.
+- `MainActivity` is exported: incoming intents go through `DeepLinkIntents.sanitize`; never read Navigation deep-link extras or non-`travelplanner://` data.
 
 ## Claude Code files
 

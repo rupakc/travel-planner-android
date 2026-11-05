@@ -113,6 +113,12 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 (integration, arch I3) One feature-visibility rule (core:data FeatureVisibility = A1's visibleFeatures) bound once with the catalogue/classifier in core:data; no @BindsOptionalOf FeatureCatalogue anywhere (supersedes the "keep @BindsOptionalOf" ruling).
 - 2026-11-05 (integration) Results watch buttons and trip detail "Watch whole trip" open Team G's sheets over their dialog controllers; nothing is created before the user confirms (web dialogs).
 - 2026-11-05 (integration) Deferred: Team D's raw-JSON ItineraryArrangement and read-only itinerary composables stay; PlanIcs (exact web .ics port) runs on them, and moving it to Team E's typed port needs an .ics parity check. Follow-up.
+- 2026-11-05 (fix pass FP3) One itinerary port: PlanIcs arranges/schedules through core:domain/itinerary via a JSON bridge (ScheduledItineraryJson) and ItineraryArrangement is deleted; .ics output was byte-for-byte identical for every PlanIcsTest input (34 builds, 35 event lists) and three realistic golden plans (kept as PlanIcsParityTest). My Plan, plan detail and the share viewer render PlanItinerary days with core/ui ItineraryDayCard (supersedes the "Deferred" line above).
+- 2026-11-05 (fix pass FP3) `AppError.Decoding`/`Unknown` never carry exception text (logged instead); `message` is backend text or null, so `error.message ?: stringResource(...)` is always safe.
+- 2026-11-05 (fix pass FP3) Saved plans strip `link_verified`/`link_checked` on save (core:model `stripLinkEvidence`, web parity); the share viewer's "Save a copy" keeps the shared selections as-is, like the web SharePage.
+- 2026-11-05 (fix pass FP3) Exported MainActivity sanitises intents (Navigation deep-link extras removed, only `travelplanner://` data kept); a deep link redirected by the auth gate is kept in ShellViewModel's SavedStateHandle and replayed once READY; chat opens a thread id only if it is the user's own.
+- 2026-11-05 (fix pass FP3) Release builds do not keep AdminApi (no admin UI); verifyReleaseKeepRules fails if R8 keeps it. Notifications start-up and OkHttp init run off the main thread (dagger.Lazy + lazy Retrofit call factory).
+- 2026-11-05 (fix pass FP3) Delete-with-undo is still implemented per screen (Chat, Plans, Search, Alerts): deduping it into one helper would touch the Alerts undo that fix pass FP2 reworks (snackbar-tied commit), so it waits until FP2 lands.
 
 ## Documentation and tooling
 
