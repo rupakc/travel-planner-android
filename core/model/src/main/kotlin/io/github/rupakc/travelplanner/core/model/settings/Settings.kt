@@ -19,6 +19,8 @@ data class AppSettings(
     val tripNotifications: Boolean = true,
     val priceAlertNotifications: Boolean = true,
     val nearbyNotifications: Boolean = false,
+    /** Nearby suggestions outside trip dates too (default: only during an active trip). */
+    val nearbyNotificationsAlways: Boolean = false,
 )
 
 /**
