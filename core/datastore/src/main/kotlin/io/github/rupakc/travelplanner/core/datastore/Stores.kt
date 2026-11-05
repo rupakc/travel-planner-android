@@ -21,6 +21,15 @@ interface SessionStore {
     suspend fun updateUser(user: User)
 
     suspend fun clear()
+
+    /**
+     * Username of the last signed-in user on this device; survives [clear] so the app can tell a
+     * different user is signing in and wipe the previous user's local data (review I6).
+     */
+    suspend fun lastUsername(): String? = null
+
+    /** Base URL of the server the last session belonged to (survives [clear]); see review R2-I2. */
+    suspend fun lastServer(): String? = null
 }
 
 /** Device-only settings: server URL, theme, dynamic colour, locale, notification toggles. */

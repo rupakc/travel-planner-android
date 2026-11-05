@@ -15,6 +15,7 @@ data class NearbyRequest(
     val limit: Int = DEFAULT_LIMIT,
 ) {
     companion object {
+        /** App default; the backend defaults to 8 when `limit` is omitted (it is always sent). */
         const val DEFAULT_LIMIT = 10
     }
 }

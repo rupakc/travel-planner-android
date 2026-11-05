@@ -76,7 +76,10 @@ interface AuthRepository {
     /** `PUT /api/auth/email` (`""` clears); returns the stored email. */
     suspend fun updateEmail(email: String): AppResult<String?>
 
-    /** Unregisters this device's push token (best effort), clears session and per-user caches. */
+    /**
+     * Unregisters this device's push token (best effort, at most 5 s), clears the session and the user's
+     * local data via [SessionCleaner]. Chat history is kept (per username).
+     */
     suspend fun logout()
 }
 
@@ -310,7 +313,10 @@ interface SettingsRepository {
     /** Effective backend URL (override or flavour default; "" when none). */
     val effectiveBaseUrl: Flow<String>
 
-    /** Validates then stores; null/blank resets to the flavour default. */
+    /**
+     * Validates then stores; null/blank resets to the flavour default. If the effective server changes
+     * the user is signed out (the token belongs to the old server) and local user data is cleared.
+     */
     suspend fun setBaseUrl(url: String?): AppResult<Unit>
 
     suspend fun setThemeMode(mode: ThemeMode)
@@ -339,6 +345,15 @@ interface FeedbackRepository {
     suspend fun sendFeedback(request: FeedbackRequest): AppResult<Unit>
 
     suspend fun sendAnalytics(events: List<AnalyticsEvent>): AppResult<Unit>
+}
+
+/**
+ * Wipes the signed-in user's local data (draft, search, caches; not chat history). Called only on explicit
+ * logout, when a different user signs in, and when the server URL changes — never on a 401 or token expiry.
+ * Features normally never call it.
+ */
+interface SessionCleaner {
+    suspend fun clearUserData()
 }
 
 /** Supplied by core:notifications when Firebase is configured (optional binding). */

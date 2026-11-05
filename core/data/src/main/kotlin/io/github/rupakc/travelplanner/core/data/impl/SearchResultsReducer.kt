@@ -55,7 +55,11 @@ object SearchResultsReducer {
 
     private fun onSection(state: SearchResultsState, event: SearchEvent.Section): SearchResultsState {
         val existing = state.sections[event.id]
-        val keepOld = event.data.isError && event.source != DataSource.STATIC && existing != null && !existing.data.isError
+        val existingGoodAi = existing != null && existing.source == DataSource.AI && !existing.data.isError
+        val keepOld =
+            // an AI error never replaces good data; Phase-0 static data replayed on the retry never replaces AI data (review M2)
+            (event.data.isError && event.source != DataSource.STATIC && existing != null && !existing.data.isError) ||
+                (event.source == DataSource.STATIC && existingGoodAi)
         val sections =
             if (keepOld) {
                 state.sections
@@ -66,6 +70,7 @@ object SearchResultsReducer {
         val current = state.statuses[event.id]
         val status =
             when {
+                event.source == DataSource.STATIC && existingGoodAi -> SectionStatus.DONE
                 event.source == DataSource.STATIC && current != SectionStatus.DONE -> SectionStatus.ENHANCING
                 event.source == DataSource.STATIC -> SectionStatus.DONE
                 else -> SectionStatus.DONE

@@ -26,42 +26,8 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 
-private fun DataStore<Preferences>.safeData(): Flow<Preferences> =
+internal fun DataStore<Preferences>.safeData(): Flow<Preferences> =
     data.catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
-
-class PreferencesSessionStore(private val store: DataStore<Preferences>) : SessionStore {
-    private val token = stringPreferencesKey("token")
-    private val user = stringPreferencesKey("user_json")
-
-    override val session: Flow<Session?> = store.safeData().map { it.toSession() }.distinctUntilChanged()
-
-    override suspend fun current(): Session? = session.first()
-
-    override suspend fun save(session: Session) {
-        store.edit {
-            it[token] = session.token
-            it[user] = TravelJson.encodeToString(User.serializer(), session.user)
-        }
-    }
-
-    override suspend fun updateToken(token: String) {
-        store.edit { it[this.token] = token }
-    }
-
-    override suspend fun updateUser(user: User) {
-        store.edit { it[this.user] = TravelJson.encodeToString(User.serializer(), user) }
-    }
-
-    override suspend fun clear() {
-        store.edit { it.clear() }
-    }
-
-    private fun Preferences.toSession(): Session? {
-        val t = this[token] ?: return null
-        val u = this[user]?.let { runCatching { TravelJson.decodeFromString(User.serializer(), it) }.getOrNull() } ?: return null
-        return Session(t, u)
-    }
-}
 
 class PreferencesSettingsStore(private val store: DataStore<Preferences>) : SettingsStore {
     private val baseUrl = stringPreferencesKey("base_url")

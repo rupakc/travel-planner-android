@@ -73,6 +73,13 @@ sealed interface AppError { val message: String? }   // message = backend `detai
 price-watch 422s (`no_live_price` with `suggestions`/`estimate` in `extras` as raw JSON text — decode with
 `TravelJson` into `NoLivePriceError`; `target_currency_mismatch`), nearby `NotFound(code = "no_place")`,
 `Server(code = "agent_error")`. 401 anywhere clears the session automatically (the shell shows Login and a snackbar).
+A 401 or an expired token only signs out: the draft, cached plans, recent searches and chat survive. Local data is
+wiped (`SessionCleaner`) only on explicit logout, on login as a different user, and on a server change.
+
+Session rules (fix round 1): the session is encrypted at rest (Tink, Keystore-wrapped key); an expired JWT
+(`exp`) reads as signed out, so `AuthRepository.session` emits `null` at expiry and the gate shows Login;
+`Session.baseUrl` records the issuing backend and the token is sent only there (never to other hosts —
+do **not** reuse the app's OkHttp clients for images or third-party pages); changing Settings → Server signs out.
 
 ```kotlin
 /** Sign-in, session, password and email. */
@@ -91,7 +98,10 @@ interface AuthRepository {
     /** `PUT /api/auth/email` (`""` clears); returns the stored email. */
     suspend fun updateEmail(email: String): AppResult<String?>
 
-    /** Unregisters this device's push token (best effort), clears session and per-user caches. */
+    /**
+     * Unregisters this device's push token (best effort, at most 5 s), clears the session and the user's
+     * local data via [SessionCleaner]. Chat history is kept (per username).
+     */
     suspend fun logout()
 }
 
@@ -325,7 +335,10 @@ interface SettingsRepository {
     /** Effective backend URL (override or flavour default; "" when none). */
     val effectiveBaseUrl: Flow<String>
 
-    /** Validates then stores; null/blank resets to the flavour default. */
+    /**
+     * Validates then stores; null/blank resets to the flavour default. If the effective server changes
+     * the user is signed out (the token belongs to the old server) and local user data is cleared.
+     */
     suspend fun setBaseUrl(url: String?): AppResult<Unit>
 
     suspend fun setThemeMode(mode: ThemeMode)
@@ -356,6 +369,15 @@ interface FeedbackRepository {
     suspend fun sendAnalytics(events: List<AnalyticsEvent>): AppResult<Unit>
 }
 
+/**
+ * Wipes the signed-in user's local data (draft, search, caches; not chat history). Called only on explicit
+ * logout, when a different user signs in, and when the server URL changes — never on a 401 or token expiry.
+ * Features normally never call it.
+ */
+interface SessionCleaner {
+    suspend fun clearUserData()
+}
+
 /** Supplied by core:notifications when Firebase is configured (optional binding). */
 fun interface PushTokenSource {
     suspend fun token(): String?
@@ -363,6 +385,11 @@ fun interface PushTokenSource {
 ```
 
 ### 3.1 Shared My Plan draft (`….core.data.plan.CurrentPlanStore`)
+
+Persistence (fix round 1): the draft is written on every change; the search-data snapshot is written only
+when it changes (debounced 500 ms) and is not persisted above 1.5 MB (kept in memory, warning logged).
+`save()` is serialised and applies only `planId`/`name` on success, so edits made during a save survive and
+leave `dirty = true`. Storage failures are logged, never thrown.
 
 ```kotlin
 /**
@@ -381,16 +408,26 @@ interface CurrentPlanStore {
 
     fun rename(name: String)
 
-    /** Records the search behind the draft and the latest sections (`{"flights":{…}}`). */
+    /** Records the search behind the draft and the latest sections (`{"flights":{…}}`); sets `searchKey`. */
     fun attachSearch(request: TravelSearchRequest, data: JsonObject?)
 
     /** Empties the draft (new, unsaved plan). */
     fun newPlan()
 
-    /** Loads a saved plan into the draft (via PlansRepository). */
+    /** Empties the draft and deletes it from storage (sign-out / user change; called by `SessionCleaner`). */
+    suspend fun reset()
+
+    /**
+     * Loads a saved plan into the draft (via PlansRepository): `searchRequest` and `searchKey` from the plan's
+     * `search_data`, and `searchData` with whatever sections the plan holds (normally just the `itinerary`
+     * snapshot) so Results can render it without a stream.
+     */
     suspend fun load(planId: Long): AppResult<PlanDraft>
 
-    /** Creates or updates the plan via PlansRepository; clears `dirty` on success. */
+    /**
+     * Creates or updates the plan via PlansRepository. Calls are serialised (a double tap creates one plan).
+     * On success only `planId`/`name` are applied; edits made while saving are kept and leave `dirty = true`.
+     */
     suspend fun save(name: String? = null): AppResult<Plan>
 
     /** For undo: capture, then [restore]. */
@@ -401,7 +438,8 @@ interface CurrentPlanStore {
 ```
 
 `PlanDraft` (`….core.model.plan`): `planId: Long?`, `name: String?`, `searchRequest: TravelSearchRequest?`,
-`searchData: JsonObject?` (sections keyed by wire name), `selections: PlanSelections`, `dirty: Boolean`;
+`searchData: JsonObject?` (sections keyed by wire name), `selections: PlanSelections`, `dirty: Boolean`,
+`searchKey: String?` (= `searchRequest.searchKey()`; set by `attachSearch`/`load`, null after `newPlan`);
 `PlanDraft.DEFAULT_NAME = "My Trip Plan"`.
 
 `PlanItem` (sealed, `….core.model.plan`): `FlightItem(flight)` (with `leg_index` → one per leg in `flights`),
@@ -448,6 +486,43 @@ gives the `{"flights":{…}}` object for chat `search_results` and `CurrentPlanS
   `NotificationsPage`, `Health` (capability flags incl. `pushConfigured`), `CompareSummary`, `DiscoveryResponse`,
   `FareCalendar`, `LayoverPlan`, `ImportPreview`, `ResolvedPlace`, `NearbyResponse`(`NearbyPlace`), `Device`,
   `TasteProfile`, `RecentSearch`, `AppSettings`, `ThemeMode`, `TravellerProfile`, `FeatureOverrides`, `Session`.
+
+## 4b. API additions in fix round 1 (all additive)
+
+- `TravelSearchRequest.searchKey(): String` (`….core.model.search`) — stable id of a search (normalised request hash;
+  empty `must_include` and a single-city `destinations` list count as absent).
+  Results: the stream belongs to the draft when `state.request?.searchKey() == draft.searchKey`.
+- `PlanDraft.searchKey: String? = null`. `CurrentPlanStore.load(id)` now also fills `searchRequest`, `searchKey` and
+  `searchData`. A saved plan's `search_data` is the request (web parity), so `searchData` normally holds only
+  `itinerary` (from `selections.itinerary`, written on save) — other sections are not stored with plans; any section
+  objects found in `search_data` are restored too. `searchData` is null when nothing is recoverable.
+- `SessionStore.lastServer()` (core-internal): local data is wiped when a login's user **or** server differs from the
+  last session's, and on every Settings → Server change (signed in or not).
+- Session storage never crashes: a broken Keystore keeps the session in memory for the process (signed in until the
+  app is killed); unreadable data reads as signed out; storage failures in `login`/`changePassword` return `Failure`.
+  Expiry is re-checked against the wall clock at least every 30 s of awake time (`EncryptedSessionStore.EXPIRY_TICK_MS`).
+
+- `Session(token, user, baseUrl: String? = null)` — issuing backend.
+- `CurrentPlanStore.reset()` (suspend) — empty the draft and its storage.
+- `SessionCleaner { suspend fun clearUserData() }` (`….core.data.repository`) — bound in Hilt; called by the core.
+- `SessionStore.lastUsername()` (core:datastore, internal to core).
+- `NetworkModule.STREAM_IDLE_SECONDS = 300`; `CurrentPlanStoreImpl.MAX_SEARCH_DATA_BYTES`, `SEARCH_DATA_DEBOUNCE_MS`.
+- Behaviour: `AuthRepository.logout()` keeps chat history and finishes within ~5 s; `SettingsRepository.setBaseUrl`
+  signs out when the effective server changes; `AppError.Client(code = "invalid_url" | "https_required")` unchanged.
+
+## 4c. Security notes
+
+- Session at rest: one AES-256-GCM sealed value (Tink); the keyset lives in `shared_prefs/tp_keys.xml`, wrapped by
+  Android Keystore key `tp_session_master`. Both files and the Room DB (+ WAL/SHM) are excluded from backup.
+- Tink silently falls back to a **cleartext** keyset when the Keystore is unusable. The app checks
+  `isUsingKeystore()` after every build: if false it deletes the keyset and keeps the session **in memory only**
+  for the process (the user signs in again after the app is killed). The session token is never written in clear, and a keyset not protected by the Keystore is never used and never left on disk.
+- Trade-off (accepted): a transient Keystore error during creation also resets the keyset, which signs the
+  user out (the old sealed session can't be decrypted). Sign-out is preferred to a crash or a cleartext key.
+- The bearer token is sent only to the backend that issued it (`Session.baseUrl`); never give the app's OkHttp
+  clients to image loaders or third-party fetches.
+- `searchKey` (R3-M2, accepted): it is persisted with the draft, so after an update that adds request fields a restored
+  draft keeps its old key until the next `attachSearch`; Results then treats a finished stream as not the draft's.
 
 ## 5. Navigation
 
@@ -680,6 +755,20 @@ interface FeatureCatalogue {
 The onboarding/settings team owns the implementations (and a Hilt `@Binds` for them in `core:domain`'s
 consumer — add a small Hilt module in your feature or ask to add one in `core:data`).
 
+## 9b. Room schema changes
+
+The schema is exported to `core/database/schemas/`. Every `version` bump ships a `Migration` (or
+`@AutoMigration`) **and** a `MigrationTestHelper` test against the previous `schemas/…/N.json`.
+`fallbackToDestructiveMigration` is not allowed (chat history is local-only user data); only
+`fallbackToDestructiveMigrationOnDowngrade()` is acceptable. Add new entities through the foundation owners.
+
+## 9c. Streams and releases
+
+- Streams (`SearchRepository`, `ChatRepository.send`) cancel the HTTP call as soon as the collector is
+  cancelled; a connection idle for 300 s (`NetworkModule.STREAM_IDLE_SECONDS`) ends as `AppError.Interrupted`.
+- R8: `core:model` `@Serializable` classes are kept by `app/proguard-rules.pro`; `./gradlew :app:verifyReleaseKeepRules`
+  (run in CI) fails if a serializer is stripped. Put new wire models in `core:model` so the rules cover them.
+
 ## 10. Testing (`core:testing`, already a `testImplementation` of every feature)
 
 - `MainDispatcherRule()` (JUnit rule), `TestAppDispatchers(dispatcher)`.
@@ -690,7 +779,8 @@ consumer — add a small Hilt module in your feature or ask to add one in `core:
   `FakeFareWatchesRepository`, `FakePriceWatchesRepository`, `FakeNotificationsRepository`, `FakeDevicesRepository`,
   `FakeNearbyRepository(result)`, `FakeCompareRepository`, `FakeDiscoverRepository`, `FakeImportRepository`,
   `FakeFareCalendarRepository`, `FakeHealthRepository(initial)`, `FakeSettingsRepository`, `FakeProfileRepository`,
-  `FakeFeedbackRepository`; store fakes for core tests (`FakeSessionStore`, `FakeSettingsStore`, …); `TestUser`, `NotStubbed`.
+  `FakeFeedbackRepository`; store fakes for core tests (`FakeSessionStore` (tracks `lastUser`), `FakeSettingsStore`, …); `TestUser`, `NotStubbed`.
+  `FakeCurrentPlanStore` implements `reset()`.
 - Fixtures: `Fixtures.searchEvents(Fixtures.SEARCH_FULL | SEARCH_INTERRUPTED)`,
   `Fixtures.chatEvents(Fixtures.CHAT_QA | CHAT_PLANNING | CHAT_FALLBACK)`, `Fixtures.read(name)` (raw SSE text).
 - `TestNetwork(baseUrl, sessionStore, dispatchers)` — the real OkHttp/Retrofit stack for MockWebServer tests.

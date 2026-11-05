@@ -13,6 +13,7 @@ import okio.BufferedSource
  */
 object SseParser {
     private const val DATA = "data:"
+    private const val BARE_DATA = "data"
 
     /** The data payloads of [lines], in order. */
     fun payloads(lines: Sequence<String>): Sequence<String> =
@@ -33,9 +34,10 @@ object SseParser {
                     }
 
                     // comment / keepalive
-                    line.startsWith(DATA) -> {
+                    line.startsWith(DATA) || line == BARE_DATA -> {
+                        // A bare `data` line is an empty data field (SSE spec; review M12).
                         if (hasData) pending.append('\n')
-                        pending.append(line.removePrefix(DATA).removePrefix(" "))
+                        pending.append(if (line == BARE_DATA) "" else line.removePrefix(DATA).removePrefix(" "))
                         hasData = true
                     }
 

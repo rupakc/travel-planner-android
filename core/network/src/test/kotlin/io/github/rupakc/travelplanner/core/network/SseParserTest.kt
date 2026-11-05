@@ -63,4 +63,9 @@ class SseParserTest {
 
         override fun close() = Unit
     }
+
+    @Test
+    fun `a bare data line is an empty data field`() {
+        assertEquals(listOf("{}\n"), SseParser.payloads("data: {}\ndata\n\n".lineSequence()).toList())
+    }
 }

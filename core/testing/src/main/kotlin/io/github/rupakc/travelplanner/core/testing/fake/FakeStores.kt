@@ -19,11 +19,23 @@ class FakeSessionStore(initial: Session? = null) : SessionStore {
     val state = MutableStateFlow(initial)
     override val session: Flow<Session?> = state
 
+    /** Like the real store: survives [clear]. */
+    var lastUser: String? = initial?.user?.username
+
     override suspend fun current(): Session? = state.value
+
+    /** Like the real store: survives [clear]. */
+    var lastServerUrl: String? = initial?.baseUrl
 
     override suspend fun save(session: Session) {
         state.value = session
+        lastUser = session.user.username
+        session.baseUrl?.let { lastServerUrl = it }
     }
+
+    override suspend fun lastUsername(): String? = lastUser
+
+    override suspend fun lastServer(): String? = lastServerUrl
 
     override suspend fun updateToken(token: String) = state.update { it?.copy(token = token) }
 

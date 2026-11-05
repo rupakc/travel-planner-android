@@ -101,6 +101,9 @@ class NearbyRepositoryImpl
                 .onSuccess { mutex.withLock { cache[key] = Entry(clock.now(), it) } }
         }
 
+        /** Drops cached results (user change). */
+        suspend fun clearCache() = mutex.withLock { cache.clear() }
+
         private fun cell(degrees: Double): Long = floor(degrees / CELL_DEGREES).toLong()
 
         private companion object {

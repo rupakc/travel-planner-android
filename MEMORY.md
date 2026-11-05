@@ -15,7 +15,6 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 ktlint 1.8.0 via Spotless 8.11.0, `ktlint_official` style; options passed with `editorConfigOverride` because Spotless did not apply `.editorconfig`. Max line length 160 (140 split too many URL/JSON test lines).
 - 2026-11-05 Lint: a11y/i18n ids are errors (list in build-logic `AndroidCommon.kt` + `config/lint/lint.xml`); version-freshness checks disabled so builds don't fail by date.
 - 2026-11-05 Preferences DataStore (not Proto): four small files (session, settings, traveller_profile, feature_overrides); no protobuf toolchain needed. Session token is excluded from backup/device transfer.
-- 2026-11-05 Token kept in app-private DataStore, not encrypted: EncryptedSharedPreferences is deprecated and the JWT expires in 24 h; revisit with Keystore-wrapped storage before a store release.
 - 2026-11-05 Base URL: requests target a placeholder host and an interceptor swaps in Settings → Server or the flavour default (keeps a base path prefix). `prod` rejects http in validation; cleartext policy is per-flavour network_security_config.
 - 2026-11-05 Three OkHttp clients: default (30 s read), AI (300 s read: agents may run 240 s; nearby cache miss 10–40 s; import 90 s), streaming (no read/call timeout).
 - 2026-11-05 SSE: parser joins multi-`data:` events (spec-correct) and delivers a trailing event without a blank line; failures cross the IO `flowOn` boundary as values (`SseItem.Failure`) and are rethrown in the collector — throwing upstream cancelled the collector and dropped buffered events (caught by a test).
@@ -34,6 +33,24 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 Admin wire models + `AdminApi` exist (contract completeness) but no admin UI (spec non-goal).
 - 2026-11-05 Auth gate re-evaluates on every destination change (not only on session change): Back from a deep-linked share screen popped to the synthetic Home entry while signed out. Share is always allowed; Onboarding with `fromSettings=true` is allowed when signed in.
 - 2026-11-05 MainActivity is `singleTask`; deep links arriving while running are forwarded with `addOnNewIntentListener { navController.handleDeepLink(it) }` (verified on the emulator, cold and warm).
+- 2026-11-05 (fix r1, I1) SSE reads run in a `channelFlow` child; `awaitClose { call.cancel() }` closes the socket the moment the collector is cancelled (a completion handler only ran after the blocked read returned — up to 240 s).
+- 2026-11-05 (fix r1, I2) Streaming client: 300 s idle read timeout, no call timeout — longer than the backend's silent Phase 1, short enough that a half-open connection ends as Interrupted and gets the one retry. A backend keepalive in Phase 1 would let this drop to ~60 s.
+- 2026-11-05 (fix r1, I3) AuthInterceptor runs before the base-URL rewrite and sends the token only to placeholder-host requests whose effective server equals `Session.baseUrl`; changing server signs out.
+- 2026-11-05 (fix r1, I4) Session sealed with Tink AES-256-GCM, keyset in SharedPreferences `tp_keys` wrapped by Android Keystore key `tp_session_master` (EncryptedSharedPreferences is deprecated); undecryptable → signed out; plaintext layout migrated; JWT `exp` checked client-side (expired → signed out, flips at expiry). Keyset prefs and Room WAL/SHM excluded from backup.
+- 2026-11-05 (fix r1, I5) CurrentPlanStore save/load/reset under a Mutex; on success only identity fields are applied.
+- 2026-11-05 (fix r1, I6) SessionCleaner on explicit logout, different-user login (`SessionStore.lastUsername` survives clear) and server change. Chat history is kept on logout (per username, like the web's localStorage) — supersedes the earlier "logout clears chat".
+- 2026-11-05 (fix r1, I7) App scope has a logging CoroutineExceptionHandler; Room calls in CurrentPlanStore are guarded; the search snapshot is stored in its own `plan_draft` row (id 1, no schema change), debounced, and not persisted above 1.5 MB.
+- 2026-11-05 (fix r1, M2) A Phase-0 static event never replaces good AI data (retry replay).
+- 2026-11-05 (fix r1, M8) R8 keep rules for core:model serializers + `:app:verifyReleaseKeepRules` in CI instead of an instrumented minified smoke test (no emulator in CI).
+- 2026-11-05 (fix r1, M1) Room policy: every version bump ships a Migration + MigrationTestHelper test; no destructive fallback (documented in Foundation-Interfaces §9b).
+- 2026-11-05 (fix r1, revised) A 401 or a locally expired JWT only signs out; it never wipes local data, so a user's draft and caches survive a 24 h token expiry. Wipes happen only on explicit logout, login as a different user, or a server change.
+- 2026-11-05 (fix r2, R2-I1) Keystore failures: reset keyset prefs + alias and retry once, then keep the session in memory for the process (logged once); every read/migration/seal failure is caught — never a crash loop or lockout.
+- 2026-11-05 (fix r2, R2-I2) Local data belongs to (user, server): `last_server` is stored with `last_username`; login wipes when either differs, and any Settings → Server change wipes whether or not a session exists.
+- 2026-11-05 (fix r2, R2-M1/M2) Session crypto/IO on an IO dispatcher; expiry re-reads the wall clock every ≤30 s of awake time (delay() is uptime-based and stops in deep sleep). A fast device clock signs out early — accepted.
+- 2026-11-05 (fix r2) `PlanDraft.searchKey` = hash of the normalised request; `load()` restores request, key and the sections a saved plan holds (normally just the itinerary snapshot — plans don't store streamed sections; the web saves only the request in `search_data`).
+- 2026-11-05 (fix r3, R3-I1) Tink 1.24 writes the keyset in clear when the Keystore is broken (no exception). After every build we check `isUsingKeystore()`; if false the keyset prefs + alias are deleted and the session stays in memory only. Decision logic sits behind `SessionKeysetSource` so it is unit-testable.
+- 2026-11-05 (fix r3, R3-M3) Accepted trade-off: a transient Keystore error at creation resets the keyset and signs the user out (sign-out over crash or cleartext key). Documented in Foundation-Interfaces §4c.
+- 2026-11-05 (fix r3, R3-M1) `searchKey` treats empty `must_include` and single-city `destinations` as absent. R3-M2 accepted: the key is persisted with the draft and may go stale across app updates that add request fields until the next `attachSearch`.
 
 ## Documentation and tooling
 
@@ -44,5 +61,4 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 
 ## Open items
 
-- Keystore-wrapped session storage before a store release (see Security).
 - Baseline profile module (see Performance).

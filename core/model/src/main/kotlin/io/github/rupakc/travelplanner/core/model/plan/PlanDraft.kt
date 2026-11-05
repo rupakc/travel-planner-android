@@ -12,6 +12,8 @@ import kotlinx.serialization.json.JsonObject
  * @property searchRequest the TravelSearchRequest used (becomes `search_data` on create)
  * @property searchData latest streamed sections keyed by wire name (`{"flights":{…},…}`), or null
  * @property dirty true when [selections]/[name] changed since the last load/save
+ * @property searchKey `searchRequest.searchKey()` — which search this draft belongs to (null when none). Compare it
+ *   with `SearchResultsState.request?.searchKey()` to tell the draft's own stream from a stale one.
  */
 @Serializable
 data class PlanDraft(
@@ -21,6 +23,7 @@ data class PlanDraft(
     @SerialName("search_data") val searchData: JsonObject? = null,
     val selections: PlanSelections = PlanSelections(),
     val dirty: Boolean = false,
+    @SerialName("search_key") val searchKey: String? = null,
 ) {
     companion object {
         /** Web default plan name. */

@@ -5,8 +5,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
+import io.github.rupakc.travelplanner.core.common.AppLogger
 import javax.inject.Qualifier
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
@@ -19,5 +21,9 @@ annotation class ApplicationScope
 @InstallIn(SingletonComponent::class)
 object ApplicationScopeModule {
     @Provides @Singleton @ApplicationScope
-    fun applicationScope(dispatchers: AppDispatchers): CoroutineScope = CoroutineScope(SupervisorJob() + dispatchers.default)
+    fun applicationScope(dispatchers: AppDispatchers): CoroutineScope = CoroutineScope(SupervisorJob() + dispatchers.default + LoggingExceptionHandler)
+
+    /** An uncaught failure in background work is logged, never a process crash (review I7). */
+    val LoggingExceptionHandler: CoroutineExceptionHandler =
+        CoroutineExceptionHandler { _, throwable -> AppLogger.e("ApplicationScope", "Uncaught exception in background work", throwable) }
 }

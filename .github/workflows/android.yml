@@ -38,6 +38,10 @@ jobs:
       - name: Verify
         run: ./gradlew spotlessCheck detekt lintLocalDebug testLocalDebugUnitTest assembleLocalDebug assembleProdRelease --stacktrace
 
+      # Review M8: R8 must not strip kotlinx.serialization models that Retrofit reaches reflectively.
+      - name: Check release keep rules
+        run: ./gradlew :app:verifyReleaseKeepRules
+
       - name: Upload reports
         if: failure()
         uses: actions/upload-artifact@v4

@@ -17,19 +17,23 @@ import io.github.rupakc.travelplanner.core.network.toAppError
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import okhttp3.Call
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okio.BufferedSource
 
 /** One item of a materialised SSE stream: a payload, or the failure that ended it. */
 sealed interface SseItem<out T> {
@@ -44,7 +48,7 @@ sealed interface SseItem<out T> {
  * - HTTP errors before streaming → [AppException] with the mapped [AppError] (429 keeps Retry-After).
  * - A network failure mid-stream → [AppException] with [AppError.Interrupted].
  *
- * Failures travel through the IO `flowOn` boundary as [SseItem.Failure] and are thrown only
+ * Failures travel through the IO boundary as [SseItem.Failure] and are thrown only
  * in the collector's context, so every payload received before a failure is delivered.
  */
 @Singleton
@@ -56,9 +60,13 @@ class SseClient
     ) {
         fun post(path: String, jsonBody: String): Flow<String> = items(path, jsonBody).dematerialize()
 
-        /** Materialised stream (never throws except cancellation); runs on the IO dispatcher. */
+        /**
+         * Materialised stream (never throws except cancellation); the blocking read runs on the IO dispatcher.
+         * Cancelling the collector cancels the OkHttp call immediately (`awaitClose`), which unblocks a read
+         * that is waiting through a long silent phase (review I1).
+         */
         fun items(path: String, jsonBody: String): Flow<SseItem<String>> =
-            flow {
+            channelFlow {
                 val request =
                     Request.Builder()
                         .url(PLACEHOLDER_BASE_URL + path.trimStart('/'))
@@ -66,38 +74,49 @@ class SseClient
                         .post(jsonBody.toRequestBody(JSON_MEDIA_TYPE))
                         .build()
                 val call = client.newCall(request)
-                val cancelHandle = currentCoroutineContext()[Job]?.invokeOnCompletion { call.cancel() }
-                try {
-                    val response =
-                        try {
-                            call.execute()
-                        } catch (e: IOException) {
-                            emit(SseItem.Failure(e.toAppError()))
-                            return@flow
-                        }
-                    response.use { resp ->
-                        if (!resp.isSuccessful) {
-                            emit(SseItem.Failure(HttpErrorMapper.map(resp.code, resp.header("Retry-After"), resp.body.string())))
-                            return@flow
-                        }
-                        val payloads = SseParser.payloads(resp.body.source()).iterator()
-                        while (true) {
-                            val next =
-                                try {
-                                    if (payloads.hasNext()) payloads.next() else null
-                                } catch (e: IOException) {
-                                    currentCoroutineContext().ensureActive()
-                                    AppLogger.w(TAG, "SSE stream interrupted", e)
-                                    emit(SseItem.Failure(AppError.Interrupted()))
-                                    return@flow
-                                } ?: break
-                            emit(SseItem.Payload(next))
-                        }
+                launch(dispatchers.io) {
+                    try {
+                        readInto(call)
+                    } finally {
+                        channel.close()
                     }
-                } finally {
-                    cancelHandle?.dispose()
                 }
-            }.flowOn(dispatchers.io)
+                awaitClose { call.cancel() }
+            }
+
+        private suspend fun ProducerScope<SseItem<String>>.readInto(call: Call) {
+            val response =
+                try {
+                    call.execute()
+                } catch (e: IOException) {
+                    if (isActive) send(SseItem.Failure(e.toAppError()))
+                    return
+                }
+            response.use { resp ->
+                if (!resp.isSuccessful) {
+                    send(SseItem.Failure(HttpErrorMapper.map(resp.code, resp.header("Retry-After"), resp.body.string())))
+                    return
+                }
+                readPayloads(resp.body.source(), call)
+            }
+        }
+
+        private suspend fun ProducerScope<SseItem<String>>.readPayloads(source: BufferedSource, call: Call) {
+            val payloads = SseParser.payloads(source).iterator()
+            while (true) {
+                val next =
+                    try {
+                        if (payloads.hasNext()) payloads.next() else null
+                    } catch (e: IOException) {
+                        // Cancelled by the collector → stop quietly; otherwise the connection died or idled out.
+                        if (!isActive || call.isCanceled()) return
+                        AppLogger.w(TAG, "SSE stream interrupted", e)
+                        send(SseItem.Failure(AppError.Interrupted()))
+                        return
+                    } ?: return
+                send(SseItem.Payload(next))
+            }
+        }
 
         companion object {
             private const val TAG = "SseClient"

@@ -8,6 +8,7 @@ import io.github.rupakc.travelplanner.core.data.repository.FeedbackRepository
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
 import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesRepository
+import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.database.RecentSearchDao
 import io.github.rupakc.travelplanner.core.database.RecentSearchEntity
@@ -39,6 +40,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @Singleton
 class PreferencesRepositoryImpl
@@ -110,6 +113,8 @@ class SettingsRepositoryImpl
     constructor(
         private val store: SettingsStore,
         private val baseUrlProvider: BaseUrlProvider,
+        private val sessionStore: SessionStore,
+        private val sessionCleaner: SessionCleaner,
     ) : SettingsRepository {
         override val settings: Flow<AppSettings> = store.settings
 
@@ -118,12 +123,12 @@ class SettingsRepositoryImpl
 
         override suspend fun setBaseUrl(url: String?): AppResult<Unit> {
             if (url.isNullOrBlank()) {
-                store.setBaseUrlOverride(null)
+                switchServer(null)
                 return AppResult.Success(Unit)
             }
             return when (val v = baseUrlProvider.validate(url)) {
                 is BaseUrlValidation.Valid -> {
-                    store.setBaseUrlOverride(v.normalized)
+                    switchServer(v.normalized)
                     AppResult.Success(Unit)
                 }
 
@@ -136,6 +141,20 @@ class SettingsRepositoryImpl
                 }
             }
         }
+
+        /** A token belongs to the server that issued it: changing server signs out and clears local user data. */
+        private suspend fun switchServer(override: String?) =
+            switchLock.withLock {
+                val before = baseUrlProvider.current()
+                store.setBaseUrlOverride(override)
+                // Local data belongs to the old server whether or not anyone is signed in (review R2-I2).
+                if (baseUrlProvider.current() != before) {
+                    sessionStore.clear()
+                    sessionCleaner.clearUserData()
+                }
+            }
+
+        private val switchLock = Mutex()
 
         override suspend fun setThemeMode(mode: ThemeMode) = store.setThemeMode(mode)
 

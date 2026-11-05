@@ -382,7 +382,7 @@ interface NotificationsApi {
     ): MarkReadResponse
 }
 
-/** §2.1 import (90 s client timeout, web parity). */
+/** §2.1 import. Uses the 300 s AI client (the web uses 90 s; extraction is an LLM call). */
 interface ImportApi {
     @POST("api/import/extract")
     suspend fun extract(

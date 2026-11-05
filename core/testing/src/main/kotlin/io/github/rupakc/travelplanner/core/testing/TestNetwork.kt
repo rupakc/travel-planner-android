@@ -32,8 +32,8 @@ class TestNetwork(
     val baseUrlProvider = BaseUrlProvider(FakeSettingsStore(AppSettings()), buildInfo)
     val client: OkHttpClient =
         OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(sessionStore, authEvents, baseUrlProvider))
             .addInterceptor(BaseUrlInterceptor(baseUrlProvider))
-            .addInterceptor(AuthInterceptor(sessionStore, authEvents))
             .build()
     val retrofit: Retrofit =
         Retrofit.Builder()

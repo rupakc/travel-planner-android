@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.core.data.plan
 
+import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.map
 import io.github.rupakc.travelplanner.core.common.onSuccess
@@ -16,27 +17,40 @@ import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionRules
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.plan.SelectionKeys
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.search.searchKey
+import io.github.rupakc.travelplanner.core.model.section.SectionId
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 
 /**
- * Hilt singleton [CurrentPlanStore]. State lives in memory; every change is
- * written (latest-wins, serialised) to the single-row `plan_draft` table and
- * restored at startup, so the draft survives process death.
+ * Hilt singleton [CurrentPlanStore]. State lives in memory and is persisted to Room so it survives
+ * process death (review I7):
+ * - the draft *without* its search data is written on every change (latest wins, collected from the state,
+ *   so a stale value can never overwrite a newer one);
+ * - the large search-data snapshot lives in its own row, written only when it changes, debounced, and is
+ *   dropped (with a logged warning) above [MAX_SEARCH_DATA_BYTES] instead of risking an oversized row;
+ * - every Room call is guarded: a failed write is logged and the next change retries; a failed read
+ *   deletes the bad rows and starts empty.
+ * `save`/`load`/`reset` are serialised with a mutex (review I5).
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(FlowPreview::class)
 @Singleton
 class CurrentPlanStoreImpl
     @Inject
@@ -47,70 +61,113 @@ class CurrentPlanStoreImpl
     ) : CurrentPlanStore {
         private val state = MutableStateFlow(PlanDraft())
         override val draft: StateFlow<PlanDraft> = state.asStateFlow()
-        private val writes = Channel<PlanDraft>(Channel.CONFLATED)
-        private val restoreJob: Job
+        private val mutex = Mutex()
+        private val restoreJob: Job = scope.launch { restore() }
 
         init {
-            restoreJob =
-                scope.launch {
-                    draftDao.get()?.json
-                        ?.let { runCatching { TravelJson.decodeFromString(PlanDraft.serializer(), it) }.getOrNull() }
-                        ?.let { saved -> state.compareAndSet(PlanDraft(), saved) }
-                }
             scope.launch {
-                writes.consumeAsFlow().collect { draftDao.save(PlanDraftEntity(json = TravelJson.encodeToString(PlanDraft.serializer(), it))) }
+                restoreJob.join()
+                launch {
+                    state.map { it.copy(searchData = null) }.distinctUntilChanged().collectLatest { persistDraft(it) }
+                }
+                launch {
+                    state.map { it.searchData }.distinctUntilChanged().debounce(SEARCH_DATA_DEBOUNCE_MS).collectLatest { persistSearchData(it) }
+                }
             }
         }
 
-        private fun set(transform: (PlanDraft) -> PlanDraft) {
-            state.update(transform)
-            writes.trySend(state.value)
-        }
-
-        override fun toggle(item: PlanItem) = set { it.copy(selections = PlanSelectionRules.toggle(it.selections, item), dirty = true) }
+        override fun toggle(item: PlanItem) = state.update { it.copy(selections = PlanSelectionRules.toggle(it.selections, item), dirty = true) }
 
         override fun isSelected(item: PlanItem): Boolean = PlanSelectionRules.isSelected(state.value.selections, item)
 
-        override fun setSelections(selections: PlanSelections) = set { it.copy(selections = selections, dirty = true) }
+        override fun setSelections(selections: PlanSelections) = state.update { it.copy(selections = selections, dirty = true) }
 
-        override fun rename(name: String) = set { it.copy(name = name, dirty = true) }
+        override fun rename(name: String) = state.update { it.copy(name = name, dirty = true) }
 
         override fun attachSearch(request: TravelSearchRequest, data: JsonObject?) =
-            set { it.copy(searchRequest = request, searchData = data) }
+            state.update { it.copy(searchRequest = request, searchData = data, searchKey = request.searchKey()) }
 
-        override fun newPlan() = set { PlanDraft() }
+        override fun newPlan() {
+            state.value = PlanDraft() // searchKey = null
+        }
+
+        override suspend fun reset() {
+            restoreJob.join()
+            mutex.withLock {
+                state.value = PlanDraft()
+                guarded("clear the draft") { draftDao.clear() }
+            }
+        }
 
         override suspend fun load(planId: Long): AppResult<PlanDraft> {
             restoreJob.join()
-            return plansRepository.get(planId).map { plan ->
-                PlanDraft(planId = plan.id, name = plan.name, searchRequest = plan.searchRequest, selections = plan.selections, dirty = false)
-            }.onSuccess { loaded -> set { loaded } }
+            return mutex.withLock {
+                plansRepository.get(planId).map { plan ->
+                    val request = plan.searchRequest
+                    PlanDraft(
+                        planId = plan.id,
+                        name = plan.name,
+                        searchRequest = request,
+                        searchData = sectionsOf(plan),
+                        selections = plan.selections,
+                        dirty = false,
+                        searchKey = request?.searchKey(),
+                    )
+                }.onSuccess { loaded -> state.value = loaded }
+            }
         }
 
         override suspend fun save(name: String?): AppResult<Plan> {
             restoreJob.join()
-            val current = state.value
-            val planName = name?.takeIf(String::isNotBlank) ?: current.name?.takeIf(String::isNotBlank) ?: PlanDraft.DEFAULT_NAME
-            val selections = withItinerarySnapshot(current)
-            val planId = current.planId
-            val result =
-                if (planId == null) {
-                    val searchData =
-                        current.searchRequest
-                            ?.let { TravelJson.encodeToJsonElement(TravelSearchRequest.serializer(), it) as JsonObject }
-                            ?: EmptyJsonObject
-                    plansRepository.create(planName, searchData, selections)
-                } else {
-                    plansRepository.update(planId, planName, selections)
+            return mutex.withLock {
+                val sent = state.value
+                val planName = name?.takeIf(String::isNotBlank) ?: sent.name?.takeIf(String::isNotBlank) ?: PlanDraft.DEFAULT_NAME
+                val planId = sent.planId
+                val result =
+                    if (planId == null) {
+                        val searchData =
+                            sent.searchRequest
+                                ?.let { TravelJson.encodeToJsonElement(TravelSearchRequest.serializer(), it) as JsonObject }
+                                ?: EmptyJsonObject
+                        plansRepository.create(planName, searchData, withItinerarySnapshot(sent))
+                    } else {
+                        plansRepository.update(planId, planName, withItinerarySnapshot(sent))
+                    }
+                result.onSuccess { plan ->
+                    // Apply only identity fields: edits made while the request was in flight are kept and stay dirty.
+                    state.update { now ->
+                        val nameUnchanged = now.name == sent.name
+                        now.copy(
+                            planId = plan.id,
+                            name = if (nameUnchanged) plan.name else now.name,
+                            dirty = now.selections != sent.selections || !nameUnchanged,
+                        )
+                    }
                 }
-            return result.onSuccess { plan ->
-                set { it.copy(planId = plan.id, name = plan.name, selections = plan.selections, dirty = false) }
             }
         }
 
         override fun snapshot(): PlanDraft = state.value
 
-        override fun restore(snapshot: PlanDraft) = set { snapshot }
+        override fun restore(snapshot: PlanDraft) {
+            state.value = snapshot
+        }
+
+        /**
+         * Sections recoverable from a saved plan, in the stream-snapshot shape (`{"itinerary":{…},…}`).
+         * A saved plan's `search_data` is the request (web parity), so normally only the itinerary snapshot
+         * (`selections.itinerary`, written on save) is available; any section objects found in `search_data`
+         * (keys that are section wire names) are taken too. Null when nothing is recoverable.
+         */
+        private fun sectionsOf(plan: Plan): JsonObject? {
+            val sections =
+                buildJsonObject {
+                    plan.searchData.forEach { (key, value) -> if (SectionId.fromWire(key) != null && value is JsonObject) put(key, value) }
+                    val itinerary = plan.selections.itinerarySnapshot
+                    if (itinerary != null && SelectionKeys.ITINERARY !in plan.searchData) put(SelectionKeys.ITINERARY, itinerary)
+                }
+            return sections.takeIf { it.isNotEmpty() }
+        }
 
         /** Web parity: on save the live itinerary is snapshotted into `selections.itinerary` so a saved plan is self-contained. */
         private fun withItinerarySnapshot(draft: PlanDraft): PlanSelections {
@@ -121,5 +178,64 @@ class CurrentPlanStoreImpl
                     live["total_estimated_cost_usd"]?.let { put("total_estimated_cost_usd", it) }
                 }
             return if (snapshot.isEmpty()) draft.selections else draft.selections.copy(itinerarySnapshot = snapshot)
+        }
+
+        private suspend fun restore() {
+            val saved =
+                guarded("restore the draft") {
+                    val draftRow = draftDao.getRow(PlanDraftEntity.SINGLE_ROW) ?: return@guarded null
+                    val restored = TravelJson.decodeFromString(PlanDraft.serializer(), draftRow.json)
+                    val search =
+                        draftDao.getRow(PlanDraftEntity.SEARCH_ROW)?.json
+                            ?.let { TravelJson.parseToJsonElement(it) as? JsonObject }
+                    restored.copy(searchData = search ?: restored.searchData)
+                }
+            if (saved == null) {
+                // Nothing stored, or the rows were unreadable: start empty and drop whatever is there.
+                guarded("drop unreadable draft rows") { if (draftDao.getRow(PlanDraftEntity.SINGLE_ROW) != null) draftDao.clear() }
+            } else {
+                state.compareAndSet(PlanDraft(), saved)
+            }
+        }
+
+        private suspend fun persistDraft(draft: PlanDraft) {
+            guarded("persist the draft") {
+                draftDao.save(PlanDraftEntity(PlanDraftEntity.SINGLE_ROW, TravelJson.encodeToString(PlanDraft.serializer(), draft)))
+            }
+        }
+
+        private suspend fun persistSearchData(data: JsonObject?) {
+            guarded("persist the search snapshot") {
+                if (data == null) {
+                    draftDao.deleteRow(PlanDraftEntity.SEARCH_ROW)
+                    return@guarded
+                }
+                val json = data.toString()
+                if (json.length > MAX_SEARCH_DATA_BYTES) {
+                    AppLogger.w(TAG, "Search snapshot is ${json.length} chars; not persisting it (limit $MAX_SEARCH_DATA_BYTES)")
+                    draftDao.deleteRow(PlanDraftEntity.SEARCH_ROW)
+                } else {
+                    draftDao.save(PlanDraftEntity(PlanDraftEntity.SEARCH_ROW, json))
+                }
+            }
+        }
+
+        @Suppress("TooGenericExceptionCaught")
+        private suspend fun <T> guarded(what: String, block: suspend () -> T): T? =
+            try {
+                block()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                AppLogger.e(TAG, "Could not $what", e)
+                null
+            }
+
+        companion object {
+            private const val TAG = "CurrentPlanStore"
+            const val SEARCH_DATA_DEBOUNCE_MS = 500L
+
+            /** Above this the snapshot is not persisted (SQLite CursorWindow is ~2 MB). Chars ≈ bytes for this ASCII-escaped JSON. */
+            const val MAX_SEARCH_DATA_BYTES = 1_500_000
         }
     }

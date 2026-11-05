@@ -2,8 +2,12 @@ package io.github.rupakc.travelplanner.core.model.settings
 
 import io.github.rupakc.travelplanner.core.model.auth.User
 
-/** A signed-in session (token from login / change-password; JWT lasts 24 h, no refresh). */
-data class Session(val token: String, val user: User)
+/**
+ * A signed-in session (token from login / change-password; JWT lasts 24 h, no refresh).
+ * [baseUrl] is the backend that issued the token (normalised, no trailing slash); the token is only
+ * ever sent there. Null for sessions saved before it was recorded (sent to the current backend).
+ */
+data class Session(val token: String, val user: User, val baseUrl: String? = null)
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
