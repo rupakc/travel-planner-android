@@ -76,5 +76,8 @@ data class PlanDraftEntity(
 ) {
     companion object {
         const val SINGLE_ROW = 0
+
+        /** The (large) search-data snapshot lives in its own row so toggles never rewrite it. */
+        const val SEARCH_ROW = 1
     }
 }

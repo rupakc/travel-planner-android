@@ -29,15 +29,30 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CurrentPlanStoreImplTest {
-    private class InMemoryDraftDao(var row: PlanDraftEntity? = null) : PlanDraftDao {
-        override suspend fun get() = row
+    private class InMemoryDraftDao : PlanDraftDao {
+        val rows = mutableMapOf<Int, PlanDraftEntity>()
+        val writes = mutableMapOf<Int, Int>()
+        var failWrites = false
+        var failReads = false
+        val row: PlanDraftEntity? get() = rows[PlanDraftEntity.SINGLE_ROW]
+
+        override suspend fun get() = getRow(PlanDraftEntity.SINGLE_ROW)
 
         override suspend fun save(draft: PlanDraftEntity) {
-            row = draft
+            if (failWrites) throw android.database.sqlite.SQLiteFullException("disk full")
+            rows[draft.id] = draft
+            writes[draft.id] = (writes[draft.id] ?: 0) + 1
         }
 
-        override suspend fun clear() {
-            row = null
+        override suspend fun clear() = rows.clear()
+
+        override suspend fun getRow(id: Int): PlanDraftEntity? {
+            if (failReads) throw android.database.sqlite.SQLiteBlobTooBigException("row too big")
+            return rows[id]
+        }
+
+        override suspend fun deleteRow(id: Int) {
+            rows.remove(id)
         }
     }
 

@@ -129,4 +129,11 @@ interface PlanDraftDao {
 
     @Query("DELETE FROM plan_draft")
     suspend fun clear()
+
+    /** Row by id: [PlanDraftEntity.SINGLE_ROW] = the draft, [PlanDraftEntity.SEARCH_ROW] = its search-data snapshot. */
+    @Query("SELECT * FROM plan_draft WHERE id = :id")
+    suspend fun getRow(id: Int): PlanDraftEntity?
+
+    @Query("DELETE FROM plan_draft WHERE id = :id")
+    suspend fun deleteRow(id: Int)
 }

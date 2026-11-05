@@ -110,6 +110,10 @@ class FakeCurrentPlanStore(private val plans: PlansRepository = FakePlansReposit
         state.value = PlanDraft()
     }
 
+    override suspend fun reset() {
+        state.value = PlanDraft()
+    }
+
     override suspend fun load(planId: Long): AppResult<PlanDraft> =
         plans.get(planId).map {
             PlanDraft(planId = it.id, name = it.name, searchRequest = it.searchRequest, selections = it.selections).also { d ->

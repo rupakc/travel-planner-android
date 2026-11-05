@@ -31,10 +31,16 @@ interface CurrentPlanStore {
     /** Empties the draft (new, unsaved plan). */
     fun newPlan()
 
+    /** Empties the draft and deletes it from storage (sign-out / user change; called by `SessionCleaner`). */
+    suspend fun reset()
+
     /** Loads a saved plan into the draft (via PlansRepository). */
     suspend fun load(planId: Long): AppResult<PlanDraft>
 
-    /** Creates or updates the plan via PlansRepository; clears `dirty` on success. */
+    /**
+     * Creates or updates the plan via PlansRepository. Calls are serialised (a double tap creates one plan).
+     * On success only `planId`/`name` are applied; edits made while saving are kept and leave `dirty = true`.
+     */
     suspend fun save(name: String? = null): AppResult<Plan>
 
     /** For undo: capture, then [restore]. */
