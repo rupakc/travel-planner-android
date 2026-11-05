@@ -121,6 +121,8 @@ class NearbyViewModel
                             LocationFix.Off -> return@launch mutable.update { it.copy(phase = NearbyPhase.LocationOff) }
                             LocationFix.Unavailable -> return@launch mutable.update { it.copy(phase = NearbyPhase.NoFix) }
                         }
+                    // Remembered as a ~5 km cell for background suggestions (no background location needed).
+                    nearby.rememberLocation(fix.lat, fix.lng)
                     mutable.update { it.copy(phase = NearbyPhase.Loading) }
                     val serverInterests = preferences.get().getOrNull()?.interests.orEmpty()
                     val sent = if (serverInterests.isEmpty()) profileInterests(profile.profile.first()).ifEmpty { null } else null

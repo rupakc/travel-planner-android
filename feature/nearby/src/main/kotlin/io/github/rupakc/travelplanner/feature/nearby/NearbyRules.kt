@@ -27,7 +27,8 @@ internal fun whyThis(item: Activity, interests: List<String>): List<String> {
     val text = listOfNotNull(item.name, item.description).joinToString(" ").lowercase(Locale.ROOT)
     return interests.filter { i ->
         val word = i.lowercase(Locale.ROOT)
-        category == word || Regex("\\b${Regex.escape(word)}").containsMatchIn(text)
+        // Whole words only (an optional plural "s"): "art" never matches "artificial".
+        category == word || Regex("\\b${Regex.escape(word)}s?\\b").containsMatchIn(text)
     }
 }
 

@@ -193,6 +193,7 @@ private fun Rationale(onRequestPermission: () -> Unit) {
         Text(stringResource(R.string.nearby_rationale_title), style = TravelTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
         Text(stringResource(R.string.nearby_message), style = TravelTheme.typography.bodyLarge)
         Text(stringResource(R.string.nearby_rationale_precise), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
+        Text(stringResource(R.string.nearby_background_note), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
         TpButton(stringResource(R.string.nearby_allow), onRequestPermission, leadingIcon = Icons.Filled.LocationOn)
     }
 }
@@ -252,7 +253,7 @@ private fun PlaceHeader(place: NearbyPlace?, interests: List<String>, count: Int
             style = TravelTheme.typography.headlineMedium,
             modifier = Modifier.semantics { heading() },
         )
-        val distance = place?.distanceKm?.let { stringResource(R.string.nearby_distance, it.toString()) }
+        val distance = place?.distanceKm?.let { stringResource(R.string.nearby_distance, decimal(it)) }
         Text(
             listOfNotNull(distance, pluralStringResource(R.plurals.nearby_count, count, count)).joinToString(" · "),
             style = TravelTheme.typography.bodyMedium,
@@ -260,7 +261,7 @@ private fun PlaceHeader(place: NearbyPlace?, interests: List<String>, count: Int
         )
         if (interests.isNotEmpty()) {
             Text(
-                stringResource(R.string.nearby_for_interests, interests.joinToString(", ")),
+                stringResource(R.string.nearby_for_interests, interests.map { interestName(it) }.joinToString(", ")),
                 style = TravelTheme.typography.bodySmall,
                 color = TravelTheme.colors.onSurfaceVariant,
             )
@@ -288,15 +289,24 @@ private fun NearbyCard(item: NearbyItem, onToggle: () -> Unit, onOpenMaps: () ->
             a.description?.let { Text(it, style = TravelTheme.typography.bodyMedium, maxLines = DESCRIPTION_LINES, overflow = TextOverflow.Ellipsis) }
             val meta =
                 listOfNotNull(
-                    a.rating?.let { r -> stringResource(R.string.nearby_rating, r.toString()) + (a.reviewCount?.let { " ($it)" } ?: "") },
-                    a.durationHours?.let { stringResource(R.string.nearby_duration, it.toString()) },
+                    a.rating?.let { r ->
+                        val reviews = a.reviewCount
+                        if (reviews !=
+                            null
+                        ) {
+                            stringResource(R.string.nearby_rating_reviews, decimal(r), reviews)
+                        } else {
+                            stringResource(R.string.nearby_rating, decimal(r))
+                        }
+                    },
+                    a.durationHours?.let { stringResource(R.string.nearby_duration, decimal(it)) },
                     a.location,
                 )
             if (meta.isNotEmpty()) Text(meta.joinToString(" · "), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
             PriceText(a.priceUsd, isEstimate = true, hideWhenUnknown = true, style = TravelTheme.typography.titleSmall)
             if (item.why.isNotEmpty()) {
                 Text(
-                    stringResource(R.string.nearby_why, item.why.joinToString(", ")),
+                    stringResource(R.string.nearby_why, item.why.map { interestName(it) }.joinToString(", ")),
                     style = TravelTheme.typography.bodySmall,
                     color = TravelTheme.colors.primary,
                 )
@@ -309,6 +319,28 @@ private fun NearbyCard(item: NearbyItem, onToggle: () -> Unit, onOpenMaps: () ->
         }
     }
 }
+
+/** Numbers in the user's locale ("1,4 km" in Spanish). */
+@Composable
+private fun decimal(value: Double): String =
+    java.text.NumberFormat.getNumberInstance(io.github.rupakc.travelplanner.core.ui.watch.currentLocale()).apply { maximumFractionDigits = 1 }.format(value)
+
+/** A web interest id in the UI language; unknown ids as given. */
+@Composable
+private fun interestName(id: String): String =
+    when (id) {
+        "food" -> stringResource(R.string.nearby_interest_food)
+        "history" -> stringResource(R.string.nearby_interest_history)
+        "adventure" -> stringResource(R.string.nearby_interest_adventure)
+        "culture" -> stringResource(R.string.nearby_interest_culture)
+        "nature" -> stringResource(R.string.nearby_interest_nature)
+        "shopping" -> stringResource(R.string.nearby_interest_shopping)
+        "nightlife" -> stringResource(R.string.nearby_interest_nightlife)
+        "wellness" -> stringResource(R.string.nearby_interest_wellness)
+        "art" -> stringResource(R.string.nearby_interest_art)
+        "family" -> stringResource(R.string.nearby_interest_family)
+        else -> id
+    }
 
 /** Provider names as text only (web `providerName`), for "Open GetYourGuide". */
 private fun providerOf(source: String?): String? =

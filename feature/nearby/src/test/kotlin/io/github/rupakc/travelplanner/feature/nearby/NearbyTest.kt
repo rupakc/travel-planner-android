@@ -47,10 +47,18 @@ class NearbyTest {
     private class RecordingNearby(var result: AppResult<NearbyResponse>) : NearbyRepository {
         var interests: List<String>? = listOf("unset")
 
+        var remembered: Pair<Double, Double>? = null
+
         override suspend fun nearby(lat: Double, lng: Double, interests: List<String>?, limit: Int): AppResult<NearbyResponse> {
             this.interests = interests
             return result
         }
+
+        override suspend fun rememberLocation(lat: Double, lng: Double) {
+            remembered = lat to lng
+        }
+
+        override suspend fun lastLocation() = null
     }
 
     private val kyoto = NearbyPlace(name = "Kyoto", region = "Kyoto", country = "Japan", distanceKm = 1.4)
@@ -63,6 +71,9 @@ class NearbyTest {
         assertEquals(listOf("food", "culture"), profileInterests(profile))
         assertEquals(listOf("food", "culture"), whyThis(hike, listOf("food", "culture", "nightlife")))
         assertTrue(whyThis(hike, listOf("art")).isEmpty())
+        // Whole words only; a plural still counts.
+        assertTrue(whyThis(Activity(name = "Artificial intelligence museum"), listOf("art")).isEmpty())
+        assertEquals(listOf("art"), whyThis(Activity(name = "Street arts walk"), listOf("art")))
         assertEquals("Kyoto, Japan", placeLabel(kyoto))
         assertEquals("Portland, Maine, United States", placeLabel(NearbyPlace(name = "Portland", region = "Maine", country = "United States")))
         assertEquals("Fushimi Inari Hike, Kyoto, Japan", mapsQuery(hike, kyoto))
@@ -83,6 +94,8 @@ class NearbyTest {
             advanceUntilIdle()
             assertEquals(NearbyPhase.Loaded, vm.state.value.phase)
             assertEquals(listOf("food"), repo.interests)
+            // The foreground fix is remembered for background suggestions.
+            assertEquals(35.0 to 135.7, repo.remembered)
             assertEquals(listOf("food"), vm.state.value.items.single().why)
             vm.onEvent(NearbyEvent.TogglePlan(vm.state.value.items.single().key))
             advanceUntilIdle()
