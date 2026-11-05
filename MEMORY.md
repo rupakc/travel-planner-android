@@ -51,6 +51,16 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 (fix r3, R3-I1) Tink 1.24 writes the keyset in clear when the Keystore is broken (no exception). After every build we check `isUsingKeystore()`; if false the keyset prefs + alias are deleted and the session stays in memory only. Decision logic sits behind `SessionKeysetSource` so it is unit-testable.
 - 2026-11-05 (fix r3, R3-M3) Accepted trade-off: a transient Keystore error at creation resets the keyset and signs the user out (sign-out over crash or cleartext key). Documented in Foundation-Interfaces §4c.
 - 2026-11-05 (fix r3, R3-M1) `searchKey` treats empty `must_include` and single-city `destinations` as absent. R3-M2 accepted: the key is persisted with the draft and may go stale across app updates that add request fields until the next `attachSearch`.
+- 2026-11-05 Onboarding Q6 uses the web's four accessibility ids (wheelchair, visual_impairment, hearing_impairment, cognitive_disability) with web labels instead of the spec's "step-free / limited walking / visual / hearing" — the spec says "the web's 4 accessibility ids" and those are the real ids.
+- 2026-11-05 Quiz → Preferences: lists union (never removed), budget set when answered, adults/children filled only while the server still has the default party (1 adult, nobody else) — review I-1, infants ≥ 1 for "infants", photography/beaches map to art / nature+wellness, family_kids adds `family`; pace stays device-local (no Preferences field). Table in docs/Onboarding-and-Traveller-Types.md.
+- 2026-11-05 Classifier default when nothing scores: CULTURE_FOODIE (broadest); tie order = TravellerType declaration order; one scored secondary at ≥ 60 %.
+- 2026-11-05 Before onboarding (no type) every catalogue feature is visible (minus explicit disables): nothing to personalise from, so nothing is hidden.
+- 2026-11-05 Feature/type copy and icons live in core:ui (`core.ui.profile`) so onboarding, home and settings share one set of strings; Hilt bindings for the pure catalogue/classifier live in feature:onboarding (core:domain has no DI).
+- 2026-11-05 `AccountChangePasswordRoute` (voluntary change from Settings) is separate from `ChangePasswordRoute`: the gate sends a READY user Home from any gate screen.
+- 2026-11-05 Onboarding finish order: profile + overrides → PUT preferences (failure: Retry / Continue without syncing, local data kept) → notification rationale (first run, Android 13+, not yet granted) → onboardingCompleted. Marking complete last keeps the gate from leaving mid-flow.
+- 2026-11-05 Login has a "Server" bottom sheet (review I-2): a signed-out user on a phone or a `prod` build without PROD_BASE_URL could not reach Settings → Server. "Test connection" needs the address in effect, so it is applied temporarily and the previous override is restored if the sheet closes without Save. Validator `ServerUrl.validate` lives in core:domain for Settings to reuse.
+- 2026-11-05 Auth/onboarding show `AppError.message` only for HTTP errors (Client, RateLimited, Unauthorized, Forbidden, NotFound, Server); Decoding/Unknown/NotConfigured carry exception text and get our own copy.
+- 2026-11-05 Feature overrides are replaced in one DataStore write (`ProfileRepository.setFeatureOverrides`), so observers never see type defaults mid-save.
 
 ## Documentation and tooling
 

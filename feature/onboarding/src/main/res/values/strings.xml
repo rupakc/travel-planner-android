@@ -1,6 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Welcome -->
     <string name="onboarding_title">Welcome to Voyager</string>
     <string name="onboarding_message">Six quick questions tailor your home screen and features to how you travel.</string>
+    <string name="onboarding_retake_title">Retake the quiz</string>
+    <string name="onboarding_retake_message">Your current answers are filled in. Change what\'s different and we\'ll update your traveller type and features.</string>
+    <string name="onboarding_get_started">Get started</string>
+    <string name="onboarding_welcome_note">Every question can be skipped. You can retake the quiz any time in Settings.</string>
+    <string name="onboarding_close">Close quiz</string>
+
+    <!-- Question chrome -->
+    <string name="onboarding_step">Step %1$d of %2$d</string>
+    <string name="onboarding_choose_one">Choose one</string>
+    <string name="onboarding_choose_many">Choose all that apply</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_see_result">See my type</string>
+    <string name="onboarding_selected">Selected</string>
+    <string name="onboarding_not_selected">Not selected</string>
+
+    <!-- Questions -->
+    <string name="onboarding_q_companions">Who do you usually travel with?</string>
+    <string name="onboarding_opt_companions_solo">Solo</string>
+    <string name="onboarding_opt_companions_partner">With a partner</string>
+    <string name="onboarding_opt_companions_family_kids">Family with kids</string>
+    <string name="onboarding_opt_companions_friends">Friends group</string>
+    <string name="onboarding_opt_companions_work">For work</string>
+
+    <string name="onboarding_q_budget">What\'s your typical budget?</string>
+    <string name="onboarding_opt_budget_shoestring">Shoestring</string>
+    <string name="onboarding_opt_budget_shoestring_hint">Hostels, street food, public transport</string>
+    <string name="onboarding_opt_budget_mid_range">Mid-range</string>
+    <string name="onboarding_opt_budget_mid_range_hint">Comfortable hotels, nice restaurants</string>
+    <string name="onboarding_opt_budget_comfort">Comfort</string>
+    <string name="onboarding_opt_budget_comfort_hint">Good hotels and a few treats</string>
+    <string name="onboarding_opt_budget_luxury">Luxury</string>
+    <string name="onboarding_opt_budget_luxury_hint">Premium hotels, fine dining, private tours</string>
+
+    <string name="onboarding_q_interests">What do you love doing?</string>
+    <string name="onboarding_opt_interests_food">Food</string>
+    <string name="onboarding_opt_interests_history_culture">History &amp; culture</string>
+    <string name="onboarding_opt_interests_nature">Nature &amp; outdoors</string>
+    <string name="onboarding_opt_interests_adventure">Adventure &amp; sports</string>
+    <string name="onboarding_opt_interests_nightlife">Nightlife</string>
+    <string name="onboarding_opt_interests_shopping">Shopping</string>
+    <string name="onboarding_opt_interests_art_museums">Art &amp; museums</string>
+    <string name="onboarding_opt_interests_beaches">Beaches &amp; relaxation</string>
+    <string name="onboarding_opt_interests_photography">Photography</string>
+    <string name="onboarding_opt_interests_wellness">Wellness</string>
+
+    <string name="onboarding_q_pace">What pace do you like?</string>
+    <string name="onboarding_opt_pace_relaxed">Relaxed</string>
+    <string name="onboarding_opt_pace_relaxed_hint">Plenty of downtime</string>
+    <string name="onboarding_opt_pace_balanced">Balanced</string>
+    <string name="onboarding_opt_pace_balanced_hint">A mix of sights and free time</string>
+    <string name="onboarding_opt_pace_packed">Packed</string>
+    <string name="onboarding_opt_pace_packed_hint">See as much as possible</string>
+
+    <string name="onboarding_q_planning">How do you plan?</string>
+    <string name="onboarding_opt_planning_ahead_deals">Book far ahead and hunt deals</string>
+    <string name="onboarding_opt_planning_loose">Plan loosely</string>
+    <string name="onboarding_opt_planning_spontaneous">Spontaneous, last-minute</string>
+
+    <string name="onboarding_q_needs">Anything we should plan around?</string>
+    <string name="onboarding_opt_needs_wheelchair">Wheelchair / Mobility aid</string>
+    <string name="onboarding_opt_needs_visual_impairment">Visual impairment</string>
+    <string name="onboarding_opt_needs_hearing_impairment">Hearing impairment</string>
+    <string name="onboarding_opt_needs_cognitive_disability">Cognitive / Neurodivergent</string>
+    <string name="onboarding_opt_needs_infants">Travelling with infants</string>
+    <string name="onboarding_opt_needs_dietary">Dietary needs</string>
+
+    <!-- Result -->
+    <string name="onboarding_result_heading">You\'re a</string>
+    <string name="onboarding_result_a11y">You\'re a %1$s</string>
+    <string name="onboarding_result_also">Also a bit of</string>
+    <string name="onboarding_result_skipped">You skipped every question, so we started you with a broad mix. Retake the quiz any time in Settings.</string>
+    <string name="onboarding_change_answers">Not you? Change answers</string>
+    <string name="onboarding_continue">Continue</string>
+
+    <!-- Feature picker -->
+    <string name="onboarding_features_title">Pick your features</string>
+    <string name="onboarding_features_message">You can change these any time in Settings.</string>
+    <string name="onboarding_features_recommended">Recommended for you</string>
+    <string name="onboarding_features_more">More features</string>
+    <string name="onboarding_features_always">Search, results, My Plan and Settings are always on.</string>
+    <plurals name="onboarding_features_count">
+        <item quantity="one">%d feature on</item>
+        <item quantity="other">%d features on</item>
+    </plurals>
     <string name="onboarding_finish">Finish</string>
+    <string name="onboarding_save_changes">Save changes</string>
+    <string name="onboarding_saving">Saving…</string>
+    <string name="onboarding_sync_failed_title">Couldn\'t save your preferences to your account</string>
+    <string name="onboarding_sync_failed_message">Your traveller type and features are saved on this device. Your interests, budget and travel group didn\'t reach your account.</string>
+    <string name="onboarding_retry">Retry</string>
+    <string name="onboarding_continue_anyway">Continue without syncing</string>
+
+    <!-- Notifications rationale -->
+    <string name="onboarding_notifications_title">Stay on top of your trips</string>
+    <string name="onboarding_notifications_message">Get trip reminders before you leave, price-drop alerts for what you watch, and suggestions nearby while you travel. You can turn each one off in Settings.</string>
+    <string name="onboarding_notifications_allow">Allow notifications</string>
+    <string name="onboarding_notifications_later">Not now</string>
 </resources>

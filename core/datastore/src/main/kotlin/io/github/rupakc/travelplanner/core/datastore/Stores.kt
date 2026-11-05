@@ -66,4 +66,11 @@ interface FeatureOverridesStore {
     suspend fun set(featureId: String, enabled: Boolean?)
 
     suspend fun clear()
+
+    /** Replaces both sets atomically (one write). */
+    suspend fun replace(overrides: FeatureOverrides) {
+        clear()
+        overrides.enabled.forEach { set(it, true) }
+        overrides.disabled.forEach { set(it, false) }
+    }
 }

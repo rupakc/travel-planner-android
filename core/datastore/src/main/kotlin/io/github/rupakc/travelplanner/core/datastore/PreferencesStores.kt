@@ -128,6 +128,13 @@ class PreferencesFeatureOverridesStore(private val store: DataStore<Preferences>
     override suspend fun clear() {
         store.edit { it.clear() }
     }
+
+    override suspend fun replace(overrides: FeatureOverrides) {
+        store.edit { p ->
+            p[enabled] = overrides.enabled
+            p[disabled] = overrides.disabled - overrides.enabled
+        }
+    }
 }
 
 private suspend fun DataStore<Preferences>.editKey(key: Preferences.Key<String>, value: String?) {
