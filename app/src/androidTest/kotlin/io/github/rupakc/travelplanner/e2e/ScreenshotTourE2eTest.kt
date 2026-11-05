@@ -79,7 +79,7 @@ class ScreenshotTourE2eTest {
 
     @Test fun tour() {
         robot.signIn(E2eConfig.SECOND_USER, E2eConfig.SECOND_PASSWORD)
-        robot.waitForText(robot.str(OnboardingR.string.onboarding_title))
+        robot.waitForText(robot.str(OnboardingR.string.onboarding_title, robot.brand))
         shot("onboarding")
         robot.completeOnboarding(
             listOf(
@@ -117,7 +117,7 @@ class ScreenshotTourE2eTest {
         robot.back()
 
         robot.openTab(AppR.string.nav_chat)
-        robot.waitForText(robot.str(ChatR.string.chat_title))
+        robot.waitForText(robot.str(ChatR.string.chat_title, robot.brand))
         robot.chatSend("What should I eat in Lisbon? Three dishes, one line each.")
         shot("chat")
 

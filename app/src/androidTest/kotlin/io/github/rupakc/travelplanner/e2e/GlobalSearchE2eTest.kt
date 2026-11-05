@@ -47,7 +47,7 @@ class GlobalSearchE2eTest {
         robot.waitForText(tripName, timeoutMs = AppRobot.LONG_TIMEOUT)
 
         robot.openTab(AppR.string.nav_chat)
-        robot.waitForText(robot.str(ChatR.string.chat_title))
+        robot.waitForText(robot.str(ChatR.string.chat_title, robot.brand))
         robot.chatSend("Which currency do they use in Portugal?")
 
         robot.tapDescription(robot.str(AppR.string.nav_global_search))

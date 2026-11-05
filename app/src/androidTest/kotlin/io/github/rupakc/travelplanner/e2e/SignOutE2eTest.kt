@@ -85,7 +85,7 @@ class SignOutE2eTest {
         robot.login(E2eConfig.SECOND_USER, E2eConfig.SECOND_PASSWORD)
         rule.waitUntil(AppRobot.LONG_TIMEOUT) { !robot.exists(hasText(robot.str(AuthR.string.auth_login_title))) }
         // A different account onboards with its own traveller profile (regression: it inherited admin's).
-        robot.waitForText(robot.str(OnboardingR.string.onboarding_title))
+        robot.waitForText(robot.str(OnboardingR.string.onboarding_title, robot.brand))
         robot.completeOnboarding()
         robot.finishOnboarding()
 
@@ -95,7 +95,7 @@ class SignOutE2eTest {
         assertFalse("admin's plan visible to the second user", robot.exists(hasText(adminPlan)))
 
         robot.openTab(AppR.string.nav_chat)
-        robot.waitForText(robot.str(ChatR.string.chat_title))
+        robot.waitForText(robot.str(ChatR.string.chat_title, robot.brand))
         assertFalse("admin's chat visible", robot.exists(hasText(question, substring = true)))
         openChatMyPlan()
         assertFalse("admin's draft visible", robot.exists(hasText(adminDraft, substring = true)))

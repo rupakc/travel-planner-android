@@ -66,7 +66,7 @@ class ChatE2eTest {
     @Test fun question_streamsReply_planCommandAddsItem() {
         robot.signInToHome()
         robot.openTab(io.github.rupakc.travelplanner.R.string.nav_chat)
-        robot.waitForText(robot.str(ChatR.string.chat_title))
+        robot.waitForText(robot.str(ChatR.string.chat_title, robot.brand))
 
         send("What is the capital city of Portugal? Answer in one short sentence.")
         robot.waitForText("Lisbon", substring = true)

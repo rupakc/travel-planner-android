@@ -36,6 +36,9 @@ class AppRobot(val rule: AppRule) {
         vararg args: Any,
     ): String = rule.activity.getString(id, *args)
 
+    /** The in-app brand name some titles take as an argument (e.g. "Welcome to Voyager"). */
+    val brand: String get() = str(UiR.string.brand_name)
+
     fun exists(matcher: SemanticsMatcher): Boolean = rule.onAllNodes(matcher, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
 
     fun waitFor(matcher: SemanticsMatcher, timeoutMs: Long = DEFAULT_TIMEOUT) {

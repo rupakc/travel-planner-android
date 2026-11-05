@@ -36,7 +36,7 @@ class OnboardingE2eTest {
     @Test fun loginOnboardingHome_updatesServerPreferences() {
         robot.signIn()
         // Admin has no forced password change: the gate goes straight to onboarding.
-        robot.waitForText(robot.str(OnboardingR.string.onboarding_title))
+        robot.waitForText(robot.str(OnboardingR.string.onboarding_title, robot.brand))
         robot.completeOnboarding(
             listOf(
                 listOf(OnboardingR.string.onboarding_opt_companions_solo),
