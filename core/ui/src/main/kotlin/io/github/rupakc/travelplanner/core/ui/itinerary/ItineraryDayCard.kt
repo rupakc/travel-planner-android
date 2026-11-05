@@ -178,7 +178,7 @@ fun warningText(warning: ScheduleWarning): String =
         }
 
         is ScheduleWarning.RunsLate -> {
-            warning.dayNumber?.let { stringResource(R.string.itinerary_warning_runs_late, it) } ?: warning.english
+            warning.dayNumber?.let { stringResource(R.string.itinerary_warning_runs_late, it.toString()) } ?: warning.english
         }
     }
 
