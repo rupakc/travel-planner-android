@@ -196,4 +196,49 @@ class SessionIsolationTest {
             assertNull(session.current())
             assertEquals(1, cleaner.calls)
         }
+
+    @Test
+    fun `expire, switch server, login as the same user wipes the draft`() =
+        runTest {
+            val plan = FakeCurrentPlanStore().apply { toggle(PlanItem.HotelItem(Hotel(name = "From server A"))) }
+            val settings = FakeSettingsStore(AppSettings())
+            val provider = BaseUrlProvider(settings, buildInfo)
+            val store = FakeSessionStore(Session("expired", User("alice"), baseUrl = "http://10.0.2.2:8001"))
+            val cleaner = cleanerFor(plan)
+            val repo = AuthRepositoryImpl(loginApi(), mockk(relaxed = true), store, Optional.empty(), provider, cleaner)
+            store.state.value = null // token expired: signed out, data kept
+            SettingsRepositoryImpl(settings, provider, store, cleaner).setBaseUrl("http://192.168.1.10:8001")
+            repo.login("alice", "pw")
+            assertNull(plan.draft.value.selections.hotel)
+            assertEquals("http://192.168.1.10:8001", store.current()?.baseUrl)
+        }
+
+    @Test
+    fun `login on a different server than the stored data's wipes it even without a settings change`() =
+        runTest {
+            val plan = FakeCurrentPlanStore().apply { toggle(PlanItem.HotelItem(Hotel(name = "Old server"))) }
+            val store = FakeSessionStore(Session("expired", User("alice"), baseUrl = "https://old.example.com"))
+            store.state.value = null
+            auth(store, cleanerFor(plan), authApi = loginApi()).login("alice", "pw")
+            assertNull(plan.draft.value.selections.hotel)
+        }
+
+    @Test
+    fun `a storage failure during login is a Failure, not a crash`() =
+        runTest {
+            val store =
+                object : io.github.rupakc.travelplanner.core.datastore.SessionStore by FakeSessionStore() {
+                    override suspend fun save(session: Session) = throw java.io.IOException("disk")
+                }
+            val repo =
+                AuthRepositoryImpl(
+                    loginApi(),
+                    mockk(relaxed = true),
+                    store,
+                    Optional.empty(),
+                    BaseUrlProvider(FakeSettingsStore(), buildInfo),
+                    CountingCleaner(),
+                )
+            assertTrue(repo.login("alice", "pw") is AppResult.Failure)
+        }
 }

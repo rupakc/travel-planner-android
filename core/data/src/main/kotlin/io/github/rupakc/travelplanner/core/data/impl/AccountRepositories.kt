@@ -40,6 +40,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @Singleton
 class PreferencesRepositoryImpl
@@ -141,14 +143,18 @@ class SettingsRepositoryImpl
         }
 
         /** A token belongs to the server that issued it: changing server signs out and clears local user data. */
-        private suspend fun switchServer(override: String?) {
-            val before = baseUrlProvider.current()
-            store.setBaseUrlOverride(override)
-            if (baseUrlProvider.current() != before && sessionStore.current() != null) {
-                sessionStore.clear()
-                sessionCleaner.clearUserData()
+        private suspend fun switchServer(override: String?) =
+            switchLock.withLock {
+                val before = baseUrlProvider.current()
+                store.setBaseUrlOverride(override)
+                // Local data belongs to the old server whether or not anyone is signed in (review R2-I2).
+                if (baseUrlProvider.current() != before) {
+                    sessionStore.clear()
+                    sessionCleaner.clearUserData()
+                }
             }
-        }
+
+        private val switchLock = Mutex()
 
         override suspend fun setThemeMode(mode: ThemeMode) = store.setThemeMode(mode)
 
