@@ -23,7 +23,6 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionRules
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
@@ -41,6 +40,7 @@ import io.github.rupakc.travelplanner.core.model.section.VisaData
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
 import io.github.rupakc.travelplanner.core.ui.PriceText
 import io.github.rupakc.travelplanner.core.ui.SectionScaffold
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.chat.R
 import io.github.rupakc.travelplanner.feature.chat.model.ChatSection
 import io.github.rupakc.travelplanner.feature.chat.model.ChatSectionStatus
@@ -190,7 +190,7 @@ private fun ColumnScope.HotelsBody(data: HotelsData, estimate: Boolean, plan: Pl
         ItemRow(h.name.orEmpty(), plan.isSelected(item), accent, onToggle = { plan.onToggle(item) }) {
             h.location?.let { Muted(it) }
             h.starRating?.takeIf { it > 0 }?.let { Muted("★".repeat(it.toInt().coerceIn(1, MAX_STARS))) }
-            formatPrice(h.pricePerNightUsd).takeIf(String::isNotEmpty)?.let {
+            localPrice(h.pricePerNightUsd).takeIf(String::isNotEmpty)?.let {
                 Text(stringResource(R.string.chat_per_night, it), style = TravelTheme.typography.titleSmall)
             }
             LinkButton(stringResource(R.string.chat_book), h.bookingUrl, plan.onOpenLink)
@@ -221,7 +221,7 @@ private fun ColumnScope.VisaBody(data: VisaData, plan: PlanCallbacks) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
         req.maxStayDays?.let { Muted(pluralStringResource(R.plurals.chat_visa_max_stay, it, it)) }
         req.feeUsd?.let { fee ->
-            Muted(stringResource(R.string.chat_visa_fee, if (fee == 0.0) stringResource(R.string.chat_free) else formatPrice(fee)))
+            Muted(stringResource(R.string.chat_visa_fee, if (fee == 0.0) stringResource(R.string.chat_free) else localPrice(fee)))
         }
         req.processingTime?.let { Muted(it) }
     }

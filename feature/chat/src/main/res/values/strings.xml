@@ -3,7 +3,7 @@
     <!-- Empty state (web ChatPage) -->
     <string name="chat_title">Travel Planner Chat</string>
     <string name="chat_message">Chat with your AI travel assistant. Ask for a full trip plan and results will stream in real-time with interactive cards.</string>
-    <string name="chat_starter_1">Plan a 5-day trip to Tokyo on a $2000 budget</string>
+    <string name="chat_starter_1">Plan a 5-day trip to Tokyo on a %1$s budget</string>
     <string name="chat_starter_2">What do I need for a visa to Thailand as a US citizen?</string>
     <string name="chat_starter_3">Find me cheap flights from NYC to Paris in June</string>
     <string name="chat_starter_4">Suggest a romantic getaway in Europe for a week</string>

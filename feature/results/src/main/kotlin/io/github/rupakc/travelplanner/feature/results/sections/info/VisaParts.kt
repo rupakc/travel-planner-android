@@ -28,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.section.Customs
 import io.github.rupakc.travelplanner.core.model.section.DutyFreeAllowances
 import io.github.rupakc.travelplanner.core.model.section.Vaccinations
@@ -38,6 +37,7 @@ import io.github.rupakc.travelplanner.core.model.section.VerificationLevel
 import io.github.rupakc.travelplanner.core.model.section.VisaData
 import io.github.rupakc.travelplanner.core.model.section.VisaRequirement
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.results.R
 
 /** Web typeColors: visa-free green, on arrival blue, e-visa yellow, required red, other gray. */
@@ -118,7 +118,7 @@ private fun Requirements(req: VisaRequirement, onOpenLink: (String) -> Unit) {
             listOfNotNull(
                 req.maxStayDays?.takeIf { it > 0 }?.let { stringResource(R.string.visa_max_stay) to pluralStringResource(R.plurals.visa_days, it, it) },
                 req.processingTime?.takeIf { it.isNotBlank() }?.let { stringResource(R.string.visa_processing) to it },
-                req.feeUsd?.let { stringResource(R.string.visa_fee) to (if (it == 0.0) stringResource(R.string.visa_fee_free) else formatPrice(it)) },
+                req.feeUsd?.let { stringResource(R.string.visa_fee) to (if (it == 0.0) stringResource(R.string.visa_fee_free) else localPrice(it)) },
             )
         if (tiles.isNotEmpty()) {
             AdaptiveGrid(tiles) { (label, value), cell -> Tile(label, value, cell) }

@@ -43,11 +43,11 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.domain.results.FareCalendarRules
 import io.github.rupakc.travelplanner.core.domain.results.PriceLevel
 import io.github.rupakc.travelplanner.core.model.search.FareCalendarDate
 import io.github.rupakc.travelplanner.core.model.section.PricingAdvisorData
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.results.FareCalendarUi
 import io.github.rupakc.travelplanner.feature.results.LoadStatus
 import io.github.rupakc.travelplanner.feature.results.R
@@ -162,7 +162,7 @@ fun PriceInsightsChip(insights: JsonObject?, modifier: Modifier = Modifier) {
         )
     val range =
         if (chip.typicalLow != null && chip.typicalHigh != null) {
-            stringResource(R.string.results_insight_range, formatPrice(chip.typicalLow), formatPrice(chip.typicalHigh))
+            stringResource(R.string.results_insight_range, localPrice(chip.typicalLow), localPrice(chip.typicalHigh))
         } else {
             null
         }
@@ -251,10 +251,10 @@ private fun FareCells(dates: List<FareCalendarDate>, onPick: (FareCalendarDate) 
                     isSelected -> stringResource(R.string.results_fare_yours)
                     delta == null -> ""
                     delta == 0L -> stringResource(R.string.results_fare_same)
-                    delta < 0 -> stringResource(R.string.results_fare_less, formatPrice(abs(delta).toDouble()))
-                    else -> stringResource(R.string.results_fare_more, formatPrice(delta.toDouble()))
+                    delta < 0 -> stringResource(R.string.results_fare_less, localPrice(abs(delta).toDouble()))
+                    else -> stringResource(R.string.results_fare_more, localPrice(delta.toDouble()))
                 }
-            val price = entry.cheapestUsd?.let { formatPrice(it) } ?: "—"
+            val price = entry.cheapestUsd?.let { localPrice(it) } ?: "—"
             val day = entry.departureDate?.let(::formatDay).orEmpty()
             val a11y = listOf(day, price, deltaText).filter(String::isNotEmpty).joinToString(", ")
             OutlinedCard(

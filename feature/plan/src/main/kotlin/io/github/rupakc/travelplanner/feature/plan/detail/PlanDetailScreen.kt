@@ -54,8 +54,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.export.PlanCalendarEvent
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionEntry
@@ -218,7 +218,7 @@ internal fun TripHeader(summary: TripSummary, modifier: Modifier = Modifier) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             tripDates(summary.startDate, summary.endDate)?.let { FactPill(Icons.Filled.DateRange, it) }
             travellersLabel(summary.travellers)?.let { FactPill(Icons.Filled.Person, it) }
-            if (summary.totalCostUsd > 0) FactPill(null, stringResource(R.string.plan_planned_spend, formatPrice(summary.totalCostUsd)))
+            if (summary.totalCostUsd > 0) FactPill(null, stringResource(R.string.plan_planned_spend, localPrice(summary.totalCostUsd)))
         }
     }
 }

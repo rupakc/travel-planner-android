@@ -65,11 +65,11 @@
     <string name="watch_fare_title">Watch this fare</string>
     <string name="watch_fare_title_done">Watching this fare</string>
     <string name="watch_fare_title_already">You’re already watching this fare</string>
-    <string name="watch_fare_any_drop_hint">Only meaningful drops — at least $15 and 5%. Never more than once a day.</string>
+    <string name="watch_fare_any_drop_hint">Only meaningful drops — at least %1$s and 5%%. Never more than once a day.</string>
     <string name="watch_fare_target_already_under">Today’s fare (%1$s) is already under this — we’ll tell you when it drops below today’s price.</string>
     <string name="watch_fare_target_prefilled">Pre-filled with the low end of the usual price.</string>
     <string name="watch_flexible">Include nearby dates (±3 days)</string>
-    <string name="watch_flexible_hint">We’ll also tell you if leaving a few days earlier or later saves at least $25, keeping the same trip length.</string>
+    <string name="watch_flexible_hint">We’ll also tell you if leaving a few days earlier or later saves at least %1$s, keeping the same trip length.</string>
     <string name="watch_fare_saving">Checking today’s price…</string>
     <string name="watch_fare_error">Couldn’t start watching this fare. Try again in a moment.</string>
     <string name="watch_fare_done_price">Today’s fare is %1$s (%2$s). We’ll check about twice a day and only speak up when it’s worth it.</string>
@@ -127,7 +127,7 @@
     <string name="watch_trip_note_per_person">per person × %1$d</string>
     <string name="watch_trip_how">When you start, we look up live prices for your flight (the cheapest fare on your dates, not one specific flight), hotel and up to 5 activities, and show the live total. Anything without a live price stays at its estimate.</string>
     <string name="watch_trip_estimates_fixed">Estimates are fixed and never trigger alerts.</string>
-    <string name="watch_trip_alert_rule">Alerts come only from live prices moving the total by at least $25 or 4 %.</string>
+    <string name="watch_trip_alert_rule">Alerts come only from live prices moving the total by at least %1$s or 4 %%.</string>
     <string name="watch_trip_watching_caption">What we’re watching · %1$s, %2$s</string>
     <string name="watch_trip_total">Total</string>
     <string name="watch_trip_not_in_total">not in total</string>

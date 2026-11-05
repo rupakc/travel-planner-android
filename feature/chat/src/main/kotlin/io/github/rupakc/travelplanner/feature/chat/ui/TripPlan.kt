@@ -58,11 +58,11 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.chat.ChatItinerary
 import io.github.rupakc.travelplanner.core.model.chat.ChatItineraryDay
 import io.github.rupakc.travelplanner.core.model.chat.ChatSlot
 import io.github.rupakc.travelplanner.core.model.section.SectionId
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.chat.R
 import io.github.rupakc.travelplanner.feature.chat.model.ChatTripMap
 import java.time.LocalDate
@@ -126,7 +126,7 @@ private fun RouteCard(tripMap: ChatTripMap, itinerary: ChatItinerary?, generatin
             }
             summary?.totalCostUsd?.takeIf { it > 0 }?.let { total ->
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(formatPrice(total), style = TravelTheme.typography.titleLarge, color = TravelTheme.colors.primary, fontWeight = FontWeight.Bold)
+                    Text(localPrice(total), style = TravelTheme.typography.titleLarge, color = TravelTheme.colors.primary, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.chat_est_per_person), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
                 }
             }
@@ -224,7 +224,7 @@ private fun IntercityRow(itinerary: ChatItinerary) {
                             opt.duration?.let { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
                             opt.priceUsd?.takeIf { it > 0 }?.let {
                                 Text(
-                                    formatPrice(it),
+                                    localPrice(it),
                                     style = TravelTheme.typography.bodySmall,
                                     color = TravelTheme.colors.primary,
                                     fontWeight = FontWeight.Bold,
@@ -305,7 +305,7 @@ private fun DayCard(day: ChatItineraryDay, number: Int, open: Boolean, cityIndex
                 }
                 day.dailyCostUsd?.takeIf {
                     it > 0
-                }?.let { Text(formatPrice(it), style = TravelTheme.typography.labelLarge, color = TravelTheme.colors.primary) }
+                }?.let { Text(localPrice(it), style = TravelTheme.typography.labelLarge, color = TravelTheme.colors.primary) }
                 Icon(if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null)
             }
             if (open) DayBody(day)
@@ -336,7 +336,7 @@ private fun DayBody(day: ChatItineraryDay) {
                     hotel.highlight?.let { Text("“$it”", style = TravelTheme.typography.bodySmall, fontStyle = FontStyle.Italic) }
                 }
                 hotel.pricePerNightUsd?.takeIf { it > 0 }?.let {
-                    Text(stringResource(R.string.chat_per_night, formatPrice(it)), style = TravelTheme.typography.labelLarge, color = accent.text)
+                    Text(stringResource(R.string.chat_per_night, localPrice(it)), style = TravelTheme.typography.labelLarge, color = accent.text)
                 }
             }
         }
@@ -348,7 +348,7 @@ private fun DayBody(day: ChatItineraryDay) {
                 stringResource(R.string.chat_must_see),
                 day.placesToSee.mapNotNull { p ->
                     val name = p.name ?: return@mapNotNull null
-                    val price = p.entryUsd?.let { if (it == 0.0) stringResource(R.string.chat_free) else formatPrice(it) }
+                    val price = p.entryUsd?.let { if (it == 0.0) stringResource(R.string.chat_free) else localPrice(it) }
                     listOfNotNull(name, price).joinToString(" · ")
                 },
             )
@@ -379,7 +379,7 @@ private fun SlotLine(labelRes: Int, slot: ChatSlot?) {
             Text(activity, style = TravelTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
             slot.place?.takeIf { it != activity }?.let { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
         }
-        slot.costUsd?.takeIf { it > 0 }?.let { Text(formatPrice(it), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.primary) }
+        slot.costUsd?.takeIf { it > 0 }?.let { Text(localPrice(it), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.primary) }
     }
 }
 

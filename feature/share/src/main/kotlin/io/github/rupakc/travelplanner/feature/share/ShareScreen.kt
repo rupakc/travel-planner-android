@@ -51,13 +51,13 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.export.safeUrl
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.FlightLeg
 import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -227,7 +227,7 @@ private fun Poster(trip: SharedTrip, onOpenLink: (String) -> Unit) {
                     )
                 }
                 Text(pluralStringResource(R.plurals.share_travellers, trip.travellers, trip.travellers), style = TravelTheme.typography.labelLarge)
-                if (trip.plannedUsd > 0) Text(stringResource(R.string.share_planned, formatPrice(trip.plannedUsd)), style = TravelTheme.typography.labelLarge)
+                if (trip.plannedUsd > 0) Text(stringResource(R.string.share_planned, localPrice(trip.plannedUsd)), style = TravelTheme.typography.labelLarge)
             }
             if (trip.interests.isNotEmpty()) {
                 FlowRow(
@@ -281,7 +281,7 @@ private fun FlightsCard(trip: SharedTrip) {
             FlightLine(tag, row.leg, row.route, row.date, row.priceUsd)
         }
         trip.legsTotalUsd?.let {
-            Text(stringResource(R.string.share_flights_total, formatPrice(it)), style = TravelTheme.typography.labelLarge, color = TravelTheme.colors.primary)
+            Text(stringResource(R.string.share_flights_total, localPrice(it)), style = TravelTheme.typography.labelLarge, color = TravelTheme.colors.primary)
         }
     }
 }
@@ -291,7 +291,7 @@ private fun FlightLine(tag: String, leg: FlightLeg, route: String?, date: String
     Column {
         Text(tag, style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.secondary)
         val title = listOfNotNull(leg.airline ?: stringResource(R.string.share_flight), leg.flightNumber).joinToString(" ")
-        Text(listOfNotNull(title, priceUsd?.takeIf { it > 0 }?.let(::formatPrice)).joinToString(" · "), style = TravelTheme.typography.bodyLarge)
+        Text(listOfNotNull(title, priceUsd?.takeIf { it > 0 }?.let { localPrice(it) }).joinToString(" · "), style = TravelTheme.typography.bodyLarge)
         listOfNotNull(route, listOfNotNull(date, leg.departureTime).joinToString(" ").ifEmpty { null }).forEach {
             Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
         }
@@ -307,8 +307,8 @@ private fun HotelCard(hotel: Hotel) {
                 hotel.starRating?.takeIf { it > 0 }?.let { stringResource(R.string.share_stars, kotlin.math.round(it).toInt()) },
                 hotel.reviewScore?.let { stringResource(R.string.share_review, it.toString()) },
                 hotel.location,
-                hotel.pricePerNightUsd?.takeIf { it > 0 }?.let { stringResource(R.string.share_per_night, formatPrice(it)) },
-                hotel.totalPriceUsd?.takeIf { it > 0 }?.let { stringResource(R.string.share_total, formatPrice(it)) },
+                hotel.pricePerNightUsd?.takeIf { it > 0 }?.let { stringResource(R.string.share_per_night, localPrice(it)) },
+                hotel.totalPriceUsd?.takeIf { it > 0 }?.let { stringResource(R.string.share_total, localPrice(it)) },
             )
         facts.forEach { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
     }
@@ -398,7 +398,7 @@ private fun LazyListScope.listCards(sel: PlanSelections, onOpenLink: (String) ->
                 Line(
                     listOfNotNull(sim.provider, sim.planName).joinToString(" — "),
                     listOfNotNull(
-                        sim.priceUsd?.let(::formatPrice),
+                        sim.priceUsd?.let { localPrice(it) },
                         data,
                         sim.validityDays?.let { pluralStringResource(R.plurals.share_validity, it, it) },
                         sim.networkQuality?.speed,
@@ -426,7 +426,7 @@ private fun LazyListScope.listCards(sel: PlanSelections, onOpenLink: (String) ->
 @Composable
 private fun ActivityLine(a: Activity) {
     val hours = a.durationHours?.let { stringResource(R.string.share_hours, it.toString().removeSuffix(".0")) }
-    Line(a.name, listOfNotNull(a.city?.substringBefore(','), a.category, hours, a.priceUsd?.let(::formatPrice), a.location))
+    Line(a.name, listOfNotNull(a.city?.substringBefore(','), a.category, hours, a.priceUsd?.let { localPrice(it) }, a.location))
 }
 
 @Composable

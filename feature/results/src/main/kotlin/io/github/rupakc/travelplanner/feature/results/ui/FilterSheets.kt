@@ -46,7 +46,6 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVarian
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.search.ActivityFilters
 import io.github.rupakc.travelplanner.core.model.search.FlightFilters
 import io.github.rupakc.travelplanner.core.model.search.HotelFilters
@@ -54,6 +53,7 @@ import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.ChipRow
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.formatDate
@@ -202,7 +202,7 @@ private fun TimeRange(label: String, value: Pair<Float, Float>, onChange: (Pair<
 @Composable
 private fun PriceSlider(label: String, value: Float?, floor: Float, ceil: Float, onChange: (Float) -> Unit) {
     val shown = value ?: ceil
-    val text = formatPrice(shown.toDouble())
+    val text = localPrice(shown.toDouble())
     Column {
         Row {
             Label(label)

@@ -2,7 +2,7 @@
 <resources>
     <string name="chat_title">Chat de Travel Planner</string>
     <string name="chat_message">Chatea con tu asistente de viajes con IA. Pide un plan de viaje completo y los resultados llegarán en tiempo real con tarjetas interactivas.</string>
-    <string name="chat_starter_1">Planifica un viaje de 5 días a Tokio con un presupuesto de 2000 $</string>
+    <string name="chat_starter_1">Planifica un viaje de 5 días a Tokio con un presupuesto de %1$s</string>
     <string name="chat_starter_2">¿Qué necesito para el visado a Tailandia como ciudadano estadounidense?</string>
     <string name="chat_starter_3">Búscame vuelos baratos de Nueva York a París en junio</string>
     <string name="chat_starter_4">Sugiere una escapada romántica por Europa durante una semana</string>

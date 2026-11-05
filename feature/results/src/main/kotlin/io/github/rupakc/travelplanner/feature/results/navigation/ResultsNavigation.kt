@@ -172,14 +172,15 @@ internal class ResultsSectionActions(
 }
 
 /** Snackbar copy (web watch dialog / results messages). */
-internal fun messageText(context: android.content.Context, message: ResultsMessage): String =
-    when (message) {
+internal fun messageText(context: android.content.Context, message: ResultsMessage): String {
+    val locale = context.resources.configuration.locales[0]
+    return when (message) {
         is ResultsMessage.FareWatched -> {
             val base =
                 if (message.price != null) {
                     context.getString(
                         R.string.results_fare_watched,
-                        formatPrice(message.price),
+                        formatPrice(message.price, locale = locale),
                         context.resources.getQuantityString(R.plurals.results_fare_travellers, message.travellers, message.travellers),
                     )
                 } else {
@@ -193,7 +194,7 @@ internal fun messageText(context: android.content.Context, message: ResultsMessa
         }
 
         is ResultsMessage.PriceWatched -> {
-            val price = message.price?.let { formatPrice(it, message.currency ?: "USD") }?.takeIf(String::isNotEmpty)
+            val price = message.price?.let { formatPrice(it, message.currency ?: "USD", locale = locale) }?.takeIf(String::isNotEmpty)
             listOfNotNull(
                 if (message.alreadyWatching) context.getString(R.string.results_already_watching) else null,
                 price?.let { context.getString(R.string.results_price_watched, it) } ?: context.getString(R.string.results_price_watched_pending),
@@ -216,3 +217,4 @@ internal fun messageText(context: android.content.Context, message: ResultsMessa
             message.message ?: context.getString(R.string.results_retry_failed)
         }
     }
+}

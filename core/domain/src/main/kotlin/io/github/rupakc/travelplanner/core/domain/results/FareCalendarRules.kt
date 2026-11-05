@@ -50,14 +50,15 @@ object FareCalendarRules {
     /** Rounded delta for display: 0 = "same"; sign drives "−$45" / "+$30". Null for unknown. */
     fun roundedDelta(delta: Double?): Long? = delta?.takeIf { it.isFinite() }?.let { jsRound(it).toLong() }
 
-    /** Web `formatUsd`: whole dollars with thousands separators ("$1,480"). */
-    fun formatUsd(amount: Double): String = "$" + "%,d".format(Locale.US, jsRound(amount).toLong())
+    /** Web `formatUsd`: whole dollars with thousands separators ("$1,480"; "1480 US$" for a Spanish [locale]). */
+    fun formatUsd(amount: Double, locale: Locale = Locale.US): String =
+        io.github.rupakc.travelplanner.core.domain.format.formatWholeUsd(amount, locale)
 
     /** Web `formatDelta`: "−$45" (real minus sign) / "+$30" / "same"; "" for unknown. */
-    fun formatDelta(delta: Double?): String {
+    fun formatDelta(delta: Double?, locale: Locale = Locale.US): String {
         val rounded = roundedDelta(delta) ?: return ""
         if (rounded == 0L) return "same"
-        return (if (rounded < 0) "−" else "+") + formatUsd(kotlin.math.abs(rounded).toDouble())
+        return (if (rounded < 0) "−" else "+") + formatUsd(kotlin.math.abs(rounded).toDouble(), locale)
     }
 
     /** Web `formatDay`: "Tue 3 Nov" (the UI passes the user's locale). */

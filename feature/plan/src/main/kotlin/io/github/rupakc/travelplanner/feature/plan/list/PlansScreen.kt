@@ -60,8 +60,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.model.TripFilter
 import io.github.rupakc.travelplanner.feature.plan.model.TripSort
@@ -306,7 +306,7 @@ internal fun TripRow(trip: TripSummary, selected: Boolean, onOpen: () -> Unit, m
                     Text(timingLabel(trip.timing), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.primary)
                     Text(pluralStringResource(R.plurals.plan_items, trip.itemCount, trip.itemCount), style = TravelTheme.typography.labelMedium)
                     if (trip.totalCostUsd > 0) {
-                        Text(stringResource(R.string.plan_planned_spend, formatPrice(trip.totalCostUsd)), style = TravelTheme.typography.labelMedium)
+                        Text(stringResource(R.string.plan_planned_spend, localPrice(trip.totalCostUsd)), style = TravelTheme.typography.labelMedium)
                     }
                     travellersLabel(trip.travellers)?.let { Text(it, style = TravelTheme.typography.labelMedium) }
                 }

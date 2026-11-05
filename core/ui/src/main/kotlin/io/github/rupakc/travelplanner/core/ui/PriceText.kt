@@ -13,7 +13,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.TextStyle
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 
 /**
  * A price from the API, formatted like the web (`formatPrice`). Never invents a
@@ -30,7 +30,7 @@ fun PriceText(
     style: TextStyle = LocalTextStyle.current,
     hideWhenUnknown: Boolean = false,
 ) {
-    val formatted = formatPrice(amount, currency, cents)
+    val formatted = localPrice(amount, currency, cents)
     if (formatted.isEmpty()) {
         if (!hideWhenUnknown) {
             Text(stringResource(R.string.price_unknown), modifier, style = style, color = TravelTheme.colors.onSurfaceVariant)

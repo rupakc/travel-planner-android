@@ -23,13 +23,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
 import io.github.rupakc.travelplanner.core.ui.BookingLinkButton
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.ResultsEvent
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.ChipRow
@@ -82,7 +82,7 @@ internal fun HotelCard(hotel: Hotel, selected: Boolean, over: Boolean, actions: 
                 Column(horizontalAlignment = Alignment.End) {
                     hotel.pricePerNightUsd?.let {
                         Text(
-                            stringResource(R.string.results_hotel_per_night, formatPrice(it)),
+                            stringResource(R.string.results_hotel_per_night, localPrice(it)),
                             style = TravelTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = TravelTheme.sectionAccents[SectionId.HOTELS].text,
@@ -90,7 +90,7 @@ internal fun HotelCard(hotel: Hotel, selected: Boolean, over: Boolean, actions: 
                     }
                     hotel.totalPriceUsd?.let {
                         Text(
-                            stringResource(R.string.results_hotel_total, formatPrice(it)),
+                            stringResource(R.string.results_hotel_total, localPrice(it)),
                             style = TravelTheme.typography.labelSmall,
                             color = TravelTheme.colors.onSurfaceVariant,
                         )

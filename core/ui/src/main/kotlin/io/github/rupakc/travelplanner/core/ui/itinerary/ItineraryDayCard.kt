@@ -30,7 +30,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.domain.itinerary.DayRow
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItineraryLayouts
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItinerarySchedule
@@ -46,6 +45,7 @@ import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.PriceText
 import io.github.rupakc.travelplanner.core.ui.R
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 
 /** Layout constants of the shared itinerary UI (defined once). */
 object ItineraryDimens {
@@ -141,7 +141,7 @@ private fun DayHeader(day: ItineraryDay) {
             day.theme?.takeIf { it.isNotBlank() }?.let { Text(it, style = TravelTheme.typography.titleSmall) }
         }
         day.dailyEstimatedCostUsd?.takeIf { it > 0 }?.let { cost ->
-            val formatted = formatPrice(cost)
+            val formatted = localPrice(cost)
             Text(
                 stringResource(R.string.itinerary_day_cost, formatted),
                 style = TravelTheme.typography.labelMedium,

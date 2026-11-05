@@ -36,12 +36,12 @@ import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.export.safeUrl
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
 import io.github.rupakc.travelplanner.core.domain.plan.CostCategory
 import io.github.rupakc.travelplanner.core.domain.plan.CostPart
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.ui.PriceText
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
 import io.github.rupakc.travelplanner.feature.plan.model.Removal
@@ -196,7 +196,7 @@ private fun EntryPrice(entry: SelectionEntry) {
         }
 
         entry.priceUsd != null && entry.perNight -> {
-            Text(stringResource(R.string.plan_per_night, formatPrice(entry.priceUsd)), style = TravelTheme.typography.labelLarge)
+            Text(stringResource(R.string.plan_per_night, localPrice(entry.priceUsd)), style = TravelTheme.typography.labelLarge)
         }
 
         entry.priceUsd != null -> {
@@ -239,9 +239,9 @@ internal fun CostCard(
     val total = parts.sumOf { it.amount }
     TpCard(modifier.fillMaxWidth()) {
         Text(stringResource(R.string.plan_estimated_cost), style = TravelTheme.typography.labelLarge, color = TravelTheme.colors.onSurfaceVariant)
-        Text(formatPrice(total), style = TravelTheme.typography.headlineMedium)
+        Text(localPrice(total), style = TravelTheme.typography.headlineMedium)
         budgetStatus?.let { status ->
-            val amount = formatPrice(status.amount.toDouble())
+            val amount = localPrice(status.amount.toDouble())
             Text(
                 stringResource(if (status.over) R.string.plan_over_budget else R.string.plan_under_budget, amount),
                 style = TravelTheme.typography.labelLarge,
@@ -259,7 +259,7 @@ internal fun CostCard(
             }
         val barDescription =
             described.map { (p, _, pct) ->
-                stringResource(R.string.plan_cost_part_a11y, p.category.label(), formatPrice(p.amount), percentText(pct))
+                stringResource(R.string.plan_cost_part_a11y, p.category.label(), localPrice(p.amount), percentText(pct))
             }
         Row(
             Modifier
@@ -271,7 +271,7 @@ internal fun CostCard(
             described.forEach { (p, color, _) -> Box(Modifier.weight(p.amount.toFloat()).fillMaxHeight().background(color)) }
         }
         Spacer(Modifier.height(TravelTheme.spacing.sm))
-        described.forEach { (p, color, pct) -> LegendRow(p.category.label(), color, formatPrice(p.amount), pct) }
+        described.forEach { (p, color, pct) -> LegendRow(p.category.label(), color, localPrice(p.amount), pct) }
         if (hasTransport) {
             Spacer(Modifier.height(TravelTheme.spacing.xs))
             Text(stringResource(R.string.plan_cost_transport_note), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
