@@ -37,6 +37,7 @@ class PreferencesSettingsStore(private val store: DataStore<Preferences>) : Sett
     private val trip = booleanPreferencesKey("notify_trip")
     private val price = booleanPreferencesKey("notify_price")
     private val nearby = booleanPreferencesKey("notify_nearby")
+    private val nearbyAlways = booleanPreferencesKey("notify_nearby_always")
 
     override val settings: Flow<AppSettings> =
         store.safeData().map { p ->
@@ -48,6 +49,7 @@ class PreferencesSettingsStore(private val store: DataStore<Preferences>) : Sett
                 tripNotifications = p[trip] ?: true,
                 priceAlertNotifications = p[price] ?: true,
                 nearbyNotifications = p[nearby] ?: false,
+                nearbyNotificationsAlways = p[nearbyAlways] ?: false,
             )
         }.distinctUntilChanged()
 
@@ -63,11 +65,12 @@ class PreferencesSettingsStore(private val store: DataStore<Preferences>) : Sett
 
     override suspend fun setLocaleTag(tag: String?) = store.editKey(locale, tag)
 
-    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?) {
+    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?, nearbyAlways: Boolean?) {
         store.edit { p ->
             trip?.let { p[this.trip] = it }
             priceAlerts?.let { p[price] = it }
             nearby?.let { p[this.nearby] = it }
+            nearbyAlways?.let { p[this.nearbyAlways] = it }
         }
     }
 }

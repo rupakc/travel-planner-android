@@ -31,9 +31,14 @@ sealed interface AppRoute
 
 /**
  * Search form. [mode]: one of [SearchModes]; [importUrl] pre-fills "From a link"
- * (chat `import_link`, share intents).
+ * (chat `import_link`, share intents); [recentSearchId] loads that recent search
+ * (`RecentSearch.id`) into the form (Home / global search "tap → Search pre-filled").
  */
-@Serializable data class SearchRoute(val mode: String? = null, val importUrl: String? = null) : AppRoute
+@Serializable data class SearchRoute(
+    val mode: String? = null,
+    val importUrl: String? = null,
+    val recentSearchId: String? = null,
+) : AppRoute
 
 /** Streamed results for the search currently held by `SearchRepository` / `CurrentPlanStore`. */
 @Serializable data object ResultsRoute : AppRoute
@@ -54,8 +59,17 @@ sealed interface AppRoute
 
 @Serializable data object NotificationsRoute : AppRoute
 
+/** Unified offline-first search over trips, chats, recent searches, features and settings (opened from Home / top bars). */
+@Serializable data object GlobalSearchRoute : AppRoute
+
 // --- settings -----------------------------------------------------------
 @Serializable data object SettingsRoute : AppRoute
+
+/**
+ * One settings row, opened from global search: the settings graph shows the screen that owns
+ * [entry] (a `SettingsEntry.key` from core:domain globalsearch) scrolled to and highlighting it.
+ */
+@Serializable data class SettingsEntryRoute(val entry: String) : AppRoute
 
 @Serializable data object PreferencesRoute : AppRoute
 

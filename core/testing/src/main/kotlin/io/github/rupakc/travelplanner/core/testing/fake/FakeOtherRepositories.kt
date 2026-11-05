@@ -233,6 +233,12 @@ class FakeHealthRepository(initial: Health? = Health(status = "ok")) : HealthRep
 
     override suspend fun refresh(): AppResult<Health> = state.value?.let { AppResult.Success(it) } ?: NotStubbed
 
+    /** Result of [probe]; every probed URL is recorded in [probed]. */
+    var probeResult: AppResult<Health> = AppResult.Success(Health(status = "ok"))
+    val probed = mutableListOf<String>()
+
+    override suspend fun probe(baseUrl: String): AppResult<Health> = probeResult.also { probed += baseUrl }
+
     fun set(health: Health?) {
         state.value = health
     }
@@ -253,12 +259,13 @@ class FakeSettingsRepository(initial: AppSettings = AppSettings(), private val d
 
     override suspend fun setLocaleTag(tag: String?) = state.update { it.copy(localeTag = tag) }
 
-    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?) =
+    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?, nearbyAlways: Boolean?) =
         state.update {
             it.copy(
                 tripNotifications = trip ?: it.tripNotifications,
                 priceAlertNotifications = priceAlerts ?: it.priceAlertNotifications,
                 nearbyNotifications = nearby ?: it.nearbyNotifications,
+                nearbyNotificationsAlways = nearbyAlways ?: it.nearbyNotificationsAlways,
             )
         }
 }

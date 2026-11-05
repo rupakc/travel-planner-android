@@ -6,5 +6,6 @@
     <string name="nav_plans">Mis viajes</string>
     <string name="nav_alerts">Alertas</string>
     <string name="nav_settings">Ajustes</string>
+    <string name="nav_global_search">Buscar en todo</string>
     <string name="session_expired">Se cerró tu sesión. Vuelve a iniciar sesión.</string>
 </resources>
