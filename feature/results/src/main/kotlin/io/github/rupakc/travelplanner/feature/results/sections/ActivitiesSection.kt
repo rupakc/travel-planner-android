@@ -28,10 +28,10 @@ import io.github.rupakc.travelplanner.feature.results.sections.commerce.LocalCom
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.Pill
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.PillTone
 import io.github.rupakc.travelplanner.feature.results.watch.WatchPriceAction
+import kotlin.math.roundToInt
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
-import kotlin.math.roundToInt
 
 /** Web `OUTDOOR_CATS`: categories that get the weather chips. */
 private val OUTDOOR = listOf("adventure", "nature", "outdoor", "sports", "hiking", "beach")
@@ -42,7 +42,12 @@ private const val DESCRIPTION_LINES = 2
 @Composable
 internal fun ActivitiesSectionContent(data: ActivitiesData, actions: SectionActions, modifier: Modifier = Modifier) {
     if (data.results.isEmpty()) {
-        Text(stringResource(R.string.results_activities_empty), modifier, style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
+        Text(
+            stringResource(R.string.results_activities_empty),
+            modifier,
+            style = TravelTheme.typography.bodyMedium,
+            color = TravelTheme.colors.onSurfaceVariant,
+        )
         return
     }
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
@@ -56,6 +61,7 @@ private fun Activity.rawBool(key: String): Boolean? = (raw[key] as? JsonPrimitiv
 
 private fun Activity.rawString(key: String): String? = (raw[key] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun ActivityCard(activity: Activity, actions: SectionActions) {
     val ctx = LocalCommerceContext.current
@@ -73,17 +79,33 @@ private fun ActivityCard(activity: Activity, actions: SectionActions) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 ChipRow(Modifier.weight(1f)) {
                     activity.category?.let { Pill(it, tone = PillTone.Accent) }
-                    if (fromLink) Pill(activity.rawString("link_quote")?.let { stringResource(R.string.results_from_link_quote, it) } ?: stringResource(R.string.results_from_link), tone = PillTone.Warning)
+                    if (fromLink) {
+                        Pill(
+                            activity.rawString("link_quote")?.let { stringResource(R.string.results_from_link_quote, it) }
+                                ?: stringResource(R.string.results_from_link),
+                            tone = PillTone.Warning,
+                        )
+                    }
                 }
                 if (!fromLink) {
                     activity.similarityScore?.takeIf { it > 0 }?.let {
-                        Text(stringResource(R.string.results_match, (it * PERCENT).roundToInt()), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
+                        Text(
+                            stringResource(R.string.results_match, (it * PERCENT).roundToInt()),
+                            style = TravelTheme.typography.labelSmall,
+                            color = TravelTheme.colors.onSurfaceVariant,
+                        )
                     }
                 }
             }
             Text(name, style = TravelTheme.typography.titleMedium)
             activity.description?.let {
-                Text(it, style = TravelTheme.typography.bodyMedium, maxLines = DESCRIPTION_LINES, overflow = TextOverflow.Ellipsis, color = TravelTheme.colors.onSurfaceVariant)
+                Text(
+                    it,
+                    style = TravelTheme.typography.bodyMedium,
+                    maxLines = DESCRIPTION_LINES,
+                    overflow = TextOverflow.Ellipsis,
+                    color = TravelTheme.colors.onSurfaceVariant,
+                )
             }
             val meta =
                 listOfNotNull(

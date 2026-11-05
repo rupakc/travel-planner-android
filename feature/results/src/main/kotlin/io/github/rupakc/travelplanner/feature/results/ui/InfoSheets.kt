@@ -45,7 +45,9 @@ import io.github.rupakc.travelplanner.feature.results.sections.formatHours
 private fun Sheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
-            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = TravelTheme.spacing.gutter).padding(bottom = TravelTheme.spacing.xl).navigationBarsPadding(),
+            Modifier.fillMaxWidth().verticalScroll(
+                rememberScrollState(),
+            ).padding(horizontal = TravelTheme.spacing.gutter).padding(bottom = TravelTheme.spacing.xl).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
         ) { content() }
     }
@@ -55,13 +57,17 @@ private fun Sheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
 private fun Title(text: String) = Text(text, style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
 
 /** Web LayoverModal: can you leave the airport, transit visa, a mini-plan, buffers, airside alternative. */
+@Suppress("CyclomaticComplexMethod")
 @Composable
 internal fun LayoverSheet(ui: LayoverUi, onDismiss: () -> Unit) {
     val place = ui.layover.city ?: ui.layover.airport.orEmpty()
     Sheet(onDismiss) {
         Title(stringResource(R.string.results_layover_title, ui.layover.durationHours?.let(::formatHours).orEmpty(), place))
         when (ui.status) {
-            LoadStatus.IDLE, LoadStatus.LOADING -> LoadingIndicator(label = stringResource(R.string.results_layover_loading))
+            LoadStatus.IDLE, LoadStatus.LOADING -> {
+                LoadingIndicator(label = stringResource(R.string.results_layover_loading))
+            }
+
             LoadStatus.ERROR -> {
                 Text(
                     ui.error?.message ?: stringResource(R.string.results_layover_error),
@@ -74,17 +80,35 @@ internal fun LayoverSheet(ui: LayoverUi, onDismiss: () -> Unit) {
                 val plan = ui.plan ?: return@Sheet
                 val canLeave = plan.feasibleToExit == true
                 Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
-                    Pill(stringResource(if (canLeave) R.string.results_layover_leave else R.string.results_layover_airside), tone = if (canLeave) PillTone.Positive else PillTone.Warning)
+                    Pill(
+                        stringResource(if (canLeave) R.string.results_layover_leave else R.string.results_layover_airside),
+                        tone = if (canLeave) PillTone.Positive else PillTone.Warning,
+                    )
                     plan.verdictSummary?.let { Text(it, style = TravelTheme.typography.bodyMedium) }
                     if (canLeave) {
                         plan.usableCityHours?.takeIf { it > 0 }?.let {
-                            Text(stringResource(R.string.results_layover_usable, formatHours(it)), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+                            Text(
+                                stringResource(R.string.results_layover_usable, formatHours(it)),
+                                style = TravelTheme.typography.bodySmall,
+                                color = TravelTheme.colors.onSurfaceVariant,
+                            )
                         }
                     }
                 }
                 plan.transitVisa?.let { v ->
                     Text(
-                        listOfNotNull(stringResource(if (v.required == true) R.string.results_layover_visa_required else R.string.results_layover_visa_none), v.notes).joinToString(" "),
+                        listOfNotNull(
+                            stringResource(
+                                if (v.required ==
+                                    true
+                                ) {
+                                    R.string.results_layover_visa_required
+                                } else {
+                                    R.string.results_layover_visa_none
+                                },
+                            ),
+                            v.notes,
+                        ).joinToString(" "),
                         style = TravelTheme.typography.bodyMedium,
                     )
                 }
@@ -137,10 +161,23 @@ internal fun VerificationSheet(detail: VerificationDetail, onOpenLink: (String) 
 
 /** 422 `no_live_price`: the backend's message and "Live prices we did find:" with "Watch this one instead". */
 @Composable
-internal fun NoLivePriceSheet(ui: NoLivePriceUi, onWatch: (io.github.rupakc.travelplanner.core.model.alerts.PriceSuggestion) -> Unit, onOpenLink: (String) -> Unit, onDismiss: () -> Unit) {
+internal fun NoLivePriceSheet(
+    ui: NoLivePriceUi,
+    onWatch: (io.github.rupakc.travelplanner.core.model.alerts.PriceSuggestion) -> Unit,
+    onOpenLink: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
     Sheet(onDismiss) {
         Title(ui.itemName)
-        Text(ui.message ?: stringResource(R.string.results_no_live_price), style = TravelTheme.typography.bodyMedium, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+        Text(
+            ui.message ?: stringResource(R.string.results_no_live_price),
+            style = TravelTheme.typography.bodyMedium,
+            modifier =
+                Modifier.semantics {
+                    liveRegion =
+                        LiveRegionMode.Polite
+                },
+        )
         if (ui.suggestions.isNotEmpty()) {
             Text(stringResource(R.string.results_live_prices_found), style = TravelTheme.typography.titleSmall)
             ui.suggestions.forEach { s ->
@@ -150,8 +187,14 @@ internal fun NoLivePriceSheet(ui: NoLivePriceUi, onWatch: (io.github.rupakc.trav
                         Text(it.joinToString(" · "), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                        if (s.spec != null) TpButton(stringResource(R.string.results_watch_this_instead), onClick = { onWatch(s) }, variant = TpButtonVariant.Tonal)
-                        s.link?.takeIf { it.startsWith("http") }?.let { TpButton(stringResource(R.string.results_open_link), onClick = { onOpenLink(it) }, variant = TpButtonVariant.Text) }
+                        if (s.spec !=
+                            null
+                        ) {
+                            TpButton(stringResource(R.string.results_watch_this_instead), onClick = { onWatch(s) }, variant = TpButtonVariant.Tonal)
+                        }
+                        s.link?.takeIf {
+                            it.startsWith("http")
+                        }?.let { TpButton(stringResource(R.string.results_open_link), onClick = { onOpenLink(it) }, variant = TpButtonVariant.Text) }
                     }
                 }
             }

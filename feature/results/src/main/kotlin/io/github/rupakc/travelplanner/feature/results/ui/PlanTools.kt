@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.results.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -45,8 +47,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.selection.toggleable
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
@@ -120,7 +120,9 @@ internal fun BestValueCard(ui: BestValueUi, onEvent: (ResultsEvent) -> Unit, onO
                 onClick = { onEvent(ResultsEvent.ApplyPackage) },
                 enabled = !ui.applied && !ui.disabled,
             )
-            if (ui.applied && ui.canUndo) TpButton(stringResource(R.string.results_undo), onClick = { onEvent(ResultsEvent.UndoPackage) }, variant = TpButtonVariant.Secondary)
+            if (ui.applied && ui.canUndo) {
+                TpButton(stringResource(R.string.results_undo), onClick = { onEvent(ResultsEvent.UndoPackage) }, variant = TpButtonVariant.Secondary)
+            }
         }
         val note =
             when {
@@ -157,15 +159,17 @@ private fun conflictLabels(conflicts: List<PackageConflict>): String {
 private fun PackageRow(entry: PackageItem, onOpenLink: (String) -> Unit) {
     val (name, href, price) = describe(entry)
     val safe = href?.takeIf { it.startsWith("https://") || it.startsWith("http://") }
+    val openLabel = stringResource(R.string.results_open_link)
+    val accent = TravelTheme.sectionAccents[entry.sectionId()].bar
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = TravelTheme.spacing.minTouchTarget)
-            .then(if (safe != null) Modifier.clickable(role = Role.Button, onClickLabel = stringResource(R.string.results_open_link)) { onOpenLink(safe) } else Modifier)
+            .then(if (safe != null) Modifier.clickable(role = Role.Button, onClickLabel = openLabel) { onOpenLink(safe) } else Modifier)
             .padding(vertical = TravelTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(TravelTheme.spacing.accentBar, TravelTheme.spacing.xl).background(TravelTheme.sectionAccents[entry.sectionId()].bar, TravelShape.Pill))
+        Box(Modifier.size(TravelTheme.spacing.accentBar, TravelTheme.spacing.xl).background(accent, TravelShape.Pill))
         Column(Modifier.weight(1f).padding(start = TravelTheme.spacing.md)) {
             ChipRow {
                 Text(name, style = TravelTheme.typography.titleSmall, color = if (safe != null) TravelTheme.colors.primary else TravelTheme.colors.onSurface)
@@ -193,14 +197,16 @@ private fun describe(entry: PackageItem): Triple<String, String?, String?> =
     when (val item = entry.item) {
         is PlanItem.FlightItem -> {
             Triple(
-                listOfNotNull(item.flight.airlineName, item.flight.flightNo).joinToString(" ").ifBlank { stringResource(R.string.results_flight_fallback_name) },
+                listOfNotNull(item.flight.airlineName, item.flight.flightNo).joinToString(" ")
+                    .ifBlank { stringResource(R.string.results_flight_fallback_name) },
                 item.flight.bookingUrl,
                 item.flight.priceUsd?.let { formatPrice(it) },
             )
         }
 
         is PlanItem.HotelItem -> {
-            Triple(item.hotel.name.orEmpty(), item.hotel.bookingUrl, item.hotel.pricePerNightUsd?.let { stringResource(R.string.results_hotel_per_night, formatPrice(it)) })
+            val nightly = item.hotel.pricePerNightUsd?.let { stringResource(R.string.results_hotel_per_night, formatPrice(it)) }
+            Triple(item.hotel.name.orEmpty(), item.hotel.bookingUrl, nightly)
         }
 
         is PlanItem.ActivityItem -> {
@@ -211,8 +217,14 @@ private fun describe(entry: PackageItem): Triple<String, String?, String?> =
             )
         }
 
-        is PlanItem.WalkingTourItem -> Triple(item.tour.name.orEmpty(), item.tour.url, null)
-        is PlanItem.PlaceItem -> Triple(item.place.name.orEmpty(), item.place.infoUrl, null)
+        is PlanItem.WalkingTourItem -> {
+            Triple(item.tour.name.orEmpty(), item.tour.url, null)
+        }
+
+        is PlanItem.PlaceItem -> {
+            Triple(item.place.name.orEmpty(), item.place.infoUrl, null)
+        }
+
         is PlanItem.SimItem -> {
             Triple(
                 listOfNotNull(item.plan.provider, item.plan.planName).joinToString(" ").ifBlank { stringResource(R.string.results_sim_fallback_name) },
@@ -221,15 +233,26 @@ private fun describe(entry: PackageItem): Triple<String, String?, String?> =
             )
         }
 
-        else -> Triple("", null, null)
+        else -> {
+            Triple("", null, null)
+        }
     }
 
 @Composable
 private fun reasonText(reason: PickReason): String =
     when (reason) {
-        PickReason.CheapestFare -> stringResource(R.string.results_reason_cheapest_fare)
-        is PickReason.FewerStops -> stringResource(R.string.results_reason_fewer_stops, formatPrice(reason.extra.toDouble()))
-        is PickReason.SavesTime -> stringResource(R.string.results_reason_saves_time, durationText(reason.minutes), formatPrice(reason.extra.toDouble()))
+        PickReason.CheapestFare -> {
+            stringResource(R.string.results_reason_cheapest_fare)
+        }
+
+        is PickReason.FewerStops -> {
+            stringResource(R.string.results_reason_fewer_stops, formatPrice(reason.extra.toDouble()))
+        }
+
+        is PickReason.SavesTime -> {
+            stringResource(R.string.results_reason_saves_time, durationText(reason.minutes), formatPrice(reason.extra.toDouble()))
+        }
+
         is PickReason.BestReviewed -> {
             val stars = reason.stars
             val label =
@@ -241,7 +264,10 @@ private fun reasonText(reason: PickReason): String =
             reason.city?.let { "$label · $it" } ?: label
         }
 
-        PickReason.CheaperStay -> stringResource(R.string.results_reason_cheaper_stay)
+        PickReason.CheaperStay -> {
+            stringResource(R.string.results_reason_cheaper_stay)
+        }
+
         is PickReason.ActivityPrice -> {
             val base =
                 when {
@@ -252,10 +278,21 @@ private fun reasonText(reason: PickReason): String =
             if (reason.matchesInterests) stringResource(R.string.results_reason_interests, base) else base
         }
 
-        is PickReason.TourNote -> reason.priceNote ?: stringResource(R.string.results_reason_free_tour)
-        PickReason.FreeEntry -> stringResource(R.string.results_reason_free_entry)
-        is PickReason.CoversTrip -> stringResource(R.string.results_reason_covers_trip, reason.days)
-        PickReason.CheapestPlan -> stringResource(R.string.results_reason_cheapest_plan)
+        is PickReason.TourNote -> {
+            reason.priceNote ?: stringResource(R.string.results_reason_free_tour)
+        }
+
+        PickReason.FreeEntry -> {
+            stringResource(R.string.results_reason_free_entry)
+        }
+
+        is PickReason.CoversTrip -> {
+            stringResource(R.string.results_reason_covers_trip, reason.days)
+        }
+
+        PickReason.CheapestPlan -> {
+            stringResource(R.string.results_reason_cheapest_plan)
+        }
     }
 
 /** "2h", "3h 20m", "45m" (web `duration`). */
@@ -391,8 +428,14 @@ private fun categoryColor(c: BudgetCategory): Color =
 @Composable
 private fun fitText(c: BudgetCategory, ui: BudgetUi): String =
     when (c) {
-        BudgetCategory.FLIGHTS -> pluralStringResource(R.plurals.results_budget_flights_fit, ui.fit.flights.total, ui.fit.flights.count, ui.fit.flights.total)
-        BudgetCategory.STAY -> pluralStringResource(R.plurals.results_budget_hotels_fit, ui.fit.hotels.total, ui.fit.hotels.count, ui.fit.hotels.total)
+        BudgetCategory.FLIGHTS -> {
+            pluralStringResource(R.plurals.results_budget_flights_fit, ui.fit.flights.total, ui.fit.flights.count, ui.fit.flights.total)
+        }
+
+        BudgetCategory.STAY -> {
+            pluralStringResource(R.plurals.results_budget_hotels_fit, ui.fit.hotels.total, ui.fit.hotels.count, ui.fit.hotels.total)
+        }
+
         BudgetCategory.ACTIVITIES -> {
             val n = ui.fit.activities.picked.size
             pluralStringResource(R.plurals.results_budget_activities_fit, n, n, formatPrice(ui.fit.activities.spent))
@@ -479,8 +522,12 @@ private fun remixDescription(p: RemixPreset): String =
 @Composable
 internal fun RemixComparisonBanner(ui: RemixUi, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     val rows = ui.rows ?: return
-    Surface(modifier.fillMaxWidth(), shape = TravelShape.ItemCard, color = TravelTheme.colors.tertiaryContainer, contentColor = TravelTheme.colors.onTertiaryContainer) {
-        Column(Modifier.padding(TravelTheme.spacing.lg).semantics { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+    val colors = TravelTheme.colors
+    Surface(modifier.fillMaxWidth(), shape = TravelShape.ItemCard, color = colors.tertiaryContainer, contentColor = colors.onTertiaryContainer) {
+        Column(
+            Modifier.padding(TravelTheme.spacing.lg).semantics { liveRegion = LiveRegionMode.Polite },
+            verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.results_remixed, remixLabel(ui.preset)), style = TravelTheme.typography.titleSmall, modifier = Modifier.weight(1f))
                 TpButton(stringResource(R.string.results_dismiss), onClick = onDismiss, variant = TpButtonVariant.Text)
@@ -505,6 +552,7 @@ private fun MetricTile(row: MetricDiff) {
                 RemixMetric.POOR_WEATHER_DAYS -> R.string.results_metric_weather
             },
         )
+
     fun fmt(v: Double) = if (row.metric.isMoney) formatPrice(v.roundToLong().toDouble()) else v.roundToLong().toString()
     val change =
         when (row.improved) {
@@ -536,8 +584,10 @@ private fun MetricTile(row: MetricDiff) {
 @Composable
 internal fun PlanBar(plan: PlanSummary, onOpen: () -> Unit, modifier: Modifier = Modifier) {
     val count = pluralStringResource(R.plurals.results_plan_items, plan.count, plan.count)
-    val budget = plan.budget?.let { stringResource(if (it.over) R.string.results_over_budget else R.string.results_under_budget, formatPrice(it.amount.toDouble())) }
-    Surface(modifier.fillMaxWidth(), color = TravelTheme.colors.inverseSurface, contentColor = TravelTheme.colors.inverseOnSurface, tonalElevation = TravelTheme.spacing.xs) {
+    val budget =
+        plan.budget?.let { stringResource(if (it.over) R.string.results_over_budget else R.string.results_under_budget, formatPrice(it.amount.toDouble())) }
+    val colors = TravelTheme.colors
+    Surface(modifier.fillMaxWidth(), color = colors.inverseSurface, contentColor = colors.inverseOnSurface, tonalElevation = TravelTheme.spacing.xs) {
         Row(
             Modifier.padding(horizontal = TravelTheme.spacing.gutter, vertical = TravelTheme.spacing.sm),
             verticalAlignment = Alignment.CenterVertically,

@@ -143,7 +143,15 @@ internal fun messageText(context: android.content.Context, message: ResultsMessa
             message.message ?: context.getString(if (message.kind == "fare") R.string.results_watch_fare_failed else R.string.results_watch_price_failed)
         }
 
-        ResultsMessage.WatchUnavailable -> context.getString(R.string.results_watch_unavailable)
-        ResultsMessage.NewPlanStarted -> context.getString(R.string.results_new_plan_started)
-        is ResultsMessage.RetryFailed -> message.message ?: context.getString(R.string.results_retry_failed)
+        ResultsMessage.WatchUnavailable -> {
+            context.getString(R.string.results_watch_unavailable)
+        }
+
+        ResultsMessage.NewPlanStarted -> {
+            context.getString(R.string.results_new_plan_started)
+        }
+
+        is ResultsMessage.RetryFailed -> {
+            message.message ?: context.getString(R.string.results_retry_failed)
+        }
     }

@@ -17,6 +17,7 @@ import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
 import io.github.rupakc.travelplanner.core.domain.results.clearPendingVerification
 import io.github.rupakc.travelplanner.core.domain.results.orderSectionByCity
 import io.github.rupakc.travelplanner.core.model.health.Health
+import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
 import io.github.rupakc.travelplanner.core.model.search.ActivityFilters
 import io.github.rupakc.travelplanner.core.model.search.FlightFilters
@@ -25,14 +26,11 @@ import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
 import io.github.rupakc.travelplanner.core.model.search.SectionResult
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
-import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.EventsData
+import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.ForexData
 import io.github.rupakc.travelplanner.core.model.section.GettingAroundData
-import io.github.rupakc.travelplanner.core.model.section.TipsData
-import io.github.rupakc.travelplanner.core.model.section.VisaData
-import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.ItineraryData
 import io.github.rupakc.travelplanner.core.model.section.PlacesData
@@ -41,11 +39,13 @@ import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
 import io.github.rupakc.travelplanner.core.model.section.SimData
+import io.github.rupakc.travelplanner.core.model.section.TipsData
+import io.github.rupakc.travelplanner.core.model.section.VisaData
 import io.github.rupakc.travelplanner.core.model.section.WalkingToursData
 import io.github.rupakc.travelplanner.core.model.section.WeatherData
 import io.github.rupakc.travelplanner.feature.results.sections.ResultsSection
-import kotlinx.serialization.json.JsonObject
 import java.time.LocalDate
+import kotlinx.serialization.json.JsonObject
 
 /** Per-search local state of the results screen (owned by the ViewModel). */
 internal data class LocalState(
@@ -85,9 +85,10 @@ internal data class LocalState(
  * state. Runs off the main thread; decodes only sections whose JSON changed.
  */
 internal class ResultsStateBuilder {
-    private val decoded = object : LinkedHashMap<JsonObject, SectionData>(CACHE_SIZE, LOAD_FACTOR, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<JsonObject, SectionData>?) = size > CACHE_SIZE
-    }
+    private val decoded =
+        object : LinkedHashMap<JsonObject, SectionData>(CACHE_SIZE, LOAD_FACTOR, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<JsonObject, SectionData>?) = size > CACHE_SIZE
+        }
 
     private fun decode(id: SectionId, raw: JsonObject, fallback: SectionData?): SectionData =
         synchronized(decoded) { decoded[raw] } ?: (fallback ?: SectionDecoder.decode(id, raw)).also { synchronized(decoded) { decoded[raw] = it } }
@@ -107,7 +108,7 @@ internal class ResultsStateBuilder {
         }
     }
 
-    @Suppress("LongParameterList")
+    @Suppress("LongParameterList", "CyclomaticComplexMethod")
     fun build(
         results: SearchResultsState,
         fromSnapshot: Boolean,
@@ -266,6 +267,20 @@ internal class ResultsStateBuilder {
                 weather = effective[SectionId.WEATHER]?.first as? WeatherData,
                 itinerary = effective[SectionId.ITINERARY]?.first as? ItineraryData,
             )
+
+        /**
+         * Which results to show (explicit source selection):
+         * 1. an in-flight stream (Search started it, or Remix/Retry) → attach to it, never start another;
+         * 2. the draft carries stored results and the stream is idle, or a saved plan opened after a
+         *    finished stream for another trip ("Open in results") → render the draft, no stream;
+         * 3. otherwise the live state (the ViewModel starts a stream only for an unsaved draft request).
+         */
+        fun useLiveStream(live: SearchResultsState, draft: PlanDraft): Boolean {
+            if (live.phase == StreamPhase.IDLE) return false
+            if (live.phase == StreamPhase.STREAMING) return true
+            val savedOther = draft.planId != null && !draft.searchData.isNullOrEmpty() && draft.searchRequest != live.request
+            return !savedOther
+        }
 
         /** Results restored from the plan draft's `searchData` (no re-stream after process death / for a saved plan). */
         fun snapshot(draft: PlanDraft): SearchResultsState? {

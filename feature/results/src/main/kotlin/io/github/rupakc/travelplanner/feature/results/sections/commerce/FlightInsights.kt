@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.feature.results.sections.commerce
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,9 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -54,8 +54,8 @@ import io.github.rupakc.travelplanner.feature.results.ResultsEvent
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import kotlinx.serialization.json.JsonObject
 import kotlin.math.abs
+import kotlinx.serialization.json.JsonObject
 
 private val SPARK_WIDTH = 180.dp
 private val SPARK_HEIGHT = 44.dp
@@ -88,7 +88,10 @@ fun PricingAdvisorBanner(data: PricingAdvisorData, daysUntilDeparture: Long, mod
             Sparkline(points.map { it.daysBefore!! to it.relativePrice!! }, daysUntilDeparture)
             ChipRow {
                 data.priceStatusLabel?.let { Pill(it, tone = tone) }
-                Pill(stringResource(if (bookNow) R.string.results_advisor_book_now else R.string.results_advisor_wait), tone = if (bookNow) PillTone.Positive else PillTone.Warning)
+                Pill(
+                    stringResource(if (bookNow) R.string.results_advisor_book_now else R.string.results_advisor_wait),
+                    tone = if (bookNow) PillTone.Positive else PillTone.Warning,
+                )
                 data.confidence?.let { Text(stringResource(R.string.results_advisor_confidence, it), style = TravelTheme.typography.labelSmall) }
             }
             if (expanded) {
@@ -121,7 +124,9 @@ private fun Sparkline(points: List<Pair<Int, Double>>, daysUntil: Long) {
             val prices = sorted.map { it.second }
             val minP = prices.min()
             val range = (prices.max() - minP).takeIf { it != 0.0 } ?: 0.1
+
             fun x(d: Int) = pad + (1 - d.toFloat() / maxDb) * (size.width - 2 * pad)
+
             fun y(p: Double) = (size.height - pad - ((p - minP) / range) * (size.height - 2 * pad)).toFloat()
             val path = Path()
             sorted.forEachIndexed { i, (d, p) -> if (i == 0) path.moveTo(x(d), y(p)) else path.lineTo(x(d), y(p)) }
@@ -131,7 +136,12 @@ private fun Sparkline(points: List<Pair<Int, Double>>, daysUntil: Long) {
             drawCircle(line, radius = SPARK_DOT.toPx(), center = Offset(x(now.first), y(now.second)))
         }
         Row(Modifier.width(SPARK_WIDTH)) {
-            Text(stringResource(R.string.results_advisor_90d), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant, modifier = Modifier.weight(1f))
+            Text(
+                stringResource(R.string.results_advisor_90d),
+                style = TravelTheme.typography.labelSmall,
+                color = TravelTheme.colors.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
             Text(stringResource(R.string.results_advisor_now), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
         }
     }
@@ -161,7 +171,11 @@ fun PriceInsightsChip(insights: JsonObject?, modifier: Modifier = Modifier) {
             PriceLevel.TYPICAL -> PillTone.Neutral
             PriceLevel.HIGH -> PillTone.Warning
         }
-    Pill(listOfNotNull(stringResource(R.string.results_insight, level), range, stringResource(R.string.results_insight_source)).joinToString(" · "), modifier, tone)
+    Pill(
+        listOfNotNull(stringResource(R.string.results_insight, level), range, stringResource(R.string.results_insight_source)).joinToString(" · "),
+        modifier,
+        tone,
+    )
 }
 
 /**
@@ -209,7 +223,9 @@ fun FareCalendarStrip(state: FareCalendarUi, onEvent: (ResultsEvent) -> Unit, mo
                 Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
                     Text(stringResource(R.string.results_fare_replan_prompt, range), style = TravelTheme.typography.bodySmall)
                     Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                        TpButton(stringResource(R.string.results_cancel), onClick = { onEvent(ResultsEvent.PickFareDate(null)) }, variant = TpButtonVariant.Text)
+                        TpButton(stringResource(R.string.results_cancel), onClick = {
+                            onEvent(ResultsEvent.PickFareDate(null))
+                        }, variant = TpButtonVariant.Text)
                         TpButton(stringResource(R.string.results_fare_replan), onClick = { onEvent(ResultsEvent.ConfirmFareReplan) })
                     }
                 }
@@ -242,10 +258,11 @@ private fun FareCells(dates: List<FareCalendarDate>, onPick: (FareCalendarDate) 
             val a11y = listOf(day, price, deltaText).filter(String::isNotEmpty).joinToString(", ")
             OutlinedCard(
                 onClick = { if (!isSelected) onPick(entry) },
-                modifier = Modifier.width(FARE_CELL_WIDTH).heightIn(min = TravelTheme.spacing.minTouchTarget).semantics {
-                    contentDescription = a11y
-                    this.selected = isSelected
-                },
+                modifier =
+                    Modifier.width(FARE_CELL_WIDTH).heightIn(min = TravelTheme.spacing.minTouchTarget).semantics {
+                        contentDescription = a11y
+                        this.selected = isSelected
+                    },
                 shape = TravelShape.Input,
                 colors =
                     CardDefaults.outlinedCardColors(
@@ -260,7 +277,18 @@ private fun FareCells(dates: List<FareCalendarDate>, onPick: (FareCalendarDate) 
                 Column(Modifier.fillMaxWidth().padding(all = TravelTheme.spacing.sm), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(day, style = TravelTheme.typography.labelSmall)
                     Text(price, style = TravelTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    Text(deltaText, style = TravelTheme.typography.labelSmall, color = if (delta != null && delta < 0) TravelTheme.extendedColors.success else TravelTheme.colors.onSurfaceVariant)
+                    Text(
+                        deltaText,
+                        style = TravelTheme.typography.labelSmall,
+                        color =
+                            if (delta != null &&
+                                delta < 0
+                            ) {
+                                TravelTheme.extendedColors.success
+                            } else {
+                                TravelTheme.colors.onSurfaceVariant
+                            },
+                    )
                 }
             }
         }

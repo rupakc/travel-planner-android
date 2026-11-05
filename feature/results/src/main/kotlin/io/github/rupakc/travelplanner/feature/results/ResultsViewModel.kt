@@ -18,6 +18,7 @@ import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.results.BestValuePackage
+import io.github.rupakc.travelplanner.core.domain.results.BudgetAllocation
 import io.github.rupakc.travelplanner.core.domain.results.BudgetPlanner
 import io.github.rupakc.travelplanner.core.domain.results.FareCalendarRules
 import io.github.rupakc.travelplanner.core.domain.results.Remix
@@ -115,8 +116,8 @@ class ResultsViewModel
             }
 
         private val source: Flow<Pair<SearchResultsState, Boolean>> =
-            combine(search.current, snapshot) { live, saved ->
-                if (live.phase != StreamPhase.IDLE || saved == null) live to false else saved to true
+            combine(search.current, snapshot, plan.draft) { live, saved, draft ->
+                if (saved == null || ResultsStateBuilder.useLiveStream(live, draft)) live to false else saved to true
             }
 
         val state: StateFlow<ResultsUiState> =
@@ -151,7 +152,9 @@ class ResultsViewModel
             combine(search.current, local) { s, l -> Triple(s.request, s.sections + l.overrides, s.phase) }
                 .distinctUntilChanged()
                 .collect { (request, sections, phase) ->
-                    if (request != null && phase != StreamPhase.IDLE && phase != StreamPhase.FAILED) {
+                    // Never overwrite a saved plan's stored results with a stale stream.
+                    val live = ResultsStateBuilder.useLiveStream(search.current.value, plan.draft.value)
+                    if (live && request != null && phase != StreamPhase.FAILED) {
                         plan.attachSearch(request, SearchResultsReducer.sectionsJson(SearchResultsState(request = request, sections = sections)))
                     }
                 }
@@ -162,23 +165,74 @@ class ResultsViewModel
         @Suppress("CyclomaticComplexMethod", "LongMethod")
         fun onEvent(event: ResultsEvent) {
             when (event) {
-                is ResultsEvent.Toggle -> plan.toggle(event.item)
-                is ResultsEvent.ToggleSection -> toggleSection(event.id)
-                is ResultsEvent.SelectSection -> local.update { it.copy(selected = event.id) }
-                is ResultsEvent.Query -> local.update { it.copy(query = event.text) }
-                ResultsEvent.RetryStream -> request?.let(search::start)
-                is ResultsEvent.RetrySection -> retrySection(event.id)
-                ResultsEvent.RunSavedSearch -> plan.draft.value.searchRequest?.let(search::start)
-                ResultsEvent.ApplyPackage -> applyPackage()
-                ResultsEvent.UndoPackage -> local.value.packageUndo?.let { undo -> plan.restore(undo).also { local.update { it.copy(packageUndo = null) } } }
-                is ResultsEvent.BudgetShare -> updateBudget { a -> BudgetPlanner.reallocate(a, event.category, event.value) }
-                is ResultsEvent.BudgetTotal -> updateBudget { a -> BudgetPlanner.withTotal(a, event.total) }
-                ResultsEvent.BudgetReset -> local.update { it.copy(allocation = null, budgetTouched = false) }
-                is ResultsEvent.ShowOnlyFits -> local.update { it.copy(showOnlyFits = event.on) }
-                ResultsEvent.FindCheaperHotels -> findCheaperHotels()
-                is ResultsEvent.Remix -> remix(event.preset)
-                ResultsEvent.DismissRemix -> local.update { it.copy(remix = null) }
-                ResultsEvent.UndoNewPlan -> local.value.newPlanUndo?.let { undo -> plan.setSelections(undo.selections).also { local.update { it.copy(newPlanUndo = null) } } }
+                is ResultsEvent.Toggle -> {
+                    plan.toggle(event.item)
+                }
+
+                is ResultsEvent.ToggleSection -> {
+                    toggleSection(event.id)
+                }
+
+                is ResultsEvent.SelectSection -> {
+                    local.update { it.copy(selected = event.id) }
+                }
+
+                is ResultsEvent.Query -> {
+                    local.update { it.copy(query = event.text) }
+                }
+
+                ResultsEvent.RetryStream -> {
+                    request?.let(search::start)
+                }
+
+                is ResultsEvent.RetrySection -> {
+                    retrySection(event.id)
+                }
+
+                ResultsEvent.RunSavedSearch -> {
+                    plan.draft.value.searchRequest?.let(search::start)
+                }
+
+                ResultsEvent.ApplyPackage -> {
+                    applyPackage()
+                }
+
+                ResultsEvent.UndoPackage -> {
+                    local.value.packageUndo?.let { undo -> plan.restore(undo).also { local.update { it.copy(packageUndo = null) } } }
+                }
+
+                is ResultsEvent.BudgetShare -> {
+                    updateBudget { a -> BudgetPlanner.reallocate(a, event.category, event.value) }
+                }
+
+                is ResultsEvent.BudgetTotal -> {
+                    updateBudget { a -> BudgetPlanner.withTotal(a, event.total) }
+                }
+
+                ResultsEvent.BudgetReset -> {
+                    local.update { it.copy(allocation = null, budgetTouched = false) }
+                }
+
+                is ResultsEvent.ShowOnlyFits -> {
+                    local.update { it.copy(showOnlyFits = event.on) }
+                }
+
+                ResultsEvent.FindCheaperHotels -> {
+                    findCheaperHotels()
+                }
+
+                is ResultsEvent.Remix -> {
+                    remix(event.preset)
+                }
+
+                ResultsEvent.DismissRemix -> {
+                    local.update { it.copy(remix = null) }
+                }
+
+                ResultsEvent.UndoNewPlan -> {
+                    undoNewPlan()
+                }
+
                 is ResultsEvent.ApplyFlightFilters -> {
                     local.update { it.copy(flightFilters = event.filters) }
                     filter(SectionId.FLIGHTS, FlightsData.serializer()) { r -> search.flightsFiltered(r, event.filters) }
@@ -194,19 +248,57 @@ class ResultsViewModel
                     filter(SectionId.ACTIVITIES, ActivitiesData.serializer()) { r -> search.activitiesFiltered(r, event.filters) }
                 }
 
-                ResultsEvent.ToggleFareCalendar -> toggleFareCalendar()
-                ResultsEvent.RetryFareCalendar -> loadFareCalendar()
-                is ResultsEvent.PickFareDate -> local.update { it.copy(fareCalendar = it.fareCalendar.copy(pending = event.date)) }
-                ResultsEvent.ConfirmFareReplan -> confirmFareReplan()
-                is ResultsEvent.OpenLayover -> openLayover(event.layover)
-                ResultsEvent.CloseLayover -> local.update { it.copy(layover = null) }
-                ResultsEvent.WatchFare -> watchFare()
-                is ResultsEvent.WatchHotel -> watchHotel(event.hotel)
-                is ResultsEvent.WatchActivity -> watchActivity(event.activity)
-                is ResultsEvent.WatchSuggestion -> watchSuggestion(event.suggestion)
-                ResultsEvent.DismissNoLivePrice -> local.update { it.copy(noLivePrice = null) }
-                is ResultsEvent.ShowVerification -> local.update { it.copy(verificationFor = event.section) }
-                ResultsEvent.DismissVerification -> local.update { it.copy(verificationFor = null) }
+                ResultsEvent.ToggleFareCalendar -> {
+                    toggleFareCalendar()
+                }
+
+                ResultsEvent.RetryFareCalendar -> {
+                    loadFareCalendar()
+                }
+
+                is ResultsEvent.PickFareDate -> {
+                    local.update { it.copy(fareCalendar = it.fareCalendar.copy(pending = event.date)) }
+                }
+
+                ResultsEvent.ConfirmFareReplan -> {
+                    confirmFareReplan()
+                }
+
+                is ResultsEvent.OpenLayover -> {
+                    openLayover(event.layover)
+                }
+
+                ResultsEvent.CloseLayover -> {
+                    local.update { it.copy(layover = null) }
+                }
+
+                ResultsEvent.WatchFare -> {
+                    watchFare()
+                }
+
+                is ResultsEvent.WatchHotel -> {
+                    watchHotel(event.hotel)
+                }
+
+                is ResultsEvent.WatchActivity -> {
+                    watchActivity(event.activity)
+                }
+
+                is ResultsEvent.WatchSuggestion -> {
+                    watchSuggestion(event.suggestion)
+                }
+
+                ResultsEvent.DismissNoLivePrice -> {
+                    local.update { it.copy(noLivePrice = null) }
+                }
+
+                is ResultsEvent.ShowVerification -> {
+                    local.update { it.copy(verificationFor = event.section) }
+                }
+
+                ResultsEvent.DismissVerification -> {
+                    local.update { it.copy(verificationFor = null) }
+                }
             }
         }
 
@@ -224,7 +316,13 @@ class ResultsViewModel
             local.update { it.copy(packageUndo = undo) }
         }
 
-        private fun updateBudget(change: (io.github.rupakc.travelplanner.core.domain.results.BudgetAllocation) -> io.github.rupakc.travelplanner.core.domain.results.BudgetAllocation) {
+        private fun undoNewPlan() {
+            val undo = local.value.newPlanUndo ?: return
+            plan.setSelections(undo.selections)
+            local.update { it.copy(newPlanUndo = null) }
+        }
+
+        private fun updateBudget(change: (BudgetAllocation) -> BudgetAllocation) {
             val current = state.value.budget?.allocation ?: return
             local.update { it.copy(allocation = change(current), budgetTouched = true) }
         }
@@ -342,7 +440,9 @@ class ResultsViewModel
             val hours = layover.durationHours ?: return
             local.update { it.copy(layover = LayoverUi(layover, LoadStatus.LOADING)) }
             viewModelScope.launch {
-                val r = search.layover(LayoverRequest(city = place, durationHours = hours, nationality = req.nationality, airport = layover.airport, interests = req.interests))
+                val body =
+                    LayoverRequest(city = place, durationHours = hours, nationality = req.nationality, airport = layover.airport, interests = req.interests)
+                val r = search.layover(body)
                 local.update { l ->
                     if (l.layover?.layover != layover) {
                         l
@@ -370,9 +470,12 @@ class ResultsViewModel
                 when (val r = fareWatches.create(trip)) {
                     is AppResult.Success -> {
                         val w = r.value
-                        val price = w.lastPrice ?: w.baselinePrice ?: WatchSpecs.cheapestFlightPrice(state.value.sections.firstOrNull { it.id == SectionId.FLIGHTS }?.data as? FlightsData)
-                        local.update { it.copy(watches = it.watches.copy(fare = WatchState(watchId = w.id, price = w.lastPrice ?: w.baselinePrice, currency = "USD"))) }
-                        messageChannel.trySend(ResultsMessage.FareWatched(price, w.numTravelers ?: trip.numTravelers, w.alreadyLow == true, w.alreadyWatching == true))
+                        val live = w.lastPrice ?: w.baselinePrice
+                        val shown = state.value.sections.firstOrNull { it.id == SectionId.FLIGHTS }?.data as? FlightsData
+                        val price = live ?: WatchSpecs.cheapestFlightPrice(shown)
+                        local.update { it.copy(watches = it.watches.copy(fare = WatchState(watchId = w.id, price = live, currency = "USD"))) }
+                        val travellers = w.numTravelers ?: trip.numTravelers
+                        messageChannel.trySend(ResultsMessage.FareWatched(price, travellers, w.alreadyLow == true, w.alreadyWatching == true))
                     }
 
                     is AppResult.Failure -> {

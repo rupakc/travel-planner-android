@@ -37,8 +37,8 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -195,7 +195,14 @@ private fun Banner(title: String, tone: PillTone, modifier: Modifier = Modifier,
 internal fun TravelEaseBanner(data: ConfidenceData, modifier: Modifier = Modifier) {
     if (data.error != null || data.total == null) return
     var expanded by rememberSaveable { mutableStateOf(false) }
-    val grade = data.grade ?: if (data.total!! >= GREEN_MIN) "green" else if (data.total!! >= AMBER_MIN) "amber" else "red"
+    val grade =
+        data.grade ?: if (data.total!! >= GREEN_MIN) {
+            "green"
+        } else if (data.total!! >= AMBER_MIN) {
+            "amber"
+        } else {
+            "red"
+        }
     val tone: Color =
         when (grade) {
             "green" -> TravelTheme.extendedColors.success
@@ -203,7 +210,12 @@ internal fun TravelEaseBanner(data: ConfidenceData, modifier: Modifier = Modifie
             else -> TravelTheme.extendedColors.warning
         }
     val subScores = data.subScores.values.toList()
-    Surface(modifier.fillMaxWidth(), shape = TravelShape.ItemCard, border = BorderStroke(1.dp, tone.copy(alpha = BORDER_ALPHA)), color = TravelTheme.colors.surface) {
+    Surface(
+        modifier.fillMaxWidth(),
+        shape = TravelShape.ItemCard,
+        border = BorderStroke(1.dp, tone.copy(alpha = BORDER_ALPHA)),
+        color = TravelTheme.colors.surface,
+    ) {
         Column(Modifier.padding(TravelTheme.spacing.lg), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
                 Box(
@@ -217,7 +229,11 @@ internal fun TravelEaseBanner(data: ConfidenceData, modifier: Modifier = Modifie
                     Modifier.weight(1f).semantics(mergeDescendants = true) {},
                 ) {
                     Text(stringResource(R.string.results_ease_title), style = TravelTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
-                    Text(stringResource(R.string.results_ease_score_a11y, data.total!!), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
+                    Text(
+                        stringResource(R.string.results_ease_score_a11y, data.total!!),
+                        style = TravelTheme.typography.labelSmall,
+                        color = TravelTheme.colors.onSurfaceVariant,
+                    )
                     data.destination?.let { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
                 }
                 val stateText = stringResource(if (expanded) R.string.results_state_expanded else R.string.results_state_collapsed)

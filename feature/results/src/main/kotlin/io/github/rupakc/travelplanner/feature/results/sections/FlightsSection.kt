@@ -122,7 +122,11 @@ private fun MultiCityFlights(legs: List<FlightLegGroup>, actions: SectionActions
                     )
                 }
                 if (leg.results.isEmpty()) {
-                    Text(stringResource(R.string.results_flights_leg_empty), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+                    Text(
+                        stringResource(R.string.results_flights_leg_empty),
+                        style = TravelTheme.typography.bodySmall,
+                        color = TravelTheme.colors.onSurfaceVariant,
+                    )
                 } else {
                     FlightList(leg.results, perLeg = true, actions = actions)
                 }
@@ -132,7 +136,14 @@ private fun MultiCityFlights(legs: List<FlightLegGroup>, actions: SectionActions
 }
 
 @Composable
-private fun FlightCard(flight: Flight, selected: Boolean, over: Boolean, perLeg: Boolean, onToggle: () -> Unit, onLayover: (io.github.rupakc.travelplanner.core.model.section.FlightLayover) -> Unit) {
+private fun FlightCard(
+    flight: Flight,
+    selected: Boolean,
+    over: Boolean,
+    perLeg: Boolean,
+    onToggle: () -> Unit,
+    onLayover: (io.github.rupakc.travelplanner.core.model.section.FlightLayover) -> Unit,
+) {
     val accent = TravelTheme.sectionAccents[SectionId.FLIGHTS].bar
     val oneWay = flight.tripType == "one_way" || flight.returnLeg == null
     val name = listOfNotNull(flight.airlineName, flight.flightNo).joinToString(" ").ifBlank { stringResource(R.string.results_flight_fallback_name) }
@@ -185,11 +196,15 @@ private fun flatLeg(f: Flight): FlightLeg {
     )
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun FlightLegRow(leg: FlightLeg, outbound: Boolean, onLayover: (io.github.rupakc.travelplanner.core.model.section.FlightLayover) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-            Pill(stringResource(if (outbound) R.string.results_flight_depart else R.string.results_flight_return), tone = if (outbound) PillTone.Info else PillTone.Accent)
+            Pill(
+                stringResource(if (outbound) R.string.results_flight_depart else R.string.results_flight_return),
+                tone = if (outbound) PillTone.Info else PillTone.Accent,
+            )
             Text(
                 listOfNotNull(leg.airline ?: "—", leg.flightNumber).joinToString(" "),
                 style = TravelTheme.typography.titleSmall,

@@ -24,12 +24,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.platform.testTag
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
@@ -89,7 +90,14 @@ private fun SheetScaffold(title: String, activeCount: Int, onDismiss: () -> Unit
                 TpButton(stringResource(R.string.results_filter_clear), onClick = onClear, variant = TpButtonVariant.Text, enabled = activeCount > 0)
                 androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
                 TpButton(
-                    text = if (activeCount > 0) stringResource(R.string.results_filter_apply_count, activeCount) else stringResource(R.string.results_filter_apply),
+                    text =
+                        if (activeCount >
+                            0
+                        ) {
+                            stringResource(R.string.results_filter_apply_count, activeCount)
+                        } else {
+                            stringResource(R.string.results_filter_apply)
+                        },
                     onClick = onApply,
                     modifier = Modifier.testTag("apply_filters"),
                 )
@@ -130,7 +138,12 @@ internal fun FlightFilterSheet(current: FlightFilters?, data: FlightsData?, onAp
     ) {
         Label(stringResource(R.string.results_filter_stops))
         ChipRow {
-            listOf(null to R.string.results_filter_any, 0 to R.string.results_filter_nonstop, 1 to R.string.results_filter_one_stop, 2 to R.string.results_filter_two_stops)
+            listOf(
+                null to R.string.results_filter_any,
+                0 to R.string.results_filter_nonstop,
+                1 to R.string.results_filter_one_stop,
+                2 to R.string.results_filter_two_stops,
+            )
                 .forEach { (value, label) -> TpChip(stringResource(label), selected = stops == value, onClick = { stops = value }) }
         }
         PriceSlider(stringResource(R.string.results_filter_max_price_pp), maxPrice, FLIGHT_PRICE_FLOOR, ceilPrice) { maxPrice = it }
@@ -148,7 +161,11 @@ private fun parseRange(from: String?, to: String?): Pair<Float, Float> =
 private fun TimeRange(label: String, value: Pair<Float, Float>, onChange: (Pair<Float, Float>) -> Unit) {
     val text = stringResource(R.string.results_filter_time_range, hour(value.first), hour(value.second))
     Column {
-        Row { Label(label); androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)); Text(text, style = TravelTheme.typography.labelLarge) }
+        Row {
+            Label(label)
+            androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+            Text(text, style = TravelTheme.typography.labelLarge)
+        }
         RangeSlider(
             value = value.first..value.second,
             onValueChange = { r -> if (r.endInclusive - r.start >= 1f) onChange(r.start.roundToInt().toFloat() to r.endInclusive.roundToInt().toFloat()) },
@@ -164,7 +181,11 @@ private fun PriceSlider(label: String, value: Float?, floor: Float, ceil: Float,
     val shown = value ?: ceil
     val text = formatPrice(shown.toDouble())
     Column {
-        Row { Label(label); androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)); Text(text, style = TravelTheme.typography.labelLarge) }
+        Row {
+            Label(label)
+            androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+            Text(text, style = TravelTheme.typography.labelLarge)
+        }
         Slider(
             value = shown.coerceIn(floor, ceil.coerceAtLeast(floor + 1)),
             onValueChange = { onChange(it.roundToInt().toFloat()) },
@@ -196,19 +217,30 @@ internal fun HotelFilterSheet(current: HotelFilters?, data: HotelsData?, onApply
         Label(stringResource(R.string.results_filter_beds))
         ChipRow {
             TpChip(stringResource(R.string.results_filter_any), selected = beds == null, onClick = { beds = null })
-            (1 until BEDS_PLUS).forEach { n -> TpChip(androidx.compose.ui.res.pluralStringResource(R.plurals.results_filter_beds_n, n, n), selected = beds == n, onClick = { beds = n }) }
+            for (n in 1 until BEDS_PLUS) {
+                TpChip(pluralStringResource(R.plurals.results_filter_beds_n, n, n), selected = beds == n, onClick = { beds = n })
+            }
             TpChip(stringResource(R.string.results_filter_beds_plus, BEDS_PLUS), selected = beds == BEDS_PLUS, onClick = { beds = BEDS_PLUS })
         }
         PriceSlider(stringResource(R.string.results_filter_max_night), maxPrice, HOTEL_PRICE_FLOOR, ceilPrice) { maxPrice = it }
         Label(stringResource(R.string.results_filter_wifi))
         ChipRow {
-            listOf(null to R.string.results_filter_any, "basic" to R.string.results_filter_wifi_basic, "good" to R.string.results_filter_wifi_good, "excellent" to R.string.results_filter_wifi_excellent)
+            listOf(
+                null to R.string.results_filter_any,
+                "basic" to R.string.results_filter_wifi_basic,
+                "good" to R.string.results_filter_wifi_good,
+                "excellent" to R.string.results_filter_wifi_excellent,
+            )
                 .forEach { (value, label) -> TpChip(stringResource(label), selected = wifi == value, onClick = { wifi = value }) }
         }
         val km = distance ?: DISTANCE_MAX
         val kmText = stringResource(R.string.results_filter_km, "%.1f".format(km))
         Column {
-            Row { Label(stringResource(R.string.results_filter_distance)); androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)); Text(kmText, style = TravelTheme.typography.labelLarge) }
+            Row {
+                Label(stringResource(R.string.results_filter_distance))
+                androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+                Text(kmText, style = TravelTheme.typography.labelLarge)
+            }
             Slider(
                 value = km,
                 onValueChange = { distance = (it * 2).roundToInt() / 2f },
@@ -217,12 +249,20 @@ internal fun HotelFilterSheet(current: HotelFilters?, data: HotelsData?, onApply
             )
         }
         Row(
-            Modifier.fillMaxWidth().heightIn(min = TravelTheme.spacing.minTouchTarget).toggleable(washroom, role = Role.Switch, onValueChange = { washroom = it }),
+            Modifier.fillMaxWidth().heightIn(min = TravelTheme.spacing.minTouchTarget).toggleable(washroom, role = Role.Switch, onValueChange = {
+                washroom = it
+            }),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Label(stringResource(R.string.results_filter_washroom))
             androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
-            if (washroom) Text(stringResource(R.string.results_filter_required), style = TravelTheme.typography.labelMedium, modifier = Modifier.padding(end = TravelTheme.spacing.sm))
+            if (washroom) {
+                Text(
+                    stringResource(R.string.results_filter_required),
+                    style = TravelTheme.typography.labelMedium,
+                    modifier = Modifier.padding(end = TravelTheme.spacing.sm),
+                )
+            }
             Switch(checked = washroom, onCheckedChange = null)
         }
     }
@@ -230,7 +270,13 @@ internal fun HotelFilterSheet(current: HotelFilters?, data: HotelsData?, onApply
 
 /** Web activity filter modal: interests, max cost per person, availability dates, minimum rating. */
 @Composable
-internal fun ActivityFilterSheet(current: ActivityFilters?, data: ActivitiesData?, request: TravelSearchRequest?, onApply: (ActivityFilters) -> Unit, onDismiss: () -> Unit) {
+internal fun ActivityFilterSheet(
+    current: ActivityFilters?,
+    data: ActivitiesData?,
+    request: TravelSearchRequest?,
+    onApply: (ActivityFilters) -> Unit,
+    onDismiss: () -> Unit,
+) {
     val ceilPrice = priceCeil(data?.results?.mapNotNull { it.priceUsd }.orEmpty(), 10.0, ACTIVITY_PRICE_DEFAULT)
     var interests by rememberSaveable { mutableStateOf(current?.filterInterests.orEmpty()) }
     var maxPrice by rememberSaveable { mutableStateOf(current?.maxPriceUsd?.toFloat()) }
@@ -244,7 +290,17 @@ internal fun ActivityFilterSheet(current: ActivityFilters?, data: ActivitiesData
         onDismiss = onDismiss,
         onClear = { onApply(ActivityFilters()) },
         onApply = {
-            onApply(ActivityFilters(interests.takeIf { it.isNotEmpty() }, maxPrice?.toDouble(), from.takeIf(String::isNotBlank), to.takeIf(String::isNotBlank), rating))
+            onApply(
+                ActivityFilters(
+                    interests.takeIf {
+                        it.isNotEmpty()
+                    },
+                    maxPrice?.toDouble(),
+                    from.takeIf(String::isNotBlank),
+                    to.takeIf(String::isNotBlank),
+                    rating,
+                ),
+            )
         },
     ) {
         Label(stringResource(R.string.results_filter_interests))

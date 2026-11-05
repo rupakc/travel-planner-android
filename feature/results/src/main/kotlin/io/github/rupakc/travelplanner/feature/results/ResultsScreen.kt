@@ -235,9 +235,17 @@ private fun androidx.compose.foundation.layout.RowScope.SectionHeaderActions(
             TpButton(filters, onClick = { onOpenFilters(FilterSheet.Flights) }, variant = TpButtonVariant.Text)
         }
 
-        SectionId.HOTELS -> TpButton(filters, onClick = { onOpenFilters(FilterSheet.Hotels) }, variant = TpButtonVariant.Text)
-        SectionId.ACTIVITIES -> TpButton(filters, onClick = { onOpenFilters(FilterSheet.Activities) }, variant = TpButtonVariant.Text)
-        else -> Unit
+        SectionId.HOTELS -> {
+            TpButton(filters, onClick = { onOpenFilters(FilterSheet.Hotels) }, variant = TpButtonVariant.Text)
+        }
+
+        SectionId.ACTIVITIES -> {
+            TpButton(filters, onClick = { onOpenFilters(FilterSheet.Activities) }, variant = TpButtonVariant.Text)
+        }
+
+        else -> {
+            Unit
+        }
     }
 }
 
@@ -245,23 +253,36 @@ private fun androidx.compose.foundation.layout.RowScope.SectionHeaderActions(
 private fun Sheets(state: ResultsUiState, onEvent: (ResultsEvent) -> Unit, actions: SectionActions, sheet: FilterSheet?, onCloseFilters: () -> Unit) {
     fun dataOf(id: SectionId) = state.sections.firstOrNull { it.id == id }?.data
     when (sheet) {
-        FilterSheet.Flights -> FlightFilterSheet(state.flightFilters, dataOf(SectionId.FLIGHTS) as? FlightsData, onApply = {
-            onCloseFilters()
-            onEvent(ResultsEvent.ApplyFlightFilters(it))
-        }, onDismiss = onCloseFilters)
-        FilterSheet.Hotels -> HotelFilterSheet(state.hotelFilters, dataOf(SectionId.HOTELS) as? HotelsData, onApply = {
-            onCloseFilters()
-            onEvent(ResultsEvent.ApplyHotelFilters(it))
-        }, onDismiss = onCloseFilters)
-        FilterSheet.Activities -> ActivityFilterSheet(state.activityFilters, dataOf(SectionId.ACTIVITIES) as? ActivitiesData, state.request, onApply = {
-            onCloseFilters()
-            onEvent(ResultsEvent.ApplyActivityFilters(it))
-        }, onDismiss = onCloseFilters)
-        null -> Unit
+        FilterSheet.Flights -> {
+            FlightFilterSheet(state.flightFilters, dataOf(SectionId.FLIGHTS) as? FlightsData, onApply = {
+                onCloseFilters()
+                onEvent(ResultsEvent.ApplyFlightFilters(it))
+            }, onDismiss = onCloseFilters)
+        }
+
+        FilterSheet.Hotels -> {
+            HotelFilterSheet(state.hotelFilters, dataOf(SectionId.HOTELS) as? HotelsData, onApply = {
+                onCloseFilters()
+                onEvent(ResultsEvent.ApplyHotelFilters(it))
+            }, onDismiss = onCloseFilters)
+        }
+
+        FilterSheet.Activities -> {
+            ActivityFilterSheet(state.activityFilters, dataOf(SectionId.ACTIVITIES) as? ActivitiesData, state.request, onApply = {
+                onCloseFilters()
+                onEvent(ResultsEvent.ApplyActivityFilters(it))
+            }, onDismiss = onCloseFilters)
+        }
+
+        null -> {
+            Unit
+        }
     }
     state.layover?.let { LayoverSheet(it, onDismiss = { onEvent(ResultsEvent.CloseLayover) }) }
     state.verificationDetail?.let { VerificationSheet(it, onOpenLink = actions::onOpenLink, onDismiss = { onEvent(ResultsEvent.DismissVerification) }) }
     state.noLivePrice?.let {
-        NoLivePriceSheet(it, onWatch = { s -> onEvent(ResultsEvent.WatchSuggestion(s)) }, onOpenLink = actions::onOpenLink, onDismiss = { onEvent(ResultsEvent.DismissNoLivePrice) })
+        NoLivePriceSheet(it, onWatch = { s ->
+            onEvent(ResultsEvent.WatchSuggestion(s))
+        }, onOpenLink = actions::onOpenLink, onDismiss = { onEvent(ResultsEvent.DismissNoLivePrice) })
     }
 }

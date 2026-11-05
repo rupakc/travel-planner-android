@@ -14,6 +14,7 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -97,7 +98,11 @@ private fun HotelCard(hotel: Hotel, selected: Boolean, over: Boolean, actions: S
                         )
                     }
                     hotel.totalPriceUsd?.let {
-                        Text(stringResource(R.string.results_hotel_total, formatPrice(it)), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
+                        Text(
+                            stringResource(R.string.results_hotel_total, formatPrice(it)),
+                            style = TravelTheme.typography.labelSmall,
+                            color = TravelTheme.colors.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -131,14 +136,19 @@ private fun HotelCard(hotel: Hotel, selected: Boolean, over: Boolean, actions: S
 private fun Stars(stars: Double?, review: Double?) {
     val count = stars?.let { Math.round(it).toInt() }?.coerceIn(0, MAX_STARS) ?: 0
     if (count == 0 && review == null) return
-    val a11y = listOfNotNull(
-        if (count > 0) stringResource(R.string.results_hotel_stars_a11y, count) else null,
-        review?.let { stringResource(R.string.results_hotel_review, formatScore(it)) },
-    ).joinToString(", ")
+    val a11y =
+        listOfNotNull(
+            if (count > 0) pluralStringResource(R.plurals.results_hotel_stars_a11y, count, count) else null,
+            review?.let { stringResource(R.string.results_hotel_review, formatScore(it)) },
+        ).joinToString(", ")
     Row(Modifier.clearAndSetSemantics { contentDescription = a11y }, verticalAlignment = Alignment.CenterVertically) {
         repeat(count) { Icon(Icons.Filled.Star, contentDescription = null, tint = TravelTheme.extendedColors.warning, modifier = Modifier.size(STAR_SIZE)) }
         review?.let {
-            Text(" " + stringResource(R.string.results_hotel_review, formatScore(it)), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.onSurfaceVariant)
+            Text(
+                " " + stringResource(R.string.results_hotel_review, formatScore(it)),
+                style = TravelTheme.typography.labelMedium,
+                color = TravelTheme.colors.onSurfaceVariant,
+            )
         }
     }
 }

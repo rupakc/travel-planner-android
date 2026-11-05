@@ -55,7 +55,13 @@ private const val BORDER_ALPHA = 0.35f
 @Composable
 fun Pill(text: String, modifier: Modifier = Modifier, tone: PillTone = PillTone.Neutral, icon: ImageVector? = null) {
     val colors = tone.colors()
-    Surface(modifier = modifier, shape = TravelShape.Pill, color = colors.container, contentColor = colors.content, border = BorderStroke(1.dp, colors.border)) {
+    Surface(
+        modifier = modifier,
+        shape = TravelShape.Pill,
+        color = colors.container,
+        contentColor = colors.content,
+        border = BorderStroke(1.dp, colors.border),
+    ) {
         Row(
             Modifier.padding(horizontal = TravelTheme.spacing.sm, vertical = TravelTheme.spacing.xxs),
             verticalAlignment = Alignment.CenterVertically,

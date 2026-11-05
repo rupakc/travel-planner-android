@@ -90,7 +90,11 @@ internal fun ResultsSectionCard(
                 }
 
                 data == null && section.status == SectionStatus.WAITING -> {
-                    Text(stringResource(R.string.results_section_waiting), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
+                    Text(
+                        stringResource(R.string.results_section_waiting),
+                        style = TravelTheme.typography.bodyMedium,
+                        color = TravelTheme.colors.onSurfaceVariant,
+                    )
                 }
 
                 data == null || section.filterLoading -> {
