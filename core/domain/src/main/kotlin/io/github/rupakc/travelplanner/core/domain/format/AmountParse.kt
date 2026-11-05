@@ -7,7 +7,8 @@ import java.util.Locale
  * Reads an amount the user typed, in their language: "1,500.50" and "1.500,50" are both 1500.5.
  * The one parser behind every numeric input (budget, fare and price targets, edits).
  *
- * - Currency symbols, letters, spaces and apostrophes are ignored ("$1,200", "1 200 US$").
+ * - Currency symbols, currency codes, spaces and apostrophes are ignored ("$1,200", "1 200 US$", "EUR 24"); any other
+ *   letter makes the text not a number ("1o0", "2k" → null), so a typo is never read as a smaller amount.
  * - Both `.` and `,` present: the last one is the decimal mark, the other groups thousands.
  * - Only one kind, used more than once: grouping ("1.500.000").
  * - Only one kind, used once: a decimal mark when it is [locale]'s decimal separator, or when 1–2
@@ -16,7 +17,8 @@ import java.util.Locale
  * Returns null for anything that isn't a number (never a guess): "abc", "1.2.3", "1,50,0".
  */
 fun parseLocalizedAmount(text: String?, locale: Locale): Double? {
-    val raw = text?.filter { it.isDigit() || it == '.' || it == ',' || it == '-' } ?: return null
+    if (text == null || LETTERS.findAll(text).any { it.value.uppercase(Locale.ROOT) !in CURRENCY_WORDS }) return null
+    val raw = text.filter { it.isDigit() || it == '.' || it == ',' || it == '-' }
     val negative = raw.startsWith('-')
     val body = raw.removePrefix("-")
     if (body.none(Char::isDigit) || '-' in body) return null
@@ -68,3 +70,8 @@ private fun validGrouping(whole: String, grouping: Char?): Boolean {
 }
 
 private const val GROUP_SIZE = 3
+
+private val LETTERS = Regex("\\p{L}+")
+
+/** ISO 4217 codes plus "US" (as in "US$"): the only words allowed around a number. */
+private val CURRENCY_WORDS: Set<String> = java.util.Currency.getAvailableCurrencies().map { it.currencyCode }.toSet() + "US"
