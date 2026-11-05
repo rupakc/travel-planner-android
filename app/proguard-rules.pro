@@ -22,5 +22,6 @@
 -keepclassmembers class io.github.rupakc.travelplanner.core.model.**$Companion {
     kotlinx.serialization.KSerializer serializer(...);
 }
-# Retrofit API interfaces are created by reflection.
--keep,allowobfuscation interface io.github.rupakc.travelplanner.core.network.api.** { *; }
+# Retrofit API interfaces are created by reflection. AdminApi has no UI (admin stays web-only), so it is
+# not kept and R8 drops it from release (performance M8; verifyReleaseKeepRules checks it is gone).
+-keep,allowobfuscation interface !io.github.rupakc.travelplanner.core.network.api.AdminApi,io.github.rupakc.travelplanner.core.network.api.** { *; }

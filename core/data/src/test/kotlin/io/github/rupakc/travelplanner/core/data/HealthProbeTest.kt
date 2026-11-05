@@ -37,7 +37,14 @@ class HealthProbeTest {
     private suspend fun repository(): HealthRepositoryImpl {
         val sessions = FakeSessionStore().apply { save(Session("secret-token", User("alice"))) }
         val net = TestNetwork(configured.url("/").toString(), sessionStore = sessions, dispatchers = TestAppDispatchers(Dispatchers.IO))
-        return HealthRepositoryImpl(net.api(), net.client, TestAppDispatchers(Dispatchers.IO))
+        return HealthRepositoryImpl(
+            net.api(),
+            net.client,
+            TestAppDispatchers(Dispatchers.IO),
+            net.baseUrlProvider,
+            MemoryHealthCache(),
+            io.github.rupakc.travelplanner.core.common.SystemAppClock(),
+        )
     }
 
     @Test

@@ -12,8 +12,9 @@ on:
       - ".github/workflows/wiki-sync.yml"
   workflow_dispatch:
 
+# Read-only by default; only the sync job (which pushes to the wiki repo) gets a write token.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: wiki-sync
@@ -22,6 +23,8 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 

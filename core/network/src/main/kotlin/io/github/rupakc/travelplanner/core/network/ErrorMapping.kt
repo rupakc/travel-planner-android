@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.core.network
 
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppException
+import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import java.io.IOException
@@ -89,15 +90,41 @@ object HttpErrorMapper {
     private fun JsonElement.asExtra(): String = if (this is JsonPrimitive && isString) content else toString()
 }
 
-/** Any throwable from a call → [AppError]. */
+private const val TAG = "ErrorMapping"
+
+/**
+ * Any throwable from a call → [AppError]. Client-side failures (decoding, unknown) never carry
+ * the exception text, which is English-only and leaks internals (an HTML 200 from a captive portal
+ * would show "Unexpected JSON token…"); the throwable is logged instead and screens show their own
+ * localized copy.
+ */
 fun Throwable.toAppError(): AppError =
     when (this) {
-        is AppException -> error
-        is HttpException -> HttpErrorMapper.map(code(), response()?.headers()?.get("Retry-After"), response()?.errorBody()?.string())
-        is NoServerConfiguredException -> AppError.NotConfigured()
-        is IOException -> AppError.Network(null)
-        is SerializationException, is IllegalArgumentException -> AppError.Decoding(message)
-        else -> AppError.Unknown(message)
+        is AppException -> {
+            error
+        }
+
+        is HttpException -> {
+            HttpErrorMapper.map(code(), response()?.headers()?.get("Retry-After"), response()?.errorBody()?.string())
+        }
+
+        is NoServerConfiguredException -> {
+            AppError.NotConfigured()
+        }
+
+        is IOException -> {
+            AppError.Network(null)
+        }
+
+        is SerializationException, is IllegalArgumentException -> {
+            AppLogger.w(TAG, "Response could not be decoded", this)
+            AppError.Decoding(null)
+        }
+
+        else -> {
+            AppLogger.w(TAG, "Unexpected failure", this)
+            AppError.Unknown(null)
+        }
     }
 
 /** Runs a Retrofit call and wraps the outcome. Cancellation is rethrown. */

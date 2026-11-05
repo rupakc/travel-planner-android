@@ -16,6 +16,7 @@ import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionRules
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.plan.SelectionKeys
+import io.github.rupakc.travelplanner.core.model.plan.stripLinkEvidence
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.SectionId
@@ -150,9 +151,9 @@ class CurrentPlanStoreImpl
                             sent.searchRequest
                                 ?.let { TravelJson.encodeToJsonElement(TravelSearchRequest.serializer(), it) as JsonObject }
                                 ?: EmptyJsonObject
-                        plansRepository.create(planName, searchData, withItinerarySnapshot(sent))
+                        plansRepository.create(planName, searchData, stripLinkEvidence(withItinerarySnapshot(sent)))
                     } else {
-                        plansRepository.update(planId, planName, withItinerarySnapshot(sent))
+                        plansRepository.update(planId, planName, stripLinkEvidence(withItinerarySnapshot(sent)))
                     }
                 result.onSuccess { plan ->
                     // Apply only identity fields: edits made while the request was in flight are kept and stay dirty.
@@ -204,6 +205,15 @@ class CurrentPlanStoreImpl
                     live["total_estimated_cost_usd"]?.let { put("total_estimated_cost_usd", it) }
                 }
             return if (snapshot.isEmpty()) draft.selections else draft.selections.copy(itinerarySnapshot = snapshot)
+        }
+
+        override suspend fun draftRequest(): TravelSearchRequest? {
+            state.value.searchRequest?.let { return it }
+            if (restoreJob.isCompleted) return null
+            // Still restoring (it parses the up-to-1.5 MB snapshot): read only the small draft row.
+            return guarded("read the draft request") {
+                draftDao.getRow(PlanDraftEntity.SINGLE_ROW)?.let { TravelJson.decodeFromString(PlanDraft.serializer(), it.json).searchRequest }
+            }
         }
 
         private suspend fun restore() {

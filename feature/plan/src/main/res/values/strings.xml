@@ -162,7 +162,6 @@
     <string name="plan_item_unnamed">Unnamed item</string>
     <string name="plan_open_link">Open link</string>
     <string name="plan_open_link_a11y">Open %1$s</string>
-    <string name="plan_from_link">From your link</string>
     <string name="plan_time_morning">Morning</string>
     <string name="plan_time_afternoon">Afternoon</string>
     <string name="plan_time_evening">Evening</string>

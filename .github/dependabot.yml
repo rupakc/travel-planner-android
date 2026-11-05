@@ -1,0 +1,10 @@
+# Keeps the SHA-pinned GitHub Actions current (security review S-M4). Gradle dependencies are bumped by hand
+# (versions live in gradle/libs.versions.toml and pinned toolchains need checking together).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci

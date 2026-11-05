@@ -341,7 +341,7 @@ class WorkersTest {
                     "title" to "Lumen dropped to €90",
                     "body" to "For 10–14 Dec",
                 )
-            assertTrue(PushAlertHandler(repo, FakeSettingsRepository(), notifier).handle(data))
+            assertTrue(PushAlertHandler(signedIn, repo, FakeSettingsRepository(), notifier).handle(data))
             val post = notifier.posts.single()
             assertEquals(TravelChannel.PRICE_ALERTS, post.channel)
             assertEquals("travelplanner://alerts?kind=hotel&watch=9", post.deepLink)
@@ -351,10 +351,12 @@ class WorkersTest {
             assertTrue((repo.unseen() as AppResult.Success).value.none { it.id == 57L })
             notifier.posts.clear()
             val off = FakeSettingsRepository(AppSettings(priceAlertNotifications = false))
-            assertFalse(PushAlertHandler(repo, off, notifier).handle(data + ("notification_id" to "58")))
+            assertFalse(PushAlertHandler(signedIn, repo, off, notifier).handle(data + ("notification_id" to "58")))
             assertTrue(notifier.posts.isEmpty())
             assertTrue(58L in repo.seen)
-            assertTrue(PushAlertHandler(repo, FakeSettingsRepository(), notifier).handle(data + ("kind" to "watch_expired") + ("notification_id" to "59")))
+            assertTrue(
+                PushAlertHandler(signedIn, repo, FakeSettingsRepository(), notifier).handle(data + ("kind" to "watch_expired") + ("notification_id" to "59")),
+            )
             assertTrue(notifier.posts.single().quiet)
         }
 
@@ -416,49 +418,223 @@ class WorkersTest {
         val repo = FakeNotificationsRepository()
         val data = mapOf("kind" to "fare_drop", "notification_id" to "70", "link" to "/alerts?watch=7", "title" to "Berlin → Lisbon dropped")
         // No coroutine scope involved: the notification exists when the call returns.
-        assertTrue(handleBlocking(PushAlertHandler(repo, FakeSettingsRepository(), notifier), data))
+        assertTrue(handleBlocking(PushAlertHandler(signedIn, repo, FakeSettingsRepository(), notifier), data))
         assertEquals("travelplanner://alerts?watch=7", notifier.posts.single().deepLink)
     }
+
+    private class RecordingScheduler : io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollScheduler {
+        val calls = mutableListOf<Boolean?>()
+
+        override fun schedule(pushActive: Boolean) {
+            calls += pushActive
+        }
+
+        override fun cancel() {
+            calls += null
+        }
+    }
+
+    /** Health whose capabilities the test sets; counts the network-backed refreshes. */
+    private class TestHealth(initial: io.github.rupakc.travelplanner.core.model.health.Health? = null) :
+        io.github.rupakc.travelplanner.core.data.repository.HealthRepository {
+        val state = kotlinx.coroutines.flow.MutableStateFlow(initial)
+        override val capabilities: kotlinx.coroutines.flow.StateFlow<io.github.rupakc.travelplanner.core.model.health.Health?> = state
+        var refreshes = 0
+
+        override suspend fun refresh(): AppResult<io.github.rupakc.travelplanner.core.model.health.Health> = AppResult.Failure(AppError.Network())
+
+        override suspend fun refreshIfStale(): io.github.rupakc.travelplanner.core.model.health.Health? {
+            refreshes++
+            return state.value
+        }
+
+        override suspend fun probe(baseUrl: String): AppResult<io.github.rupakc.travelplanner.core.model.health.Health> = refresh()
+    }
+
+    private class MemoryRegistrationLog : PushRegistrationLog {
+        var value: PushRegistration? = null
+
+        override fun last() = value
+
+        override fun record(registration: PushRegistration) {
+            value = registration
+        }
+
+        override fun clear() {
+            value = null
+        }
+    }
+
+    private fun initializer(
+        auth: FakeAuthRepository,
+        scope: kotlinx.coroutines.CoroutineScope,
+        health: io.github.rupakc.travelplanner.core.data.repository.HealthRepository = TestHealth(),
+        settings: FakeSettingsRepository = FakeSettingsRepository(),
+        scheduler: RecordingScheduler = RecordingScheduler(),
+        nearbyRepo: FakeNearbyRepository = FakeNearbyRepository(),
+        devices: io.github.rupakc.travelplanner.core.testing.fake.FakeDevicesRepository =
+            io.github.rupakc.travelplanner.core.testing.fake.FakeDevicesRepository(),
+        foreground: AppForeground = AppForeground { },
+    ) = NotificationsInitializer(
+        context,
+        scope,
+        auth,
+        health,
+        FakePlansRepository(),
+        settings,
+        scheduler,
+        object : io.github.rupakc.travelplanner.core.notifications.reminders.TripReminderScheduler {
+            override fun reschedule(plans: List<Plan>, clockChanged: Boolean) = Unit
+        },
+        io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionsToggle(
+            object : io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionScheduler {
+                override fun setEnabled(enabled: Boolean) = Unit
+            },
+            nearbyRepo,
+        ),
+        PushRegistrar(auth, { "fcm-1" }, devices, MemoryRegistrationLog(), clock, foreground),
+        baseline,
+        foreground,
+    )
 
     @Test
     fun `turning nearby suggestions off forgets the remembered location`() =
         runBlocking {
             val settings = FakeSettingsRepository(AppSettings(nearbyNotifications = true))
             val nearbyRepo = FakeNearbyRepository().apply { last = LocationCell(38.725, -9.125, 0) }
-            val auth = FakeAuthRepository(null)
             val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined)
-            val initializer =
-                NotificationsInitializer(
-                    context,
-                    scope,
-                    auth,
-                    io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository(null),
-                    FakePlansRepository(),
-                    settings,
-                    object : io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollScheduler {
-                        override fun schedule(pushActive: Boolean) = Unit
-
-                        override fun cancel() = Unit
-                    },
-                    object : io.github.rupakc.travelplanner.core.notifications.reminders.TripReminderScheduler {
-                        override fun reschedule(plans: List<Plan>, clockChanged: Boolean) = Unit
-                    },
-                    io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionsToggle(
-                        object : io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionScheduler {
-                            override fun setEnabled(enabled: Boolean) = Unit
-                        },
-                        nearbyRepo,
-                    ),
-                    PushRegistrar(auth, { null }, io.github.rupakc.travelplanner.core.testing.fake.FakeDevicesRepository()),
-                    baseline,
-                )
-            initializer.start()
+            initializer(FakeAuthRepository(null), scope, settings = settings, nearbyRepo = nearbyRepo).start()
             assertTrue(nearbyRepo.last != null)
             settings.setNotificationToggles(nearby = false)
             assertNull(nearbyRepo.last)
             scope.coroutineContext[kotlinx.coroutines.Job]?.cancel()
             Unit
         }
+
+    @Test
+    fun `the poll is scheduled once, only after capabilities are known`() =
+        runBlocking {
+            val health = TestHealth(initial = null)
+            val scheduler = RecordingScheduler()
+            val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined)
+            initializer(signedIn, scope, health = health, scheduler = scheduler).apply { firebaseConfigured = { true } }.start()
+            assertTrue("nothing scheduled from unknown capabilities: ${scheduler.calls}", scheduler.calls.isEmpty())
+            health.state.value =
+                io.github.rupakc.travelplanner.core.model.health
+                    .Health(pushConfigured = true)
+            assertEquals(listOf<Boolean?>(true), scheduler.calls)
+            health.state.value =
+                io.github.rupakc.travelplanner.core.model.health
+                    .Health(pushConfigured = true, serpapiConfigured = true)
+            assertEquals(listOf<Boolean?>(true), scheduler.calls)
+            scope.coroutineContext[kotlinx.coroutines.Job]?.cancel()
+            Unit
+        }
+
+    @Test
+    fun `a background process start makes no health or device calls`() =
+        runBlocking {
+            val health = TestHealth()
+            val devices = io.github.rupakc.travelplanner.core.testing.fake.FakeDevicesRepository()
+            val never = AppForeground { kotlinx.coroutines.awaitCancellation() }
+            val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined)
+            initializer(signedIn, scope, health = health, devices = devices, foreground = never).start()
+            assertEquals(0, health.refreshes)
+            assertTrue(devices.devices.value.isEmpty())
+            scope.coroutineContext[kotlinx.coroutines.Job]?.cancel()
+            val shown = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined)
+            initializer(signedIn, shown, health = health, devices = devices).start()
+            assertEquals(1, health.refreshes)
+            assertEquals(1, devices.devices.value.size)
+            shown.coroutineContext[kotlinx.coroutines.Job]?.cancel()
+            Unit
+        }
+
+    @Test
+    fun `the device is registered again only when user, token, locale or server change, or after 7 days`() =
+        runBlocking {
+            val devices = io.github.rupakc.travelplanner.core.testing.fake.FakeDevicesRepository()
+            val log = MemoryRegistrationLog()
+            var token = "fcm-1"
+            val registrar = PushRegistrar(signedIn, { token }, devices, log, clock) { }
+            assertTrue(registrar.register())
+            assertFalse(registrar.register())
+            token = "fcm-2"
+            assertTrue(registrar.register())
+            assertFalse(registrar.register("fcm-2"))
+            clock.instant = clock.instant.plus(PushRegistrar.REREGISTER_AFTER)
+            assertTrue(registrar.register())
+            PushRegistrationCleaner(log).clear() // sign-out: the server forgot this token
+            assertTrue(registrar.register())
+            assertEquals(4, devices.devices.value.size)
+            assertFalse(PushRegistrar(FakeAuthRepository(null), { token }, devices, MemoryRegistrationLog(), clock) { }.register("fcm-3"))
+            val other = Session("t", TestUser.copy(username = "bob"))
+            assertTrue(PushRegistrar(FakeAuthRepository(other), { token }, devices, log, clock) { }.register())
+            assertTrue(
+                pushRegistrationFingerprint("alice", "t", "en", "https://a") != pushRegistrationFingerprint("alice", "t", "en", "https://b"),
+            )
+        }
+
+    @Test
+    fun `a push posts nothing without a session but is still marked seen`() =
+        runBlocking {
+            val repo = FakeNotificationsRepository()
+            val data = mapOf("kind" to "fare_drop", "notification_id" to "80", "title" to "Berlin → Lisbon dropped")
+            assertFalse(PushAlertHandler(FakeAuthRepository(null), repo, FakeSettingsRepository(), notifier).handle(data))
+            assertTrue(notifier.posts.isEmpty())
+            assertEquals(setOf(80L), repo.seen)
+        }
+
+    @Test
+    fun `a rate-limited poll waits for the next period instead of retrying`() =
+        runBlocking {
+            val limited = FailingNotifications(AppError.RateLimited(retryAfterSeconds = 120, message = "slow down"))
+            val result = build({ c, p -> AlertPollWorker(c, p, signedIn, limited, FakeSettingsRepository(), notifier, baseline) }).doWork()
+            assertEquals(ListenableWorker.Result.success(), result)
+            val server = FailingNotifications(AppError.Server(503, "down"))
+            assertEquals(
+                ListenableWorker.Result.retry(),
+                build({ c, p ->
+                    AlertPollWorker(c, p, signedIn, server, FakeSettingsRepository(), notifier, baseline)
+                }).doWork(),
+            )
+        }
+
+    private class MemoryIntervalStore : io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollIntervalStore {
+        var value: Duration? = null
+
+        override fun applied() = value
+
+        override fun set(interval: Duration?) {
+            value = interval
+        }
+    }
+
+    @Test
+    fun `the poll interval is persisted, kept when unchanged and updated when it changes`() {
+        val store = MemoryIntervalStore()
+
+        fun poll() =
+            WorkManager.getInstance(context).getWorkInfosForUniqueWork(
+                io.github.rupakc.travelplanner.core.notifications.alerts.WorkManagerAlertPollScheduler.UNIQUE,
+            ).get().single { it.state == WorkInfo.State.ENQUEUED }
+        io.github.rupakc.travelplanner.core.notifications.alerts.WorkManagerAlertPollScheduler(context, store).schedule(pushActive = true)
+        val first = poll()
+        assertEquals(Duration.ofHours(6), store.value)
+        assertEquals(Duration.ofHours(6).toMillis(), first.periodicityInfo?.repeatIntervalMillis)
+        // A new process with the same interval keeps the schedule as it is.
+        io.github.rupakc.travelplanner.core.notifications.alerts.WorkManagerAlertPollScheduler(context, store).schedule(pushActive = true)
+        assertEquals(first.id, poll().id)
+        assertEquals(first.nextScheduleTimeMillis, poll().nextScheduleTimeMillis)
+        io.github.rupakc.travelplanner.core.notifications.alerts.WorkManagerAlertPollScheduler(context, store).schedule(pushActive = false)
+        assertEquals(Duration.ofMinutes(30).toMillis(), poll().periodicityInfo?.repeatIntervalMillis)
+        assertEquals(Duration.ofMinutes(30), store.value)
+        assertEquals(
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            AlertPollIntervals.policy(Duration.ofMinutes(30), Duration.ofMinutes(30)),
+        )
+        assertEquals(androidx.work.ExistingPeriodicWorkPolicy.UPDATE, AlertPollIntervals.policy(null, Duration.ofMinutes(30)))
+    }
 
     private fun notificationLinkOf(n: AppNotification) =
         io.github.rupakc.travelplanner.core.domain.alerts

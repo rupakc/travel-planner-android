@@ -33,6 +33,9 @@ Memory-friendly form when several builds share a machine:
 - UI tests render `XxxScreen(state, onEvent)` directly with hand-built state; assert content, clicks, and a11y semantics.
 - Streaming tests use recorded SSE streams from the contract, including a stream cut mid-way and a stream without `done`.
 - Never assert on real prices or provider data; fixtures are synthetic.
+- Golden files: `core/domain/src/test/resources/ics-parity/` holds three synthetic, realistic plans and the exact `.ics` the export
+  produced for them (`PlanIcsParityTest`). A missing `.ics` is recorded on the next run and the test fails, so review a new golden file before committing it;
+  never re-record an existing one to make a change pass.
 
 ## End to end with the local backend and a fake SerpAPI
 

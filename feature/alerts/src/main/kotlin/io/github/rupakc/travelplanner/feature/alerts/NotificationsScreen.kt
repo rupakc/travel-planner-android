@@ -73,6 +73,7 @@ import io.github.rupakc.travelplanner.core.domain.alerts.timeAgo
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.watch.toneColors
+import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -308,18 +309,43 @@ internal fun NotificationRow(n: AppNotification, now: Instant, onOpen: () -> Uni
     }
 }
 
-/** Unread count for the shell's bell; refreshed whenever the app comes to the foreground. */
+/**
+ * Unread count for the shell's bell. The bell re-enters composition on every return to a top-level tab, so
+ * [refresh] asks the server at most once per [REFRESH_TTL] (performance review M7); opening the alerts list
+ * ([invalidate]) makes the next [refresh] ask again, so alerts read there clear the badge on return.
+ */
 @HiltViewModel
 class NotificationBellViewModel
     @Inject
     constructor(
         private val repository: NotificationsRepository,
+        private val clock: AppClock,
     ) : ViewModel() {
         private val mutable = MutableStateFlow(0)
         val unread: StateFlow<Int> = mutable.asStateFlow()
+        private var lastRefresh: Instant? = null
 
         fun refresh() {
-            viewModelScope.launch { (repository.unreadCount() as? AppResult.Success)?.let { mutable.value = it.value } }
+            val now = clock.now()
+            lastRefresh?.let { if (Duration.between(it, now) < REFRESH_TTL) return }
+            lastRefresh = now
+            viewModelScope.launch {
+                when (val result = repository.unreadCount()) {
+                    is AppResult.Success -> mutable.value = result.value
+
+                    // A failed call doesn't count: try again on the next resume.
+                    is AppResult.Failure -> lastRefresh = null
+                }
+            }
+        }
+
+        /** The user opened the alerts list: the count may change there. */
+        fun invalidate() {
+            lastRefresh = null
+        }
+
+        companion object {
+            val REFRESH_TTL: Duration = Duration.ofMinutes(1)
         }
     }
 
@@ -334,7 +360,10 @@ fun NotificationBellAction(onOpen: () -> Unit, viewModel: NotificationBellViewMo
         viewModel.refresh()
         onPauseOrDispose { }
     }
-    NotificationBell(unread, onOpen)
+    NotificationBell(unread, {
+        viewModel.invalidate()
+        onOpen()
+    })
 }
 
 @Composable

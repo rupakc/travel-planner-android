@@ -61,8 +61,9 @@ class ShareLogicTest {
         assertEquals(420.0, trip.legsTotalUsd!!, 0.0)
         assertTrue(trip.fullItinerary)
         val slot = trip.itinerary.single().slots.single()
-        assertEquals("09:00–11:00", slot.timeRange)
-        assertEquals("Go early", slot.note)
+        assertEquals("09:00", slot.startTime)
+        assertEquals("11:00", slot.endTime)
+        assertEquals("Go early", trip.itineraryNotes[slot.key])
     }
 
     private fun vm(token: String?, repo: FakePlansRepository, signedIn: Boolean) =

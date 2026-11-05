@@ -99,7 +99,7 @@ interface AuthRepository {
     suspend fun updateEmail(email: String): AppResult<String?>
 
     /**
-     * Unregisters this device's push token (best effort, at most 5 s), clears the session and the user's
+     * Unregisters this device's push token (best effort, at most 3 s) and deletes it (at most 2 s), clears the session and the user's
      * local data via [SessionCleaner]. Chat history is kept (per username).
      */
     suspend fun logout()

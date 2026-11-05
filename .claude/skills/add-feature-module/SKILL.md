@@ -15,4 +15,7 @@ Read `docs/Adding-a-Feature.md`, `docs/Modules.md`, `docs/Foundation-Interfaces.
 6. Strings in `values/strings.xml` and `values-es/strings.xml` (prefix `<name>_`).
 7. Tests first (ViewModel with fakes, Compose on Robolectric).
 8. Docs: add a TitleCase page under `docs/`, link from `docs/Home.md` and `docs/Modules.md`, add a `MEMORY.md` line.
-9. Run the `verify-android` skill.
+9. Optional feature (toggled per traveller type)? Also add the `FeatureId`, its `DefaultFeatureCatalogue` entry, `ProfileUi.kt` title/description strings, the Home tile mapping (`HomeRoutes.kt`, `ProfileHelpers.kt`) and, for a results section, `SectionArrangement.FEATURE_OF`. Read visibility only through `FeatureVisibility` (core:data).
+10. Top-level tab? Add a `TopLevelDestination` entry and switch to it with `navigateToTopLevel`, never `navigate()`.
+11. Per-user device state? Clear it in `SessionCleanerImpl` (or a `UserStateCleaner`) and review the backup / data-extraction rules.
+12. Run the `verify-android` skill.

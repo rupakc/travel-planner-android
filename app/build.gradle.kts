@@ -90,7 +90,7 @@ dependencies {
 // a generated `$$serializer`, a custom `*Serializer` object, a `Companion` field or a `serializer()` member.
 val verifyReleaseKeepRules by tasks.registering {
     group = "verification"
-    description = "Checks the prodRelease R8 usage report for removed core:model serializers."
+    description = "Checks the prodRelease R8 usage report: core:model serializers kept, AdminApi removed."
     dependsOn("minifyProdReleaseWithR8")
     val usage = layout.buildDirectory.file("outputs/mapping/prodRelease/usage.txt")
     inputs.file(usage)
@@ -112,5 +112,10 @@ val verifyReleaseKeepRules by tasks.registering {
             }
         }
         check(problems.isEmpty()) { "R8 removed serialization members:\n" + problems.joinToString("\n") }
+        // AdminApi has no UI (admin is web-only): it must not ship in release.
+        val adminApi = "io.github.rupakc.travelplanner.core.network.api.AdminApi"
+        check(usage.get().asFile.useLines { lines -> lines.any { it == adminApi || it == "$adminApi:" } }) {
+            "AdminApi was kept in the release build; it should be removed by R8"
+        }
     }
 }

@@ -1,5 +1,8 @@
 package io.github.rupakc.travelplanner.core.domain.export
 
+import io.github.rupakc.travelplanner.core.domain.itinerary.ItineraryLayouts
+import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import io.github.rupakc.travelplanner.core.model.section.ItineraryData
 import java.time.Instant
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -320,7 +323,7 @@ class PlanIcsTest {
     /** The layouts the web's `moveSlot(trip, null, '1-morning', 2, 'evening')` / `removeSlot(trip, null, '1-morning')` produce. */
     private fun layout(vararg positions: Pair<String, String?>) =
         buildJsonObject {
-            put("fingerprint", ItineraryArrangement.fingerprint(trip))
+            put("fingerprint", ItineraryLayouts.fingerprint(TravelJson.decodeFromJsonElement(ItineraryData.serializer(), trip)))
             put("positions", JsonObject(positions.associate { (k, v) -> k to (v?.let(::JsonPrimitive) ?: kotlinx.serialization.json.JsonNull) }))
         }
 

@@ -24,8 +24,7 @@ import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
 import io.github.rupakc.travelplanner.feature.plan.export.ShareTextInput
-import io.github.rupakc.travelplanner.feature.plan.model.ItineraryDayUi
-import io.github.rupakc.travelplanner.feature.plan.model.ItineraryUi
+import io.github.rupakc.travelplanner.feature.plan.model.PlanItineraryUi
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroup
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroups
 import io.github.rupakc.travelplanner.feature.plan.model.TripSummary
@@ -54,7 +53,7 @@ import kotlinx.serialization.json.JsonPrimitive
 internal data class PlanDetailContent(
     val summary: TripSummary,
     val groups: List<SelectionGroup>,
-    val itinerary: List<ItineraryDayUi>,
+    val itinerary: PlanItineraryUi,
     val costParts: List<CostPart>,
     val budgetStatus: BudgetStatus?,
     val hasTransport: Boolean,
@@ -261,7 +260,7 @@ internal class PlanDetailViewModel
             return PlanDetailContent(
                 summary = summary,
                 groups = SelectionGroups.of(plan.selections),
-                itinerary = ItineraryUi.of(plan.selections),
+                itinerary = PlanItineraryUi.of(plan.selections),
                 costParts = parts,
                 budgetStatus = getBudgetStatus(parts.sumOf { it.amount }, summary.budgetUsd),
                 hasTransport = plan.selections.gettingAround.isNotEmpty(),
