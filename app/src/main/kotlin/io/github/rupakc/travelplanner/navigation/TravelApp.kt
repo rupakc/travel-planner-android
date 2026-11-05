@@ -40,17 +40,20 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.github.rupakc.travelplanner.AuthGate
 import io.github.rupakc.travelplanner.R
+import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
+import io.github.rupakc.travelplanner.core.model.navigation.NotificationsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.OnboardingRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlanDetailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
+import io.github.rupakc.travelplanner.feature.alerts.NotificationBellAction
 import io.github.rupakc.travelplanner.feature.alerts.navigation.alertsGraph
 import io.github.rupakc.travelplanner.feature.auth.navigation.authGraph
 import io.github.rupakc.travelplanner.feature.chat.navigation.chatGraph
@@ -100,6 +103,7 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
         showNavigation = gate == AuthGate.READY && topLevel != null,
         onNavigate = { navController.navigateToTopLevel(it) },
         onOpenSettings = { navController.navigate(SettingsRoute) },
+        bell = { NotificationBellAction(onOpen = { navController.navigate(NotificationsRoute) }) },
         snackbarHostState = snackbarHostState,
     ) {
         NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.fillMaxSize()) {
@@ -122,9 +126,12 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                     SearchRoute(mode = io.github.rupakc.travelplanner.core.model.navigation.SearchModes.IMPORT, importUrl = url),
                 )
             })
-            alertsGraph(onReplan = {
-                navController.navigateToTopLevel(TopLevelDestination.SEARCH)
-            }, onBack = { navController.popBackStack() })
+            alertsGraph(
+                onReplan = { navController.navigate(ResultsRoute) },
+                onBack = { navController.popBackStack() },
+                onOpenAlert = { kind, watchId -> navController.navigate(AlertsRoute(kind = kind, watchId = watchId)) },
+                onSearch = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
+            )
             settingsGraph(
                 onBack = { navController.popBackStack() },
                 onRetakeQuiz = { navController.navigate(OnboardingRoute(fromSettings = true)) },
@@ -148,6 +155,8 @@ fun TravelAppScaffold(
     showNavigation: Boolean,
     onNavigate: (TopLevelDestination) -> Unit,
     onOpenSettings: () -> Unit,
+    /** Notifications bell (top bar action); empty in previews and tests. */
+    bell: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable () -> Unit,
 ) {
@@ -158,6 +167,7 @@ fun TravelAppScaffold(
                     TopAppBar(
                         title = { Text(stringResource(currentTopLevel.labelRes), modifier = Modifier.semantics { heading() }) },
                         actions = {
+                            bell()
                             IconButton(onClick = onOpenSettings) {
                                 Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.nav_settings))
                             }
