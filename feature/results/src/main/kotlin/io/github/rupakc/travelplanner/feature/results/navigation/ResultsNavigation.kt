@@ -101,7 +101,7 @@ internal class ResultsSectionActions(
     private val openLink: (String) -> Unit,
     private val state: () -> ResultsUiState,
 ) : SectionActions, SelectionsSource {
-    override val selections: io.github.rupakc.travelplanner.core.model.plan.PlanSelections get() = state().selections
+    override val selectionsNow: io.github.rupakc.travelplanner.core.model.plan.PlanSelections get() = state().selections
 
     override fun onToggle(item: PlanItem) = onEvent(ResultsEvent.Toggle(item))
 

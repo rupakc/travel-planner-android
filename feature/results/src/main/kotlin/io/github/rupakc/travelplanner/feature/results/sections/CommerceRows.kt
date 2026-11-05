@@ -134,11 +134,11 @@ private fun flightRows(data: FlightsData, budget: BudgetUi?, selections: PlanSel
 /** The current selections: the snapshot state when provided, else via [SectionActions.isSelected]'s source. */
 @Composable
 internal fun currentSelections(actions: SectionActions): PlanSelections =
-    LocalSelections.current?.value ?: (actions as? SelectionsSource)?.selections ?: PlanSelections()
+    LocalSelections.current?.value ?: (actions as? SelectionsSource)?.selectionsNow ?: PlanSelections()
 
 /** Implemented by section actions that can expose the whole selection set. */
 internal interface SelectionsSource {
-    val selections: PlanSelections
+    val selectionsNow: PlanSelections
 }
 
 /** "Selected" for one card, derived so only this card recomposes when it flips. */
