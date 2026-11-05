@@ -109,6 +109,7 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 
 - 2026-11-05 **Docs home** - `docs/*.md` (TitleCase) are the wiki source; `wiki-sync.yml` publishes them on push to main. Pages for unmerged features say "Planned" instead of describing code that does not exist.
 - 2026-11-05 **Doc link check** - `scripts/check-doc-links.sh` verifies relative links (CI runs it); pages owned by other teams (Firebase-Setup, Onboarding-and-Traveller-Types) are allowed to be missing until they merge.
+- 2026-11-05 **Doc link check** - both pages are merged; the PENDING list is empty (supersedes the line above), so a missing page now fails CI.
 - 2026-11-05 **Claude Code settings** - `.claude/settings.json` allows only read-only gradle/adb/git commands; build and install commands still prompt.
 - 2026-11-05 **Pseudo-locales** - enabled on the debug build type by the convention plugin; documented in Localization.
 
