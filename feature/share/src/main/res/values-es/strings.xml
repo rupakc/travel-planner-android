@@ -1,5 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="share_title">Viaje compartido</string>
-    <string name="share_message">Un viaje de solo lectura que alguien compartió contigo.</string>
+    <string name="share_brand">✈ Viaje de Voyager</string>
+    <string name="share_unavailable_title">Este viaje compartido no está disponible</string>
+    <string name="share_unavailable_message">Puede que el enlace se haya revocado o esté mal escrito.</string>
+    <string name="share_plan_own">Planea tu propio viaje</string>
+    <string name="share_destination_fallback">Un lugar maravilloso</string>
+    <string name="share_from">desde %1$s</string>
+    <string name="share_dates">%1$s → %2$s</string>
+    <string name="share_planned">~%1$s previstos</string>
+    <string name="share_inspired_by">Inspirado en %1$s</string>
+    <string name="share_footer">Compartido solo para lectura: nunca se incluyen datos personales.</string>
+    <string name="share_save_copy">Guardar una copia</string>
+    <string name="share_saving">Guardando…</string>
+    <string name="share_saved">Guardado en Mis viajes</string>
+    <string name="share_open_saved">Abrir</string>
+    <string name="share_save_failed">No se pudo guardar una copia.</string>
+    <string name="share_offline">Sin conexión. Conéctate para abrir este viaje compartido.</string>
+    <string name="share_flights">Vuelos</string>
+    <string name="share_hotel">Hotel</string>
+    <string name="share_itinerary">Itinerario día a día (%1$s)</string>
+    <string name="share_itinerary_picks">Selección del itinerario</string>
+    <string name="share_activities">Actividades (%1$d)</string>
+    <string name="share_events">Eventos locales (%1$d)</string>
+    <string name="share_tours">Free tours a pie (%1$d)</string>
+    <string name="share_sim">Conectividad</string>
+    <string name="share_getting_around">Cómo moverse (%1$d)</string>
+    <string name="share_tips">Conviene saber (%1$d)</string>
+    <string name="share_depart">Ida</string>
+    <string name="share_return">Vuelta</string>
+    <string name="share_flight">Vuelo</string>
+    <string name="share_leg">Tramo %1$d</string>
+    <string name="share_flights_total">%1$s en vuelos por persona</string>
+    <string name="share_day">Día %1$d</string>
+    <string name="share_per_night">%1$s/noche</string>
+    <string name="share_total">%1$s en total</string>
+    <string name="share_stars">Hotel de %1$d estrellas</string>
+    <string name="share_review">%1$s/10</string>
+    <string name="share_data_gb">%1$s GB</string>
+    <string name="share_unlimited">Datos ilimitados</string>
+    <string name="share_from_link">De tu enlace</string>
+    <string name="share_open_link_a11y">Abrir %1$s</string>
+    <string name="share_unnamed">Elemento sin nombre</string>
+    <string name="share_morning">Mañana</string>
+    <string name="share_afternoon">Tarde</string>
+    <string name="share_evening">Noche</string>
+    <plurals name="share_days">
+        <item quantity="one">%1$d día</item>
+        <item quantity="many">%1$d días</item>
+        <item quantity="other">%1$d días</item>
+    </plurals>
+    <plurals name="share_travellers">
+        <item quantity="one">%1$d viajero</item>
+        <item quantity="many">%1$d viajeros</item>
+        <item quantity="other">%1$d viajeros</item>
+    </plurals>
+    <plurals name="share_validity">
+        <item quantity="one">%1$d día</item>
+        <item quantity="many">%1$d días</item>
+        <item quantity="other">%1$d días</item>
+    </plurals>
 </resources>

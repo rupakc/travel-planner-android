@@ -41,6 +41,9 @@ import java.util.Locale
 /** Width of the date badge (layout constant, defined once). */
 private val DateBadgeWidth = 56.dp
 
+/** Icon size inside a fact pill. */
+private val PillIconSize = 16.dp
+
 /** Localised medium date ("Apr 1, 2027" / "1 abr 2027"). */
 internal fun LocalDate.medium(): String = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(this)
 
@@ -95,7 +98,7 @@ internal fun FactPill(icon: ImageVector?, text: String, modifier: Modifier = Mod
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs),
         ) {
-            if (icon != null) Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp))
+            if (icon != null) Icon(icon, contentDescription = null, modifier = Modifier.size(PillIconSize))
             Text(text, style = TravelTheme.typography.labelLarge)
         }
     }

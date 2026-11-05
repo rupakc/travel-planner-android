@@ -137,11 +137,21 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 onSignOut = { scope.launch { shellViewModel.signOut() } },
             )
             nearbyGraph(onBack = { navController.popBackStack() })
-            shareGraph(onBack = {
-                if (!navController.popBackStack()) {
-                    navController.navigate(if (gate == AuthGate.READY) HomeRoute else LoginRoute) { popUpTo(0) { inclusive = true } }
-                }
-            })
+            shareGraph(
+                onBack = {
+                    if (!navController.popBackStack()) {
+                        navController.navigate(if (gate == AuthGate.READY) HomeRoute else LoginRoute) { popUpTo(0) { inclusive = true } }
+                    }
+                },
+                onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
+                onPlanTrip = {
+                    if (gate == AuthGate.READY) {
+                        navController.navigateToTopLevel(TopLevelDestination.SEARCH)
+                    } else {
+                        navController.navigate(LoginRoute) { popUpTo(0) { inclusive = true } }
+                    }
+                },
+            )
         }
     }
 }
