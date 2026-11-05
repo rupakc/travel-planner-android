@@ -38,6 +38,19 @@ class PlatformExportTest {
     }
 
     @Test
+    fun `an app-only share link says it opens in the app`() {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val app =
+            PlatformExport.linkText(
+                context,
+                io.github.rupakc.travelplanner.feature.plan.export.ExportRequest.Link("Japan", "travelplanner://share/x", appOnly = true),
+            )
+        assertEquals("Japan\ntravelplanner://share/x\nOpens in the Voyager Travel Planner app.", app)
+        val web = PlatformExport.linkText(context, io.github.rupakc.travelplanner.feature.plan.export.ExportRequest.Link("Japan", "https://w.example/share/x"))
+        assertEquals("Japan\nhttps://w.example/share/x", web)
+    }
+
+    @Test
     fun `share text uses the module strings`() {
         val text =
             PlatformExport.buildText(

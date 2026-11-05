@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -73,7 +75,8 @@ class PlanScreensTest {
                     plan(2, "Andalucía", "Málaga, Spain", "2026-12-01", "2026-12-05"),
                 ),
             )
-        val vm = PlansViewModel(repo, FixedClock(), TestAppDispatchers(Dispatchers.Main), CoroutineScope(SupervisorJob()))
+        val vm =
+            PlansViewModel(androidx.lifecycle.SavedStateHandle(), repo, FixedClock(), TestAppDispatchers(Dispatchers.Main), CoroutineScope(SupervisorJob()))
         compose.setContent {
             val state by vm.state.collectAsStateWithLifecycle()
             TravelTheme(themeMode = ThemeMode.DARK) { PlansScreen(state, vm::onEvent, {}, {}) }
@@ -179,5 +182,18 @@ class PlanScreensTest {
             TravelTheme(themeMode = ThemeMode.DARK) { MyPlanScreen(MyPlanUiState(content = content), {}, {}, {}, {}) }
         }
         compose.onNodeWithText("Select flights, hotels & activities to build your plan").assertIsDisplayed()
+    }
+
+    @Test
+    fun `offline detail shows the cached-copy banner and disables sharing`() {
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                PlanDetailScreen(detailState().copy(staleError = io.github.rupakc.travelplanner.core.common.AppError.Network()), {}, {}, onBack = {})
+            }
+        }
+        compose.onNodeWithText("You're offline. Showing the copy saved on this phone; sharing and deleting are off until you reconnect.").assertExists()
+        compose.onNodeWithText("Share link").assertIsNotEnabled()
+        compose.onNodeWithText("Stop sharing").assertIsNotEnabled()
+        compose.onNodeWithText("Open in results").assertIsEnabled()
     }
 }

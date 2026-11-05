@@ -40,6 +40,8 @@ internal data class ShareUiState(
     /** "Save a copy" is offered only to signed-in users. */
     val canSaveCopy: Boolean = false,
     val isSaving: Boolean = false,
+    /** Set after "Save a copy" succeeded; the button then opens the copy (no duplicates). */
+    val savedPlanId: Long? = null,
     val message: ShareMessage? = null,
 )
 
@@ -109,7 +111,7 @@ internal class ShareViewModel
 
         private fun saveCopy() {
             val plan = shared ?: return
-            if (status.value.isSaving) return
+            if (status.value.isSaving || status.value.savedPlanId != null) return
             status.update { it.copy(isSaving = true) }
             viewModelScope.launch {
                 val searchData = TravelJson.encodeToJsonElement(SharedSearchData.serializer(), plan.searchData) as JsonObject
@@ -117,6 +119,7 @@ internal class ShareViewModel
                 status.update {
                     it.copy(
                         isSaving = false,
+                        savedPlanId = (result as? AppResult.Success)?.value?.id,
                         message =
                             when (result) {
                                 is AppResult.Success -> ShareMessage.Saved(result.value.id)

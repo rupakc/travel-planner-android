@@ -71,6 +71,10 @@
     <string name="plan_more_actions">Más acciones</string>
     <string name="plan_share_hint">Comparte un enlace público. Cualquiera puede ver esta tarjeta del viaje sin iniciar sesión.</string>
     <string name="plan_shared_status">Compartido: cualquiera con el enlace puede ver este viaje.</string>
+    <string name="plan_link_app_only">Se abre en la app Voyager Travel Planner.</string>
+    <string name="plan_needs_connection">Sin conexión. Compartir y eliminar necesitan conexión.</string>
+    <string name="plan_detail_stale">Mostramos la copia guardada en este teléfono. Puede no estar actualizada.</string>
+    <string name="plan_detail_offline">Sin conexión. Mostramos la copia guardada en este teléfono; compartir y eliminar no están disponibles hasta que vuelvas a conectarte.</string>
     <string name="plan_link_revoked">Ya no se comparte. El enlace anterior ha dejado de funcionar.</string>
     <string name="plan_share_failed">No se pudo crear el enlace para compartir</string>
     <string name="plan_no_selections">Este plan aún no tiene selecciones guardadas.</string>
@@ -152,6 +156,7 @@
     <string name="plan_leg">Tramo %1$d</string>
     <string name="plan_day">Día %1$d</string>
     <string name="plan_per_night">%1$s / noche</string>
+    <string name="plan_data_gb">%1$s GB</string>
     <string name="plan_free_entry">Entrada gratuita</string>
     <plurals name="plan_packed">
         <item quantity="one">%1$d de %2$d en la maleta</item>

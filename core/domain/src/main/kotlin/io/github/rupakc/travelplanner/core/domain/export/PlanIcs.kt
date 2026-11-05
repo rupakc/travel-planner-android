@@ -235,7 +235,7 @@ object PlanIcs {
                 events +=
                     PlanCalendarEvent(
                         id = "extras-${day["day_number"].js()}",
-                        summary = "Also from your link: ${extras.joinToString(", ") { it["name"].js() }}",
+                        summary = "Also from your link: ${extras.joinToString(", ") { it["name"].text().orEmpty() }}",
                         location = null,
                         description = extras.joinToString("\n") { x -> listOfNotNull(x["name"].text(), x["note"].text()).joinToString(" — ") },
                         allDay = true,

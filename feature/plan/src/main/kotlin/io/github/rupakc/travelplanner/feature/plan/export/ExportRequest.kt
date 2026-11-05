@@ -26,8 +26,8 @@ internal sealed interface ExportRequest {
     /** Share the plan as plain text. */
     data class Text(val input: ShareTextInput) : ExportRequest
 
-    /** Share a public link. */
-    data class Link(val planName: String, val url: String) : ExportRequest
+    /** Share a public link; [appOnly] = an app link (no web address known), said so in the text. */
+    data class Link(val planName: String, val url: String, val appOnly: Boolean = false) : ExportRequest
 
     /** "Add to calendar" for one event (CalendarContract insert intent). */
     data class CalendarInsert(val event: PlanCalendarEvent) : ExportRequest

@@ -67,6 +67,10 @@
     <string name="plan_more_actions">More actions</string>
     <string name="plan_share_hint">Share a public link. Anyone can view this trip card, no login needed.</string>
     <string name="plan_shared_status">Shared: anyone with the link can view this trip.</string>
+    <string name="plan_link_app_only">Opens in the Voyager Travel Planner app.</string>
+    <string name="plan_needs_connection">You\'re offline. Sharing and deleting need a connection.</string>
+    <string name="plan_detail_stale">Showing the copy saved on this phone. It may be out of date.</string>
+    <string name="plan_detail_offline">You\'re offline. Showing the copy saved on this phone; sharing and deleting are off until you reconnect.</string>
     <string name="plan_link_revoked">Sharing stopped. The old link no longer works.</string>
     <string name="plan_share_failed">Couldn\'t create share link</string>
     <string name="plan_no_selections">This plan has no saved selections yet.</string>
@@ -148,6 +152,7 @@
     <string name="plan_leg">Leg %1$d</string>
     <string name="plan_day">Day %1$d</string>
     <string name="plan_per_night">%1$s / night</string>
+    <string name="plan_data_gb">%1$s GB</string>
     <string name="plan_free_entry">Free entry</string>
     <plurals name="plan_packed">
         <item quantity="one">%1$d of %2$d packed</item>

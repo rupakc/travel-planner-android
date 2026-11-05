@@ -39,8 +39,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
@@ -95,7 +97,7 @@ internal fun PlanDetailScreen(
             TpTopBar(
                 title = content?.summary?.displayName() ?: stringResource(R.string.plan_detail_title),
                 onBack = onBack,
-                actions = { if (content != null) OverflowMenu(onEvent) },
+                actions = { if (content != null) OverflowMenu(onEvent, deleteEnabled = !state.offline) },
             )
         },
         snackbarHost = { SnackbarHost(snackbar) },
@@ -127,7 +129,7 @@ internal fun PlanDetailScreen(
 private const val SKELETON_LINES = 6
 
 @Composable
-private fun OverflowMenu(onEvent: (PlanDetailEvent) -> Unit) {
+private fun OverflowMenu(onEvent: (PlanDetailEvent) -> Unit, deleteEnabled: Boolean) {
     var open by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { open = true }) {
@@ -143,6 +145,7 @@ private fun OverflowMenu(onEvent: (PlanDetailEvent) -> Unit) {
                 },
             )
             DropdownMenuItem(
+                enabled = deleteEnabled,
                 text = { Text(stringResource(R.string.plan_action_delete)) },
                 leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
                 onClick = {
@@ -160,6 +163,9 @@ private fun DetailBody(content: PlanDetailContent, state: PlanDetailUiState, onE
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = TravelTheme.spacing.gutter, vertical = TravelTheme.spacing.md),
     ) {
+        state.staleError?.let { error ->
+            item(key = "stale", contentType = "banner") { StaleBanner(error, onRetry = { onEvent(PlanDetailEvent.Retry) }) }
+        }
         item(key = "header", contentType = "header") { TripHeader(content.summary) }
         item(key = "actions", contentType = "actions") { ActionRow(content.summary, state, onEvent) }
         if (content.costParts.isNotEmpty()) {
@@ -223,6 +229,7 @@ private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (
                 onClick = { onEvent(PlanDetailEvent.ShareLink) },
                 variant = TpButtonVariant.Tonal,
                 loading = state.shareBusy,
+                enabled = !state.offline,
                 leadingIcon = Icons.Filled.Share,
             )
             TpButton(
@@ -244,7 +251,7 @@ private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (
                         stringResource(R.string.plan_action_revoke),
                         onClick = { onEvent(PlanDetailEvent.RevokeShare) },
                         variant = TpButtonVariant.Text,
-                        enabled = !state.shareBusy,
+                        enabled = !state.shareBusy && !state.offline,
                     )
                 }
             }
@@ -260,6 +267,7 @@ private fun DetailMessages(message: DetailMessage?, snackbar: SnackbarHostState,
         when (message) {
             null -> null
             DetailMessage.LinkRevoked -> stringResource(R.string.plan_link_revoked)
+            DetailMessage.NeedsConnection -> stringResource(R.string.plan_needs_connection)
             DetailMessage.NothingToExport -> stringResource(R.string.plan_nothing_to_export)
             is DetailMessage.Failed -> message.error.message ?: stringResource(io.github.rupakc.travelplanner.core.designsystem.R.string.ds_error_generic)
         }
@@ -418,5 +426,26 @@ private fun DetailDarkPreview() {
 private fun DetailErrorPreview() {
     TravelTheme(themeMode = ThemeMode.LIGHT) {
         PlanDetailScreen(PlanDetailUiState(isLoading = false, error = io.github.rupakc.travelplanner.core.common.AppError.NotFound()), {}, {}, onBack = {})
+    }
+}
+
+/** Shown above a trip served from the phone's cache after a failed refresh; says what is off and why. */
+@Composable
+private fun StaleBanner(error: io.github.rupakc.travelplanner.core.common.AppError, onRetry: () -> Unit) {
+    val offline = error is io.github.rupakc.travelplanner.core.common.AppError.Network
+    Surface(
+        color = TravelTheme.extendedColors.warningContainer,
+        contentColor = TravelTheme.extendedColors.onWarningContainer,
+        shape = TravelShape.ItemCard,
+        modifier = Modifier.fillMaxWidth().padding(bottom = TravelTheme.spacing.md),
+    ) {
+        Column(Modifier.padding(TravelTheme.spacing.md)) {
+            Text(
+                stringResource(if (offline) R.string.plan_detail_offline else R.string.plan_detail_stale),
+                style = TravelTheme.typography.bodyMedium,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
+            TpButton(stringResource(R.string.plan_refresh), onClick = onRetry, variant = TpButtonVariant.Text)
+        }
     }
 }

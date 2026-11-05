@@ -145,6 +145,9 @@ private fun SelectionRow(
                 Text(it, style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.primary)
             }
             Text(title, style = TravelTheme.typography.bodyLarge)
+            entry.dataGb?.let {
+                Text(stringResource(R.string.plan_data_gb, it), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+            }
             entry.details.forEach {
                 Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
             }

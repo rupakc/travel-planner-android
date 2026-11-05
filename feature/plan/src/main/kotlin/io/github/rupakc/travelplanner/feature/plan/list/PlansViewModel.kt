@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.plan.list
 
 import androidx.compose.runtime.Immutable
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,8 +39,8 @@ internal data class TripControls(
 
 /** One-off message for the snackbar. */
 internal sealed interface PlansMessage {
-    /** "Trip deleted" with Undo. */
-    data class Deleted(val name: String) : PlansMessage
+    /** "Trip deleted" with Undo; [id] keeps two same-named trips' messages distinct. */
+    data class Deleted(val id: Long, val name: String) : PlansMessage
 
     data class DeleteFailed(val error: AppError) : PlansMessage
 }
@@ -85,6 +86,7 @@ internal sealed interface PlansEvent {
 internal class PlansViewModel
     @Inject
     constructor(
+        private val savedState: SavedStateHandle,
         private val plans: PlansRepository,
         private val clock: AppClock,
         private val dispatchers: AppDispatchers,
@@ -120,7 +122,16 @@ internal class PlansViewModel
                     error = s.error,
                     message = s.message,
                 )
-            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), PlansUiState())
+            }.flowOn(dispatchers.default)
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), PlansUiState())
+
+        init {
+            // A swipe-delete still pending when the process died: the user never undid it, so finish it.
+            savedState.get<Long>(PENDING_DELETE_KEY)?.let { id ->
+                savedState.remove<Long>(PENDING_DELETE_KEY)
+                viewModelScope.launch { plans.delete(id) }
+            }
+        }
 
         fun onEvent(event: PlansEvent) {
             when (event) {
@@ -151,18 +162,21 @@ internal class PlansViewModel
             commit() // one pending delete at a time
             val trip = state.value.trips.firstOrNull { it.id == id } ?: return
             pending = trip
-            status.update { it.copy(hidden = it.hidden + id, message = PlansMessage.Deleted(trip.name)) }
+            savedState[PENDING_DELETE_KEY] = id
+            status.update { it.copy(hidden = it.hidden + id, message = PlansMessage.Deleted(trip.id, trip.name)) }
         }
 
         private fun undo() {
             val trip = pending ?: return
             pending = null
+            savedState.remove<Long>(PENDING_DELETE_KEY)
             status.update { it.copy(hidden = it.hidden - trip.id, message = null) }
         }
 
         private fun commit() {
             val trip = pending ?: return
             pending = null
+            savedState.remove<Long>(PENDING_DELETE_KEY)
             viewModelScope.launch {
                 val result = plans.delete(trip.id)
                 status.update {
@@ -180,7 +194,10 @@ internal class PlansViewModel
             super.onCleared()
         }
 
-        private companion object {
-            const val STOP_TIMEOUT_MS = 5_000L
+        companion object {
+            private const val STOP_TIMEOUT_MS = 5_000L
+
+            /** SavedStateHandle key of a swipe-delete waiting for its Undo window. */
+            const val PENDING_DELETE_KEY = "pendingDeleteId"
         }
     }

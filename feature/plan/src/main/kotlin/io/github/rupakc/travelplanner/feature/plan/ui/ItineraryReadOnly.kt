@@ -68,7 +68,7 @@ internal fun ItineraryDayCard(day: ItineraryDayUi, modifier: Modifier = Modifier
 @Composable
 internal fun ItinerarySlotRow(slot: ItinerarySlotUi, modifier: Modifier = Modifier) {
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-        Column(Modifier.widthIn(min = TimeColumnWidth, max = TimeColumnWidth)) {
+        Column(Modifier.widthIn(min = TimeColumnWidth)) {
             timeOfDayLabel(slot.timeOfDay)?.let { Text(it, style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.onSurfaceVariant) }
             slot.timeRange?.let { Text(it, style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant) }
         }

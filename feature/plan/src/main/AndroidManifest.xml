@@ -4,7 +4,7 @@
     <application>
         <!-- Shares exported .ics files with calendar / mail apps (authority = PlatformExport.authority). -->
         <provider
-            android:name="androidx.core.content.FileProvider"
+            android:name=".export.PlanExportFileProvider"
             android:authorities="${applicationId}.plan.exports"
             android:exported="false"
             android:grantUriPermissions="true">

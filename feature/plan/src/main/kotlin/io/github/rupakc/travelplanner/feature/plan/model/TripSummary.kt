@@ -123,5 +123,7 @@ internal object TripQuery {
 
     /** Case- and accent-insensitive ("Malaga" finds "Málaga"). */
     fun fold(text: String): String =
-        Normalizer.normalize(text, Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "").lowercase()
+        Normalizer.normalize(text, Normalizer.Form.NFD).replace(MARKS, "").lowercase()
+
+    private val MARKS = Regex("\\p{Mn}+")
 }

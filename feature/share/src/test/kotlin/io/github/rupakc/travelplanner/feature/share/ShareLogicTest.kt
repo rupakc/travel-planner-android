@@ -103,8 +103,12 @@ class ShareLogicTest {
             vm.state.test {
                 assertTrue(expectMostRecentItem().canSaveCopy)
                 vm.onEvent(ShareEvent.SaveCopy)
-                assertEquals(ShareMessage.Saved(1), expectMostRecentItem().message)
+                val s = expectMostRecentItem()
+                assertEquals(ShareMessage.Saved(1), s.message)
+                assertEquals(1L, s.savedPlanId)
+                vm.onEvent(ShareEvent.SaveCopy)
             }
+            assertEquals(1, repo.plans.first().size)
             val saved = repo.plans.first().single()
             assertEquals("Japan", saved.name)
             assertEquals("Park Hyatt", saved.selections.hotel?.name)

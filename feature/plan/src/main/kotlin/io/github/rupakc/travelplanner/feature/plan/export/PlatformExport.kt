@@ -31,9 +31,13 @@ internal object PlatformExport {
         when (request) {
             is ExportRequest.Ics -> shareIcs(context, request)
             is ExportRequest.Text -> shareText(context, request.input.planName, buildText(context, request.input))
-            is ExportRequest.Link -> shareText(context, request.planName, "${request.planName}\n${request.url}")
+            is ExportRequest.Link -> shareText(context, request.planName, linkText(context, request))
             is ExportRequest.CalendarInsert -> start(context, calendarInsert(request.event))
         }
+
+    /** "Name\nURL", plus a note when the link opens only in the app. */
+    fun linkText(context: Context, link: ExportRequest.Link): String =
+        listOfNotNull(link.planName, link.url, context.getString(R.string.plan_link_app_only).takeIf { link.appOnly }).joinToString("\n")
 
     private suspend fun shareIcs(context: Context, ics: ExportRequest.Ics): Boolean {
         val uri =

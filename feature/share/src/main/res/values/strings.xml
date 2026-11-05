@@ -13,6 +13,8 @@
     <string name="share_footer">Shared read-only — personal details are never included.</string>
     <string name="share_save_copy">Save a copy</string>
     <string name="share_saving">Saving…</string>
+    <string name="share_hours">%1$s h</string>
+    <string name="share_open_copy">Open my copy</string>
     <string name="share_saved">Saved to My trips</string>
     <string name="share_open_saved">Open</string>
     <string name="share_save_failed">Couldn\'t save a copy.</string>

@@ -59,6 +59,8 @@ internal data class SelectionEntry(
     /** Itinerary slot / note position. */
     val dayNumber: Int? = null,
     val timeOfDay: String? = null,
+    /** SIM data allowance as sent ("5", "unlimited"), formatted by the UI. */
+    val dataGb: String? = null,
     /** Packing list progress. */
     val packedCount: Int? = null,
     val packTotal: Int? = null,
@@ -135,7 +137,8 @@ internal object SelectionGroups {
                     SelectionEntry(
                         key = "sim|${s.provider}|${s.planName}",
                         title = listOfNotNull(s.provider, s.planName).joinToString(" — ").ifEmpty { null },
-                        details = listOfNotNull(s.dataGb?.let { "$it GB" }, s.purchaseLocation),
+                        details = listOfNotNull(s.purchaseLocation),
+                        dataGb = s.dataGb,
                         priceUsd = s.priceUsd?.takeIf { it > 0 },
                         url = s.url,
                         removal = Removal.Item(PlanItem.SimItem(s)),
@@ -313,16 +316,19 @@ internal object ItineraryUi {
                             timeOfDay = slot["time_of_day"].text(),
                             timeRange = if (start != null && end != null) "$start–$end" else null,
                             activity = edit?.get("activity").text() ?: slot["activity"].text(),
-                            location = (edit?.get("location") ?: slot["location"]).text(),
+                            location = edit?.get("location").orNull(slot["location"]).text(),
                             note = selections.itineraryNotes[key]?.takeIf(String::isNotBlank),
                             slotNotes = slot["notes"].text(),
-                            costUsd = ((edit?.get("cost") ?: slot["estimated_cost_usd"]).prim()?.content?.toDoubleOrNull())?.takeIf { it > 0 },
+                            costUsd = edit?.get("cost").orNull(slot["estimated_cost_usd"]).prim()?.content?.toDoubleOrNull()?.takeIf { it > 0 },
                             fromLink = slot["from_link"].prim()?.booleanOrNull == true,
                         )
                     },
             )
         }
     }
+
+    /** JS `a ?? b`: an explicit JSON null falls back too. */
+    private fun JsonElement?.orNull(other: JsonElement?): JsonElement? = if (this == null || this is kotlinx.serialization.json.JsonNull) other else this
 
     private fun JsonElement?.prim(): JsonPrimitive? = (this as? JsonPrimitive)?.takeIf { it !is kotlinx.serialization.json.JsonNull }
 

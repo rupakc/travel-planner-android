@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.feature.plan.detail
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import io.github.rupakc.travelplanner.core.common.AppBuildInfo
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
@@ -11,7 +12,6 @@ import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
-import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
 import io.github.rupakc.travelplanner.feature.plan.FixedClock
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
 import io.github.rupakc.travelplanner.feature.plan.model.plan
@@ -19,6 +19,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -47,12 +48,19 @@ class PlanDetailViewModelTest {
     private val repo = FakePlansRepository(listOf(saved))
     private val store = FakeCurrentPlanStore(repo)
 
-    private fun viewModel(id: Long = 7) =
+    private fun viewModel(id: Long = 7, webBaseUrl: String = "https://voyager.example/") =
         PlanDetailViewModel(
             SavedStateHandle(mapOf(PlanDetailViewModel.PLAN_ID_ARG to id)),
             repo,
             store,
-            FakeSettingsRepository(defaultBaseUrl = "https://voyager.example/"),
+            AppBuildInfo(
+                defaultBaseUrl = "http://10.0.2.2:8001",
+                flavor = "local",
+                versionName = "t",
+                debug = true,
+                cleartextAllowed = true,
+                webBaseUrl = webBaseUrl,
+            ),
             FixedClock(),
             TestAppDispatchers(main.testDispatcher),
         )
@@ -175,8 +183,123 @@ class PlanDetailViewModelTest {
         }
 
     @Test
-    fun `share url falls back to the app link without a server`() {
-        assertEquals("travelplanner://share/abc", PlanDetailViewModel.shareUrl("", "abc"))
-        assertEquals("http://10.0.2.2:8001/share/abc", PlanDetailViewModel.shareUrl("http://10.0.2.2:8001", "abc"))
+    fun `share link uses the web app address, else the app link — never the API server`() {
+        assertEquals(ShareLink("https://voyager.example/share/abc", appOnly = false), PlanDetailViewModel.shareLink("https://voyager.example/", "abc"))
+        assertEquals(ShareLink("travelplanner://share/abc", appOnly = true), PlanDetailViewModel.shareLink("", "abc"))
     }
+
+    @Test
+    fun `without a web address the shared link is the app link and says so`() =
+        runTest {
+            val vm = viewModel(webBaseUrl = "")
+            vm.exportRequests.test {
+                vm.onEvent(PlanDetailEvent.ShareLink)
+                assertEquals(ExportRequest.Link("Japan", "travelplanner://share/share-token-7", appOnly = true), awaitItem())
+            }
+        }
+
+    @Test
+    fun `a cached token is re-checked with the server so a revoked link is never re-shared`() =
+        runTest {
+            val stale = FakePlansRepository(listOf(saved.copy(shareToken = "revoked-on-web")))
+            val vm =
+                PlanDetailViewModel(
+                    SavedStateHandle(mapOf(PlanDetailViewModel.PLAN_ID_ARG to 7L)),
+                    stale,
+                    store,
+                    AppBuildInfo("", "local", "t", true, true, webBaseUrl = "https://voyager.example"),
+                    FixedClock(),
+                    TestAppDispatchers(main.testDispatcher),
+                )
+            vm.exportRequests.test {
+                vm.onEvent(PlanDetailEvent.ShareLink)
+                assertEquals("https://voyager.example/share/share-token-7", (awaitItem() as ExportRequest.Link).url)
+            }
+        }
+
+    @Test
+    fun `offline uses the cached token`() =
+        runTest {
+            val offline = FakePlansRepository(listOf(saved.copy(shareToken = "cached")))
+            val vm =
+                PlanDetailViewModel(
+                    SavedStateHandle(mapOf(PlanDetailViewModel.PLAN_ID_ARG to 7L)),
+                    offline,
+                    store,
+                    AppBuildInfo("", "local", "t", true, true, webBaseUrl = "https://voyager.example"),
+                    FixedClock(),
+                    TestAppDispatchers(main.testDispatcher),
+                )
+            vm.state.test { expectMostRecentItem() }
+            offline.failNext = AppError.Network()
+            vm.exportRequests.test {
+                vm.onEvent(PlanDetailEvent.ShareLink)
+                assertEquals("https://voyager.example/share/cached", (awaitItem() as ExportRequest.Link).url)
+            }
+        }
+
+    @Test
+    fun `offline refresh shows the cached copy as stale and blocks server actions`() =
+        runTest {
+            repo.failNext = AppError.Network()
+            val vm = viewModel()
+            vm.state.test {
+                val s = expectMostRecentItem()
+                assertNotNull(s.content)
+                assertTrue(s.offline)
+                vm.onEvent(PlanDetailEvent.Delete)
+                vm.onEvent(PlanDetailEvent.Confirm)
+                assertEquals(DetailMessage.NeedsConnection, expectMostRecentItem().message)
+            }
+            assertEquals(1, repo.plans.first().size)
+        }
+
+    @Test
+    fun `server error keeps the cached copy flagged stale but not offline`() =
+        runTest {
+            repo.failNext = AppError.Server(500, null)
+            viewModel().state.test {
+                val s = expectMostRecentItem()
+                assertNotNull(s.content)
+                assertTrue(s.staleError is AppError.Server)
+                assertFalse(s.offline)
+            }
+        }
+
+    @Test
+    fun `a 404 hides the cached copy and shows not found`() =
+        runTest {
+            repo.failNext = AppError.NotFound("Plan not found")
+            viewModel().state.test {
+                val s = expectMostRecentItem()
+                assertNull(s.content)
+                assertTrue(s.error is AppError.NotFound)
+            }
+        }
+
+    @Test
+    fun `a plan deleted elsewhere after loading turns into not found, not an endless skeleton`() =
+        runTest {
+            val vm = viewModel()
+            vm.state.test {
+                assertNotNull(expectMostRecentItem().content)
+                repo.delete(7)
+                val s = expectMostRecentItem()
+                assertNull(s.content)
+                assertFalse(s.isLoading)
+                assertTrue(s.error is AppError.NotFound)
+            }
+        }
+
+    @Test
+    fun `open in results confirms before dropping unsaved edits of the same plan`() =
+        runTest {
+            store.restore(PlanDraft(planId = 7, selections = PlanSelections(), dirty = true))
+            val vm = viewModel()
+            vm.state.test {
+                expectMostRecentItem()
+                vm.onEvent(PlanDetailEvent.OpenInResults)
+                assertEquals(DetailConfirm.DISCARD_DRAFT, expectMostRecentItem().confirm)
+            }
+        }
 }

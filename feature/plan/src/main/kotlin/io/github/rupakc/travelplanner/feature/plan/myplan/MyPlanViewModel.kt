@@ -57,8 +57,10 @@ internal data class MyPlanContent(
     val budgetStatus: BudgetStatus?,
     val hasTransport: Boolean,
     val itemCount: Int,
+    /** Web `selectedCount` also counts non-empty itinerary notes. */
+    val hasNotes: Boolean = false,
 ) {
-    val isEmpty: Boolean get() = itemCount == 0 && itinerary.isEmpty()
+    val isEmpty: Boolean get() = itemCount == 0 && itinerary.isEmpty() && !hasNotes
 }
 
 internal sealed interface MyPlanMessage {
@@ -150,6 +152,8 @@ internal class MyPlanViewModel
             }
         }
 
+        /** Synchronised: content is built on the default dispatcher, save/export run on main. */
+        @Synchronized
         private fun displayName(draft: PlanDraft): String {
             draft.name?.let { return it }
             val request = draft.searchRequest ?: return PlanDraft.DEFAULT_NAME
@@ -176,6 +180,7 @@ internal class MyPlanViewModel
                 budgetStatus = PlanCost.budgetStatus(total, request?.budgetUsd),
                 hasTransport = draft.selections.gettingAround.isNotEmpty(),
                 itemCount = draft.selections.count,
+                hasNotes = draft.selections.itineraryNotes.values.any(String::isNotBlank),
             )
         }
 
@@ -203,7 +208,8 @@ internal class MyPlanViewModel
             status.update { it.copy(isSaving = true) }
             viewModelScope.launch {
                 val result = store.save(name)
-                if (result is AppResult.Failure && asNew) store.restore(before)
+                // Only the plan id goes back: edits made while the request was in flight stay.
+                if (result is AppResult.Failure && asNew) store.restore(store.snapshot().copy(planId = before.planId))
                 status.update {
                     it.copy(
                         isSaving = false,

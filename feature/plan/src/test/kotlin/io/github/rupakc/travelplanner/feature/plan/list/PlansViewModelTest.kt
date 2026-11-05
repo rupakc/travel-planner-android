@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.feature.plan.list
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
@@ -32,7 +33,7 @@ class PlansViewModelTest {
         )
 
     private fun TestScope.viewModel(repo: FakePlansRepository) =
-        PlansViewModel(repo, FixedClock(), TestAppDispatchers(main.testDispatcher), backgroundScope)
+        PlansViewModel(SavedStateHandle(), repo, FixedClock(), TestAppDispatchers(main.testDispatcher), backgroundScope)
 
     @Test
     fun `shows cached trips, then search, filter and sort narrow them`() =
@@ -99,7 +100,7 @@ class PlansViewModelTest {
                 vm.onEvent(PlansEvent.Delete(1))
                 val s = expectMostRecentItem()
                 assertEquals(listOf(2L, 3L), s.trips.map { it.id })
-                assertEquals(PlansMessage.Deleted("Spring in Japan"), s.message)
+                assertEquals(PlansMessage.Deleted(1, "Spring in Japan"), s.message)
                 vm.onEvent(PlansEvent.UndoDelete)
                 assertEquals(listOf(1L, 2L, 3L), expectMostRecentItem().trips.map { it.id })
             }
@@ -134,5 +135,34 @@ class PlansViewModelTest {
                 assertEquals(3, s.trips.size)
                 assertTrue(s.message is PlansMessage.DeleteFailed)
             }
+        }
+
+    @Test
+    fun `same-named trips get distinct undo messages`() =
+        runTest {
+            val repo = FakePlansRepository(listOf(plan(1, "Paris", "Paris", "2027-01-01"), plan(2, "Paris", "Paris", "2027-02-01")))
+            val vm = viewModel(repo)
+            vm.state.test {
+                expectMostRecentItem()
+                vm.onEvent(PlansEvent.Delete(1))
+                val first = expectMostRecentItem().message
+                vm.onEvent(PlansEvent.Delete(2))
+                val second = expectMostRecentItem().message
+                assertTrue(first != second)
+            }
+        }
+
+    @Test
+    fun `a swipe-delete pending at process death is completed on restore`() =
+        runTest {
+            val repo = FakePlansRepository(initial)
+            PlansViewModel(
+                SavedStateHandle(mapOf(PlansViewModel.PENDING_DELETE_KEY to 3L)),
+                repo,
+                FixedClock(),
+                TestAppDispatchers(main.testDispatcher),
+                backgroundScope,
+            )
+            assertEquals(listOf(1L, 2L), repo.plans.first().map { it.id })
         }
 }

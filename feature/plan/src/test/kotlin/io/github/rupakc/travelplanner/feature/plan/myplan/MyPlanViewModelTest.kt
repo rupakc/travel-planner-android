@@ -168,4 +168,13 @@ class MyPlanViewModelTest {
                 assertTrue((awaitItem() as ExportRequest.Ics).content.contains("DTSTART;VALUE=DATE:20270401"))
             }
         }
+
+    @Test
+    fun `a plan with only notes is not empty`() =
+        runTest {
+            store.setSelections(io.github.rupakc.travelplanner.core.model.plan.PlanSelections(itineraryNotes = mapOf("1-morning" to "Bring cash")))
+            viewModel().state.test {
+                assertFalse(expectMostRecentItem().content!!.isEmpty)
+            }
+        }
 }

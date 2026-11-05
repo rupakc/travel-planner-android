@@ -90,7 +90,7 @@ internal fun ShareScreen(
             val trip = state.trip
             when {
                 trip != null -> {
-                    TripBody(trip, state, onEvent, onPlanOwn, onOpenLink)
+                    TripBody(trip, state, onEvent, onPlanOwn, onOpenLink, onOpenSaved)
                 }
 
                 state.error is AppError.Network -> {
@@ -142,7 +142,14 @@ private fun ShareMessages(message: ShareMessage?, snackbar: SnackbarHostState, o
 }
 
 @Composable
-private fun TripBody(trip: SharedTrip, state: ShareUiState, onEvent: (ShareEvent) -> Unit, onPlanOwn: () -> Unit, onOpenLink: (String) -> Unit) {
+private fun TripBody(
+    trip: SharedTrip,
+    state: ShareUiState,
+    onEvent: (ShareEvent) -> Unit,
+    onPlanOwn: () -> Unit,
+    onOpenLink: (String) -> Unit,
+    onOpenSaved: (Long) -> Unit,
+) {
     val sel = trip.selections
     LazyColumn(
         Modifier.fillMaxSize().widthIn(max = MaxContentWidth),
@@ -156,7 +163,11 @@ private fun TripBody(trip: SharedTrip, state: ShareUiState, onEvent: (ShareEvent
         listCards(sel, onOpenLink)
         item(key = "actions", contentType = "actions") {
             Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                if (state.canSaveCopy) {
+                val savedId = state.savedPlanId
+                if (savedId != null) {
+                    // Saved once: open the copy instead of creating duplicates.
+                    TpButton(stringResource(R.string.share_open_copy), onClick = { onOpenSaved(savedId) }, modifier = Modifier.fillMaxWidth())
+                } else if (state.canSaveCopy) {
                     TpButton(
                         stringResource(if (state.isSaving) R.string.share_saving else R.string.share_save_copy),
                         onClick = { onEvent(ShareEvent.SaveCopy) },
@@ -329,7 +340,7 @@ private fun LazyListScope.itinerary(trip: SharedTrip) {
 @Composable
 private fun SlotLine(slot: SharedSlot) {
     Row(Modifier.fillMaxWidth().padding(top = TravelTheme.spacing.xs)) {
-        Column(Modifier.widthIn(min = TimeColumnWidth, max = TimeColumnWidth)) {
+        Column(Modifier.widthIn(min = TimeColumnWidth)) {
             val tod =
                 when (slot.timeOfDay) {
                     "morning" -> stringResource(R.string.share_morning)
@@ -414,7 +425,7 @@ private fun LazyListScope.listCards(sel: PlanSelections, onOpenLink: (String) ->
 
 @Composable
 private fun ActivityLine(a: Activity) {
-    val hours = a.durationHours?.let { "${it.toString().removeSuffix(".0")} h" }
+    val hours = a.durationHours?.let { stringResource(R.string.share_hours, it.toString().removeSuffix(".0")) }
     Line(a.name, listOfNotNull(a.city?.substringBefore(','), a.category, hours, a.priceUsd?.let(::formatPrice), a.location))
 }
 

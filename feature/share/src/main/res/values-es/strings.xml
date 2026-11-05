@@ -13,6 +13,8 @@
     <string name="share_footer">Compartido solo para lectura: nunca se incluyen datos personales.</string>
     <string name="share_save_copy">Guardar una copia</string>
     <string name="share_saving">Guardando…</string>
+    <string name="share_hours">%1$s h</string>
+    <string name="share_open_copy">Abrir mi copia</string>
     <string name="share_saved">Guardado en Mis viajes</string>
     <string name="share_open_saved">Abrir</string>
     <string name="share_save_failed">No se pudo guardar una copia.</string>

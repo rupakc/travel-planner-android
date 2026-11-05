@@ -71,6 +71,13 @@ internal fun PlansRoute(onOpenPlan: (Long) -> Unit, onPlanTrip: () -> Unit, onOp
                 }
             }
         } else {
+            // Expanded → compact (fold, rotation) with a trip open beside the list: keep it open full screen.
+            LaunchedEffect(selected) {
+                selected?.let {
+                    selected = null
+                    onOpenPlan(it)
+                }
+            }
             PlansScreen(state, viewModel::onEvent, onOpenTrip = onOpenPlan, onPlanTrip = onPlanTrip)
         }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
