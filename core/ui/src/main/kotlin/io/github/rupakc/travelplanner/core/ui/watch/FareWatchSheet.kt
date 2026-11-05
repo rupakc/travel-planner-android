@@ -175,12 +175,7 @@ private fun FareForm(state: FareWatchDialogState, userEmail: String?, onEvent: (
                 else -> travellers
             },
     )
-    CheckRow(
-        checked = state.flexible,
-        title = stringResource(R.string.watch_flexible),
-        subtitle = stringResource(R.string.watch_flexible_hint),
-        onChange = { onEvent(WatchSheetEvent.SetFlexible(it)) },
-    )
+    FlexibleOption(state.flexible) { onEvent(WatchSheetEvent.SetFlexible(it)) }
     if (state.emailAvailable) EmailOption(state.email, userEmail, { onEvent(WatchSheetEvent.SetEmail(it)) })
     state.error?.let { err ->
         ToneBox(io.github.rupakc.travelplanner.core.domain.alerts.Tone.WARN, live = true) {

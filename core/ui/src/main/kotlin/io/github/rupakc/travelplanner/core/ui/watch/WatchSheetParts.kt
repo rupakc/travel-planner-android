@@ -192,6 +192,18 @@ fun EmailOption(checked: Boolean, email: String?, onChange: (Boolean) -> Unit, m
     )
 }
 
+/** "Include nearby dates (±3 days)" with its explanation (fare watches). */
+@Composable
+fun FlexibleOption(checked: Boolean, modifier: Modifier = Modifier, onChange: (Boolean) -> Unit) {
+    CheckRow(
+        checked = checked,
+        title = stringResource(R.string.watch_flexible),
+        subtitle = stringResource(R.string.watch_flexible_hint),
+        onChange = onChange,
+        modifier = modifier,
+    )
+}
+
 /** The big price line: "Today $454  total for 2 travellers" / "Shown now $410  AI estimate…". */
 @Composable
 internal fun PriceLead(lead: String, price: String, note: String?, modifier: Modifier = Modifier) {
