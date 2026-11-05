@@ -294,7 +294,7 @@ private fun Tabs(selected: AlertTab, counts: Map<AlertTab, Int>, onSelect: (Aler
             val desc = stringResource(R.string.alerts_tab_a11y, label, n)
             val state = stringResource(if (tab == selected) R.string.alerts_selected else R.string.alerts_not_selected)
             TpChip(
-                label = "$label  $n",
+                label = stringResource(R.string.alerts_tab_label, label, n),
                 selected = tab == selected,
                 onClick = { onSelect(tab) },
                 modifier =

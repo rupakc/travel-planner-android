@@ -6,6 +6,7 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertMode
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertTab
+import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.health.Health
@@ -14,6 +15,7 @@ import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
@@ -45,6 +47,7 @@ class AlertsViewModelTest {
     private val fares = FakeFareWatchesRepository()
     private val prices = FakePriceWatchesRepository()
     private val search = FakeSearchRepository()
+    private val notifications = FakeNotificationsRepository()
 
     private fun fare(id: Long, status: String = "active") =
         FareWatch(
@@ -68,6 +71,7 @@ class AlertsViewModelTest {
             FakeAuthRepository(Session("t", TestUser.copy(email = "a@b.c"))),
             FakePreferencesRepository(),
             search,
+            notifications,
             clock,
             appScope,
         )
@@ -156,6 +160,7 @@ class AlertsViewModelTest {
                     FakeAuthRepository(null),
                     FakePreferencesRepository(),
                     search,
+                    notifications,
                     clock,
                     backgroundScope,
                 )
@@ -187,5 +192,43 @@ class AlertsViewModelTest {
             vm.onEvent(AlertsEvent.Save("watch-1", WatchEdit(AlertMode.BELOW_TARGET, 420.0, flexible = true, email = false, targetChanged = true)))
             advanceUntilIdle()
             assertEquals(CardMessage.Saved, vm.state.value.messages["watch-1"])
+        }
+
+    @Test
+    fun `an alert found by Check now is marked seen so no system notification repeats it`() =
+        runTest {
+            val alert = AppNotification(id = 99, kind = "fare_drop", title = "Berlin → Lisbon dropped to $420")
+            val checking =
+                object : io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository by fares {
+                    override suspend fun check(id: Long) = AppResult.Success(fare(1).copy(checkStatus = "checked", notification = alert))
+                }
+            fares.watches.value = listOf(fare(1))
+            val vm =
+                AlertsViewModel(
+                    SavedStateHandle(),
+                    checking,
+                    prices,
+                    FakeHealthRepository(Health()),
+                    FakeAuthRepository(null),
+                    FakePreferencesRepository(),
+                    search,
+                    notifications,
+                    clock,
+                    backgroundScope,
+                )
+            advanceUntilIdle()
+            vm.onEvent(AlertsEvent.Check("watch-1"))
+            advanceUntilIdle()
+            assertEquals(setOf(99L), notifications.seen)
+            assertEquals("Berlin → Lisbon dropped to $420", (vm.state.value.messages["watch-1"] as CardMessage.Checked).outcome.notificationTitle)
+        }
+
+    @Test
+    fun `the inbox marks what it shows as seen`() =
+        runTest {
+            val repo = FakeNotificationsRepository(listOf(AppNotification(id = 5, title = "x"), AppNotification(id = 6, title = "y")))
+            NotificationsViewModel(repo, clock)
+            advanceUntilIdle()
+            assertEquals(setOf(5L, 6L), repo.seen)
         }
 }

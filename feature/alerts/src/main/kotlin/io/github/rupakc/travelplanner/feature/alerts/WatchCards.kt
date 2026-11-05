@@ -77,6 +77,7 @@ import io.github.rupakc.travelplanner.core.domain.alerts.routeLabel
 import io.github.rupakc.travelplanner.core.domain.alerts.sparkGeometry
 import io.github.rupakc.travelplanner.core.domain.alerts.timeAgo
 import io.github.rupakc.travelplanner.core.domain.alerts.timeUntil
+import io.github.rupakc.travelplanner.core.domain.alerts.tripReplanRequest
 import io.github.rupakc.travelplanner.core.domain.alerts.tripRows
 import io.github.rupakc.travelplanner.core.domain.alerts.watchCurrency
 import io.github.rupakc.travelplanner.core.domain.alerts.watchStatus
@@ -143,6 +144,7 @@ internal fun WatchCard(
     val title = if (fare != null) routeLabel(fare) else price?.title.orEmpty()
     var editing by rememberSaveable(item.key) { mutableStateOf(false) }
     var confirmDelete by rememberSaveable(item.key) { mutableStateOf(false) }
+    var saveSent by remember(item.key) { mutableStateOf(false) }
 
     TpCard(modifier = modifier.fillMaxWidth(), size = TpCardSize.Large, selected = highlighted) {
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
@@ -169,41 +171,25 @@ internal fun WatchCard(
             Sparkline(history, target) { v -> if (fare != null) formatUsd(v) else formatPrice(v, price?.currency) }
             MetaLine(item, now)
 
-            if (item.status == WatchStatuses.ERROR) {
-                ToneBox(Tone.WARN) {
-                    val problem = fare?.problem ?: price?.problem
-                    val hold = stringResource(if (fare != null) R.string.alerts_on_hold_fare else R.string.alerts_on_hold_price)
-                    Text(listOfNotNull(problem, hold).joinToString(" "))
-                    TpButton(
-                        stringResource(R.string.alerts_retry),
-                        { callbacks.onStatus(true) },
-                        loading = busy == CardAction.STATUS,
-                        variant = TpButtonVariant.Secondary,
-                        leadingIcon = Icons.Filled.Refresh,
-                    )
-                }
+            if (item.status ==
+                WatchStatuses.ERROR
+            ) {
+                ProblemBox(fare?.problem ?: price?.problem, fare != null, busy == CardAction.STATUS) { callbacks.onStatus(true) }
             }
 
-            message?.let { m ->
-                val tone =
-                    when (m) {
-                        is CardMessage.Checked -> m.outcome.tone
-                        is CardMessage.Failed -> Tone.WARN
-                        else -> Tone.NEUTRAL
-                    }
-                val (_, fg) = toneColors(tone)
-                Text(
-                    messageText(m),
-                    style = TravelTheme.typography.bodyMedium,
-                    color = if (tone == Tone.NEUTRAL) TravelTheme.colors.onSurfaceVariant else fg,
-                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                )
-            }
+            message?.let { CardMessageText(it) }
 
             if (editing) {
+                // Closes only once the save succeeded (web parity): a failed save keeps what was typed.
+                androidx.compose.runtime.LaunchedEffect(busy, message) {
+                    if (saveSent && busy == null) {
+                        saveSent = false
+                        if (message == CardMessage.Saved) editing = false
+                    }
+                }
                 EditPanel(item, emailAvailable, userEmail, saving = busy == CardAction.SAVE, onCancel = { editing = false }) { edit ->
+                    saveSent = true
                     callbacks.onSave(edit)
-                    editing = false
                 }
             }
 
@@ -211,6 +197,34 @@ internal fun WatchCard(
             CardActions(item, past, busy, editing, confirmDelete, callbacks, onEdit = { editing = true }, onConfirmDelete = { confirmDelete = it })
         }
     }
+}
+
+/** Checks on hold after repeated failures, with Retry (web amber box). */
+@Composable
+private fun ProblemBox(problem: String?, fare: Boolean, retrying: Boolean, onRetry: () -> Unit) {
+    ToneBox(Tone.WARN) {
+        val hold = stringResource(if (fare) R.string.alerts_on_hold_fare else R.string.alerts_on_hold_price)
+        Text(listOfNotNull(problem, hold).joinToString(" "))
+        TpButton(stringResource(R.string.alerts_retry), onRetry, loading = retrying, variant = TpButtonVariant.Secondary, leadingIcon = Icons.Filled.Refresh)
+    }
+}
+
+/** The latest outcome on a card, read out politely (web sr-only aria-live). */
+@Composable
+private fun CardMessageText(m: CardMessage) {
+    val tone =
+        when (m) {
+            is CardMessage.Checked -> m.outcome.tone
+            is CardMessage.Failed -> Tone.WARN
+            else -> Tone.NEUTRAL
+        }
+    val (_, fg) = toneColors(tone)
+    Text(
+        messageText(m),
+        style = TravelTheme.typography.bodyMedium,
+        color = if (tone == Tone.NEUTRAL) TravelTheme.colors.onSurfaceVariant else fg,
+        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+    )
 }
 
 @Composable
@@ -384,10 +398,16 @@ internal fun Sparkline(history: List<Double?>, target: Double?, format: (Double)
             .height(SPARK_HEIGHT)
             .semantics { contentDescription = summary },
     ) {
-        val pad = 4.dp.toPx()
+        val pad = SPARK_PAD.toPx()
         val g = sparkGeometry(values, size.width, size.height, pad = pad, target = target) ?: return@Canvas
         g.targetY?.let { y ->
-            drawLine(targetColor, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f)))
+            drawLine(
+                targetColor,
+                Offset(0f, y),
+                Offset(size.width, y),
+                strokeWidth = TARGET_STROKE.toPx(),
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(DASH.toPx(), DASH.toPx())),
+            )
         }
         val path = Path()
         g.points.forEachIndexed { i, p -> if (i == 0) path.moveTo(p.x, p.y) else path.lineTo(p.x, p.y) }
@@ -399,9 +419,9 @@ internal fun Sparkline(history: List<Double?>, target: Double?, format: (Double)
                 close()
             }
         drawPath(area, line.copy(alpha = AREA_ALPHA))
-        drawPath(path, line, style = Stroke(width = 2.dp.toPx()))
+        drawPath(path, line, style = Stroke(width = LINE_STROKE.toPx()))
         val last = g.points.last()
-        drawCircle(line, radius = 3.5.dp.toPx(), center = Offset(last.x, last.y))
+        drawCircle(line, radius = DOT_RADIUS.toPx(), center = Offset(last.x, last.y))
     }
 }
 
@@ -445,11 +465,20 @@ private fun ActivityDetails(watch: PriceWatch) {
     val total = watch.lastPrice ?: watch.baselinePrice
     Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xxs)) {
         val rating = observed.num("rating")
-        Muted(listOfNotNull(provider, rating?.let { "★ $it" + (observed.int("reviews")?.let { r -> " ($r)" } ?: "") }).joinToString(" · "))
+        val ratingText =
+            rating?.let { r ->
+                val reviews = observed.int("reviews")
+                if (reviews != null) stringResource(R.string.alerts_rating_reviews, decimal(r), reviews) else stringResource(R.string.alerts_rating, decimal(r))
+            }
+        Muted(listOfNotNull(provider, ratingText).joinToString(" · "))
         if (!isUnavailable(watch) && unit != null) {
             val pp = stringResource(R.string.alerts_from_pp, formatPrice(unit, currency))
             Text(
-                if (n > 1 && total != null) pp + " × " + pluralStringResource(R.plurals.alerts_travellers, n, n) + " = " + formatPrice(total, currency) else pp,
+                if (n > 1 && total != null) {
+                    stringResource(R.string.alerts_times_travellers, pp, pluralStringResource(R.plurals.alerts_travellers, n, n), formatPrice(total, currency))
+                } else {
+                    pp
+                },
                 style = TravelTheme.typography.bodyMedium,
             )
         }
@@ -475,7 +504,7 @@ private fun TripDetails(watch: PriceWatch, past: Boolean, callbacks: CardCallbac
                     .height(BAR_HEIGHT)
                     .clip(RoundedCornerShape(BAR_HEIGHT))
                     .semantics { contentDescription = label },
-                horizontalArrangement = Arrangement.spacedBy(1.dp),
+                horizontalArrangement = Arrangement.spacedBy(BAR_GAP),
             ) {
                 groups.forEach { g -> Box(Modifier.weight(g.share.toFloat().coerceAtLeast(MIN_SHARE)).fillMaxHeight().background(colors.getValue(g.group))) }
             }
@@ -484,7 +513,8 @@ private fun TripDetails(watch: PriceWatch, past: Boolean, callbacks: CardCallbac
         rows.forEach { TripRowLine(it) }
         if (rows.any { !it.live }) Muted(stringResource(R.string.alerts_trip_estimates_fixed))
         whatChanged(watch)?.let { Muted(tripChangeText(it)) }
-        val replannable = !past && (watch.subject["components"] != null)
+        // Only when the watch has a live flight route to search again (web `tripReplanFare`).
+        val replannable = !past && tripReplanRequest(watch, null) != null
         if (replannable) {
             TpButton(stringResource(R.string.alerts_replan_trip), { callbacks.onReplan(false) }, variant = TpButtonVariant.Secondary)
         }
@@ -602,11 +632,11 @@ private fun EditPanel(
         fare?.targetPrice?.let { kotlin.math.round(it).toLong().toString() }
             ?: price?.targetPrice?.let { if (it == kotlin.math.floor(it)) it.toLong().toString() else it.toString() }
             ?: ""
-    var mode by remember(item.key) { mutableStateOf(AlertMode.of(fare?.alertMode ?: price?.alertMode)) }
-    var target by remember(item.key) { mutableStateOf(initialTarget) }
-    var touched by remember(item.key) { mutableStateOf(false) }
-    var flexible by remember(item.key) { mutableStateOf((fare?.flexibleDays ?: 0) > 0) }
-    var email by remember(item.key) { mutableStateOf((fare?.emailEnabled ?: price?.emailEnabled) == true) }
+    var mode by rememberSaveable(item.key) { mutableStateOf(AlertMode.of(fare?.alertMode ?: price?.alertMode)) }
+    var target by rememberSaveable(item.key) { mutableStateOf(initialTarget) }
+    var touched by rememberSaveable(item.key) { mutableStateOf(false) }
+    var flexible by rememberSaveable(item.key) { mutableStateOf((fare?.flexibleDays ?: 0) > 0) }
+    var email by rememberSaveable(item.key) { mutableStateOf((fare?.emailEnabled ?: price?.emailEnabled) == true) }
     val check = if (mode == AlertMode.BELOW_TARGET) (if (fare != null) checkTarget(target, fare.lastPrice) else checkPriceTarget(target)) else null
     val error = check?.error?.let { stringResource(R.string.alerts_target_error) }
     val currency = price?.currency ?: "USD"
@@ -660,10 +690,22 @@ private fun EditPanel(
     }
 }
 
+// Layout constants (defined once; everything else comes from TravelTheme.spacing).
 private val SPARK_HEIGHT = 48.dp
+private val SPARK_PAD = 4.dp
+private val TARGET_STROKE = 1.dp
+private val LINE_STROKE = 2.dp
+private val DOT_RADIUS = 3.5.dp
+private val DASH = 4.dp
+private val BAR_GAP = 1.dp
 private val BAR_HEIGHT = 10.dp
 private const val AREA_ALPHA = 0.16f
 private const val MIN_SHARE = 0.01f
 
 /** Width for side-by-side cards on wide windows (grid minimum cell). */
-internal val CARD_MIN_WIDTH = 360.dp
+internal val CARD_MIN_WIDTH = 340.dp
+
+/** Numbers in the user's locale ("4,8" in Spanish). */
+@Composable
+internal fun decimal(value: Double): String =
+    java.text.NumberFormat.getNumberInstance(io.github.rupakc.travelplanner.core.ui.watch.currentLocale()).apply { maximumFractionDigits = 1 }.format(value)

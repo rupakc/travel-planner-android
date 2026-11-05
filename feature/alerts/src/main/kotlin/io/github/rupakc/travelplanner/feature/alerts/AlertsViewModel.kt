@@ -12,6 +12,7 @@ import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
+import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
 import io.github.rupakc.travelplanner.core.data.repository.PriceWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
@@ -163,6 +164,7 @@ class AlertsViewModel
         private val auth: AuthRepository,
         private val preferences: PreferencesRepository,
         private val search: SearchRepository,
+        private val notifications: NotificationsRepository,
         private val clock: AppClock,
         @param:ApplicationScope private val appScope: CoroutineScope,
     ) : ViewModel() {
@@ -275,6 +277,9 @@ class AlertsViewModel
                 when (result) {
                     is AppResult.Success -> {
                         val updated = result.value
+                        // Shown inline on the card already: never post it again as a system notification.
+                        val alert = (updated as? AnyWatch.Fare)?.watch?.notification ?: (updated as? AnyWatch.Price)?.watch?.notification
+                        alert?.let { notifications.markSeen(listOf(it.id)) }
                         replace(updated)
                         val outcome =
                             when (updated) {
@@ -316,6 +321,7 @@ class AlertsViewModel
         private fun save(key: String, edit: WatchEdit) {
             val w = find(key) ?: return
             val below = edit.mode == AlertMode.BELOW_TARGET
+            mutable.update { it.copy(messages = it.messages - key) }
             withBusy(key, CardAction.SAVE) {
                 val result =
                     when (w) {

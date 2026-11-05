@@ -131,8 +131,15 @@ class NotificationsViewModel
             mutable.update { it.copy(failed = false, now = clock.now()) }
             viewModelScope.launch {
                 when (val page = repository.list(limit = PAGE)) {
-                    is AppResult.Success -> mutable.update { it.copy(items = page.value.items, unread = page.value.unread) }
-                    is AppResult.Failure -> mutable.update { it.copy(failed = true) }
+                    is AppResult.Success -> {
+                        mutable.update { it.copy(items = page.value.items, unread = page.value.unread) }
+                        // Seen here: the poller won't post these as system notifications later.
+                        page.value.items.map { it.id }.takeIf { it.isNotEmpty() }?.let { repository.markSeen(it) }
+                    }
+
+                    is AppResult.Failure -> {
+                        mutable.update { it.copy(failed = true) }
+                    }
                 }
             }
         }

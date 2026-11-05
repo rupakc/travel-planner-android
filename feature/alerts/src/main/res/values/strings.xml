@@ -150,6 +150,10 @@
     <string name="alerts_action_check_trip">Check trip</string>
     <string name="alerts_action_view">View</string>
     <string name="alerts_action_retry">Retry</string>
+    <string name="alerts_tab_label">%1$s  %2$d</string>
+    <string name="alerts_rating">★ %1$s</string>
+    <string name="alerts_rating_reviews">★ %1$s (%2$d)</string>
+    <string name="alerts_times_travellers">%1$s × %2$s = %3$s</string>
     <plurals name="alerts_bell_unread">
         <item quantity="one">Notifications, %d unread</item>
         <item quantity="other">Notifications, %d unread</item>
