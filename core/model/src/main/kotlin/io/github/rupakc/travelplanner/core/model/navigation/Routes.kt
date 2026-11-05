@@ -30,9 +30,10 @@ sealed interface AppRoute
 @Serializable data object HomeRoute : AppRoute
 
 /**
- * Search form. [mode]: one of [SearchModes]; [importUrl] pre-fills "From a link"
- * (chat `import_link`, share intents); [recentSearchId] loads that recent search
- * (`RecentSearch.id`) into the form (Home / global search "tap → Search pre-filled").
+ * Search form. [mode]: one of [SearchModes] (null = known destination); [importUrl] pre-fills
+ * "From a link" and starts reading it (chat `import_link`, share intents); [recentSearchId] loads that
+ * recent search (`RecentSearch.id`, from the `RecentSearchesRepository` cache) into the known-destination
+ * form (Home's recent searches row and global search "tap → Search pre-filled"), shifting past dates like the web.
  */
 @Serializable data class SearchRoute(
     val mode: String? = null,

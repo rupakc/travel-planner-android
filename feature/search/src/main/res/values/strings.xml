@@ -1,6 +1,349 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Hero -->
     <string name="search_title">Plan Your Perfect Trip</string>
     <string name="search_message">Flights, hotels, activities, visa, SIM &amp; itinerary — all in one place.</string>
-    <string name="search_show_results">Show results</string>
+
+    <!-- Modes -->
+    <string name="search_modes">Search mode</string>
+    <string name="search_mode_known">I know where I\'m going</string>
+    <string name="search_mode_surprise">Surprise me 🎲</string>
+    <string name="search_mode_compare">Compare ⚖️</string>
+    <string name="search_paste_link_prompt">Saw a great trip online? Paste the link</string>
+    <string name="search_mode_import">From a link ✨</string>
+
+    <!-- Fields -->
+    <string name="search_from">From</string>
+    <string name="search_to">To</string>
+    <string name="search_flying_from">Flying from</string>
+    <string name="search_city_or_airport">City or airport…</string>
+    <string name="search_stopover_city">Stopover city…</string>
+    <string name="search_stop_label">Stop %1$d — on the way</string>
+    <string name="search_stop_nights">Nights (opt)</string>
+    <string name="search_stop_nights_placeholder">auto</string>
+    <string name="search_remove_stop">Remove stop %1$d</string>
+    <string name="search_add_stop">Add a stop on the way (multi-city)</string>
+    <string name="search_route_summary">Your route: %1$s. Stops are visited on the way; the \"To\" city is your final destination. Nights left blank are split automatically.</string>
+    <string name="search_route_origin">Origin</string>
+    <string name="search_route_destination">your destination</string>
+    <string name="search_route_stops">stops</string>
+    <string name="search_clear_field">Clear %1$s</string>
+    <string name="search_searching">Searching…</string>
+    <plurals name="search_suggestions">
+        <item quantity="one">%1$d suggestion</item>
+        <item quantity="other">%1$d suggestions</item>
+    </plurals>
+    <string name="search_departure">Departure</string>
+    <string name="search_return">Return</string>
+    <string name="search_one_way">One-way</string>
+    <string name="search_pick_dates">Pick your dates</string>
+    <string name="search_dates_ok">OK</string>
+    <string name="search_dates_cancel">Cancel</string>
+    <string name="search_dates_hint">Leave the return empty for a one-way trip.</string>
+    <string name="search_nationality">Nationality</string>
+    <string name="search_nationality_placeholder">American, Indian…</string>
+    <string name="search_budget">Budget (USD)</string>
+    <string name="search_budget_optional">Budget (USD, optional)</string>
+    <string name="search_usd_prefix">$</string>
+    <string name="search_budget_placeholder">Optional</string>
+    <string name="search_budget_total_placeholder">Total trip budget</string>
+    <string name="search_travelers">Travelers</string>
+    <string name="search_travelers_edit">Change travelers and accessibility needs</string>
+    <string name="search_adults">Adults</string>
+    <string name="search_adults_sub">18–64</string>
+    <string name="search_seniors">Seniors</string>
+    <string name="search_seniors_sub">65+</string>
+    <string name="search_children">Children</string>
+    <string name="search_children_sub">5–17</string>
+    <string name="search_infants">Infants</string>
+    <string name="search_infants_sub">0–4</string>
+    <string name="search_add_one">Add one: %1$s</string>
+    <string name="search_remove_one">Remove one: %1$s</string>
+    <string name="search_accessibility_needs">Accessibility needs</string>
+    <string name="search_access_wheelchair">♿ Wheelchair / Mobility aid</string>
+    <string name="search_access_visual">👁️ Visual impairment</string>
+    <string name="search_access_hearing">🦻 Hearing impairment</string>
+    <string name="search_access_cognitive">🧠 Cognitive / Neurodivergent</string>
+    <string name="search_residence_permits">🏠 Residence Permits (if any)</string>
+    <string name="search_residence_placeholder">Schengen, UK, UAE…</string>
+    <string name="search_existing_visas">📋 Existing Visas (if any)</string>
+    <string name="search_visas_placeholder">US, Japan, Canada…</string>
+    <string name="search_tag_hint">Press Enter or comma to add</string>
+    <string name="search_tag_remove">Remove %1$s</string>
+    <string name="search_interests">✨ Interests</string>
+    <string name="search_interests_discover">✨ What are you into?</string>
+    <string name="search_interest_food">🍜 Food</string>
+    <string name="search_interest_history">🏛️ History</string>
+    <string name="search_interest_adventure">🧗 Adventure</string>
+    <string name="search_interest_culture">🎭 Culture</string>
+    <string name="search_interest_nature">🌿 Nature</string>
+    <string name="search_interest_shopping">🛍️ Shopping</string>
+    <string name="search_interest_nightlife">🌙 Nightlife</string>
+    <string name="search_interest_wellness">🧘 Wellness</string>
+    <string name="search_interest_art">🎨 Art</string>
+    <string name="search_interest_family">👨‍👩‍👧 Family</string>
+    <string name="search_discovery_style">🎯 Discovery style</string>
+    <string name="search_style_classics">🏛️ Famous classics</string>
+    <string name="search_style_balanced">⚖️ Balanced mix</string>
+    <string name="search_style_gems">💎 Hidden gems</string>
+    <string name="search_style_start">Iconic must-sees</string>
+    <string name="search_style_end">Off the beaten path</string>
+    <string name="search_serendipity_label">Serendipity dial: classics to hidden gems</string>
+    <string name="search_pace">Trip pace</string>
+    <string name="search_pace_relaxed">Relaxed</string>
+    <string name="search_pace_balanced">Balanced</string>
+    <string name="search_pace_packed">Packed</string>
+    <string name="search_submit">Plan My Trip</string>
+    <string name="search_selected">Selected</string>
+    <string name="search_not_selected">Not selected</string>
+
+    <!-- Validation -->
+    <string name="search_issue_origin">Add where you\'re flying from</string>
+    <string name="search_issue_destination">Add where you\'re going</string>
+    <string name="search_issue_nationality">Add your nationality — it decides visa info</string>
+    <string name="search_issue_stop_city">Add a city for each stop, or remove it</string>
+    <string name="search_issue_stop_nights">Nights per stop must be between 1 and 30</string>
+    <string name="search_issue_budget">Enter the budget as a number, or leave it empty</string>
+    <string name="search_issue_departure_required">Pick a departure date</string>
+    <string name="search_issue_departure_past">That departure date has passed — pick today or later</string>
+    <string name="search_issue_return_before">The return date can\'t be before the departure</string>
+
+    <!-- Recent searches -->
+    <string name="search_recent_title">Recent searches</string>
+    <string name="search_recent_dates_passed">· dates passed</string>
+    <string name="search_recent_again">Search again</string>
+    <string name="search_recent_again_passed">These dates have passed — load it and pick new dates</string>
+    <string name="search_recent_load">Load %1$s into the form</string>
+    <string name="search_recent_remove">Remove recent search %1$s</string>
+    <string name="search_recent_removed">Removed %1$s</string>
+    <string name="search_recent_undo">Undo</string>
+    <string name="search_recent_loaded">Loaded %1$s. Change anything you like, then plan.</string>
+    <string name="search_recent_loaded_shifted">Loaded %1$s. Its dates had passed, so they now start next week with the same trip length — check them, then plan.</string>
+    <string name="search_dismiss">Dismiss</string>
+    <string name="search_expanded">Expanded</string>
+    <string name="search_collapsed">Collapsed</string>
+    <plurals name="search_more_interests">
+        <item quantity="one">+%1$d</item>
+        <item quantity="other">+%1$d</item>
+    </plurals>
+    <plurals name="search_traveler_count">
+        <item quantity="one">%1$d traveler</item>
+        <item quantity="other">%1$d travelers</item>
+    </plurals>
+
+    <!-- Surprise me -->
+    <string name="search_discover_submit">Find My Perfect Destination</string>
+    <string name="search_discover_busy">Finding destinations…</string>
+    <string name="search_discover_error">Discovery failed — please try again</string>
+    <string name="search_discover_picks">Your personalized picks ✨</string>
+    <string name="search_discover_empty">No destinations found — try different interests or a higher budget.</string>
+    <string name="search_discover_need_fields">Add where you\'re flying from and your nationality to get suggestions.</string>
+    <string name="search_plan_this_trip">Plan this trip</string>
+    <string name="search_plan_trip_to">Plan a trip to %1$s</string>
+    <string name="search_rough_estimate">rough estimate</string>
+    <string name="search_cost_range">~%1$s–%2$s</string>
+    <string name="search_visa_free">✓ Visa-free</string>
+    <string name="search_visa_on_arrival">Visa on arrival</string>
+    <string name="search_visa_e_visa">e-Visa</string>
+    <string name="search_visa_required">Visa required</string>
+    <string name="search_visa_verify">Verify visa</string>
+    <string name="search_visa_unverified">Not verified — check the official site</string>
+
+    <!-- Compare -->
+    <string name="search_compare_intro">Compare two or three destinations side by side — cost, flights, hotels, weather and visa — before you commit to a full plan.</string>
+    <string name="search_compare_destination">Destination %1$d</string>
+    <string name="search_compare_remove">Remove destination %1$d</string>
+    <string name="search_compare_add">Add another</string>
+    <string name="search_compare_submit">Compare destinations</string>
+    <string name="search_compare_busy">Comparing…</string>
+    <string name="search_compare_need_two">Add at least two different destinations to compare.</string>
+    <string name="search_compare_couldnt_load">Couldn\'t load</string>
+    <string name="search_compare_retry">Retry</string>
+    <string name="search_compare_retry_for">Retry %1$s</string>
+    <string name="search_compare_check_details">Please check the trip details</string>
+    <string name="search_compare_unavailable">Service unavailable — try again</string>
+    <string name="search_compare_missing">Missing: %1$s</string>
+    <string name="search_compare_loading">Loading %1$s</string>
+    <string name="search_compare_best">Best</string>
+    <string name="search_compare_row_estimate">Est. trip cost / person</string>
+    <string name="search_compare_row_flight">Cheapest flight / person</string>
+    <string name="search_compare_row_hotel">Hotel / night (per room)</string>
+    <string name="search_compare_row_weather">Weather</string>
+    <string name="search_compare_row_visa">Visa</string>
+    <string name="search_compare_row_ease">Travel Ease</string>
+    <string name="search_compare_row_safety">Safety</string>
+    <string name="search_compare_row_english">English</string>
+    <string name="search_compare_row_daily">Typical daily spend / person (incl. stay)</string>
+    <string name="search_compare_estimate">estimate</string>
+    <string name="search_compare_under_budget">Under budget</string>
+    <string name="search_compare_over_budget">Over budget</string>
+    <string name="search_compare_partial">partial — some costs unknown</string>
+    <string name="search_compare_nonstop">Nonstop</string>
+    <plurals name="search_compare_stops">
+        <item quantity="one">%1$d stop</item>
+        <item quantity="other">%1$d stops</item>
+    </plurals>
+    <string name="search_compare_typical">%1$s typical</string>
+    <string name="search_compare_from_reviewed">from %1$s (well reviewed)</string>
+    <string name="search_compare_temps">%1$s / %2$s</string>
+    <string name="search_compare_celsius_suffix">C</string>
+    <string name="search_compare_climate_estimate">climate estimate</string>
+    <string name="search_compare_poor_days">%1$s of %2$s days poor</string>
+    <string name="search_compare_verified">Verified</string>
+    <string name="search_compare_ai_check">AI — check official site</string>
+    <string name="search_compare_no_fee">no fee</string>
+    <string name="search_compare_fee">%1$s fee</string>
+    <plurals name="search_compare_max_stay">
+        <item quantity="one">%1$d day max</item>
+        <item quantity="other">%1$d days max</item>
+    </plurals>
+    <string name="search_compare_ease_value">%1$d/100</string>
+    <string name="search_compare_easy">Easy</string>
+    <string name="search_compare_moderate">Moderate</string>
+    <string name="search_compare_hard">Hard</string>
+    <string name="search_compare_out_of_20">%1$d/20</string>
+    <string name="search_compare_per_day">%1$s / day</string>
+    <string name="search_compare_table">Comparison table</string>
+
+    <!-- From a link -->
+    <string name="search_import_heading">Turn any travel post into your trip</string>
+    <string name="search_import_sub">A blog, a YouTube or TikTok video, a friend\'s message or a screenshot — we\'ll find every place and plan the days around them.</string>
+    <string name="search_import_input_label">Paste a link, or the text itself</string>
+    <string name="search_import_placeholder">A travel blog, YouTube or TikTok link…\nor a caption, a friend\'s message, a list of places</string>
+    <string name="search_import_hint_link">Link — we\'ll read the page</string>
+    <string name="search_import_hint_text">Text — we\'ll pick out the places</string>
+    <plurals name="search_import_hint_shots">
+        <item quantity="one">We\'ll read your screenshot — remove it to use text instead</item>
+        <item quantity="other">We\'ll read your %1$d screenshots — remove them to use text instead</item>
+    </plurals>
+    <string name="search_import_count">%1$s / %2$s</string>
+    <string name="search_import_add_shots">Choose screenshots</string>
+    <string name="search_import_add_another">Add another</string>
+    <plurals name="search_import_up_to">
+        <item quantity="one">Up to %1$d screenshot</item>
+        <item quantity="other">Up to %1$d screenshots</item>
+    </plurals>
+    <string name="search_import_remove_shot">Remove %1$s</string>
+    <plurals name="search_import_kept">
+        <item quantity="one">Up to %1$d screenshot at a time — we kept the first %2$d.</item>
+        <item quantity="other">Up to %1$d screenshots at a time — we kept the first %2$d.</item>
+    </plurals>
+    <string name="search_import_heic">%1$s: iPhone HEIC photos can\'t be read yet — take a screenshot instead (screenshots are PNG), or export it as JPEG.</string>
+    <string name="search_import_not_image">%1$s isn\'t an image we can read. Use PNG, JPEG, WebP or GIF.</string>
+    <string name="search_import_too_big_read">%1$s is too big to read here (over 40 MB). Crop it or save it smaller.</string>
+    <string name="search_import_too_big">%1$s is over 5 MB. Crop it or save it as a smaller PNG or JPEG.</string>
+    <string name="search_import_still_big">%1$s is still too big after shrinking. Crop it and try again.</string>
+    <string name="search_import_unreadable">We couldn\'t read %1$s — try saving it again as PNG or JPEG.</string>
+    <string name="search_import_examples">Try an example:</string>
+    <string name="search_import_example_lisbon_label">48 hours in Lisbon</string>
+    <string name="search_import_example_lisbon">48 hours in Lisbon: lunch at Time Out Market, Belém Tower and custard tarts at Pastéis de Belém, browse LX Factory, sunset at Miradouro da Senhora do Monte, then a day trip to Pena Palace in Sintra.</string>
+    <string name="search_import_example_tokyo_label">A friend\'s Tokyo tips</string>
+    <string name="search_import_example_tokyo">Tokyo musts from my trip!! Tsukiji Outer Market for breakfast, teamLab Planets (book ahead), Senso-ji at dawn before the crowds, drinks in Golden Gai, and Shibuya Sky at sunset. If you have time, Hakone for the onsen.</string>
+    <string name="search_import_example_rome_label">Rome and Florence</string>
+    <string name="search_import_example_rome">Day 1–2 Rome: Colosseum, dinner in Trastevere, the Pantheon, gelato at Giolitti. Day 3–4 Florence: the Uffizi, climb the Duomo, Piazzale Michelangelo at sunset and lunch at Mercato Centrale.</string>
+    <string name="search_import_submit">Find the places</string>
+    <plurals name="search_import_submit_shots">
+        <item quantity="one">Find the places in my screenshot</item>
+        <item quantity="other">Find the places in %1$d screenshots</item>
+    </plurals>
+    <string name="search_import_step_url">Reading the page</string>
+    <string name="search_import_step_text">Reading your text</string>
+    <string name="search_import_step_images">Reading your screenshots</string>
+    <string name="search_import_step_places">Finding places</string>
+    <string name="search_import_step_map">Putting them on the map</string>
+    <string name="search_import_step_active">%1$s…</string>
+    <string name="search_import_typical_long">Usually 10–30 seconds</string>
+    <string name="search_import_typical_short">Usually 5–10 seconds</string>
+    <string name="search_import_elapsed">%1$s · %2$ds so far</string>
+    <string name="search_import_cancel">Cancel</string>
+    <string name="search_import_network">We couldn\'t reach Voyager. Check your connection and try again.</string>
+    <string name="search_import_unknown">Something went wrong while reading that. Try again in a moment.</string>
+    <string name="search_import_too_large">That upload is too big — use up to 4 screenshots of 5 MB or less.</string>
+    <string name="search_import_action_text">Paste the text</string>
+    <string name="search_import_action_images">Drop a screenshot</string>
+    <string name="search_import_action_retry">Try again</string>
+    <string name="search_import_found">Here’s what we found</string>
+    <string name="search_import_source_page">The page you shared</string>
+    <string name="search_import_source_images">Your screenshots</string>
+    <string name="search_import_source_text">Your pasted text</string>
+    <string name="search_import_read_now">Read just now</string>
+    <string name="search_import_by_author">by %1$s</string>
+    <plurals name="search_import_places_found">
+        <item quantity="one">%1$d place found</item>
+        <item quantity="other">%1$d places found</item>
+    </plurals>
+    <string name="search_import_open_source">Open the source page</string>
+    <string name="search_import_your_route">Your route</string>
+    <plurals name="search_import_nights">
+        <item quantity="one">%1$d night</item>
+        <item quantity="other">%1$d nights</item>
+    </plurals>
+    <string name="search_import_less_night">One less night in %1$s</string>
+    <string name="search_import_more_night">One more night in %1$s</string>
+    <string name="search_import_leave_out">Leave out %1$s</string>
+    <string name="search_import_add_back">Add %1$s back</string>
+    <string name="search_import_left_out">left out</string>
+    <plurals name="search_import_total_nights">
+        <item quantity="one">%1$d night in total.</item>
+        <item quantity="other">%1$d nights in total.</item>
+    </plurals>
+    <plurals name="search_import_suggested_days">
+        <item quantity="one">The source suggests about %1$d day.</item>
+        <item quantity="other">The source suggests about %1$d days.</item>
+    </plurals>
+    <string name="search_import_best_time">Best time: %1$s.</string>
+    <string name="search_import_places_in">Places in %1$s</string>
+    <string name="search_import_all">All</string>
+    <string name="search_import_none">None</string>
+    <string name="search_import_select_all">Select all in %1$s</string>
+    <string name="search_import_select_none">Select none in %1$s</string>
+    <string name="search_import_include">Include %1$s</string>
+    <string name="search_import_day_trip">day trip to %1$s</string>
+    <string name="search_import_on_map">On the map</string>
+    <string name="search_import_on_map_rating">On the map · ★ %1$s</string>
+    <string name="search_import_approximate">Approximate</string>
+    <string name="search_import_approximate_hint">We know the town, not the exact spot</string>
+    <string name="search_import_quote">“%1$s”</string>
+    <string name="search_import_stop">Stop</string>
+    <string name="search_import_stop_for">Stop for %1$s</string>
+    <plurals name="search_import_unplaced_title">
+        <item quantity="one">Couldn\'t place this one</item>
+        <item quantity="other">Couldn\'t place these %1$d</item>
+    </plurals>
+    <string name="search_import_unplaced_sub">Type the town each one is in, and we\'ll put it on the map and plan it in.</string>
+    <string name="search_import_which_town">Which town?</string>
+    <string name="search_import_town_for">Town for %1$s</string>
+    <string name="search_import_place_it">Place it</string>
+    <string name="search_import_placing">Placing…</string>
+    <string name="search_import_or_add_to">or add it to</string>
+    <string name="search_import_which_stop">Which stop is %1$s in?</string>
+    <string name="search_import_leave_out_option">Leave out</string>
+    <string name="search_import_cant_place">We couldn’t place that — try another spelling.</string>
+    <string name="search_import_too_many_stops">%1$s isn\'t one of this trip\'s stops, and a trip has at most 3 — add it to one of them instead.</string>
+    <string name="search_import_leaving_on">Leaving on</string>
+    <string name="search_import_back_on">Back %1$s</string>
+    <string name="search_import_interests">Interests: %1$s</string>
+    <string name="search_import_no_places">Tick at least one place to plan around.</string>
+    <string name="search_import_no_stops">Keep at least one stop on the route.</string>
+    <string name="search_import_past">Pick a departure date from today on.</string>
+    <plurals name="search_import_first_25">
+        <item quantity="one">We\'ll plan the first %1$d ticked place — untick a few to choose which.</item>
+        <item quantity="other">We\'ll plan the first %1$d ticked places — untick a few to choose which.</item>
+    </plurals>
+    <string name="search_import_start_over">Start over</string>
+    <plurals name="search_import_plan">
+        <item quantity="one">Plan this trip (%1$d place)</item>
+        <item quantity="other">Plan this trip (%1$d places)</item>
+    </plurals>
+    <string name="search_import_kind_sight">Sight</string>
+    <string name="search_import_kind_food">Food</string>
+    <string name="search_import_kind_drink">Drinks</string>
+    <string name="search_import_kind_stay">Stay</string>
+    <string name="search_import_kind_activity">Activity</string>
+    <string name="search_import_kind_nature">Nature</string>
+    <string name="search_import_kind_shopping">Shopping</string>
+    <string name="search_import_kind_nightlife">Nightlife</string>
+    <string name="search_import_kind_event">Event</string>
+    <string name="search_import_kind_transport">Getting around</string>
+    <string name="search_import_kind_area">Neighbourhood</string>
 </resources>
