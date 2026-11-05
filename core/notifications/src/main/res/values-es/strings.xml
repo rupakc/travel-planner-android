@@ -5,7 +5,7 @@
     <string name="channel_price_alerts">Alertas de precio</string>
     <string name="channel_price_alerts_desc">Cuando baja o alcanza tu objetivo el precio de un vuelo, hotel, actividad o viaje vigilado.</string>
     <string name="channel_nearby">Sugerencias cercanas</string>
-    <string name="channel_nearby_desc">Cosas que hacer cerca de ti durante un viaje.</string>
+    <string name="channel_nearby_desc">Cosas que hacer cerca de ti durante un viaje, según tu ubicación de la última vez que abriste Cerca de mí.</string>
     <string name="channel_account">Cuenta</string>
     <string name="channel_account_desc">Mensajes de inicio de sesión y de la cuenta.</string>
     <string name="reminder_week_title">%1$s en una semana</string>

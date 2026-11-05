@@ -19,6 +19,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.MarkReadResponse
 import io.github.rupakc.travelplanner.core.model.alerts.NotificationsPage
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.plan.Plan
@@ -27,9 +28,11 @@ import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollIntervals
 import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollWorker
+import io.github.rupakc.travelplanner.core.notifications.alerts.PollBaseline
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbyNotificationPolicy
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbyPostLog
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionWorker
+import io.github.rupakc.travelplanner.core.notifications.reminders.ReminderPostLog
 import io.github.rupakc.travelplanner.core.notifications.reminders.TripReminderWorker
 import io.github.rupakc.travelplanner.core.notifications.reminders.WorkManagerTripReminderScheduler
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
@@ -98,12 +101,37 @@ class WorkersTest {
 
     private val signedIn = FakeAuthRepository(Session("t", TestUser))
 
+    /** Already past the first poll for alice (the normal case). */
+    private val baseline =
+        object : PollBaseline {
+            var user: String? = TestUser.username
+
+            override fun user() = user
+
+            override fun set(user: String?) {
+                this.user = user
+            }
+        }
+
+    private val postLog =
+        object : ReminderPostLog {
+            val names = mutableSetOf<String>()
+
+            override fun wasPosted(name: String) = name in names
+
+            override fun markPosted(name: String) {
+                names += name
+            }
+        }
+
+    private var zone: ZoneId = ZoneId.of("Europe/Lisbon")
+
     @Test
     fun `alert poll posts unseen alerts once and dedupes by id`() =
         runBlocking {
             val repo = FakeNotificationsRepository(listOf(alert(1), alert(2), alert(3, read = true)))
             val settings = FakeSettingsRepository()
-            val worker = { build({ c, p -> AlertPollWorker(c, p, signedIn, repo, settings, notifier) }) }
+            val worker = { build({ c, p -> AlertPollWorker(c, p, signedIn, repo, settings, notifier, baseline) }) }
             assertEquals(ListenableWorker.Result.success(), worker().doWork())
             assertEquals(listOf(1L, 2L), notifier.priceAlerts.map { it.id })
             assertEquals(setOf(1L, 2L), repo.seen)
@@ -117,7 +145,7 @@ class WorkersTest {
         runBlocking {
             val repo = FakeNotificationsRepository(listOf(alert(1)))
             val settings = FakeSettingsRepository(AppSettings(priceAlertNotifications = false))
-            build({ c, p -> AlertPollWorker(c, p, signedIn, repo, settings, notifier) }).doWork()
+            build({ c, p -> AlertPollWorker(c, p, signedIn, repo, settings, notifier, baseline) }).doWork()
             assertTrue(notifier.priceAlerts.isEmpty())
             assertEquals(setOf(1L), repo.seen)
         }
@@ -126,10 +154,10 @@ class WorkersTest {
     fun `alert poll does nothing signed out and retries on network errors`() =
         runBlocking {
             val repo = FakeNotificationsRepository(listOf(alert(1)))
-            build({ c, p -> AlertPollWorker(c, p, FakeAuthRepository(null), repo, FakeSettingsRepository(), notifier) }).doWork()
+            build({ c, p -> AlertPollWorker(c, p, FakeAuthRepository(null), repo, FakeSettingsRepository(), notifier, baseline) }).doWork()
             assertTrue(notifier.priceAlerts.isEmpty())
             val failing = FailingNotifications(AppError.Network())
-            val result = build({ c, p -> AlertPollWorker(c, p, signedIn, failing, FakeSettingsRepository(), notifier) }).doWork()
+            val result = build({ c, p -> AlertPollWorker(c, p, signedIn, failing, FakeSettingsRepository(), notifier, baseline) }).doWork()
             assertEquals(ListenableWorker.Result.retry(), result)
             assertEquals(Duration.ofMinutes(30), AlertPollIntervals.of(pushActive = false))
             assertEquals(Duration.ofHours(6), AlertPollIntervals.of(pushActive = true))
@@ -151,7 +179,7 @@ class WorkersTest {
     @Test
     fun `trip reminders are rescheduled from saved plans and cancelled with them`() {
         clock.instant = Instant.parse("2026-11-05T10:00:00Z")
-        val scheduler = WorkManagerTripReminderScheduler(context, clock)
+        val scheduler = WorkManagerTripReminderScheduler(context, clock) { zone }
         scheduler.reschedule(listOf(plan(1, "2026-12-10", "2026-12-12"), plan(2, "2026-12-20", "2026-12-21")))
         // Plan 1: week, day before, 3 days; plan 2: week, day before, 2 days.
         assertEquals(9, reminders().size)
@@ -172,14 +200,14 @@ class WorkersTest {
                     TripReminderWorker.KEY_DAY to 1,
                     TripReminderWorker.KEY_DESTINATION to "Lisbon",
                 )
-            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier) }, input).doWork()
+            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog) }, input).doWork()
             val posted = notifier.posts.single()
             assertEquals(TravelChannel.TRIP_REMINDERS, posted.channel)
             assertEquals("Your Lisbon trip starts today", posted.title)
             assertEquals("travelplanner://plan/4", posted.deepLink)
             assertEquals(listOf("travelplanner://plan/4", "travelplanner://plan/4", "travelplanner://nearby"), posted.actions.map { it.deepLink })
             notifier.posts.clear()
-            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(AppSettings(tripNotifications = false)), notifier) }, input).doWork()
+            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(AppSettings(tripNotifications = false)), notifier, postLog) }, input).doWork()
             assertTrue(notifier.posts.isEmpty())
         }
 
@@ -191,7 +219,7 @@ class WorkersTest {
         }
     }
 
-    private fun nearbyWorker(settings: AppSettings, plans: List<Plan>, log: NearbyPostLog, location: Pair<Double, Double>? = 38.7 to -9.1) =
+    private fun nearbyWorker(settings: AppSettings, plans: List<Plan>, log: NearbyPostLog, cellAgeHours: Long? = 1) =
         build({ c, p ->
             NearbySuggestionWorker(
                 c,
@@ -201,8 +229,9 @@ class WorkersTest {
                 FakePlansRepository(plans),
                 FakeNearbyRepository(
                     AppResult.Success(NearbyResponse(NearbyPlace(name = "Lisbon"), listOf(Activity(name = "Tram 28", description = "Ride the old tram")))),
-                ),
-                { location },
+                ).apply {
+                    last = cellAgeHours?.let { LocationCell(38.725, -9.125, clock.instant.minus(Duration.ofHours(it)).toEpochMilli()) }
+                },
                 log,
                 notifier,
                 clock,
@@ -232,9 +261,18 @@ class WorkersTest {
             val noTrip = listOf(plan(1, "2027-01-10", "2027-01-14"))
             nearbyWorker(AppSettings(nearbyNotifications = true), noTrip, MemoryLog()).doWork()
             assertTrue(notifier.posts.isEmpty())
-            nearbyWorker(AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true), noTrip, MemoryLog(), location = null).doWork()
+            nearbyWorker(AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true), noTrip, MemoryLog(), cellAgeHours = null).doWork()
             assertTrue(notifier.posts.isEmpty())
             nearbyWorker(AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true), noTrip, MemoryLog()).doWork()
+            assertEquals(1, notifier.posts.size)
+        }
+
+    @Test
+    fun `nearby suggestions ignore a remembered location older than 24 h`() =
+        runBlocking {
+            nearbyWorker(AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true), emptyList(), MemoryLog(), cellAgeHours = 25).doWork()
+            assertTrue(notifier.posts.isEmpty())
+            nearbyWorker(AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true), emptyList(), MemoryLog(), cellAgeHours = 23).doWork()
             assertEquals(1, notifier.posts.size)
         }
 
@@ -244,6 +282,8 @@ class WorkersTest {
         assertFalse(NearbyNotificationPolicy.shouldNotify(enabled = true, always = false, onTrip = false, lastPostedAt = null, now = now))
         assertTrue(NearbyNotificationPolicy.shouldNotify(enabled = true, always = true, onTrip = false, lastPostedAt = null, now = now))
         assertFalse(NearbyNotificationPolicy.shouldNotify(true, false, true, now.minus(Duration.ofHours(3)), now))
+        // WorkManager flex may start the 4 h run a few minutes early.
+        assertTrue(NearbyNotificationPolicy.shouldNotify(true, false, true, now.minus(Duration.ofMinutes(230)), now))
         assertTrue(NearbyNotificationPolicy.shouldNotify(true, false, true, now.minus(Duration.ofHours(4)), now))
         val trip = plan(1, "2026-12-10", "2026-12-14").searchRequest!!
         assertTrue(NearbyNotificationPolicy.isOnTrip(listOf(trip), LocalDate.parse("2026-12-14")))
@@ -256,6 +296,105 @@ class WorkersTest {
         assertEquals("travelplanner://alerts?watch=7", pushAlertLink(mapOf("watch_id" to "7")).toDeepLink())
         assertEquals("travelplanner://alerts", pushAlertLink(emptyMap()).toDeepLink())
         assertTrue(NotificationIds.priceAlert(42) != NotificationIds.tripReminder("x"))
+    }
+
+    @Test
+    fun `first poll after sign-in seeds the seen table without posting, later ones post only newer alerts`() =
+        runBlocking {
+            baseline.user = null
+            val repo = FakeNotificationsRepository(listOf(alert(1), alert(2)))
+            val poll: suspend () -> Unit = { build({ c, p -> AlertPollWorker(c, p, signedIn, repo, FakeSettingsRepository(), notifier, baseline) }).doWork() }
+            poll()
+            assertTrue(notifier.priceAlerts.isEmpty())
+            assertEquals(setOf(1L, 2L), repo.seen)
+            assertEquals("alice", baseline.user)
+            repo.items.value = listOf(alert(3)) + repo.items.value
+            poll()
+            assertEquals(listOf(3L), notifier.priceAlerts.map { it.id })
+        }
+
+    @Test
+    fun `a data-only push is marked seen, honours the toggle and opens the watch`() =
+        runBlocking {
+            val repo = FakeNotificationsRepository()
+            val data =
+                mapOf(
+                    "kind" to "hotel_drop",
+                    "notification_id" to "57",
+                    "link" to "/alerts?kind=hotel&watch=9",
+                    "watch_id" to "9",
+                    "watch_kind" to "hotel",
+                    "title" to "Lumen dropped to €90",
+                    "body" to "For 10–14 Dec",
+                )
+            assertTrue(PushAlertHandler(repo, FakeSettingsRepository(), notifier).handle(data))
+            val post = notifier.posts.single()
+            assertEquals(TravelChannel.PRICE_ALERTS, post.channel)
+            assertEquals("travelplanner://alerts?kind=hotel&watch=9", post.deepLink)
+            assertEquals("Lumen dropped to €90", post.title)
+            assertEquals(setOf(57L), repo.seen)
+            // The poller won't post it again.
+            assertTrue((repo.unseen() as AppResult.Success).value.none { it.id == 57L })
+            notifier.posts.clear()
+            val off = FakeSettingsRepository(AppSettings(priceAlertNotifications = false))
+            assertFalse(PushAlertHandler(repo, off, notifier).handle(data + ("notification_id" to "58")))
+            assertTrue(notifier.posts.isEmpty())
+            assertTrue(58L in repo.seen)
+            assertTrue(PushAlertHandler(repo, FakeSettingsRepository(), notifier).handle(data + ("kind" to "watch_expired") + ("notification_id" to "59")))
+            assertTrue(notifier.posts.single().quiet)
+        }
+
+    @Test
+    fun `a system-shown push opens the watch from its link extra`() {
+        val intent = android.content.Intent(android.content.Intent.ACTION_MAIN).putExtra("link", "/alerts?kind=trip&watch=3").putExtra("watch_id", "3")
+        assertEquals("travelplanner://alerts?kind=trip&watch=3", withPushDeepLink(intent).data.toString())
+        val fare = android.content.Intent().putExtra("watch_id", "7")
+        assertEquals("travelplanner://alerts?watch=7", withPushDeepLink(fare).data.toString())
+        val plain = android.content.Intent(android.content.Intent.ACTION_MAIN)
+        assertEquals(null, withPushDeepLink(plain).data)
+    }
+
+    @Test
+    fun `rescheduling keeps a pending reminder that is due, and never posts it twice`() =
+        runBlocking {
+            // 08:05 Lisbon on the first day: the 08:00 trip-start reminder is overdue but within the grace window.
+            clock.instant = Instant.parse("2026-12-10T08:05:00Z")
+            val scheduler = WorkManagerTripReminderScheduler(context, clock) { zone }
+            val plans = listOf(plan(1, "2026-12-10", "2026-12-12"))
+            scheduler.reschedule(plans)
+
+            fun all() = WorkManager.getInstance(context).getWorkInfosByTag(WorkManagerTripReminderScheduler.TAG).get()
+            // The overdue start-of-trip reminder is (re)scheduled to run at once, not dropped.
+            val start = all().first { info -> info.tags.any { it.contains("TRIP_START") } }
+            // A pending future reminder is kept as it is (same work) when the plans re-emit.
+            val lastDay = reminders().single { info -> info.tags.any { it.contains("LAST_DAY") } }
+            scheduler.reschedule(plans)
+            assertEquals(lastDay.id, reminders().single { info -> info.tags.any { it.contains("LAST_DAY") } }.id)
+            val name = start.tags.first { it.startsWith("trip-reminder-name:") }.removePrefix("trip-reminder-name:")
+            val input =
+                workDataOf(
+                    TripReminderWorker.KEY_PLAN_ID to 1L,
+                    TripReminderWorker.KEY_TYPE to "TRIP_START",
+                    TripReminderWorker.KEY_DAY to 1,
+                    TripReminderWorker.KEY_DESTINATION to "Lisbon",
+                    TripReminderWorker.KEY_UNIQUE to name,
+                )
+            repeat(2) { build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog) }, input).doWork() }
+            assertEquals(1, notifier.posts.size)
+        }
+
+    @Test
+    fun `a time-zone change re-times reminders to 08 00 in the new zone`() {
+        clock.instant = Instant.parse("2026-11-05T10:00:00Z")
+        val scheduler = WorkManagerTripReminderScheduler(context, clock) { zone }
+        val plans = listOf(plan(1, "2026-12-10", "2026-12-11"))
+        scheduler.reschedule(plans)
+        val before = reminders().map { it.id }.toSet()
+        zone = ZoneId.of("Asia/Tokyo")
+        scheduler.reschedule(plans, clockChanged = true)
+        val after = reminders()
+        assertEquals(before.size, after.size)
+        assertTrue(after.none { it.id in before })
     }
 
     private fun notificationLinkOf(n: AppNotification) =
@@ -280,15 +419,31 @@ class WorkersTest {
 
 /** Records what would be posted. */
 class RecordingNotifier : Notifier {
-    data class Post(val channel: TravelChannel, val id: Int, val title: String, val body: String, val deepLink: String, val actions: List<NotificationAction>)
+    data class Post(
+        val channel: TravelChannel,
+        val id: Int,
+        val title: String,
+        val body: String,
+        val deepLink: String,
+        val actions: List<NotificationAction>,
+        val quiet: Boolean = false,
+    )
 
     val posts = mutableListOf<Post>()
     val priceAlerts = mutableListOf<AppNotification>()
 
     override fun canPost(): Boolean = true
 
-    override fun post(channel: TravelChannel, id: Int, title: String, body: String, deepLink: String, actions: List<NotificationAction>) {
-        posts += Post(channel, id, title, body, deepLink, actions)
+    override fun post(
+        channel: TravelChannel,
+        id: Int,
+        title: String,
+        body: String,
+        deepLink: String,
+        actions: List<NotificationAction>,
+        quiet: Boolean,
+    ) {
+        posts += Post(channel, id, title, body, deepLink, actions, quiet)
     }
 
     override fun postPriceAlert(notification: AppNotification) {

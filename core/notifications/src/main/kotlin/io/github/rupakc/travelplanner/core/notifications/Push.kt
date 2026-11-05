@@ -1,6 +1,8 @@
 package io.github.rupakc.travelplanner.core.notifications
 
 import android.content.Context
+import android.content.Intent
+import androidx.core.net.toUri
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -94,10 +96,64 @@ fun pushAlertLink(data: Map<String, String>): AlertLink =
     parseAlertsPath(data[PushDataKeys.LINK])
         ?: AlertLink(data[PushDataKeys.WATCH_KIND], data[PushDataKeys.WATCH_ID]?.toLongOrNull())
 
+/** Price-alert notification kinds the server pushes high-priority; `watch_expired` / `watch_error` are notices. */
+private val NOTICE_KINDS = setOf("watch_expired", "watch_error")
+
 /**
- * FCM entry point. Disabled in the manifest unless Firebase is configured. In the background
- * Android shows the message itself; in the foreground we post it (if Price alerts are on) and
- * mark the id seen so [io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollWorker] won't post it again.
+ * Handles one data-only FCM message (backend `push.py`: keys `kind`, `notification_id`, `link`,
+ * `watch_id`, `watch_kind`, `title`, `body`, all strings). Marks the id seen first (so the poller never
+ * posts it again), then posts it on the Price alerts channel if that toggle is on, opening the app
+ * route for the server's web `link`. Returns true when something was posted.
+ */
+@Singleton
+class PushAlertHandler
+    @Inject
+    constructor(
+        private val notifications: NotificationsRepository,
+        private val settings: SettingsRepository,
+        private val notifier: Notifier,
+    ) {
+        suspend fun handle(data: Map<String, String>): Boolean {
+            val id = data[PushDataKeys.NOTIFICATION_ID]?.toLongOrNull() ?: return false
+            notifications.markSeen(listOf(id))
+            if (!settings.settings.first().priceAlertNotifications) return false
+            val title = data[KEY_TITLE].orEmpty()
+            if (title.isBlank()) return false
+            notifier.post(
+                TravelChannel.PRICE_ALERTS,
+                NotificationIds.priceAlert(id),
+                title,
+                data[KEY_BODY].orEmpty(),
+                pushAlertLink(data).toDeepLink(),
+                quiet = data[PushDataKeys.KIND] in NOTICE_KINDS,
+            )
+            return true
+        }
+
+        companion object {
+            const val KEY_TITLE = "title"
+            const val KEY_BODY = "body"
+        }
+    }
+
+/**
+ * A notification posted by FCM itself (not via [PushAlertHandler]) opens MainActivity with the data
+ * keys as extras. If [intent] has no data URI but a web `link` extra, give it the app deep link
+ * (`travelplanner://alerts?…`) in place, so the NavHost opens the watch. Safe to call on any intent.
+ */
+fun withPushDeepLink(intent: Intent): Intent {
+    if (intent.data != null) return intent
+    val extras = intent.extras ?: return intent
+    val link = extras.getString(PushDataKeys.LINK) ?: extras.getString(PushDataKeys.WATCH_ID)?.let { "/alerts?watch=$it" } ?: return intent
+    val data = buildMap { extras.keySet().forEach { k -> extras.getString(k)?.let { put(k, it) } } } + (PushDataKeys.LINK to link)
+    intent.action = Intent.ACTION_VIEW
+    intent.data = pushAlertLink(data).toDeepLink().toUri()
+    return intent
+}
+
+/**
+ * FCM entry point. Disabled in the manifest unless Firebase is configured. Messages are
+ * data-only, so this always runs, in the foreground and the background ([PushAlertHandler]).
  */
 @AndroidEntryPoint
 class TravelMessagingService : FirebaseMessagingService() {
@@ -105,11 +161,7 @@ class TravelMessagingService : FirebaseMessagingService() {
 
     @Inject lateinit var auth: AuthRepository
 
-    @Inject lateinit var notifications: NotificationsRepository
-
-    @Inject lateinit var settings: SettingsRepository
-
-    @Inject lateinit var notifier: Notifier
+    @Inject lateinit var handler: PushAlertHandler
 
     @Inject @ApplicationScope
     lateinit var scope: CoroutineScope
@@ -123,17 +175,13 @@ class TravelMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         val data = message.data
-        val id = data[PushDataKeys.NOTIFICATION_ID]?.toLongOrNull() ?: return
-        scope.launch {
-            notifications.markSeen(listOf(id))
-            if (!settings.settings.first().priceAlertNotifications) return@launch
-            notifier.post(
-                TravelChannel.PRICE_ALERTS,
-                NotificationIds.priceAlert(id),
-                message.notification?.title.orEmpty(),
-                message.notification?.body.orEmpty(),
-                pushAlertLink(data).toDeepLink(),
-            )
-        }
+        // Older servers also sent a notification block; fall back to it for the text.
+        val withText =
+            data +
+                listOfNotNull(
+                    message.notification?.title?.let { PushAlertHandler.KEY_TITLE to it }.takeIf { data[PushAlertHandler.KEY_TITLE] == null },
+                    message.notification?.body?.let { PushAlertHandler.KEY_BODY to it }.takeIf { data[PushAlertHandler.KEY_BODY] == null },
+                )
+        scope.launch { handler.handle(withText) }
     }
 }

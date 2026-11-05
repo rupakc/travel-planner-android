@@ -37,6 +37,8 @@ interface Notifier {
         body: String,
         deepLink: String,
         actions: List<NotificationAction> = emptyList(),
+        /** Ended/paused notices: no sound or heads-up (web parity: lower priority than drops). */
+        quiet: Boolean = false,
     )
 
     /** A backend price alert (from AlertPollWorker or FCM); deep-links to Alerts like the web `/alerts?kind&watch`. */
@@ -95,7 +97,15 @@ class SystemNotifier
             return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
-        override fun post(channel: TravelChannel, id: Int, title: String, body: String, deepLink: String, actions: List<NotificationAction>) {
+        override fun post(
+            channel: TravelChannel,
+            id: Int,
+            title: String,
+            body: String,
+            deepLink: String,
+            actions: List<NotificationAction>,
+            quiet: Boolean,
+        ) {
             if (!canPost()) return
             val builder =
                 NotificationCompat.Builder(context, channel.id)
@@ -104,6 +114,9 @@ class SystemNotifier
                     .setContentText(body)
                     .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                     .setAutoCancel(true)
+                    // Re-posting the same id (poll + push race, retried work) never alerts twice.
+                    .setOnlyAlertOnce(true)
+                    .setSilent(quiet)
                     .setContentIntent(open(id, deepLink))
             actions.forEachIndexed { i, action ->
                 // Distinct request codes keep each action's PendingIntent apart.

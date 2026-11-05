@@ -30,6 +30,35 @@ import kotlin.random.Random
 import kotlinx.coroutines.flow.first
 
 /**
+ * Which signed-in user the poller has a baseline for. The first poll for a user (fresh install,
+ * or after sign-out, which clears the seen table) marks every current unread alert seen without
+ * posting it, so signing in never floods old alerts; later polls post only newer ones.
+ */
+interface PollBaseline {
+    fun user(): String?
+
+    fun set(user: String?)
+}
+
+@Singleton
+class SharedPrefsPollBaseline
+    @Inject
+    constructor(
+        @param:ApplicationContext private val context: Context,
+    ) : PollBaseline {
+        private val prefs by lazy { context.getSharedPreferences(FILE, Context.MODE_PRIVATE) }
+
+        override fun user(): String? = prefs.getString(KEY, null)
+
+        override fun set(user: String?) = prefs.edit().putString(KEY, user).apply()
+
+        private companion object {
+            const val FILE = "alert_poll"
+            const val KEY = "baseline_user"
+        }
+    }
+
+/**
  * Reads `/api/notifications` and posts new unread ones locally, deduped by id in Room
  * (`NotificationsRepository.unseen` / `markSeen`, shared with FCM). With the Price alerts toggle
  * off it marks them seen without posting, so turning it back on never floods old alerts.
@@ -44,20 +73,26 @@ class AlertPollWorker
         private val notifications: NotificationsRepository,
         private val settings: SettingsRepository,
         private val notifier: Notifier,
+        private val baseline: PollBaseline,
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
-            if (auth.session.first() == null) return Result.success()
+            val user = auth.session.first()?.user?.username ?: return Result.success()
             val unseen =
                 when (val result = notifications.unseen()) {
                     is AppResult.Success -> result.value
                     is AppResult.Failure -> return if (result.error.isTransient()) Result.retry() else Result.success()
                 }
-            if (unseen.isEmpty()) return Result.success()
+            val first = baseline.user() != user
+            // Seen first: a crash after posting must not post (and alert) again.
+            if (unseen.isNotEmpty()) notifications.markSeen(unseen.map { it.id })
+            if (first) {
+                baseline.set(user)
+                return Result.success()
+            }
             if (settings.settings.first().priceAlertNotifications) {
                 // Oldest first, so the newest ends up on top of the shade.
                 unseen.sortedBy { it.id }.forEach(notifier::postPriceAlert)
             }
-            notifications.markSeen(unseen.map { it.id })
             return Result.success()
         }
     }
@@ -117,4 +152,6 @@ class WorkManagerAlertPollScheduler
 @InstallIn(SingletonComponent::class)
 abstract class AlertPollModule {
     @Binds abstract fun scheduler(impl: WorkManagerAlertPollScheduler): AlertPollScheduler
+
+    @Binds abstract fun baseline(impl: SharedPrefsPollBaseline): PollBaseline
 }

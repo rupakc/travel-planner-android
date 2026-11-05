@@ -42,6 +42,7 @@ class NotificationsInitializer
         private val tripReminders: TripReminderScheduler,
         private val nearby: NearbySuggestionScheduler,
         private val pushRegistrar: PushRegistrar,
+        private val pollBaseline: io.github.rupakc.travelplanner.core.notifications.alerts.PollBaseline,
     ) {
         private var started = false
 
@@ -60,21 +61,26 @@ class NotificationsInitializer
                             alertPoll.schedule(pushActive = push && firebase)
                         } else {
                             alertPoll.cancel()
+                            // Sign-out clears the seen table: the next sign-in starts a fresh baseline.
+                            pollBaseline.set(null)
                         }
                     }
             }
-            scope.launch { plans.plans.distinctUntilChanged().collect(tripReminders::reschedule) }
+            scope.launch { plans.plans.distinctUntilChanged().collect { tripReminders.reschedule(it) } }
             scope.launch { settings.settings.map { it.nearbyNotifications }.distinctUntilChanged().collect(nearby::setEnabled) }
             scope.launch { pushRegistrar.run() }
         }
 
-        /** After a reboot or app update: WorkManager keeps its work, but re-derive reminders from the cached plans. */
-        suspend fun rescheduleNow() {
-            tripReminders.reschedule(plans.plans.first())
+        /** After a reboot or app update (re-derive from the cached plans) or a time / time-zone change (re-time all). */
+        suspend fun rescheduleNow(clockChanged: Boolean = false) {
+            tripReminders.reschedule(plans.plans.first(), clockChanged)
         }
     }
 
-/** BOOT_COMPLETED / MY_PACKAGE_REPLACED: reschedule trip reminders from the cached plans. */
+/**
+ * BOOT_COMPLETED / MY_PACKAGE_REPLACED: reschedule trip reminders from the cached plans.
+ * TIMEZONE_CHANGED / TIME_SET: re-time them for the new wall clock (08:00 where the traveller is now).
+ */
 @AndroidEntryPoint
 class RescheduleReceiver : BroadcastReceiver() {
     @Inject lateinit var initializer: NotificationsInitializer
@@ -87,7 +93,7 @@ class RescheduleReceiver : BroadcastReceiver() {
         val pending = goAsync()
         scope.launch {
             try {
-                initializer.rescheduleNow()
+                initializer.rescheduleNow(clockChanged = intent.action in CLOCK_ACTIONS)
             } finally {
                 pending.finish()
             }
@@ -95,6 +101,7 @@ class RescheduleReceiver : BroadcastReceiver() {
     }
 
     private companion object {
-        val ACTIONS = setOf(Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED)
+        val CLOCK_ACTIONS = setOf(Intent.ACTION_TIMEZONE_CHANGED, Intent.ACTION_TIME_CHANGED)
+        val ACTIONS = setOf(Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED) + CLOCK_ACTIONS
     }
 }

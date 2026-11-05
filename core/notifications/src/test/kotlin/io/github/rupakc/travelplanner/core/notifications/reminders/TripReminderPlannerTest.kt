@@ -43,8 +43,11 @@ class TripReminderPlannerTest {
         val r = TripReminderPlanner.plan(1, LocalDate.parse("2026-11-08"), LocalDate.parse("2026-11-09"), now)
         assertEquals(listOf(ReminderType.DAY_BEFORE, ReminderType.TRIP_START, ReminderType.LAST_DAY), r.map { it.type })
         val today = TripReminderPlanner.plan(1, LocalDate.parse("2026-11-05"), LocalDate.parse("2026-11-06"), now)
-        // 08:00 today has passed at noon; only tomorrow's last-day reminder is left.
+        // 08:00 today has passed by 4 h at noon (beyond the 2 h grace); only tomorrow's last-day reminder is left.
         assertEquals(listOf(ReminderType.LAST_DAY), today.map { it.type })
+        val justAfter = ZonedDateTime.of(2026, 11, 5, 9, 30, 0, 0, berlin)
+        val grace = TripReminderPlanner.plan(1, LocalDate.parse("2026-11-05"), LocalDate.parse("2026-11-06"), justAfter)
+        assertEquals(listOf(ReminderType.TRIP_START, ReminderType.LAST_DAY), grace.map { it.type })
         assertTrue(TripReminderPlanner.plan(1, LocalDate.parse("2026-10-01"), LocalDate.parse("2026-10-05"), now).isEmpty())
     }
 
@@ -53,7 +56,9 @@ class TripReminderPlannerTest {
         val oneWay = TripReminderPlanner.plan(1, LocalDate.parse("2026-12-10"), null, now)
         assertEquals(listOf(ReminderType.WEEK_BEFORE, ReminderType.DAY_BEFORE, ReminderType.TRIP_START), oneWay.map { it.type })
         val long = TripReminderPlanner.plan(1, LocalDate.parse("2026-12-10"), LocalDate.parse("2027-03-10"), now)
-        assertEquals(TripReminderPlanner.MAX_TRIP_DAYS, long.count { it.dayNumber > 0 })
+        assertEquals(TripReminderPlanner.MAX_TRIP_DAYS, long.count { it.dayNumber in 1..TripReminderPlanner.MAX_TRIP_DAYS })
+        // The checkout reminder survives the cap.
+        assertEquals(LocalDate.parse("2027-03-10"), long.last { it.type == ReminderType.LAST_DAY }.date)
     }
 
     @Test
@@ -75,6 +80,19 @@ class TripReminderPlannerTest {
         // Our times (08:00 / 09:00 / 18:00) are outside every real-world gap, so they are kept as-is.
         val r = TripReminderPlanner.plan(3, LocalDate.parse("2026-03-08"), LocalDate.parse("2026-03-09"), ZonedDateTime.of(2026, 3, 1, 0, 0, 0, 0, ny))
         assertTrue(r.filter { it.dayNumber > 0 }.all { it.fireAt.toLocalTime() == LocalTime.of(8, 0) })
+    }
+
+    @Test
+    fun `the same trip gets 08 00 local wherever the phone is`() {
+        val tokyo = ZoneId.of("Asia/Tokyo")
+
+        fun plan(json: String) = Plan(id = 1, name = "Trip", searchData = TravelJson.parseToJsonElement(json) as JsonObject)
+        val p = plan("""{"origin":"BER","destination":"Tokyo","departure_date":"2026-12-10","return_date":"2026-12-11","nationality":""}""")
+        val inBerlin = remindersFor(listOf(p), now).first { it.second.type == ReminderType.TRIP_START }.second.fireAt
+        val inTokyo = remindersFor(listOf(p), now.withZoneSameInstant(tokyo)).first { it.second.type == ReminderType.TRIP_START }.second.fireAt
+        assertEquals(LocalTime.of(8, 0), inBerlin.toLocalTime())
+        assertEquals(LocalTime.of(8, 0), inTokyo.toLocalTime())
+        assertEquals(Duration.ofHours(8), Duration.between(inTokyo, inBerlin))
     }
 
     @Test

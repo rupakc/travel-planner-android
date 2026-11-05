@@ -1,10 +1,6 @@
 package io.github.rupakc.travelplanner.core.notifications.nearby
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -13,7 +9,6 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.google.android.gms.location.LocationServices
 import dagger.Binds
 import dagger.Module
 import dagger.assisted.Assisted
@@ -22,13 +17,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.common.AppClock
-import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.domain.alerts.parseIsoDate
+import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.notifications.NotificationIds
@@ -43,16 +38,18 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.tasks.await
 
 /** When a nearby suggestion may be posted (spec §7/§8): opt-in, during a trip unless "always", at most 1 per 4 h. */
 object NearbyNotificationPolicy {
     val MIN_GAP: Duration = Duration.ofHours(4)
 
+    /** WorkManager's flex can start a 4 h periodic run a little early; don't skip it for that. */
+    val TOLERANCE: Duration = Duration.ofMinutes(15)
+
     fun shouldNotify(enabled: Boolean, always: Boolean, onTrip: Boolean, lastPostedAt: Instant?, now: Instant): Boolean {
         if (!enabled) return false
         if (!always && !onTrip) return false
-        return lastPostedAt == null || Duration.between(lastPostedAt, now) >= MIN_GAP
+        return lastPostedAt == null || Duration.between(lastPostedAt, now) >= MIN_GAP.minus(TOLERANCE)
     }
 
     /** [today] falls within a trip's dates (departure..return, one-way = the departure day). */
@@ -64,38 +61,15 @@ object NearbyNotificationPolicy {
         }
 }
 
-/** A coarse fix for background suggestions: the last known location only (never turns on GPS). */
-fun interface LastLocationSource {
-    /** `lat to lng`, or null without permission or a cached fix. */
-    suspend fun lastLocation(): Pair<Double, Double>?
-}
+/**
+ * Where background suggestions look: the last foreground fix from Near me (a ~5 km cell), only
+ * while it is under [MAX_AGE] old. Background location is never requested (spec §8: foreground only).
+ */
+fun usableLocation(cell: LocationCell?, now: Instant): LocationCell? =
+    cell?.takeIf { Duration.between(Instant.ofEpochMilli(it.atEpochMillis), now) < MAX_AGE }
 
-@Singleton
-class FusedLastLocationSource
-    @Inject
-    constructor(
-        @param:ApplicationContext private val context: Context,
-    ) : LastLocationSource {
-        @SuppressLint("MissingPermission") // checked just below
-        @Suppress("TooGenericExceptionCaught") // Play services may be missing or throw on any device
-        override suspend fun lastLocation(): Pair<Double, Double>? {
-            val granted =
-                listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION).any {
-                    ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-                }
-            if (!granted) return null
-            return try {
-                LocationServices.getFusedLocationProviderClient(context).lastLocation.await()?.let { it.latitude to it.longitude }
-            } catch (e: Exception) {
-                AppLogger.w(TAG, "No last location", e)
-                null
-            }
-        }
-
-        private companion object {
-            const val TAG = "NearbyLocation"
-        }
-    }
+/** How old the remembered Near me fix may be for a background suggestion. */
+val MAX_AGE: Duration = Duration.ofHours(24)
 
 /** Remembers when the last nearby suggestion was posted (device-local, survives restarts). */
 interface NearbyPostLog {
@@ -133,7 +107,6 @@ class NearbySuggestionWorker
         private val currentPlan: CurrentPlanStore,
         private val plans: PlansRepository,
         private val nearby: NearbyRepository,
-        private val location: LastLocationSource,
         private val log: NearbyPostLog,
         private val notifier: Notifier,
         private val clock: AppClock,
@@ -159,8 +132,8 @@ class NearbySuggestionWorker
         }
 
         private suspend fun suggestions(): NearbyResponse? {
-            val (lat, lng) = location.lastLocation() ?: return null
-            return (nearby.nearby(lat, lng, limit = SUGGESTIONS) as? AppResult.Success)?.value
+            val cell = usableLocation(nearby.lastLocation(), clock.now()) ?: return null
+            return (nearby.nearby(cell.lat, cell.lng, limit = SUGGESTIONS) as? AppResult.Success)?.value
         }
 
         private companion object {
@@ -200,8 +173,6 @@ class WorkManagerNearbySuggestionScheduler
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class NearbyNotificationsModule {
-    @Binds abstract fun location(impl: FusedLastLocationSource): LastLocationSource
-
     @Binds abstract fun log(impl: SharedPrefsNearbyPostLog): NearbyPostLog
 
     @Binds abstract fun scheduler(impl: WorkManagerNearbySuggestionScheduler): NearbySuggestionScheduler
