@@ -61,6 +61,17 @@ interface ChatDao {
     @Query("DELETE FROM chat_threads WHERE id = :id")
     suspend fun deleteThread(id: Long)
 
+    /**
+     * Ids of [username]'s threads with a message containing [pattern] (a LIKE pattern with
+     * `\\` as escape; callers wrap the query in `%…%`). Joined through the indexed
+     * `threadId`/`username` columns; capped by [limit]. LIKE is case-insensitive for ASCII.
+     */
+    @Query(
+        "SELECT DISTINCT m.threadId FROM chat_messages m JOIN chat_threads t ON t.id = m.threadId " +
+            "WHERE t.username = :username AND m.content LIKE :pattern ESCAPE '\\' LIMIT :limit",
+    )
+    fun observeThreadIdsWithText(username: String, pattern: String, limit: Int): Flow<List<Long>>
+
     @Query("SELECT * FROM chat_messages WHERE threadId = :threadId ORDER BY id ASC")
     fun observeMessages(threadId: Long): Flow<List<ChatMessageEntity>>
 

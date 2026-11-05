@@ -48,6 +48,19 @@ class ChatRepositoryImpl
         override fun messages(threadId: Long): Flow<List<StoredChatMessage>> =
             chatDao.observeMessages(threadId).map { list -> list.map { it.toModel() } }
 
+        override fun threadIdsMatching(query: String): Flow<Set<Long>> {
+            val text = query.trim()
+            if (text.isEmpty()) return flowOf(emptySet())
+            val pattern = "%" + text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
+            return sessionStore.session.flatMapLatest { session ->
+                if (session == null) {
+                    flowOf(emptySet())
+                } else {
+                    chatDao.observeThreadIdsWithText(session.user.username, pattern, SEARCH_LIMIT).map { it.toSet() }
+                }
+            }
+        }
+
         override suspend fun createThread(title: String): Long {
             val now = clock.now().toEpochMilli()
             val username = sessionStore.current()?.user?.username.orEmpty()
@@ -78,6 +91,10 @@ class ChatRepositoryImpl
 
         override suspend fun saveSessionContext(threadId: Long, context: JsonObject) =
             chatDao.updateSessionContext(threadId, context.toString(), clock.now().toEpochMilli())
+
+        private companion object {
+            const val SEARCH_LIMIT = 200
+        }
 
         private fun ChatMessageEntity.toModel() = StoredChatMessage(id, threadId, role, content, extrasJson, createdAtMillis)
     }
