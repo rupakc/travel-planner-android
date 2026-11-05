@@ -166,6 +166,26 @@ class ChatViewModelTest {
         }
 
     @Test
+    fun `stop before any event clears the placeholder`() =
+        runTest {
+            val gate = CompletableDeferred<Unit>()
+            val silent =
+                object : FakeChatRepositoryDelegate(repo) {
+                    override fun send(request: io.github.rupakc.travelplanner.core.model.chat.ChatRequest): Flow<ChatEvent> =
+                        flow { gate.await() }
+                }
+            val vm = ChatViewModel(silent, store, TestAppDispatchers(main.testDispatcher))
+            vm.uiState.test {
+                vm.onEvent(ChatUiEvent.Send("hello"))
+                expectMostRecentItemMatching { it.isStreaming }
+                vm.onEvent(ChatUiEvent.Stop)
+                val stopped = expectMostRecentItemMatching { !it.isStreaming && it.turns.size == 2 }
+                assertTrue(stopped.turns[1].stopped)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
     fun `delete hides a thread until undo or commit`() =
         runTest {
             val first = repo.createThread("Tokyo")

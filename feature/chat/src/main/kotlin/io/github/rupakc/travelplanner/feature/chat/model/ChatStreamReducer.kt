@@ -98,7 +98,8 @@ object ChatStreamReducer {
             }
 
             is ChatEvent.Error -> {
-                state.copy(errorReceived = true, turn = turn.copy(error = TurnError.STREAM, streaming = false))
+                // The stream goes on to `done`; [finish] ends it.
+                state.copy(errorReceived = true, turn = turn.copy(error = TurnError.STREAM))
             }
 
             is ChatEvent.PlanningDone -> {

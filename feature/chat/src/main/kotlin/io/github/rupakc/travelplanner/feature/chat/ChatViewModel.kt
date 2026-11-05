@@ -200,7 +200,12 @@ class ChatViewModel
                     val earlier = if (existing == null) emptyList() else loadTurns(threadId)
                     val userId = chat.appendMessage(threadId, ChatMessage.ROLE_USER, question)
                     stream(threadId, earlier + ChatTurn(id = userId, role = ChatMessage.ROLE_USER, content = question))
-                }
+                }.also(::clearPlaceholderOnEnd)
+        }
+
+        /** A Stop before the first event leaves no reply to save: drop the placeholder bubble. */
+        private fun clearPlaceholderOnEnd(job: Job) {
+            job.invokeOnCompletion { streamingTurn.update { turn -> turn?.takeUnless { it.streaming } } }
         }
 
         private fun retry(turnId: Long) {
@@ -218,7 +223,7 @@ class ChatViewModel
                     }
                     chat.deleteMessage(turnId)
                     stream(threadId, history)
-                }
+                }.also(::clearPlaceholderOnEnd)
         }
 
         private suspend fun loadTurns(threadId: Long): List<ChatTurn> =
