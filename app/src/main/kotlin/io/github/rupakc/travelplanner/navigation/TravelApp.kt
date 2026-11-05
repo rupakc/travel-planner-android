@@ -22,7 +22,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -41,6 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.github.rupakc.travelplanner.AuthGate
 import io.github.rupakc.travelplanner.R
+import io.github.rupakc.travelplanner.core.model.navigation.AccountChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
@@ -64,13 +64,11 @@ import io.github.rupakc.travelplanner.feature.results.navigation.resultsGraph
 import io.github.rupakc.travelplanner.feature.search.navigation.searchGraph
 import io.github.rupakc.travelplanner.feature.settings.navigation.settingsGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareGraph
-import kotlinx.coroutines.launch
 
 /** Root of the UI: auth gate + NavHost + adaptive navigation suite. */
 @Composable
 fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavController()) {
     val shellViewModel: ShellViewModel = hiltViewModel()
-    val scope = rememberCoroutineScope()
     val backStack by navController.currentBackStackEntryAsState()
     val destination = backStack?.destination
     // singleTask activity: deep links that arrive while running come through onNewIntent.
@@ -133,7 +131,11 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
             settingsGraph(
                 onBack = { navController.popBackStack() },
                 onRetakeQuiz = { navController.navigate(OnboardingRoute(fromSettings = true)) },
-                onSignOut = { scope.launch { shellViewModel.signOut() } },
+                // Settings signs out itself (AuthRepository.logout unregisters the push token); the gate then shows Login.
+                onSignOut = {},
+                // feature:auth (team A1) registers AccountChangePasswordRoute.
+                onChangePassword = { navController.navigate(AccountChangePasswordRoute) },
+                onNavigate = { route -> navController.navigate(route) },
             )
             nearbyGraph(onBack = { navController.popBackStack() })
             shareGraph(onBack = {
