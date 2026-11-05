@@ -95,4 +95,23 @@ class GlobalSearchTest {
         assertNull(SettingsEntry.fromKey("nope"))
         assertEquals(SettingsEntry.entries.size, SettingsEntry.entries.map { it.key }.toSet().size)
     }
+
+    @Test
+    fun `ties sort by normalised title`() {
+        val list = listOf(SearchableItem(TRIP, "1", "Zed trip"), SearchableItem(TRIP, "2", "alpha trip"), SearchableItem(TRIP, "3", "Ärger trip"))
+        assertEquals(listOf("2", "3", "1"), GlobalSearch.search("trip", list).groups.single().hits.map { it.item.id })
+    }
+
+    @Test
+    fun `a prepared index is searched without re-normalising and gives the same results`() {
+        val big =
+            (1..5_000).map { i ->
+                SearchableItem(CHAT, "$i", "Thread $i", subtitle = "Ünïcode preview $i", keywords = listOf("message about café number $i"))
+            }
+        val prepared = GlobalSearch.prepare(big)
+        val viaPrepared = GlobalSearch.search("cafe 4999", prepared)
+        assertEquals(listOf("4999"), viaPrepared.groups.single().hits.map { it.item.id })
+        assertEquals(GlobalSearch.search("unicode", big).counts, GlobalSearch.search("unicode", prepared).counts)
+        assertEquals(5_000, GlobalSearch.search("unicode", prepared).counts[CHAT])
+    }
 }

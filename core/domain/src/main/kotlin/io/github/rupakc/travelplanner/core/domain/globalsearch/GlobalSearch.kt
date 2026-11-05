@@ -67,51 +67,77 @@ object GlobalSearch {
             .replace(separators, " ")
             .trim()
 
-    /** Score of [item] for [query], or null when some token does not match. */
-    fun score(query: String, item: SearchableItem): Int? {
-        val normalizedQuery = normalize(query)
-        val tokens = normalizedQuery.split(' ').filter(String::isNotEmpty)
-        if (tokens.isEmpty()) return null
+    /** Normalises [item] once so repeated searches don't redo NFD/regex work. */
+    fun prepare(item: SearchableItem): PreparedItem {
         val title = normalize(item.title)
         val subtitle = item.subtitle?.let(::normalize).orEmpty()
-        val keywords = item.keywords.map(::normalize)
+        val keywords = item.keywords.map(::normalize).filter(String::isNotEmpty)
+        return PreparedItem(
+            item = item,
+            title = title,
+            titleWords = title.split(' '),
+            subtitle = subtitle,
+            subtitleWords = subtitle.split(' '),
+            keywords = keywords,
+            keywordWords = keywords.flatMap { it.split(' ') },
+        )
+    }
+
+    fun prepare(items: List<SearchableItem>): List<PreparedItem> = items.map(::prepare)
+
+    /** Score of [item] for [query], or null when some token does not match. */
+    fun score(query: String, item: SearchableItem): Int? = score(normalize(query), prepare(item))
+
+    private fun score(normalizedQuery: String, item: PreparedItem): Int? {
+        val tokens = normalizedQuery.split(' ').filter(String::isNotEmpty)
+        if (tokens.isEmpty()) return null
         var total = 0
         for (token in tokens) {
-            val best = tokenScore(token, title, subtitle, keywords)
+            val best = tokenScore(token, item)
             if (best == 0) return null
             total += best
         }
-        if (title == normalizedQuery) total += EXACT_TITLE
+        if (item.title == normalizedQuery) total += EXACT_TITLE
         return total
     }
 
-    private fun tokenScore(token: String, title: String, subtitle: String, keywords: List<String>): Int {
-        val titleWords = title.split(' ')
-        return listOf(
-            if (titleWords.firstOrNull()?.startsWith(token) == true) TITLE_FIRST_WORD_PREFIX else 0,
-            if (titleWords.any { it.startsWith(token) }) TITLE_WORD_PREFIX else 0,
-            if (title.contains(token)) TITLE_SUBSTRING else 0,
-            if (subtitle.split(' ').any { it.startsWith(token) }) SUBTITLE_WORD_PREFIX else 0,
-            if (subtitle.contains(token)) SUBTITLE_SUBSTRING else 0,
-            if (keywords.any { k -> k.split(' ').any { it.startsWith(token) } }) KEYWORD_PREFIX else 0,
-            if (keywords.any { it.contains(token) }) KEYWORD_SUBSTRING else 0,
-        ).max()
-    }
+    private fun tokenScore(token: String, item: PreparedItem): Int =
+        when {
+            item.titleWords.firstOrNull()?.startsWith(token) == true -> TITLE_FIRST_WORD_PREFIX
+            item.titleWords.any { it.startsWith(token) } -> TITLE_WORD_PREFIX
+            item.title.contains(token) -> TITLE_SUBSTRING
+            item.subtitleWords.any { it.startsWith(token) } -> SUBTITLE_WORD_PREFIX
+            item.keywordWords.any { it.startsWith(token) } -> KEYWORD_PREFIX
+            item.subtitle.contains(token) -> SUBTITLE_SUBSTRING
+            item.keywords.any { it.contains(token) } -> KEYWORD_SUBSTRING
+            else -> 0
+        }
 
-    /**
-     * Searches [items]. [filter] empty = every kind. At most [limitPerKind] hits per group;
-     * counts are the full match counts.
-     */
+    /** Convenience: prepares [items] then searches them (use [prepare] once for repeated queries). */
     fun search(
         query: String,
         items: List<SearchableItem>,
         filter: Set<GlobalSearchKind> = emptySet(),
         limitPerKind: Int = DEFAULT_LIMIT_PER_KIND,
+    ): GlobalSearchResults = search(query, prepare(items), filter, limitPerKind)
+
+    /**
+     * Searches a prepared index. [filter] empty = every kind. At most [limitPerKind] hits per
+     * group; counts are the full match counts. Ties sort by normalised title, then id.
+     */
+    @JvmName("searchPrepared")
+    fun search(
+        query: String,
+        items: List<PreparedItem>,
+        filter: Set<GlobalSearchKind> = emptySet(),
+        limitPerKind: Int = DEFAULT_LIMIT_PER_KIND,
     ): GlobalSearchResults {
-        if (normalize(query).isEmpty()) return GlobalSearchResults(query = query)
+        val normalizedQuery = normalize(query)
+        if (normalizedQuery.isEmpty()) return GlobalSearchResults(query = query)
         val hits =
-            items.mapNotNull { item -> score(query, item)?.let { GlobalSearchHit(item, it) } }
-                .sortedWith(compareByDescending<GlobalSearchHit> { it.score }.thenBy { it.item.title }.thenBy { it.item.id })
+            items.mapNotNull { p -> score(normalizedQuery, p)?.let { PreparedHit(p, it) } }
+                .sortedWith(compareByDescending<PreparedHit> { it.score }.thenBy { it.item.title }.thenBy { it.item.item.id })
+                .map { GlobalSearchHit(it.item.item, it.score) }
         val byKind = hits.groupBy { it.item.kind }
         val groups =
             GlobalSearchKind.entries
@@ -119,4 +145,17 @@ object GlobalSearch {
                 .mapNotNull { kind -> byKind[kind]?.let { GlobalSearchGroup(kind, it.take(limitPerKind)) } }
         return GlobalSearchResults(query = query, groups = groups, counts = byKind.mapValues { it.value.size })
     }
+
+    private class PreparedHit(val item: PreparedItem, val score: Int)
 }
+
+/** A [SearchableItem] with its text normalised once (see [GlobalSearch.prepare]). */
+class PreparedItem internal constructor(
+    val item: SearchableItem,
+    internal val title: String,
+    internal val titleWords: List<String>,
+    internal val subtitle: String,
+    internal val subtitleWords: List<String>,
+    internal val keywords: List<String>,
+    internal val keywordWords: List<String>,
+)

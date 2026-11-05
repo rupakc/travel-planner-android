@@ -17,6 +17,7 @@ import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.globalsearch.GlobalSearch
 import io.github.rupakc.travelplanner.core.domain.globalsearch.GlobalSearchKind
 import io.github.rupakc.travelplanner.core.domain.globalsearch.GlobalSearchResults
+import io.github.rupakc.travelplanner.core.domain.globalsearch.PreparedItem
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SearchableItem
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
@@ -41,10 +42,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -100,19 +100,20 @@ class GlobalSearchViewModel
                 FeatureId.entries.filterNot { it in visible }.map { it.id }.toSet()
             }
 
+        /**
+         * Chat threads with their messages. One live query (threads, debounced so streaming writes don't
+         * rebuild the index per token); messages are read once per rebuild, not observed per thread.
+         */
         private val chatItems: Flow<List<SearchableItem>> =
-            chatRepository.threads.flatMapLatest { threads ->
-                if (threads.isEmpty()) {
-                    flowOf(emptyList())
-                } else {
-                    combine(threads.take(MAX_THREADS).map { t -> chatRepository.messages(t.id).map { chatItem(t, it) } }) { it.toList() }
-                }
-            }
+            chatRepository.threads
+                .debounce(CHAT_DEBOUNCE_MILLIS)
+                .mapLatest { threads -> threads.take(MAX_THREADS).map { t -> chatItem(t, chatRepository.messages(t.id).first()) } }
 
-        private val index: Flow<List<SearchableItem>> =
+        /** The index, normalised once per source change (not per keystroke). */
+        private val index: Flow<List<PreparedItem>> =
             combine(plansRepository.plans, chatItems, recentSearchesRepository.recent) { plans, chats, recent ->
-                plans.map(::tripItem) + chats + recent.map(::recentItem) + staticItems()
-            }
+                GlobalSearch.prepare(plans.map(::tripItem) + chats + recent.map(::recentItem) + staticItems())
+            }.flowOn(dispatchers.default)
 
         val state: StateFlow<GlobalSearchUiState> =
             combine(query.debounce(DEBOUNCE_MILLIS), filter, index, hidden) { q, f, items, hiddenIds ->
@@ -207,7 +208,7 @@ class GlobalSearchViewModel
                 kind = GlobalSearchKind.RECENT_SEARCH,
                 id = recent.id,
                 title = s.routeLabel(),
-                subtitle = listOfNotNull(s.departureDate, s.returnDate).joinToString(" – "),
+                subtitle = listOfNotNull(s.departureDate, s.returnDate).filter(String::isNotBlank).joinToString(" – ").ifEmpty { null },
                 keywords = s.interests,
             )
         }
@@ -226,6 +227,7 @@ class GlobalSearchViewModel
             const val DEBOUNCE_MILLIS = 150L
             const val STOP_TIMEOUT_MILLIS = 5_000L
             const val MAX_THREADS = 100
+            const val CHAT_DEBOUNCE_MILLIS = 300L
             const val PREVIEW_CHARS = 120
             const val MAX_MESSAGE_CHARS = 2_000
         }
