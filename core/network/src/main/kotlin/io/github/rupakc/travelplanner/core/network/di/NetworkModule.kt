@@ -14,6 +14,7 @@ import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.network.AuthInterceptor
 import io.github.rupakc.travelplanner.core.network.BaseUrlInterceptor
 import io.github.rupakc.travelplanner.core.network.PLACEHOLDER_BASE_URL
+import io.github.rupakc.travelplanner.core.network.RedactingHttpLogger
 import io.github.rupakc.travelplanner.core.network.api.AdminApi
 import io.github.rupakc.travelplanner.core.network.api.AuthApi
 import io.github.rupakc.travelplanner.core.network.api.DevicesApi
@@ -86,7 +87,8 @@ object NetworkModule {
             .apply {
                 if (buildInfo.debug) {
                     addInterceptor(
-                        HttpLoggingInterceptor().apply {
+                        // Share tokens and token-like path segments are masked (security review S-M3).
+                        HttpLoggingInterceptor(RedactingHttpLogger()).apply {
                             level = HttpLoggingInterceptor.Level.BASIC
                             redactHeader(AuthInterceptor.HEADER)
                         },

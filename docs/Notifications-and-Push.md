@@ -59,7 +59,7 @@ sequenceDiagram
   `PushAlertHandler`, which marks the id seen first (so the poller will not duplicate it) and posts the alert. A system-shown push from an older
   server carries only a web `link` extra; `MainActivity` maps it to the app deep link. The service is disabled in the manifest unless Firebase is configured.
 - Backend endpoints (travel-planner repo, [API-Reference](https://github.com/rupakc/travel-planner/blob/main/docs/API-Reference.md)):
-  `POST /api/devices` (register, call on every start and token refresh), `GET /api/devices`, `DELETE /api/devices/{id}`,
+  `POST /api/devices` (register; the app calls it only when its user/token/locale/server fingerprint changes, or weekly), `GET /api/devices`, `DELETE /api/devices/{id}`,
   `POST /api/devices/unregister` (sign-out, idempotent). A token travels only in a request body, never a URL. `/health` reports `push_configured`.
 - Backend config: `FCM_SERVICE_ACCOUNT_FILE` (service-account JSON). Without it alerts still appear in-app and by email.
 - Dead tokens are pruned by the backend only on definitive FCM rejections.

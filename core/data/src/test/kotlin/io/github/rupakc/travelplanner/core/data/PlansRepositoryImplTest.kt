@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
@@ -32,8 +33,13 @@ class PlansRepositoryImplTest {
     private class MemoryPlanDao : PlanDao {
         val rows = MutableStateFlow(mapOf<Long, CachedPlanEntity>())
 
+        @Volatile var observedOn: Thread? = null
+
         override fun observeAll(username: String): Flow<List<CachedPlanEntity>> =
-            rows.map { m -> m.values.filter { it.username == username }.sortedByDescending { it.updatedAt } }
+            rows.map { m ->
+                observedOn = Thread.currentThread()
+                m.values.filter { it.username == username }.sortedByDescending { it.updatedAt }
+            }
 
         override fun observe(id: Long): Flow<CachedPlanEntity?> = rows.map { it[id] }
 
@@ -47,6 +53,13 @@ class PlansRepositoryImplTest {
 
         override suspend fun deleteAllFor(username: String) = rows.update { m -> m.filterValues { it.username != username } }
 
+        var replaceCalls = 0
+
+        override suspend fun replaceAll(username: String, plans: List<CachedPlanEntity>) {
+            replaceCalls++
+            rows.update { m -> m.filterValues { it.username != username } + plans.associateBy { it.id } }
+        }
+
         override suspend fun clear() = rows.update { emptyMap() }
     }
 
@@ -58,9 +71,9 @@ class PlansRepositoryImplTest {
 
     @After fun tearDown() = server.close()
 
-    private fun repository(): PlansRepositoryImpl {
+    private fun TestScope.repository(): PlansRepositoryImpl {
         val net = TestNetwork(server.url("/").toString(), sessions, TestAppDispatchers(Dispatchers.IO))
-        return PlansRepositoryImpl(net.api(), dao, sessions)
+        return PlansRepositoryImpl(net.api(), dao, sessions, TestAppDispatchers(Dispatchers.IO), backgroundScope)
     }
 
     private fun cached(id: Long, username: String) =
@@ -95,5 +108,32 @@ class PlansRepositoryImplTest {
             server.enqueue(MockResponse.Builder().code(500).body("""{"detail":"boom"}""").build())
             repository().get(2)
             assertEquals("P2", dao.get(2)?.name)
+        }
+
+    private val listBody =
+        """[{"id":2,"username":"alice","name":"Lisbon","updated_at":"2026-11-02 00:00:00"},""" +
+            """{"id":3,"username":"alice","name":"Rome","updated_at":"2026-11-01 00:00:00"}]"""
+
+    @Test
+    fun `refresh skips the cache rewrite when the server list is unchanged`() =
+        runTest {
+            repeat(2) { server.enqueue(MockResponse.Builder().code(200).body(listBody).build()) }
+            val repo = repository()
+            repo.refresh()
+            assertEquals(1, dao.replaceCalls)
+            assertEquals(listOf("Lisbon", "Rome"), repo.plans.first().map { it.name })
+            repo.refresh()
+            assertEquals(1, dao.replaceCalls)
+            server.enqueue(MockResponse.Builder().code(200).body(listBody.replace("Rome", "Roma")).build())
+            repo.refresh()
+            assertEquals(2, dao.replaceCalls)
+        }
+
+    @Test
+    fun `plans are read and decoded off the collector's thread`() =
+        runTest {
+            dao.upsert(cached(2, TestUser.username))
+            assertEquals("P2", repository().plans.first().single().name)
+            assertTrue(dao.observedOn != null && dao.observedOn != Thread.currentThread())
         }
 }

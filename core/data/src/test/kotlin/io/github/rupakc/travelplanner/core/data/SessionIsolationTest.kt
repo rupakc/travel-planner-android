@@ -131,6 +131,28 @@ class SessionIsolationTest {
         }
 
     @Test
+    fun `logout deletes the FCM token even when the unregister call never arrives, both bounded`() =
+        runTest {
+            val store = FakeSessionStore(Session("t", User("alice")))
+            val devices = mockk<DevicesApi>()
+            coEvery { devices.unregister(any()) } coAnswers { awaitCancellation() }
+            var deleted = 0
+            val push =
+                object : PushTokenSource {
+                    override suspend fun token() = "fcm-token"
+
+                    override suspend fun delete() {
+                        deleted++
+                        awaitCancellation()
+                    }
+                }
+            auth(store, CountingCleaner(), devicesApi = devices, push = push).logout()
+            assertEquals(1, deleted)
+            assertTrue("took $currentTime ms", currentTime <= AuthRepositoryImpl.UNREGISTER_TIMEOUT_MS + AuthRepositoryImpl.DELETE_TOKEN_TIMEOUT_MS)
+            assertNull(store.current())
+        }
+
+    @Test
     fun `a 401 signs out but keeps the user's data`() =
         runTest {
             val events = AuthEvents()

@@ -96,15 +96,20 @@ class AuthRepositoryImpl
 
         override suspend fun logout() {
             // Best effort and bounded: a dead network must not keep the user signed in.
+            val push = pushTokenSource.orElse(null)
             withTimeoutOrNull(UNREGISTER_TIMEOUT_MS) {
-                val token = if (pushTokenSource.isPresent) pushTokenSource.get().token() else null
+                val token = push?.token()
                 if (token != null) apiCall { devicesApi.unregister(UnregisterDeviceRequest(token)) }
             }
+            // Even if the unregister never arrived, a deleted token is pruned by the server on its next send,
+            // so this phone stops receiving the user's alerts (API review I1).
+            if (push != null) withTimeoutOrNull(DELETE_TOKEN_TIMEOUT_MS) { push.delete() }
             sessionStore.clear()
             sessionCleaner.clearUserData()
         }
 
         companion object {
-            const val UNREGISTER_TIMEOUT_MS = 5_000L
+            const val UNREGISTER_TIMEOUT_MS = 3_000L
+            const val DELETE_TOKEN_TIMEOUT_MS = 2_000L
         }
     }
