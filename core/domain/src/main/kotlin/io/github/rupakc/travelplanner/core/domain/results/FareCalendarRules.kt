@@ -74,7 +74,14 @@ object FareCalendarRules {
 
     /** Web `priceInsightsChip(...).text` in English: "Fares are low right now · typical $420–$610". */
     fun priceInsightsText(insight: PriceInsight): String {
-        val range = if (insight.typicalLow != null && insight.typicalHigh != null) " · typical ${formatUsd(insight.typicalLow)}–${formatUsd(insight.typicalHigh)}" else ""
+        val range =
+            if (insight.typicalLow != null &&
+                insight.typicalHigh != null
+            ) {
+                " · typical ${formatUsd(insight.typicalLow)}–${formatUsd(insight.typicalHigh)}"
+            } else {
+                ""
+            }
         return "Fares are ${insight.level.wire} right now$range"
     }
 

@@ -8,13 +8,13 @@ import io.github.rupakc.travelplanner.core.domain.results.with
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
 import io.github.rupakc.travelplanner.core.model.plan.SelectionKeys
+import kotlin.random.Random
 import kotlinx.serialization.json.JsonArray
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.random.Random
 
 /** Every case of `frontend/src/utils/planHelpers.test.js` (names: "describe - it"), plus budget status and plan name. */
 class PlanHelpersTest {

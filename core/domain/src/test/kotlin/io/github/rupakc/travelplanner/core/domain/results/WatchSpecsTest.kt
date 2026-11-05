@@ -1,4 +1,4 @@
-@file:Suppress("MaxLineLength") // fixtures ported verbatim from the web tests
+@file:Suppress("MaxLineLength", "ktlint:standard:max-line-length") // fixtures ported verbatim from the web tests
 
 package io.github.rupakc.travelplanner.core.domain.results
 
@@ -6,12 +6,12 @@ import io.github.rupakc.travelplanner.core.model.alerts.ActivityWatchSpec
 import io.github.rupakc.travelplanner.core.model.alerts.HotelWatchSpec
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.Hotel
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalDate
 
 /**
  * The cases of `hotelWatch.test.js`, `activityWatch.test.js` and `fareWatch.test.js` for the
@@ -65,7 +65,14 @@ class WatchSpecsTest {
 
     @Test
     fun `hotelWatch - hotelStay - uses the city's own nights on a multi-city trip`() {
-        val multi = searchSd.copy(destination = "Paris", destinations = listOf("Paris, France", "Rome, Italy", "Madrid"), departureDate = "2026-12-01", returnDate = "2026-12-10", destinationNights = listOf(2, null, null))
+        val multi =
+            searchSd.copy(
+                destination = "Paris",
+                destinations = listOf("Paris, France", "Rome, Italy", "Madrid"),
+                departureDate = "2026-12-01",
+                returnDate = "2026-12-10",
+                destinationNights = listOf(2, null, null),
+            )
         assertEquals(Triple("2026-12-01", "2026-12-03", "Paris"), stay(hotel("city" to "Paris"), multi))
         assertEquals(Triple("2026-12-03", "2026-12-07", "rome"), stay(hotel("city" to "rome"), multi))
         assertEquals(Triple("2026-12-07", "2026-12-10", "Madrid, Spain"), stay(hotel("city" to "Madrid, Spain"), multi))
@@ -76,13 +83,25 @@ class WatchSpecsTest {
 
     @Test
     fun `hotelWatch - hotelWatchSpec - builds the spec the hotel source matches, with the AI total as an estimate`() {
-        assertEquals(HotelWatchSpec("Lumen Hotel", "Lisbon, Portugal", "2026-12-10", "2026-12-14", adults = 2, rooms = 1, estimateTotal = 410.0), WatchSpecs.hotelWatchSpec(hotel(), searchSd, today))
+        assertEquals(
+            HotelWatchSpec("Lumen Hotel", "Lisbon, Portugal", "2026-12-10", "2026-12-14", adults = 2, rooms = 1, estimateTotal = 410.0),
+            WatchSpecs.hotelWatchSpec(hotel(), searchSd, today),
+        )
     }
 
     @Test
     fun `hotelWatch - hotelWatchSpec - estimates the total from the nightly price when there is none`() {
-        assertEquals(360.0, WatchSpecs.hotelWatchSpec(hotel("name" to "X", "price_per_night_usd" to 90, "total_price_usd" to UNDEFINED), searchSd, today)!!.estimateTotal)
-        assertNull(WatchSpecs.hotelWatchSpec(hotel("name" to "X", "price_per_night_usd" to UNDEFINED, "total_price_usd" to UNDEFINED), searchSd, today)!!.estimateTotal)
+        assertEquals(
+            360.0,
+            WatchSpecs.hotelWatchSpec(hotel("name" to "X", "price_per_night_usd" to 90, "total_price_usd" to UNDEFINED), searchSd, today)!!.estimateTotal,
+        )
+        assertNull(
+            WatchSpecs.hotelWatchSpec(
+                hotel("name" to "X", "price_per_night_usd" to UNDEFINED, "total_price_usd" to UNDEFINED),
+                searchSd,
+                today,
+            )!!.estimateTotal,
+        )
     }
 
     @Test
@@ -118,7 +137,10 @@ class WatchSpecsTest {
                 "days" to
                     listOf(
                         mapOf("date" to "2026-12-10", "slots" to listOf(mapOf("activity" to "Arrive in Lisbon"))),
-                        mapOf("date" to "2026-12-11", "slots" to listOf(mapOf("activity" to "Small group walking tour of Belém"), mapOf("activity" to "Fado night"))),
+                        mapOf(
+                            "date" to "2026-12-11",
+                            "slots" to listOf(mapOf("activity" to "Small group walking tour of Belém"), mapOf("activity" to "Fado night")),
+                        ),
                     ),
             ),
         )
@@ -145,7 +167,10 @@ class WatchSpecsTest {
 
     @Test
     fun `activityWatch - activitySpec - prefers the activity's own city and leaves out unknown or past dates`() {
-        assertEquals(ActivityWatchSpec("Tram 28", "Porto", travellers = 2), WatchSpecs.activitySpec(act("name" to "Tram 28", "city" to "Porto"), tripSd, itinerary, now))
+        assertEquals(
+            ActivityWatchSpec("Tram 28", "Porto", travellers = 2),
+            WatchSpecs.activitySpec(act("name" to "Tram 28", "city" to "Porto"), tripSd, itinerary, now),
+        )
         assertNull(WatchSpecs.activitySpec(act("name" to "Fado night"), tripSd, itinerary, LocalDate.of(2026, 12, 20))!!.date)
     }
 

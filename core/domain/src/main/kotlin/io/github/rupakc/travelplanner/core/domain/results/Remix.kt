@@ -112,5 +112,12 @@ data class RemixMetrics(
 /** One before/after row; [improved] null when unchanged. */
 data class MetricDiff(val metric: RemixMetric, val before: Double, val after: Double, val delta: Double, val improved: Boolean?) {
     /** Web `direction`: same / down / up. */
-    val direction: String get() = if (delta == 0.0) "same" else if (delta < 0) "down" else "up"
+    val direction: String get() =
+        if (delta == 0.0) {
+            "same"
+        } else if (delta < 0) {
+            "down"
+        } else {
+            "up"
+        }
 }

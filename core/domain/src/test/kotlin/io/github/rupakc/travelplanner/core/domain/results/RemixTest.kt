@@ -1,3 +1,5 @@
+@file:Suppress("MaxLineLength", "ktlint:standard:max-line-length") // fixtures ported verbatim from the web tests
+
 package io.github.rupakc.travelplanner.core.domain.results
 
 import org.junit.Assert.assertEquals

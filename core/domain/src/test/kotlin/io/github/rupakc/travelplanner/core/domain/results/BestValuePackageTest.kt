@@ -1,4 +1,4 @@
-@file:Suppress("MaxLineLength", "LargeClass") // fixtures ported verbatim from the web tests
+@file:Suppress("MaxLineLength", "LargeClass", "ktlint:standard:max-line-length") // fixtures ported verbatim from the web tests
 
 package io.github.rupakc.travelplanner.core.domain.results
 
@@ -26,7 +26,13 @@ class BestValuePackageTest {
             "return" to mapOf("stops" to 0, "duration_minutes" to 600),
         ).with(*over)
 
-    private fun hotel(vararg over: Pair<String, Any?>) = obj("name" to "Hotel A", "star_rating" to 3, "price_per_night_usd" to 100, "review_score" to 8).with(*over)
+    private fun hotel(vararg over: Pair<String, Any?>) =
+        obj(
+            "name" to "Hotel A",
+            "star_rating" to 3,
+            "price_per_night_usd" to 100,
+            "review_score" to 8,
+        ).with(*over)
 
     private fun activity(vararg over: Pair<String, Any?>) = obj("name" to "Act", "price_usd" to 10, "similarity_score" to 0.4, "city" to "Paris").with(*over)
 
@@ -51,14 +57,29 @@ class BestValuePackageTest {
 
     private fun money(n: Number) = "$" + "%,d".format(Math.round(n.toDouble()))
 
-    private fun dur(mins: Int) = listOfNotNull((mins / 60).takeIf { it > 0 }?.let { "${it}h" }, (mins % 60).takeIf { it > 0 }?.let { "${it}m" }).joinToString(" ")
+    private fun dur(mins: Int) =
+        listOfNotNull(
+            (mins / 60).takeIf {
+                it > 0
+            }?.let { "${it}h" },
+            (mins % 60).takeIf { it > 0 }?.let { "${it}m" },
+        ).joinToString(" ")
 
     /** The web's English reason strings (the app renders the same copy from strings.xml). */
     private fun en(r: PickReason): String =
         when (r) {
-            PickReason.CheapestFare -> "Cheapest fare"
-            is PickReason.FewerStops -> "Fewer stops for ${money(r.extra)} more than the cheapest fare"
-            is PickReason.SavesTime -> "Saves ${dur(r.minutes)} of travel for ${money(r.extra)} more than the cheapest fare"
+            PickReason.CheapestFare -> {
+                "Cheapest fare"
+            }
+
+            is PickReason.FewerStops -> {
+                "Fewer stops for ${money(r.extra)} more than the cheapest fare"
+            }
+
+            is PickReason.SavesTime -> {
+                "Saves ${dur(r.minutes)} of travel for ${money(r.extra)} more than the cheapest fare"
+            }
+
             is PickReason.BestReviewed -> {
                 val label =
                     when (r.stars) {
@@ -68,23 +89,56 @@ class BestValuePackageTest {
                     }
                 r.city?.let { "$label · $it" } ?: label
             }
-            PickReason.CheaperStay -> "Cheaper stay to fit your budget"
+
+            PickReason.CheaperStay -> {
+                "Cheaper stay to fit your budget"
+            }
+
             is PickReason.ActivityPrice -> {
-                val base = if (r.price == 0.0) "Free" else if (r.typical) "${money(r.price)} · at or below the typical price here" else money(r.price)
+                val base =
+                    if (r.price == 0.0) {
+                        "Free"
+                    } else if (r.typical) {
+                        "${money(r.price)} · at or below the typical price here"
+                    } else {
+                        money(r.price)
+                    }
                 if (r.matchesInterests) "$base · matches your interests" else base
             }
-            is PickReason.TourNote -> r.priceNote ?: "Free walking tour"
-            PickReason.FreeEntry -> "Free entry"
-            is PickReason.CoversTrip -> "Covers your ${r.days}-day trip"
-            PickReason.CheapestPlan -> "Cheapest plan"
+
+            is PickReason.TourNote -> {
+                r.priceNote ?: "Free walking tour"
+            }
+
+            PickReason.FreeEntry -> {
+                "Free entry"
+            }
+
+            is PickReason.CoversTrip -> {
+                "Covers your ${r.days}-day trip"
+            }
+
+            PickReason.CheapestPlan -> {
+                "Cheapest plan"
+            }
         }
 
     // ── flight pick ──
 
     @Test
     fun `flight pick - prefers fewer stops within 15 percent of the cheapest fare`() {
-        val twoStop = flight("flight_number" to "A", "price_usd" to 480, "outbound" to mapOf("airline" to "X", "flight_number" to "A", "stops" to 2, "duration_minutes" to 900))
-        val oneStop = flight("flight_number" to "B", "price_usd" to 500, "outbound" to mapOf("airline" to "Y", "flight_number" to "B", "stops" to 1, "duration_minutes" to 700))
+        val twoStop =
+            flight(
+                "flight_number" to "A",
+                "price_usd" to 480,
+                "outbound" to mapOf("airline" to "X", "flight_number" to "A", "stops" to 2, "duration_minutes" to 900),
+            )
+        val oneStop =
+            flight(
+                "flight_number" to "B",
+                "price_usd" to 500,
+                "outbound" to mapOf("airline" to "Y", "flight_number" to "B", "stops" to 1, "duration_minutes" to 700),
+            )
         val pkg = build(obj(*fl(twoStop, oneStop)))!!
         assertEquals("B", pkg.flightNo)
         assertEquals("Fewer stops for $20 more than the cheapest fare", pkg.reason(PackageItemType.FLIGHT))
@@ -101,7 +155,13 @@ class BestValuePackageTest {
 
     @Test
     fun `flight pick - drops estimates when a real fare exists, keeps them otherwise`() {
-        val est = flight("flight_number" to "E", "price_usd" to 300, "source" to "estimate", "outbound" to mapOf("airline" to "T", "flight_number" to "E", "stops" to 0))
+        val est =
+            flight(
+                "flight_number" to "E",
+                "price_usd" to 300,
+                "source" to "estimate",
+                "outbound" to mapOf("airline" to "T", "flight_number" to "E", "stops" to 0),
+            )
         val real = flight("flight_number" to "R", "price_usd" to 500, "outbound" to mapOf("airline" to "T", "flight_number" to "R", "stops" to 0))
         assertEquals("R", build(obj(*fl(est, real)))!!.flightNo)
         assertEquals("E", build(obj(*fl(est)))!!.flightNo)
@@ -122,7 +182,11 @@ class BestValuePackageTest {
     }
 
     private fun direct(n: String, price: Number, out: Int, ret: Int) =
-        flight("price_usd" to price, "outbound" to mapOf("airline" to "X", "flight_number" to n, "stops" to 0, "duration_minutes" to out), "return" to mapOf("stops" to 0, "duration_minutes" to ret))
+        flight(
+            "price_usd" to price,
+            "outbound" to mapOf("airline" to "X", "flight_number" to n, "stops" to 0, "duration_minutes" to out),
+            "return" to mapOf("stops" to 0, "duration_minutes" to ret),
+        )
 
     @Test
     fun `flight pick - does not chase 5 minutes - 169 beats 183 when both are direct`() {
@@ -132,7 +196,11 @@ class BestValuePackageTest {
     }
 
     private fun oneStop(n: String, price: Number, dur: Int?) =
-        flight("price_usd" to price, "outbound" to mapOf("airline" to "X", "flight_number" to n, "stops" to 1, "duration_minutes" to dur), "return" to UNDEFINED)
+        flight(
+            "price_usd" to price,
+            "outbound" to mapOf("airline" to "X", "flight_number" to n, "stops" to 1, "duration_minutes" to dur),
+            "return" to UNDEFINED,
+        )
 
     @Test
     fun `flight pick - takes a pricier same-stops fare that saves 90+ minutes`() {
@@ -186,7 +254,18 @@ class BestValuePackageTest {
 
     @Test
     fun `hotel pick - prefers 3 star with the best review score`() {
-        val pkg = build(hotels(hotel("name" to "Low", "review_score" to 7), hotel("name" to "Best", "review_score" to 9), hotel("name" to "Four", "star_rating" to 4, "review_score" to 10)))!!
+        val pkg =
+            build(
+                hotels(
+                    hotel("name" to "Low", "review_score" to 7),
+                    hotel("name" to "Best", "review_score" to 9),
+                    hotel(
+                        "name" to "Four",
+                        "star_rating" to 4,
+                        "review_score" to 10,
+                    ),
+                ),
+            )!!
         assertEquals("Best", pkg.selections.hotel?.name)
         assertEquals("Mid-range (3★), best-reviewed in its class", pkg.reason(PackageItemType.HOTEL))
     }
@@ -265,14 +344,32 @@ class BestValuePackageTest {
 
     @Test
     fun `activities - never picks unknown prices, zero price is Free`() {
-        val pkg = build(acts(listOf(activity("name" to "N", "price_usd" to null), activity("name" to "Z", "price_usd" to 0), activity("name" to "V", "price_usd" to "varies"))))!!
+        val pkg =
+            build(
+                acts(
+                    listOf(
+                        activity("name" to "N", "price_usd" to null),
+                        activity("name" to "Z", "price_usd" to 0),
+                        activity(
+                            "name" to "V",
+                            "price_usd" to "varies",
+                        ),
+                    ),
+                ),
+            )!!
         assertEquals(listOf("Z"), pkg.activityNames)
         assertTrue(pkg.reason(PackageItemType.ACTIVITIES).startsWith("Free"))
     }
 
     @Test
     fun `activities - keeps the 30 dollar floor for the cap, including string prices`() {
-        val list = listOf(activity("name" to "S", "price_usd" to "45"), activity("name" to "T", "price_usd" to 60), activity("name" to "U", "price_usd" to 90), activity("name" to "OK", "price_usd" to "12"))
+        val list =
+            listOf(
+                activity("name" to "S", "price_usd" to "45"),
+                activity("name" to "T", "price_usd" to 60),
+                activity("name" to "U", "price_usd" to 90),
+                activity("name" to "OK", "price_usd" to "12"),
+            )
         val pkg = build(acts(list))!!
         assertEquals(listOf("OK", "S"), pkg.activityNames)
         assertEquals("$12", pkg.reason(PackageItemType.ACTIVITIES))
@@ -287,7 +384,14 @@ class BestValuePackageTest {
         assertEquals(listOf("P39", "P45"), pkg.activityNames)
         val four = build(acts(prices.mapIndexed { i, p -> activity("name" to "P$p", "price_usd" to p, "city" to "C$i") }))!!
         assertTrue(four.selections.activities.all { (it.priceUsd ?: 0.0) <= 59 })
-        val wide = build(acts(list.map { a -> a.with("similarity_score" to if (a["price_usd"].toString() == "55" || a["price_usd"].toString() == "59") 0.9 else 0.1) }))!!
+        val wide =
+            build(
+                acts(
+                    list.map { a ->
+                        a.with("similarity_score" to if (a["price_usd"].toString() == "55" || a["price_usd"].toString() == "59") 0.9 else 0.1)
+                    },
+                ),
+            )!!
         assertEquals(listOf("P39", "P45"), wide.activityNames.mapNotNull { it }.sorted())
         assertEquals("$39 · at or below the typical price here", pkg.reason(PackageItemType.ACTIVITIES))
     }
@@ -300,7 +404,16 @@ class BestValuePackageTest {
 
     @Test
     fun `activities - caps at 2 per city and 4 overall, best similarity first`() {
-        val list = listOf("A", "B", "C").flatMap { city -> (0 until 4).map { i -> activity("name" to "$city$i", "city" to city, "similarity_score" to 0.9 - i * 0.1) } }
+        val list =
+            listOf("A", "B", "C").flatMap { city ->
+                (0 until 4).map { i ->
+                    activity(
+                        "name" to "$city$i",
+                        "city" to city,
+                        "similarity_score" to 0.9 - i * 0.1,
+                    )
+                }
+            }
         assertEquals(listOf("A0", "B0", "C0", "A1"), build(acts(list))!!.activityNames)
         assertEquals(listOf("A0", "A1"), build(acts(list.filter { it["city"].toString() == "\"A\"" }))!!.activityNames)
     }
@@ -354,7 +467,15 @@ class BestValuePackageTest {
 
     @Test
     fun `sim pick - prefers a plan covering the trip over a cheaper short one`() {
-        val pkg = withSim(sim("plan_name" to "Short", "price_usd" to 5, "validity_days" to 7), sim("plan_name" to "Long", "price_usd" to 20, "validity_days" to 30))
+        val pkg =
+            withSim(
+                sim("plan_name" to "Short", "price_usd" to 5, "validity_days" to 7),
+                sim(
+                    "plan_name" to "Long",
+                    "price_usd" to 20,
+                    "validity_days" to 30,
+                ),
+            )
         assertEquals("Long", pkg.selections.sim?.planName)
         assertEquals("Covers your 10-day trip", pkg.reason(PackageItemType.SIM))
     }
@@ -368,7 +489,12 @@ class BestValuePackageTest {
 
     @Test
     fun `sim pick - ignores unpriced plans and treats missing dates as unknown trip length`() {
-        val o = obj(*fl(flight()), "sim" to mapOf("plans" to listOf(sim("plan_name" to "F", "price_usd" to "n/a"), sim("plan_name" to "O", "price_usd" to 8, "validity_days" to 3))))
+        val o =
+            obj(
+                *fl(flight()),
+                "sim" to
+                    mapOf("plans" to listOf(sim("plan_name" to "F", "price_usd" to "n/a"), sim("plan_name" to "O", "price_usd" to 8, "validity_days" to 3))),
+            )
         val pkg = BestValuePackage.build(results(o), search("2026-04-01", null, null))!!
         assertEquals("O", pkg.selections.sim?.planName)
         assertEquals("Cheapest plan", pkg.reason(PackageItemType.SIM))
@@ -387,7 +513,15 @@ class BestValuePackageTest {
     @Test
     fun `package assembly - returns null without a flight and a hotel`() {
         assertNull(build(obj()))
-        assertNull(build(obj("flights" to mapOf("error" to "x"), "hotels" to mapOf("error" to "y"), "activities" to mapOf("results" to listOf(activity("price_usd" to 0))))))
+        assertNull(
+            build(
+                obj(
+                    "flights" to mapOf("error" to "x"),
+                    "hotels" to mapOf("error" to "y"),
+                    "activities" to mapOf("results" to listOf(activity("price_usd" to 0))),
+                ),
+            ),
+        )
         assertNull(build(null))
     }
 
@@ -400,14 +534,32 @@ class BestValuePackageTest {
     fun `package assembly - selections only hold the package keys`() {
         val s = build(obj(*fl(flight())))!!.selections
         // Typed selections: every other category stays empty.
-        assertEquals(PlanSelections(flight = s.flight, flights = s.flights, hotel = s.hotel, activities = s.activities, placesToSee = s.placesToSee, walkingTours = s.walkingTours, sim = s.sim), s)
+        assertEquals(
+            PlanSelections(
+                flight = s.flight,
+                flights = s.flights,
+                hotel = s.hotel,
+                activities = s.activities,
+                placesToSee = s.placesToSee,
+                walkingTours = s.walkingTours,
+                sim = s.sim,
+            ),
+            s,
+        )
         assertTrue(s.tips.isEmpty() && s.events.isEmpty() && s.gettingAround.isEmpty() && s.itinerarySlots.isEmpty() && s.packingList == null)
     }
 
     @Test
     fun `package assembly - total equals computePlanCost, is finite, and budget status matches`() {
         val sd = searchData.copy(budgetUsd = 5000.0)
-        val pkg = build(obj(*fl(flight("price_usd" to "500")), "hotels" to mapOf("results" to listOf(hotel("price_per_night_usd" to "varies"), hotel("name" to "H2")))), sd)!!
+        val pkg =
+            build(
+                obj(
+                    *fl(flight("price_usd" to "500")),
+                    "hotels" to mapOf("results" to listOf(hotel("price_per_night_usd" to "varies"), hotel("name" to "H2"))),
+                ),
+                sd,
+            )!!
         assertEquals(computePlanCost(pkg.selections, sd), pkg.total, 0.0)
         assertTrue(pkg.total.isFinite())
         assertEquals(false, pkg.budget?.over)
@@ -432,7 +584,12 @@ class BestValuePackageTest {
         val pkg = full()
         val before =
             selectionsOf(
-                obj("hotel" to hotel("name" to "Old"), "activities" to listOf(activity("name" to "Mine"), activity("name" to "A1")), "tips" to listOf(mapOf("title" to "t")), "itinerary_notes" to mapOf("1" to "n")),
+                obj(
+                    "hotel" to hotel("name" to "Old"),
+                    "activities" to listOf(activity("name" to "Mine"), activity("name" to "A1")),
+                    "tips" to listOf(mapOf("title" to "t")),
+                    "itinerary_notes" to mapOf("1" to "n"),
+                ),
             )
         val snapshot = before.copy()
         val after = BestValuePackage.apply(before, pkg)
@@ -457,7 +614,12 @@ class BestValuePackageTest {
         assertEquals(countOf(once), countOf(BestValuePackage.apply(once, pkg)))
     }
 
-    private fun mk(i: Int, p: Number, a: String, n: String = "X") = mapOf("leg_index" to i, "price_usd" to p, "outbound" to mapOf("airline" to a, "flight_number" to n, "stops" to 0))
+    private fun mk(i: Int, p: Number, a: String, n: String = "X") =
+        mapOf(
+            "leg_index" to i,
+            "price_usd" to p,
+            "outbound" to mapOf("airline" to a, "flight_number" to n, "stops" to 0),
+        )
 
     private fun legs(vararg legs: Pair<Int, List<Any>>) = obj("flights" to mapOf("legs" to legs.map { (i, r) -> mapOf("leg_index" to i, "results" to r) }))
 
@@ -471,7 +633,14 @@ class BestValuePackageTest {
     // ── isPackageApplied ──
 
     private fun appliedPkg() =
-        build(obj(*fl(flight()), "hotels" to mapOf("results" to listOf(hotel())), "activities" to mapOf("results" to listOf(activity("name" to "A1"))), "sim" to mapOf("plans" to listOf(sim()))))!!
+        build(
+            obj(
+                *fl(flight()),
+                "hotels" to mapOf("results" to listOf(hotel())),
+                "activities" to mapOf("results" to listOf(activity("name" to "A1"))),
+                "sim" to mapOf("plans" to listOf(sim())),
+            ),
+        )!!
 
     @Test
     fun `isPackageApplied - true right after apply, false after removing one item`() {
@@ -494,7 +663,15 @@ class BestValuePackageTest {
 
     // ── packageConflicts ──
 
-    private val conflictPkg by lazy { build(obj(*fl(flight()), "hotels" to mapOf("results" to listOf(hotel("name" to "Mine"))), "sim" to mapOf("plans" to listOf(sim()))))!! }
+    private val conflictPkg by lazy {
+        build(
+            obj(
+                *fl(flight()),
+                "hotels" to mapOf("results" to listOf(hotel("name" to "Mine"))),
+                "sim" to mapOf("plans" to listOf(sim())),
+            ),
+        )!!
+    }
 
     @Test
     fun `packageConflicts - reports a different hotel`() {
@@ -517,14 +694,27 @@ class BestValuePackageTest {
 
     @Test
     fun `fix round 1 - whitespace and array prices are unknown, not free`() {
-        val pkg = build(obj(*fl(flight()), "activities" to mapOf("results" to listOf(activity("name" to "W", "price_usd" to " "), activity("name" to "Arr", "price_usd" to emptyList<Any>())))))!!
+        val pkg =
+            build(
+                obj(
+                    *fl(flight()),
+                    "activities" to
+                        mapOf("results" to listOf(activity("name" to "W", "price_usd" to " "), activity("name" to "Arr", "price_usd" to emptyList<Any>()))),
+                ),
+            )!!
         assertEquals(emptyList<Any>(), pkg.selections.activities)
         assertNull(build(obj(*fl(flight("price_usd" to " ")))))
     }
 
     @Test
     fun `fix round 1 - nameless activities are skipped and package duplicates are applied once`() {
-        val pkg = build(obj(*fl(flight()), "activities" to mapOf("results" to listOf(activity("name" to UNDEFINED), activity("name" to "D"), activity("name" to "D")))))!!
+        val pkg =
+            build(
+                obj(
+                    *fl(flight()),
+                    "activities" to mapOf("results" to listOf(activity("name" to UNDEFINED), activity("name" to "D"), activity("name" to "D"))),
+                ),
+            )!!
         assertEquals(listOf("D", "D"), pkg.activityNames)
         val applied = BestValuePackage.apply(PlanSelections.EMPTY, pkg)
         assertEquals(1, applied.activities.size)
@@ -560,14 +750,21 @@ class BestValuePackageTest {
     fun `fix round 1 - applyPackage tolerates null selections`() {
         // Typed selections are never null in Kotlin; the empty plan is the equivalent input.
         val l = mk(0, 80, "C", "3")
-        val pkg = build(obj("flights" to mapOf("legs" to listOf(mapOf("leg_index" to 0, "results" to listOf(l))), "results" to listOf(l)), "activities" to mapOf("results" to listOf(activity("name" to "N")))))!!
+        val pkg =
+            build(
+                obj(
+                    "flights" to mapOf("legs" to listOf(mapOf("leg_index" to 0, "results" to listOf(l))), "results" to listOf(l)),
+                    "activities" to mapOf("results" to listOf(activity("name" to "N"))),
+                ),
+            )!!
         assertEquals(listOf(toJson(l)), BestValuePackage.apply(PlanSelections.EMPTY, pkg).flights.map { it.raw })
     }
 
     @Test
     fun `fix round 1 - non-array leg results does not throw`() {
         val l1 = mk(1, 80, "C", "3")
-        val pkg = build(obj("flights" to mapOf("legs" to listOf(mapOf("leg_index" to 0, "results" to "oops"), mapOf("leg_index" to 1, "results" to listOf(l1))))))
+        val pkg =
+            build(obj("flights" to mapOf("legs" to listOf(mapOf("leg_index" to 0, "results" to "oops"), mapOf("leg_index" to 1, "results" to listOf(l1))))))
         // The tolerant decoder drops the malformed leg list, as the web treats it as empty.
         assertEquals(listOf("C"), pkg?.selections?.flights?.map { it.airlineName } ?: listOf("C"))
     }
@@ -581,7 +778,11 @@ class BestValuePackageTest {
 
     @Test
     fun `multi-city first stop matching - (a) IATA destinations - uses flights legs 0 to`() {
-        val o = obj("flights" to mapOf("legs" to listOf(mapOf("leg_index" to 0, "to" to "Lisbon, Portugal", "results" to listOf(flight("leg_index" to 0))))), "hotels" to mapOf("results" to listOf(opo, lis)))
+        val o =
+            obj(
+                "flights" to mapOf("legs" to listOf(mapOf("leg_index" to 0, "to" to "Lisbon, Portugal", "results" to listOf(flight("leg_index" to 0))))),
+                "hotels" to mapOf("results" to listOf(opo, lis)),
+            )
         val pkg = build(o, sd("LIS", "OPO"))!!
         assertEquals("Lis", pkg.selections.hotel?.name)
         assertTrue(pkg.reason(PackageItemType.HOTEL).contains("Lisbon"))
@@ -605,7 +806,8 @@ class BestValuePackageTest {
         val cheapLis = hotel("name" to "CheapLis", "city" to "Lisbon", "star_rating" to 2, "price_per_night_usd" to 40, "review_score" to 8)
         val o =
             obj(
-                "flights" to mapOf("legs" to listOf(mapOf("leg_index" to 0, "to" to "Lisbon", "results" to listOf(flight("leg_index" to 0, "price_usd" to 500))))),
+                "flights" to
+                    mapOf("legs" to listOf(mapOf("leg_index" to 0, "to" to "Lisbon", "results" to listOf(flight("leg_index" to 0, "price_usd" to 500))))),
                 "hotels" to mapOf("results" to listOf(hotel("name" to "BigLis", "city" to "Lisbon", "price_per_night_usd" to 300), cheapOpo, cheapLis)),
             )
         assertEquals("CheapLis", build(o, sd("LIS", "OPO").copy(budgetUsd = 1000.0))!!.selections.hotel?.name)

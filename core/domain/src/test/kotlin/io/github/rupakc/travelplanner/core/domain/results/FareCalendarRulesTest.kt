@@ -1,10 +1,12 @@
+@file:Suppress("MaxLineLength", "ktlint:standard:max-line-length") // fixtures ported verbatim from the web tests
+
 package io.github.rupakc.travelplanner.core.domain.results
 
 import io.github.rupakc.travelplanner.core.model.search.FareCalendarDate
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import java.time.LocalDate
 
 /** Every case of `frontend/src/utils/fareCalendar.test.js` (names: "describe - it"). */
 class FareCalendarRulesTest {
@@ -89,7 +91,10 @@ class FareCalendarRulesTest {
         val low = chip("""{"price_level":"low","typical_price_range":[420,610]}""")!!
         assertEquals(PriceLevel.LOW, low.level)
         assertEquals("Fares are low right now · typical $420–$610", FareCalendarRules.priceInsightsText(low))
-        assertEquals("Fares are high right now · typical $1,420–$1,610", FareCalendarRules.priceInsightsText(chip("""{"price_level":"high","typical_price_range":[1420,1610]}""")!!))
+        assertEquals(
+            "Fares are high right now · typical $1,420–$1,610",
+            FareCalendarRules.priceInsightsText(chip("""{"price_level":"high","typical_price_range":[1420,1610]}""")!!),
+        )
     }
 
     @Test

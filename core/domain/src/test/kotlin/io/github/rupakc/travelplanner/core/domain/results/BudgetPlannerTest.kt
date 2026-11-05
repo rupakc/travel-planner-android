@@ -1,4 +1,4 @@
-@file:Suppress("MaxLineLength") // fixtures ported verbatim from the web tests
+@file:Suppress("MaxLineLength", "ktlint:standard:max-line-length") // fixtures ported verbatim from the web tests
 
 package io.github.rupakc.travelplanner.core.domain.results
 
@@ -160,7 +160,12 @@ class BudgetPlannerTest {
     @Test
     fun `defaultAllocation - fit comparisons tolerate floating-point noise`() {
         // 0.1 + 0.2 = 0.30000000000000004 > 0.3
-        val res = r("flights" to fl(flight("F", 0.1 + 0.2)), "hotels" to hl(hotel("H", (0.1 + 0.2) / 7)), "activities" to mapOf("results" to listOf(activity("A", 0.1 + 0.2, 1.0))))
+        val res =
+            r(
+                "flights" to fl(flight("F", 0.1 + 0.2)),
+                "hotels" to hl(hotel("H", (0.1 + 0.2) / 7)),
+                "activities" to mapOf("results" to listOf(activity("A", 0.1 + 0.2, 1.0))),
+            )
         val fit = BudgetPlanner.fitResults(res, a(0.3, 0.3, 0.3, 0.0), sd())
         assertEquals(1, fit.flights.count)
         assertEquals(1, fit.hotels.count)

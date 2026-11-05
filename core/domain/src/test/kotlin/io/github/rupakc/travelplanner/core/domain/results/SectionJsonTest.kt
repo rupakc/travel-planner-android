@@ -1,3 +1,5 @@
+@file:Suppress("MaxLineLength", "ktlint:standard:max-line-length") // fixtures ported verbatim from the web tests
+
 package io.github.rupakc.travelplanner.core.domain.results
 
 import kotlinx.serialization.json.JsonArray
@@ -47,7 +49,14 @@ class SectionJsonTest {
         val act = obj("name" to "Tour", "link_verified" to true, "link_checked" to true, "booking_url" to "https://x")
         val hotel = obj("name" to "H", "link_verified" to false)
         val plain = obj("name" to "Plain")
-        val selections = obj("hotel" to hotel, "activities" to listOf(act, plain), "places_to_see" to emptyList<Any>(), "itinerary_notes" to mapOf("a" to "note"), "flight" to null)
+        val selections =
+            obj(
+                "hotel" to hotel,
+                "activities" to listOf(act, plain),
+                "places_to_see" to emptyList<Any>(),
+                "itinerary_notes" to mapOf("a" to "note"),
+                "flight" to null,
+            )
         val out = stripLinkEvidence(selections)
         assertEquals(obj("name" to "Tour", "booking_url" to "https://x"), out["activities"]!!.jsonArray[0])
         assertSame(plain, out["activities"]!!.jsonArray[1])
@@ -66,13 +75,32 @@ class SectionJsonTest {
 
     @Test
     fun `orderSectionByCity - does not throw and sorts city-tagged lists into journey order`() {
-        val data = obj("results" to listOf(mapOf("name" to "c", "city" to "San Francisco"), mapOf("name" to "a", "city" to "Amsterdam"), mapOf("name" to "b", "city" to "New York, USA")))
+        val data =
+            obj(
+                "results" to
+                    listOf(
+                        mapOf("name" to "c", "city" to "San Francisco"),
+                        mapOf("name" to "a", "city" to "Amsterdam"),
+                        mapOf(
+                            "name" to "b",
+                            "city" to "New York, USA",
+                        ),
+                    ),
+            )
         assertEquals(listOf("a", "b", "c"), names(orderSectionByCity(data, destinations), "results"))
     }
 
     @Test
     fun `orderSectionByCity - is a stable sort within the same city and puts unknown cities last`() {
-        val data = obj("hotels" to listOf(mapOf("name" to "x", "city" to "Atlantis"), mapOf("name" to "h1", "city" to "Amsterdam"), mapOf("name" to "h2", "city" to "Amsterdam")))
+        val data =
+            obj(
+                "hotels" to
+                    listOf(
+                        mapOf("name" to "x", "city" to "Atlantis"),
+                        mapOf("name" to "h1", "city" to "Amsterdam"),
+                        mapOf("name" to "h2", "city" to "Amsterdam"),
+                    ),
+            )
         assertEquals(listOf("h1", "h2", "x"), names(orderSectionByCity(data, destinations), "hotels"))
     }
 
@@ -86,7 +114,15 @@ class SectionJsonTest {
 
     @Test
     fun `orderSectionByCity - handles array-valued city fields and missing cities without crashing`() {
-        val data = obj("places" to listOf(mapOf("name" to "p2", "city" to listOf("New York", "NYC")), mapOf("name" to "p3"), mapOf("name" to "p1", "city" to "amsterdam")))
+        val data =
+            obj(
+                "places" to
+                    listOf(
+                        mapOf("name" to "p2", "city" to listOf("New York", "NYC")),
+                        mapOf("name" to "p3"),
+                        mapOf("name" to "p1", "city" to "amsterdam"),
+                    ),
+            )
         assertEquals(listOf("p1", "p2", "p3"), names(orderSectionByCity(data, destinations), "places"))
     }
 }
