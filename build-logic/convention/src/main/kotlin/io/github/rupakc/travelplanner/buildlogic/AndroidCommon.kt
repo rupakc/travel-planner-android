@@ -75,6 +75,8 @@ internal fun Project.configureAndroidCommon(ext: CommonExtension) {
         xmlReport = true
         targetSdk = Sdk.TARGET
     }
+    // Shared robolectric.properties (sdk=35) for every module's unit tests.
+    ext.sourceSets.getByName("test").resources.srcDir(rootProject.file("config/robolectric"))
     ext.testOptions.unitTests.isIncludeAndroidResources = true
     ext.testOptions.unitTests.isReturnDefaultValues = true
     ext.packaging.resources.excludes +=

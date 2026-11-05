@@ -29,6 +29,8 @@ class UnitTestConventionPlugin : Plugin<Project> {
                 maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
                 systemProperty("robolectric.logging.enabled", "false")
                 testLogging { events("failed") }
+                // Modules with only KSP-generated test sources (Hilt) and no tests yet must not fail the build.
+                failOnNoDiscoveredTests.set(false)
             }
         }
     }
