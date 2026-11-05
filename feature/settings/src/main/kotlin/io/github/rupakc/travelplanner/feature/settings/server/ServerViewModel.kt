@@ -15,12 +15,14 @@ import io.github.rupakc.travelplanner.core.domain.server.ServerUrl
 import io.github.rupakc.travelplanner.core.domain.server.ServerUrlResult
 import io.github.rupakc.travelplanner.core.model.health.Health
 import javax.inject.Inject
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Why a URL was rejected (`ServerUrl.validate` results, or the repository's codes on save). */
 enum class UrlProblem { INVALID, UNSUPPORTED_SCHEME, MISSING_HOST, HTTPS_REQUIRED }
@@ -112,7 +114,7 @@ class ServerViewModel
                 ServerEvent.ConfirmSwitch -> {
                     val url = mutableState.value.pendingUrl
                     mutableState.update { it.copy(confirmingSwitch = false, pendingUrl = null) }
-                    viewModelScope.launch { store(url) }
+                    viewModelScope.launch { switchServer(url) }
                 }
 
                 ServerEvent.CancelSwitch -> {
@@ -146,6 +148,19 @@ class ServerViewModel
                     authRepository.session.first() != null -> mutableState.update { it.copy(confirmingSwitch = true, pendingUrl = url) }
                     else -> store(url)
                 }
+            }
+        }
+
+        /**
+         * Signs out on the current server first (unregisters this device's push token there and wipes the
+         * session and per-user caches), then stores the new URL. Both survive the auth gate popping this
+         * screen when the session clears. Logout is idempotent, so a later sign-out triggered by the URL
+         * change itself is harmless.
+         */
+        private suspend fun switchServer(url: String?) {
+            withContext(NonCancellable) {
+                if (authRepository.session.first() != null) authRepository.logout()
+                store(url)
             }
         }
 

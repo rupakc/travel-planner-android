@@ -200,15 +200,41 @@ class SettingsViewModelsTest {
             vm.onEvent(ServerEvent.CancelSwitch)
             assertFalse(vm.state.value.confirmingSwitch)
             assertNull(settings.state.value.baseUrlOverride)
+            assertEquals(0, auth.logoutCalls)
             vm.onEvent(ServerEvent.Save)
             vm.onEvent(ServerEvent.ConfirmSwitch)
+            assertEquals(1, auth.logoutCalls)
+            assertNull(auth.sessionFlow.value)
             assertEquals("http://192.168.1.2:8001", settings.state.value.baseUrlOverride)
+            // Signed out now: going back to the default needs no confirmation and no second logout.
             vm.onEvent(ServerEvent.UseDefault)
-            assertEquals(null, vm.state.value.pendingUrl)
-            assertTrue(vm.state.value.confirmingSwitch)
-            vm.onEvent(ServerEvent.ConfirmSwitch)
+            assertFalse(vm.state.value.confirmingSwitch)
             assertNull(settings.state.value.baseUrlOverride)
             assertTrue(vm.state.value.usingDefault)
+            assertEquals(1, auth.logoutCalls)
+        }
+
+    @Test
+    fun `server switch finishes logout and stores the url even when the screen closes mid-switch`() =
+        runTest {
+            lateinit var vm: ServerViewModel
+            val closingAuth =
+                object : io.github.rupakc.travelplanner.core.data.repository.AuthRepository by auth {
+                    override suspend fun logout() {
+                        auth.logout()
+                        // The auth gate pops Settings as soon as the session clears.
+                        vm.viewModelScope.cancel()
+                        yield()
+                    }
+                }
+            vm = ServerViewModel(SavedStateHandle(), settings, FakeHealthRepository(), closingAuth, TestBuildInfo)
+            vm.onEvent(ServerEvent.InputChanged("https://new.example"))
+            vm.onEvent(ServerEvent.Save)
+            assertTrue(vm.state.value.confirmingSwitch)
+            vm.onEvent(ServerEvent.ConfirmSwitch)
+            assertEquals(1, auth.logoutCalls)
+            assertNull(auth.sessionFlow.value)
+            assertEquals("https://new.example", settings.state.value.baseUrlOverride)
         }
 
     @Test
@@ -284,5 +310,8 @@ class SettingsViewModelsTest {
         val members = io.github.rupakc.travelplanner.feature.settings.features.FeatureGroup.entries.flatMap { it.members }
         assertEquals(FeatureId.entries.toSet(), members.toSet())
         assertEquals(members.size, members.toSet().size)
+        val ordered = io.github.rupakc.travelplanner.feature.settings.features.FeatureGroup.orderedFeatures()
+        assertEquals(FeatureId.entries.size, ordered.size)
+        FeatureId.entries.forEach { assertTrue(it in io.github.rupakc.travelplanner.feature.settings.features.FeatureGroup.of(it).members) }
     }
 }

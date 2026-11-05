@@ -35,6 +35,18 @@ enum class FeatureGroup(val members: List<FeatureId>) {
             FeatureId.ACCESSIBILITY_INFO,
         ),
     ),
+    ;
+
+    companion object {
+        /** Grouped features in display order, then any feature no group lists (so a new one never disappears). */
+        fun orderedFeatures(): List<FeatureId> {
+            val grouped = entries.flatMap { it.members }
+            return grouped + FeatureId.entries.filterNot { it in grouped }
+        }
+
+        /** The group a feature is shown in; unlisted features go to the last group. */
+        fun of(id: FeatureId): FeatureGroup = entries.firstOrNull { id in it.members } ?: entries.last()
+    }
 }
 
 @Immutable
@@ -72,7 +84,7 @@ class FeaturesViewModel
                 val icons = catalogue.orElse(null)?.all?.associate { it.id to it.iconName }.orEmpty()
                 FeaturesUiState(
                     loading = false,
-                    rows = FeatureGroup.entries.flatMap { it.members }.map { FeatureRow(it, it in visible, it in defaults, icons[it]) },
+                    rows = FeatureGroup.orderedFeatures().map { FeatureRow(it, it in visible, it in defaults, icons[it]) },
                     catalogueAvailable = catalogue.isPresent,
                     hasOverrides = overrides.enabled.isNotEmpty() || overrides.disabled.isNotEmpty(),
                 )

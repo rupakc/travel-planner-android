@@ -39,7 +39,6 @@ fun FeaturesScreen(state: FeaturesUiState, onEvent: (FeaturesEvent) -> Unit, onB
             SkeletonList(Modifier.padding(TravelTheme.spacing.gutter), lines = 6)
             return@SettingsScaffold
         }
-        val byId = state.rows.associateBy { it.id }
         KeyedSettingsList(keys = emptyList(), highlightKey = null, contentPadding = padding) {
             item(key = "intro", contentType = "note") {
                 SettingsNote(pluralStringResource(R.plurals.settings_features_on, state.onCount, state.onCount, state.rows.size))
@@ -48,7 +47,7 @@ fun FeaturesScreen(state: FeaturesUiState, onEvent: (FeaturesEvent) -> Unit, onB
             }
             FeatureGroup.entries.forEach { group ->
                 item(key = "h-${group.name}", contentType = "heading") { SettingsHeading(stringResource(group.titleRes())) }
-                group.members.mapNotNull(byId::get).forEach { row ->
+                state.rows.filter { FeatureGroup.of(it.id) == group }.forEach { row ->
                     item(key = row.id.id, contentType = "feature") {
                         val description = stringResource(row.id.descriptionRes())
                         SettingsSwitchRow(
