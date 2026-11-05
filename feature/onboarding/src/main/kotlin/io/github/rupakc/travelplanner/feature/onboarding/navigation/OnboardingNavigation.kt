@@ -1,30 +1,21 @@
 package io.github.rupakc.travelplanner.feature.onboarding.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import io.github.rupakc.travelplanner.core.model.navigation.OnboardingRoute
-import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
-import io.github.rupakc.travelplanner.core.ui.PlaceholderAction
-import io.github.rupakc.travelplanner.feature.onboarding.R
+import io.github.rupakc.travelplanner.feature.onboarding.OnboardingRoute as OnboardingScreenRoute
 
-/** Welcome → 6 questions → result → feature picker. [onFinished] gets `fromSettings`. */
+/**
+ * Welcome → 6 questions → result → feature picker (→ notification rationale on first run).
+ * Edit mode: navigate to `OnboardingRoute(fromSettings = true)` (Settings → "Retake quiz"): it starts
+ * from the saved answers/toggles, saves with "Save changes", never asks for notifications and
+ * calls [onFinished] with `true` (also when closed with ✕, without saving).
+ * First run (`fromSettings = false`) marks onboarding complete before calling [onFinished] with `false`.
+ */
 fun NavGraphBuilder.onboardingGraph(onFinished: (fromSettings: Boolean) -> Unit) {
     composable<OnboardingRoute> { entry ->
         val route = entry.toRoute<OnboardingRoute>()
-        OnboardingScreen(onFinish = { onFinished(route.fromSettings) })
+        OnboardingScreenRoute(onFinished = { onFinished(route.fromSettings) })
     }
-}
-
-@Composable
-internal fun OnboardingScreen(onFinish: () -> Unit, modifier: Modifier = Modifier) {
-    FeaturePlaceholder(
-        title = stringResource(R.string.onboarding_title),
-        message = stringResource(R.string.onboarding_message),
-        modifier = modifier,
-        actions = listOf(PlaceholderAction(stringResource(R.string.onboarding_finish), onFinish)),
-    )
 }
