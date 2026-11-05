@@ -6,8 +6,8 @@ import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
-import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.common.AppLogger
+import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.notifications.NotificationChannels
 import io.github.rupakc.travelplanner.core.notifications.NotificationsInitializer
 import javax.inject.Inject

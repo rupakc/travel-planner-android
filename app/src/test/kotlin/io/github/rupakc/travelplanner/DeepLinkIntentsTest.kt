@@ -36,7 +36,10 @@ class DeepLinkIntentsTest {
         assertEquals("travelplanner://plan/7", app.dataString)
         val web = DeepLinkIntents.sanitize(Intent(Intent.ACTION_VIEW, Uri.parse("https://evil.example/share/abc")))
         assertNull(web.data)
-        assertEquals("travelplanner://alerts?kind=fare&watch=3", DeepLinkIntents.appLink(Intent(Intent.ACTION_VIEW, Uri.parse("travelplanner://alerts?kind=fare&watch=3"))))
+        assertEquals(
+            "travelplanner://alerts?kind=fare&watch=3",
+            DeepLinkIntents.appLink(Intent(Intent.ACTION_VIEW, Uri.parse("travelplanner://alerts?kind=fare&watch=3"))),
+        )
         assertNull(DeepLinkIntents.appLink(Intent(Intent.ACTION_MAIN)))
     }
 

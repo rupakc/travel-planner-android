@@ -100,14 +100,27 @@ private const val TAG = "ErrorMapping"
  */
 fun Throwable.toAppError(): AppError =
     when (this) {
-        is AppException -> error
-        is HttpException -> HttpErrorMapper.map(code(), response()?.headers()?.get("Retry-After"), response()?.errorBody()?.string())
-        is NoServerConfiguredException -> AppError.NotConfigured()
-        is IOException -> AppError.Network(null)
+        is AppException -> {
+            error
+        }
+
+        is HttpException -> {
+            HttpErrorMapper.map(code(), response()?.headers()?.get("Retry-After"), response()?.errorBody()?.string())
+        }
+
+        is NoServerConfiguredException -> {
+            AppError.NotConfigured()
+        }
+
+        is IOException -> {
+            AppError.Network(null)
+        }
+
         is SerializationException, is IllegalArgumentException -> {
             AppLogger.w(TAG, "Response could not be decoded", this)
             AppError.Decoding(null)
         }
+
         else -> {
             AppLogger.w(TAG, "Unexpected failure", this)
             AppError.Unknown(null)
