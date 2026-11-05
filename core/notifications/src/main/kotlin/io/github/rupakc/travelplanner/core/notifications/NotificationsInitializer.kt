@@ -38,6 +38,8 @@ import kotlinx.coroutines.launch
  */
 @Singleton
 class NotificationsInitializer
+    // The app's one notifications wiring point: each dependency is a separate concern it starts.
+    @Suppress("LongParameterList")
     @Inject
     constructor(
         @param:ApplicationContext private val context: Context,

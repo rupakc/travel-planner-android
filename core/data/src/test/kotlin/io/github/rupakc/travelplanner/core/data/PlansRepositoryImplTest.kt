@@ -111,7 +111,8 @@ class PlansRepositoryImplTest {
         }
 
     private val listBody =
-        """[{"id":2,"username":"alice","name":"Lisbon","updated_at":"2026-11-02 00:00:00"},{"id":3,"username":"alice","name":"Rome","updated_at":"2026-11-01 00:00:00"}]"""
+        """[{"id":2,"username":"alice","name":"Lisbon","updated_at":"2026-11-02 00:00:00"},""" +
+            """{"id":3,"username":"alice","name":"Rome","updated_at":"2026-11-01 00:00:00"}]"""
 
     @Test
     fun `refresh skips the cache rewrite when the server list is unchanged`() =
