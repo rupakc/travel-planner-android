@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -184,7 +185,7 @@ private fun entryOverline(entry: SelectionEntry): String? =
 private fun EntryPrice(entry: SelectionEntry) {
     when {
         entry.packedCount != null && entry.packTotal != null -> {
-            Text(stringResource(R.string.plan_packed, entry.packedCount, entry.packTotal), style = TravelTheme.typography.labelLarge)
+            Text(pluralStringResource(R.plurals.plan_packed, entry.packTotal, entry.packedCount, entry.packTotal), style = TravelTheme.typography.labelLarge)
         }
 
         entry.isFree -> {
@@ -253,7 +254,10 @@ internal fun CostCard(
             parts.map { p ->
                 Triple(p, TravelTheme.sectionAccents[p.category.section()].bar, (p.amount / total * PERCENT).roundToInt())
             }
-        val barDescription = described.map { (p, _, pct) -> stringResource(R.string.plan_cost_part_a11y, p.category.label(), formatPrice(p.amount), pct) }
+        val barDescription =
+            described.map { (p, _, pct) ->
+                stringResource(R.string.plan_cost_part_a11y, p.category.label(), formatPrice(p.amount), percentText(pct))
+            }
         Row(
             Modifier
                 .fillMaxWidth()
@@ -289,3 +293,8 @@ private fun LegendRow(label: String, color: Color, amount: String, percent: Int)
 }
 
 private const val PERCENT = 100
+
+/** Localised percentage ("42%", "42 %"). */
+@Composable
+private fun percentText(percent: Int): String =
+    java.text.NumberFormat.getPercentInstance(androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).format(percent / PERCENT.toDouble())

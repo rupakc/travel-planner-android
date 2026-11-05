@@ -124,7 +124,7 @@
     <string name="plan_over_budget">%1$s over budget</string>
     <string name="plan_cost_breakdown">Where the money goes</string>
     <string name="plan_cost_transport_note">Local transport isn\'t included — fares vary by trip.</string>
-    <string name="plan_cost_part_a11y">%1$s %2$s, %3$d percent</string>
+    <string name="plan_cost_part_a11y">%1$s %2$s, %3$s</string>
     <string name="plan_cost_flights">Flights</string>
     <string name="plan_cost_hotel">Hotel</string>
     <string name="plan_cost_activities">Activities</string>
@@ -149,7 +149,10 @@
     <string name="plan_day">Day %1$d</string>
     <string name="plan_per_night">%1$s / night</string>
     <string name="plan_free_entry">Free entry</string>
-    <string name="plan_packed">%1$d of %2$d packed</string>
+    <plurals name="plan_packed">
+        <item quantity="one">%1$d of %2$d packed</item>
+        <item quantity="other">%1$d of %2$d packed</item>
+    </plurals>
     <string name="plan_packing_saved">Packing list saved</string>
     <string name="plan_item_unnamed">Unnamed item</string>
     <string name="plan_open_link">Open link</string>

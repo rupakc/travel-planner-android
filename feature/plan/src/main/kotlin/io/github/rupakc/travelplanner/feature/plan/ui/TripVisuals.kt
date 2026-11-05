@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -36,7 +37,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
-import java.util.Locale
 
 /** Width of the date badge (layout constant, defined once). */
 private val DateBadgeWidth = 56.dp
@@ -80,7 +80,7 @@ internal fun DateBadge(date: LocalDate?, timing: TripTiming, modifier: Modifier 
                 Icon(Icons.Filled.DateRange, contentDescription = null, modifier = Modifier.padding(TravelTheme.spacing.xs))
             } else {
                 Text(
-                    date.month.getDisplayName(TextStyle.SHORT, Locale.getDefault()).replace(".", ""),
+                    date.month.getDisplayName(TextStyle.SHORT, LocalConfiguration.current.locales[0]).replace(".", ""),
                     style = TravelTheme.typography.labelMedium,
                 )
                 Text(date.dayOfMonth.toString(), style = TravelTheme.typography.headlineSmall)

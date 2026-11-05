@@ -128,7 +128,7 @@
     <string name="plan_over_budget">%1$s por encima del presupuesto</string>
     <string name="plan_cost_breakdown">En qué se va el dinero</string>
     <string name="plan_cost_transport_note">El transporte local no está incluido: las tarifas varían según el viaje.</string>
-    <string name="plan_cost_part_a11y">%1$s %2$s, %3$d por ciento</string>
+    <string name="plan_cost_part_a11y">%1$s %2$s, %3$s</string>
     <string name="plan_cost_flights">Vuelos</string>
     <string name="plan_cost_hotel">Hotel</string>
     <string name="plan_cost_activities">Actividades</string>
@@ -153,7 +153,11 @@
     <string name="plan_day">Día %1$d</string>
     <string name="plan_per_night">%1$s / noche</string>
     <string name="plan_free_entry">Entrada gratuita</string>
-    <string name="plan_packed">%1$d de %2$d en la maleta</string>
+    <plurals name="plan_packed">
+        <item quantity="one">%1$d de %2$d en la maleta</item>
+        <item quantity="many">%1$d de %2$d en la maleta</item>
+        <item quantity="other">%1$d de %2$d en la maleta</item>
+    </plurals>
     <string name="plan_packing_saved">Lista de equipaje guardada</string>
     <string name="plan_item_unnamed">Elemento sin nombre</string>
     <string name="plan_open_link">Abrir enlace</string>
