@@ -24,55 +24,79 @@ class AeadSessionCipher(private val aead: Aead) : SessionCipher {
     override fun decrypt(ciphertext: ByteArray, associatedData: ByteArray): ByteArray = aead.decrypt(ciphertext, associatedData)
 }
 
-/**
- * Tink AES-256-GCM keyset stored in SharedPreferences [KEYSET_PREFS] and wrapped by an
- * Android Keystore master key. Both the prefs file and the session file are excluded from backup,
- * so a restored ciphertext is never paired with a key. If the Keystore key is lost (some OEM restores),
- * decrypt fails and the session store treats the user as signed out.
- */
+/** A built keyset: the cipher plus whether its keyset is wrapped by an Android Keystore key. */
+data class BuiltKeyset(val cipher: SessionCipher, val usingKeystore: Boolean)
+
+/** Where the session keyset comes from (Tink + Keystore in the app; fakes in tests). */
+interface SessionKeysetSource {
+    fun build(): BuiltKeyset
+
+    /** Deletes the keyset prefs file and the Keystore alias. Must not throw. */
+    fun reset()
+}
+
 object TinkSessionCrypto {
     const val KEYSET_PREFS = "tp_keys"
-    private const val KEYSET_NAME = "tp_session_keyset"
-    private const val MASTER_KEY_ALIAS = "tp_session_master"
-    private const val MASTER_KEY_URI = "android-keystore://$MASTER_KEY_ALIAS"
     private const val TAG = "SessionCrypto"
 
+    fun create(context: Context): SessionCipher? = create(AndroidKeystoreKeysetSource(context))
+
     /**
-     * Builds the cipher. On failure (broken/reset Keystore, keyset prefs without their master key) the
-     * keyset prefs and the Keystore alias are deleted and creation is retried once; if that fails too,
-     * returns null and the session store keeps the session in memory only (review R2-I1).
+     * Returns a cipher only if its keyset is protected by the Android Keystore; otherwise null, and the
+     * session store keeps the session in memory only.
+     * - Tink 1.24 does not throw when the Keystore is broken: it logs, disables the Keystore and writes the
+     *   keyset **in clear** to the prefs file. So after every build `usingKeystore` is checked; if false the
+     *   prefs file (cleartext keyset) and alias are deleted and null is returned (review R3-I1).
+     * - If the build throws (unusable existing key, corrupt prefs), the keyset and alias are reset and the build
+     *   is retried once, with the same check (review R2-I1). A transient Keystore error therefore also resets
+     *   the keyset and signs the user out — accepted: sign-out beats a crash or a cleartext key (review R3-M3).
      */
     @Suppress("TooGenericExceptionCaught")
-    fun create(context: Context): SessionCipher? =
+    fun create(source: SessionKeysetSource): SessionCipher? =
         try {
-            build(context)
+            keystoreOnly(source, source.build())
         } catch (first: Exception) {
             AppLogger.w(TAG, "Session keyset unusable; resetting it", first)
-            reset(context)
+            source.reset()
             try {
-                build(context)
+                keystoreOnly(source, source.build())
             } catch (second: Exception) {
                 AppLogger.e(TAG, "Session keyset could not be created", second)
+                source.reset()
                 null
             }
         }
 
-    private fun build(context: Context): SessionCipher {
+    private fun keystoreOnly(source: SessionKeysetSource, built: BuiltKeyset): SessionCipher? {
+        if (built.usingKeystore) return built.cipher
+        AppLogger.w(TAG, "Android Keystore unavailable: deleting the unprotected keyset; session kept in memory only")
+        source.reset()
+        return null
+    }
+}
+
+/**
+ * Tink AES-256-GCM keyset in SharedPreferences [TinkSessionCrypto.KEYSET_PREFS], wrapped by an Android Keystore
+ * master key. Both the prefs file and the session file are excluded from backup, so a restored ciphertext is never
+ * paired with a key. If the Keystore key is lost (some OEM restores), decrypt fails and the user is signed out.
+ */
+class AndroidKeystoreKeysetSource(private val context: Context) : SessionKeysetSource {
+    override fun build(): BuiltKeyset {
         AeadConfig.register()
-        val handle =
+        val manager =
             AndroidKeysetManager.Builder()
-                .withSharedPref(context, KEYSET_NAME, KEYSET_PREFS)
+                .withSharedPref(context, KEYSET_NAME, TinkSessionCrypto.KEYSET_PREFS)
                 .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
                 .withMasterKeyUri(MASTER_KEY_URI)
                 .build()
-                .keysetHandle
-        return AeadSessionCipher(handle.getPrimitive(RegistryConfiguration.get(), Aead::class.java))
+        val aead = manager.keysetHandle.getPrimitive(RegistryConfiguration.get(), Aead::class.java)
+        return BuiltKeyset(AeadSessionCipher(aead), manager.isUsingKeystore)
     }
 
     @Suppress("TooGenericExceptionCaught")
-    private fun reset(context: Context) {
+    override fun reset() {
         try {
-            context.deleteSharedPreferences(KEYSET_PREFS)
+            context.deleteSharedPreferences(TinkSessionCrypto.KEYSET_PREFS)
         } catch (e: Exception) {
             AppLogger.w(TAG, "Could not delete keyset prefs", e)
         }
@@ -81,6 +105,13 @@ object TinkSessionCrypto {
         } catch (e: Exception) {
             AppLogger.w(TAG, "Could not delete the Keystore alias", e)
         }
+    }
+
+    private companion object {
+        const val KEYSET_NAME = "tp_session_keyset"
+        const val MASTER_KEY_ALIAS = "tp_session_master"
+        const val MASTER_KEY_URI = "android-keystore://$MASTER_KEY_ALIAS"
+        const val TAG = "SessionCrypto"
     }
 }
 

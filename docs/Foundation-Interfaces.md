@@ -489,7 +489,8 @@ gives the `{"flights":{…}}` object for chat `search_results` and `CurrentPlanS
 
 ## 4b. API additions in fix round 1 (all additive)
 
-- `TravelSearchRequest.searchKey(): String` (`….core.model.search`) — stable id of a search (normalised request hash).
+- `TravelSearchRequest.searchKey(): String` (`….core.model.search`) — stable id of a search (normalised request hash;
+  empty `must_include` and a single-city `destinations` list count as absent).
   Results: the stream belongs to the draft when `state.request?.searchKey() == draft.searchKey`.
 - `PlanDraft.searchKey: String? = null`. `CurrentPlanStore.load(id)` now also fills `searchRequest`, `searchKey` and
   `searchData`. A saved plan's `search_data` is the request (web parity), so `searchData` normally holds only
@@ -508,6 +509,20 @@ gives the `{"flights":{…}}` object for chat `search_results` and `CurrentPlanS
 - `NetworkModule.STREAM_IDLE_SECONDS = 300`; `CurrentPlanStoreImpl.MAX_SEARCH_DATA_BYTES`, `SEARCH_DATA_DEBOUNCE_MS`.
 - Behaviour: `AuthRepository.logout()` keeps chat history and finishes within ~5 s; `SettingsRepository.setBaseUrl`
   signs out when the effective server changes; `AppError.Client(code = "invalid_url" | "https_required")` unchanged.
+
+## 4c. Security notes
+
+- Session at rest: one AES-256-GCM sealed value (Tink); the keyset lives in `shared_prefs/tp_keys.xml`, wrapped by
+  Android Keystore key `tp_session_master`. Both files and the Room DB (+ WAL/SHM) are excluded from backup.
+- Tink silently falls back to a **cleartext** keyset when the Keystore is unusable. The app checks
+  `isUsingKeystore()` after every build: if false it deletes the keyset and keeps the session **in memory only**
+  for the process (the user signs in again after the app is killed). Nothing is ever written in clear.
+- Trade-off (accepted): a transient Keystore error during creation also resets the keyset, which signs the
+  user out (the old sealed session can't be decrypted). Sign-out is preferred to a crash or a cleartext key.
+- The bearer token is sent only to the backend that issued it (`Session.baseUrl`); never give the app's OkHttp
+  clients to image loaders or third-party fetches.
+- `searchKey` (R3-M2, accepted): it is persisted with the draft, so after an update that adds request fields a restored
+  draft keeps its old key until the next `attachSearch`; Results then treats a finished stream as not the draft's.
 
 ## 5. Navigation
 

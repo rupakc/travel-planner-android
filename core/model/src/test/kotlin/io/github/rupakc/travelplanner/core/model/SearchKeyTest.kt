@@ -28,4 +28,11 @@ class SearchKeyTest {
         assertNotEquals(base.searchKey(), base.copy(returnDate = "2026-04-08").searchKey())
         assertNotEquals(base.searchKey(), base.copy(numTravelers = 2).searchKey())
     }
+
+    @Test
+    fun `empty must_include and a single-city destinations list equal their absence`() {
+        assertEquals(base.searchKey(), base.copy(mustInclude = emptyList()).searchKey())
+        assertEquals(base.searchKey(), base.copy(destinations = listOf("Tokyo"), destinationNights = listOf(7)).searchKey())
+        assertNotEquals(base.searchKey(), base.copy(destinations = listOf("Kyoto", "Tokyo")).searchKey())
+    }
 }
