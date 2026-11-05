@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,6 +43,7 @@ import io.github.rupakc.travelplanner.AuthGate
 import io.github.rupakc.travelplanner.R
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
+import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
@@ -100,6 +102,7 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
         showNavigation = gate == AuthGate.READY && topLevel != null,
         onNavigate = { navController.navigateToTopLevel(it) },
         onOpenSettings = { navController.navigate(SettingsRoute) },
+        onOpenSearch = { navController.navigate(GlobalSearchRoute) },
         snackbarHostState = snackbarHostState,
     ) {
         NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.fillMaxSize()) {
@@ -111,6 +114,8 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 onPlanTrip = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
                 onOpenNearby = { navController.navigate(NearbyRoute) },
                 onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
+                onNavigate = { route -> navController.navigate(route) },
+                onBack = { navController.popBackStack() },
             )
             searchGraph(onSearchStarted = {
                 navController.navigate(ResultsRoute)
@@ -148,6 +153,7 @@ fun TravelAppScaffold(
     showNavigation: Boolean,
     onNavigate: (TopLevelDestination) -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenSearch: () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable () -> Unit,
 ) {
@@ -158,6 +164,9 @@ fun TravelAppScaffold(
                     TopAppBar(
                         title = { Text(stringResource(currentTopLevel.labelRes), modifier = Modifier.semantics { heading() }) },
                         actions = {
+                            IconButton(onClick = onOpenSearch) {
+                                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.nav_global_search))
+                            }
                             IconButton(onClick = onOpenSettings) {
                                 Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.nav_settings))
                             }

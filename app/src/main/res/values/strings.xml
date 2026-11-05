@@ -7,5 +7,6 @@
     <string name="nav_plans">My trips</string>
     <string name="nav_alerts">Alerts</string>
     <string name="nav_settings">Settings</string>
+    <string name="nav_global_search">Search everything</string>
     <string name="session_expired">You were signed out. Please sign in again.</string>
 </resources>
