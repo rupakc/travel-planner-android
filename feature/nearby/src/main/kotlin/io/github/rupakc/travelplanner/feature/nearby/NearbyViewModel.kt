@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
 import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
+import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyRequest
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
@@ -85,6 +86,7 @@ class NearbyViewModel
         private val preferences: PreferencesRepository,
         private val profile: ProfileRepository,
         private val plan: CurrentPlanStore,
+        private val settings: SettingsRepository,
     ) : ViewModel() {
         private val mutable = MutableStateFlow(NearbyUiState(phase = if (location.hasPermission()) NearbyPhase.Locating else NearbyPhase.NeedsPermission))
         val state: StateFlow<NearbyUiState> = mutable.asStateFlow()
@@ -121,8 +123,8 @@ class NearbyViewModel
                             LocationFix.Off -> return@launch mutable.update { it.copy(phase = NearbyPhase.LocationOff) }
                             LocationFix.Unavailable -> return@launch mutable.update { it.copy(phase = NearbyPhase.NoFix) }
                         }
-                    // Remembered as a ~5 km cell for background suggestions (no background location needed).
-                    nearby.rememberLocation(fix.lat, fix.lng)
+                    // Remembered as a ~5 km cell for background suggestions, only while they are turned on.
+                    if (settings.settings.first().nearbyNotifications) nearby.rememberLocation(fix.lat, fix.lng)
                     mutable.update { it.copy(phase = NearbyPhase.Loading) }
                     val serverInterests = preferences.get().getOrNull()?.interests.orEmpty()
                     val sent = if (serverInterests.isEmpty()) profileInterests(profile.profile.first()).ifEmpty { null } else null

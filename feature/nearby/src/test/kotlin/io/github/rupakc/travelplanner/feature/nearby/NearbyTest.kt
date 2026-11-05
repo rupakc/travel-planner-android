@@ -15,12 +15,14 @@ import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.section.Activity
+import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -59,7 +61,13 @@ class NearbyTest {
         }
 
         override suspend fun lastLocation() = null
+
+        override suspend fun forgetLocation() {
+            remembered = null
+        }
     }
+
+    private val nearbyOn = FakeSettingsRepository(AppSettings(nearbyNotifications = true))
 
     private val kyoto = NearbyPlace(name = "Kyoto", region = "Kyoto", country = "Japan", distanceKm = 1.4)
     private val hike =
@@ -85,7 +93,7 @@ class NearbyTest {
             val location = FakeLocation(permitted = false)
             val repo = RecordingNearby(AppResult.Success(NearbyResponse(kyoto, listOf(hike))))
             val profile = FakeProfileRepository(TravellerProfile(answers = mapOf("loves" to listOf("food"))))
-            val vm = NearbyViewModel(location, repo, FakePreferencesRepository(), profile, FakeCurrentPlanStore())
+            val vm = NearbyViewModel(location, repo, FakePreferencesRepository(), profile, FakeCurrentPlanStore(), nearbyOn)
             assertEquals(NearbyPhase.NeedsPermission, vm.state.value.phase)
             vm.onEvent(NearbyEvent.PermissionResult(granted = false))
             assertEquals(NearbyPhase.Denied, vm.state.value.phase)
@@ -103,11 +111,23 @@ class NearbyTest {
         }
 
     @Test
+    fun `the location is remembered only while nearby suggestions are on`() =
+        runTest {
+            val repo = RecordingNearby(AppResult.Success(NearbyResponse(kyoto, listOf(hike))))
+            NearbyViewModel(FakeLocation(true), repo, FakePreferencesRepository(), FakeProfileRepository(), FakeCurrentPlanStore(), FakeSettingsRepository())
+            advanceUntilIdle()
+            assertNull(repo.remembered)
+            NearbyViewModel(FakeLocation(true), repo, FakePreferencesRepository(), FakeProfileRepository(), FakeCurrentPlanStore(), nearbyOn)
+            advanceUntilIdle()
+            assertEquals(35.0 to 135.7, repo.remembered)
+        }
+
+    @Test
     fun `server interests win and are not resent`() =
         runTest {
             val repo = RecordingNearby(AppResult.Success(NearbyResponse(kyoto, listOf(hike))))
             val prefs = FakePreferencesRepository(Preferences(username = "alice", interests = listOf("culture")))
-            val vm = NearbyViewModel(FakeLocation(true), repo, prefs, FakeProfileRepository(), FakeCurrentPlanStore())
+            val vm = NearbyViewModel(FakeLocation(true), repo, prefs, FakeProfileRepository(), FakeCurrentPlanStore(), FakeSettingsRepository())
             advanceUntilIdle()
             assertNull(repo.interests)
             assertEquals(listOf("culture"), vm.state.value.interests)
@@ -118,7 +138,7 @@ class NearbyTest {
         runTest {
             val repo = RecordingNearby(AppResult.Failure(AppError.NotFound("We don't know a town or city near you yet.", "no_place")))
             val location = FakeLocation(true)
-            val vm = NearbyViewModel(location, repo, FakePreferencesRepository(), FakeProfileRepository(), FakeCurrentPlanStore())
+            val vm = NearbyViewModel(location, repo, FakePreferencesRepository(), FakeProfileRepository(), FakeCurrentPlanStore(), FakeSettingsRepository())
             advanceUntilIdle()
             assertEquals(NearbyPhase.NoPlace("We don't know a town or city near you yet."), vm.state.value.phase)
             repo.result = AppResult.Failure(AppError.RateLimited("Too many requests — please wait 30 seconds and try again.", 30))
