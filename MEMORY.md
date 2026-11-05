@@ -113,6 +113,10 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 (integration, arch I3) One feature-visibility rule (core:data FeatureVisibility = A1's visibleFeatures) bound once with the catalogue/classifier in core:data; no @BindsOptionalOf FeatureCatalogue anywhere (supersedes the "keep @BindsOptionalOf" ruling).
 - 2026-11-05 (integration) Results watch buttons and trip detail "Watch whole trip" open Team G's sheets over their dialog controllers; nothing is created before the user confirms (web dialogs).
 - 2026-11-05 (integration) Deferred: Team D's raw-JSON ItineraryArrangement and read-only itinerary composables stay; PlanIcs (exact web .ics port) runs on them, and moving it to Team E's typed port needs an .ics parity check. Follow-up.
+- 2026-11-05 (R4 FP2, ui I1) Light theme: primary teal-700 #0F766E (web hover shade), secondary/info sky-700, success emerald-700, outline gray-500 (the ruling's gray-400 is 2.5:1 on white, under the 3:1 border minimum; gray-500 is 4.8:1); dark: outline slate-500, onSurfaceVariant slate-300, primaryContainer teal-900, infoContainer sky-950. `SectionAccent.text` (-700 light / -300 dark) for words in an accent. `ContrastTest` guards every pair.
+- 2026-11-05 (R4 FP2, ui I2) Every typed amount goes through core:domain `parseLocalizedAmount(text, locale)` with the UI locale; ViewModels get it from the route (`SetLocale` events), sheets/edit panels from `currentLocale()`.
+- 2026-11-05 (R4 FP2, ui I3) On-screen prices use the app language (core:ui `localPrice`/`localUsd`, "1.480 US$" in Spanish); share text, .ics and other exports stay en-US ("$1,480") on purpose (same text as the web, read by other apps). Amounts in copy are `%1$s` placeholders.
+- 2026-11-05 (R4 FP2, ui I4) Alerts delete commits when the Undo snackbar closes without Undo, on the next delete, or in onCleared; no fixed timer. Supersedes "Alerts delete = … Undo snackbar (6 s)": TalkBack's accessibility timeout can keep the snackbar up for minutes.
 
 ## Documentation and tooling
 
