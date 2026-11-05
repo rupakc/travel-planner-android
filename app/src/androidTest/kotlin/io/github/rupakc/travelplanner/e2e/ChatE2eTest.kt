@@ -32,14 +32,7 @@ class ChatE2eTest {
     }
 
     private fun send(text: String, timeoutMs: Long = CHAT_TIMEOUT) {
-        val input = hasTestTag("chat_input")
-        robot.waitFor(input)
-        rule.onNode(input).performTextInput(text)
-        rule.onAllNodes(robot.hasDescription(robot.str(ChatR.string.chat_send))).onFirst().performClick()
-        val stop = robot.hasDescription(robot.str(ChatR.string.chat_stop))
-        // Streaming: Stop shows while the reply streams, then Send comes back.
-        robot.waitFor(stop, AppRobot.DEFAULT_TIMEOUT)
-        rule.waitUntil(timeoutMs) { !robot.exists(stop) }
+        robot.chatSend(text, timeoutMs)
         sent++
         Screenshots.capture("debug-chat-$sent")
     }
