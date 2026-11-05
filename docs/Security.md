@@ -34,7 +34,7 @@ Booking and provider links open in a Custom Tab through `BookingLinkButton`, whi
 ## CI
 
 `.github/workflows/android.yml` runs with a read-only `GITHUB_TOKEN` (`permissions: contents: read`); third-party actions
-(`android-actions/setup-android`, `gradle/actions/setup-gradle`) are pinned by commit SHA. `wiki-sync.yml` is read-only at workflow level and
+(`android-actions/setup-android` v3.2.2, `gradle/actions/setup-gradle` v4.4.3) are pinned by commit SHA and `.github/dependabot.yml` proposes action updates weekly. `wiki-sync.yml` is read-only at workflow level and
 grants `contents: write` only to the job that pushes the wiki.
 
 ## Secrets

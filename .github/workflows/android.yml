@@ -29,13 +29,14 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+      # Third-party actions are pinned by commit SHA (the comment is the release tag); Dependabot proposes updates weekly.
       - name: Set up Android SDK
-        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3 (third-party: pinned by SHA)
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3.2.2
         with:
           packages: "platform-tools platforms;android-36 platforms;android-37.0 build-tools;36.0.0"
 
       - name: Set up Gradle (with cache)
-        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4 (third-party: pinned by SHA)
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
 
       # No google-services.json in CI: FCM stays inert (spec §7).
       # assembleProdRelease is signed with the debug key for CI only (docs/Release.md); never publish it.
