@@ -108,7 +108,9 @@ class AppRobot(val rule: AppRule) {
     fun openSettings() = tapDescription(str(io.github.rupakc.travelplanner.R.string.nav_settings))
 
     /** A top-level destination from the navigation bar / rail. */
-    fun openTab(@StringRes label: Int) {
+    fun openTab(
+        @StringRes label: Int,
+    ) {
         val text = str(label)
         waitForText(text)
         rule.onAllNodes(hasText(text) and hasClickAction()).onFirst().performClick()
