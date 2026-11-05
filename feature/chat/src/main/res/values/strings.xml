@@ -1,5 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Empty state (web ChatPage) -->
     <string name="chat_title">Travel Planner Chat</string>
     <string name="chat_message">Chat with your AI travel assistant. Ask for a full trip plan and results will stream in real-time with interactive cards.</string>
+    <string name="chat_starter_1">Plan a 5-day trip to Tokyo on a $2000 budget</string>
+    <string name="chat_starter_2">What do I need for a visa to Thailand as a US citizen?</string>
+    <string name="chat_starter_3">Find me cheap flights from NYC to Paris in June</string>
+    <string name="chat_starter_4">Suggest a romantic getaway in Europe for a week</string>
+
+    <!-- Composer -->
+    <string name="chat_input_placeholder">Ask about your next trip…</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_stop">Stop</string>
+    <string name="chat_disclaimer">AI-powered travel assistant. Verify important details with official sources.</string>
+
+    <!-- Messages -->
+    <string name="chat_user_message">You: %1$s</string>
+    <string name="chat_thinking">Thinking…</string>
+    <string name="chat_planning">Planning your trip…</string>
+    <string name="chat_searching">Searching %1$s…</string>
+    <string name="chat_building_itinerary">Building your itinerary…</string>
+    <string name="chat_plotting">Plotting your journey…</string>
+    <string name="chat_error_stream">Sorry — something went wrong while answering that. Please try again.</string>
+    <string name="chat_error_empty">Sorry — I didn\'t get a response there. Please try asking again.</string>
+    <string name="chat_error_request">Sorry, something went wrong. Please try again.</string>
+    <string name="chat_retry">Retry</string>
+    <string name="chat_copy">Copy</string>
+    <string name="chat_copied">Copied</string>
+    <string name="chat_stopped">Stopped</string>
+    <string name="chat_import_link">Plan a trip from this link</string>
+    <string name="chat_jump_latest">Jump to latest</string>
+    <string name="chat_suggestions">Suggested follow-ups</string>
+    <string name="chat_reply_announce">Assistant: %1$s</string>
+    <string name="chat_plan_ready_announce">Trip plan ready for %1$s</string>
+    <string name="chat_plan_ready_announce_generic">Trip plan ready</string>
+    <string name="chat_reply_failed_announce">The assistant couldn\'t answer. Retry is available.</string>
+
+    <!-- Header, threads -->
+    <string name="chat_my_plan">My Plan</string>
+    <plurals name="chat_my_plan_a11y">
+        <item quantity="one">My Plan, %d item</item>
+        <item quantity="other">My Plan, %d items</item>
+    </plurals>
+    <string name="chat_threads">Chats</string>
+    <string name="chat_threads_show">Show chats</string>
+    <string name="chat_new">New chat</string>
+    <string name="chat_threads_search">Search chats</string>
+    <string name="chat_threads_clear_search">Clear search</string>
+    <string name="chat_threads_empty">No chats yet</string>
+    <string name="chat_threads_empty_message">Your conversations are kept on this device.</string>
+    <string name="chat_threads_no_match">No chats match “%1$s”</string>
+    <string name="chat_thread_menu">More options for %1$s</string>
+    <string name="chat_rename">Rename</string>
+    <string name="chat_delete">Delete</string>
+    <string name="chat_rename_title">Rename chat</string>
+    <string name="chat_rename_label">Chat name</string>
+    <string name="chat_save">Save</string>
+    <string name="chat_cancel">Cancel</string>
+    <string name="chat_deleted">Chat deleted</string>
+    <string name="chat_undo">Undo</string>
+
+    <!-- Section cards (specialist fallback) -->
+    <plurals name="chat_show_more">
+        <item quantity="one">Show %d more</item>
+        <item quantity="other">Show %d more</item>
+    </plurals>
+    <string name="chat_show_less">Show less</string>
+    <string name="chat_progress">Ready: %1$d/%2$d</string>
+    <string name="chat_no_flights">No flights found</string>
+    <string name="chat_no_hotels">No hotels found</string>
+    <string name="chat_no_activities">No activities found</string>
+    <string name="chat_no_sim">No SIM plans found</string>
+    <string name="chat_no_visa">No visa info available</string>
+    <string name="chat_no_tips">No tips available</string>
+    <string name="chat_no_transport">No transport info available</string>
+    <string name="chat_no_forex">No forex info available</string>
+    <string name="chat_no_itinerary">No itinerary available</string>
+    <string name="chat_estimate_banner">Prices are estimates — verify with booking sites before booking</string>
+    <string name="chat_round_trip">round-trip</string>
+    <string name="chat_route">%1$s → %2$s</string>
+    <string name="chat_per_night">%1$s/night</string>
+    <plurals name="chat_visa_max_stay">
+        <item quantity="one">Max stay: %d day</item>
+        <item quantity="other">Max stay: %d days</item>
+    </plurals>
+    <string name="chat_visa_fee">Fee: %1$s</string>
+    <string name="chat_free">Free</string>
+    <string name="chat_official_source">Official Source</string>
+    <string name="chat_get">Get</string>
+    <string name="chat_source">Source</string>
+    <string name="chat_info">Info</string>
+    <string name="chat_book">Book</string>
+    <string name="chat_sim_data">%1$s GB</string>
+    <plurals name="chat_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="chat_hours">%1$s h</string>
+    <string name="chat_tipping_expected">Tipping expected</string>
+    <string name="chat_tipping_not_expected">Tipping not expected</string>
+
+    <!-- Trip plan (comprehensive itinerary) -->
+    <plurals name="chat_trip_nights">
+        <item quantity="one">%d night</item>
+        <item quantity="other">%d nights</item>
+    </plurals>
+    <plurals name="chat_trip_full_days">
+        <item quantity="one">%d full day</item>
+        <item quantity="other">%d full days</item>
+    </plurals>
+    <plurals name="chat_trip_travelers">
+        <item quantity="one">%d traveler</item>
+        <item quantity="other">%d travelers</item>
+    </plurals>
+    <string name="chat_est_per_person">est. per person</string>
+    <string name="chat_departure_city">Departure city</string>
+    <string name="chat_open_in_maps">Open %1$s in Maps</string>
+    <string name="chat_getting_there">Getting there</string>
+    <string name="chat_itinerary_failed">Could not build itinerary — please try again.</string>
+    <plurals name="chat_day_itinerary">
+        <item quantity="one">%d-day itinerary</item>
+        <item quantity="other">%d-day itinerary</item>
+    </plurals>
+    <string name="chat_collapse_all">Collapse all</string>
+    <string name="chat_expand_all">Expand all</string>
+    <string name="chat_day">Day %1$d</string>
+    <string name="chat_travel_day">Travel</string>
+    <string name="chat_city_country">%1$s, %2$s</string>
+    <string name="chat_morning">Morning</string>
+    <string name="chat_afternoon">Afternoon</string>
+    <string name="chat_evening">Evening</string>
+    <string name="chat_must_see">Must see</string>
+    <string name="chat_dining">Dining</string>
+    <string name="chat_day_expanded">expanded</string>
+    <string name="chat_day_collapsed">collapsed</string>
+    <string name="chat_save_as_plan">Save as plan</string>
+    <string name="chat_replace_title">Start a new plan?</string>
+    <string name="chat_replace_message">My Plan has unsaved changes. Saving this itinerary starts a new plan instead.</string>
+    <string name="chat_replace_confirm">Start new plan</string>
+    <string name="chat_save_failed">Save failed</string>
 </resources>

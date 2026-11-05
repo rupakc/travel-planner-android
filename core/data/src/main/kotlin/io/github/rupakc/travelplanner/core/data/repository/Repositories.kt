@@ -136,6 +136,9 @@ interface ChatRepository {
 
     fun messages(threadId: Long): Flow<List<StoredChatMessage>>
 
+    /** Ids of the signed-in user's threads with a message containing [query] (case-insensitive for ASCII; capped). */
+    fun threadIdsMatching(query: String): Flow<Set<Long>>
+
     suspend fun createThread(title: String): Long
 
     suspend fun renameThread(threadId: Long, title: String)
