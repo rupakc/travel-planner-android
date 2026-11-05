@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.core.network.di
 
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -106,22 +107,26 @@ object NetworkModule {
     ): OkHttpClient =
         base.newBuilder().readTimeout(Duration.ofSeconds(STREAM_IDLE_SECONDS)).callTimeout(Duration.ZERO).build()
 
-    private fun retrofit(client: OkHttpClient, json: Json): Retrofit =
+    /**
+     * The client is [Lazy] (performance M1): OkHttp (platform + TLS init) is built on the first call,
+     * which runs off the main thread, not when the API graph is injected.
+     */
+    private fun retrofit(client: Lazy<OkHttpClient>, json: Json): Retrofit =
         Retrofit.Builder()
             .baseUrl(PLACEHOLDER_BASE_URL)
-            .client(client)
+            .callFactory { request -> client.get().newCall(request) }
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
 
     @Provides @Singleton @DefaultHttp
     fun defaultRetrofit(
-        @DefaultHttp client: OkHttpClient,
+        @DefaultHttp client: Lazy<OkHttpClient>,
         json: Json,
     ): Retrofit = retrofit(client, json)
 
     @Provides @Singleton @AiHttp
     fun aiRetrofit(
-        @AiHttp client: OkHttpClient,
+        @AiHttp client: Lazy<OkHttpClient>,
         json: Json,
     ): Retrofit = retrofit(client, json)
 
