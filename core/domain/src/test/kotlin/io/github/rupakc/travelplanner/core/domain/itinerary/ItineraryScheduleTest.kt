@@ -7,6 +7,7 @@ import io.github.rupakc.travelplanner.core.domain.itinerary.ItinerarySchedule.sl
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItinerarySchedule.syncPlannedSlotTimes
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItinerarySchedule.timeRange
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItinerarySchedule.transitLabel
+import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.ItineraryLayout
 import io.github.rupakc.travelplanner.core.model.section.ItineraryData
 import io.github.rupakc.travelplanner.core.model.section.ItineraryDay
@@ -69,11 +70,22 @@ class ItineraryScheduleTest {
 
     @Test
     fun `falls back to the default for invalid durations`() {
-        // web also lists '2' (string) — lenient decoding reads it as 2 h on Android (documented deviation)
         for (hours in listOf(0.0, 0.1, 13.0, -2.0, Double.NaN, Double.POSITIVE_INFINITY, null)) {
             val d = scheduleDays(arranged(one(day(1, listOf(slot("morning", "A", hours)))))).single()
             assertEquals("12:00", d.slots[0].endTime)
         }
+    }
+
+    @Test
+    fun `a string duration falls back to the default like the web`() {
+        val it =
+            TravelJson.decodeFromString(
+                ItineraryData.serializer(),
+                """{"days":[{"day_number":1,"slots":[{"time_of_day":"morning","activity":"A","duration_hours":"2"},{"time_of_day":"afternoon","activity":"B","duration_hours":1.5}]}]}""",
+            )
+        val d = scheduleDays(arranged(it)).single()
+        assertEquals("12:00", d.slots[0].endTime)
+        assertEquals("15:00", d.slots[1].endTime)
     }
 
     @Test

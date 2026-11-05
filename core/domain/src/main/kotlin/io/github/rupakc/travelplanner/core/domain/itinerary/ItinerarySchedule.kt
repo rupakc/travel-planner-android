@@ -178,9 +178,19 @@ object ItinerarySchedule {
     }
 
     private fun durationMinutes(slot: ItinerarySlot): Int {
-        val hours = slot.durationHours?.takeIf { it.isFinite() }
+        val hours = durationHours(slot)?.takeIf { it.isFinite() }
         if (hours != null && hours in MIN_HOURS..MAX_HOURS) return floor(hours * MINUTES_PER_HOUR + HALF).toInt()
         return DEFAULT_MINUTES[slot.timeOfDay] ?: OTHER_DEFAULT_MINUTES
+    }
+
+    /**
+     * Web parity: only a JSON number counts (`typeof n === 'number'`); a string such as "2" falls back to the
+     * default even though lenient decoding would read it. Typed-only slots (no raw JSON) use the typed value.
+     */
+    private fun durationHours(slot: ItinerarySlot): Double? {
+        if (slot.raw.isEmpty()) return slot.durationHours
+        val v = slot.raw["duration_hours"] as? JsonPrimitive ?: return null
+        return if (v.isString) null else v.content.toDoubleOrNull()
     }
 
     private fun transitBetween(prev: ItinerarySlot, slot: ItinerarySlot): Transit? {
