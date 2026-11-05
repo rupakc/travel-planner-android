@@ -111,7 +111,7 @@ internal class ResultsStateBuilder {
      * draft snapshot hold them for every screen): journey order (not flights/weather, web parity), resolved
      * pending chips. Each section is ordered and decoded once per original JSON object (M5).
      */
-    fun effectiveSections(results: SearchResultsState, local: LocalState): Map<SectionId, Pair<SectionData, JsonObject>> {
+    fun effectiveSections(results: SearchResultsState): Map<SectionId, Pair<SectionData, JsonObject>> {
         val merged = results.sections
         val destinations = results.request?.destinations
         val streaming = results.phase == StreamPhase.STREAMING
@@ -140,7 +140,7 @@ internal class ResultsStateBuilder {
         val fromSnapshot = sourced.source == ResultsSource.SNAPSHOT
         val stored = sourced.source == ResultsSource.SNAPSHOT || sourced.source == ResultsSource.RUN_SAVED
         val request = results.request
-        val effective = effectiveSections(results, local)
+        val effective = effectiveSections(results)
         val done = results.phase == StreamPhase.DONE || fromSnapshot
         val trip = tripResults(effective)
         val query = local.query

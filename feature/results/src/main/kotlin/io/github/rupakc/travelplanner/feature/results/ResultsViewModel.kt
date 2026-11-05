@@ -436,7 +436,7 @@ class ResultsViewModel
         private fun remix(preset: RemixPreset) {
             val req = request ?: return
             val remixed = Remix.apply(req, preset) ?: return
-            val before = Remix.snapshot(ResultsStateBuilder.tripResults(builder.effectiveSections(currentResults(), local.value)))
+            val before = Remix.snapshot(ResultsStateBuilder.tripResults(builder.effectiveSections(currentResults())))
             local.update { it.copy(remix = preset to before) }
             rerun(remixed)
         }
