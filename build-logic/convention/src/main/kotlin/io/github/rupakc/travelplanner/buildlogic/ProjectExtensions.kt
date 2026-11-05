@@ -16,7 +16,8 @@ fun VersionCatalog.pluginId(alias: String): String = findPlugin(alias).get().get
 
 /** Shared SDK levels (spec §4). */
 object Sdk {
-    const val COMPILE = 36
+    /** 37: the pinned AndroidX/OkHttp releases require compileSdk >= 37 (AAR metadata). targetSdk stays 36. */
+    const val COMPILE = 37
     const val TARGET = 36
     const val MIN = 26
     const val JAVA = 21

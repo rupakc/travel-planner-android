@@ -18,6 +18,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 configureAndroidCommon(this)
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 defaultConfig.consumerProguardFiles("consumer-rules.pro")
+                testOptions.targetSdk = io.github.rupakc.travelplanner.buildlogic.Sdk.TARGET
                 // Resources are opt-in per module (designsystem, ui, features, notifications).
                 buildFeatures.androidResources = false
             }

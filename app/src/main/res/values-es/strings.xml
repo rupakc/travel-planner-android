@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">Inicio</string>
+    <string name="nav_search">Buscar</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_plans">Mis viajes</string>
+    <string name="nav_alerts">Alertas</string>
+    <string name="nav_settings">Ajustes</string>
+    <string name="session_expired">Se cerró tu sesión. Vuelve a iniciar sesión.</string>
+</resources>

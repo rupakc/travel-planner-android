@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The session token and caches never leave the device. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="file" path="datastore/session.preferences_pb" />
+        <exclude domain="database" path="travel-planner.db" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="file" path="datastore/session.preferences_pb" />
+        <exclude domain="database" path="travel-planner.db" />
+    </device-transfer>
+</data-extraction-rules>

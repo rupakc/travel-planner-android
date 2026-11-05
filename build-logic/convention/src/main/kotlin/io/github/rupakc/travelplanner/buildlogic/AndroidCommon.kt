@@ -76,7 +76,6 @@ internal fun Project.configureAndroidCommon(ext: CommonExtension) {
     }
     ext.testOptions.unitTests.isIncludeAndroidResources = true
     ext.testOptions.unitTests.isReturnDefaultValues = true
-    ext.testOptions.targetSdk = Sdk.TARGET
     ext.packaging.resources.excludes += setOf(
         "/META-INF/{AL2.0,LGPL2.1}",
         "/META-INF/LICENSE*",
