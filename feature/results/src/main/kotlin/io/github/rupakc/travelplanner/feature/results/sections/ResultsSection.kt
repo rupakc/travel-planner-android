@@ -1,10 +1,10 @@
 package io.github.rupakc.travelplanner.feature.results.sections
 
+import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.Flight
 import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.SectionId
-import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 
 /** The 16 results sections in web `AGENT_ORDER` (api-contract §3.2). */
 enum class ResultsSection(val id: SectionId) {

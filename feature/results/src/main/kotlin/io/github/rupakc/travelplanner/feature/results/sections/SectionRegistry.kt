@@ -5,27 +5,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
+import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
+import io.github.rupakc.travelplanner.core.model.section.EmergencyCardData
+import io.github.rupakc.travelplanner.core.model.section.EventsData
+import io.github.rupakc.travelplanner.core.model.section.FlightsData
+import io.github.rupakc.travelplanner.core.model.section.ForexData
+import io.github.rupakc.travelplanner.core.model.section.GettingAroundData
+import io.github.rupakc.travelplanner.core.model.section.HotelsData
+import io.github.rupakc.travelplanner.core.model.section.ItineraryData
+import io.github.rupakc.travelplanner.core.model.section.PackingListData
+import io.github.rupakc.travelplanner.core.model.section.PlacesData
 import io.github.rupakc.travelplanner.core.model.section.SectionData
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
+import io.github.rupakc.travelplanner.core.model.section.SimData
+import io.github.rupakc.travelplanner.core.model.section.StressTestData
+import io.github.rupakc.travelplanner.core.model.section.TipsData
+import io.github.rupakc.travelplanner.core.model.section.VisaData
+import io.github.rupakc.travelplanner.core.model.section.WalkingToursData
+import io.github.rupakc.travelplanner.core.model.section.WeatherData
 import io.github.rupakc.travelplanner.core.ui.SectionScaffold
 import io.github.rupakc.travelplanner.core.ui.VerificationChip
 import io.github.rupakc.travelplanner.feature.results.R
-import io.github.rupakc.travelplanner.core.model.section.FlightsData
-import io.github.rupakc.travelplanner.core.model.section.WeatherData
-import io.github.rupakc.travelplanner.core.model.section.HotelsData
-import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
-import io.github.rupakc.travelplanner.core.model.section.PlacesData
-import io.github.rupakc.travelplanner.core.model.section.WalkingToursData
-import io.github.rupakc.travelplanner.core.model.section.EventsData
-import io.github.rupakc.travelplanner.core.model.section.VisaData
-import io.github.rupakc.travelplanner.core.model.section.SimData
-import io.github.rupakc.travelplanner.core.model.section.TipsData
-import io.github.rupakc.travelplanner.core.model.section.EmergencyCardData
-import io.github.rupakc.travelplanner.core.model.section.GettingAroundData
-import io.github.rupakc.travelplanner.core.model.section.ForexData
-import io.github.rupakc.travelplanner.core.model.section.ItineraryData
-import io.github.rupakc.travelplanner.core.model.section.StressTestData
-import io.github.rupakc.travelplanner.core.model.section.PackingListData
 
 /**
  * Maps each [ResultsSection] to its content composable inside [SectionScaffold].

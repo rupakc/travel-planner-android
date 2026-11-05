@@ -41,14 +41,24 @@ class FakePlansRepository(initial: List<Plan> = emptyList()) : PlansRepository {
 
     override suspend fun refresh(): AppResult<Unit> = guard { }
 
-    override suspend fun get(id: Long): AppResult<Plan> = guard { store.value.firstOrNull { it.id == id } }
-        .let { r -> if (r is AppResult.Success && r.value == null) AppResult.Failure(AppError.NotFound("Plan not found")) else r.map { it!! } }
+    override suspend fun get(id: Long): AppResult<Plan> =
+        guard { store.value.firstOrNull { it.id == id } }
+            .let { r ->
+                if (r is AppResult.Success &&
+                    r.value == null
+                ) {
+                    AppResult.Failure(AppError.NotFound("Plan not found"))
+                } else {
+                    r.map { it!! }
+                }
+            }
 
-    override suspend fun create(name: String, searchData: JsonObject, selections: PlanSelections): AppResult<Plan> = guard {
-        Plan(id = nextId++, username = "alice", name = name, searchData = searchData, selections = selections).also { plan ->
-            store.update { listOf(plan) + it }
+    override suspend fun create(name: String, searchData: JsonObject, selections: PlanSelections): AppResult<Plan> =
+        guard {
+            Plan(id = nextId++, username = "alice", name = name, searchData = searchData, selections = selections).also { plan ->
+                store.update { listOf(plan) + it }
+            }
         }
-    }
 
     override suspend fun update(id: Long, name: String?, selections: PlanSelections?): AppResult<Plan> {
         val existing = store.value.firstOrNull { it.id == id } ?: return AppResult.Failure(AppError.NotFound("Plan not found"))
@@ -61,15 +71,17 @@ class FakePlansRepository(initial: List<Plan> = emptyList()) : PlansRepository {
 
     override suspend fun delete(id: Long): AppResult<Unit> = guard { store.update { list -> list.filterNot { it.id == id } } }
 
-    override suspend fun share(id: Long): AppResult<String> = guard {
-        val token = "share-token-$id"
-        store.update { list -> list.map { if (it.id == id) it.copy(shareToken = token) else it } }
-        token
-    }
+    override suspend fun share(id: Long): AppResult<String> =
+        guard {
+            val token = "share-token-$id"
+            store.update { list -> list.map { if (it.id == id) it.copy(shareToken = token) else it } }
+            token
+        }
 
-    override suspend fun unshare(id: Long): AppResult<Unit> = guard {
-        store.update { list -> list.map { if (it.id == id) it.copy(shareToken = null) else it } }
-    }
+    override suspend fun unshare(id: Long): AppResult<Unit> =
+        guard {
+            store.update { list -> list.map { if (it.id == id) it.copy(shareToken = null) else it } }
+        }
 
     override suspend fun shared(token: String): AppResult<SharedPlan> =
         sharedPlans[token]?.let { AppResult.Success(it) } ?: AppResult.Failure(AppError.NotFound("Shared plan not found"))
@@ -80,7 +92,10 @@ class FakeCurrentPlanStore(private val plans: PlansRepository = FakePlansReposit
     private val state = MutableStateFlow(PlanDraft())
     override val draft: StateFlow<PlanDraft> = state.asStateFlow()
 
-    override fun toggle(item: PlanItem) = state.update { it.copy(selections = PlanSelectionRules.toggle(it.selections, item), dirty = true) }
+    override fun toggle(item: PlanItem) =
+        state.update {
+            it.copy(selections = PlanSelectionRules.toggle(it.selections, item), dirty = true)
+        }
 
     override fun isSelected(item: PlanItem): Boolean = PlanSelectionRules.isSelected(state.value.selections, item)
 
@@ -95,15 +110,25 @@ class FakeCurrentPlanStore(private val plans: PlansRepository = FakePlansReposit
         state.value = PlanDraft()
     }
 
-    override suspend fun load(planId: Long): AppResult<PlanDraft> = plans.get(planId).map {
-        PlanDraft(planId = it.id, name = it.name, searchRequest = it.searchRequest, selections = it.selections).also { d -> state.value = d }
-    }
+    override suspend fun load(planId: Long): AppResult<PlanDraft> =
+        plans.get(planId).map {
+            PlanDraft(planId = it.id, name = it.name, searchRequest = it.searchRequest, selections = it.selections).also { d ->
+                state.value = d
+            }
+        }
 
     override suspend fun save(name: String?): AppResult<Plan> {
         val d = state.value
         val planName = name ?: d.name ?: PlanDraft.DEFAULT_NAME
         val planId = d.planId
-        val result = if (planId == null) plans.create(planName, JsonObject(emptyMap()), d.selections) else plans.update(planId, planName, d.selections)
+        val result =
+            if (planId ==
+                null
+            ) {
+                plans.create(planName, JsonObject(emptyMap()), d.selections)
+            } else {
+                plans.update(planId, planName, d.selections)
+            }
         if (result is AppResult.Success) state.update { it.copy(planId = result.value.id, name = result.value.name, dirty = false) }
         return result
     }

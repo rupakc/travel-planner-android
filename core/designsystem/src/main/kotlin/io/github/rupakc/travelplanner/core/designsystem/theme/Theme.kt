@@ -25,17 +25,33 @@ fun TravelTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    val dark = when (themeMode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-    }
+    val dark =
+        when (themeMode) {
+            ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+        }
     val context = LocalContext.current
-    val colors = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        dark -> DarkColors
-        else -> LightColors
-    }
+    val colors =
+        when {
+            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                if (dark) {
+                    dynamicDarkColorScheme(
+                        context,
+                    )
+                } else {
+                    dynamicLightColorScheme(context)
+                }
+            }
+
+            dark -> {
+                DarkColors
+            }
+
+            else -> {
+                LightColors
+            }
+        }
     val accents = remember(dark) { SectionAccents(dark) }
     CompositionLocalProvider(
         LocalExtendedColors provides if (dark) DarkExtendedColors else LightExtendedColors,

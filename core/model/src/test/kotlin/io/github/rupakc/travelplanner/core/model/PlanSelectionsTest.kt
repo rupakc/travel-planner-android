@@ -17,7 +17,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PlanSelectionsTest {
-    private val webPlan = """
+    private val webPlan =
+        """
         {"id":7,"username":"alice","name":"Tokyo","search_data":{"origin":"NYC","destination":"Tokyo","departure_date":"2026-04-01","nationality":"American","web_only":1},
          "selections":{"flight":null,"flights":[],"hotel":{"name":"Park Hyatt","price_per_night_usd":"650","x_web":"keep"},
            "activities":[{"name":"Food tour","price_usd":120}],"places_to_see":[],"walking_tours":[],"sim":null,
@@ -28,7 +29,7 @@ class PlanSelectionsTest {
            "packing_list":{"checked_items":{"Clothing-Jacket":true}},
            "itinerary":{"days":[],"total_estimated_cost_usd":500},"future_key":[1,2]},
          "created_at":"2026-01-01 10:00:00","updated_at":"2026-01-02 10:00:00","share_token":null}
-    """.trimIndent()
+        """.trimIndent()
 
     @Test
     fun `web plan decodes and re-encodes losslessly with web keys in order`() {
@@ -50,10 +51,12 @@ class PlanSelectionsTest {
     @Test
     fun `empty selections encode to the web EMPTY_SELECTIONS`() {
         val encoded = TravelJson.encodeToJsonElement(PlanSelections.serializer(), PlanSelections()) as JsonObject
-        val expected = TravelJson.parseToJsonElement(
-            """{"flight":null,"flights":[],"hotel":null,"activities":[],"places_to_see":[],"walking_tours":[],"sim":null,"tips":[],""" +
-                """"getting_around":[],"events":[],"itinerary_notes":{},"itinerary_edits":{},"itinerary_slots":[],"itinerary_layout":null,"packing_list":null}""",
-        )
+        val expected =
+            TravelJson.parseToJsonElement(
+                """{"flight":null,"flights":[],"hotel":null,"activities":[],"places_to_see":[],"walking_tours":[],"sim":null,"tips":[],""" +
+                    """"getting_around":[],"events":[],"itinerary_notes":{},"itinerary_edits":{},"itinerary_slots":[],""" +
+                    """"itinerary_layout":null,"packing_list":null}""",
+            )
         assertEquals(expected, encoded)
     }
 

@@ -48,7 +48,7 @@ style:
     max: 4
     excludeGuardClauses: true
   MaxLineLength:
-    maxLineLength: 140
+    maxLineLength: 160
   WildcardImport:
     active: true
   DestructuringDeclarationWithTooManyEntries:

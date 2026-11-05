@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.feature.results.R
  * Forex section body (inside SectionScaffold). Placeholder: replace this whole
  * file; keep the signature so SectionRegistry keeps compiling.
  */
+@Suppress("UnusedParameter") // placeholder: the section team uses `actions`
 @Composable
 internal fun ForexSectionContent(data: ForexData, actions: SectionActions, modifier: Modifier = Modifier) {
     val count = data.exchangeRates.size

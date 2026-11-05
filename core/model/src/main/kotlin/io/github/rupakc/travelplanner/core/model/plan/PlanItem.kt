@@ -68,43 +68,102 @@ sealed interface PlanItem {
 
 /** Pure selection rules shared by [PlanItem] consumers (CurrentPlanStore, chat plan actions). */
 object PlanSelectionRules {
-    fun isSelected(selections: PlanSelections, item: PlanItem): Boolean = when (item) {
-        is PlanItem.FlightItem -> if (item.isLeg) {
-            selections.flights.any { it.sameAs(item.flight) }
-        } else {
-            selections.flight?.sameAs(item.flight) == true
+    fun isSelected(selections: PlanSelections, item: PlanItem): Boolean =
+        when (item) {
+            is PlanItem.FlightItem -> {
+                if (item.isLeg) {
+                    selections.flights.any { it.sameAs(item.flight) }
+                } else {
+                    selections.flight?.sameAs(item.flight) == true
+                }
+            }
+
+            is PlanItem.HotelItem -> {
+                selections.hotel?.name == item.hotel.name && selections.hotel != null
+            }
+
+            is PlanItem.SimItem -> {
+                selections.sim?.let { PlanItem.SimItem(it).key == item.key } == true
+            }
+
+            is PlanItem.ActivityItem -> {
+                selections.activities.any { it.name == item.activity.name }
+            }
+
+            is PlanItem.PlaceItem -> {
+                selections.placesToSee.any { it.name == item.place.name }
+            }
+
+            is PlanItem.WalkingTourItem -> {
+                selections.walkingTours.any { it.url == item.tour.url }
+            }
+
+            is PlanItem.EventItem -> {
+                selections.events.any { it.name == item.event.name }
+            }
+
+            is PlanItem.TipItem -> {
+                selections.tips.any { it.title == item.tip.title }
+            }
+
+            is PlanItem.TransportItem -> {
+                selections.gettingAround.any { it.name == item.option.name }
+            }
+
+            is PlanItem.SlotItem -> {
+                selections.itinerarySlots.any { it.key == item.slot.key }
+            }
         }
-        is PlanItem.HotelItem -> selections.hotel?.name == item.hotel.name && selections.hotel != null
-        is PlanItem.SimItem -> selections.sim?.let { PlanItem.SimItem(it).key == item.key } == true
-        is PlanItem.ActivityItem -> selections.activities.any { it.name == item.activity.name }
-        is PlanItem.PlaceItem -> selections.placesToSee.any { it.name == item.place.name }
-        is PlanItem.WalkingTourItem -> selections.walkingTours.any { it.url == item.tour.url }
-        is PlanItem.EventItem -> selections.events.any { it.name == item.event.name }
-        is PlanItem.TipItem -> selections.tips.any { it.title == item.tip.title }
-        is PlanItem.TransportItem -> selections.gettingAround.any { it.name == item.option.name }
-        is PlanItem.SlotItem -> selections.itinerarySlots.any { it.key == item.slot.key }
-    }
 
     /** Selects [item] if not selected, else deselects it. */
     @Suppress("CyclomaticComplexMethod")
     fun toggle(selections: PlanSelections, item: PlanItem): PlanSelections {
         val selected = isSelected(selections, item)
         return when (item) {
-            is PlanItem.FlightItem -> if (item.isLeg) {
-                val others = selections.flights.filterNot { it.legIndex == item.flight.legIndex }
-                selections.copy(flights = if (selected) others else (others + item.flight).sortedBy { it.legIndex })
-            } else {
-                selections.copy(flight = if (selected) null else item.flight)
+            is PlanItem.FlightItem -> {
+                if (item.isLeg) {
+                    val others = selections.flights.filterNot { it.legIndex == item.flight.legIndex }
+                    selections.copy(flights = if (selected) others else (others + item.flight).sortedBy { it.legIndex })
+                } else {
+                    selections.copy(flight = if (selected) null else item.flight)
+                }
             }
-            is PlanItem.HotelItem -> selections.copy(hotel = if (selected) null else item.hotel)
-            is PlanItem.SimItem -> selections.copy(sim = if (selected) null else item.plan)
-            is PlanItem.ActivityItem -> selections.copy(activities = selections.activities.toggled(item.activity, selected) { it.name })
-            is PlanItem.PlaceItem -> selections.copy(placesToSee = selections.placesToSee.toggled(item.place, selected) { it.name })
-            is PlanItem.WalkingTourItem -> selections.copy(walkingTours = selections.walkingTours.toggled(item.tour, selected) { it.url })
-            is PlanItem.EventItem -> selections.copy(events = selections.events.toggled(item.event, selected) { it.name })
-            is PlanItem.TipItem -> selections.copy(tips = selections.tips.toggled(item.tip, selected) { it.title })
-            is PlanItem.TransportItem -> selections.copy(gettingAround = selections.gettingAround.toggled(item.option, selected) { it.name })
-            is PlanItem.SlotItem -> selections.copy(itinerarySlots = selections.itinerarySlots.toggled(item.slot, selected) { it.key })
+
+            is PlanItem.HotelItem -> {
+                selections.copy(hotel = if (selected) null else item.hotel)
+            }
+
+            is PlanItem.SimItem -> {
+                selections.copy(sim = if (selected) null else item.plan)
+            }
+
+            is PlanItem.ActivityItem -> {
+                selections.copy(activities = selections.activities.toggled(item.activity, selected) { it.name })
+            }
+
+            is PlanItem.PlaceItem -> {
+                selections.copy(placesToSee = selections.placesToSee.toggled(item.place, selected) { it.name })
+            }
+
+            is PlanItem.WalkingTourItem -> {
+                selections.copy(walkingTours = selections.walkingTours.toggled(item.tour, selected) { it.url })
+            }
+
+            is PlanItem.EventItem -> {
+                selections.copy(events = selections.events.toggled(item.event, selected) { it.name })
+            }
+
+            is PlanItem.TipItem -> {
+                selections.copy(tips = selections.tips.toggled(item.tip, selected) { it.title })
+            }
+
+            is PlanItem.TransportItem -> {
+                selections.copy(gettingAround = selections.gettingAround.toggled(item.option, selected) { it.name })
+            }
+
+            is PlanItem.SlotItem -> {
+                selections.copy(itinerarySlots = selections.itinerarySlots.toggled(item.slot, selected) { it.key })
+            }
         }
     }
 

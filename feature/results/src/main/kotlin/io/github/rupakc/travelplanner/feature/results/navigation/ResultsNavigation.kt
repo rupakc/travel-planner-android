@@ -41,23 +41,24 @@ fun NavGraphBuilder.resultsGraph(onBack: () -> Unit) {
         val viewModel: ResultsViewModel = hiltViewModel()
         val state by viewModel.state.collectAsStateWithLifecycle()
         val open = rememberLinkOpener()
-        val actions = remember(viewModel) {
-            object : SectionActions {
-                override fun onToggle(item: PlanItem) = viewModel.toggle(item)
+        val actions =
+            remember(viewModel) {
+                object : SectionActions {
+                    override fun onToggle(item: PlanItem) = viewModel.toggle(item)
 
-                override fun isSelected(item: PlanItem) = viewModel.isSelected(item)
+                    override fun isSelected(item: PlanItem) = viewModel.isSelected(item)
 
-                override fun onOpenLink(url: String) = open(url)
+                    override fun onOpenLink(url: String) = open(url)
 
-                override fun onWatchFare(flight: Flight) = Unit
+                    override fun onWatchFare(flight: Flight) = Unit
 
-                override fun onWatchHotel(hotel: Hotel) = Unit
+                    override fun onWatchHotel(hotel: Hotel) = Unit
 
-                override fun onWatchActivity(activity: Activity) = Unit
+                    override fun onWatchActivity(activity: Activity) = Unit
 
-                override fun onRetry(section: ResultsSection) = Unit
+                    override fun onRetry(section: ResultsSection) = Unit
+                }
             }
-        }
         ResultsScreen(state = state, actions = actions, onBack = onBack)
     }
     composable<CompareRoute> {

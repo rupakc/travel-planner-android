@@ -40,24 +40,25 @@ enum class AccentHue(
 }
 
 /** Section → hue (spec §5). */
-val SectionHues: Map<SectionId, AccentHue> = mapOf(
-    SectionId.FLIGHTS to AccentHue.SKY,
-    SectionId.WEATHER to AccentHue.SKY,
-    SectionId.HOTELS to AccentHue.VIOLET,
-    SectionId.ACTIVITIES to AccentHue.EMERALD,
-    SectionId.PLACES_TO_SEE to AccentHue.LIME,
-    SectionId.WALKING_TOURS to AccentHue.TEAL,
-    SectionId.EVENTS to AccentHue.FUCHSIA,
-    SectionId.VISA to AccentHue.AMBER,
-    SectionId.SIM to AccentHue.ROSE,
-    SectionId.TIPS to AccentHue.AMBER,
-    SectionId.GETTING_AROUND to AccentHue.CYAN,
-    SectionId.FOREX to AccentHue.EMERALD,
-    SectionId.ITINERARY to AccentHue.TEAL,
-    SectionId.STRESS_TEST to AccentHue.ROSE,
-    SectionId.EMERGENCY_CARD to AccentHue.RED,
-    SectionId.PACKING_LIST to AccentHue.TEAL,
-)
+val SectionHues: Map<SectionId, AccentHue> =
+    mapOf(
+        SectionId.FLIGHTS to AccentHue.SKY,
+        SectionId.WEATHER to AccentHue.SKY,
+        SectionId.HOTELS to AccentHue.VIOLET,
+        SectionId.ACTIVITIES to AccentHue.EMERALD,
+        SectionId.PLACES_TO_SEE to AccentHue.LIME,
+        SectionId.WALKING_TOURS to AccentHue.TEAL,
+        SectionId.EVENTS to AccentHue.FUCHSIA,
+        SectionId.VISA to AccentHue.AMBER,
+        SectionId.SIM to AccentHue.ROSE,
+        SectionId.TIPS to AccentHue.AMBER,
+        SectionId.GETTING_AROUND to AccentHue.CYAN,
+        SectionId.FOREX to AccentHue.EMERALD,
+        SectionId.ITINERARY to AccentHue.TEAL,
+        SectionId.STRESS_TEST to AccentHue.ROSE,
+        SectionId.EMERGENCY_CARD to AccentHue.RED,
+        SectionId.PACKING_LIST to AccentHue.TEAL,
+    )
 
 /** All section accents for the current theme; read via `TravelTheme.sectionAccents[id]`. */
 @Immutable

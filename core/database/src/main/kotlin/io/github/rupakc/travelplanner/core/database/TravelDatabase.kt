@@ -44,7 +44,9 @@ abstract class TravelDatabase : RoomDatabase() {
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
     @Provides @Singleton
-    fun database(@ApplicationContext context: Context): TravelDatabase =
+    fun database(
+        @ApplicationContext context: Context,
+    ): TravelDatabase =
         Room.databaseBuilder(context, TravelDatabase::class.java, TravelDatabase.NAME).build()
 
     @Provides fun planDao(db: TravelDatabase): PlanDao = db.planDao()

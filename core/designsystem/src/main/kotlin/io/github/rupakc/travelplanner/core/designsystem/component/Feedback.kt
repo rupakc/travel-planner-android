@@ -55,22 +55,24 @@ fun rememberReduceMotion(): Boolean {
 }
 
 /** Shimmer placeholder (web shimmer skeleton #f1f5f9/#e2e8f0); static when reduce-motion is on. */
-fun Modifier.shimmer(): Modifier = composed {
-    val base = TravelTheme.extendedColors.skeletonBase
-    val highlight = TravelTheme.extendedColors.skeletonHighlight
-    if (rememberReduceMotion()) {
-        background(base)
-    } else {
-        val progress = rememberInfiniteTransition(label = "shimmer").animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(tween(SHIMMER_MILLIS, easing = LinearEasing), RepeatMode.Restart),
-            label = "shimmerProgress",
-        ).value
-        val x = SHIMMER_WIDTH * (progress * 2 - 1)
-        background(Brush.linearGradient(listOf(base, highlight, base), start = Offset(x, 0f), end = Offset(x + SHIMMER_WIDTH, 0f)))
+fun Modifier.shimmer(): Modifier =
+    composed {
+        val base = TravelTheme.extendedColors.skeletonBase
+        val highlight = TravelTheme.extendedColors.skeletonHighlight
+        if (rememberReduceMotion()) {
+            background(base)
+        } else {
+            val progress =
+                rememberInfiniteTransition(label = "shimmer").animateFloat(
+                    initialValue = 0f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(tween(SHIMMER_MILLIS, easing = LinearEasing), RepeatMode.Restart),
+                    label = "shimmerProgress",
+                ).value
+            val x = SHIMMER_WIDTH * (progress * 2 - 1)
+            background(Brush.linearGradient(listOf(base, highlight, base), start = Offset(x, 0f), end = Offset(x + SHIMMER_WIDTH, 0f)))
+        }
     }
-}
 
 private const val SHIMMER_MILLIS = 1200
 private const val SHIMMER_WIDTH = 600f
@@ -159,7 +161,12 @@ private fun StateLayout(
         Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(40.dp))
         Text(title, style = TravelTheme.typography.titleMedium, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
         if (message != null) {
-            Text(message, style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant, textAlign = TextAlign.Center)
+            Text(
+                message,
+                style = TravelTheme.typography.bodyMedium,
+                color = TravelTheme.colors.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
         }
         if (actionLabel != null && onAction != null) TpButton(actionLabel, onAction, variant = actionVariant)
     }

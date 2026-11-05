@@ -60,9 +60,13 @@ class FakeAuthRepository(initial: Session? = null) : AuthRepository {
     override suspend fun login(username: String, password: String): AppResult<User> =
         loginResult.also { if (it is AppResult.Success) sessionFlow.value = Session("token", it.value) }
 
-    override suspend fun changePassword(currentPassword: String, newPassword: String): AppResult<Unit> = changePasswordResult.also {
-        if (it is AppResult.Success) sessionFlow.value = sessionFlow.value?.let { s -> s.copy(user = s.user.copy(requiresPasswordChange = false)) }
-    }
+    override suspend fun changePassword(currentPassword: String, newPassword: String): AppResult<Unit> =
+        changePasswordResult.also {
+            if (it is AppResult.Success) {
+                sessionFlow.value =
+                    sessionFlow.value?.let { s -> s.copy(user = s.user.copy(requiresPasswordChange = false)) }
+            }
+        }
 
     override suspend fun refreshUser(): AppResult<User> = refreshResult
 
@@ -98,13 +102,14 @@ class FakeSearchRepository(var events: List<SearchEvent> = Fixtures.searchEvents
         started += request
         var folded = SearchResultsState(request = request, phase = StreamPhase.STREAMING)
         val error = failure
-        folded = if (error != null) {
-            folded.copy(phase = StreamPhase.FAILED, error = error)
-        } else {
-            events.fold(folded, SearchResultsReducer::reduce).let {
-                if (it.phase == StreamPhase.DONE) it else SearchResultsReducer.finish(it, StreamPhase.INTERRUPTED)
+        folded =
+            if (error != null) {
+                folded.copy(phase = StreamPhase.FAILED, error = error)
+            } else {
+                events.fold(folded, SearchResultsReducer::reduce).let {
+                    if (it.phase == StreamPhase.DONE) it else SearchResultsReducer.finish(it, StreamPhase.INTERRUPTED)
+                }
             }
-        }
         state.value = folded
     }
 
@@ -116,24 +121,26 @@ class FakeSearchRepository(var events: List<SearchEvent> = Fixtures.searchEvents
         state.value = SearchResultsState()
     }
 
-    override fun results(request: TravelSearchRequest): Flow<SearchResultsState> = flow {
-        var folded = SearchResultsState(request = request, phase = StreamPhase.STREAMING)
-        emit(folded)
-        failure?.let {
-            emit(folded.copy(phase = StreamPhase.FAILED, error = it))
-            return@flow
-        }
-        for (event in events) {
-            folded = SearchResultsReducer.reduce(folded, event)
+    override fun results(request: TravelSearchRequest): Flow<SearchResultsState> =
+        flow {
+            var folded = SearchResultsState(request = request, phase = StreamPhase.STREAMING)
             emit(folded)
+            failure?.let {
+                emit(folded.copy(phase = StreamPhase.FAILED, error = it))
+                return@flow
+            }
+            for (event in events) {
+                folded = SearchResultsReducer.reduce(folded, event)
+                emit(folded)
+            }
+            if (folded.phase != StreamPhase.DONE) emit(SearchResultsReducer.finish(folded, StreamPhase.INTERRUPTED))
         }
-        if (folded.phase != StreamPhase.DONE) emit(SearchResultsReducer.finish(folded, StreamPhase.INTERRUPTED))
-    }
 
-    override fun events(request: TravelSearchRequest): Flow<SearchEvent> = flow {
-        failure?.let { throw AppException(it) }
-        events.forEach { emit(it) }
-    }
+    override fun events(request: TravelSearchRequest): Flow<SearchEvent> =
+        flow {
+            failure?.let { throw AppException(it) }
+            events.forEach { emit(it) }
+        }
 
     override suspend fun section(section: SectionId, request: TravelSearchRequest) = sectionResult
 
@@ -151,7 +158,10 @@ class FakeSearchRepository(var events: List<SearchEvent> = Fixtures.searchEvents
 
     override suspend fun airports(query: String, limit: Int): AppResult<List<Airport>> = AppResult.Success(airports.take(limit))
 
-    override suspend fun nationalities(query: String, limit: Int): AppResult<List<Nationality>> = AppResult.Success(nationalities.take(limit))
+    override suspend fun nationalities(query: String, limit: Int): AppResult<List<Nationality>> =
+        AppResult.Success(
+            nationalities.take(limit),
+        )
 }
 
 /** Fake chat: [replies] (default `chat_qa.sse`) is the stream for every send; history is in memory. */
@@ -171,7 +181,10 @@ class FakeChatRepository(var replies: List<ChatEvent> = Fixtures.chatEvents(Fixt
 
     override val threads: Flow<List<ChatThread>> = threadState
 
-    override fun messages(threadId: Long): Flow<List<StoredChatMessage>> = messageState.map { all -> all.filter { it.threadId == threadId } }
+    override fun messages(threadId: Long): Flow<List<StoredChatMessage>> =
+        messageState.map { all ->
+            all.filter { it.threadId == threadId }
+        }
 
     override suspend fun createThread(title: String): Long {
         val id = nextId++

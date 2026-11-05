@@ -30,7 +30,14 @@ data class ChatThreadEntity(
 
 @Entity(
     tableName = "chat_messages",
-    foreignKeys = [ForeignKey(entity = ChatThreadEntity::class, parentColumns = ["id"], childColumns = ["threadId"], onDelete = ForeignKey.CASCADE)],
+    foreignKeys = [
+        ForeignKey(
+            entity = ChatThreadEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["threadId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
     indices = [Index("threadId")],
 )
 data class ChatMessageEntity(
@@ -56,11 +63,17 @@ data class RecentSearchEntity(
 
 /** Notification ids already posted on this device (dedupe for AlertPollWorker). */
 @Entity(tableName = "seen_notifications")
-data class SeenNotificationEntity(@PrimaryKey val id: Long, val seenAtMillis: Long)
+data class SeenNotificationEntity(
+    @PrimaryKey val id: Long,
+    val seenAtMillis: Long,
+)
 
 /** The single My Plan draft (CurrentPlanStore), so it survives process death. */
 @Entity(tableName = "plan_draft")
-data class PlanDraftEntity(@PrimaryKey val id: Int = SINGLE_ROW, val json: String) {
+data class PlanDraftEntity(
+    @PrimaryKey val id: Int = SINGLE_ROW,
+    val json: String,
+) {
     companion object {
         const val SINGLE_ROW = 0
     }

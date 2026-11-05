@@ -26,73 +26,85 @@ import io.github.rupakc.travelplanner.core.network.api.ImportApi
 import io.github.rupakc.travelplanner.core.network.api.NearbyApi
 import io.github.rupakc.travelplanner.core.network.api.SearchApi
 import io.github.rupakc.travelplanner.core.network.apiCall
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.floor
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @Singleton
-class CompareRepositoryImpl @Inject constructor(private val api: SearchApi) : CompareRepository {
-    override suspend fun compare(request: TravelSearchRequest): AppResult<CompareSummary> = apiCall { api.compareDestination(request) }
-}
+class CompareRepositoryImpl
+    @Inject
+    constructor(private val api: SearchApi) : CompareRepository {
+        override suspend fun compare(request: TravelSearchRequest): AppResult<CompareSummary> = apiCall { api.compareDestination(request) }
+    }
 
 @Singleton
-class DiscoverRepositoryImpl @Inject constructor(private val api: SearchApi) : DiscoverRepository {
-    override suspend fun discover(request: DiscoveryRequest): AppResult<DiscoveryResponse> = apiCall { api.discover(request) }
-}
+class DiscoverRepositoryImpl
+    @Inject
+    constructor(private val api: SearchApi) : DiscoverRepository {
+        override suspend fun discover(request: DiscoveryRequest): AppResult<DiscoveryResponse> = apiCall { api.discover(request) }
+    }
 
 @Singleton
-class ImportRepositoryImpl @Inject constructor(private val api: ImportApi) : ImportRepository {
-    override suspend fun extract(request: ImportRequest): AppResult<ImportPreview> = apiCall { api.extract(request) }
+class ImportRepositoryImpl
+    @Inject
+    constructor(private val api: ImportApi) : ImportRepository {
+        override suspend fun extract(request: ImportRequest): AppResult<ImportPreview> = apiCall { api.extract(request) }
 
-    override suspend fun resolvePlace(request: ResolvePlaceRequest): AppResult<ResolvedPlace> = apiCall { api.resolvePlace(request) }
-}
-
-@Singleton
-class FareCalendarRepositoryImpl @Inject constructor(private val api: SearchApi) : FareCalendarRepository {
-    override suspend fun fareCalendar(request: TravelSearchRequest): AppResult<FareCalendar> = apiCall { api.fareCalendar(request) }
-}
+        override suspend fun resolvePlace(request: ResolvePlaceRequest): AppResult<ResolvedPlace> = apiCall { api.resolvePlace(request) }
+    }
 
 @Singleton
-class HealthRepositoryImpl @Inject constructor(private val api: HealthApi) : HealthRepository {
-    private val state = MutableStateFlow<Health?>(null)
-    override val capabilities: StateFlow<Health?> = state.asStateFlow()
+class FareCalendarRepositoryImpl
+    @Inject
+    constructor(private val api: SearchApi) : FareCalendarRepository {
+        override suspend fun fareCalendar(request: TravelSearchRequest): AppResult<FareCalendar> = apiCall { api.fareCalendar(request) }
+    }
 
-    override suspend fun refresh(): AppResult<Health> = apiCall { api.health() }.onSuccess { state.value = it }
-}
+@Singleton
+class HealthRepositoryImpl
+    @Inject
+    constructor(private val api: HealthApi) : HealthRepository {
+        private val state = MutableStateFlow<Health?>(null)
+        override val capabilities: StateFlow<Health?> = state.asStateFlow()
+
+        override suspend fun refresh(): AppResult<Health> = apiCall { api.health() }.onSuccess { state.value = it }
+    }
 
 /** In-memory cache: 1 h per ~5 km cell (0.05° grid), keyed with interests and limit. */
 @Singleton
-class NearbyRepositoryImpl @Inject constructor(
-    private val api: NearbyApi,
-    private val clock: AppClock,
-) : NearbyRepository {
-    private data class Key(val latCell: Long, val lngCell: Long, val interests: List<String>, val limit: Int)
+class NearbyRepositoryImpl
+    @Inject
+    constructor(
+        private val api: NearbyApi,
+        private val clock: AppClock,
+    ) : NearbyRepository {
+        private data class Key(val latCell: Long, val lngCell: Long, val interests: List<String>, val limit: Int)
 
-    private data class Entry(val at: Instant, val value: NearbyResponse)
+        private data class Entry(val at: Instant, val value: NearbyResponse)
 
-    private val cache = mutableMapOf<Key, Entry>()
-    private val mutex = Mutex()
+        private val cache = mutableMapOf<Key, Entry>()
+        private val mutex = Mutex()
 
-    override suspend fun nearby(lat: Double, lng: Double, interests: List<String>?, limit: Int): AppResult<NearbyResponse> {
-        val key = Key(cell(lat), cell(lng), interests.orEmpty().sorted(), limit)
-        mutex.withLock {
-            cache[key]?.takeIf { Duration.between(it.at, clock.now()) < TTL }?.let { return AppResult.Success(it.value) }
+        override suspend fun nearby(lat: Double, lng: Double, interests: List<String>?, limit: Int): AppResult<NearbyResponse> {
+            val key = Key(cell(lat), cell(lng), interests.orEmpty().sorted(), limit)
+            mutex.withLock {
+                cache[key]?.takeIf { Duration.between(it.at, clock.now()) < TTL }?.let { return AppResult.Success(it.value) }
+            }
+            return apiCall { api.nearby(NearbyRequest(lat, lng, interests, limit)) }
+                .onSuccess { mutex.withLock { cache[key] = Entry(clock.now(), it) } }
         }
-        return apiCall { api.nearby(NearbyRequest(lat, lng, interests, limit)) }
-            .onSuccess { mutex.withLock { cache[key] = Entry(clock.now(), it) } }
-    }
 
-    private fun cell(degrees: Double): Long = floor(degrees / CELL_DEGREES).toLong()
+        private fun cell(degrees: Double): Long = floor(degrees / CELL_DEGREES).toLong()
 
-    private companion object {
-        const val CELL_DEGREES = 0.05
-        val TTL: Duration = Duration.ofHours(1)
+        private companion object {
+            const val CELL_DEGREES = 0.05
+            val TTL: Duration = Duration.ofHours(1)
+        }
     }
-}

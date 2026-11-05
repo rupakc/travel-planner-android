@@ -27,16 +27,24 @@ object DataStoreModule {
         PreferenceDataStoreFactory.create { preferencesDataStoreFile(name) }
 
     @Provides @Singleton
-    fun sessionStore(@ApplicationContext context: Context): SessionStore = PreferencesSessionStore(context.store(DataStoreFiles.SESSION))
+    fun sessionStore(
+        @ApplicationContext context: Context,
+    ): SessionStore = PreferencesSessionStore(context.store(DataStoreFiles.SESSION))
 
     @Provides @Singleton
-    fun settingsStore(@ApplicationContext context: Context): SettingsStore = PreferencesSettingsStore(context.store(DataStoreFiles.SETTINGS))
+    fun settingsStore(
+        @ApplicationContext context: Context,
+    ): SettingsStore = PreferencesSettingsStore(context.store(DataStoreFiles.SETTINGS))
 
     @Provides @Singleton
-    fun profileStore(@ApplicationContext context: Context): TravellerProfileStore =
+    fun profileStore(
+        @ApplicationContext context: Context,
+    ): TravellerProfileStore =
         PreferencesTravellerProfileStore(context.store(DataStoreFiles.PROFILE))
 
     @Provides @Singleton
-    fun featureOverridesStore(@ApplicationContext context: Context): FeatureOverridesStore =
+    fun featureOverridesStore(
+        @ApplicationContext context: Context,
+    ): FeatureOverridesStore =
         PreferencesFeatureOverridesStore(context.store(DataStoreFiles.FEATURES))
 }

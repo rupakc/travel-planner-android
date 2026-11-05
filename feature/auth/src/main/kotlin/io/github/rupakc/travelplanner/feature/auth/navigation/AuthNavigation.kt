@@ -5,11 +5,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
+import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
 import io.github.rupakc.travelplanner.core.ui.PlaceholderAction
 import io.github.rupakc.travelplanner.feature.auth.R
-import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
-import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 
 /**
  * Login and forced password change. The app's auth gate decides which one shows

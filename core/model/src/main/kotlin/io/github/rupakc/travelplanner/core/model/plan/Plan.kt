@@ -43,7 +43,9 @@ data class CreatePlanRequest(
 data class UpdatePlanRequest(val name: String? = null, val selections: PlanSelections? = null)
 
 @Serializable
-data class ShareTokenResponse(@SerialName("share_token") val shareToken: String)
+data class ShareTokenResponse(
+    @SerialName("share_token") val shareToken: String,
+)
 
 /** `{"success":true}` responses. */
 @Serializable

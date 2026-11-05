@@ -5,10 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
 import io.github.rupakc.travelplanner.core.ui.PlaceholderAction
 import io.github.rupakc.travelplanner.feature.search.R
-import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 
 /** Search form (known destination, Surprise me, Compare, From a link) + recent searches. */
 @Suppress("UnusedParameter", "UNUSED_PARAMETER") // callbacks reserved for the feature team

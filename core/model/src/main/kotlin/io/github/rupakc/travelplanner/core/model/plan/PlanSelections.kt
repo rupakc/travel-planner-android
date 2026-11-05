@@ -71,9 +71,10 @@ data class PlanSelections(
 
     /** Web `countSelections`. */
     val count: Int
-        get() = (if (flight != null) 1 else 0) + flights.size + (if (hotel != null) 1 else 0) + activities.size +
-            placesToSee.size + walkingTours.size + (if (sim != null) 1 else 0) + gettingAround.size + tips.size +
-            events.size + itinerarySlots.size + (if (packingList != null) 1 else 0)
+        get() =
+            (if (flight != null) 1 else 0) + flights.size + (if (hotel != null) 1 else 0) + activities.size +
+                placesToSee.size + walkingTours.size + (if (sim != null) 1 else 0) + gettingAround.size + tips.size +
+                events.size + itinerarySlots.size + (if (packingList != null) 1 else 0)
 
     val isEmpty: Boolean get() = count == 0
 
@@ -105,10 +106,25 @@ object SelectionKeys {
     const val PACKING_LIST = "packing_list"
     const val ITINERARY = "itinerary"
 
-    val ALL = listOf(
-        FLIGHT, FLIGHTS, HOTEL, ACTIVITIES, PLACES_TO_SEE, WALKING_TOURS, SIM, TIPS, GETTING_AROUND, EVENTS,
-        ITINERARY_NOTES, ITINERARY_EDITS, ITINERARY_SLOTS, ITINERARY_LAYOUT, PACKING_LIST, ITINERARY,
-    )
+    val ALL =
+        listOf(
+            FLIGHT,
+            FLIGHTS,
+            HOTEL,
+            ACTIVITIES,
+            PLACES_TO_SEE,
+            WALKING_TOURS,
+            SIM,
+            TIPS,
+            GETTING_AROUND,
+            EVENTS,
+            ITINERARY_NOTES,
+            ITINERARY_EDITS,
+            ITINERARY_SLOTS,
+            ITINERARY_LAYOUT,
+            PACKING_LIST,
+            ITINERARY,
+        )
 }
 
 object PlanSelectionsSerializer : KSerializer<PlanSelections> {
@@ -125,56 +141,61 @@ object PlanSelectionsSerializer : KSerializer<PlanSelections> {
         jsonEncoder.encodeJsonElement(toJson(value, jsonEncoder.json))
     }
 
-    fun fromJson(obj: JsonObject, json: Json = TravelJson): PlanSelections = PlanSelections(
-        flight = decodeRawBacked(Flight.serializer(), obj[SelectionKeys.FLIGHT], json),
-        flights = decodeRawBackedList(Flight.serializer(), obj[SelectionKeys.FLIGHTS], json),
-        hotel = decodeRawBacked(Hotel.serializer(), obj[SelectionKeys.HOTEL], json),
-        activities = decodeRawBackedList(Activity.serializer(), obj[SelectionKeys.ACTIVITIES], json),
-        placesToSee = decodeRawBackedList(PlaceToSee.serializer(), obj[SelectionKeys.PLACES_TO_SEE], json),
-        walkingTours = decodeRawBackedList(WalkingTour.serializer(), obj[SelectionKeys.WALKING_TOURS], json),
-        sim = decodeRawBacked(SimPlan.serializer(), obj[SelectionKeys.SIM], json),
-        tips = decodeRawBackedList(Tip.serializer(), obj[SelectionKeys.TIPS], json),
-        gettingAround = decodeRawBackedList(TransportOption.serializer(), obj[SelectionKeys.GETTING_AROUND], json),
-        events = decodeRawBackedList(TravelEvent.serializer(), obj[SelectionKeys.EVENTS], json),
-        itineraryNotes = (obj[SelectionKeys.ITINERARY_NOTES] as? JsonObject)
-            ?.mapNotNull { (k, v) -> (v as? JsonPrimitive)?.takeIf { it !is JsonNull }?.contentOrNull?.let { k to it } }
-            ?.toMap().orEmpty(),
-        itineraryEdits = (obj[SelectionKeys.ITINERARY_EDITS] as? JsonObject)
-            ?.mapNotNull { (k, v) -> (v as? JsonObject)?.let { k to it } }?.toMap().orEmpty(),
-        itinerarySlots = decodeRawBackedList(ItinerarySlot.serializer(), obj[SelectionKeys.ITINERARY_SLOTS], json),
-        itineraryLayout = (obj[SelectionKeys.ITINERARY_LAYOUT] as? JsonObject)
-            ?.let { runCatching { json.decodeFromJsonElement(ItineraryLayout.serializer(), it) }.getOrNull() },
-        packingList = obj[SelectionKeys.PACKING_LIST] as? JsonObject,
-        itinerarySnapshot = obj[SelectionKeys.ITINERARY] as? JsonObject,
-        extras = obj.filterKeys { it !in SelectionKeys.ALL },
-    )
-
-    fun toJson(value: PlanSelections, json: Json = TravelJson): JsonObject = buildJsonObject {
-        fun <T : RawBacked<T>> one(key: String, item: T?, serializer: KSerializer<T>) =
-            put(key, item?.toJson(serializer, json) ?: JsonNull)
-
-        fun <T : RawBacked<T>> many(key: String, items: List<T>, serializer: KSerializer<T>) =
-            put(key, JsonArray(items.map { it.toJson(serializer, json) }))
-
-        one(SelectionKeys.FLIGHT, value.flight, Flight.serializer())
-        many(SelectionKeys.FLIGHTS, value.flights, Flight.serializer())
-        one(SelectionKeys.HOTEL, value.hotel, Hotel.serializer())
-        many(SelectionKeys.ACTIVITIES, value.activities, Activity.serializer())
-        many(SelectionKeys.PLACES_TO_SEE, value.placesToSee, PlaceToSee.serializer())
-        many(SelectionKeys.WALKING_TOURS, value.walkingTours, WalkingTour.serializer())
-        one(SelectionKeys.SIM, value.sim, SimPlan.serializer())
-        many(SelectionKeys.TIPS, value.tips, Tip.serializer())
-        many(SelectionKeys.GETTING_AROUND, value.gettingAround, TransportOption.serializer())
-        many(SelectionKeys.EVENTS, value.events, TravelEvent.serializer())
-        put(SelectionKeys.ITINERARY_NOTES, JsonObject(value.itineraryNotes.mapValues { JsonPrimitive(it.value) }))
-        put(SelectionKeys.ITINERARY_EDITS, JsonObject(value.itineraryEdits))
-        many(SelectionKeys.ITINERARY_SLOTS, value.itinerarySlots, ItinerarySlot.serializer())
-        put(
-            SelectionKeys.ITINERARY_LAYOUT,
-            value.itineraryLayout?.let { json.encodeToJsonElement(ItineraryLayout.serializer(), it) } ?: JsonNull,
+    fun fromJson(obj: JsonObject, json: Json = TravelJson): PlanSelections =
+        PlanSelections(
+            flight = decodeRawBacked(Flight.serializer(), obj[SelectionKeys.FLIGHT], json),
+            flights = decodeRawBackedList(Flight.serializer(), obj[SelectionKeys.FLIGHTS], json),
+            hotel = decodeRawBacked(Hotel.serializer(), obj[SelectionKeys.HOTEL], json),
+            activities = decodeRawBackedList(Activity.serializer(), obj[SelectionKeys.ACTIVITIES], json),
+            placesToSee = decodeRawBackedList(PlaceToSee.serializer(), obj[SelectionKeys.PLACES_TO_SEE], json),
+            walkingTours = decodeRawBackedList(WalkingTour.serializer(), obj[SelectionKeys.WALKING_TOURS], json),
+            sim = decodeRawBacked(SimPlan.serializer(), obj[SelectionKeys.SIM], json),
+            tips = decodeRawBackedList(Tip.serializer(), obj[SelectionKeys.TIPS], json),
+            gettingAround = decodeRawBackedList(TransportOption.serializer(), obj[SelectionKeys.GETTING_AROUND], json),
+            events = decodeRawBackedList(TravelEvent.serializer(), obj[SelectionKeys.EVENTS], json),
+            itineraryNotes =
+                (obj[SelectionKeys.ITINERARY_NOTES] as? JsonObject)
+                    ?.mapNotNull { (k, v) -> (v as? JsonPrimitive)?.takeIf { it !is JsonNull }?.contentOrNull?.let { k to it } }
+                    ?.toMap().orEmpty(),
+            itineraryEdits =
+                (obj[SelectionKeys.ITINERARY_EDITS] as? JsonObject)
+                    ?.mapNotNull { (k, v) -> (v as? JsonObject)?.let { k to it } }?.toMap().orEmpty(),
+            itinerarySlots = decodeRawBackedList(ItinerarySlot.serializer(), obj[SelectionKeys.ITINERARY_SLOTS], json),
+            itineraryLayout =
+                (obj[SelectionKeys.ITINERARY_LAYOUT] as? JsonObject)
+                    ?.let { runCatching { json.decodeFromJsonElement(ItineraryLayout.serializer(), it) }.getOrNull() },
+            packingList = obj[SelectionKeys.PACKING_LIST] as? JsonObject,
+            itinerarySnapshot = obj[SelectionKeys.ITINERARY] as? JsonObject,
+            extras = obj.filterKeys { it !in SelectionKeys.ALL },
         )
-        put(SelectionKeys.PACKING_LIST, value.packingList ?: JsonNull)
-        value.itinerarySnapshot?.let { put(SelectionKeys.ITINERARY, it) }
-        value.extras.forEach { (k, v) -> put(k, v) }
-    }
+
+    fun toJson(value: PlanSelections, json: Json = TravelJson): JsonObject =
+        buildJsonObject {
+            fun <T : RawBacked<T>> one(key: String, item: T?, serializer: KSerializer<T>) =
+                put(key, item?.toJson(serializer, json) ?: JsonNull)
+
+            fun <T : RawBacked<T>> many(key: String, items: List<T>, serializer: KSerializer<T>) =
+                put(key, JsonArray(items.map { it.toJson(serializer, json) }))
+
+            one(SelectionKeys.FLIGHT, value.flight, Flight.serializer())
+            many(SelectionKeys.FLIGHTS, value.flights, Flight.serializer())
+            one(SelectionKeys.HOTEL, value.hotel, Hotel.serializer())
+            many(SelectionKeys.ACTIVITIES, value.activities, Activity.serializer())
+            many(SelectionKeys.PLACES_TO_SEE, value.placesToSee, PlaceToSee.serializer())
+            many(SelectionKeys.WALKING_TOURS, value.walkingTours, WalkingTour.serializer())
+            one(SelectionKeys.SIM, value.sim, SimPlan.serializer())
+            many(SelectionKeys.TIPS, value.tips, Tip.serializer())
+            many(SelectionKeys.GETTING_AROUND, value.gettingAround, TransportOption.serializer())
+            many(SelectionKeys.EVENTS, value.events, TravelEvent.serializer())
+            put(SelectionKeys.ITINERARY_NOTES, JsonObject(value.itineraryNotes.mapValues { JsonPrimitive(it.value) }))
+            put(SelectionKeys.ITINERARY_EDITS, JsonObject(value.itineraryEdits))
+            many(SelectionKeys.ITINERARY_SLOTS, value.itinerarySlots, ItinerarySlot.serializer())
+            put(
+                SelectionKeys.ITINERARY_LAYOUT,
+                value.itineraryLayout?.let { json.encodeToJsonElement(ItineraryLayout.serializer(), it) } ?: JsonNull,
+            )
+            put(SelectionKeys.PACKING_LIST, value.packingList ?: JsonNull)
+            value.itinerarySnapshot?.let { put(SelectionKeys.ITINERARY, it) }
+            value.extras.forEach { (k, v) -> put(k, v) }
+        }
 }

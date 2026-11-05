@@ -27,17 +27,20 @@ class TestNetwork(
     val dispatchers: AppDispatchers,
 ) {
     val authEvents = AuthEvents()
-    private val buildInfo = AppBuildInfo(defaultBaseUrl = baseUrl, flavor = "local", versionName = "test", debug = false, cleartextAllowed = true)
+    private val buildInfo =
+        AppBuildInfo(defaultBaseUrl = baseUrl, flavor = "local", versionName = "test", debug = false, cleartextAllowed = true)
     val baseUrlProvider = BaseUrlProvider(FakeSettingsStore(AppSettings()), buildInfo)
-    val client: OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(BaseUrlInterceptor(baseUrlProvider))
-        .addInterceptor(AuthInterceptor(sessionStore, authEvents))
-        .build()
-    val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(PLACEHOLDER_BASE_URL)
-        .client(client)
-        .addConverterFactory(TravelJson.asConverterFactory("application/json".toMediaType()))
-        .build()
+    val client: OkHttpClient =
+        OkHttpClient.Builder()
+            .addInterceptor(BaseUrlInterceptor(baseUrlProvider))
+            .addInterceptor(AuthInterceptor(sessionStore, authEvents))
+            .build()
+    val retrofit: Retrofit =
+        Retrofit.Builder()
+            .baseUrl(PLACEHOLDER_BASE_URL)
+            .client(client)
+            .addConverterFactory(TravelJson.asConverterFactory("application/json".toMediaType()))
+            .build()
 
     inline fun <reified T> api(): T = retrofit.create(T::class.java)
 }

@@ -12,38 +12,64 @@ import kotlinx.serialization.json.buildJsonObject
 
 /** Pure fold of search events into [SearchResultsState] (web ResultsPage rules, api-contract §3.2). */
 object SearchResultsReducer {
-    fun reduce(state: SearchResultsState, event: SearchEvent): SearchResultsState = when (event) {
-        is SearchEvent.Section -> onSection(state, event).advanceDependents()
-        is SearchEvent.Confidence -> state.copy(confidence = event.data)
-        is SearchEvent.PricingAdvisor -> state.copy(pricingAdvisor = event.data)
-        is SearchEvent.AgentStatus -> if (event.agent == SectionId.STRESS_TEST.wire && event.status == "searching") {
-            state.withStatus(SectionId.STRESS_TEST, SectionStatus.LOADING)
-        } else {
-            state
+    fun reduce(state: SearchResultsState, event: SearchEvent): SearchResultsState =
+        when (event) {
+            is SearchEvent.Section -> {
+                onSection(state, event).advanceDependents()
+            }
+
+            is SearchEvent.Confidence -> {
+                state.copy(confidence = event.data)
+            }
+
+            is SearchEvent.PricingAdvisor -> {
+                state.copy(pricingAdvisor = event.data)
+            }
+
+            is SearchEvent.AgentStatus -> {
+                if (event.agent == SectionId.STRESS_TEST.wire && event.status == "searching") {
+                    state.withStatus(SectionId.STRESS_TEST, SectionStatus.LOADING)
+                } else {
+                    state
+                }
+            }
+
+            SearchEvent.Done -> {
+                finish(state, StreamPhase.DONE)
+            }
+
+            is SearchEvent.Unknown -> {
+                state
+            }
         }
-        SearchEvent.Done -> finish(state, StreamPhase.DONE)
-        is SearchEvent.Unknown -> state
-    }
 
     /** Stream end: every section not done becomes done (web parity). */
     fun finish(state: SearchResultsState, phase: StreamPhase): SearchResultsState =
         state.copy(statuses = state.statuses.mapValues { SectionStatus.DONE }, phase = phase)
 
     /** Sections as `{"flights":{…},…}` — the chat `search_results` / plan draft `search_data` shape. */
-    fun sectionsJson(state: SearchResultsState): JsonObject = buildJsonObject {
-        state.sections.values.forEach { put(it.id.wire, it.raw) }
-    }
+    fun sectionsJson(state: SearchResultsState): JsonObject =
+        buildJsonObject {
+            state.sections.values.forEach { put(it.id.wire, it.raw) }
+        }
 
     private fun onSection(state: SearchResultsState, event: SearchEvent.Section): SearchResultsState {
         val existing = state.sections[event.id]
         val keepOld = event.data.isError && event.source != DataSource.STATIC && existing != null && !existing.data.isError
-        val sections = if (keepOld) state.sections else state.sections + (event.id to SectionResult(event.id, event.data, event.raw, event.source))
+        val sections =
+            if (keepOld) {
+                state.sections
+            } else {
+                state.sections +
+                    (event.id to SectionResult(event.id, event.data, event.raw, event.source))
+            }
         val current = state.statuses[event.id]
-        val status = when {
-            event.source == DataSource.STATIC && current != SectionStatus.DONE -> SectionStatus.ENHANCING
-            event.source == DataSource.STATIC -> SectionStatus.DONE
-            else -> SectionStatus.DONE
-        }
+        val status =
+            when {
+                event.source == DataSource.STATIC && current != SectionStatus.DONE -> SectionStatus.ENHANCING
+                event.source == DataSource.STATIC -> SectionStatus.DONE
+                else -> SectionStatus.DONE
+            }
         return state.copy(sections = sections).withStatus(event.id, status)
     }
 

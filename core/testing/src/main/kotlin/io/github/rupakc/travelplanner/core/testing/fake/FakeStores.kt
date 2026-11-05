@@ -48,13 +48,14 @@ class FakeSettingsStore(initial: AppSettings = AppSettings()) : SettingsStore {
 
     override suspend fun setLocaleTag(tag: String?) = state.update { it.copy(localeTag = tag) }
 
-    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?) = state.update {
-        it.copy(
-            tripNotifications = trip ?: it.tripNotifications,
-            priceAlertNotifications = priceAlerts ?: it.priceAlertNotifications,
-            nearbyNotifications = nearby ?: it.nearbyNotifications,
-        )
-    }
+    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?) =
+        state.update {
+            it.copy(
+                tripNotifications = trip ?: it.tripNotifications,
+                priceAlertNotifications = priceAlerts ?: it.priceAlertNotifications,
+                nearbyNotifications = nearby ?: it.nearbyNotifications,
+            )
+        }
 }
 
 class FakeTravellerProfileStore : TravellerProfileStore {
@@ -74,11 +75,12 @@ class FakeFeatureOverridesStore : FeatureOverridesStore {
     val state = MutableStateFlow(FeatureOverrides())
     override val overrides: Flow<FeatureOverrides> = state
 
-    override suspend fun set(featureId: String, enabled: Boolean?) = state.update { o ->
-        val on = o.enabled - featureId
-        val off = o.disabled - featureId
-        FeatureOverrides(if (enabled == true) on + featureId else on, if (enabled == false) off + featureId else off)
-    }
+    override suspend fun set(featureId: String, enabled: Boolean?) =
+        state.update { o ->
+            val on = o.enabled - featureId
+            val off = o.disabled - featureId
+            FeatureOverrides(if (enabled == true) on + featureId else on, if (enabled == false) off + featureId else off)
+        }
 
     override suspend fun clear() {
         state.value = FeatureOverrides()

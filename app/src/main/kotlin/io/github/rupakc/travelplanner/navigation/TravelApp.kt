@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -7,13 +8,17 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -60,15 +65,21 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
     val scope = rememberCoroutineScope()
     val backStack by navController.currentBackStackEntryAsState()
     val destination = backStack?.destination
+    val snackbarHostState = remember { SnackbarHostState() }
+    val expiredMessage = stringResource(R.string.session_expired)
+    LaunchedEffect(shellViewModel) {
+        shellViewModel.sessionExpired.collect { snackbarHostState.showSnackbar(expiredMessage) }
+    }
 
     LaunchedEffect(gate) {
-        val target: AppRoute = when (gate) {
-            AuthGate.LOADING -> return@LaunchedEffect
-            AuthGate.SIGNED_OUT -> LoginRoute
-            AuthGate.MUST_CHANGE_PASSWORD -> ChangePasswordRoute
-            AuthGate.NEEDS_ONBOARDING -> OnboardingRoute()
-            AuthGate.READY -> HomeRoute
-        }
+        val target: AppRoute =
+            when (gate) {
+                AuthGate.LOADING -> return@LaunchedEffect
+                AuthGate.SIGNED_OUT -> LoginRoute
+                AuthGate.MUST_CHANGE_PASSWORD -> ChangePasswordRoute
+                AuthGate.NEEDS_ONBOARDING -> OnboardingRoute()
+                AuthGate.READY -> HomeRoute
+            }
         // The public share viewer stays open whatever the session state.
         if (destination?.hasRoute(ShareRoute::class) == true) return@LaunchedEffect
         if (gate == AuthGate.READY && destination != null && !destination.isGateScreen()) return@LaunchedEffect
@@ -81,20 +92,31 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
         showNavigation = gate == AuthGate.READY && topLevel != null,
         onNavigate = { navController.navigateToTopLevel(it) },
         onOpenSettings = { navController.navigate(SettingsRoute) },
+        snackbarHostState = snackbarHostState,
     ) {
         NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.fillMaxSize()) {
             authGraph(onLoggedIn = {}, onPasswordChanged = {})
-            onboardingGraph(onFinished = { fromSettings -> if (fromSettings) navController.popBackStack() else shellViewModel.completeOnboarding() })
+            onboardingGraph(onFinished = { fromSettings ->
+                if (fromSettings) navController.popBackStack() else shellViewModel.completeOnboarding()
+            })
             homeGraph(
                 onPlanTrip = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
                 onOpenNearby = { navController.navigate(NearbyRoute) },
                 onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
             )
-            searchGraph(onSearchStarted = { navController.navigate(ResultsRoute) }, onCompare = { navController.navigate(io.github.rupakc.travelplanner.core.model.navigation.CompareRoute) })
+            searchGraph(onSearchStarted = {
+                navController.navigate(ResultsRoute)
+            }, onCompare = { navController.navigate(io.github.rupakc.travelplanner.core.model.navigation.CompareRoute) })
             resultsGraph(onBack = { navController.popBackStack() })
             planGraph(onOpenPlan = { navController.navigate(PlanDetailRoute(it)) }, onBack = { navController.popBackStack() })
-            chatGraph(onOpenImport = { url -> navController.navigate(SearchRoute(mode = io.github.rupakc.travelplanner.core.model.navigation.SearchModes.IMPORT, importUrl = url)) })
-            alertsGraph(onReplan = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) }, onBack = { navController.popBackStack() })
+            chatGraph(onOpenImport = { url ->
+                navController.navigate(
+                    SearchRoute(mode = io.github.rupakc.travelplanner.core.model.navigation.SearchModes.IMPORT, importUrl = url),
+                )
+            })
+            alertsGraph(onReplan = {
+                navController.navigateToTopLevel(TopLevelDestination.SEARCH)
+            }, onBack = { navController.popBackStack() })
             settingsGraph(
                 onBack = { navController.popBackStack() },
                 onRetakeQuiz = { navController.navigate(OnboardingRoute(fromSettings = true)) },
@@ -114,21 +136,25 @@ fun TravelAppScaffold(
     showNavigation: Boolean,
     onNavigate: (TopLevelDestination) -> Unit,
     onOpenSettings: () -> Unit,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable () -> Unit,
 ) {
     val body: @Composable () -> Unit = {
-        Column(Modifier.fillMaxSize()) {
-            if (showNavigation && currentTopLevel != null) {
-                TopAppBar(
-                    title = { Text(stringResource(currentTopLevel.labelRes), modifier = Modifier.semantics { heading() }) },
-                    actions = {
-                        IconButton(onClick = onOpenSettings) {
-                            Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.nav_settings))
-                        }
-                    },
-                )
+        Box(Modifier.fillMaxSize()) {
+            Column(Modifier.fillMaxSize()) {
+                if (showNavigation && currentTopLevel != null) {
+                    TopAppBar(
+                        title = { Text(stringResource(currentTopLevel.labelRes), modifier = Modifier.semantics { heading() }) },
+                        actions = {
+                            IconButton(onClick = onOpenSettings) {
+                                Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.nav_settings))
+                            }
+                        },
+                    )
+                }
+                content()
             }
-            content()
+            SnackbarHost(snackbarHostState, Modifier.align(Alignment.BottomCenter))
         }
     }
     if (!showNavigation) {

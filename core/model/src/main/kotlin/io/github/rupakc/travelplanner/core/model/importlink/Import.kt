@@ -14,7 +14,10 @@ data class ImportRequest(
 )
 
 @Serializable
-data class ImportImage(@SerialName("media_type") val mediaType: String, @SerialName("data_base64") val dataBase64: String)
+data class ImportImage(
+    @SerialName("media_type") val mediaType: String,
+    @SerialName("data_base64") val dataBase64: String,
+)
 
 /** `ImportPreview` (`schemas/link_import.py`). */
 @Serializable
@@ -75,7 +78,10 @@ data class PreviewPlace(
 )
 
 @Serializable
-data class AlsoMentioned(val name: String = "", @SerialName("place_count") val placeCount: Int = 0)
+data class AlsoMentioned(
+    val name: String = "",
+    @SerialName("place_count") val placeCount: Int = 0,
+)
 
 /** `POST /api/import/resolve-place` body. */
 @Serializable

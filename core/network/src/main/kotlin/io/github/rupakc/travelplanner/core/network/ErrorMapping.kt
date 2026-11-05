@@ -4,6 +4,7 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppException
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonArray
@@ -13,7 +14,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import retrofit2.HttpException
-import java.io.IOException
 
 /**
  * Maps backend errors to [AppError] (api-contract §0.3):
@@ -50,22 +50,30 @@ object HttpErrorMapper {
     )
 
     internal fun parseBody(body: String?): ParsedBody {
-        val obj = body?.takeIf(String::isNotBlank)?.let { runCatching { TravelJson.parseToJsonElement(it) }.getOrNull() } as? JsonObject
-            ?: return ParsedBody(null, null, emptyList(), emptyMap())
+        val obj =
+            body?.takeIf(String::isNotBlank)?.let { runCatching { TravelJson.parseToJsonElement(it) }.getOrNull() } as? JsonObject
+                ?: return ParsedBody(null, null, emptyList(), emptyMap())
         var message: String? = null
         var code: String? = (obj["code"] as? JsonPrimitive)?.contentOrNull
         var fieldErrors = emptyList<AppError.FieldError>()
         when (val detail = obj["detail"]) {
-            is JsonPrimitive -> message = detail.takeIf { it !is JsonNull }?.contentOrNull?.takeIf(String::isNotBlank)
+            is JsonPrimitive -> {
+                message = detail.takeIf { it !is JsonNull }?.contentOrNull?.takeIf(String::isNotBlank)
+            }
+
             is JsonArray -> {
                 fieldErrors = detail.mapNotNull { (it as? JsonObject)?.toFieldError() }
                 message = fieldErrors.firstOrNull()?.message
             }
+
             is JsonObject -> {
                 code = (detail["code"] as? JsonPrimitive)?.contentOrNull ?: code
                 message = (detail["message"] as? JsonPrimitive)?.contentOrNull?.takeIf(String::isNotBlank)
             }
-            else -> Unit
+
+            else -> {
+                Unit
+            }
         }
         if (message == null) message = (obj["message"] as? JsonPrimitive)?.contentOrNull?.takeIf(String::isNotBlank)
         val extras = obj.filterKeys { it != "detail" && it != "code" }.mapValues { (_, v) -> v.asExtra() }
@@ -82,24 +90,26 @@ object HttpErrorMapper {
 }
 
 /** Any throwable from a call → [AppError]. */
-fun Throwable.toAppError(): AppError = when (this) {
-    is AppException -> error
-    is HttpException -> HttpErrorMapper.map(code(), response()?.headers()?.get("Retry-After"), response()?.errorBody()?.string())
-    is NoServerConfiguredException -> AppError.NotConfigured()
-    is IOException -> AppError.Network(null)
-    is SerializationException, is IllegalArgumentException -> AppError.Decoding(message)
-    else -> AppError.Unknown(message)
-}
+fun Throwable.toAppError(): AppError =
+    when (this) {
+        is AppException -> error
+        is HttpException -> HttpErrorMapper.map(code(), response()?.headers()?.get("Retry-After"), response()?.errorBody()?.string())
+        is NoServerConfiguredException -> AppError.NotConfigured()
+        is IOException -> AppError.Network(null)
+        is SerializationException, is IllegalArgumentException -> AppError.Decoding(message)
+        else -> AppError.Unknown(message)
+    }
 
 /** Runs a Retrofit call and wraps the outcome. Cancellation is rethrown. */
 @Suppress("TooGenericExceptionCaught")
-suspend fun <T> apiCall(block: suspend () -> T): AppResult<T> = try {
-    AppResult.Success(block())
-} catch (e: CancellationException) {
-    throw e
-} catch (e: Exception) {
-    AppResult.Failure(e.toAppError())
-}
+suspend fun <T> apiCall(block: suspend () -> T): AppResult<T> =
+    try {
+        AppResult.Success(block())
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        AppResult.Failure(e.toAppError())
+    }
 
 /** Thrown by the base-URL interceptor when no server is configured. */
 class NoServerConfiguredException : IOException("No server URL is configured")

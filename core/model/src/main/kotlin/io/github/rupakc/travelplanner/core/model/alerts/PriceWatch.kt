@@ -99,7 +99,9 @@ data class ActivityWatchSpec(
 )
 
 @Serializable
-data class TripWatchSpec(@SerialName("plan_id") val planId: Long)
+data class TripWatchSpec(
+    @SerialName("plan_id") val planId: Long,
+)
 
 @Serializable
 data class PriceWatchMatch(val watch: PriceWatch? = null)

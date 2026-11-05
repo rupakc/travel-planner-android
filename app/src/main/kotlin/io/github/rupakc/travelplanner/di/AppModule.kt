@@ -12,12 +12,13 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
     @Provides @Singleton
-    fun buildInfo(): AppBuildInfo = AppBuildInfo(
-        defaultBaseUrl = BuildConfig.DEFAULT_BASE_URL,
-        flavor = BuildConfig.FLAVOR,
-        versionName = BuildConfig.VERSION_NAME,
-        debug = BuildConfig.DEBUG,
-        cleartextAllowed = BuildConfig.CLEARTEXT_ALLOWED,
-        webBaseUrl = BuildConfig.WEB_BASE_URL,
-    )
+    fun buildInfo(): AppBuildInfo =
+        AppBuildInfo(
+            defaultBaseUrl = BuildConfig.DEFAULT_BASE_URL,
+            flavor = BuildConfig.FLAVOR,
+            versionName = BuildConfig.VERSION_NAME,
+            debug = BuildConfig.DEBUG,
+            cleartextAllowed = BuildConfig.CLEARTEXT_ALLOWED,
+            webBaseUrl = BuildConfig.WEB_BASE_URL,
+        )
 }

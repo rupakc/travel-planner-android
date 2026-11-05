@@ -15,6 +15,7 @@ sealed interface AppRoute
 @Serializable data object ChangePasswordRoute : AppRoute
 
 // --- onboarding ---------------------------------------------------------
+
 /** Welcome → questions → result → feature picker. [fromSettings] = re-run from Settings (ends with back, not Home). */
 @Serializable data class OnboardingRoute(val fromSettings: Boolean = false) : AppRoute
 

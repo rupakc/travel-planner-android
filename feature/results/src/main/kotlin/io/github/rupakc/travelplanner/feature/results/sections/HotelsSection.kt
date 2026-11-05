@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.feature.results.R
  * Hotels section body (inside SectionScaffold). Placeholder: replace this whole
  * file; keep the signature so SectionRegistry keeps compiling.
  */
+@Suppress("UnusedParameter") // placeholder: the section team uses `actions`
 @Composable
 internal fun HotelsSectionContent(data: HotelsData, actions: SectionActions, modifier: Modifier = Modifier) {
     val count = data.results.size

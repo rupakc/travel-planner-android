@@ -39,39 +39,50 @@ class StreamClientsTest {
         return SearchStreamClient(sse, dispatchers) to ChatStreamClient(sse, dispatchers)
     }
 
-    private fun sse(name: String) = MockResponse.Builder().code(200).addHeader("Content-Type", "text/event-stream").body(Fixtures.read(name)).build()
+    private fun sse(name: String) =
+        MockResponse.Builder().code(
+            200,
+        ).addHeader("Content-Type", "text/event-stream").body(Fixtures.read(name)).build()
 
     @Test
-    fun `search stream decodes fixture and stops at done`() = runTest {
-        server.enqueue(sse(Fixtures.SEARCH_FULL))
-        val events = clients().first.stream(request).toList()
-        assertEquals(SearchEvent.Done, events.last())
-        val recorded = server.takeRequest()
-        assertEquals("/api/search", recorded.target)
-        assertTrue(recorded.body!!.utf8().contains("\"destination\":\"Tokyo\""))
-    }
+    fun `search stream decodes fixture and stops at done`() =
+        runTest {
+            server.enqueue(sse(Fixtures.SEARCH_FULL))
+            val events = clients().first.stream(request).toList()
+            assertEquals(SearchEvent.Done, events.last())
+            val recorded = server.takeRequest()
+            assertEquals("/api/search", recorded.target)
+            assertTrue(recorded.body!!.utf8().contains("\"destination\":\"Tokyo\""))
+        }
 
     @Test
-    fun `search stream without done throws Interrupted after emitting what arrived`() = runTest {
-        server.enqueue(sse(Fixtures.SEARCH_INTERRUPTED))
-        val received = mutableListOf<SearchEvent>()
-        val error = runCatching { clients().first.stream(request).collect { received += it } }.exceptionOrNull()
-        assertTrue((error as AppException).error is AppError.Interrupted)
-        assertEquals(2, received.size)
-    }
+    fun `search stream without done throws Interrupted after emitting what arrived`() =
+        runTest {
+            server.enqueue(sse(Fixtures.SEARCH_INTERRUPTED))
+            val received = mutableListOf<SearchEvent>()
+            val error = runCatching { clients().first.stream(request).collect { received += it } }.exceptionOrNull()
+            assertTrue((error as AppException).error is AppError.Interrupted)
+            assertEquals(2, received.size)
+        }
 
     @Test
-    fun `429 before streaming maps to RateLimited`() = runTest {
-        server.enqueue(MockResponse.Builder().code(429).addHeader("Retry-After", "12").body("""{"detail":"Too many requests — please wait 12 seconds and try again."}""").build())
-        val error = runCatching { clients().first.stream(request).toList() }.exceptionOrNull() as AppException
-        assertEquals(12L, (error.error as AppError.RateLimited).retryAfterSeconds)
-    }
+    fun `429 before streaming maps to RateLimited`() =
+        runTest {
+            server.enqueue(
+                MockResponse.Builder().code(
+                    429,
+                ).addHeader("Retry-After", "12").body("""{"detail":"Too many requests — please wait 12 seconds and try again."}""").build(),
+            )
+            val error = runCatching { clients().first.stream(request).toList() }.exceptionOrNull() as AppException
+            assertEquals(12L, (error.error as AppError.RateLimited).retryAfterSeconds)
+        }
 
     @Test
-    fun `chat stream ends on planning_done`() = runTest {
-        server.enqueue(sse(Fixtures.CHAT_PLANNING))
-        val events = clients().second.stream(ChatRequest(messages = listOf(ChatMessage("user", "Plan Tokyo")))).toList()
-        assertEquals(ChatEvent.PlanningDone, events.last())
-        assertEquals("/api/chat", server.takeRequest().target)
-    }
+    fun `chat stream ends on planning_done`() =
+        runTest {
+            server.enqueue(sse(Fixtures.CHAT_PLANNING))
+            val events = clients().second.stream(ChatRequest(messages = listOf(ChatMessage("user", "Plan Tokyo")))).toList()
+            assertEquals(ChatEvent.PlanningDone, events.last())
+            assertEquals("/api/chat", server.takeRequest().target)
+        }
 }

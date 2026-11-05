@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <bool name="fcm_enabled">false</bool>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Read by the manifest (service android:enabled); the app overrides it via resValue. -->
+    <bool name="fcm_enabled" tools:ignore="UnusedResources">false</bool>
 </resources>

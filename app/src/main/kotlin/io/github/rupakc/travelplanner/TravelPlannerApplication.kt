@@ -22,15 +22,17 @@ class TravelPlannerApplication :
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
-            AppLogger.sink = AppLogger.Sink { priority, tag, message, throwable ->
-                val level = when (priority) {
-                    AppLogger.Priority.DEBUG -> Log.DEBUG
-                    AppLogger.Priority.INFO -> Log.INFO
-                    AppLogger.Priority.WARN -> Log.WARN
-                    AppLogger.Priority.ERROR -> Log.ERROR
+            AppLogger.sink =
+                AppLogger.Sink { priority, tag, message, throwable ->
+                    val level =
+                        when (priority) {
+                            AppLogger.Priority.DEBUG -> Log.DEBUG
+                            AppLogger.Priority.INFO -> Log.INFO
+                            AppLogger.Priority.WARN -> Log.WARN
+                            AppLogger.Priority.ERROR -> Log.ERROR
+                        }
+                    Log.println(level, tag, message + (throwable?.let { "\n" + Log.getStackTraceString(it) } ?: ""))
                 }
-                Log.println(level, tag, message + (throwable?.let { "\n" + Log.getStackTraceString(it) } ?: ""))
-            }
             StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
             StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectLeakedClosableObjects().detectActivityLeaks().penaltyLog().build())
         }

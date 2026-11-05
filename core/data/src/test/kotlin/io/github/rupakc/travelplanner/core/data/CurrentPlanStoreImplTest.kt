@@ -50,84 +50,90 @@ class CurrentPlanStoreImplTest {
         CurrentPlanStoreImpl(plans, dao, TestScope(UnconfinedTestDispatcher(testScheduler)))
 
     @Test
-    fun `single-choice categories replace and lists add or remove`() = runTest {
-        val store = store()
-        store.toggle(PlanItem.HotelItem(hotelA))
-        store.toggle(PlanItem.HotelItem(hotelB))
-        assertEquals("B", store.draft.value.selections.hotel?.name)
-        store.toggle(PlanItem.HotelItem(hotelB))
-        assertNull(store.draft.value.selections.hotel)
+    fun `single-choice categories replace and lists add or remove`() =
+        runTest {
+            val store = store()
+            store.toggle(PlanItem.HotelItem(hotelA))
+            store.toggle(PlanItem.HotelItem(hotelB))
+            assertEquals("B", store.draft.value.selections.hotel?.name)
+            store.toggle(PlanItem.HotelItem(hotelB))
+            assertNull(store.draft.value.selections.hotel)
 
-        store.toggle(PlanItem.ActivityItem(activity))
-        assertTrue(store.isSelected(PlanItem.ActivityItem(activity)))
-        store.toggle(PlanItem.ActivityItem(activity))
-        assertFalse(store.isSelected(PlanItem.ActivityItem(activity)))
-        assertTrue(store.draft.value.dirty)
-    }
-
-    @Test
-    fun `multi-city legs keep one flight per leg`() = runTest {
-        val store = store()
-        val leg0a = Flight(priceUsd = 100.0, legIndex = 0, outbound = FlightLeg(airline = "X", flightNumber = "1"))
-        val leg0b = Flight(priceUsd = 120.0, legIndex = 0, outbound = FlightLeg(airline = "Y", flightNumber = "2"))
-        val leg1 = Flight(priceUsd = 90.0, legIndex = 1, outbound = FlightLeg(airline = "Z", flightNumber = "3"))
-        store.toggle(PlanItem.FlightItem(leg1))
-        store.toggle(PlanItem.FlightItem(leg0a))
-        store.toggle(PlanItem.FlightItem(leg0b))
-        assertEquals(listOf(0, 1), store.draft.value.selections.flights.map { it.legIndex })
-        assertEquals("Y", store.draft.value.selections.flights.first().outbound?.airline)
-    }
-
-    @Test
-    fun `save creates then updates and snapshots the live itinerary`() = runTest {
-        val plans = FakePlansRepository()
-        val store = store(plans = plans)
-        val itinerary = buildJsonObject {
-            put("days", kotlinx.serialization.json.JsonArray(emptyList()))
-            put("total_estimated_cost_usd", JsonPrimitive(560))
+            store.toggle(PlanItem.ActivityItem(activity))
+            assertTrue(store.isSelected(PlanItem.ActivityItem(activity)))
+            store.toggle(PlanItem.ActivityItem(activity))
+            assertFalse(store.isSelected(PlanItem.ActivityItem(activity)))
+            assertTrue(store.draft.value.dirty)
         }
-        store.attachSearch(request, buildJsonObject { put("itinerary", itinerary) })
-        store.toggle(PlanItem.HotelItem(hotelA))
-        val created = store.save("Tokyo trip") as AppResult.Success
-        assertEquals(1L, created.value.id)
-        assertEquals("Tokyo", (created.value.searchData["destination"] as JsonPrimitive).content)
-        assertNotNull(created.value.selections.itinerarySnapshot)
-        assertFalse(store.draft.value.dirty)
-
-        store.toggle(PlanItem.ActivityItem(activity))
-        val updated = store.save() as AppResult.Success
-        assertEquals(1L, updated.value.id)
-        assertEquals("Tokyo trip", updated.value.name)
-        assertEquals(1, updated.value.selections.activities.size)
-    }
 
     @Test
-    fun `load, snapshot and restore`() = runTest {
-        val plans = FakePlansRepository()
-        val store = store(plans = plans)
-        store.toggle(PlanItem.HotelItem(hotelA))
-        val saved = (store.save("Saved") as AppResult.Success).value
-        store.newPlan()
-        assertNull(store.draft.value.planId)
-        store.load(saved.id)
-        assertEquals("A", store.draft.value.selections.hotel?.name)
-        val snap = store.snapshot()
-        store.toggle(PlanItem.HotelItem(hotelA))
-        store.restore(snap)
-        assertEquals("A", store.draft.value.selections.hotel?.name)
-    }
+    fun `multi-city legs keep one flight per leg`() =
+        runTest {
+            val store = store()
+            val leg0a = Flight(priceUsd = 100.0, legIndex = 0, outbound = FlightLeg(airline = "X", flightNumber = "1"))
+            val leg0b = Flight(priceUsd = 120.0, legIndex = 0, outbound = FlightLeg(airline = "Y", flightNumber = "2"))
+            val leg1 = Flight(priceUsd = 90.0, legIndex = 1, outbound = FlightLeg(airline = "Z", flightNumber = "3"))
+            store.toggle(PlanItem.FlightItem(leg1))
+            store.toggle(PlanItem.FlightItem(leg0a))
+            store.toggle(PlanItem.FlightItem(leg0b))
+            assertEquals(listOf(0, 1), store.draft.value.selections.flights.map { it.legIndex })
+            assertEquals("Y", store.draft.value.selections.flights.first().outbound?.airline)
+        }
 
     @Test
-    fun `draft is persisted and restored after process death`() = runTest {
-        val dao = InMemoryDraftDao()
-        val first = store(dao)
-        first.toggle(PlanItem.ActivityItem(activity))
-        advanceUntilIdle()
-        assertNotNull(dao.row)
-        val second = store(dao)
-        advanceUntilIdle()
-        assertEquals("Food tour", second.draft.value.selections.activities.single().name)
-        val decoded = TravelJson.decodeFromString(PlanDraft.serializer(), dao.row!!.json)
-        assertEquals("Food tour", decoded.selections.activities.single().name)
-    }
+    fun `save creates then updates and snapshots the live itinerary`() =
+        runTest {
+            val plans = FakePlansRepository()
+            val store = store(plans = plans)
+            val itinerary =
+                buildJsonObject {
+                    put("days", kotlinx.serialization.json.JsonArray(emptyList()))
+                    put("total_estimated_cost_usd", JsonPrimitive(560))
+                }
+            store.attachSearch(request, buildJsonObject { put("itinerary", itinerary) })
+            store.toggle(PlanItem.HotelItem(hotelA))
+            val created = store.save("Tokyo trip") as AppResult.Success
+            assertEquals(1L, created.value.id)
+            assertEquals("Tokyo", (created.value.searchData["destination"] as JsonPrimitive).content)
+            assertNotNull(created.value.selections.itinerarySnapshot)
+            assertFalse(store.draft.value.dirty)
+
+            store.toggle(PlanItem.ActivityItem(activity))
+            val updated = store.save() as AppResult.Success
+            assertEquals(1L, updated.value.id)
+            assertEquals("Tokyo trip", updated.value.name)
+            assertEquals(1, updated.value.selections.activities.size)
+        }
+
+    @Test
+    fun `load, snapshot and restore`() =
+        runTest {
+            val plans = FakePlansRepository()
+            val store = store(plans = plans)
+            store.toggle(PlanItem.HotelItem(hotelA))
+            val saved = (store.save("Saved") as AppResult.Success).value
+            store.newPlan()
+            assertNull(store.draft.value.planId)
+            store.load(saved.id)
+            assertEquals("A", store.draft.value.selections.hotel?.name)
+            val snap = store.snapshot()
+            store.toggle(PlanItem.HotelItem(hotelA))
+            store.restore(snap)
+            assertEquals("A", store.draft.value.selections.hotel?.name)
+        }
+
+    @Test
+    fun `draft is persisted and restored after process death`() =
+        runTest {
+            val dao = InMemoryDraftDao()
+            val first = store(dao)
+            first.toggle(PlanItem.ActivityItem(activity))
+            advanceUntilIdle()
+            assertNotNull(dao.row)
+            val second = store(dao)
+            advanceUntilIdle()
+            assertEquals("Food tour", second.draft.value.selections.activities.single().name)
+            val decoded = TravelJson.decodeFromString(PlanDraft.serializer(), dao.row!!.json)
+            assertEquals("Food tour", decoded.selections.activities.single().name)
+        }
 }

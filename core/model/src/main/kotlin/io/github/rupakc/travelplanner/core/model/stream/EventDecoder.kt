@@ -37,17 +37,31 @@ object EventDecoder {
             return SearchEvent.Section(id, source, SectionDecoder.decode(id, data, json), data)
         }
         return when (type) {
-            "confidence" -> SearchEvent.Confidence(
-                runCatching { json.decodeFromJsonElement(ConfidenceData.serializer(), data) }.getOrElse { ConfidenceData() },
-                source,
-            )
-            "pricing_advisor" -> SearchEvent.PricingAdvisor(
-                runCatching { json.decodeFromJsonElement(PricingAdvisorData.serializer(), data) }.getOrElse { PricingAdvisorData() },
-                source,
-            )
-            "agent_status" -> SearchEvent.AgentStatus(obj.string("agent").orEmpty(), obj.string("status").orEmpty())
-            "done" -> SearchEvent.Done
-            else -> SearchEvent.Unknown(type, obj)
+            "confidence" -> {
+                SearchEvent.Confidence(
+                    runCatching { json.decodeFromJsonElement(ConfidenceData.serializer(), data) }.getOrElse { ConfidenceData() },
+                    source,
+                )
+            }
+
+            "pricing_advisor" -> {
+                SearchEvent.PricingAdvisor(
+                    runCatching { json.decodeFromJsonElement(PricingAdvisorData.serializer(), data) }.getOrElse { PricingAdvisorData() },
+                    source,
+                )
+            }
+
+            "agent_status" -> {
+                SearchEvent.AgentStatus(obj.string("agent").orEmpty(), obj.string("status").orEmpty())
+            }
+
+            "done" -> {
+                SearchEvent.Done
+            }
+
+            else -> {
+                SearchEvent.Unknown(type, obj)
+            }
         }
     }
 
@@ -57,43 +71,89 @@ object EventDecoder {
     fun decodeChat(obj: JsonObject, json: Json = TravelJson): ChatEvent {
         val type = obj.string("type")
         return when (type) {
-            "delta" -> ChatEvent.Delta(obj.string("text").orEmpty())
-            "suggestions" -> ChatEvent.Suggestions(
-                (obj["chips"] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.takeIf(String::isNotBlank) }.orEmpty(),
-            )
-            "session_context_update" -> ChatEvent.SessionContextUpdate(obj["context"] as? JsonObject ?: EmptyJsonObject)
-            "plan_action" -> ChatEvent.PlanAction(
-                action = PlanActionType.fromWire(obj.string("action")),
-                field = obj.string("field").orEmpty(),
-                data = obj["data"] as? JsonObject,
-            )
-            "planning_start" -> ChatEvent.PlanningStart(obj.string("destination"))
-            "trip_map" -> ChatEvent.TripMap(
-                origin = obj.string("origin"),
-                originLat = lenientDouble(obj["origin_lat"]),
-                originLng = lenientDouble(obj["origin_lng"]),
-                cities = (obj["cities"] as? JsonArray)?.mapNotNull { el ->
-                    runCatching { json.decodeFromJsonElement(TripMapCity.serializer(), el) }.getOrNull()
-                }.orEmpty(),
-                departureDate = obj.string("departure_date"),
-                returnDate = obj.string("return_date"),
-                numTravelers = lenientDouble(obj["num_travelers"])?.toInt(),
-            )
-            "itinerary_generating" -> ChatEvent.ItineraryGenerating
-            "comprehensive_itinerary" -> decodeItinerary(obj, json)
-            "agent_status" -> ChatEvent.AgentStatus(obj.string("agent").orEmpty(), obj.string("status").orEmpty())
+            "delta" -> {
+                ChatEvent.Delta(obj.string("text").orEmpty())
+            }
+
+            "suggestions" -> {
+                ChatEvent.Suggestions(
+                    (obj["chips"] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.takeIf(String::isNotBlank) }.orEmpty(),
+                )
+            }
+
+            "session_context_update" -> {
+                ChatEvent.SessionContextUpdate(obj["context"] as? JsonObject ?: EmptyJsonObject)
+            }
+
+            "plan_action" -> {
+                ChatEvent.PlanAction(
+                    action = PlanActionType.fromWire(obj.string("action")),
+                    field = obj.string("field").orEmpty(),
+                    data = obj["data"] as? JsonObject,
+                )
+            }
+
+            "planning_start" -> {
+                ChatEvent.PlanningStart(obj.string("destination"))
+            }
+
+            "trip_map" -> {
+                ChatEvent.TripMap(
+                    origin = obj.string("origin"),
+                    originLat = lenientDouble(obj["origin_lat"]),
+                    originLng = lenientDouble(obj["origin_lng"]),
+                    cities =
+                        (obj["cities"] as? JsonArray)?.mapNotNull { el ->
+                            runCatching { json.decodeFromJsonElement(TripMapCity.serializer(), el) }.getOrNull()
+                        }.orEmpty(),
+                    departureDate = obj.string("departure_date"),
+                    returnDate = obj.string("return_date"),
+                    numTravelers = lenientDouble(obj["num_travelers"])?.toInt(),
+                )
+            }
+
+            "itinerary_generating" -> {
+                ChatEvent.ItineraryGenerating
+            }
+
+            "comprehensive_itinerary" -> {
+                decodeItinerary(obj, json)
+            }
+
+            "agent_status" -> {
+                ChatEvent.AgentStatus(obj.string("agent").orEmpty(), obj.string("status").orEmpty())
+            }
+
             "section_result" -> {
                 val name = obj.string("section").orEmpty()
                 val id = SectionId.fromWire(name)
                 val data = obj["data"] as? JsonObject ?: EmptyJsonObject
                 ChatEvent.SectionResult(name, id, DataSource.fromWire(obj.string("source")), id?.let { SectionDecoder.decode(it, data, json) }, data)
             }
-            "planning_done" -> ChatEvent.PlanningDone
-            "import_link" -> obj.string("url")?.let { ChatEvent.ImportLink(it, obj.string("href")) } ?: ChatEvent.Unknown(type, obj)
-            "error" -> ChatEvent.Error(obj.string("text"))
-            "message", "result" -> ChatEvent.Message(obj.string("text").orEmpty())
-            "done" -> ChatEvent.Done
-            else -> ChatEvent.Unknown(type, obj)
+
+            "planning_done" -> {
+                ChatEvent.PlanningDone
+            }
+
+            "import_link" -> {
+                obj.string("url")?.let { ChatEvent.ImportLink(it, obj.string("href")) } ?: ChatEvent.Unknown(type, obj)
+            }
+
+            "error" -> {
+                ChatEvent.Error(obj.string("text"))
+            }
+
+            "message", "result" -> {
+                ChatEvent.Message(obj.string("text").orEmpty())
+            }
+
+            "done" -> {
+                ChatEvent.Done
+            }
+
+            else -> {
+                ChatEvent.Unknown(type, obj)
+            }
         }
     }
 
@@ -104,9 +164,10 @@ object EventDecoder {
         return ChatEvent.ComprehensiveItinerary(itinerary, error ?: if (itinerary == null) "" else null, data)
     }
 
-    private fun JsonObject.string(key: String): String? = when (val el: JsonElement? = this[key]) {
-        null, JsonNull -> null
-        is JsonPrimitive -> el.contentOrNull
-        else -> null
-    }
+    private fun JsonObject.string(key: String): String? =
+        when (val el: JsonElement? = this[key]) {
+            null, JsonNull -> null
+            is JsonPrimitive -> el.contentOrNull
+            else -> null
+        }
 }

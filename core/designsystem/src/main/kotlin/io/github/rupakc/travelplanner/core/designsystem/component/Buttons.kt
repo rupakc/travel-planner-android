@@ -41,17 +41,31 @@ fun TpButton(
     val content: @Composable () -> Unit = { ButtonContent(text, loading, leadingIcon) }
     val click = { if (!loading) onClick() }
     when (variant) {
-        TpButtonVariant.Primary -> Button(click, modifier.then(minHeight), enabled, shape = TravelShape.Input) { content() }
-        TpButtonVariant.Destructive -> Button(
-            click,
-            modifier.then(minHeight),
-            enabled,
-            shape = TravelShape.Input,
-            colors = ButtonDefaults.buttonColors(containerColor = TravelTheme.colors.error, contentColor = TravelTheme.colors.onError),
-        ) { content() }
-        TpButtonVariant.Secondary -> OutlinedButton(click, modifier.then(minHeight), enabled, shape = TravelShape.Input) { content() }
-        TpButtonVariant.Tonal -> FilledTonalButton(click, modifier.then(minHeight), enabled, shape = TravelShape.Input) { content() }
-        TpButtonVariant.Text -> TextButton(click, modifier.then(minHeight), enabled, shape = TravelShape.Input) { content() }
+        TpButtonVariant.Primary -> {
+            Button(click, modifier.then(minHeight), enabled, shape = TravelShape.Input) { content() }
+        }
+
+        TpButtonVariant.Destructive -> {
+            Button(
+                click,
+                modifier.then(minHeight),
+                enabled,
+                shape = TravelShape.Input,
+                colors = ButtonDefaults.buttonColors(containerColor = TravelTheme.colors.error, contentColor = TravelTheme.colors.onError),
+            ) { content() }
+        }
+
+        TpButtonVariant.Secondary -> {
+            OutlinedButton(click, modifier.then(minHeight), enabled, shape = TravelShape.Input) { content() }
+        }
+
+        TpButtonVariant.Tonal -> {
+            FilledTonalButton(click, modifier.then(minHeight), enabled, shape = TravelShape.Input) { content() }
+        }
+
+        TpButtonVariant.Text -> {
+            TextButton(click, modifier.then(minHeight), enabled, shape = TravelShape.Input) { content() }
+        }
     }
 }
 

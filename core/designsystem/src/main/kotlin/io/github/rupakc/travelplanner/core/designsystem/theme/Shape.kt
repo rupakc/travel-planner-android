@@ -9,13 +9,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /** Spec §5: 24 dp large cards, 12 dp item cards, 8 dp inputs, pills fully rounded. */
-internal val TravelShapes = Shapes(
-    extraSmall = RoundedCornerShape(4.dp),
-    small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(12.dp),
-    large = RoundedCornerShape(24.dp),
-    extraLarge = RoundedCornerShape(28.dp),
-)
+internal val TravelShapes =
+    Shapes(
+        extraSmall = RoundedCornerShape(4.dp),
+        small = RoundedCornerShape(8.dp),
+        medium = RoundedCornerShape(12.dp),
+        large = RoundedCornerShape(24.dp),
+        extraLarge = RoundedCornerShape(28.dp),
+    )
 
 /** Named shapes for components (use these, not raw dp). */
 object TravelShape {

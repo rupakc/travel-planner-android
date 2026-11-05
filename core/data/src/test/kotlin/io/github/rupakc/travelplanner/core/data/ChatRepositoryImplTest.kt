@@ -41,26 +41,29 @@ class ChatRepositoryImplTest {
     private val request = ChatRequest(messages = listOf(ChatMessage(ChatMessage.ROLE_USER, "Plan Tokyo")))
 
     @Test
-    fun `planning stream terminates on planning_done`() = runTest {
-        server.enqueue(MockResponse.Builder().code(200).body(Fixtures.read(Fixtures.CHAT_PLANNING)).build())
-        val events = repository().send(request).toList()
-        assertEquals(ChatEvent.PlanningDone, events.last())
-        assertTrue(events.any { it is ChatEvent.ComprehensiveItinerary })
-    }
+    fun `planning stream terminates on planning_done`() =
+        runTest {
+            server.enqueue(MockResponse.Builder().code(200).body(Fixtures.read(Fixtures.CHAT_PLANNING)).build())
+            val events = repository().send(request).toList()
+            assertEquals(ChatEvent.PlanningDone, events.last())
+            assertTrue(events.any { it is ChatEvent.ComprehensiveItinerary })
+        }
 
     @Test
-    fun `qa stream ends on done and request carries selections with web keys`() = runTest {
-        server.enqueue(MockResponse.Builder().code(200).body(Fixtures.read(Fixtures.CHAT_QA)).build())
-        val events = repository().send(request).toList()
-        assertEquals(ChatEvent.Done, events.last())
-        val body = server.takeRequest().body!!.utf8()
-        assertTrue(body.contains("\"selections\":{\"flight\":null,\"flights\":[]"))
-        assertTrue(body.contains("\"session_context\":{}"))
-    }
+    fun `qa stream ends on done and request carries selections with web keys`() =
+        runTest {
+            server.enqueue(MockResponse.Builder().code(200).body(Fixtures.read(Fixtures.CHAT_QA)).build())
+            val events = repository().send(request).toList()
+            assertEquals(ChatEvent.Done, events.last())
+            val body = server.takeRequest().body!!.utf8()
+            assertTrue(body.contains("\"selections\":{\"flight\":null,\"flights\":[]"))
+            assertTrue(body.contains("\"session_context\":{}"))
+        }
 
     @Test
-    fun `stream that just ends completes without error`() = runTest {
-        server.enqueue(MockResponse.Builder().code(200).body("data: {\"type\":\"delta\",\"text\":\"hi\"}\n\n").build())
-        assertEquals(listOf<ChatEvent>(ChatEvent.Delta("hi")), repository().send(request).toList())
-    }
+    fun `stream that just ends completes without error`() =
+        runTest {
+            server.enqueue(MockResponse.Builder().code(200).body("data: {\"type\":\"delta\",\"text\":\"hi\"}\n\n").build())
+            assertEquals(listOf<ChatEvent>(ChatEvent.Delta("hi")), repository().send(request).toList())
+        }
 }

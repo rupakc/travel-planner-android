@@ -34,54 +34,62 @@ interface Notifier {
 }
 
 @Singleton
-class SystemNotifier @Inject constructor(@param:ApplicationContext private val context: Context) : Notifier {
-    private val manager = NotificationManagerCompat.from(context)
+class SystemNotifier
+    @Inject
+    constructor(
+        @param:ApplicationContext private val context: Context,
+    ) : Notifier {
+        private val manager = NotificationManagerCompat.from(context)
 
-    override fun canPost(): Boolean {
-        val permitted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        return permitted && manager.areNotificationsEnabled()
-    }
-
-    override fun post(channel: TravelChannel, id: Int, title: String, body: String, deepLink: String) {
-        if (!canPost()) return
-        val intent = Intent(Intent.ACTION_VIEW, deepLink.toUri()).setPackage(context.packageName)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pending = PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val notification = NotificationCompat.Builder(context, channel.id)
-            .setSmallIcon(R.drawable.ic_stat_voyager)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
-            .setAutoCancel(true)
-            .setContentIntent(pending)
-            .build()
-        @Suppress("MissingPermission") // checked by canPost()
-        manager.notify(id, notification)
-    }
-
-    override fun postPriceAlert(notification: AppNotification) {
-        val link = buildString {
-            append("${DeepLinks.SCHEME}://alerts")
-            val params = listOfNotNull(notification.watchKind?.let { "kind=$it" }, notification.watchId?.let { "watch=$it" })
-            if (params.isNotEmpty()) append("?").append(params.joinToString("&"))
+        override fun canPost(): Boolean {
+            val permitted =
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            return permitted && manager.areNotificationsEnabled()
         }
-        post(
-            TravelChannel.PRICE_ALERTS,
-            id = (PRICE_ALERT_ID_BASE + notification.id % PRICE_ALERT_ID_RANGE).toInt(),
-            title = notification.title.orEmpty(),
-            body = notification.body.orEmpty(),
-            deepLink = link,
-        )
-    }
 
-    override fun cancel(id: Int) = manager.cancel(id)
+        override fun post(channel: TravelChannel, id: Int, title: String, body: String, deepLink: String) {
+            if (!canPost()) return
+            val intent =
+                Intent(Intent.ACTION_VIEW, deepLink.toUri()).setPackage(context.packageName)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            val pending = PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            val notification =
+                NotificationCompat.Builder(context, channel.id)
+                    .setSmallIcon(R.drawable.ic_stat_voyager)
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+                    .setAutoCancel(true)
+                    .setContentIntent(pending)
+                    .build()
+            @Suppress("MissingPermission") // checked by canPost()
+            manager.notify(id, notification)
+        }
 
-    private companion object {
-        const val PRICE_ALERT_ID_BASE = 100_000L
-        const val PRICE_ALERT_ID_RANGE = 1_000_000L
+        override fun postPriceAlert(notification: AppNotification) {
+            val link =
+                buildString {
+                    append("${DeepLinks.SCHEME}://alerts")
+                    val params = listOfNotNull(notification.watchKind?.let { "kind=$it" }, notification.watchId?.let { "watch=$it" })
+                    if (params.isNotEmpty()) append("?").append(params.joinToString("&"))
+                }
+            post(
+                TravelChannel.PRICE_ALERTS,
+                id = (PRICE_ALERT_ID_BASE + notification.id % PRICE_ALERT_ID_RANGE).toInt(),
+                title = notification.title.orEmpty(),
+                body = notification.body.orEmpty(),
+                deepLink = link,
+            )
+        }
+
+        override fun cancel(id: Int) = manager.cancel(id)
+
+        private companion object {
+            const val PRICE_ALERT_ID_BASE = 100_000L
+            const val PRICE_ALERT_ID_RANGE = 1_000_000L
+        }
     }
-}
 
 @Module
 @InstallIn(SingletonComponent::class)

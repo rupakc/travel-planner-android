@@ -19,34 +19,38 @@ import io.github.rupakc.travelplanner.core.data.repository.PushTokenSource
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.devices.PushDataKeys
 import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 /** True only when the app was built with google-services.json (FirebaseApp auto-initialised). */
 fun isFirebaseConfigured(context: Context): Boolean = runCatching { FirebaseApp.getApps(context).isNotEmpty() }.getOrDefault(false)
 
 /** FCM token, or null when Firebase is not configured (the default build). */
 @Singleton
-class FirebasePushTokenSource @Inject constructor(@param:ApplicationContext private val context: Context) : PushTokenSource {
-    @Suppress("TooGenericExceptionCaught")
-    override suspend fun token(): String? {
-        if (!isFirebaseConfigured(context)) return null
-        return try {
-            FirebaseMessaging.getInstance().token.await()
-        } catch (e: Exception) {
-            AppLogger.w(TAG, "FCM token unavailable", e)
-            null
+class FirebasePushTokenSource
+    @Inject
+    constructor(
+        @param:ApplicationContext private val context: Context,
+    ) : PushTokenSource {
+        @Suppress("TooGenericExceptionCaught")
+        override suspend fun token(): String? {
+            if (!isFirebaseConfigured(context)) return null
+            return try {
+                FirebaseMessaging.getInstance().token.await()
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "FCM token unavailable", e)
+                null
+            }
+        }
+
+        private companion object {
+            const val TAG = "Push"
         }
     }
-
-    private companion object {
-        const val TAG = "Push"
-    }
-}
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -76,19 +80,28 @@ class TravelMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         val data = message.data
         val id = data[PushDataKeys.NOTIFICATION_ID]?.toLongOrNull() ?: return
-        val alert = AppNotification(
-            id = id,
-            kind = data[PushDataKeys.KIND],
-            title = message.notification?.title,
-            body = message.notification?.body,
-        )
+        val alert =
+            AppNotification(
+                id = id,
+                kind = data[PushDataKeys.KIND],
+                title = message.notification?.title,
+                body = message.notification?.body,
+            )
         scope.launch {
             notifications.markSeen(listOf(id))
-            val watchLink = data[PushDataKeys.WATCH_ID]?.let { watch ->
-                "${DeepLinks.SCHEME}://alerts?" + listOfNotNull(data[PushDataKeys.WATCH_KIND]?.let { "kind=$it" }, "watch=$watch").joinToString("&")
-            }
+            val watchLink =
+                data[PushDataKeys.WATCH_ID]?.let { watch ->
+                    "${DeepLinks.SCHEME}://alerts?" +
+                        listOfNotNull(data[PushDataKeys.WATCH_KIND]?.let { "kind=$it" }, "watch=$watch").joinToString("&")
+                }
             if (watchLink != null) {
-                notifier.post(TravelChannel.PRICE_ALERTS, (id % Int.MAX_VALUE).toInt(), alert.title.orEmpty(), alert.body.orEmpty(), watchLink)
+                notifier.post(
+                    TravelChannel.PRICE_ALERTS,
+                    (id % Int.MAX_VALUE).toInt(),
+                    alert.title.orEmpty(),
+                    alert.body.orEmpty(),
+                    watchLink,
+                )
             } else {
                 notifier.postPriceAlert(alert)
             }

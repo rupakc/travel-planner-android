@@ -9,8 +9,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 
@@ -24,11 +24,12 @@ fun AddToPlanButton(selected: Boolean, itemName: String, onToggle: () -> Unit, m
     TpButton(
         text = stringResource(if (selected) R.string.plan_added else R.string.plan_add),
         onClick = onToggle,
-        modifier = modifier.semantics {
-            contentDescription = a11y
-            role = Role.Switch
-            this.selected = selected
-        },
+        modifier =
+            modifier.semantics {
+                contentDescription = a11y
+                role = Role.Switch
+                this.selected = selected
+            },
         variant = if (selected) TpButtonVariant.Tonal else TpButtonVariant.Secondary,
         leadingIcon = if (selected) Icons.Filled.Check else Icons.Filled.Add,
     )

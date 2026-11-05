@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.feature.results.R
  * Itinerary section body (inside SectionScaffold). Placeholder: replace this whole
  * file; keep the signature so SectionRegistry keeps compiling.
  */
+@Suppress("UnusedParameter") // placeholder: the section team uses `actions`
 @Composable
 internal fun ItinerarySectionContent(data: ItineraryData, actions: SectionActions, modifier: Modifier = Modifier) {
     val count = data.days.size

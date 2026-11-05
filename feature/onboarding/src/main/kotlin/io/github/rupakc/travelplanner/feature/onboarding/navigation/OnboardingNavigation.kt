@@ -5,11 +5,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import io.github.rupakc.travelplanner.core.model.navigation.OnboardingRoute
 import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
 import io.github.rupakc.travelplanner.core.ui.PlaceholderAction
 import io.github.rupakc.travelplanner.feature.onboarding.R
-import androidx.navigation.toRoute
-import io.github.rupakc.travelplanner.core.model.navigation.OnboardingRoute
 
 /** Welcome → 6 questions → result → feature picker. [onFinished] gets `fromSettings`. */
 fun NavGraphBuilder.onboardingGraph(onFinished: (fromSettings: Boolean) -> Unit) {

@@ -5,13 +5,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
-import io.github.rupakc.travelplanner.core.ui.PlaceholderAction
-import io.github.rupakc.travelplanner.feature.alerts.R
 import androidx.navigation.navDeepLink
 import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationsRoute
+import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
+import io.github.rupakc.travelplanner.core.ui.PlaceholderAction
+import io.github.rupakc.travelplanner.feature.alerts.R
 
 /** Watches (deep link parity with web `/alerts?kind=&watch=`) and the notifications inbox. */
 @Suppress("UnusedParameter", "UNUSED_PARAMETER") // callbacks reserved for the feature team

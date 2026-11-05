@@ -1,13 +1,14 @@
 package io.github.rupakc.travelplanner.core.model.json
 
+import kotlin.math.roundToLong
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.descriptors.nullable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.nullable
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
@@ -15,23 +16,30 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.doubleOrNull
-import kotlin.math.roundToLong
 
 /**
  * Numbers the LLM-backed API may send as numbers, numeric strings ("1,200",
  * "$45"), words ("varies") or nothing. Unparseable values decode to null —
  * never to an invented number.
  */
-typealias LenientDouble = @Serializable(with = LenientDoubleSerializer::class) Double?
+typealias LenientDouble =
+    @Serializable(with = LenientDoubleSerializer::class)
+    Double?
 
 /** Integer version of [LenientDouble] (rounds 2.0 → 2; "3 days" → 3). */
-typealias LenientInt = @Serializable(with = LenientIntSerializer::class) Int?
+typealias LenientInt =
+    @Serializable(with = LenientIntSerializer::class)
+    Int?
 
 /** Booleans sent as true/false, 0/1 (SQLite) or "true"/"yes". */
-typealias LenientBoolean = @Serializable(with = LenientBooleanSerializer::class) Boolean?
+typealias LenientBoolean =
+    @Serializable(with = LenientBooleanSerializer::class)
+    Boolean?
 
 /** Strings that may arrive as numbers or booleans (e.g. a rating "4.5" or 4.5). Objects/arrays → null. */
-typealias LenientString = @Serializable(with = LenientStringSerializer::class) String?
+typealias LenientString =
+    @Serializable(with = LenientStringSerializer::class)
+    String?
 
 private val NUMBER = Regex("""-?\d+(?:\.\d+)?""")
 
@@ -67,7 +75,14 @@ object LenientDoubleSerializer : KSerializer<Double?> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("travelplanner.LenientDouble", PrimitiveKind.DOUBLE).nullable
 
-    override fun deserialize(decoder: Decoder): Double? = if (decoder is JsonDecoder) lenientDouble(decoder.element()) else decoder.decodeDouble()
+    override fun deserialize(decoder: Decoder): Double? =
+        if (decoder is JsonDecoder) {
+            lenientDouble(
+                decoder.element(),
+            )
+        } else {
+            decoder.decodeDouble()
+        }
 
     override fun serialize(encoder: Encoder, value: Double?) {
         if (value == null) encoder.encodeNull() else encoder.encodeDouble(value)
@@ -78,11 +93,12 @@ object LenientIntSerializer : KSerializer<Int?> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("travelplanner.LenientInt", PrimitiveKind.INT).nullable
 
-    override fun deserialize(decoder: Decoder): Int? = if (decoder is JsonDecoder) {
-        lenientDouble(decoder.element())?.roundToLong()?.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong())?.toInt()
-    } else {
-        decoder.decodeInt()
-    }
+    override fun deserialize(decoder: Decoder): Int? =
+        if (decoder is JsonDecoder) {
+            lenientDouble(decoder.element())?.roundToLong()?.coerceIn(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong())?.toInt()
+        } else {
+            decoder.decodeInt()
+        }
 
     override fun serialize(encoder: Encoder, value: Int?) {
         if (value == null) encoder.encodeNull() else encoder.encodeInt(value)
@@ -114,7 +130,9 @@ object LenientStringSerializer : KSerializer<String?> {
 }
 
 /** Lists that may arrive as a list of strings, a single string, or nothing. */
-typealias LenientStringList = @Serializable(with = LenientStringListSerializer::class) List<String>
+typealias LenientStringList =
+    @Serializable(with = LenientStringListSerializer::class)
+    List<String>
 
 object LenientStringListSerializer : KSerializer<List<String>> {
     private val delegate = ListSerializer(String.serializer())

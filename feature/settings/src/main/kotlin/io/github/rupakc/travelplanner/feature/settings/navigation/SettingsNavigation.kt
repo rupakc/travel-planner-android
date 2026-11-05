@@ -5,9 +5,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
-import io.github.rupakc.travelplanner.core.ui.PlaceholderAction
-import io.github.rupakc.travelplanner.feature.settings.R
 import io.github.rupakc.travelplanner.core.model.navigation.AppearanceRoute
 import io.github.rupakc.travelplanner.core.model.navigation.FeaturesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationSettingsRoute
@@ -15,6 +12,9 @@ import io.github.rupakc.travelplanner.core.model.navigation.PreferencesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ServerRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TasteProfileRoute
+import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
+import io.github.rupakc.travelplanner.core.ui.PlaceholderAction
+import io.github.rupakc.travelplanner.feature.settings.R
 
 /** Settings root + sub-screens. [onSignOut] must call AuthRepository.logout() (the gate then shows Login). */
 fun NavGraphBuilder.settingsGraph(
@@ -38,10 +38,11 @@ internal fun SettingsScreen(onBack: () -> Unit, onRetakeQuiz: () -> Unit, onSign
         message = stringResource(R.string.settings_message),
         modifier = modifier,
         onBack = onBack,
-        actions = listOf(
-            PlaceholderAction(stringResource(R.string.settings_retake_quiz), onRetakeQuiz),
-            PlaceholderAction(stringResource(R.string.settings_sign_out), onSignOut),
-        ),
+        actions =
+            listOf(
+                PlaceholderAction(stringResource(R.string.settings_retake_quiz), onRetakeQuiz),
+                PlaceholderAction(stringResource(R.string.settings_sign_out), onSignOut),
+            ),
     )
 }
 

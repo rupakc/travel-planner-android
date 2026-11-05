@@ -43,24 +43,25 @@ import io.github.rupakc.travelplanner.core.model.section.SectionStatus
 
 /** Web section labels as string resources. */
 @StringRes
-fun SectionId.titleRes(): Int = when (this) {
-    SectionId.FLIGHTS -> R.string.section_flights
-    SectionId.WEATHER -> R.string.section_weather
-    SectionId.HOTELS -> R.string.section_hotels
-    SectionId.ACTIVITIES -> R.string.section_activities
-    SectionId.PLACES_TO_SEE -> R.string.section_places_to_see
-    SectionId.WALKING_TOURS -> R.string.section_walking_tours
-    SectionId.EVENTS -> R.string.section_events
-    SectionId.VISA -> R.string.section_visa
-    SectionId.SIM -> R.string.section_sim
-    SectionId.TIPS -> R.string.section_tips
-    SectionId.EMERGENCY_CARD -> R.string.section_emergency_card
-    SectionId.GETTING_AROUND -> R.string.section_getting_around
-    SectionId.FOREX -> R.string.section_forex
-    SectionId.ITINERARY -> R.string.section_itinerary
-    SectionId.STRESS_TEST -> R.string.section_stress_test
-    SectionId.PACKING_LIST -> R.string.section_packing_list
-}
+fun SectionId.titleRes(): Int =
+    when (this) {
+        SectionId.FLIGHTS -> R.string.section_flights
+        SectionId.WEATHER -> R.string.section_weather
+        SectionId.HOTELS -> R.string.section_hotels
+        SectionId.ACTIVITIES -> R.string.section_activities
+        SectionId.PLACES_TO_SEE -> R.string.section_places_to_see
+        SectionId.WALKING_TOURS -> R.string.section_walking_tours
+        SectionId.EVENTS -> R.string.section_events
+        SectionId.VISA -> R.string.section_visa
+        SectionId.SIM -> R.string.section_sim
+        SectionId.TIPS -> R.string.section_tips
+        SectionId.EMERGENCY_CARD -> R.string.section_emergency_card
+        SectionId.GETTING_AROUND -> R.string.section_getting_around
+        SectionId.FOREX -> R.string.section_forex
+        SectionId.ITINERARY -> R.string.section_itinerary
+        SectionId.STRESS_TEST -> R.string.section_stress_test
+        SectionId.PACKING_LIST -> R.string.section_packing_list
+    }
 
 /**
  * A results section card: accent bar (spec §5 map), icon, title (semantic heading,
@@ -128,19 +129,36 @@ fun SectionScaffold(
 
 @Composable
 fun SectionStatusIndicator(status: SectionStatus, modifier: Modifier = Modifier) {
-    val label = stringResource(
-        when (status) {
-            SectionStatus.LOADING -> R.string.section_status_loading
-            SectionStatus.ENHANCING -> R.string.section_status_enhancing_hint
-            SectionStatus.DONE -> R.string.section_status_done
-            SectionStatus.WAITING -> R.string.section_status_waiting
-        },
-    )
+    val label =
+        stringResource(
+            when (status) {
+                SectionStatus.LOADING -> R.string.section_status_loading
+                SectionStatus.ENHANCING -> R.string.section_status_enhancing_hint
+                SectionStatus.DONE -> R.string.section_status_done
+                SectionStatus.WAITING -> R.string.section_status_waiting
+            },
+        )
     val m = modifier.size(18.dp).semantics { contentDescription = label }
     when (status) {
-        SectionStatus.LOADING -> CircularProgressIndicator(m, strokeWidth = 2.dp)
-        SectionStatus.ENHANCING -> CircularProgressIndicator(m, strokeWidth = 2.dp, color = TravelTheme.extendedColors.warning)
-        SectionStatus.DONE -> Icon(Icons.Filled.Check, contentDescription = label, tint = TravelTheme.colors.primary, modifier = modifier.size(18.dp))
-        SectionStatus.WAITING -> Box(m.padding(6.dp).clip(TravelShape.Pill).background(TravelTheme.colors.outline))
+        SectionStatus.LOADING -> {
+            CircularProgressIndicator(m, strokeWidth = 2.dp)
+        }
+
+        SectionStatus.ENHANCING -> {
+            CircularProgressIndicator(m, strokeWidth = 2.dp, color = TravelTheme.extendedColors.warning)
+        }
+
+        SectionStatus.DONE -> {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = label,
+                tint = TravelTheme.colors.primary,
+                modifier = modifier.size(18.dp),
+            )
+        }
+
+        SectionStatus.WAITING -> {
+            Box(m.padding(6.dp).clip(TravelShape.Pill).background(TravelTheme.colors.outline))
+        }
     }
 }

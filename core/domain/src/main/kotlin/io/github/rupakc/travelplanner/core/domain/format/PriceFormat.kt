@@ -17,11 +17,11 @@ import kotlin.math.roundToLong
 fun formatPrice(amount: Double?, currency: String? = "USD", cents: Boolean = false): String {
     if (amount == null || !amount.isFinite()) return ""
     val code = currency?.trim()?.takeIf(String::isNotEmpty)?.uppercase(Locale.ROOT) ?: "USD"
-    val rounded = (amount * 100).roundToLong() / 100.0
-    val fractional = abs(rounded) < 100 && rounded != rounded.roundToLong().toDouble()
+    val rounded = (amount * CENTS).roundToLong() / CENTS
+    val fractional = abs(rounded) < CENTS_BELOW && rounded != rounded.roundToLong().toDouble()
     val platformCurrency = runCatching { Currency.getInstance(code) }.getOrNull()
-    val currencyDigits = platformCurrency?.defaultFractionDigits?.takeIf { it >= 0 } ?: 2
-    val digits = if ((cents || fractional) && currencyDigits > 0) 2 else 0
+    val currencyDigits = platformCurrency?.defaultFractionDigits?.takeIf { it >= 0 } ?: CENT_DIGITS
+    val digits = if ((cents || fractional) && currencyDigits > 0) CENT_DIGITS else 0
     return if (platformCurrency != null) {
         NumberFormat.getCurrencyInstance(Locale.US).apply {
             this.currency = platformCurrency
@@ -29,10 +29,15 @@ fun formatPrice(amount: Double?, currency: String? = "USD", cents: Boolean = fal
             maximumFractionDigits = digits
         }.format(amount)
     } else {
-        val number = NumberFormat.getNumberInstance(Locale.US).apply {
-            minimumFractionDigits = digits
-            maximumFractionDigits = digits
-        }.format(amount)
+        val number =
+            NumberFormat.getNumberInstance(Locale.US).apply {
+                minimumFractionDigits = digits
+                maximumFractionDigits = digits
+            }.format(amount)
         "$code $number"
     }
 }
+
+private const val CENTS = 100.0
+private const val CENTS_BELOW = 100.0
+private const val CENT_DIGITS = 2

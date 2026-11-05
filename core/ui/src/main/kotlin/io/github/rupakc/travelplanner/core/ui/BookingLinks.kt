@@ -24,10 +24,11 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 fun openInCustomTab(context: Context, url: String, toolbarColor: Int? = null): Boolean {
     val uri = url.toUri()
     if (uri.scheme != "https" && uri.scheme != "http") return false
-    val intent = CustomTabsIntent.Builder()
-        .setShowTitle(true)
-        .apply { toolbarColor?.let { setDefaultColorSchemeParams(CustomTabColorSchemeParams.Builder().setToolbarColor(it).build()) } }
-        .build()
+    val intent =
+        CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .apply { toolbarColor?.let { setDefaultColorSchemeParams(CustomTabColorSchemeParams.Builder().setToolbarColor(it).build()) } }
+            .build()
     return try {
         intent.launchUrl(context, uri)
         true

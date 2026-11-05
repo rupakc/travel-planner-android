@@ -45,4 +45,3 @@ data class EmailResponse(val email: String? = null)
 
 /** Minimum new-password length enforced by the backend. */
 const val MIN_PASSWORD_LENGTH = 8
-

@@ -13,17 +13,30 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
+// Mirrors .editorconfig: Spotless does not reliably pick the file up for ktlint 1.x.
+val ktlintOverrides =
+    mapOf(
+        "max_line_length" to "160",
+        "ktlint_code_style" to "ktlint_official",
+        "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+        "ktlint_standard_function-signature" to "disabled",
+        "ktlint_standard_class-signature" to "disabled",
+        "ktlint_standard_function-expression-body" to "disabled",
+        "ktlint_standard_chain-method-continuation" to "disabled",
+        "ktlint_standard_backing-property-naming" to "disabled",
+    )
+
 spotless {
     val ktlintVersion = libs.versions.ktlint.get()
     kotlin {
         target("**/*.kt")
         targetExclude("**/build/**", "build-logic/**/build/**")
-        ktlint(ktlintVersion)
+        ktlint(ktlintVersion).editorConfigOverride(ktlintOverrides)
     }
     kotlinGradle {
         target("**/*.kts")
         targetExclude("**/build/**")
-        ktlint(ktlintVersion)
+        ktlint(ktlintVersion).editorConfigOverride(ktlintOverrides)
     }
     format("xml") {
         target("**/*.xml")

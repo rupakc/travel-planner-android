@@ -101,12 +101,20 @@ class FakeFareWatchesRepository : FareWatchesRepository {
 
     override suspend fun match(trip: FareWatchMatchRequest): AppResult<FareWatch?> = AppResult.Success(null)
 
-    override suspend fun create(request: CreateFareWatchRequest): AppResult<FareWatch> = createResult ?: AppResult.Success(
-        FareWatch(id = nextId++, planId = request.planId, alertMode = request.alertMode, targetPrice = request.targetPrice, status = "active")
-            .also { w -> watches.update { it + w } },
-    )
+    override suspend fun create(request: CreateFareWatchRequest): AppResult<FareWatch> =
+        createResult ?: AppResult.Success(
+            FareWatch(
+                id = nextId++,
+                planId = request.planId,
+                alertMode = request.alertMode,
+                targetPrice = request.targetPrice,
+                status = "active",
+            )
+                .also { w -> watches.update { it + w } },
+        )
 
-    override suspend fun get(id: Long): AppResult<FareWatch> = watches.value.firstOrNull { it.id == id }?.let { AppResult.Success(it) } ?: NotStubbed
+    override suspend fun get(id: Long): AppResult<FareWatch> =
+        watches.value.firstOrNull { it.id == id }?.let { AppResult.Success(it) } ?: NotStubbed
 
     override suspend fun update(id: Long, patch: UpdateFareWatchRequest): AppResult<FareWatch> {
         val updated = watches.value.firstOrNull { it.id == id }?.copy(status = patch.status ?: "active") ?: return NotStubbed
@@ -129,12 +137,14 @@ class FakePriceWatchesRepository : PriceWatchesRepository {
 
     override suspend fun match(kind: String, spec: JsonObject): AppResult<PriceWatch?> = AppResult.Success(null)
 
-    override suspend fun create(request: CreatePriceWatchRequest): AppResult<PriceWatch> = createResult ?: AppResult.Success(
-        PriceWatch(id = nextId++, kind = request.kind, planId = request.planId, alertMode = request.alertMode, status = "active")
-            .also { w -> watches.update { it + w } },
-    )
+    override suspend fun create(request: CreatePriceWatchRequest): AppResult<PriceWatch> =
+        createResult ?: AppResult.Success(
+            PriceWatch(id = nextId++, kind = request.kind, planId = request.planId, alertMode = request.alertMode, status = "active")
+                .also { w -> watches.update { it + w } },
+        )
 
-    override suspend fun get(id: Long): AppResult<PriceWatch> = watches.value.firstOrNull { it.id == id }?.let { AppResult.Success(it) } ?: NotStubbed
+    override suspend fun get(id: Long): AppResult<PriceWatch> =
+        watches.value.firstOrNull { it.id == id }?.let { AppResult.Success(it) } ?: NotStubbed
 
     override suspend fun update(id: Long, patch: UpdatePriceWatchRequest): AppResult<PriceWatch> {
         val updated = watches.value.firstOrNull { it.id == id }?.copy(status = patch.status ?: "active") ?: return NotStubbed
@@ -243,13 +253,14 @@ class FakeSettingsRepository(initial: AppSettings = AppSettings(), private val d
 
     override suspend fun setLocaleTag(tag: String?) = state.update { it.copy(localeTag = tag) }
 
-    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?) = state.update {
-        it.copy(
-            tripNotifications = trip ?: it.tripNotifications,
-            priceAlertNotifications = priceAlerts ?: it.priceAlertNotifications,
-            nearbyNotifications = nearby ?: it.nearbyNotifications,
-        )
-    }
+    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?) =
+        state.update {
+            it.copy(
+                tripNotifications = trip ?: it.tripNotifications,
+                priceAlertNotifications = priceAlerts ?: it.priceAlertNotifications,
+                nearbyNotifications = nearby ?: it.nearbyNotifications,
+            )
+        }
 }
 
 class FakeProfileRepository(initial: TravellerProfile = TravellerProfile()) : ProfileRepository {
@@ -262,11 +273,12 @@ class FakeProfileRepository(initial: TravellerProfile = TravellerProfile()) : Pr
         profileState.value = profile
     }
 
-    override suspend fun setFeature(featureId: String, enabled: Boolean?) = overridesState.update { o ->
-        val on = o.enabled - featureId
-        val off = o.disabled - featureId
-        FeatureOverrides(if (enabled == true) on + featureId else on, if (enabled == false) off + featureId else off)
-    }
+    override suspend fun setFeature(featureId: String, enabled: Boolean?) =
+        overridesState.update { o ->
+            val on = o.enabled - featureId
+            val off = o.disabled - featureId
+            FeatureOverrides(if (enabled == true) on + featureId else on, if (enabled == false) off + featureId else off)
+        }
 
     override suspend fun resetFeatures() {
         overridesState.value = FeatureOverrides()
@@ -279,5 +291,8 @@ class FakeFeedbackRepository : FeedbackRepository {
 
     override suspend fun sendFeedback(request: FeedbackRequest): AppResult<Unit> = AppResult.Success(Unit).also { feedback += request }
 
-    override suspend fun sendAnalytics(events: List<AnalyticsEvent>): AppResult<Unit> = AppResult.Success(Unit).also { this.events += events }
+    override suspend fun sendAnalytics(events: List<AnalyticsEvent>): AppResult<Unit> =
+        AppResult.Success(Unit).also {
+            this.events += events
+        }
 }

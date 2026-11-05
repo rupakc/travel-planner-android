@@ -29,7 +29,9 @@ data class AdminUser(
 )
 
 @Serializable
-data class ResetPasswordRequest(@SerialName("new_password") val newPassword: String)
+data class ResetPasswordRequest(
+    @SerialName("new_password") val newPassword: String,
+)
 
 @Serializable
 data class AdminStatusResponse(val status: String? = null, val username: String? = null)

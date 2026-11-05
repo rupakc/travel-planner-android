@@ -40,7 +40,10 @@ data class TasteSignal(val value: String? = null, val count: LenientInt = null)
 
 /** `DELETE /api/taste-profile`. */
 @Serializable
-data class TasteResetResponse(val success: Boolean? = null, @SerialName("deleted_signals") val deletedSignals: LenientInt = null)
+data class TasteResetResponse(
+    val success: Boolean? = null,
+    @SerialName("deleted_signals") val deletedSignals: LenientInt = null,
+)
 
 /** `GET /api/recent-searches` element. */
 @Serializable
@@ -74,4 +77,3 @@ data class RecentSearchIn(
 
 @Serializable
 data class RecentStop(val city: String, val nights: Int? = null)
-

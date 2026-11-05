@@ -26,22 +26,24 @@ import io.github.rupakc.travelplanner.core.model.section.VerificationLevel
 @Composable
 fun VerificationChip(verification: Verification, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
     val level = verification.levelKind
-    val fallback = stringResource(
-        when {
-            verification.pending == true -> R.string.verification_pending
-            level == VerificationLevel.VERIFIED -> R.string.verification_verified
-            level == VerificationLevel.PARTIAL -> R.string.verification_partial
-            level == VerificationLevel.CONFLICT -> R.string.verification_conflict
-            else -> R.string.verification_unverified
-        },
-    )
+    val fallback =
+        stringResource(
+            when {
+                verification.pending == true -> R.string.verification_pending
+                level == VerificationLevel.VERIFIED -> R.string.verification_verified
+                level == VerificationLevel.PARTIAL -> R.string.verification_partial
+                level == VerificationLevel.CONFLICT -> R.string.verification_conflict
+                else -> R.string.verification_unverified
+            },
+        )
     val label = verification.label?.takeIf(String::isNotBlank) ?: fallback
-    val (icon, tint) = when (level) {
-        VerificationLevel.VERIFIED -> Icons.Filled.CheckCircle to TravelTheme.extendedColors.success
-        VerificationLevel.PARTIAL -> Icons.Filled.CheckCircle to TravelTheme.extendedColors.info
-        VerificationLevel.CONFLICT -> Icons.Filled.Warning to TravelTheme.extendedColors.warning
-        VerificationLevel.UNVERIFIED, null -> Icons.Filled.Info to TravelTheme.colors.onSurfaceVariant
-    }
+    val (icon, tint) =
+        when (level) {
+            VerificationLevel.VERIFIED -> Icons.Filled.CheckCircle to TravelTheme.extendedColors.success
+            VerificationLevel.PARTIAL -> Icons.Filled.CheckCircle to TravelTheme.extendedColors.info
+            VerificationLevel.CONFLICT -> Icons.Filled.Warning to TravelTheme.extendedColors.warning
+            VerificationLevel.UNVERIFIED, null -> Icons.Filled.Info to TravelTheme.colors.onSurfaceVariant
+        }
     AssistChip(
         onClick = onClick,
         label = { Text(label, style = TravelTheme.typography.labelSmall) },
