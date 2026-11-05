@@ -70,10 +70,10 @@ fun bestByRow(summaries: List<CompareSummary?>): Map<CompareRow, Set<Int>> =
         row to values.filter { it.second == best }.map { it.first }.toSet()
     }.toMap()
 
-/** Web `fmtUsd`: "$1,234" (rounded), "—" when unknown. */
-fun fmtUsd(value: Double?): String {
+/** Web `fmtUsd`: "$1,234" (rounded; "1234 US$" for a Spanish [locale]), "—" when unknown. */
+fun fmtUsd(value: Double?, locale: Locale = Locale.US): String {
     if (value == null || !value.isFinite()) return DASH
-    return "$" + NumberFormat.getIntegerInstance(Locale.US).format(value.roundToLong())
+    return io.github.rupakc.travelplanner.core.domain.format.formatWholeUsd(value, locale)
 }
 
 /** Web `fmtDuration`: "2h 5m", null when unknown or not positive. */

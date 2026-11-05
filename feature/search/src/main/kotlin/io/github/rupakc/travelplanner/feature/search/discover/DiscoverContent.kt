@@ -38,6 +38,7 @@ import io.github.rupakc.travelplanner.core.domain.search.backendDetail
 import io.github.rupakc.travelplanner.core.domain.search.fmtUsd
 import io.github.rupakc.travelplanner.core.domain.search.visaBadge
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.search.R
 import io.github.rupakc.travelplanner.feature.search.components.AirportField
 import io.github.rupakc.travelplanner.feature.search.components.BudgetField
@@ -162,7 +163,14 @@ internal fun DestinationCard(dest: DiscoveredDestination, onPlan: () -> Unit, mo
             }
             dest.estimatedCostUsdLow?.let { low ->
                 val high = dest.estimatedCostUsdHigh
-                val range = if (high != null) stringResource(R.string.search_cost_range, fmtUsd(low), fmtUsd(high)) else "~${fmtUsd(low)}"
+                val range =
+                    if (high !=
+                        null
+                    ) {
+                        stringResource(R.string.search_cost_range, fmtUsd(low, currentLocale()), fmtUsd(high, currentLocale()))
+                    } else {
+                        "~${fmtUsd(low, currentLocale())}"
+                    }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
                     Text(range, style = TravelTheme.typography.titleSmall, color = TravelTheme.colors.primary, fontWeight = FontWeight.SemiBold)
                     Text(stringResource(R.string.search_rough_estimate), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)

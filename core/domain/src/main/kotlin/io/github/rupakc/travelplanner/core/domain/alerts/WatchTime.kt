@@ -101,8 +101,9 @@ fun formatDay(iso: String?, locale: Locale = Locale.UK): String? {
 /** `YYYY-MM-DD` (a longer ISO string is cut to its date) → date, else null. */
 fun parseIsoDate(iso: String?): LocalDate? = iso?.take(ISO_DATE_LENGTH)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
-/** Whole dollars, US style: "$1,234" (web `formatUsd`). */
-fun formatUsd(amount: Double): String = "$" + java.text.NumberFormat.getIntegerInstance(Locale.US).format(jsRound(amount))
+/** Whole dollars (web `formatUsd`): "$1,234" in en-US; the UI passes the app [locale] ("1234 US$"). */
+fun formatUsd(amount: Double, locale: Locale = Locale.US): String =
+    io.github.rupakc.travelplanner.core.domain.format.formatWholeUsd(amount, locale)
 
 internal fun Double.roundCents(): Double = (this * CENTS).roundToLong() / CENTS
 

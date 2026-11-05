@@ -62,8 +62,8 @@ class ChatScreenTest {
     fun `empty state shows the web starters and sends one`() {
         show(ChatUiState())
         compose.onNodeWithText("Travel Planner Chat").assertExists()
-        compose.onNodeWithText("Plan a 5-day trip to Tokyo on a \$2000 budget").performClick()
-        assertEquals(ChatUiEvent.Send("Plan a 5-day trip to Tokyo on a \$2000 budget"), events.single())
+        compose.onNodeWithText("Plan a 5-day trip to Tokyo on a \$2,000 budget").performClick()
+        assertEquals(ChatUiEvent.Send("Plan a 5-day trip to Tokyo on a \$2,000 budget"), events.single())
     }
 
     @Test

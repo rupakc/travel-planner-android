@@ -63,11 +63,11 @@
     <string name="watch_fare_title">Vigilar esta tarifa</string>
     <string name="watch_fare_title_done">Vigilando esta tarifa</string>
     <string name="watch_fare_title_already">Ya estás vigilando esta tarifa</string>
-    <string name="watch_fare_any_drop_hint">Solo bajadas importantes: al menos 15 $ y un 5 %. Nunca más de una vez al día.</string>
+    <string name="watch_fare_any_drop_hint">Solo bajadas importantes: al menos %1$s y un 5 %%. Nunca más de una vez al día.</string>
     <string name="watch_fare_target_already_under">La tarifa de hoy (%1$s) ya está por debajo; te avisaremos cuando baje del precio de hoy.</string>
     <string name="watch_fare_target_prefilled">Rellenado con el extremo bajo del precio habitual.</string>
     <string name="watch_flexible">Incluir fechas cercanas (±3 días)</string>
-    <string name="watch_flexible_hint">También te avisaremos si salir unos días antes o después ahorra al menos 25 $, con la misma duración del viaje.</string>
+    <string name="watch_flexible_hint">También te avisaremos si salir unos días antes o después ahorra al menos %1$s, con la misma duración del viaje.</string>
     <string name="watch_fare_saving">Comprobando el precio de hoy…</string>
     <string name="watch_fare_error">No se pudo empezar a vigilar esta tarifa. Inténtalo de nuevo en un momento.</string>
     <string name="watch_fare_done_price">La tarifa de hoy es %1$s (%2$s). La revisaremos unas dos veces al día y solo te avisaremos cuando merezca la pena.</string>
@@ -125,7 +125,7 @@
     <string name="watch_trip_note_per_person">por persona × %1$d</string>
     <string name="watch_trip_how">Al empezar, buscamos precios en vivo de tu vuelo (la tarifa más barata en tus fechas, no un vuelo concreto), tu hotel y hasta 5 actividades, y mostramos el total en vivo. Lo que no tenga precio en vivo se queda en su estimación.</string>
     <string name="watch_trip_estimates_fixed">Las estimaciones son fijas y nunca generan alertas.</string>
-    <string name="watch_trip_alert_rule">Las alertas solo llegan cuando los precios en vivo mueven el total al menos 25 $ o un 4 %.</string>
+    <string name="watch_trip_alert_rule">Las alertas solo llegan cuando los precios en vivo mueven el total al menos %1$s o un 4 %%.</string>
     <string name="watch_trip_watching_caption">Lo que vigilamos · %1$s, %2$s</string>
     <string name="watch_trip_total">Total</string>
     <string name="watch_trip_not_in_total">no incluido en el total</string>

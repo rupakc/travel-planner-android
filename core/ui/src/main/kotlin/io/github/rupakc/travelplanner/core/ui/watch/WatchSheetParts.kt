@@ -65,6 +65,7 @@ fun ToneBox(tone: Tone, modifier: Modifier = Modifier, live: Boolean = false, co
 
 /** The UI locale, observed (recomposes when the per-app language changes). */
 @Composable
+@androidx.compose.runtime.ReadOnlyComposable
 fun currentLocale(): java.util.Locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
 
 /** "US dollars" for USD, else the code ("EUR") — web `currencyLabel`. */
@@ -198,7 +199,7 @@ fun FlexibleOption(checked: Boolean, modifier: Modifier = Modifier, onChange: (B
     CheckRow(
         checked = checked,
         title = stringResource(R.string.watch_flexible),
-        subtitle = stringResource(R.string.watch_flexible_hint),
+        subtitle = stringResource(R.string.watch_flexible_hint, io.github.rupakc.travelplanner.core.ui.format.localUsd(FLEXIBLE_SAVING_USD)),
         onChange = onChange,
         modifier = modifier,
     )
@@ -215,3 +216,8 @@ internal fun PriceLead(lead: String, price: String, note: String?, modifier: Mod
 }
 
 private const val SELECTED_TINT = 0.06f
+
+// Backend alert rules quoted in the sheet copy (services/price_rules.py, fare_watch.py), in USD.
+internal const val FARE_ALERT_STEP_USD = 15.0
+internal const val FLEXIBLE_SAVING_USD = 25.0
+internal const val TRIP_ALERT_STEP_USD = 25.0

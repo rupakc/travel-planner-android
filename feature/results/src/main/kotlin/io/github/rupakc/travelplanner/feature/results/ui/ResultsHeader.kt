@@ -49,13 +49,13 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVarian
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.ConfidenceData
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
 import io.github.rupakc.travelplanner.core.ui.SectionStatusIndicator
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.core.ui.titleRes
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.ResultsUiState
@@ -102,7 +102,7 @@ internal fun TripSummary(state: ResultsUiState, modifier: Modifier = Modifier) {
             listOfNotNull(
                 dates,
                 pluralStringResource(R.plurals.results_travellers, travellers, travellers),
-                request.budgetUsd?.takeIf { it > 0 }?.let { stringResource(R.string.results_budget_label, formatPrice(it)) },
+                request.budgetUsd?.takeIf { it > 0 }?.let { stringResource(R.string.results_budget_label, localPrice(it)) },
             ).joinToString(" · "),
             style = TravelTheme.typography.bodyMedium,
             color = TravelTheme.colors.onSurfaceVariant,

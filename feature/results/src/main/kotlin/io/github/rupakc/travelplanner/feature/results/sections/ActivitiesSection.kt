@@ -13,13 +13,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
 import io.github.rupakc.travelplanner.core.ui.BookingLinkButton
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.ChipRow
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.CityChip
@@ -107,7 +107,7 @@ internal fun ActivityCard(activity: Activity, selected: Boolean, fits: Boolean, 
             val meta =
                 listOfNotNull(
                     activity.durationHours?.let { stringResource(R.string.results_hours, formatHours(it)) },
-                    activity.priceUsd?.let { formatPrice(it) },
+                    activity.priceUsd?.let { localPrice(it) },
                     activity.location,
                     activity.rating?.let { r ->
                         activity.reviewCount?.let { n -> stringResource(R.string.results_rating_reviews, formatScore(r), "%,d".format(n)) }
