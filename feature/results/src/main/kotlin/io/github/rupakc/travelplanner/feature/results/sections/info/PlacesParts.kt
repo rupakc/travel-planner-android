@@ -117,7 +117,7 @@ private fun PlaceCard(
                 if (place.raw.linkVerified()) FoundOnlineChip()
                 if (place.hiddenGem == true) InfoPill(stringResource(R.string.info_hidden_gem), tone = Tone.Accent, section = SectionId.EVENTS)
                 if (place.familyFriendly == true) InfoPill(stringResource(R.string.info_family), tone = Tone.Info)
-                if (place.accessibilityFeatures.isNotEmpty()) InfoPill(stringResource(R.string.info_accessible), tone = Tone.Accent, section = SectionId.HOTELS)
+                if (place.accessibilityFeatures.isNotEmpty()) InfoPill(stringResource(R.string.info_accessible), tone = Tone.Violet)
                 when (weatherChip) {
                     PlaceWeather.CHECK -> InfoPill(stringResource(R.string.info_check_weather), tone = Tone.Warning)
                     PlaceWeather.GOOD -> InfoPill(stringResource(R.string.info_good_weather), tone = Tone.Success)

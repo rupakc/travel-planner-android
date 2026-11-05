@@ -55,8 +55,11 @@ internal object InfoDimens {
     val Border = 1.dp
 }
 
-/** Semantic tone of a pill/callout; colour is never the only signal (each use carries text). */
-internal enum class Tone { Neutral, Info, Success, Warning, Danger, Accent }
+/**
+ * Semantic tone of a pill/callout ([Violet] = the web's purple chips: Tourist Police, Accessible, ATM);
+ * colour is never the only signal (each use carries text).
+ */
+internal enum class Tone { Neutral, Info, Success, Warning, Danger, Accent, Violet }
 
 @Immutable
 internal data class ToneColors(val container: Color, val content: Color)
@@ -84,6 +87,10 @@ internal fun toneColors(tone: Tone, section: SectionId? = null): ToneColors {
 
         Tone.Danger -> {
             ToneColors(c.errorContainer, c.onErrorContainer)
+        }
+
+        Tone.Violet -> {
+            TravelTheme.sectionAccents[SectionId.HOTELS].let { ToneColors(it.tint, it.icon) }
         }
 
         Tone.Accent -> {

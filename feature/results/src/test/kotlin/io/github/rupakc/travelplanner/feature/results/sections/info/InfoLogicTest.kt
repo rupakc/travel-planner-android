@@ -67,6 +67,8 @@ class InfoLogicTest {
         assertEquals(PackingState.decode(back.encode()), back)
         assertEquals(PackingState(), PackingState.fromPlan(null))
         // survives the plan selections serializer (web ↔ app)
+        val raw = TravelJson.parseToJsonElement("""[{"name":"Clothing","items":[{"item":"Light jacket","essential":true,"brand":"any"}]}]""")
+        assertEquals(raw, PackingState().toPlanJson(packing, raw)["categories"])
         val sel = PlanSelectionsSerializer.fromJson(PlanSelectionsSerializer.toJson(PlanSelections(packingList = json)))
         assertEquals(json, sel.packingList)
     }

@@ -3,6 +3,7 @@ package io.github.rupakc.travelplanner.feature.results.sections.info
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,7 +30,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.net.toUri
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
@@ -75,7 +75,7 @@ internal fun dialableNumber(value: String?): String? {
 /** Opens the dialer pre-filled (never calls directly: no CALL_PHONE permission). */
 internal fun dial(context: Context, number: String): Boolean =
     try {
-        context.startActivity(Intent(Intent.ACTION_DIAL, "tel:$number".toUri()))
+        context.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", number, null)))
         true
     } catch (_: ActivityNotFoundException) {
         false
@@ -200,7 +200,7 @@ private fun CityCard(card: EmergencyCardModel, onOpenLink: (String) -> Unit) {
                 Triple(R.string.emergency_police, n?.police, Tone.Info),
                 Triple(R.string.emergency_ambulance, n?.ambulance, Tone.Danger),
                 Triple(R.string.emergency_fire, n?.fire, Tone.Warning),
-                Triple(R.string.emergency_tourist_police, n?.touristPolice, Tone.Accent),
+                Triple(R.string.emergency_tourist_police, n?.touristPolice, Tone.Violet),
             )
         NumberGrid(tiles)
         card.embassy?.let { EmbassyBlock(it, onOpenLink) }
@@ -244,7 +244,7 @@ private fun NumberGrid(tiles: List<Triple<Int, String?, Tone>>) {
 /** A big tap-to-dial tile; with no number it is plain text ("—"). */
 @Composable
 private fun NumberTile(label: String, value: String?, tone: Tone, modifier: Modifier) {
-    val colors = toneColors(tone, SectionId.HOTELS)
+    val colors = toneColors(tone)
     val context = LocalContext.current
     val number = dialableNumber(value)
     val a11y =

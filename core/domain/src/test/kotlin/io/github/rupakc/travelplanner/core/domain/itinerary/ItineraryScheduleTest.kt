@@ -81,7 +81,9 @@ class ItineraryScheduleTest {
         val it =
             TravelJson.decodeFromString(
                 ItineraryData.serializer(),
-                """{"days":[{"day_number":1,"slots":[{"time_of_day":"morning","activity":"A","duration_hours":"2"},{"time_of_day":"afternoon","activity":"B","duration_hours":1.5}]}]}""",
+                """{"days":[{"day_number":1,"slots":[""" +
+                    """{"time_of_day":"morning","activity":"A","duration_hours":"2"},""" +
+                    """{"time_of_day":"afternoon","activity":"B","duration_hours":1.5}]}]}""",
             )
         val d = scheduleDays(arranged(it)).single()
         assertEquals("12:00", d.slots[0].endTime)

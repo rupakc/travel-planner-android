@@ -5,6 +5,7 @@ import io.github.rupakc.travelplanner.core.model.section.PackingCategory
 import io.github.rupakc.travelplanner.core.model.section.PackingListData
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonObjectBuilder
 import kotlinx.serialization.json.JsonPrimitive
@@ -36,10 +37,13 @@ internal data class PackingState(val checked: Map<String, Boolean> = emptyMap(),
     /** Web `totalItems`: the list's own total plus every custom item. */
     fun total(data: PackingListData): Int = (data.totalItems ?: 0) + custom.values.sumOf { it.size }
 
-    /** The `selections.packing_list` object the web saves (`buildPlanState`). */
-    fun toPlanJson(data: PackingListData): JsonObject =
+    /**
+     * The `selections.packing_list` object the web saves (`buildPlanState`). [rawCategories] is the section's
+     * original `categories` JSON (kept verbatim like the web); the typed list is the fallback.
+     */
+    fun toPlanJson(data: PackingListData, rawCategories: JsonElement? = null): JsonObject =
         buildJsonObject {
-            put("categories", TravelJson.encodeToJsonElement(ListSerializer(PackingCategory.serializer()), data.categories))
+            put("categories", rawCategories ?: TravelJson.encodeToJsonElement(ListSerializer(PackingCategory.serializer()), data.categories))
             data.luggageNote?.let { put("luggage_note", JsonPrimitive(it)) }
             putState(this@PackingState)
             put("total_items", JsonPrimitive(total(data)))

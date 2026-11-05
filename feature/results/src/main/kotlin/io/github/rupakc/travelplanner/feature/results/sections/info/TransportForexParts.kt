@@ -329,7 +329,7 @@ private fun CashBlock(cash: CashAdvice, modifier: Modifier) {
 
 @Composable
 private fun AtmBlock(atm: AtmInfo) {
-    Panel(Tone.Accent, section = SectionId.HOTELS) {
+    Panel(Tone.Violet) {
         SubHeading(stringResource(R.string.forex_atm))
         LabeledLine(stringResource(R.string.forex_availability), atm.availability)
         LabeledLine(stringResource(R.string.forex_networks), atm.networks)

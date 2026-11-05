@@ -49,6 +49,7 @@ import io.github.rupakc.travelplanner.core.model.section.PackingItem
 import io.github.rupakc.travelplanner.core.model.section.PackingListData
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.feature.results.R
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
 private val PackingStateSaver = Saver<PackingState, String>(save = { it.encode() }, restore = { PackingState.decode(it) })
@@ -59,7 +60,13 @@ private val PackingStateSaver = Saver<PackingState, String>(save = { it.encode()
  * [onSave] receives the web-shaped object, or null to remove it from the plan.
  */
 @Composable
-internal fun PackingBody(data: PackingListData, saved: JsonObject?, onSave: (JsonObject?) -> Unit, modifier: Modifier = Modifier) {
+internal fun PackingBody(
+    data: PackingListData,
+    saved: JsonObject?,
+    onSave: (JsonObject?) -> Unit,
+    modifier: Modifier = Modifier,
+    rawCategories: JsonElement? = null,
+) {
     if (data.categories.isEmpty()) {
         EmptyState(stringResource(R.string.packing_unavailable), modifier)
         return
@@ -69,7 +76,7 @@ internal fun PackingBody(data: PackingListData, saved: JsonObject?, onSave: (Jso
     val state = if (isSaved) PackingState.fromPlan(saved) else local
     val update = { next: PackingState ->
         local = next
-        if (isSaved) onSave(next.toPlanJson(data))
+        if (isSaved) onSave(next.toPlanJson(data, rawCategories))
     }
     val inputs = remember { mutableStateMapOf<String, String>() }
 
@@ -94,7 +101,9 @@ internal fun PackingBody(data: PackingListData, saved: JsonObject?, onSave: (Jso
                     modifier = Modifier.semantics { contentDescription = a11y },
                 )
             } else {
-                TpButton(stringResource(R.string.packing_save), onClick = { onSave(state.toPlanJson(data)) }, variant = TpButtonVariant.Secondary)
+                TpButton(stringResource(R.string.packing_save), onClick = {
+                    onSave(state.toPlanJson(data, rawCategories))
+                }, variant = TpButtonVariant.Secondary)
             }
         }
         AdaptiveGrid(data.categories) { category, cell ->
