@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -185,7 +186,14 @@ class FakeChatRepository(var replies: List<ChatEvent> = Fixtures.chatEvents(Fixt
         return replies.asFlow()
     }
 
-    override val threads: Flow<List<ChatThread>> = threadState
+    /** Threads stored on the device for another username: they exist (and have messages) but are not this user's. */
+    private val otherUsers = MutableStateFlow<Set<Long>>(emptySet())
+
+    /** Per username, like ChatRepositoryImpl: another user's threads are never listed. */
+    override val threads: Flow<List<ChatThread>> = combine(threadState, otherUsers) { all, foreign -> all.filterNot { it.id in foreign } }
+
+    /** Stores a thread that belongs to another user on the same device. */
+    suspend fun createThreadForAnotherUser(title: String): Long = createThread(title).also { otherUsers.value += it }
 
     override fun messages(threadId: Long): Flow<List<StoredChatMessage>> =
         messageState.map { all ->

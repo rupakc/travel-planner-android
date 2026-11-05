@@ -24,7 +24,6 @@ import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.feature.share.navigation.SHARE_APP_LINK_BASE
-import io.github.rupakc.travelplanner.feature.share.navigation.SHARE_WEB_LINK_PATTERN
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -66,20 +65,31 @@ class ShareScreenTest {
     }
 
     @Test
-    fun `app and https share deep links open the share route with the token`() {
+    fun `shared itinerary renders through the shared day cards with derived times and notes`() {
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                ShareScreen(ShareUiState(isLoading = false, trip = SharedTrip.from(sharedFixture)), {}, {}, {}, {}, {})
+            }
+        }
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Market"))
+        compose.onNodeWithText("Market").assertExists()
+        compose.onNodeWithText("09:00–11:00").assertExists()
+        compose.onNodeWithText("📝 Go early", substring = true).assertExists()
+    }
+
+    @Test
+    fun `app share deep links open the share route with the token`() {
         lateinit var nav: TestNavHostController
         compose.setContent {
             nav = TestNavHostController(ApplicationProvider.getApplicationContext()).apply { navigatorProvider.addNavigator(ComposeNavigator()) }
             NavHost(nav, startDestination = HomeRoute) {
                 composable<HomeRoute> { Text("home") }
                 composable<ShareRoute>(
-                    deepLinks = listOf(navDeepLink<ShareRoute>(basePath = SHARE_APP_LINK_BASE), navDeepLink { uriPattern = SHARE_WEB_LINK_PATTERN }),
+                    deepLinks = listOf(navDeepLink<ShareRoute>(basePath = SHARE_APP_LINK_BASE)),
                 ) { Text("share") }
             }
         }
         compose.runOnUiThread { nav.navigate(Uri.parse("travelplanner://share/abc123")) }
         assertEquals("abc123", nav.currentBackStackEntry!!.toRoute<ShareRoute>().token)
-        compose.runOnUiThread { nav.navigate(Uri.parse("https://voyager.example/share/xyz_9")) }
-        assertEquals("xyz_9", nav.currentBackStackEntry!!.toRoute<ShareRoute>().token)
     }
 }

@@ -1,6 +1,8 @@
 package io.github.rupakc.travelplanner.core.network
 
 import io.github.rupakc.travelplanner.core.common.AppError
+import io.github.rupakc.travelplanner.core.common.AppLogger
+import kotlinx.serialization.SerializationException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -52,5 +54,22 @@ class ErrorMappingTest {
         val html = HttpErrorMapper.map(500, null, "<html>oops</html>") as AppError.Server
         assertNull(html.message)
         assertNull(HttpErrorMapper.parseRetryAfter("Wed, 21 Oct 2026 07:28:00 GMT"))
+    }
+
+    @Test
+    fun `decoding and unknown failures carry no exception text but are logged`() {
+        val logged = mutableListOf<Throwable?>()
+        val previous = AppLogger.sink
+        AppLogger.sink = AppLogger.Sink { _, _, _, t -> logged += t }
+        try {
+            val html = SerializationException("Unexpected JSON token at offset 0: <!DOCTYPE html>")
+            assertEquals(AppError.Decoding(null), html.toAppError())
+            assertEquals(AppError.Decoding(null), IllegalArgumentException("Expected start of the object").toAppError())
+            assertEquals(AppError.Unknown(null), IllegalStateException("java internals").toAppError())
+            assertEquals(3, logged.size)
+            assertTrue(logged.first() === html)
+        } finally {
+            AppLogger.sink = previous
+        }
     }
 }

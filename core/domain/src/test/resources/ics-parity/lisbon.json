@@ -1,0 +1,219 @@
+{
+  "id": 101,
+  "name": "Lisbon long weekend",
+  "search_data": {
+    "origin": "London, United Kingdom (LHR)",
+    "destination": "Lisbon, Portugal (LIS)",
+    "departure_date": "2027-05-14",
+    "return_date": "2027-05-17",
+    "num_travelers": 2,
+    "adults": 2,
+    "import_source": {
+      "title": "48 hours in Lisbon",
+      "url": "https://example.com/lisbon-48h"
+    }
+  },
+  "selections": {
+    "flights": [
+      {
+        "leg_index": 0,
+        "price_usd": 142,
+        "outbound": {
+          "airline": "TAP Air Portugal",
+          "flight_number": "TP1351",
+          "departure_airport": "LHR",
+          "arrival_airport": "LIS",
+          "departure_time": "2027-05-14T07:05",
+          "arrival_time": "2027-05-14T09:50"
+        },
+        "return_flight": {
+          "airline": "TAP Air Portugal",
+          "flight_number": "TP1350",
+          "departure_airport": "LIS",
+          "arrival_airport": "LHR",
+          "departure_time": "2027-05-17T18:25",
+          "arrival_time": "2027-05-17T21:10"
+        }
+      }
+    ],
+    "hotel": {
+      "name": "Memmo Alfama",
+      "address": "Travessa das Merceeiras 27, Lisbon",
+      "price_per_night_usd": 210,
+      "star_rating": 4
+    },
+    "events": [
+      {
+        "name": "Festas de Lisboa warm-up concert",
+        "date": "2027-05-15",
+        "venue": "Praça do Comércio"
+      }
+    ],
+    "itinerary_edits": {
+      "1-afternoon": {
+        "activity": "Tram 28 (early, before the crowds)"
+      },
+      "2-afternoon": {
+        "cost": 0
+      },
+      "3-evening": {
+        "location": "Cascais marina"
+      }
+    },
+    "itinerary_notes": {
+      "1-evening": "Book Clube de Fado for 20:30",
+      "4-morning": "Leave bags at the hotel"
+    },
+    "itinerary_layout": {
+      "fingerprint": "19njh4m",
+      "positions": {
+        "1-morning": "1-afternoon",
+        "1-afternoon": "1-morning",
+        "1-evening": "2-evening",
+        "2-evening": "1-evening",
+        "3-afternoon": null,
+        "4-morning": "3-afternoon"
+      }
+    },
+    "itinerary": {
+      "days": [
+        {
+          "day_number": 1,
+          "date": "2027-05-14",
+          "city": "Lisbon, Portugal",
+          "theme": "Alfama and the river",
+          "daily_estimated_cost_usd": 95,
+          "slots": [
+            {
+              "time_of_day": "morning",
+              "activity": "São Jorge Castle",
+              "location": "Castelo, Lisbon",
+              "duration_hours": 2.5,
+              "estimated_cost_usd": 15,
+              "lat": 38.7139,
+              "lng": -9.1335,
+              "notes": "Buy tickets online; the queue builds after 10:00."
+            },
+            {
+              "time_of_day": "afternoon",
+              "activity": "Tram 28 to Estrela",
+              "location": "Martim Moniz",
+              "duration_hours": 1.5,
+              "estimated_cost_usd": 3.1,
+              "lat": 38.7166,
+              "lng": -9.136
+            },
+            {
+              "time_of_day": "evening",
+              "activity": "Fado dinner in Alfama",
+              "location": "Rua de São Miguel, Lisbon",
+              "duration_hours": 3,
+              "estimated_cost_usd": 55,
+              "lat": 38.711,
+              "lng": -9.129
+            }
+          ]
+        },
+        {
+          "day_number": 2,
+          "date": "2027-05-15",
+          "city": "Lisbon, Portugal",
+          "theme": "Belém",
+          "slots": [
+            {
+              "time_of_day": "morning",
+              "activity": "Jerónimos Monastery",
+              "location": "Belém, Lisbon",
+              "duration_hours": 2,
+              "estimated_cost_usd": 12,
+              "lat": 38.6979,
+              "lng": -9.2068
+            },
+            {
+              "time_of_day": "lunch",
+              "activity": "Pastéis de Belém",
+              "location": "Rua de Belém 84",
+              "estimated_cost_usd": 6
+            },
+            {
+              "time_of_day": "afternoon",
+              "activity": "MAAT and the riverside walk",
+              "location": "Av. Brasília, Lisbon",
+              "duration_hours": 3,
+              "estimated_cost_usd": 11,
+              "lat": 38.6957,
+              "lng": -9.1923,
+              "from_link": true,
+              "link_quote": "the riverside walk to MAAT is the best sunset spot"
+            },
+            {
+              "time_of_day": "evening",
+              "activity": "LX Factory",
+              "location": "Alcântara",
+              "duration_hours": 2,
+              "lat": 38.7033,
+              "lng": -9.1786
+            }
+          ],
+          "link_extras": [
+            {
+              "name": "Time Out Market",
+              "note": "Mentioned for lunch, no free slot"
+            }
+          ]
+        },
+        {
+          "day_number": 3,
+          "date": "2027-05-16",
+          "city": "Sintra & Cascais, Portugal",
+          "theme": "Day trip",
+          "slots": [
+            {
+              "time_of_day": "morning",
+              "activity": "Pena Palace",
+              "location": "Sintra",
+              "duration_hours": 4,
+              "estimated_cost_usd": 20,
+              "lat": 38.7876,
+              "lng": -9.3906
+            },
+            {
+              "time_of_day": "afternoon",
+              "activity": "Quinta da Regaleira",
+              "location": "Sintra",
+              "duration_hours": 2.5,
+              "estimated_cost_usd": 12,
+              "lat": 38.7964,
+              "lng": -9.396
+            },
+            {
+              "time_of_day": "evening",
+              "activity": "Sunset at Cabo da Roca, then late dinner in Cascais",
+              "location": "Cabo da Roca",
+              "duration_hours": 6,
+              "estimated_cost_usd": 45,
+              "lat": 38.7804,
+              "lng": -9.4989
+            }
+          ]
+        },
+        {
+          "day_number": 4,
+          "date": "2027-05-17",
+          "city": "Lisbon",
+          "theme": "Departure",
+          "slots": [
+            {
+              "time_of_day": "morning",
+              "activity": "Time Out Market brunch",
+              "location": "Cais do Sodré",
+              "duration_hours": 1.5,
+              "estimated_cost_usd": 18
+            }
+          ]
+        }
+      ],
+      "total_estimated_cost_usd": 540
+    }
+  }
+}

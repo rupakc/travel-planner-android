@@ -1,0 +1,70 @@
+{
+  "id": 303,
+  "name": "Tokyo food week",
+  "search_data": {
+    "origin": "Singapore (SIN)",
+    "destination": "Tokyo, Japan (HND)",
+    "departure_date": "2027-03-28",
+    "return_date": "2027-04-03",
+    "num_travelers": 2
+  },
+  "selections": {
+    "itinerary_layout": {
+      "fingerprint": "stale0",
+      "positions": {
+        "1-morning": "1-evening"
+      }
+    },
+    "itinerary_slots": [
+      {
+        "key": "2-evening",
+        "day_number": 2,
+        "date": "2027-03-29",
+        "time_of_day": "evening",
+        "activity": "Omoide Yokocho yakitori",
+        "location": "Shinjuku",
+        "estimated_cost_usd": 35,
+        "start_time": "18:30",
+        "end_time": "20:30"
+      },
+      {
+        "key": "1-morning",
+        "day_number": 1,
+        "date": "2027-03-28",
+        "time_of_day": "morning",
+        "activity": "Tsukiji Outer Market breakfast",
+        "location": "Tsukiji, Tokyo",
+        "duration_hours": 2,
+        "estimated_cost_usd": 30
+      },
+      {
+        "key": "2-morning",
+        "day_number": 2,
+        "date": "2027-03-29",
+        "time_of_day": "morning",
+        "activity": "Meiji Shrine",
+        "location": "Shibuya",
+        "start_time": "09:00",
+        "end_time": "10:30",
+        "notes": "Go early"
+      },
+      {
+        "key": "3-afternoon",
+        "day_number": 3,
+        "time_of_day": "afternoon",
+        "activity": "Ramen Street",
+        "location": "Tokyo Station",
+        "estimated_cost_usd": 15
+      }
+    ],
+    "itinerary_notes": {
+      "2-evening": "Cash only"
+    },
+    "events": [
+      {
+        "name": "Sumida cherry blossom festival",
+        "date": "2027-03-30"
+      }
+    ]
+  }
+}

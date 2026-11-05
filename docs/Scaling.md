@@ -2,13 +2,15 @@
 
 Goal: the design should not collapse at 10 million users. The honest split is what the app does and what the backend must change.
 
-## Client side (in place, or planned where marked)
+## Client side (in place)
 
 - **Stateless against the API**: the app holds a bearer token and caches per user; no server affinity is required.
 - **Backoff on 429**: `Retry-After` is parsed (`AppError.RateLimited.retryAfterSeconds`) and the backend's message is shown; there is no tight retry loop. Explicit user retry only, plus one SSE retry per search.
-- **Jitter** (planned, spec section 7): the periodic WorkManager poller will be jittered so devices do not poll in lockstep; the worker is not on `main` yet.
-- **Push over polling** (planned poller, wired FCM): FCM moves alert delivery to server push; the planned 30-minute poller then drops to a 6 h safety net ([Notifications-and-Push](Notifications-and-Push.md)).
-- **Cache first**: Room serves saved plans offline; near-me is cached per cell for an hour; the server's 30-minute search cache absorbs repeats.
+- **Jitter**: the periodic alert poll (`AlertPollWorker`) starts after a random delay of up to half its period, so devices do not poll in lockstep.
+- **Push over polling**: with FCM configured on both sides, alerts arrive by server push and the 30-minute poll drops to a 6 h safety net ([Notifications-and-Push](Notifications-and-Push.md)).
+- **Cache first**: Room serves saved plans offline; the server's 30-minute search cache absorbs repeats. Near me results are cached in memory,
+  per process, for an hour per ~5 km cell (`NearbyRepositoryImpl`); the cache does not survive into the background near-me worker's process start,
+  whose 4 h spacing is longer than the TTL anyway.
 - **Cheap chrome**: lightweight endpoints (`/health`, notifications unread count) are separate from AI calls, which sit in tight rate-limit buckets.
 
 ## Backend side (what must change; today it does not)

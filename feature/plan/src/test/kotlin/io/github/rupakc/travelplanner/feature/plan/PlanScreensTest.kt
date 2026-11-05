@@ -30,6 +30,7 @@ import io.github.rupakc.travelplanner.feature.plan.list.PlansEvent
 import io.github.rupakc.travelplanner.feature.plan.list.PlansScreen
 import io.github.rupakc.travelplanner.feature.plan.list.PlansUiState
 import io.github.rupakc.travelplanner.feature.plan.list.PlansViewModel
+import io.github.rupakc.travelplanner.feature.plan.model.PlanItineraryUi
 import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroups
 import io.github.rupakc.travelplanner.feature.plan.model.TripSummary
 import io.github.rupakc.travelplanner.feature.plan.model.plan
@@ -117,9 +118,39 @@ class PlanScreensTest {
         val summary = TripSummary.from(p, today)
         return PlanDetailUiState(
             isLoading = false,
-            content = PlanDetailContent(summary, SelectionGroups.of(p.selections), emptyList(), emptyList(), null, false),
+            content = PlanDetailContent(summary, SelectionGroups.of(p.selections), PlanItineraryUi.of(p.selections), emptyList(), null, false),
             confirm = confirm,
         )
+    }
+
+    @Test
+    fun `saved itinerary renders through the shared day cards with edits, notes and derived times`() {
+        val selections =
+            io.github.rupakc.travelplanner.core.model.json.TravelJson.decodeFromString(
+                PlanSelections.serializer(),
+                """{"itinerary":{"days":[{"day_number":1,"date":"2027-04-01","city":"Tokyo","theme":"Arrival","slots":[
+                {"time_of_day":"morning","activity":"Market","duration_hours":2,"estimated_cost_usd":40}]}]},
+                "itinerary_edits":{"1-morning":{"activity":"Toyosu"}},"itinerary_notes":{"1-morning":"Go early"}}""",
+            )
+        val p = plan(8, "Japan", "Tokyo", "2027-04-01", "2027-04-04", selections = selections)
+        val state =
+            PlanDetailUiState(
+                isLoading = false,
+                content =
+                    PlanDetailContent(
+                        TripSummary.from(p, today),
+                        SelectionGroups.of(selections),
+                        PlanItineraryUi.of(selections),
+                        emptyList(),
+                        null,
+                        false,
+                    ),
+            )
+        compose.setContent { TravelTheme(themeMode = ThemeMode.LIGHT) { PlanDetailScreen(state, {}, {}, onBack = {}) } }
+        compose.onNode(androidx.compose.ui.test.hasScrollAction()).performScrollToNode(hasText("Toyosu"))
+        compose.onNodeWithText("Toyosu").assertExists()
+        compose.onNodeWithText("09:00–11:00").assertExists()
+        compose.onNodeWithText("📝 Go early", substring = true).assertExists()
     }
 
     @Test
@@ -165,7 +196,7 @@ class PlanScreensTest {
         val events = mutableListOf<MyPlanEvent>()
         val selections = PlanSelections(activities = listOf(Activity(name = "Sushi", priceUsd = 80.0)))
         val content =
-            MyPlanContent(null, "My Trip Plan", true, "Tokyo", null, SelectionGroups.of(selections), emptyList(), emptyList(), 0.0, null, false, 1)
+            MyPlanContent(null, "My Trip Plan", true, "Tokyo", null, SelectionGroups.of(selections), PlanItineraryUi(), emptyList(), 0.0, null, false, 1)
         compose.setContent {
             TravelTheme(themeMode = ThemeMode.LIGHT) { MyPlanScreen(MyPlanUiState(content = content), { events += it }, {}, {}, {}) }
         }
@@ -177,7 +208,7 @@ class PlanScreensTest {
 
     @Test
     fun `empty My Plan shows the web empty copy`() {
-        val content = MyPlanContent(null, "My Trip Plan", false, null, null, emptyList(), emptyList(), emptyList(), 0.0, null, false, 0)
+        val content = MyPlanContent(null, "My Trip Plan", false, null, null, emptyList(), PlanItineraryUi(), emptyList(), 0.0, null, false, 0)
         compose.setContent {
             TravelTheme(themeMode = ThemeMode.DARK) { MyPlanScreen(MyPlanUiState(content = content), {}, {}, {}, {}) }
         }

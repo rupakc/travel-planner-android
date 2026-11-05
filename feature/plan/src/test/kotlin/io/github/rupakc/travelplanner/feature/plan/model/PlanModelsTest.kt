@@ -175,14 +175,17 @@ class PlanModelsTest {
                 {"time_of_day":"morning","activity":"Market","duration_hours":2,"estimated_cost_usd":40}]}]},
                 "itinerary_edits":{"1-morning":{"activity":"Toyosu"}},"itinerary_notes":{"1-morning":"Go early"}}""",
             )
-        val day = ItineraryUi.of(sel).single()
-        assertEquals(1, day.dayNumber)
-        assertEquals("Arrival", day.theme)
+        val itinerary = PlanItineraryUi.of(sel)
+        val day = itinerary.days.single()
+        assertEquals(1, day.day.dayNumber)
+        assertEquals("Arrival", day.day.theme)
         val slot = day.slots.single()
-        assertEquals("Toyosu", slot.activity)
-        assertEquals("09:00–11:00", slot.timeRange)
-        assertEquals("Go early", slot.note)
-        assertEquals(40.0, slot.costUsd!!, 0.0)
-        assertFalse(slot.fromLink)
+        assertEquals("1-morning", slot.key)
+        assertEquals("Toyosu", itinerary.edits.getValue("1-morning").activityOr(slot.slot.activity))
+        assertEquals("09:00", slot.startTime)
+        assertEquals("11:00", slot.endTime)
+        assertEquals("Go early", itinerary.notes["1-morning"])
+        assertEquals(40.0, slot.slot.estimatedCostUsd!!, 0.0)
+        assertFalse(slot.slot.fromLink == true)
     }
 }

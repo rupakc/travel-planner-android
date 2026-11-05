@@ -30,4 +30,5 @@ Source of truth for scope: the [design spec](superpowers/specs/2026-11-05-androi
 - Web UI inventory (copy, tokens): [web-ui-inventory](reference/web-ui-inventory.md)
 - Decision log: [MEMORY](../MEMORY.md)
 
-Pages marked "Planned" describe work that is specified but not yet merged.
+Pages marked "Planned" describe work that is specified but not yet merged. The pages describe `main` after the review-round-4 fix pass FP3;
+the notifications/push performance fix pass (FP1) has landed; the UI/accessibility/i18n fix pass (FP2) may land separately and update its pages then.
