@@ -430,11 +430,46 @@ class ResultsViewModelTest {
             val vm = vm()
             vm.state.test {
                 search.start(request)
-                plan.restore(plan.draft.value.copy(planId = 3))
+                plan.restore(plan.draft.value.copy(planId = 3, loadedPlan = true))
                 assertTrue(expectMostRecentItem().bestValue!!.disabled)
                 vm.onEvent(ResultsEvent.ApplyPackage)
                 assertEquals(0, plan.draft.value.selections.count)
             }
+        }
+
+    @Test
+    fun `saving does not lock the itinerary, opening a saved plan does, a new search unlocks (web loadedPlanId)`() =
+        runTest {
+            val vm = vm()
+            vm.state.test {
+                search.start(request)
+                plan.attachSearch(request, null)
+                plan.save("Tokyo")
+                assertTrue(plan.draft.value.planId != null)
+                assertFalse(vm.itineraryEditingLocked)
+                assertFalse(expectMostRecentItem().bestValue!!.disabled)
+                plan.load(io.github.rupakc.travelplanner.core.model.plan.Plan(id = 9, name = "Saved"))
+                assertTrue(vm.itineraryEditingLocked)
+                FakeSearchLauncher(plan, search).startNewSearch(request)
+                assertFalse(vm.itineraryEditingLocked)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `section actions update selections synchronously once and expose the shown results`() =
+        runTest {
+            val vm = vm()
+            search.start(request)
+            var calls = 0
+            vm.updateSelections {
+                calls++
+                it.copy(itineraryNotes = mapOf("0-morning" to "Bring cash"))
+            }
+            assertEquals(1, calls)
+            assertEquals("Bring cash", plan.draft.value.selections.itineraryNotes["0-morning"])
+            assertEquals("Bring cash", vm.selections.value.itineraryNotes["0-morning"])
+            assertEquals(request, vm.results.value.request)
         }
 
     @Test

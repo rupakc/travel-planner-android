@@ -46,6 +46,7 @@ import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.SectionUi
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.Pill
 import io.github.rupakc.travelplanner.feature.results.sections.commerce.PillTone
+import io.github.rupakc.travelplanner.feature.results.sections.info.rendersOwnError
 import kotlinx.coroutines.delay
 
 private const val LOADING_ROTATE_MS = 3_000L
@@ -116,7 +117,8 @@ internal fun ResultsSectionCard(
                     LoadingSkeleton(section.section)
                 }
 
-                data.isError -> {
+                // Walking tours, events, health check and forex show the web's own error copy (Team E).
+                data.isError && !section.section.rendersOwnError -> {
                     ErrorState(message = stringResource(R.string.results_section_error), onRetry = { actions.onRetry(section.section) })
                 }
 

@@ -34,11 +34,13 @@ import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatchKinds
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
+import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.search.HotelFilters
 import io.github.rupakc.travelplanner.core.model.search.LayoverRequest
 import io.github.rupakc.travelplanner.core.model.search.SearchResultsState
 import io.github.rupakc.travelplanner.core.model.search.SectionResult
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
+import io.github.rupakc.travelplanner.core.model.search.StressTestPayload
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.section.ActivitiesData
@@ -54,6 +56,8 @@ import io.github.rupakc.travelplanner.core.model.section.SectionData
 import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
+import io.github.rupakc.travelplanner.core.model.section.StressTestData
+import io.github.rupakc.travelplanner.feature.results.sections.info.StressRecheckController
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -63,6 +67,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -137,8 +142,44 @@ class ResultsViewModel
             }.flowOn(dispatchers.default)
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ResultsUiState())
 
+        // ── Team E's SectionActions members (info sections, itinerary editor, health re-check) ──
+
+        /** The draft's selections, observed (itinerary layout/edits/notes/slots, packing list). */
+        val selections: StateFlow<PlanSelections> =
+            plan.draft.map { it.selections }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.Eagerly, plan.draft.value.selections)
+
+        /** The results on screen, by the same source rule as [state] (live stream, draft snapshot, …). */
+        val results: StateFlow<SearchResultsState> =
+            source.map { it.results }.stateIn(viewModelScope, SharingStarted.Eagerly, sourceOf(search.current.value, plan.draft.value).results)
+
+        /**
+         * Read-only itinerary while a saved plan is open (web `loadedPlanId`, ResultsPage.jsx:3482): set only by
+         * `CurrentPlanStore.load`, never by saving, cleared by a new search or New plan.
+         */
+        val itineraryEditingLocked: Boolean get() = plan.draft.value.loadedPlan
+
+        /** Retained Trip Health Check re-check (survives scrolling the card away and rotation). */
+        val stressRecheck = StressRecheckController(viewModelScope) { search.stressTest(it) }
+
+        /** Synchronous read-modify-write of the draft's selections, applied exactly once. */
+        fun updateSelections(transform: (PlanSelections) -> PlanSelections) {
+            plan.setSelections(transform(plan.draft.value.selections))
+        }
+
+        suspend fun recheckStressTest(payload: StressTestPayload): AppResult<StressTestData> = search.stressTest(payload)
+
+        /** Web `clearRecheck`: a new search, opening a saved plan and clearing the selections drop the re-check. */
+        private suspend fun clearRecheckOnPlanChange() {
+            plan.draft
+                .map { Triple(it.searchKey, it.planId.takeIf { _ -> it.loadedPlan }, it.selections.isEmpty) }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { stressRecheck.clear() }
+        }
+
         init {
             viewModelScope.launch { if (health.capabilities.value == null) health.refresh() }
+            viewModelScope.launch { clearRecheckOnPlanChange() }
             viewModelScope.launch { resetOnNewSearch() }
             viewModelScope.launch(dispatchers.default) { attachToDraft() }
             viewModelScope.launch { rememberExtras() }

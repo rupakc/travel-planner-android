@@ -181,7 +181,7 @@ internal class ResultsStateBuilder {
             query = query,
             hiddenByQuery = sections.size - visibleSections.size,
             selections = selections,
-            plan = PlanSummary(selections.count, total, getBudgetStatus(total, request?.budgetUsd), savedPlanOpen = draft.planId != null),
+            plan = PlanSummary(selections.count, total, getBudgetStatus(total, request?.budgetUsd), savedPlanOpen = draft.loadedPlan),
             bestValue = if (done) bestValue(trip, request, draft, local) else null,
             budget = if (done) budget(trip, request, local) else null,
             remix = local.remix?.let { (preset, before) -> RemixUi(preset, if (done) Remix.diff(before, Remix.snapshot(trip)) else null) },
@@ -256,7 +256,7 @@ internal class ResultsStateBuilder {
             applied = applied,
             conflicts = if (applied) emptyList() else BestValuePackage.conflicts(draft.selections, pkg),
             canUndo = local.packageUndo != null,
-            disabled = draft.planId != null,
+            disabled = draft.loadedPlan,
             planTotal = planTotal?.takeIf { Math.round(it) != Math.round(pkg.total) },
         )
     }
