@@ -93,8 +93,9 @@ val verifyReleaseKeepRules by tasks.registering {
     val usage = layout.buildDirectory.file("outputs/mapping/prodRelease/usage.txt")
     inputs.file(usage)
     doLast {
-        val stripped = usage.get().asFile.readLines()
-            .filter { it.startsWith("io.github.rupakc.travelplanner.core.model.") && it.trimEnd().endsWith("\$\$serializer") }
+        val stripped =
+            usage.get().asFile.readLines()
+                .filter { it.startsWith("io.github.rupakc.travelplanner.core.model.") && it.trimEnd().endsWith("\$\$serializer") }
         check(stripped.isEmpty()) { "R8 removed serializers:\n" + stripped.joinToString("\n") }
     }
 }

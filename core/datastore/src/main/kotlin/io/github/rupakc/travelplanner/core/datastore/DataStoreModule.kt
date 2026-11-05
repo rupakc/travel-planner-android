@@ -13,7 +13,10 @@ import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.common.AppClock
 import javax.inject.Singleton
 
-/** File names (+ the Tink keyset prefs `tp_keys`); excluded from cloud backup in the app's data_extraction_rules (the session token must not leave the device). */
+/**
+ * File names (+ the Tink keyset prefs `tp_keys`); excluded from cloud backup in the app's
+ * data_extraction_rules (the session token must not leave the device).
+ */
 object DataStoreFiles {
     const val SESSION = "session"
     const val SETTINGS = "settings"

@@ -56,5 +56,7 @@ object JwtExpiry {
 
     private val EXP = Regex(""""exp"\s*:\s*([0-9]+(?:\.[0-9]+)?)""")
 
-    private fun String.padBase64(): String = this + "=".repeat((4 - length % 4) % 4)
+    private const val BASE64_BLOCK = 4
+
+    private fun String.padBase64(): String = this + "=".repeat((BASE64_BLOCK - length % BASE64_BLOCK) % BASE64_BLOCK)
 }

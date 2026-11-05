@@ -102,12 +102,9 @@ private class QuietServer : AutoCloseable {
             runCatching {
                 socket.accept().use { s ->
                     val input = s.getInputStream().bufferedReader()
-                    var contentLength = 0
-                    while (true) {
-                        val line = input.readLine() ?: break
-                        if (line.isEmpty()) break
-                        if (line.startsWith("Content-Length:", ignoreCase = true)) contentLength = line.substringAfter(':').trim().toInt()
-                    }
+                    val headers = generateSequence { input.readLine() }.takeWhile { it.isNotEmpty() }.toList()
+                    val contentLength =
+                        headers.firstOrNull { it.startsWith("Content-Length:", ignoreCase = true) }?.substringAfter(':')?.trim()?.toInt() ?: 0
                     repeat(contentLength) { input.read() }
                     val out = s.getOutputStream()
                     out.write("HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: close\r\n\r\n$firstEvent".toByteArray())

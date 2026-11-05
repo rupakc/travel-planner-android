@@ -33,6 +33,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okio.BufferedSource
 
 /** One item of a materialised SSE stream: a payload, or the failure that ended it. */
 sealed interface SseItem<out T> {
@@ -96,20 +97,24 @@ class SseClient
                     send(SseItem.Failure(HttpErrorMapper.map(resp.code, resp.header("Retry-After"), resp.body.string())))
                     return
                 }
-                val payloads = SseParser.payloads(resp.body.source()).iterator()
-                while (true) {
-                    val next =
-                        try {
-                            if (payloads.hasNext()) payloads.next() else null
-                        } catch (e: IOException) {
-                            // Cancelled by the collector → stop quietly; otherwise the connection died or idled out.
-                            if (!isActive || call.isCanceled()) return
-                            AppLogger.w(TAG, "SSE stream interrupted", e)
-                            send(SseItem.Failure(AppError.Interrupted()))
-                            return
-                        } ?: break
-                    send(SseItem.Payload(next))
-                }
+                readPayloads(resp.body.source(), call)
+            }
+        }
+
+        private suspend fun ProducerScope<SseItem<String>>.readPayloads(source: BufferedSource, call: Call) {
+            val payloads = SseParser.payloads(source).iterator()
+            while (true) {
+                val next =
+                    try {
+                        if (payloads.hasNext()) payloads.next() else null
+                    } catch (e: IOException) {
+                        // Cancelled by the collector → stop quietly; otherwise the connection died or idled out.
+                        if (!isActive || call.isCanceled()) return
+                        AppLogger.w(TAG, "SSE stream interrupted", e)
+                        send(SseItem.Failure(AppError.Interrupted()))
+                        return
+                    } ?: return
+                send(SseItem.Payload(next))
             }
         }
 
