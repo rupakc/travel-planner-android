@@ -17,6 +17,7 @@ import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
 import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
+import io.github.rupakc.travelplanner.core.domain.profile.quizPace
 import io.github.rupakc.travelplanner.core.domain.search.ExtraStop
 import io.github.rupakc.travelplanner.core.domain.search.MAX_EXTRA_STOPS
 import io.github.rupakc.travelplanner.core.domain.search.RecentSearchSummary
@@ -217,7 +218,7 @@ class SearchViewModel
                 }
                 // Spec §6.1 Q4: the onboarding pace answer seeds the form when nothing else set it.
                 if (!loadedRecent && !paceTouched) {
-                    quizPaceAnswer(profileRepository.profile.first().answers)?.let { pace ->
+                    quizPace(profileRepository.profile.first().answers)?.let { pace ->
                         if (!paceTouched) _state.update { it.copy(form = it.form.copy(pace = pace)) }
                     }
                 }
