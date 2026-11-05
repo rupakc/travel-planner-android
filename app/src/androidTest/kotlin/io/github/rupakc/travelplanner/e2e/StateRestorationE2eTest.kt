@@ -17,7 +17,7 @@ import org.junit.runner.RunWith
 /**
  * Flow 11 (in-process part): rotation keeps Search and Results state. Process death is checked from the host
  * (`adb shell am kill` after backgrounding), because killing the app also kills this instrumentation; see
- * `tools/e2e/process_death.sh`.
+ * `tools/e2e/process_death.py`.
  */
 @E2eTest
 @RunWith(AndroidJUnit4::class)
@@ -52,32 +52,6 @@ class StateRestorationE2eTest {
         robot.device.setOrientationNatural()
         rule.waitForIdle()
         flows.awaitTerminal(UiR.string.section_hotels, timeoutMs = AppRobot.DEFAULT_TIMEOUT)
-    }
-
-    /**
-     * First half of the process-death check driven by `tools/e2e/process_death.sh`: fills the Search form, then
-     * leaves the app in the background. The script kills the process and relaunches it from the launcher.
-     */
-    @Test fun processDeath_prepareSearchForm() {
-        BackendApi().resetPreferences(BackendApi().adminToken())
-        robot = AppRobot(rule)
-        robot.signInToHome()
-        robot.openTab(io.github.rupakc.travelplanner.R.string.nav_search)
-        robot.waitFor(hasTestTag("search_submit"))
-        robot.pickSuggestion(robot.str(SearchR.string.search_from), "New York", "JFK")
-        robot.pickSuggestion(robot.str(SearchR.string.search_to), "Lisbon", "LIS")
-        robot.device.pressHome()
-    }
-
-    /** Same, on Results after a search has finished streaming its first sections. */
-    @Test fun processDeath_prepareResults() {
-        BackendApi().resetPreferences(BackendApi().adminToken())
-        robot = AppRobot(rule)
-        robot.signInToHome()
-        robot.searchTrip(AppRobot.Trip())
-        robot.waitForText(robot.str(ResultsR.string.results_ease_title), timeoutMs = PlanFlows.STREAM_TIMEOUT)
-        PlanFlows(robot).awaitTerminal(UiR.string.section_hotels)
-        robot.device.pressHome()
     }
 
     @Test fun rotation_keepsSearchForm() {
