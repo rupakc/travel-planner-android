@@ -29,11 +29,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -183,6 +181,8 @@ private fun PreferenceItem(key: String, state: PreferencesUiState, onEvent: (Pre
                     label = stringResource(R.string.settings_prefs_permits),
                     placeholder = stringResource(R.string.settings_prefs_permits_placeholder),
                     tags = prefs.residencePermits,
+                    input = state.permitInput,
+                    onInputChange = { onEvent(PreferencesEvent.PermitInputChanged(it)) },
                     onAdd = { onEvent(PreferencesEvent.AddPermits(it)) },
                     onRemove = { onEvent(PreferencesEvent.RemovePermit(it)) },
                 )
@@ -190,6 +190,8 @@ private fun PreferenceItem(key: String, state: PreferencesUiState, onEvent: (Pre
                     label = stringResource(R.string.settings_prefs_visas),
                     placeholder = stringResource(R.string.settings_prefs_visas_placeholder),
                     tags = prefs.existingVisas,
+                    input = state.visaInput,
+                    onInputChange = { onEvent(PreferencesEvent.VisaInputChanged(it)) },
                     onAdd = { onEvent(PreferencesEvent.AddVisas(it)) },
                     onRemove = { onEvent(PreferencesEvent.RemoveVisa(it)) },
                 )
@@ -308,10 +310,17 @@ private fun EmailField(state: PreferencesUiState, onEvent: (PreferencesEvent) ->
     }
 }
 
-/** Web TagInput: chips + a field; Enter or comma adds, the chip's ✕ removes. */
+/** Web TagInput: chips + a field; Enter, comma or leaving the field adds, the chip's ✕ removes. Pending text lives in the ViewModel. */
 @Composable
-private fun TagInput(label: String, placeholder: String, tags: List<String>, onAdd: (String) -> Unit, onRemove: (String) -> Unit) {
-    var input by rememberSaveable(label) { mutableStateOf("") }
+private fun TagInput(
+    label: String,
+    placeholder: String,
+    tags: List<String>,
+    input: String,
+    onInputChange: (String) -> Unit,
+    onAdd: (String) -> Unit,
+    onRemove: (String) -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
         Text(label, style = TravelTheme.typography.labelLarge)
         if (tags.isNotEmpty()) {
@@ -330,32 +339,21 @@ private fun TagInput(label: String, placeholder: String, tags: List<String>, onA
         }
         OutlinedTextField(
             value = input,
-            onValueChange = { text ->
-                if (text.contains(',')) {
-                    onAdd(text)
-                    input = ""
-                } else {
-                    input = text
-                }
-            },
+            onValueChange = onInputChange,
             placeholder = { Text(placeholder) },
             singleLine = true,
             trailingIcon = {
                 if (input.isNotBlank()) {
                     IconButton(onClick = {
                         onAdd(input)
-                        input = ""
                     }) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_prefs_tag_add, input.trim())) }
                 }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions =
-                KeyboardActions(onDone = {
-                    onAdd(input)
-                    input = ""
-                }),
+                KeyboardActions(onDone = { onAdd(input) }),
             supportingText = { Text(stringResource(R.string.settings_prefs_tag_help)) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().onFocusChanged { if (!it.isFocused && input.isNotBlank()) onAdd(input) },
         )
     }
 }
@@ -407,7 +405,7 @@ private fun Stepper(prefs: Preferences, field: TravellerField, onEvent: (Prefere
                     liveRegion = LiveRegionMode.Polite
                 },
         )
-        IconButton(onClick = { onEvent(PreferencesEvent.ChangeCount(field, 1)) }, enabled = PreferencesRules.canIncrease(prefs, field)) {
+        IconButton(onClick = { onEvent(PreferencesEvent.ChangeCount(field, 1)) }, enabled = PreferencesRules.canIncrease(prefs)) {
             Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_prefs_increase, label))
         }
     }

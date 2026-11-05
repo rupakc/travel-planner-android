@@ -14,6 +14,9 @@ interface AppLocales {
 
     /** [tag] null = follow the system language. */
     fun apply(tag: String?)
+
+    /** The language currently set for the app (primary language subtag, e.g. "es"), or null for the system default. */
+    fun current(): String?
 }
 
 /** [AppLocales] over `LocaleManager` (the system persists the choice and recreates the activity). */
@@ -28,5 +31,11 @@ class SystemAppLocales
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
             val manager = context.getSystemService(LocaleManager::class.java) ?: return
             manager.applicationLocales = if (tag == null) LocaleList.getEmptyLocaleList() else LocaleList.forLanguageTags(tag)
+        }
+
+        override fun current(): String? {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return null
+            val locales = context.getSystemService(LocaleManager::class.java)?.applicationLocales ?: return null
+            return if (locales.isEmpty) null else locales[0].language
         }
     }

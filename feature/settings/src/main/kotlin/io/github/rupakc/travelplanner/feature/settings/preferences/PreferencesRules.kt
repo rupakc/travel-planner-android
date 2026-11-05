@@ -16,7 +16,7 @@ val BudgetCategories: List<String> = listOf("low", "medium", "high")
 
 /** Pure Preferences form rules, ported from the web (TravelerPanel, TagInput, AlertEmailField, PreferencesPage). */
 object PreferencesRules {
-    /** Backend cap per count (`PreferencesUpdate`: 0..20). */
+    /** Backend cap: each count 0..20 and `num_travelers` 1..20, so the whole group is at most 20. */
     const val MAX_COUNT = 20
 
     // Mirrors the server's check: local@domain.tld, no spaces.
@@ -32,11 +32,11 @@ object PreferencesRules {
 
     fun total(prefs: Preferences): Int = prefs.adults + prefs.seniors + prefs.children + prefs.infants
 
-    /** Web `change`: never below 0, never a group total below 1; capped at [MAX_COUNT]. */
+    /** Web `change`: never below 0, never a group total below 1; the group total never above [MAX_COUNT]. */
     fun change(prefs: Preferences, field: TravellerField, delta: Int): Preferences {
         val next = (count(prefs, field) + delta).coerceIn(0, MAX_COUNT)
         val newTotal = total(prefs) - count(prefs, field) + next
-        if (newTotal < 1) return prefs
+        if (newTotal < 1 || newTotal > MAX_COUNT) return prefs
         return when (field) {
             TravellerField.ADULTS -> prefs.copy(adults = next)
             TravellerField.SENIORS -> prefs.copy(seniors = next)
@@ -52,7 +52,7 @@ object PreferencesRules {
         return !(field == TravellerField.ADULTS && total(prefs) <= 1 && value <= 1)
     }
 
-    fun canIncrease(prefs: Preferences, field: TravellerField): Boolean = count(prefs, field) < MAX_COUNT
+    fun canIncrease(prefs: Preferences): Boolean = total(prefs) < MAX_COUNT
 
     /** Web TagInput `addTag`: trimmed, non-empty, no duplicates. */
     fun addTag(tags: List<String>, raw: String): List<String> {

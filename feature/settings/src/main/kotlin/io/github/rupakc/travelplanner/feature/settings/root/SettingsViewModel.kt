@@ -16,6 +16,7 @@ import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.feature.settings.common.travellerTypesOf
 import java.util.Optional
 import javax.inject.Inject
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Languages offered (must match `locales_config.xml`); null tag = system. */
 val SupportedLanguageTags: List<String?> = listOf(null, "en", "es")
@@ -38,6 +40,8 @@ data class SettingsUiState(
     val effectiveBaseUrl: String = "",
     val versionName: String = "",
     val perAppLanguage: Boolean = true,
+    /** Current app language tag (`null` = system): the system per-app locale on API 33+, else the stored setting. */
+    val languageTag: String? = null,
     val choosingLanguage: Boolean = false,
     val confirmingSignOut: Boolean = false,
     val signingOut: Boolean = false,
@@ -95,6 +99,7 @@ class SettingsViewModel
                     effectiveBaseUrl = url,
                     versionName = buildInfo.versionName,
                     perAppLanguage = appLocales.perAppSupported,
+                    languageTag = if (appLocales.perAppSupported) appLocales.current() else settings.localeTag,
                     choosingLanguage = d.language,
                     confirmingSignOut = d.signOut,
                     signingOut = d.signingOut,
@@ -137,7 +142,9 @@ class SettingsViewModel
             if (dialogs.value.signingOut) return
             dialogs.update { it.copy(signOut = false, signingOut = true) }
             viewModelScope.launch {
-                authRepository.logout()
+                // The auth gate pops this screen (cancelling viewModelScope) as soon as the session clears;
+                // logout must still finish clearing the previous user's caches.
+                withContext(NonCancellable) { authRepository.logout() }
                 dialogs.update { it.copy(signingOut = false) }
                 signedOutChannel.value = true
             }

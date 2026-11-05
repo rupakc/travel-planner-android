@@ -12,7 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +31,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.preferences.TasteProfile
 import io.github.rupakc.travelplanner.core.model.preferences.TasteSignal
@@ -103,15 +104,15 @@ private fun Signals(state: TasteUiState, onEvent: (TasteEvent) -> Unit) {
                 Text(signalLabel(type), style = TravelTheme.typography.labelLarge, modifier = Modifier.semantics { heading() })
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                     entries.filter { !it.value.isNullOrBlank() }.take(TOP_VALUES).forEach { e ->
-                        SuggestionChip(onClick = {}, enabled = false, label = {
+                        // A plain label, not a disabled chip (TalkBack would say "disabled").
+                        Surface(shape = TravelShape.Pill, color = TravelTheme.extendedColors.warningContainer) {
                             Text(
-                                stringResource(
-                                    R.string.settings_taste_value,
-                                    e.value.orEmpty(),
-                                    e.count ?: 0,
-                                ),
+                                stringResource(R.string.settings_taste_value, e.value.orEmpty(), e.count ?: 0),
+                                style = TravelTheme.typography.labelLarge,
+                                color = TravelTheme.extendedColors.onWarningContainer,
+                                modifier = Modifier.padding(horizontal = TravelTheme.spacing.md, vertical = TravelTheme.spacing.xs),
                             )
-                        })
+                        }
                     }
                 }
             }

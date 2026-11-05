@@ -13,6 +13,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -81,9 +82,12 @@ class FeaturesViewModel
             viewModelScope.launch {
                 when (event) {
                     is FeaturesEvent.Toggle -> {
-                        val row = state.value.rows.firstOrNull { it.id == event.id }
                         // Back to the type default → drop the override, so retaking the quiz applies new defaults.
-                        val override = if (row != null && row.defaultOn == event.on) null else event.on
+                        // Defaults come from the profile itself (state may still be the initial empty value).
+                        val profile = profileRepository.profile.first()
+                        val defaultOn =
+                            catalogue.orElse(null)?.defaultsFor(travellerTypesOf(profile.primaryType, profile.secondaryTypes))?.contains(event.id) == true
+                        val override = if (defaultOn == event.on) null else event.on
                         profileRepository.setFeature(event.id.id, override)
                     }
 

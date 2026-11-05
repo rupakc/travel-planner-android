@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -181,7 +182,7 @@ fun SettingsScreen(
             }
         }
     }
-    if (state.choosingLanguage) LanguageDialog(state.settings.localeTag, state.perAppLanguage, onEvent, onNav)
+    if (state.choosingLanguage) LanguageDialog(state.languageTag, state.perAppLanguage, onEvent, onNav)
     if (state.confirmingSignOut) SignOutDialog(onEvent)
 }
 
@@ -252,7 +253,7 @@ private fun RootItem(key: String, state: SettingsUiState, highlightKey: String?,
         SettingsEntry.LANGUAGE.key -> {
             SettingsRow(
                 stringResource(R.string.settings_language),
-                subtitle = stringResource(languageLabelRes(state.settings.localeTag)),
+                subtitle = stringResource(languageLabelRes(state.languageTag)),
                 icon = Icons.AutoMirrored.Filled.List,
                 highlighted = lit,
                 onClick = { onEvent(SettingsEvent.ChooseLanguage) },
@@ -392,7 +393,7 @@ private fun AboutBlock(versionName: String, highlighted: Boolean, onNav: (Settin
         SettingsRow(stringResource(R.string.settings_version, versionName), icon = Icons.Filled.Info)
         SettingsRow(stringResource(R.string.settings_licences), onClick = { onNav(SettingsNav.OpenLink(LICENCE_URL)) })
         SettingsNote(stringResource(R.string.settings_geonames_attribution))
-        Row(Modifier.padding(horizontal = TravelTheme.spacing.sm)) {
+        FlowRow(Modifier.padding(horizontal = TravelTheme.spacing.sm)) {
             TpButton(stringResource(R.string.settings_link_geonames), onClick = { onNav(SettingsNav.OpenLink(GEONAMES_URL)) }, variant = TpButtonVariant.Text)
             TpButton(stringResource(R.string.settings_link_cc_by), onClick = { onNav(SettingsNav.OpenLink(CC_BY_URL)) }, variant = TpButtonVariant.Text)
             TpButton(stringResource(R.string.settings_link_ourairports), onClick = {

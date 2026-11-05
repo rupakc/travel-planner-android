@@ -1,6 +1,11 @@
 package io.github.rupakc.travelplanner.feature.settings.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -23,6 +28,10 @@ import io.github.rupakc.travelplanner.feature.settings.preferences.PreferencesRo
 import io.github.rupakc.travelplanner.feature.settings.root.SettingsRoute as SettingsRootRoute
 import io.github.rupakc.travelplanner.feature.settings.server.ServerRoute as ServerScreenRoute
 import io.github.rupakc.travelplanner.feature.settings.taste.TasteProfileRoute as TasteScreenRoute
+import kotlinx.coroutines.delay
+
+/** How long a row opened from global search stays highlighted. */
+private const val HIGHLIGHT_MILLIS = 2_500L
 
 /**
  * Settings root + sub-screens + [SettingsEntryRoute] (a row opened from global search).
@@ -49,7 +58,13 @@ fun NavGraphBuilder.settingsGraph(
     composable<SettingsEntryRoute> { entry ->
         val key = entry.toRoute<SettingsEntryRoute>().entry
         val settingsEntry = SettingsEntry.fromKey(key)
-        screens.Page(settingsEntry?.page ?: SettingsPage.ROOT, highlight = settingsEntry?.key)
+        // Scroll + highlight once; saved so a recreation doesn't scroll again, cleared after a moment.
+        var highlight by rememberSaveable { mutableStateOf(settingsEntry?.key) }
+        LaunchedEffect(Unit) {
+            delay(HIGHLIGHT_MILLIS)
+            highlight = null
+        }
+        screens.Page(settingsEntry?.page ?: SettingsPage.ROOT, highlight = highlight)
     }
 }
 

@@ -3,6 +3,8 @@ package io.github.rupakc.travelplanner.feature.settings
 import android.app.Application
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.hasScrollToNodeAction
@@ -151,5 +153,55 @@ class SettingsScreensTest {
         compose.onNodeWithText("Reset to my type's defaults").performClick()
         assertEquals(listOf(FeaturesEvent.Toggle(FeatureId.COMPARE, true), FeaturesEvent.ResetToDefaults), events)
         assertTrue(compose.onAllNodes(hasText("On for your type", substring = true)).fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    fun `nearby always switch is disabled while nearby suggestions are off`() {
+        val toggles = mutableListOf<io.github.rupakc.travelplanner.feature.settings.notifications.SetToggle>()
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                io.github.rupakc.travelplanner.feature.settings.notifications.NotificationSettingsScreen(
+                    settings = io.github.rupakc.travelplanner.core.model.settings.AppSettings(nearbyNotifications = false),
+                    systemEnabled = true,
+                    onToggle = { toggles += it },
+                    onOpenSystem = {},
+                    onBack = {},
+                )
+            }
+        }
+        val always = hasText("Suggest places even when I'm not on a trip") and SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)
+        compose.onNode(always).assertIsNotEnabled()
+        compose.onNode(hasText("Nearby suggestions") and SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState)).performClick()
+        assertEquals(
+            listOf(
+                io.github.rupakc.travelplanner.feature.settings.notifications.SetToggle(
+                    io.github.rupakc.travelplanner.feature.settings.notifications.NotificationToggle.NEARBY,
+                    true,
+                ),
+            ),
+            toggles,
+        )
+    }
+
+    @Test
+    fun `nearby always toggles when nearby suggestions are on`() {
+        val toggles = mutableListOf<io.github.rupakc.travelplanner.feature.settings.notifications.SetToggle>()
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.DARK) {
+                io.github.rupakc.travelplanner.feature.settings.notifications.NotificationSettingsScreen(
+                    settings = io.github.rupakc.travelplanner.core.model.settings.AppSettings(nearbyNotifications = true),
+                    systemEnabled = true,
+                    onToggle = { toggles += it },
+                    onOpenSystem = {},
+                    onBack = {},
+                )
+            }
+        }
+        compose.onNode(hasText("Suggest places even when I'm not on a trip") and SemanticsMatcher.keyIsDefined(SemanticsProperties.ToggleableState))
+            .assertIsEnabled()
+            .assertIsOff()
+            .performClick()
+        assertEquals(io.github.rupakc.travelplanner.feature.settings.notifications.NotificationToggle.NEARBY_ALWAYS, toggles.single().toggle)
+        assertTrue(toggles.single().enabled)
     }
 }

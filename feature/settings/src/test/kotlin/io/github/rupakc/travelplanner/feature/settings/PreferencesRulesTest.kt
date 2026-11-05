@@ -22,9 +22,13 @@ class PreferencesRulesTest {
     }
 
     @Test
-    fun `counts cap at the backend maximum of 20`() {
+    fun `the whole group caps at the backend num_travelers maximum of 20`() {
         val many = Preferences(adults = 20)
         assertEquals(many, PreferencesRules.change(many, TravellerField.ADULTS, 1))
+        val full = Preferences(adults = 19, children = 1)
+        assertEquals(full, PreferencesRules.change(full, TravellerField.INFANTS, 1))
+        assertFalse(PreferencesRules.canIncrease(full))
+        assertTrue(PreferencesRules.canIncrease(Preferences(adults = 19)))
     }
 
     @Test

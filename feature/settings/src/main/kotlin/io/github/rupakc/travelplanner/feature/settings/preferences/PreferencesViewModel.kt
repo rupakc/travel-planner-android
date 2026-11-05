@@ -54,6 +54,9 @@ data class PreferencesUiState(
     val emailStatus: EmailStatus? = null,
     /** `/health.email_alerts_available`. */
     val emailAlertsAvailable: Boolean = false,
+    /** Text typed in the permits / visas fields but not yet turned into a tag (committed on Save too). */
+    val permitInput: String = "",
+    val visaInput: String = "",
 )
 
 sealed interface PreferencesEvent {
@@ -69,6 +72,12 @@ sealed interface PreferencesEvent {
 
     data class ResidenceChanged(val text: String) : PreferencesEvent
 
+    /** Typing in the permits field; a comma commits the text before it (web TagInput). */
+    data class PermitInputChanged(val text: String) : PreferencesEvent
+
+    data class VisaInputChanged(val text: String) : PreferencesEvent
+
+    /** Commits [raw] (Enter, the add button or focus leaving the field) and clears the pending text. */
     data class AddPermits(val raw: String) : PreferencesEvent
 
     data class RemovePermit(val tag: String) : PreferencesEvent
@@ -149,20 +158,10 @@ class PreferencesViewModel
                     edit { it.copy(currentResidence = event.text) }
                 }
 
-                is PreferencesEvent.AddPermits -> {
-                    edit { it.copy(residencePermits = PreferencesRules.addTags(it.residencePermits, event.raw)) }
-                }
-
-                is PreferencesEvent.RemovePermit -> {
-                    edit { it.copy(residencePermits = it.residencePermits - event.tag) }
-                }
-
-                is PreferencesEvent.AddVisas -> {
-                    edit { it.copy(existingVisas = PreferencesRules.addTags(it.existingVisas, event.raw)) }
-                }
-
-                is PreferencesEvent.RemoveVisa -> {
-                    edit { it.copy(existingVisas = it.existingVisas - event.tag) }
+                is PreferencesEvent.PermitInputChanged, is PreferencesEvent.VisaInputChanged, is PreferencesEvent.AddPermits,
+                is PreferencesEvent.RemovePermit, is PreferencesEvent.AddVisas, is PreferencesEvent.RemoveVisa,
+                -> {
+                    onTagEvent(event)
                 }
 
                 is PreferencesEvent.ChangeCount -> {
@@ -188,6 +187,39 @@ class PreferencesViewModel
 
                 PreferencesEvent.SaveEmail -> {
                     saveEmail()
+                }
+            }
+        }
+
+        /** Permits / visas tag inputs (web TagInput). */
+        private fun onTagEvent(event: PreferencesEvent) {
+            when (event) {
+                is PreferencesEvent.PermitInputChanged -> {
+                    if (event.text.contains(',')) commitPermits(event.text) else mutableState.update { it.copy(permitInput = event.text) }
+                }
+
+                is PreferencesEvent.VisaInputChanged -> {
+                    if (event.text.contains(',')) commitVisas(event.text) else mutableState.update { it.copy(visaInput = event.text) }
+                }
+
+                is PreferencesEvent.AddPermits -> {
+                    commitPermits(event.raw)
+                }
+
+                is PreferencesEvent.RemovePermit -> {
+                    edit { it.copy(residencePermits = it.residencePermits - event.tag) }
+                }
+
+                is PreferencesEvent.AddVisas -> {
+                    commitVisas(event.raw)
+                }
+
+                is PreferencesEvent.RemoveVisa -> {
+                    edit { it.copy(existingVisas = it.existingVisas - event.tag) }
+                }
+
+                else -> {
+                    Unit
                 }
             }
         }
@@ -221,8 +253,21 @@ class PreferencesViewModel
                 }
         }
 
+        private fun commitPermits(raw: String) {
+            mutableState.update { it.copy(permitInput = "") }
+            if (raw.isNotBlank()) edit { it.copy(residencePermits = PreferencesRules.addTags(it.residencePermits, raw)) }
+        }
+
+        private fun commitVisas(raw: String) {
+            mutableState.update { it.copy(visaInput = "") }
+            if (raw.isNotBlank()) edit { it.copy(existingVisas = PreferencesRules.addTags(it.existingVisas, raw)) }
+        }
+
         private fun save() {
             if (mutableState.value.saving) return
+            // Web TagInput adds pending text on blur; Save must never drop what the user typed.
+            commitPermits(mutableState.value.permitInput)
+            commitVisas(mutableState.value.visaInput)
             mutableState.update { it.copy(saving = true, saveStatus = null) }
             viewModelScope.launch {
                 when (val result = preferencesRepository.save(PreferencesRules.forSave(mutableState.value.prefs))) {

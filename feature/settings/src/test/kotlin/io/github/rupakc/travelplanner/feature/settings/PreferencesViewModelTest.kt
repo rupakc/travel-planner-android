@@ -135,4 +135,19 @@ class PreferencesViewModelTest {
         assertEquals(listOf("nature"), restored.prefs.interests)
         assertNull(restored.loadError)
     }
+
+    @Test
+    fun `typed but uncommitted tags are kept on save and commas commit as you type`() {
+        val model = vm()
+        model.onEvent(PreferencesEvent.PermitInputChanged("UK,"))
+        assertEquals(listOf("UK"), model.state.value.prefs.residencePermits)
+        assertEquals("", model.state.value.permitInput)
+        model.onEvent(PreferencesEvent.PermitInputChanged("Schengen"))
+        model.onEvent(PreferencesEvent.VisaInputChanged("Japan"))
+        model.onEvent(PreferencesEvent.Save)
+        val sent = repo.saved.single()
+        assertEquals(listOf("UK", "Schengen"), sent.residencePermits)
+        assertEquals(listOf("Japan"), sent.existingVisas)
+        assertEquals("", model.state.value.permitInput)
+    }
 }

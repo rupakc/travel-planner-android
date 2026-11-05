@@ -24,6 +24,8 @@ internal class FakeAppLocales(override val perAppSupported: Boolean = true) : Ap
     override fun apply(tag: String?) {
         applied += tag
     }
+
+    override fun current(): String? = applied.lastOrNull()
 }
 
 internal val TestBuildInfo =

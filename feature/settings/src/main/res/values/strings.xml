@@ -183,4 +183,6 @@
         <item quantity="one">Built from %d signal in your saved plans. Logged-in searches are automatically personalised with this profile.</item>
         <item quantity="other">Built from %d signals in your saved plans. Logged-in searches are automatically personalised with this profile.</item>
     </plurals>
+    <string name="settings_notif_nearby_always">Suggest places even when I\'m not on a trip</string>
+    <string name="settings_notif_nearby_always_sub">Otherwise only during the dates of a saved trip</string>
 </resources>

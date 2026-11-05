@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** In-app notification switches (read by the notifications team's workers from the settings DataStore). */
-enum class NotificationToggle { TRIP, PRICE_ALERTS, NEARBY }
+enum class NotificationToggle { TRIP, PRICE_ALERTS, NEARBY, NEARBY_ALWAYS }
 
 /** Notification channel ids (must match core:notifications `TravelChannel`; features can't depend on that module). */
 enum class ChannelShortcut(val channelId: String) {
@@ -40,6 +40,7 @@ class NotificationSettingsViewModel
                     NotificationToggle.TRIP -> settingsRepository.setNotificationToggles(trip = event.enabled)
                     NotificationToggle.PRICE_ALERTS -> settingsRepository.setNotificationToggles(priceAlerts = event.enabled)
                     NotificationToggle.NEARBY -> settingsRepository.setNotificationToggles(nearby = event.enabled)
+                    NotificationToggle.NEARBY_ALWAYS -> settingsRepository.setNotificationToggles(nearbyAlways = event.enabled)
                 }
             }
         }

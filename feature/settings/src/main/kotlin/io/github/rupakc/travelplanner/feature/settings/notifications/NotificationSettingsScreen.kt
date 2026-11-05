@@ -123,6 +123,13 @@ fun NotificationSettingsScreen(
                 checked = settings.nearbyNotifications,
                 onCheckedChange = { onToggle(SetToggle(NotificationToggle.NEARBY, it)) },
             )
+            SettingsSwitchRow(
+                title = stringResource(R.string.settings_notif_nearby_always),
+                subtitle = stringResource(R.string.settings_notif_nearby_always_sub),
+                checked = settings.nearbyNotificationsAlways && settings.nearbyNotifications,
+                enabled = settings.nearbyNotifications,
+                onCheckedChange = { onToggle(SetToggle(NotificationToggle.NEARBY_ALWAYS, it)) },
+            )
             SettingsHeading(stringResource(R.string.settings_notif_system))
             SettingsNote(stringResource(R.string.settings_notif_system_note))
             ChannelShortcut.entries.forEach { channel ->

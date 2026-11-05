@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.settings
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
@@ -35,7 +36,9 @@ import io.github.rupakc.travelplanner.feature.settings.server.UrlProblem
 import io.github.rupakc.travelplanner.feature.settings.taste.TasteEvent
 import io.github.rupakc.travelplanner.feature.settings.taste.TasteProfileViewModel
 import java.util.Optional
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -206,4 +209,57 @@ class SettingsViewModelsTest {
             vm.onEvent(ServerEvent.Test)
             assertTrue(vm.state.value.test is ConnectionTest.Failed)
         }
+
+    @Test
+    fun `sign out finishes clearing caches even when the screen closes mid-logout`() =
+        runTest {
+            var cachesCleared = false
+            lateinit var vm: SettingsViewModel
+            val closingAuth =
+                object : io.github.rupakc.travelplanner.core.data.repository.AuthRepository by auth {
+                    override suspend fun logout() {
+                        auth.sessionFlow.value = null
+                        // The auth gate pops Settings here, cancelling its viewModelScope.
+                        vm.viewModelScope.cancel()
+                        yield()
+                        cachesCleared = true
+                    }
+                }
+            vm = SettingsViewModel(closingAuth, profile, settings, Optional.of(catalogue), locales, TestBuildInfo)
+            vm.onEvent(SettingsEvent.ConfirmSignOut)
+            assertTrue(cachesCleared)
+        }
+
+    @Test
+    fun `language row follows the system per-app locale`() =
+        runTest {
+            locales.apply("es")
+            root().state.test { assertEquals("es", expectMostRecentItem().languageTag) }
+        }
+
+    @Test
+    fun `nearby always is its own setting`() =
+        runTest {
+            val notifications = NotificationSettingsViewModel(settings)
+            notifications.onEvent(SetToggle(NotificationToggle.NEARBY_ALWAYS, true))
+            assertTrue(settings.state.value.nearbyNotificationsAlways)
+            assertFalse(settings.state.value.nearbyNotifications)
+        }
+
+    @Test
+    fun `a toggle before the state is collected still compares against the type default`() =
+        runTest {
+            val vm = FeaturesViewModel(profile, Optional.of(catalogue))
+            vm.onEvent(FeaturesEvent.Toggle(FeatureId.CHAT, true))
+            assertTrue(profile.overridesState.value.enabled.isEmpty())
+            vm.onEvent(FeaturesEvent.Toggle(FeatureId.NEAR_ME, true))
+            assertEquals(setOf("near_me"), profile.overridesState.value.enabled)
+        }
+
+    @Test
+    fun `feature groups cover every catalogue feature exactly once`() {
+        val members = io.github.rupakc.travelplanner.feature.settings.features.FeatureGroup.entries.flatMap { it.members }
+        assertEquals(FeatureId.entries.toSet(), members.toSet())
+        assertEquals(members.size, members.toSet().size)
+    }
 }

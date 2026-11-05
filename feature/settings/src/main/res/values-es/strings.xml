@@ -185,4 +185,6 @@
         <item quantity="many">Creado a partir de %d señales de tus planes guardados. Las búsquedas con sesión iniciada se personalizan automáticamente con este perfil.</item>
         <item quantity="other">Creado a partir de %d señales de tus planes guardados. Las búsquedas con sesión iniciada se personalizan automáticamente con este perfil.</item>
     </plurals>
+    <string name="settings_notif_nearby_always">Sugerir lugares aunque no esté de viaje</string>
+    <string name="settings_notif_nearby_always_sub">Si no, solo durante las fechas de un viaje guardado</string>
 </resources>
