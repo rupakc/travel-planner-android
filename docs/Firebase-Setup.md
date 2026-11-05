@@ -42,16 +42,17 @@ The build applies the Google Services plugin and sets the resource `fcm_enabled=
 
 ## 4. What the app does
 
-- After every sign-in (and at app start while signed in) the app sends its FCM token with `POST /api/devices` (`PushRegistrar`). Tokens go only in request bodies, never in URLs.
-- On sign-out it calls `POST /api/devices/unregister` before dropping the session (`AuthRepository.logout`).
-- `onNewToken` re-registers while signed in.
+- After sign-in, and at app starts that show UI while signed in, the app sends its FCM token with `POST /api/devices` (`PushRegistrar`) only when the (user, token, locale, server) fingerprint changed or the last registration is 7 days old. Worker and FCM process starts never register. Tokens go only in request bodies, never in URLs.
+- On sign-out it calls `POST /api/devices/unregister` (at most 3 s), then deletes the FCM token (at most 2 s), so the server prunes it even if the unregister never arrived (`AuthRepository.logout`).
+- `onNewToken` re-registers while signed in (same fingerprint rule).
 - Messages are **data-only** (no `notification` block): keys `kind`, `notification_id`, `link`, `watch_id`, `watch_kind`, `title`, `body`, all strings, `android.priority` high for alerts. `TravelMessagingService.onMessageReceived` therefore runs in the foreground and the background (`PushAlertHandler`). It:
   - marks `notification_id` as seen, so the poller never posts it twice;
+  - posts nothing while nobody is signed in;
   - posts nothing if the in-app **Price alerts** toggle is off;
   - otherwise posts on the **Price alerts** channel, quietly for `watch_expired` / `watch_error`;
   - makes the tap open `travelplanner://alerts?kind=…&watch=…`, mapped from the web `link`.
 - Safety net for an older server that still sends a `notification` block: MainActivity maps a `link` / `watch_id` extra on the launch intent to the same deep link (`withPushDeepLink`).
-- When both `/health.push_configured` and the app's Firebase are on, `AlertPollWorker` runs every 6 h instead of every 30 min.
+- When both `/health.push_configured` and the app's Firebase are on, `AlertPollWorker` runs every 6 h instead of every 30 min. The interval is chosen only from known capabilities (`/health` is cached per server for 6 h), persisted, and left as it is (KEEP) when unchanged.
 
 ## 5. Verify end to end
 
