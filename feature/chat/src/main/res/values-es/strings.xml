@@ -7,7 +7,7 @@
     <string name="chat_starter_3">Búscame vuelos baratos de Nueva York a París en junio</string>
     <string name="chat_starter_4">Sugiere una escapada romántica por Europa durante una semana</string>
 
-    <string name="chat_input_placeholder">Pregunta sobre tu próximo viaje...</string>
+    <string name="chat_input_placeholder">Pregunta sobre tu próximo viaje…</string>
     <string name="chat_send">Enviar</string>
     <string name="chat_stop">Detener</string>
     <string name="chat_disclaimer">Asistente de viajes con IA. Comprueba los datos importantes en fuentes oficiales.</string>
@@ -15,7 +15,7 @@
     <string name="chat_you">Tú</string>
     <string name="chat_assistant">Asistente de viajes</string>
     <string name="chat_thinking">Pensando…</string>
-    <string name="chat_planning">Planificando tu viaje...</string>
+    <string name="chat_planning">Planificando tu viaje…</string>
     <string name="chat_searching">Buscando %1$s…</string>
     <string name="chat_building_itinerary">Creando tu itinerario…</string>
     <string name="chat_plotting">Trazando tu recorrido…</string>
@@ -66,7 +66,7 @@
         <item quantity="other">Mostrar %d más</item>
     </plurals>
     <string name="chat_show_less">Mostrar menos</string>
-    <string name="chat_progress">%1$d de %2$d listos</string>
+    <string name="chat_progress">Listos: %1$d/%2$d</string>
     <string name="chat_no_flights">No se encontraron vuelos</string>
     <string name="chat_no_hotels">No se encontraron hoteles</string>
     <string name="chat_no_activities">No se encontraron actividades</string>
@@ -80,7 +80,11 @@
     <string name="chat_round_trip">ida y vuelta</string>
     <string name="chat_route">%1$s → %2$s</string>
     <string name="chat_per_night">%1$s/noche</string>
-    <string name="chat_visa_max_stay">Estancia máxima: %1$d días</string>
+    <plurals name="chat_visa_max_stay">
+        <item quantity="one">Estancia máxima: %d día</item>
+        <item quantity="many">Estancia máxima: %d días</item>
+        <item quantity="other">Estancia máxima: %d días</item>
+    </plurals>
     <string name="chat_visa_fee">Tasa: %1$s</string>
     <string name="chat_free">Gratis</string>
     <string name="chat_official_source">Fuente oficial</string>

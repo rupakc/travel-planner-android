@@ -219,7 +219,7 @@ private fun ColumnScope.VisaBody(data: VisaData, plan: PlanCallbacks) {
     val req = data.requirement ?: return Muted(stringResource(R.string.chat_no_visa))
     req.visaType?.let { Text(it.replace('-', ' ').replaceFirstChar(Char::uppercase), style = TravelTheme.typography.labelLarge, fontWeight = FontWeight.Bold) }
     FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
-        req.maxStayDays?.let { Muted(stringResource(R.string.chat_visa_max_stay, it)) }
+        req.maxStayDays?.let { Muted(pluralStringResource(R.plurals.chat_visa_max_stay, it, it)) }
         req.feeUsd?.let { fee ->
             Muted(stringResource(R.string.chat_visa_fee, if (fee == 0.0) stringResource(R.string.chat_free) else formatPrice(fee)))
         }

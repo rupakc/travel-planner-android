@@ -50,6 +50,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.core.net.toUri
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonBlock
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
@@ -420,9 +421,9 @@ internal fun formatDay(date: String?): String? {
 internal fun openInMaps(context: Context, label: String, lat: Double?, lng: Double?) {
     val uri =
         if (lat != null && lng != null) {
-            Uri.parse("geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})")
+            "geo:$lat,$lng?q=$lat,$lng(${Uri.encode(label)})".toUri()
         } else {
-            Uri.parse("geo:0,0?q=${Uri.encode(label)}")
+            "geo:0,0?q=${Uri.encode(label)}".toUri()
         }
     try {
         context.startActivity(Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

@@ -9,7 +9,7 @@
     <string name="chat_starter_4">Suggest a romantic getaway in Europe for a week</string>
 
     <!-- Composer -->
-    <string name="chat_input_placeholder">Ask about your next trip...</string>
+    <string name="chat_input_placeholder">Ask about your next trip…</string>
     <string name="chat_send">Send</string>
     <string name="chat_stop">Stop</string>
     <string name="chat_disclaimer">AI-powered travel assistant. Verify important details with official sources.</string>
@@ -18,7 +18,7 @@
     <string name="chat_you">You</string>
     <string name="chat_assistant">Travel assistant</string>
     <string name="chat_thinking">Thinking…</string>
-    <string name="chat_planning">Planning your trip...</string>
+    <string name="chat_planning">Planning your trip…</string>
     <string name="chat_searching">Searching %1$s…</string>
     <string name="chat_building_itinerary">Building your itinerary…</string>
     <string name="chat_plotting">Plotting your journey…</string>
@@ -69,7 +69,7 @@
         <item quantity="other">Show %d more</item>
     </plurals>
     <string name="chat_show_less">Show less</string>
-    <string name="chat_progress">%1$d of %2$d ready</string>
+    <string name="chat_progress">Ready: %1$d/%2$d</string>
     <string name="chat_no_flights">No flights found</string>
     <string name="chat_no_hotels">No hotels found</string>
     <string name="chat_no_activities">No activities found</string>
@@ -83,7 +83,10 @@
     <string name="chat_round_trip">round-trip</string>
     <string name="chat_route">%1$s → %2$s</string>
     <string name="chat_per_night">%1$s/night</string>
-    <string name="chat_visa_max_stay">Max stay: %1$d days</string>
+    <plurals name="chat_visa_max_stay">
+        <item quantity="one">Max stay: %d day</item>
+        <item quantity="other">Max stay: %d days</item>
+    </plurals>
     <string name="chat_visa_fee">Fee: %1$s</string>
     <string name="chat_free">Free</string>
     <string name="chat_official_source">Official Source</string>
