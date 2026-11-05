@@ -1,7 +1,7 @@
 package io.github.rupakc.travelplanner.core.domain.results
 
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
-import io.github.rupakc.travelplanner.core.model.plan.PlanSelectionsSerializer
+import io.github.rupakc.travelplanner.core.model.plan.stripLinkEvidence as modelStripLinkEvidence
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -13,8 +13,6 @@ import kotlinx.serialization.json.contentOrNull
  * They work on the raw section / selections JSON so nothing the app does not
  * model is lost, exactly like the web's object spreads.
  */
-
-private val EVIDENCE_KEYS = listOf("link_verified", "link_checked")
 
 /** Summary the web shows when link checks never finished. */
 const val GAVE_UP_SUMMARY = "Link checks did not finish — verify before booking."
@@ -40,18 +38,11 @@ fun <K> clearPendingVerification(sections: Map<K, JsonObject>): Map<K, JsonObjec
     return if (changed) next else sections
 }
 
-private fun stripItem(item: JsonElement): JsonElement {
-    if (item !is JsonObject || EVIDENCE_KEYS.none(item::containsKey)) return item
-    return JsonObject(item - EVIDENCE_KEYS.toSet())
-}
+/** Saved plans store the chosen items, not this search's live link evidence. Delegates to core:model's shared port. */
+fun stripLinkEvidence(selections: JsonObject): JsonObject = modelStripLinkEvidence(selections)
 
-/** Saved plans store the chosen items, not this search's live link evidence (`link_verified`, `link_checked`). */
-fun stripLinkEvidence(selections: JsonObject): JsonObject =
-    JsonObject(selections.mapValues { (_, value) -> if (value is JsonArray) JsonArray(value.map(::stripItem)) else stripItem(value) })
-
-/** [stripLinkEvidence] on typed selections (round-trips through the lossless JSON form). */
-fun stripLinkEvidence(selections: PlanSelections): PlanSelections =
-    PlanSelectionsSerializer.fromJson(stripLinkEvidence(PlanSelectionsSerializer.toJson(selections)))
+/** [stripLinkEvidence] on typed selections. */
+fun stripLinkEvidence(selections: PlanSelections): PlanSelections = modelStripLinkEvidence(selections)
 
 private val CITY_LIST_FIELDS = listOf("results", "hotels", "places", "events", "options", "plans")
 

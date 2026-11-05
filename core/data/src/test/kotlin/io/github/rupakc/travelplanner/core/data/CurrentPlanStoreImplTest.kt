@@ -121,6 +121,25 @@ class CurrentPlanStoreImplTest {
         }
 
     @Test
+    fun `save strips this search's link evidence from the posted selections`() =
+        runTest {
+            val plans = FakePlansRepository()
+            val store = store(plans = plans)
+            val raw = buildJsonObject {
+                put("name", JsonPrimitive("A"))
+                put("link_verified", JsonPrimitive(true))
+                put("link_checked", JsonPrimitive(true))
+            }
+            store.toggle(PlanItem.HotelItem(Hotel(name = "A").withRaw(raw)))
+            assertTrue(store.draft.value.selections.hotel!!.raw.containsKey("link_verified"))
+            val saved = (store.save("Trip") as AppResult.Success).value
+            val posted = saved.selections.hotel!!.raw
+            assertEquals("A", (posted["name"] as JsonPrimitive).content)
+            assertFalse(posted.containsKey("link_verified"))
+            assertFalse(posted.containsKey("link_checked"))
+        }
+
+    @Test
     fun `load, snapshot and restore`() =
         runTest {
             val plans = FakePlansRepository()
