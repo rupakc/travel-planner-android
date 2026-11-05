@@ -1,6 +1,9 @@
 package io.github.rupakc.travelplanner.core.data.impl
 
 import io.github.rupakc.travelplanner.core.common.AppClock
+import io.github.rupakc.travelplanner.core.common.AppDispatchers
+import io.github.rupakc.travelplanner.core.common.AppError
+import io.github.rupakc.travelplanner.core.common.AppException
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.onSuccess
 import io.github.rupakc.travelplanner.core.data.repository.CompareRepository
@@ -14,6 +17,7 @@ import io.github.rupakc.travelplanner.core.model.importlink.ImportPreview
 import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
+import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyRequest
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.search.CompareSummary
@@ -21,11 +25,13 @@ import io.github.rupakc.travelplanner.core.model.search.DiscoveryRequest
 import io.github.rupakc.travelplanner.core.model.search.DiscoveryResponse
 import io.github.rupakc.travelplanner.core.model.search.FareCalendar
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.network.HttpErrorMapper
 import io.github.rupakc.travelplanner.core.network.api.HealthApi
 import io.github.rupakc.travelplanner.core.network.api.ImportApi
 import io.github.rupakc.travelplanner.core.network.api.NearbyApi
 import io.github.rupakc.travelplanner.core.network.api.SearchApi
 import io.github.rupakc.travelplanner.core.network.apiCall
+import io.github.rupakc.travelplanner.core.network.di.DefaultHttp
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
@@ -36,6 +42,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 @Singleton
 class CompareRepositoryImpl
@@ -70,11 +80,42 @@ class FareCalendarRepositoryImpl
 @Singleton
 class HealthRepositoryImpl
     @Inject
-    constructor(private val api: HealthApi) : HealthRepository {
+    constructor(
+        private val api: HealthApi,
+        @param:DefaultHttp private val client: OkHttpClient,
+        private val dispatchers: AppDispatchers,
+    ) : HealthRepository {
         private val state = MutableStateFlow<Health?>(null)
         override val capabilities: StateFlow<Health?> = state.asStateFlow()
 
+        /** Same timeouts and pool, but without the base-URL and auth interceptors: never sends the token elsewhere. */
+        private val bareClient: OkHttpClient by lazy {
+            client.newBuilder().apply {
+                interceptors().clear()
+                networkInterceptors().clear()
+            }.build()
+        }
+
         override suspend fun refresh(): AppResult<Health> = apiCall { api.health() }.onSuccess { state.value = it }
+
+        override suspend fun probe(baseUrl: String): AppResult<Health> {
+            val url =
+                baseUrl.trim().trimEnd('/').let { "$it/health" }.toHttpUrlOrNull()
+                    ?: return AppResult.Failure(AppError.Client(status = 0, message = null, code = CODE_INVALID_URL))
+            return apiCall {
+                withContext(dispatchers.io) {
+                    bareClient.newCall(Request.Builder().url(url).get().build()).execute().use { response ->
+                        val body = response.body.string()
+                        if (!response.isSuccessful) throw AppException(HttpErrorMapper.map(response.code, response.header("Retry-After"), body))
+                        TravelJson.decodeFromString(Health.serializer(), body)
+                    }
+                }
+            }
+        }
+
+        private companion object {
+            const val CODE_INVALID_URL = "invalid_url"
+        }
     }
 
 /** In-memory cache: 1 h per ~5 km cell (0.05° grid), keyed with interests and limit. */

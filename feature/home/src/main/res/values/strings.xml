@@ -1,7 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home_title">Home</string>
-    <string name="home_message">Your personalised home: feature tiles for your traveller type, your next trip and quick actions.</string>
+    <string name="home_loading">Loading your home</string>
+    <string name="home_greeting">Hello, %1$s</string>
+    <string name="home_greeting_anonymous">Hello</string>
+    <string name="home_type_unset">Choose your traveller type</string>
+    <string name="home_type_joiner">" + "</string>
+    <string name="home_type_a11y">Your traveller type: %1$s. Opens Settings.</string>
+    <string name="home_search_hint">Search trips, chats, features and settings</string>
+    <string name="home_search_open">Open search</string>
+    <string name="home_refresh_failed">Couldn\'t refresh. Showing what\'s saved on this device.</string>
+    <string name="home_retry">Retry</string>
+    <string name="home_dismiss">Dismiss</string>
+    <string name="home_next_trip">Your next trip</string>
+    <string name="home_date_range">%1$s – %2$s</string>
+    <string name="home_trip_today">Starts today</string>
+    <string name="home_trip_ongoing">On your trip now</string>
+    <plurals name="home_trip_in_days">
+        <item quantity="one">In %d day</item>
+        <item quantity="other">In %d days</item>
+    </plurals>
+    <string name="home_plan_next_title">Plan your next trip</string>
+    <string name="home_plan_next_message">Flights, hotels, visa, weather and more, planned together in one search.</string>
     <string name="home_plan_trip">Plan a trip</string>
-    <string name="home_near_me">Near me</string>
+    <string name="home_tools_heading">Your tools</string>
+    <string name="home_tools_empty_title">No tools turned on</string>
+    <string name="home_tools_empty_message">Turn features on in Settings, or retake the traveller quiz.</string>
+    <string name="home_tools_empty_action">Open Settings</string>
+    <string name="home_in_results">In your trip results</string>
+    <string name="home_reason_budget">You searched with a budget</string>
+    <string name="home_reason_accessibility">You searched with accessibility needs</string>
+    <string name="home_reason_kids">You searched with children</string>
+    <string name="home_reason_multi_city">You searched a multi-city trip</string>
+    <string name="home_reason_several">You searched several destinations</string>
+    <string name="home_reason_destination">Watch prices for this trip</string>
+    <string name="home_reason_taste">From your Taste Graph</string>
+    <string name="home_because_heading">Because you searched %1$s</string>
+    <string name="home_because_again">Load this search</string>
+    <string name="home_taste_heading">What we\'ve learned about your travel taste</string>
+    <string name="home_recent_heading">Recent searches</string>
+    <plurals name="home_travellers">
+        <item quantity="one">%d traveler</item>
+        <item quantity="other">%d travelers</item>
+    </plurals>
+
+    <!-- Global search -->
+    <string name="home_search_back">Back</string>
+    <string name="home_search_clear">Clear search</string>
+    <string name="home_search_clear_filters">Show all results</string>
+    <string name="home_search_empty_title">Search everything</string>
+    <string name="home_search_empty_message">Find saved trips, chats, recent searches, features and settings. Works offline.</string>
+    <string name="home_search_none_title">No matches for “%1$s”</string>
+    <string name="home_search_none_message">Try another word, or check the spelling.</string>
+    <string name="home_search_feature_off">Off: opening it turns it on</string>
+    <string name="home_search_open_result">Open</string>
+    <string name="home_search_filter_all">All (%1$d)</string>
+    <string name="home_search_filter_trips">Trips (%1$d)</string>
+    <string name="home_search_filter_chats">Chats (%1$d)</string>
+    <string name="home_search_filter_recent">Recent searches (%1$d)</string>
+    <string name="home_search_filter_features">Features (%1$d)</string>
+    <string name="home_search_filter_settings">Settings (%1$d)</string>
+    <plurals name="home_search_result_count">
+        <item quantity="one">%d result</item>
+        <item quantity="other">%d results</item>
+    </plurals>
+
+    <!-- Settings rows indexed by global search -->
+    <string name="home_setting_travel_preferences">Travel preferences</string>
+    <string name="home_setting_taste_graph">Taste Graph</string>
+    <string name="home_setting_budget">Budget category</string>
+    <string name="home_setting_nationality">Nationality</string>
+    <string name="home_setting_residence">Current residence</string>
+    <string name="home_setting_email">Email for fare alerts</string>
+    <string name="home_setting_documents">Residence permits and visas</string>
+    <string name="home_setting_travel_group">Default travel group</string>
+    <string name="home_setting_travel_group_keywords">adults, children, seniors, infants, accessibility</string>
+    <string name="home_setting_interests">Interests</string>
+    <string name="home_setting_traveller_type">Your traveller type</string>
+    <string name="home_setting_traveller_type_keywords">retake quiz, onboarding</string>
+    <string name="home_setting_features">Features</string>
+    <string name="home_setting_theme">Theme</string>
+    <string name="home_setting_theme_keywords">dark mode, light mode</string>
+    <string name="home_setting_dynamic_color">Dynamic colour</string>
+    <string name="home_setting_language">Language</string>
+    <string name="home_setting_notifications">Notifications</string>
+    <string name="home_setting_notifications_keywords">trip reminders, price alerts, nearby suggestions</string>
+    <string name="home_setting_server">Server address</string>
+    <string name="home_setting_server_keywords">backend, URL, test connection</string>
+    <string name="home_setting_change_password">Change password</string>
+    <string name="home_setting_sign_out">Sign out</string>
+    <string name="home_setting_about">About</string>
+    <string name="home_setting_about_keywords">version, licences, GeoNames</string>
+    <string name="home_setting_section_preferences">Travel preferences</string>
+    <string name="home_setting_section_type">Your traveller type</string>
+    <string name="home_setting_section_features">Features</string>
+    <string name="home_setting_section_appearance">Appearance</string>
+    <string name="home_setting_section_language">Language</string>
+    <string name="home_setting_section_notifications">Notifications</string>
+    <string name="home_setting_section_server">Server</string>
+    <string name="home_setting_section_account">Account</string>
+    <string name="home_setting_section_about">About</string>
 </resources>

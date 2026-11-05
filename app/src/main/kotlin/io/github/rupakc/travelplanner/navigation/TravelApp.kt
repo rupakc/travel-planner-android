@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,7 +22,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -40,8 +40,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.github.rupakc.travelplanner.AuthGate
 import io.github.rupakc.travelplanner.R
+import io.github.rupakc.travelplanner.core.model.navigation.AccountChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
+import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
@@ -62,13 +64,11 @@ import io.github.rupakc.travelplanner.feature.results.navigation.resultsGraph
 import io.github.rupakc.travelplanner.feature.search.navigation.searchGraph
 import io.github.rupakc.travelplanner.feature.settings.navigation.settingsGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareGraph
-import kotlinx.coroutines.launch
 
 /** Root of the UI: auth gate + NavHost + adaptive navigation suite. */
 @Composable
 fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavController()) {
     val shellViewModel: ShellViewModel = hiltViewModel()
-    val scope = rememberCoroutineScope()
     val backStack by navController.currentBackStackEntryAsState()
     val destination = backStack?.destination
     // singleTask activity: deep links that arrive while running come through onNewIntent.
@@ -100,6 +100,7 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
         showNavigation = gate == AuthGate.READY && topLevel != null,
         onNavigate = { navController.navigateToTopLevel(it) },
         onOpenSettings = { navController.navigate(SettingsRoute) },
+        onOpenSearch = { navController.navigate(GlobalSearchRoute) },
         snackbarHostState = snackbarHostState,
     ) {
         NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.fillMaxSize()) {
@@ -110,6 +111,8 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 onPlanTrip = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
                 onOpenNearby = { navController.navigate(NearbyRoute) },
                 onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
+                onNavigate = { route -> navController.navigateTo(route) },
+                onBack = { navController.popBackStack() },
             )
             searchGraph(onSearchStarted = {
                 navController.navigate(ResultsRoute)
@@ -127,7 +130,11 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
             settingsGraph(
                 onBack = { navController.popBackStack() },
                 onRetakeQuiz = { navController.navigate(OnboardingRoute(fromSettings = true)) },
-                onSignOut = { scope.launch { shellViewModel.signOut() } },
+                // Settings signs out itself (AuthRepository.logout unregisters the push token); the gate then shows Login.
+                onSignOut = {},
+                // feature:auth (team A1) registers AccountChangePasswordRoute.
+                onChangePassword = { navController.navigate(AccountChangePasswordRoute) },
+                onNavigate = { route -> navController.navigateTo(route) },
             )
             nearbyGraph(onBack = { navController.popBackStack() })
             shareGraph(onBack = {
@@ -147,6 +154,7 @@ fun TravelAppScaffold(
     showNavigation: Boolean,
     onNavigate: (TopLevelDestination) -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenSearch: () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable () -> Unit,
 ) {
@@ -157,6 +165,9 @@ fun TravelAppScaffold(
                     TopAppBar(
                         title = { Text(stringResource(currentTopLevel.labelRes), modifier = Modifier.semantics { heading() }) },
                         actions = {
+                            IconButton(onClick = onOpenSearch) {
+                                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.nav_global_search))
+                            }
                             IconButton(onClick = onOpenSettings) {
                                 Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.nav_settings))
                             }
@@ -204,10 +215,29 @@ internal fun gateTarget(gate: AuthGate, current: NavDestination, retakingQuiz: B
 private fun NavDestination.isGateScreen(): Boolean =
     hasRoute(LoginRoute::class) || hasRoute(ChangePasswordRoute::class) || hasRoute(OnboardingRoute::class)
 
-private fun NavHostController.navigateToTopLevel(dest: TopLevelDestination) {
-    navigate(dest.route) {
+private fun NavHostController.navigateToTopLevel(dest: TopLevelDestination) = navigateToTopLevel(dest.route)
+
+/**
+ * Switches to a top-level tab (popUpTo start with saveState, launchSingleTop, restoreState). A route
+ * with arguments (e.g. `SearchRoute(mode = "compare")`) is not restored from the tab's saved state,
+ * so its arguments arrive.
+ */
+private fun NavHostController.navigateToTopLevel(route: AppRoute) {
+    val restore = restoresTabState(route)
+    navigate(route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
+        launchSingleTop = restore
+        restoreState = restore
     }
 }
+
+/** Top-level routes switch tabs; everything else is pushed. */
+private fun NavHostController.navigateTo(route: AppRoute) {
+    if (isTopLevelRoute(route)) navigateToTopLevel(route) else navigate(route)
+}
+
+/** True when [route] is one of the navigation-suite destinations (with or without arguments). */
+internal fun isTopLevelRoute(route: AppRoute): Boolean = TopLevelDestination.entries.any { it.routeClass.isInstance(route) }
+
+/** True when [route] is a tab's plain route, so its saved state may be restored. */
+internal fun restoresTabState(route: AppRoute): Boolean = TopLevelDestination.entries.any { it.route == route }
