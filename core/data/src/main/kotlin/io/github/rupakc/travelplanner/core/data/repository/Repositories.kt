@@ -417,4 +417,10 @@ interface SessionCleaner {
 /** Supplied by core:notifications when Firebase is configured (optional binding). */
 fun interface PushTokenSource {
     suspend fun token(): String?
+
+    /**
+     * Deletes this install's token (sign-out), so the push service reports it unregistered and the server
+     * prunes it even when the unregister call never arrived (API review I1). No-op without push.
+     */
+    suspend fun delete() = Unit
 }
