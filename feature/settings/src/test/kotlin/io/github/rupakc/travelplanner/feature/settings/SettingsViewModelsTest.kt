@@ -214,6 +214,20 @@ class SettingsViewModelsTest {
         }
 
     @Test
+    fun `a url the store would reject does not sign the user out (review M12)`() =
+        runTest {
+            settings.rejectUrls = AppError.Client(status = 0, message = null, code = "https_required")
+            val vm = ServerViewModel(SavedStateHandle(), settings, FakeHealthRepository(), auth, TestBuildInfo)
+            vm.onEvent(ServerEvent.InputChanged("http://192.168.1.2:8001"))
+            vm.onEvent(ServerEvent.Save)
+            vm.onEvent(ServerEvent.ConfirmSwitch)
+            assertEquals(0, auth.logoutCalls)
+            assertTrue(auth.sessionFlow.value != null)
+            assertNull(settings.state.value.baseUrlOverride)
+            assertEquals(UrlProblem.HTTPS_REQUIRED, vm.state.value.problem)
+        }
+
+    @Test
     fun `server switch finishes logout and stores the url even when the screen closes mid-switch`() =
         runTest {
             lateinit var vm: ServerViewModel

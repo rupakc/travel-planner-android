@@ -341,6 +341,13 @@ interface SettingsRepository {
      */
     suspend fun setBaseUrl(url: String?): AppResult<Unit>
 
+    /**
+     * [setBaseUrl]'s own validation without storing anything: the normalised URL, or the same failure
+     * `setBaseUrl` would return. Callers that sign out before switching check this first, so a URL the
+     * store would reject never costs the user their session.
+     */
+    fun checkBaseUrl(url: String): AppResult<String>
+
     suspend fun setThemeMode(mode: ThemeMode)
 
     suspend fun setDynamicColor(enabled: Boolean)

@@ -126,21 +126,24 @@ class SettingsRepositoryImpl
                 switchServer(null)
                 return AppResult.Success(Unit)
             }
-            return when (val v = baseUrlProvider.validate(url)) {
-                is BaseUrlValidation.Valid -> {
-                    switchServer(v.normalized)
+            return when (val checked = checkBaseUrl(url)) {
+                is AppResult.Success -> {
+                    switchServer(checked.value)
                     AppResult.Success(Unit)
                 }
 
-                BaseUrlValidation.Invalid -> {
-                    AppResult.Failure(AppError.Client(status = 0, message = null, code = CODE_INVALID_URL))
-                }
-
-                BaseUrlValidation.HttpsRequired -> {
-                    AppResult.Failure(AppError.Client(status = 0, message = null, code = CODE_HTTPS_REQUIRED))
+                is AppResult.Failure -> {
+                    checked
                 }
             }
         }
+
+        override fun checkBaseUrl(url: String): AppResult<String> =
+            when (val v = baseUrlProvider.validate(url)) {
+                is BaseUrlValidation.Valid -> AppResult.Success(v.normalized)
+                BaseUrlValidation.Invalid -> AppResult.Failure(AppError.Client(status = 0, message = null, code = CODE_INVALID_URL))
+                BaseUrlValidation.HttpsRequired -> AppResult.Failure(AppError.Client(status = 0, message = null, code = CODE_HTTPS_REQUIRED))
+            }
 
         /** A token belongs to the server that issued it: changing server signs out and clears local user data. */
         private suspend fun switchServer(override: String?) =
