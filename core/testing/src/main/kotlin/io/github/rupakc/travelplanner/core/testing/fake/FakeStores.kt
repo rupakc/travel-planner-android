@@ -48,12 +48,13 @@ class FakeSettingsStore(initial: AppSettings = AppSettings()) : SettingsStore {
 
     override suspend fun setLocaleTag(tag: String?) = state.update { it.copy(localeTag = tag) }
 
-    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?) =
+    override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?, nearbyAlways: Boolean?) =
         state.update {
             it.copy(
                 tripNotifications = trip ?: it.tripNotifications,
                 priceAlertNotifications = priceAlerts ?: it.priceAlertNotifications,
                 nearbyNotifications = nearby ?: it.nearbyNotifications,
+                nearbyNotificationsAlways = nearbyAlways ?: it.nearbyNotificationsAlways,
             )
         }
 }

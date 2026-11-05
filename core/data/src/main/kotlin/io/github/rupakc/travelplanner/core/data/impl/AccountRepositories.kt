@@ -143,8 +143,8 @@ class SettingsRepositoryImpl
 
         override suspend fun setLocaleTag(tag: String?) = store.setLocaleTag(tag)
 
-        override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?) =
-            store.setNotificationToggles(trip, priceAlerts, nearby)
+        override suspend fun setNotificationToggles(trip: Boolean?, priceAlerts: Boolean?, nearby: Boolean?, nearbyAlways: Boolean?) =
+            store.setNotificationToggles(trip, priceAlerts, nearby, nearbyAlways)
 
         companion object {
             /** AppError.Client.code values from [setBaseUrl]. */

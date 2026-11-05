@@ -319,7 +319,7 @@ interface SettingsRepository {
 
     suspend fun setLocaleTag(tag: String?)
 
-    suspend fun setNotificationToggles(trip: Boolean? = null, priceAlerts: Boolean? = null, nearby: Boolean? = null)
+    suspend fun setNotificationToggles(trip: Boolean? = null, priceAlerts: Boolean? = null, nearby: Boolean? = null, nearbyAlways: Boolean? = null)
 }
 
 /** Traveller profile + feature overrides (device-local, spec §6). */
