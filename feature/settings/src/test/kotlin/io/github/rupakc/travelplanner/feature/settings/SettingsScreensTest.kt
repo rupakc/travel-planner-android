@@ -204,4 +204,22 @@ class SettingsScreensTest {
         assertEquals(io.github.rupakc.travelplanner.feature.settings.notifications.NotificationToggle.NEARBY_ALWAYS, toggles.single().toggle)
         assertTrue(toggles.single().enabled)
     }
+
+    @Test
+    fun `server switch asks for confirmation before signing out`() {
+        val events = mutableListOf<io.github.rupakc.travelplanner.feature.settings.server.ServerEvent>()
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                io.github.rupakc.travelplanner.feature.settings.server.ServerScreen(
+                    io.github.rupakc.travelplanner.feature.settings.server.ServerUiState(confirmingSwitch = true, pendingUrl = "https://new.example"),
+                    onEvent = { events += it },
+                    onBack = {},
+                )
+            }
+        }
+        compose.onNodeWithText("Switch servers?").assertExists()
+        compose.onNodeWithText("Switching to https://new.example signs you out", substring = true).assertExists()
+        compose.onNodeWithText("Switch and sign out").performClick()
+        assertEquals(listOf<Any>(io.github.rupakc.travelplanner.feature.settings.server.ServerEvent.ConfirmSwitch), events)
+    }
 }

@@ -187,4 +187,10 @@
     </plurals>
     <string name="settings_notif_nearby_always">Sugerir lugares aunque no esté de viaje</string>
     <string name="settings_notif_nearby_always_sub">Si no, solo durante las fechas de un viaje guardado</string>
+    <string name="settings_server_scheme">Usa una dirección que empiece por http:// o https://.</string>
+    <string name="settings_server_host">Añade el host del servidor, como 192.168.1.20:8001.</string>
+    <string name="settings_server_test_note">Probar no cambia nada y nunca envía tu sesión al servidor.</string>
+    <string name="settings_server_switch_title">¿Cambiar de servidor?</string>
+    <string name="settings_server_switch_message">Al cambiar a %1$s se cerrará tu sesión y se borrarán los viajes y chats guardados en este dispositivo. Iniciarás sesión en el nuevo servidor.</string>
+    <string name="settings_server_switch_confirm">Cambiar y cerrar sesión</string>
 </resources>

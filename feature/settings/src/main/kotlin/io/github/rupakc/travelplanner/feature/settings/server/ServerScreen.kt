@@ -13,10 +13,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -60,6 +62,8 @@ fun ServerScreen(state: ServerUiState, onEvent: (ServerEvent) -> Unit, onBack: (
             val problem =
                 when (state.problem) {
                     UrlProblem.INVALID -> stringResource(R.string.settings_server_invalid)
+                    UrlProblem.UNSUPPORTED_SCHEME -> stringResource(R.string.settings_server_scheme)
+                    UrlProblem.MISSING_HOST -> stringResource(R.string.settings_server_host)
                     UrlProblem.HTTPS_REQUIRED -> stringResource(R.string.settings_server_https)
                     null -> null
                 }
@@ -95,8 +99,18 @@ fun ServerScreen(state: ServerUiState, onEvent: (ServerEvent) -> Unit, onBack: (
                     enabled = !state.usingDefault || state.input.isNotEmpty(),
                 )
             }
+            SettingsNote(stringResource(R.string.settings_server_test_note))
             TestResult(state.test)
         }
+    }
+    if (state.confirmingSwitch) {
+        AlertDialog(
+            onDismissRequest = { onEvent(ServerEvent.CancelSwitch) },
+            title = { Text(stringResource(R.string.settings_server_switch_title)) },
+            text = { Text(stringResource(R.string.settings_server_switch_message, state.pendingUrl ?: state.defaultUrl)) },
+            confirmButton = { TextButton(onClick = { onEvent(ServerEvent.ConfirmSwitch) }) { Text(stringResource(R.string.settings_server_switch_confirm)) } },
+            dismissButton = { TextButton(onClick = { onEvent(ServerEvent.CancelSwitch) }) { Text(stringResource(R.string.settings_cancel)) } },
+        )
     }
 }
 

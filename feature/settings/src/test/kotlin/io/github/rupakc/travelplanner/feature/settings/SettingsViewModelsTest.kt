@@ -173,41 +173,64 @@ class SettingsViewModelsTest {
         }
 
     @Test
-    fun `server rejects invalid urls with the repository code`() =
+    fun `server input is validated with ServerUrl before anything is stored`() =
         runTest {
-            val base = settings
-            val rejecting =
-                object : SettingsRepository by base {
-                    override suspend fun setBaseUrl(url: String?): AppResult<Unit> =
-                        if (url != null && !url.startsWith("https")) AppResult.Failure(AppError.Client(0, null, "https_required")) else base.setBaseUrl(url)
-                }
-            val vm = ServerViewModel(SavedStateHandle(), rejecting, FakeHealthRepository(), TestBuildInfo)
-            vm.onEvent(ServerEvent.InputChanged("http://plain"))
+            val vm = ServerViewModel(SavedStateHandle(), settings, FakeHealthRepository(), FakeAuthRepository(), TestBuildInfo.copy(cleartextAllowed = false))
+            vm.onEvent(ServerEvent.InputChanged("ftp://x"))
+            vm.onEvent(ServerEvent.Save)
+            assertEquals(UrlProblem.UNSUPPORTED_SCHEME, vm.state.value.problem)
+            vm.onEvent(ServerEvent.InputChanged("http://plain.example"))
             vm.onEvent(ServerEvent.Save)
             assertEquals(UrlProblem.HTTPS_REQUIRED, vm.state.value.problem)
-            vm.onEvent(ServerEvent.InputChanged("https://ok.example"))
+            assertNull(settings.state.value.baseUrlOverride)
+            vm.onEvent(ServerEvent.InputChanged("https://OK.example/"))
             vm.onEvent(ServerEvent.Save)
-            assertNull(vm.state.value.problem)
-            assertTrue(vm.state.value.saved)
             assertEquals("https://ok.example", settings.state.value.baseUrlOverride)
+            assertTrue(vm.state.value.saved)
+        }
+
+    @Test
+    fun `switching servers while signed in asks first, and use default goes through the same check`() =
+        runTest {
+            val vm = ServerViewModel(SavedStateHandle(), settings, FakeHealthRepository(), auth, TestBuildInfo)
+            vm.onEvent(ServerEvent.InputChanged("http://192.168.1.2:8001"))
+            vm.onEvent(ServerEvent.Save)
+            assertTrue(vm.state.value.confirmingSwitch)
+            assertNull(settings.state.value.baseUrlOverride)
+            vm.onEvent(ServerEvent.CancelSwitch)
+            assertFalse(vm.state.value.confirmingSwitch)
+            assertNull(settings.state.value.baseUrlOverride)
+            vm.onEvent(ServerEvent.Save)
+            vm.onEvent(ServerEvent.ConfirmSwitch)
+            assertEquals("http://192.168.1.2:8001", settings.state.value.baseUrlOverride)
             vm.onEvent(ServerEvent.UseDefault)
+            assertEquals(null, vm.state.value.pendingUrl)
+            assertTrue(vm.state.value.confirmingSwitch)
+            vm.onEvent(ServerEvent.ConfirmSwitch)
             assertNull(settings.state.value.baseUrlOverride)
             assertTrue(vm.state.value.usingDefault)
         }
 
     @Test
-    fun `test connection saves a changed url then reports health flags or the failure`() =
+    fun `test connection probes the candidate without storing it`() =
         runTest {
-            val health = FakeHealthRepository(Health(status = "ok", serpapiConfigured = true, pushConfigured = true))
-            val vm = ServerViewModel(SavedStateHandle(), settings, health, TestBuildInfo)
-            vm.onEvent(ServerEvent.InputChanged("http://192.168.1.2:8001"))
+            val health = FakeHealthRepository()
+            health.probeResult = AppResult.Success(Health(status = "ok", serpapiConfigured = true, pushConfigured = true))
+            val vm = ServerViewModel(SavedStateHandle(), settings, health, auth, TestBuildInfo)
+            vm.onEvent(ServerEvent.InputChanged("http://192.168.1.2:8001/"))
             vm.onEvent(ServerEvent.Test)
-            assertEquals("http://192.168.1.2:8001", settings.state.value.baseUrlOverride)
-            val ok = vm.state.value.test as ConnectionTest.Ok
-            assertTrue(ok.health.serpapiConfigured)
-            health.set(null)
+            assertEquals(listOf("http://192.168.1.2:8001"), health.probed)
+            assertNull(settings.state.value.baseUrlOverride)
+            assertTrue((vm.state.value.test as ConnectionTest.Ok).health.serpapiConfigured)
+            health.probeResult = AppResult.Failure(AppError.Network())
+            vm.onEvent(ServerEvent.InputChanged(""))
             vm.onEvent(ServerEvent.Test)
+            assertEquals("http://10.0.2.2:8001", health.probed.last())
             assertTrue(vm.state.value.test is ConnectionTest.Failed)
+            vm.onEvent(ServerEvent.InputChanged("nope"))
+            vm.onEvent(ServerEvent.Test)
+            assertEquals(UrlProblem.INVALID, vm.state.value.problem)
+            assertEquals(2, health.probed.size)
         }
 
     @Test

@@ -8,8 +8,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppBuildInfo
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.domain.server.ServerUrl
+import io.github.rupakc.travelplanner.core.domain.server.ServerUrlResult
 import io.github.rupakc.travelplanner.core.model.health.Health
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,10 +22,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Why a URL was rejected (codes from `SettingsRepository.setBaseUrl`). */
-enum class UrlProblem { INVALID, HTTPS_REQUIRED }
+/** Why a URL was rejected (`ServerUrl.validate` results, or the repository's codes on save). */
+enum class UrlProblem { INVALID, UNSUPPORTED_SCHEME, MISSING_HOST, HTTPS_REQUIRED }
 
-/** Result of "Test connection" (`GET /health`). */
+/** Result of "Test connection" (`GET <candidate>/health`, no token, settings unchanged). */
 sealed interface ConnectionTest {
     data object Running : ConnectionTest
 
@@ -41,6 +44,9 @@ data class ServerUiState(
     val problem: UrlProblem? = null,
     val saved: Boolean = false,
     val test: ConnectionTest? = null,
+    /** Switching servers signs you out: asked before saving while signed in. [pendingUrl] null = default. */
+    val confirmingSwitch: Boolean = false,
+    val pendingUrl: String? = null,
 )
 
 sealed interface ServerEvent {
@@ -50,10 +56,19 @@ sealed interface ServerEvent {
 
     data object UseDefault : ServerEvent
 
+    data object ConfirmSwitch : ServerEvent
+
+    data object CancelSwitch : ServerEvent
+
     data object Test : ServerEvent
 }
 
-/** Settings → Server: backend URL with validation and "Test connection" (spec §4 Networking). */
+/**
+ * Settings → Server. Input is checked with `ServerUrl.validate`; "Test connection" probes the
+ * candidate with a one-off unauthenticated request (the session token never goes to an unsaved
+ * server, and settings don't change). Only Save (after a sign-out warning when signed in)
+ * calls `setBaseUrl`, which owns the stored override key.
+ */
 @HiltViewModel
 class ServerViewModel
     @Inject
@@ -61,7 +76,8 @@ class ServerViewModel
         private val savedStateHandle: SavedStateHandle,
         private val settingsRepository: SettingsRepository,
         private val healthRepository: HealthRepository,
-        buildInfo: AppBuildInfo,
+        private val authRepository: AuthRepository,
+        private val buildInfo: AppBuildInfo,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(ServerUiState(defaultUrl = buildInfo.defaultBaseUrl))
         val state: StateFlow<ServerUiState> = mutableState.asStateFlow()
@@ -81,54 +97,94 @@ class ServerViewModel
             when (event) {
                 is ServerEvent.InputChanged -> {
                     savedStateHandle[KEY_INPUT] = event.text
-                    mutableState.update { it.copy(input = event.text, problem = null, saved = false) }
+                    mutableState.update { it.copy(input = event.text, problem = null, saved = false, test = null) }
                 }
 
                 ServerEvent.Save -> {
-                    viewModelScope.launch { save(mutableState.value.input) }
+                    val input = mutableState.value.input
+                    if (input.isBlank()) requestSwitch(null) else validated(input)?.let(::requestSwitch)
                 }
 
                 ServerEvent.UseDefault -> {
-                    viewModelScope.launch {
-                        savedStateHandle[KEY_INPUT] = ""
-                        mutableState.update { it.copy(input = "") }
-                        save("")
-                    }
+                    requestSwitch(null)
+                }
+
+                ServerEvent.ConfirmSwitch -> {
+                    val url = mutableState.value.pendingUrl
+                    mutableState.update { it.copy(confirmingSwitch = false, pendingUrl = null) }
+                    viewModelScope.launch { store(url) }
+                }
+
+                ServerEvent.CancelSwitch -> {
+                    mutableState.update { it.copy(confirmingSwitch = false, pendingUrl = null) }
                 }
 
                 ServerEvent.Test -> {
-                    viewModelScope.launch { test() }
+                    test()
                 }
             }
         }
 
-        /** Validates and stores [url]; blank = flavour default. Returns false when rejected. */
-        private suspend fun save(url: String): Boolean =
-            when (val result = settingsRepository.setBaseUrl(url.trim().ifEmpty { null })) {
+        /** The normalised URL, or null after recording the problem. */
+        private fun validated(input: String): String? =
+            when (val result = ServerUrl.validate(input, allowHttp = buildInfo.cleartextAllowed)) {
+                is ServerUrlResult.Valid -> {
+                    result.url
+                }
+
+                else -> {
+                    mutableState.update { it.copy(problem = result.toProblem(), saved = false) }
+                    null
+                }
+            }
+
+        private fun requestSwitch(url: String?) {
+            viewModelScope.launch {
+                val current = settingsRepository.settings.first().baseUrlOverride
+                when {
+                    url == current -> mutableState.update { it.copy(problem = null, saved = true) }
+                    authRepository.session.first() != null -> mutableState.update { it.copy(confirmingSwitch = true, pendingUrl = url) }
+                    else -> store(url)
+                }
+            }
+        }
+
+        private suspend fun store(url: String?) {
+            when (val result = settingsRepository.setBaseUrl(url)) {
                 is AppResult.Success -> {
-                    mutableState.update { it.copy(problem = null, saved = true, usingDefault = url.isBlank(), test = null) }
-                    true
+                    savedStateHandle[KEY_INPUT] = url.orEmpty()
+                    mutableState.update { it.copy(input = url.orEmpty(), problem = null, saved = true, usingDefault = url == null, test = null) }
                 }
 
                 is AppResult.Failure -> {
                     val problem = if ((result.error as? AppError.Client)?.code == CODE_HTTPS_REQUIRED) UrlProblem.HTTPS_REQUIRED else UrlProblem.INVALID
                     mutableState.update { it.copy(problem = problem, saved = false) }
-                    false
                 }
             }
-
-        private suspend fun test() {
-            val current = settingsRepository.settings.first().baseUrlOverride.orEmpty()
-            // Test what is in the field: save it first when it changed.
-            if (mutableState.value.input.trim() != current && !save(mutableState.value.input)) return
-            mutableState.update { it.copy(test = ConnectionTest.Running) }
-            val outcome =
-                when (val result = healthRepository.refresh()) {
-                    is AppResult.Success -> ConnectionTest.Ok(result.value)
-                    is AppResult.Failure -> ConnectionTest.Failed(result.error)
-                }
-            mutableState.update { it.copy(test = outcome) }
         }
+
+        private fun test() {
+            val input = mutableState.value.input
+            // Blank field = test the server in use now (override or flavour default).
+            val candidate = if (input.isBlank()) mutableState.value.effectiveUrl.ifEmpty { buildInfo.defaultBaseUrl } else validated(input) ?: return
+            mutableState.update { it.copy(test = ConnectionTest.Running) }
+            viewModelScope.launch {
+                val outcome =
+                    when (val result = healthRepository.probe(candidate)) {
+                        is AppResult.Success -> ConnectionTest.Ok(result.value)
+                        is AppResult.Failure -> ConnectionTest.Failed(result.error)
+                    }
+                mutableState.update { it.copy(test = outcome) }
+            }
+        }
+
+        private fun ServerUrlResult.toProblem(): UrlProblem =
+            when (this) {
+                ServerUrlResult.UnsupportedScheme -> UrlProblem.UNSUPPORTED_SCHEME
+                ServerUrlResult.MissingHost -> UrlProblem.MISSING_HOST
+                ServerUrlResult.HttpsRequired -> UrlProblem.HTTPS_REQUIRED
+                else -> UrlProblem.INVALID
+            }
 
         private companion object {
             const val KEY_INPUT = "server_input"

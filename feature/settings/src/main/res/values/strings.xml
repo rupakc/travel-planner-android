@@ -185,4 +185,10 @@
     </plurals>
     <string name="settings_notif_nearby_always">Suggest places even when I\'m not on a trip</string>
     <string name="settings_notif_nearby_always_sub">Otherwise only during the dates of a saved trip</string>
+    <string name="settings_server_scheme">Use an address that starts with http:// or https://.</string>
+    <string name="settings_server_host">Add the server\'s host, like 192.168.1.20:8001.</string>
+    <string name="settings_server_test_note">Testing doesn\'t change anything and never sends your sign-in to the server.</string>
+    <string name="settings_server_switch_title">Switch servers?</string>
+    <string name="settings_server_switch_message">Switching to %1$s signs you out and clears this device\'s cached trips and chats. You\'ll sign in on the new server.</string>
+    <string name="settings_server_switch_confirm">Switch and sign out</string>
 </resources>
