@@ -200,7 +200,10 @@ private fun LocalDate.medium(): String = DateTimeFormatter.ofLocalizedDate(Forma
 private fun Poster(trip: SharedTrip, onOpenLink: (String) -> Unit) {
     Surface(color = TravelTheme.colors.primary, contentColor = TravelTheme.colors.onPrimary, shape = TravelShape.LargeCard) {
         Column(Modifier.fillMaxWidth().padding(TravelTheme.spacing.xl), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-            Text(stringResource(R.string.share_brand), style = TravelTheme.typography.labelLarge)
+            Text(
+                stringResource(R.string.share_brand, stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)),
+                style = TravelTheme.typography.labelLarge,
+            )
             Text(
                 trip.destination ?: stringResource(R.string.share_destination_fallback),
                 style = TravelTheme.typography.displaySmall,

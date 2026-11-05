@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="share_title">Shared trip</string>
-    <string name="share_brand">✈ Voyager Trip</string>
+    <string name="share_brand">✈ %1$s Trip</string>
     <string name="share_unavailable_title">This shared trip isn\'t available</string>
     <string name="share_unavailable_message">The link may have been revoked or mistyped.</string>
     <string name="share_plan_own">Plan your own trip</string>

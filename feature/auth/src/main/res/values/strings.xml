@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Login (web LoginPage) -->
-    <string name="auth_app_name">Travel Planner</string>
     <string name="auth_tagline">Plan your perfect trip</string>
     <string name="auth_login_title">Sign in to your account</string>
     <string name="auth_username">Username</string>
@@ -44,7 +43,7 @@
     <string name="auth_server_button">Server: %1$s</string>
     <string name="auth_server_button_unset">Set up server</string>
     <string name="auth_server_title">Server</string>
-    <string name="auth_server_message">The address of your Travel Planner backend, for example http://192.168.1.20:8001.</string>
+    <string name="auth_server_message">The address of your %1$s server, for example http://192.168.1.20:8001.</string>
     <string name="auth_server_url">Server address</string>
     <string name="auth_server_default">Default: %1$s</string>
     <string name="auth_server_no_default">This build has no default server.</string>

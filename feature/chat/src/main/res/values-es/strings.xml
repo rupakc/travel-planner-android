@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="chat_title">Chat de Travel Planner</string>
+    <string name="chat_title">Chat de %1$s</string>
     <string name="chat_message">Chatea con tu asistente de viajes con IA. Pide un plan de viaje completo y los resultados llegarán en tiempo real con tarjetas interactivas.</string>
     <string name="chat_starter_1">Planifica un viaje de 5 días a Tokio con un presupuesto de %1$s</string>
     <string name="chat_starter_2">¿Qué necesito para el visado a Tailandia como ciudadano estadounidense?</string>

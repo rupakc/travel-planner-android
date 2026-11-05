@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="auth_app_name">Travel Planner</string>
     <string name="auth_tagline">Planifica tu viaje perfecto</string>
     <string name="auth_login_title">Inicia sesión en tu cuenta</string>
     <string name="auth_username">Usuario</string>
@@ -41,7 +40,7 @@
     <string name="auth_server_button">Servidor: %1$s</string>
     <string name="auth_server_button_unset">Configurar servidor</string>
     <string name="auth_server_title">Servidor</string>
-    <string name="auth_server_message">La dirección de tu backend de Travel Planner, por ejemplo http://192.168.1.20:8001.</string>
+    <string name="auth_server_message">La dirección de tu servidor de %1$s, por ejemplo http://192.168.1.20:8001.</string>
     <string name="auth_server_url">Dirección del servidor</string>
     <string name="auth_server_default">Predeterminado: %1$s</string>
     <string name="auth_server_no_default">Esta versión no tiene servidor predeterminado.</string>

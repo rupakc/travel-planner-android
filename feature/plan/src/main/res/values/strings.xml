@@ -67,7 +67,7 @@
     <string name="plan_more_actions">More actions</string>
     <string name="plan_share_hint">Share a public link. Anyone can view this trip card, no login needed.</string>
     <string name="plan_shared_status">Shared: anyone with the link can view this trip.</string>
-    <string name="plan_link_app_only">Opens in the Voyager Travel Planner app.</string>
+    <string name="plan_link_app_only">Opens in the %1$s app.</string>
     <string name="plan_needs_connection">You\'re offline. Sharing and deleting need a connection.</string>
     <string name="plan_detail_stale">Showing the copy saved on this phone. It may be out of date.</string>
     <string name="plan_detail_offline">You\'re offline. Showing the copy saved on this phone; sharing and deleting are off until you reconnect.</string>
