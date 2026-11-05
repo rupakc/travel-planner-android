@@ -20,14 +20,7 @@ fun parseLocalizedAmount(text: String?, locale: Locale): Double? {
     val negative = raw.startsWith('-')
     val body = raw.removePrefix("-")
     if (body.none(Char::isDigit) || '-' in body) return null
-    val lastDot = body.lastIndexOf('.')
-    val lastComma = body.lastIndexOf(',')
-    val decimalMark: Char? =
-        when {
-            lastDot >= 0 && lastComma >= 0 -> if (lastDot > lastComma) '.' else ','
-            lastDot < 0 && lastComma < 0 -> null
-            else -> singleKindDecimal(body, if (lastDot >= 0) '.' else ',', locale)
-        }
+    val decimalMark = decimalMarkOf(body, locale)
     val grouping =
         if (decimalMark == '.') {
             ','
@@ -36,12 +29,22 @@ fun parseLocalizedAmount(text: String?, locale: Locale): Double? {
         } else {
             body.firstOrNull { it == '.' || it == ',' }
         }
-    val (whole, fraction) =
-        if (decimalMark != null) body.substringBeforeLast(decimalMark) to body.substringAfterLast(decimalMark) else body to ""
-    if (decimalMark != null && decimalMark in whole) return null
-    if (!validGrouping(whole, grouping)) return null
+    val whole = if (decimalMark != null) body.substringBeforeLast(decimalMark) else body
+    val fraction = if (decimalMark != null) body.substringAfterLast(decimalMark) else ""
+    if ((decimalMark != null && decimalMark in whole) || !validGrouping(whole, grouping)) return null
     val canonical = whole.filter(Char::isDigit).ifEmpty { "0" } + if (fraction.isEmpty()) "" else ".$fraction"
     return canonical.toDoubleOrNull()?.takeIf { it.isFinite() }?.let { if (negative) -it else it }
+}
+
+/** Which of `.`/`,` is the decimal mark in [body], or null when there is none. */
+private fun decimalMarkOf(body: String, locale: Locale): Char? {
+    val lastDot = body.lastIndexOf('.')
+    val lastComma = body.lastIndexOf(',')
+    return when {
+        lastDot >= 0 && lastComma >= 0 -> if (lastDot > lastComma) '.' else ','
+        lastDot < 0 && lastComma < 0 -> null
+        else -> singleKindDecimal(body, if (lastDot >= 0) '.' else ',', locale)
+    }
 }
 
 /** One separator kind only: is [mark] the decimal point here? null = it groups thousands. */
