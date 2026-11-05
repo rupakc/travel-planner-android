@@ -20,6 +20,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import io.github.rupakc.travelplanner.MainActivity
 import io.github.rupakc.travelplanner.feature.auth.R as AuthR
+import io.github.rupakc.travelplanner.core.ui.R as UiR
 import io.github.rupakc.travelplanner.feature.chat.R as ChatR
 import io.github.rupakc.travelplanner.feature.onboarding.R as OnboardingR
 import io.github.rupakc.travelplanner.feature.search.R as SearchR
@@ -240,6 +241,25 @@ class AppRobot(val rule: AppRule) {
         rule.waitForIdle()
     }
 
+    /** Merged-tree existence (a clickable row merges its texts and icon descriptions). */
+    fun existsMerged(matcher: SemanticsMatcher): Boolean = rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty()
+
+    /** Scrolls the list tagged [listTag] to a node matching [matcher]; true when it exists. */
+    fun scrollListTo(listTag: String, matcher: SemanticsMatcher): Boolean =
+        runCatching { rule.onNode(androidx.compose.ui.test.hasTestTag(listTag)).performScrollToNode(matcher) }.isSuccess
+
+    /** Names in "Add <name> to My Plan" buttons currently composed, with their top edge in the window. */
+    fun addButtons(): List<Pair<String, Float>> {
+        val (prefix, suffix) = str(UiR.string.plan_add_a11y, MARK).split(MARK)
+        return rule.onAllNodes(androidx.compose.ui.test.hasContentDescription(prefix, substring = true))
+            .fetchSemanticsNodes()
+            .mapNotNull { node ->
+                val d = node.config.getOrElse(androidx.compose.ui.semantics.SemanticsProperties.ContentDescription) { emptyList() }
+                    .firstOrNull { it.startsWith(prefix) && it.endsWith(suffix) } ?: return@mapNotNull null
+                d.removePrefix(prefix).removeSuffix(suffix) to node.boundsInWindow.top
+            }
+    }
+
     /** Sends a chat message and waits until its reply has finished streaming (Stop shows, then goes). */
     fun chatSend(text: String, timeoutMs: Long = LONG_TIMEOUT * 2) {
         val input = androidx.compose.ui.test.hasTestTag("chat_input")
@@ -271,6 +291,7 @@ class AppRobot(val rule: AppRule) {
     )
 
     companion object {
+        const val MARK = "\u0000"
         const val QUESTIONS = 6
         const val DEFAULT_TIMEOUT = 20_000L
         const val LONG_TIMEOUT = 60_000L
