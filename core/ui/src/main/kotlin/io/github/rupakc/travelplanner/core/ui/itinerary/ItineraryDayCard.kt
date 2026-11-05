@@ -83,7 +83,7 @@ fun ItineraryDayCard(
     ) {
         Column {
             DayHeader(day.day)
-            if (day.warnings.isNotEmpty()) ScheduleWarnings(day.warnings, edits)
+            if (day.warnings.isNotEmpty()) ScheduleWarnings(day.warnings)
             rows.forEachIndexed { index, row ->
                 if (index > 0) HorizontalDivider(color = TravelTheme.colors.outlineVariant)
                 when (row) {
@@ -152,7 +152,7 @@ private fun DayHeader(day: ItineraryDay) {
 }
 
 @Composable
-private fun ScheduleWarnings(warnings: List<ScheduleWarning>, edits: Map<String, SlotEdit>) {
+private fun ScheduleWarnings(warnings: List<ScheduleWarning>) {
     Column(
         Modifier
             .fillMaxWidth()
