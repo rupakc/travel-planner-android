@@ -66,6 +66,7 @@
     <string name="settings_notif_price_sub">Cuando baja un vuelo, hotel, actividad o viaje que vigilas</string>
     <string name="settings_notif_nearby">Sugerencias cercanas</string>
     <string name="settings_notif_nearby_sub">Qué hacer cerca de ti, como mucho una cada 4 horas</string>
+    <string name="settings_notif_nearby_location_note">Usa tu ubicación de la última vez que abriste Cerca de mí.</string>
     <string name="settings_notif_account">Cuenta</string>
     <string name="settings_notif_system">Sonido y avisos por tipo</string>
     <string name="settings_notif_system_note">Android controla el sonido, la vibración y los avisos de cada tipo.</string>

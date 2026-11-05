@@ -66,6 +66,7 @@
     <string name="settings_notif_price_sub">When a watched fare, hotel, activity or trip drops</string>
     <string name="settings_notif_nearby">Nearby suggestions</string>
     <string name="settings_notif_nearby_sub">Things to do around you, at most one every 4 hours</string>
+    <string name="settings_notif_nearby_location_note">Uses your location from the last time you opened Near me.</string>
     <string name="settings_notif_account">Account</string>
     <string name="settings_notif_system">Sound and pop-up per type</string>
     <string name="settings_notif_system_note">Android controls sound, vibration and pop-ups for each type.</string>
