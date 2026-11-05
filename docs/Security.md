@@ -22,9 +22,10 @@ Debug HTTP logs redact the `Authorization` header. Saved plans drop this search'
 Scheme `travelplanner://` with hosts `share`, `alerts`, `plan`, `chat`, `nearby` (declared in the manifest and `DeepLinks`). Treat all link parameters as untrusted:
 tokens and ids are validated by the backend, `kind` must be a known kind, numeric ids are parsed safely. `MainActivity` is `singleTask` and exported, so
 `DeepLinkIntents.sanitize` runs on every incoming intent (before `super.onCreate` and in `onNewIntent`): it removes Navigation's internal deep-link extras
-(`deepLinkIds`/`Args`/`Extras`/`Intent`, which would otherwise let another app open any destination with arguments of its choosing) and drops any data
-that is not a `travelplanner://` URI. Links arriving while running are handled with `handleDeepLink`.
-Auth gating still applies (only Share is reachable signed out); a link the gate redirects away from is kept by `ShellViewModel` and opened once signed in.
+(`deepLinkIds`/`Args`/`Extras`/`Intent`, which would otherwise let another app open any destination with arguments of its choosing) and keeps data only on a
+`travelplanner://` VIEW intent (no https/App Links: web share links do not open the app). Links arriving while running are handled with `handleDeepLink`.
+Auth gating still applies (only Share is reachable signed out); a link the gate redirects away from is kept by `ShellViewModel` and opened once signed in
+(`DeepLinkHold`); a link that was already shown (the public share viewer, a link opened while signed in) is dropped and never replayed.
 A chat thread opens by id only if it is one of the signed-in user's threads. Notification PendingIntents are `FLAG_IMMUTABLE` and restricted to this package.
 
 ## Outbound links

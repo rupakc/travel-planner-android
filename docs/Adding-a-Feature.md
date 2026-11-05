@@ -46,6 +46,6 @@ its own SharedPreferences or DataStore file, decide whether it may be backed up 
 
 Patterns live in `DeepLinks` (`core/model/.../navigation/Routes.kt`) with a matching host in the manifest. Only
 `travelplanner://` VIEW intents route (`DeepLinkIntents` in `app` strips everything else); a link that arrives while
-signed out is kept by `ShellViewModel` and opened after sign-in.
+signed out is kept by `ShellViewModel` and opened after sign-in (`DeepLinkHold`, unit-tested in `DeepLinkHoldTest`).
 
 The `add-feature-module` Claude skill automates the boilerplate steps.

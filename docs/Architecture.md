@@ -45,9 +45,17 @@ feature goes through lambdas the feature's graph function receives; `app` turns 
 
 ## Dependency injection
 
-Hilt (KSP). `app` is the graph root. Modules: `NetworkModule` (three OkHttp clients and the Retrofit APIs, built lazily),
-`DataModule` (repository bindings), `ProfileDomainModule` (feature catalogue), `DataStoreModule`, `DatabaseModule`,
-`ApplicationScopeModule`, `NotifierModule`, `PushModule`, `AlertPollModule`, `TripReminderModule`, `NearbyNotificationsModule`, `AppModule`.
+Hilt (KSP). `app` is the graph root; every module is installed in `SingletonComponent`:
+
+| Where | Modules |
+|---|---|
+| `app` | `AppModule` |
+| `core:network` | `NetworkModule` (three OkHttp clients and the Retrofit APIs, built lazily) |
+| `core:datastore`, `core:database` | `DataStoreModule`, `DatabaseModule` |
+| `core:data` | `DataModule` (repository bindings), `ProfileDomainModule` (feature catalogue), `ApplicationScopeModule` |
+| `core:notifications` | `NotifierModule`, `PushModule`, `AppForegroundModule`, `AlertPollModule`, `TripReminderModule`, `NearbyNotificationsModule` |
+| features | `HomeModule` (home), `SearchModule` (search), `SettingsModule` (settings), `LocationModule` (nearby) |
+
 `@ApplicationScope` provides the long-lived coroutine scope (draft writes, push registration, the notifications start-up).
 
 ```mermaid
