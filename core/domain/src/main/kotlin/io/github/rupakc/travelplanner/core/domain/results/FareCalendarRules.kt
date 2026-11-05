@@ -2,7 +2,9 @@ package io.github.rupakc.travelplanner.core.domain.results
 
 import io.github.rupakc.travelplanner.core.model.search.FareCalendarDate
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import kotlin.math.max
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -47,6 +49,34 @@ object FareCalendarRules {
 
     /** Rounded delta for display: 0 = "same"; sign drives "−$45" / "+$30". Null for unknown. */
     fun roundedDelta(delta: Double?): Long? = delta?.takeIf { it.isFinite() }?.let { jsRound(it).toLong() }
+
+    /** Web `formatUsd`: whole dollars with thousands separators ("$1,480"). */
+    fun formatUsd(amount: Double): String = "$" + "%,d".format(Locale.US, jsRound(amount).toLong())
+
+    /** Web `formatDelta`: "−$45" (real minus sign) / "+$30" / "same"; "" for unknown. */
+    fun formatDelta(delta: Double?): String {
+        val rounded = roundedDelta(delta) ?: return ""
+        if (rounded == 0L) return "same"
+        return (if (rounded < 0) "−" else "+") + formatUsd(kotlin.math.abs(rounded).toDouble())
+    }
+
+    /** Web `formatDay`: "Tue 3 Nov" (the UI passes the user's locale). */
+    fun formatDay(iso: String, locale: Locale = Locale.ENGLISH): String =
+        date(iso)?.format(DateTimeFormatter.ofPattern("EEE d MMM", locale)) ?: iso
+
+    /** Web `formatTripRange`: "Tue 3 Nov – Tue 10 Nov", just the departure for one-way trips. */
+    fun formatTripRange(departure: String, returnDate: String?, locale: Locale = Locale.ENGLISH): String =
+        if (returnDate != null) "${formatDay(departure, locale)} – ${formatDay(returnDate, locale)}" else formatDay(departure, locale)
+
+    /** Web `replanPrompt` (English; the app shows the localized `results_fare_replan_prompt`). */
+    fun replanPrompt(departure: String, returnDate: String?): String =
+        "Re-plan for ${formatTripRange(departure, returnDate)}? This runs a new search."
+
+    /** Web `priceInsightsChip(...).text` in English: "Fares are low right now · typical $420–$610". */
+    fun priceInsightsText(insight: PriceInsight): String {
+        val range = if (insight.typicalLow != null && insight.typicalHigh != null) " · typical ${formatUsd(insight.typicalLow)}–${formatUsd(insight.typicalHigh)}" else ""
+        return "Fares are ${insight.level.wire} right now$range"
+    }
 
     /** Google Flights' own verdict (`low|typical|high`) and its typical range, or null when unknown. */
     fun priceInsights(insights: JsonObject?): PriceInsight? {

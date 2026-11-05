@@ -297,8 +297,7 @@ private fun FareCells(dates: List<FareCalendarDate>, onPick: (FareCalendarDate) 
 }
 
 /** "Tue 3 Nov" in the user's locale. */
-internal fun formatDay(iso: String): String =
-    runCatching { LocalDate.parse(iso).format(DateTimeFormatter.ofPattern("EEE d MMM")) }.getOrDefault(iso)
+internal fun formatDay(iso: String): String = FareCalendarRules.formatDay(iso, java.util.Locale.getDefault())
 
 /** Medium localized date ("Dec 10, 2026"). */
 internal fun formatDate(iso: String?): String? =

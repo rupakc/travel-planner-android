@@ -59,6 +59,19 @@ object Remix {
             }
         }
 
+    /** Web `applyRemix(searchData, presetId)`: unknown ids and inapplicable presets return [search] unchanged. */
+    fun apply(search: TravelSearchRequest, presetId: String): TravelSearchRequest =
+        RemixPreset.entries.firstOrNull { it.id == presetId }?.let { apply(search, it) } ?: search
+
+    /** Web `formatMetricValue`: "$1,235" for money, the plain number for counts, "—" for unknown. */
+    fun formatMetricValue(value: Double?, isMoney: Boolean): String =
+        when {
+            value == null -> "—"
+            isMoney -> "$" + "%,d".format(java.util.Locale.US, jsRound(value).toLong())
+            value == Math.floor(value) -> value.toLong().toString()
+            else -> value.toString()
+        }
+
     /** Metrics captured before a remix (web `snapshotMetrics`). */
     fun snapshot(results: TripResults): RemixMetrics =
         RemixMetrics(
@@ -97,4 +110,7 @@ data class RemixMetrics(
 }
 
 /** One before/after row; [improved] null when unchanged. */
-data class MetricDiff(val metric: RemixMetric, val before: Double, val after: Double, val delta: Double, val improved: Boolean?)
+data class MetricDiff(val metric: RemixMetric, val before: Double, val after: Double, val delta: Double, val improved: Boolean?) {
+    /** Web `direction`: same / down / up. */
+    val direction: String get() = if (delta == 0.0) "same" else if (delta < 0) "down" else "up"
+}
