@@ -9,11 +9,13 @@ import io.github.rupakc.travelplanner.core.data.repository.FareCalendarRepositor
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.ImportRepository
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
+import io.github.rupakc.travelplanner.core.datastore.LastLocationStore
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.importlink.ImportPreview
 import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
+import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyRequest
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.search.CompareSummary
@@ -84,6 +86,7 @@ class NearbyRepositoryImpl
     constructor(
         private val api: NearbyApi,
         private val clock: AppClock,
+        private val lastLocationStore: LastLocationStore,
     ) : NearbyRepository {
         private data class Key(val latCell: Long, val lngCell: Long, val interests: List<String>, val limit: Int)
 
@@ -103,7 +106,16 @@ class NearbyRepositoryImpl
 
         private fun cell(degrees: Double): Long = floor(degrees / CELL_DEGREES).toLong()
 
+        override suspend fun rememberLocation(lat: Double, lng: Double) {
+            // The cell's centre: precise coordinates are never stored.
+            fun centre(d: Double) = (floor(d / CELL_DEGREES) + HALF) * CELL_DEGREES
+            lastLocationStore.set(LocationCell(centre(lat), centre(lng), clock.now().toEpochMilli()))
+        }
+
+        override suspend fun lastLocation() = lastLocationStore.get()
+
         private companion object {
+            const val HALF = 0.5
             const val CELL_DEGREES = 0.05
             val TTL: Duration = Duration.ofHours(1)
         }

@@ -10,6 +10,7 @@ import io.github.rupakc.travelplanner.core.database.PlanDao
 import io.github.rupakc.travelplanner.core.database.PlanDraftDao
 import io.github.rupakc.travelplanner.core.database.RecentSearchDao
 import io.github.rupakc.travelplanner.core.database.SeenNotificationDao
+import io.github.rupakc.travelplanner.core.datastore.LastLocationStore
 import io.github.rupakc.travelplanner.core.datastore.SessionStore
 import io.github.rupakc.travelplanner.core.model.auth.ChangePasswordRequest
 import io.github.rupakc.travelplanner.core.model.auth.EmailUpdateRequest
@@ -38,6 +39,7 @@ class AuthRepositoryImpl
         private val recentSearchDao: RecentSearchDao,
         private val seenNotificationDao: SeenNotificationDao,
         private val planDraftDao: PlanDraftDao,
+        private val lastLocationStore: LastLocationStore,
     ) : AuthRepository {
         override val session: Flow<Session?> = sessionStore.session
 
@@ -71,5 +73,6 @@ class AuthRepositoryImpl
             seenNotificationDao.clear()
             planDraftDao.clear()
             chatDao.clear()
+            lastLocationStore.clear()
         }
     }

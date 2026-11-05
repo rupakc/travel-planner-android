@@ -18,6 +18,7 @@ object DataStoreFiles {
     const val SETTINGS = "settings"
     const val PROFILE = "traveller_profile"
     const val FEATURES = "feature_overrides"
+    const val LAST_LOCATION = "last_location"
 }
 
 @Module
@@ -47,4 +48,9 @@ object DataStoreModule {
         @ApplicationContext context: Context,
     ): FeatureOverridesStore =
         PreferencesFeatureOverridesStore(context.store(DataStoreFiles.FEATURES))
+
+    @Provides @Singleton
+    fun lastLocationStore(
+        @ApplicationContext context: Context,
+    ): LastLocationStore = PreferencesLastLocationStore(context.store(DataStoreFiles.LAST_LOCATION))
 }
