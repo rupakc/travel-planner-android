@@ -64,9 +64,11 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** A recent search as its card shows it. */
+/**
+ * A recent search as its card shows it. [summary] dates are en-US; the card formats them again in the
+ * UI locale (a ViewModel outlives a per-app language switch).
+ */
 @Immutable
-/** [summary] dates are en-US; the card formats them again in the UI locale (a ViewModel outlives a language switch). */
 data class RecentSearchCard(val entry: RecentSearch, val summary: RecentSearchSummary, val datesPassed: Boolean) {
     val id: String get() = entry.id
 }
