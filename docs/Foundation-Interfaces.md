@@ -516,7 +516,7 @@ gives the `{"flights":{…}}` object for chat `search_results` and `CurrentPlanS
   Android Keystore key `tp_session_master`. Both files and the Room DB (+ WAL/SHM) are excluded from backup.
 - Tink silently falls back to a **cleartext** keyset when the Keystore is unusable. The app checks
   `isUsingKeystore()` after every build: if false it deletes the keyset and keeps the session **in memory only**
-  for the process (the user signs in again after the app is killed). Nothing is ever written in clear.
+  for the process (the user signs in again after the app is killed). The session token is never written in clear, and a keyset not protected by the Keystore is never used and never left on disk.
 - Trade-off (accepted): a transient Keystore error during creation also resets the keyset, which signs the
   user out (the old sealed session can't be decrypted). Sign-out is preferred to a crash or a cleartext key.
 - The bearer token is sent only to the backend that issued it (`Session.baseUrl`); never give the app's OkHttp
