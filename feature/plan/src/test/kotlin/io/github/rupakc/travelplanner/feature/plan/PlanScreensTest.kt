@@ -83,6 +83,10 @@ class PlanScreensTest {
         }
         compose.onNodeWithText("Spring in Japan").assertIsDisplayed()
         compose.onNode(hasText("Search trips by name or destination") and androidx.compose.ui.test.hasSetTextAction()).performTextInput("malaga")
+        // R4 ui M9: the keyboard shows Search (and hides on it) instead of a dead Enter key.
+        compose.onNode(
+            hasText("Search trips by name or destination") and androidx.compose.ui.test.hasImeAction(androidx.compose.ui.text.input.ImeAction.Search),
+        ).assertExists()
         compose.waitForIdle()
         compose.onNodeWithText("Andalucía").assertIsDisplayed()
         compose.onNodeWithText("Spring in Japan").assertDoesNotExist()
