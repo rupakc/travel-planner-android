@@ -550,10 +550,11 @@ sealed interface AppRoute
 @Serializable data object HomeRoute : AppRoute
 
 /**
- * Search form. [mode]: one of [SearchModes]; [importUrl] pre-fills "From a link"
- * (chat `import_link`, share intents).
+ * Search form. [mode]: one of [SearchModes] (null = known destination); [importUrl] pre-fills
+ * "From a link" and starts reading it (chat `import_link`, share intents); [recentSearchId] loads that
+ * recent search into the known-destination form (Home's recent searches row).
  */
-@Serializable data class SearchRoute(val mode: String? = null, val importUrl: String? = null) : AppRoute
+@Serializable data class SearchRoute(val mode: String? = null, val importUrl: String? = null, val recentSearchId: String? = null) : AppRoute
 
 /** Streamed results for the search currently held by `SearchRepository` / `CurrentPlanStore`. */
 @Serializable data object ResultsRoute : AppRoute
