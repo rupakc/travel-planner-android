@@ -239,11 +239,23 @@ class AppRobot(val rule: AppRule) {
         type("Start date", trip.departureDigits)
         type("End date", trip.returnDigits)
         tap(SearchR.string.search_dates_ok)
-        // Pick the suggestion so its dropdown closes before the travellers panel is used.
-        pickSuggestion(str(SearchR.string.search_nationality), trip.nationality, trip.nationality)
+        // Pick the suggestion so its dropdown closes before the travellers panel is used (the typed text is already
+        // the value, so a missing suggestion only means closing the keyboard).
+        type(str(SearchR.string.search_nationality), trip.nationality)
+        val suggestion = androidx.compose.ui.test.hasTestTag("suggestion:${trip.nationality}")
+        if (runCatching { waitFor(suggestion, SHORT_TIMEOUT) }.isSuccess) {
+            rule.onAllNodes(suggestion, useUnmergedTree = true).onFirst().performClick()
+        } else {
+            runCatching { androidx.test.espresso.Espresso.closeSoftKeyboard() }
+        }
+        rule.waitForIdle()
         tap(SearchR.string.search_travelers)
-        repeat(trip.adults - 1) { tapDescription(str(SearchR.string.search_add_one, str(SearchR.string.search_adults))) }
-        waitFor(hasDescription("${str(SearchR.string.search_adults)} ${trip.adults}"))
+        // The party may be pre-filled from Preferences: step the adults count to the trip's.
+        val adults = str(SearchR.string.search_adults)
+        val current = descriptionsStartingWith("$adults ").firstNotNullOfOrNull { it.removePrefix("$adults ").toIntOrNull() } ?: 1
+        val step = if (trip.adults > current) SearchR.string.search_add_one else SearchR.string.search_remove_one
+        repeat(kotlin.math.abs(trip.adults - current)) { tapDescription(str(step, adults)) }
+        waitFor(hasDescription("$adults ${trip.adults}"))
         val submit = androidx.compose.ui.test.hasTestTag("search_submit")
         rule.onNode(submit).performScrollTo().performClick()
         rule.waitForIdle()
@@ -315,6 +327,7 @@ class AppRobot(val rule: AppRule) {
         const val MARK = "\u0000"
         const val QUESTIONS = 6
         const val DEFAULT_TIMEOUT = 20_000L
+        const val SHORT_TIMEOUT = 8_000L
         const val LONG_TIMEOUT = 60_000L
     }
 }

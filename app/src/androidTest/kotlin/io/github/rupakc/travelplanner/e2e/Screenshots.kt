@@ -16,7 +16,8 @@ object Screenshots {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         instrumentation.waitForIdleSync()
         val bitmap = instrumentation.uiAutomation.takeScreenshot() ?: return
-        TestStorage().openOutputFile("screenshots/$name.png").use { bitmap.compress(Bitmap.CompressFormat.PNG, QUALITY, it) }
+        val prefix = InstrumentationRegistry.getArguments().getString("e2eShotPrefix").orEmpty()
+        TestStorage().openOutputFile("screenshots/$prefix$name.png").use { bitmap.compress(Bitmap.CompressFormat.PNG, QUALITY, it) }
         bitmap.recycle()
     }
 

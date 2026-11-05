@@ -8,8 +8,26 @@ Status: foundation merged (build system, core modules, app shell); feature scree
 
 ## Screenshots
 
-<!-- Filled with real emulator screenshots (light + dark, phone + tablet) once the features are merged. -->
-_Screenshots will be added here._
+Real emulator screenshots (Pixel, API 36) from the instrumented E2E suite against the local backend
+(`ScreenshotTourE2eTest`, see docs/Testing.md). Light and dark:
+
+| Screen | Light | Dark |
+|---|---|---|
+| Home | <img src="docs/screenshots/home.png" width="200" alt="Home, light theme"> | <img src="docs/screenshots/home-dark.png" width="200" alt="Home, dark theme"> |
+| Onboarding | <img src="docs/screenshots/onboarding.png" width="200" alt="Onboarding, light theme"> |  |
+| Traveller type | <img src="docs/screenshots/onboarding-result.png" width="200" alt="Traveller type, light theme"> |  |
+| Search | <img src="docs/screenshots/search.png" width="200" alt="Search, light theme"> | <img src="docs/screenshots/search-dark.png" width="200" alt="Search, dark theme"> |
+| Results | <img src="docs/screenshots/results.png" width="200" alt="Results, light theme"> | <img src="docs/screenshots/results-dark.png" width="200" alt="Results, dark theme"> |
+| My Plan | <img src="docs/screenshots/my-plan.png" width="200" alt="My Plan, light theme"> |  |
+| Trip detail | <img src="docs/screenshots/trip-detail.png" width="200" alt="Trip detail, light theme"> | <img src="docs/screenshots/trip-detail-dark.png" width="200" alt="Trip detail, dark theme"> |
+| Chat | <img src="docs/screenshots/chat.png" width="200" alt="Chat, light theme"> | <img src="docs/screenshots/chat-dark.png" width="200" alt="Chat, dark theme"> |
+| Alerts | <img src="docs/screenshots/alerts.png" width="200" alt="Alerts, light theme"> | <img src="docs/screenshots/alerts-dark.png" width="200" alt="Alerts, dark theme"> |
+| Near me | <img src="docs/screenshots/near-me.png" width="200" alt="Near me, light theme"> |  |
+| Settings | <img src="docs/screenshots/settings.png" width="200" alt="Settings, light theme"> | <img src="docs/screenshots/settings-dark.png" width="200" alt="Settings, dark theme"> |
+
+Tablet (800 dp wide):
+
+<img src="docs/screenshots/tablet-home.png" width="260" alt="Home on a tablet"> <img src="docs/screenshots/tablet-results.png" width="260" alt="Results on a tablet"> <img src="docs/screenshots/tablet-trip-detail.png" width="260" alt="Trip detail on a tablet">
 
 ## Features
 

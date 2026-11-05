@@ -82,17 +82,18 @@ class PlanFlows(private val robot: AppRobot, private val api: BackendApi = Backe
     }
 
     /** An existing plan of this account with an itinerary snapshot whose name starts with [prefix]. */
-    fun existingItineraryPlan(prefix: String): JsonObject? {
-        val token = api.adminToken()
-        return api.plans(token).map { it.jsonObject }
-            .filter { it["name"]?.jsonPrimitive?.content?.startsWith(prefix) == true }
-            .map { api.plan(token, it.getValue("id").jsonPrimitive.content) }
-            .firstOrNull { (it["selections"] as? JsonObject)?.get("itinerary") is JsonObject }
-    }
+    fun existingItineraryPlan(prefix: String): JsonObject? = existingItineraryPlanFor(api, api.adminToken(), prefix)
 
     companion object {
         const val RESULTS_LIST = "results_list"
         const val STREAM_TIMEOUT = 300_000L
         const val PLAN_PREFIX = "E2E Lisbon itinerary"
+
+        /** A plan of [token]'s account with an itinerary snapshot whose name starts with [prefix]. */
+        fun existingItineraryPlanFor(api: BackendApi, token: String, prefix: String): JsonObject? =
+            api.plans(token).map { it.jsonObject }
+                .filter { it["name"]?.jsonPrimitive?.content?.startsWith(prefix) == true }
+                .map { api.plan(token, it.getValue("id").jsonPrimitive.content) }
+                .firstOrNull { (it["selections"] as? JsonObject)?.get("itinerary") is JsonObject }
     }
 }
