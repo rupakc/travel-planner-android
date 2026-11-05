@@ -34,6 +34,7 @@ import io.github.rupakc.travelplanner.core.model.importlink.ImportPreview
 import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
+import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
@@ -201,7 +202,20 @@ class FakeDevicesRepository : DevicesRepository {
 }
 
 class FakeNearbyRepository(var result: AppResult<NearbyResponse> = AppResult.Success(NearbyResponse())) : NearbyRepository {
+    var last: LocationCell? = null
+    var now: () -> Long = { System.currentTimeMillis() }
+
     override suspend fun nearby(lat: Double, lng: Double, interests: List<String>?, limit: Int) = result
+
+    override suspend fun rememberLocation(lat: Double, lng: Double) {
+        last = LocationCell(lat, lng, now())
+    }
+
+    override suspend fun lastLocation() = last
+
+    override suspend fun forgetLocation() {
+        last = null
+    }
 }
 
 class FakeCompareRepository(var result: AppResult<CompareSummary> = AppResult.Success(CompareSummary())) : CompareRepository {

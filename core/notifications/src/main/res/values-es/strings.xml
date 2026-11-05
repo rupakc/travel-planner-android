@@ -5,7 +5,22 @@
     <string name="channel_price_alerts">Alertas de precio</string>
     <string name="channel_price_alerts_desc">Cuando baja o alcanza tu objetivo el precio de un vuelo, hotel, actividad o viaje vigilado.</string>
     <string name="channel_nearby">Sugerencias cercanas</string>
-    <string name="channel_nearby_desc">Cosas que hacer cerca de ti durante un viaje.</string>
+    <string name="channel_nearby_desc">Cosas que hacer cerca de ti durante un viaje, según tu ubicación de la última vez que abriste Cerca de mí.</string>
     <string name="channel_account">Cuenta</string>
     <string name="channel_account_desc">Mensajes de inicio de sesión y de la cuenta.</string>
+    <string name="reminder_week_title">%1$s en una semana</string>
+    <string name="reminder_week_body">Es momento de revisar tu visado y empezar tu lista de equipaje.</string>
+    <string name="reminder_day_before_title">%1$s mañana</string>
+    <string name="reminder_day_before_body">Revisa tu vuelo y el tiempo antes de salir.</string>
+    <string name="reminder_start_title">Tu viaje a %1$s empieza hoy</string>
+    <string name="reminder_start_body">El itinerario de hoy, tu tarjeta de emergencia y cosas que hacer cerca están a un toque.</string>
+    <string name="reminder_day_title">Día %1$d en %2$s</string>
+    <string name="reminder_day_body">Mira el itinerario de hoy.</string>
+    <string name="reminder_last_title">Último día en %1$s</string>
+    <string name="reminder_last_body">Revisa la hora de salida del hotel y tu vuelta.</string>
+    <string name="reminder_action_itinerary">Itinerario</string>
+    <string name="reminder_action_emergency">Tarjeta de emergencia</string>
+    <string name="reminder_action_nearby">Cerca de mí</string>
+    <string name="nearby_notification_title">Algo que hacer cerca de ti</string>
+    <string name="nearby_notification_title_place">Algo que hacer cerca de ti en %1$s</string>
 </resources>

@@ -41,6 +41,7 @@ import androidx.navigation.toRoute
 import io.github.rupakc.travelplanner.AuthGate
 import io.github.rupakc.travelplanner.R
 import io.github.rupakc.travelplanner.core.model.navigation.AccountChangePasswordRoute
+import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
@@ -48,12 +49,14 @@ import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MyPlanRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
+import io.github.rupakc.travelplanner.core.model.navigation.NotificationsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.OnboardingRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlanDetailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
+import io.github.rupakc.travelplanner.feature.alerts.NotificationBellAction
 import io.github.rupakc.travelplanner.feature.alerts.navigation.alertsGraph
 import io.github.rupakc.travelplanner.feature.auth.navigation.authGraph
 import io.github.rupakc.travelplanner.feature.chat.navigation.chatGraph
@@ -102,6 +105,7 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
         onNavigate = { navController.navigateToTopLevel(it) },
         onOpenSettings = { navController.navigate(SettingsRoute) },
         onOpenSearch = { navController.navigate(GlobalSearchRoute) },
+        bell = { NotificationBellAction(onOpen = { navController.navigate(NotificationsRoute) }) },
         snackbarHostState = snackbarHostState,
     ) {
         NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.fillMaxSize()) {
@@ -139,9 +143,18 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 onOpenMyPlan = { navController.navigate(MyPlanRoute) },
                 onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
             )
-            alertsGraph(onReplan = {
-                navController.navigateToTopLevel(TopLevelDestination.SEARCH)
-            }, onBack = { navController.popBackStack() })
+            alertsGraph(
+                onReplan = { navController.navigate(ResultsRoute) },
+                onBack = { navController.popBackStack() },
+                onOpenAlert = { kind, watchId ->
+                    // Replace any Alerts entry above the inbox instead of stacking another.
+                    navController.navigate(AlertsRoute(kind = kind, watchId = watchId)) {
+                        popUpTo<AlertsRoute> { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onSearch = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
+            )
             settingsGraph(
                 onBack = { navController.popBackStack() },
                 onRetakeQuiz = { navController.navigate(OnboardingRoute(fromSettings = true)) },
@@ -180,6 +193,8 @@ fun TravelAppScaffold(
     onNavigate: (TopLevelDestination) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenSearch: () -> Unit = {},
+    /** Notifications bell (top bar action); empty in previews and tests. */
+    bell: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable () -> Unit,
 ) {
@@ -193,6 +208,7 @@ fun TravelAppScaffold(
                             IconButton(onClick = onOpenSearch) {
                                 Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.nav_global_search))
                             }
+                            bell()
                             IconButton(onClick = onOpenSettings) {
                                 Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.nav_settings))
                             }

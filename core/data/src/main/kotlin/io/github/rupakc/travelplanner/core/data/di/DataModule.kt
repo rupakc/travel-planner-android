@@ -5,6 +5,7 @@ import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.Multibinds
 import io.github.rupakc.travelplanner.core.data.impl.AuthRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.ChatRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.CompareRepositoryImpl
@@ -48,6 +49,7 @@ import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesReposit
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
 import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.data.repository.UserStateCleaner
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -93,6 +95,9 @@ abstract class DataModule {
     @Binds abstract fun currentPlan(impl: CurrentPlanStoreImpl): CurrentPlanStore
 
     @Binds abstract fun sessionCleaner(impl: SessionCleanerImpl): SessionCleaner
+
+    /** Per-user state other modules contribute to the session wipe (may be empty). */
+    @Multibinds abstract fun userStateCleaners(): Set<UserStateCleaner>
 
     /** Bound by core:notifications when Firebase is configured. */
     @BindsOptionalOf abstract fun pushTokenSource(): PushTokenSource

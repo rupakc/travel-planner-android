@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.FeatureOverrides
 import io.github.rupakc.travelplanner.core.model.settings.Session
@@ -146,4 +147,29 @@ private suspend fun DataStore<Preferences>.editKey(key: Preferences.Key<String>,
 
 private fun MutablePreferences.setOrRemove(key: Preferences.Key<String>, value: String?) {
     if (value.isNullOrBlank()) remove(key) else this[key] = value
+}
+
+class PreferencesLastLocationStore(private val store: DataStore<Preferences>) : LastLocationStore {
+    private val lat = stringPreferencesKey("lat")
+    private val lng = stringPreferencesKey("lng")
+    private val at = longPreferencesKey("at")
+
+    override suspend fun get(): LocationCell? {
+        val p = store.safeData().first()
+        val la = p[lat]?.toDoubleOrNull() ?: return null
+        val ln = p[lng]?.toDoubleOrNull() ?: return null
+        return LocationCell(la, ln, p[at] ?: return null)
+    }
+
+    override suspend fun set(cell: LocationCell) {
+        store.edit {
+            it[lat] = cell.lat.toString()
+            it[lng] = cell.lng.toString()
+            it[at] = cell.atEpochMillis
+        }
+    }
+
+    override suspend fun clear() {
+        store.edit { it.clear() }
+    }
 }

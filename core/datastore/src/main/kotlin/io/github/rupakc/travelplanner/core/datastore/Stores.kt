@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.core.datastore
 
 import io.github.rupakc.travelplanner.core.model.auth.User
+import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.FeatureOverrides
 import io.github.rupakc.travelplanner.core.model.settings.Session
@@ -73,4 +74,13 @@ interface FeatureOverridesStore {
         overrides.enabled.forEach { set(it, true) }
         overrides.disabled.forEach { set(it, false) }
     }
+}
+
+/** Last coarse foreground fix (Near me), for background nearby suggestions. Cleared on sign-out. */
+interface LastLocationStore {
+    suspend fun get(): LocationCell?
+
+    suspend fun set(cell: LocationCell)
+
+    suspend fun clear()
 }
