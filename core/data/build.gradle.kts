@@ -15,4 +15,5 @@ dependencies {
     implementation(projects.core.database)
     implementation(projects.core.datastore)
     testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(projects.core.testing)
 }

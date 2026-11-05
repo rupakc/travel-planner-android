@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
@@ -78,28 +79,33 @@ class SearchRepositoryImpl @Inject constructor(
         emit(folded)
         var attempt = 0
         while (true) {
-            try {
-                streamClient.stream(request).collect { event ->
+            var failure: AppError? = null
+            streamClient.stream(request)
+                .catch { e -> if (e is AppException) failure = e.error else throw e }
+                .collect { event ->
                     folded = SearchResultsReducer.reduce(folded, event)
                     emit(folded)
                 }
-                if (folded.phase != StreamPhase.DONE) folded = SearchResultsReducer.finish(folded, StreamPhase.DONE)
-                emit(folded)
-                return@flow
-            } catch (e: AppException) {
-                if (e.error is AppError.Interrupted && attempt < MAX_RETRIES) {
+            val error = failure
+            when {
+                error == null -> {
+                    if (folded.phase != StreamPhase.DONE) folded = SearchResultsReducer.finish(folded, StreamPhase.DONE)
+                    emit(folded)
+                    return@flow
+                }
+                error is AppError.Interrupted && attempt < MAX_RETRIES -> {
                     attempt++
                     folded = folded.copy(retries = attempt)
                     emit(folded)
-                    continue
                 }
-                folded = if (e.error is AppError.Interrupted) {
-                    SearchResultsReducer.finish(folded, StreamPhase.INTERRUPTED)
-                } else {
-                    folded.copy(phase = StreamPhase.FAILED, error = e.error)
+                error is AppError.Interrupted -> {
+                    emit(SearchResultsReducer.finish(folded, StreamPhase.INTERRUPTED))
+                    return@flow
                 }
-                emit(folded)
-                return@flow
+                else -> {
+                    emit(folded.copy(phase = StreamPhase.FAILED, error = error))
+                    return@flow
+                }
             }
         }
     }
@@ -107,15 +113,15 @@ class SearchRepositoryImpl @Inject constructor(
     override fun events(request: TravelSearchRequest): Flow<SearchEvent> = flow {
         var attempt = 0
         while (true) {
-            try {
-                streamClient.stream(request).collect { emit(it) }
-                return@flow
-            } catch (e: AppException) {
-                if (e.error is AppError.Interrupted && attempt < MAX_RETRIES) {
-                    attempt++
-                    continue
-                }
-                throw e
+            var failure: AppException? = null
+            streamClient.stream(request)
+                .catch { e -> if (e is AppException) failure = e else throw e }
+                .collect { emit(it) }
+            val error = failure ?: return@flow
+            if (error.error is AppError.Interrupted && attempt < MAX_RETRIES) {
+                attempt++
+            } else {
+                throw error
             }
         }
     }

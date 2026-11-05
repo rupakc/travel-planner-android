@@ -3,6 +3,7 @@ package io.github.rupakc.travelplanner.core.network.sse
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppException
+import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.model.chat.ChatRequest
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
@@ -19,6 +20,8 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -28,18 +31,31 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** One item of a materialised SSE stream: a payload, or the failure that ended it. */
+sealed interface SseItem<out T> {
+    data class Payload<T>(val value: T) : SseItem<T>
+
+    data class Failure(val error: AppError) : SseItem<Nothing>
+}
+
 /**
  * POSTs JSON and streams SSE `data:` payloads as a cold [Flow].
  * - No read/call timeout (long silent agent phases); cancelling the collector cancels the call.
  * - HTTP errors before streaming → [AppException] with the mapped [AppError] (429 keeps Retry-After).
  * - A network failure mid-stream → [AppException] with [AppError.Interrupted].
+ *
+ * Failures travel through the IO `flowOn` boundary as [SseItem.Failure] and are thrown only
+ * in the collector's context, so every payload received before a failure is delivered.
  */
 @Singleton
 class SseClient @Inject constructor(
     @param:StreamingHttp private val client: OkHttpClient,
     private val dispatchers: AppDispatchers,
 ) {
-    fun post(path: String, jsonBody: String): Flow<String> = flow {
+    fun post(path: String, jsonBody: String): Flow<String> = items(path, jsonBody).dematerialize()
+
+    /** Materialised stream (never throws except cancellation); runs on the IO dispatcher. */
+    fun items(path: String, jsonBody: String): Flow<SseItem<String>> = flow {
         val request = Request.Builder()
             .url(PLACEHOLDER_BASE_URL + path.trimStart('/'))
             .header("Accept", "text/event-stream")
@@ -51,17 +67,25 @@ class SseClient @Inject constructor(
             val response = try {
                 call.execute()
             } catch (e: IOException) {
-                throw AppException(e.toAppError(), e)
+                emit(SseItem.Failure(e.toAppError()))
+                return@flow
             }
             response.use { resp ->
                 if (!resp.isSuccessful) {
-                    throw AppException(HttpErrorMapper.map(resp.code, resp.header("Retry-After"), resp.body.string()))
+                    emit(SseItem.Failure(HttpErrorMapper.map(resp.code, resp.header("Retry-After"), resp.body.string())))
+                    return@flow
                 }
-                try {
-                    for (payload in SseParser.payloads(resp.body.source())) emit(payload)
-                } catch (e: IOException) {
-                    currentCoroutineContext().ensureActive()
-                    throw AppException(AppError.Interrupted(), e)
+                val payloads = SseParser.payloads(resp.body.source()).iterator()
+                while (true) {
+                    val next = try {
+                        if (payloads.hasNext()) payloads.next() else null
+                    } catch (e: IOException) {
+                        currentCoroutineContext().ensureActive()
+                        AppLogger.w(TAG, "SSE stream interrupted", e)
+                        emit(SseItem.Failure(AppError.Interrupted()))
+                        return@flow
+                    } ?: break
+                    emit(SseItem.Payload(next))
                 }
             }
         } finally {
@@ -70,14 +94,23 @@ class SseClient @Inject constructor(
     }.flowOn(dispatchers.io)
 
     companion object {
+        private const val TAG = "SseClient"
         private val JSON_MEDIA_TYPE = "application/json".toMediaType()
     }
 }
 
+/** Re-throws [SseItem.Failure] as [AppException] in the collector's context. */
+fun <T> Flow<SseItem<T>>.dematerialize(): Flow<T> = transform { item ->
+    when (item) {
+        is SseItem.Payload -> emit(item.value)
+        is SseItem.Failure -> throw AppException(item.error)
+    }
+}
+
 /**
- * `POST /api/search` as typed events. Completes after [SearchEvent.Done]; a stream
- * that ends without `done` throws [AppException] with [AppError.Interrupted]
- * (the repository retries once, web parity).
+ * `POST /api/search` as typed events (decoded on the Default dispatcher). Completes after
+ * [SearchEvent.Done]; a stream that ends without `done` throws [AppException] with
+ * [AppError.Interrupted] (the repository retries once, web parity).
  */
 @Singleton
 class SearchStreamClient @Inject constructor(
@@ -88,14 +121,22 @@ class SearchStreamClient @Inject constructor(
 
     fun stream(request: TravelSearchRequest): Flow<SearchEvent> = flow {
         var done = false
-        sse.post(SEARCH_PATH, json.encodeToString(TravelSearchRequest.serializer(), request)).collect { payload ->
-            if (done) return@collect
-            val event = EventDecoder.decodeSearch(payload, json) ?: return@collect
-            emit(event)
-            if (event is SearchEvent.Done) done = true
-        }
+        sse.items(SEARCH_PATH, json.encodeToString(TravelSearchRequest.serializer(), request))
+            .map<SseItem<String>, SseItem<SearchEvent?>> { item ->
+                when (item) {
+                    is SseItem.Payload -> SseItem.Payload(EventDecoder.decodeSearch(item.value, json))
+                    is SseItem.Failure -> item
+                }
+            }
+            .flowOn(dispatchers.default)
+            .dematerialize()
+            .collect { event ->
+                if (done || event == null) return@collect
+                emit(event)
+                if (event is SearchEvent.Done) done = true
+            }
         if (!done) throw AppException(AppError.Interrupted())
-    }.flowOn(dispatchers.default)
+    }
 
     companion object {
         const val SEARCH_PATH = "api/search"
@@ -115,13 +156,21 @@ class ChatStreamClient @Inject constructor(
 
     fun stream(request: ChatRequest): Flow<ChatEvent> = flow {
         var finished = false
-        sse.post(CHAT_PATH, json.encodeToString(ChatRequest.serializer(), request)).collect { payload ->
-            if (finished) return@collect
-            val event = EventDecoder.decodeChat(payload, json) ?: return@collect
-            emit(event)
-            if (event.isTerminal) finished = true
-        }
-    }.flowOn(dispatchers.default)
+        sse.items(CHAT_PATH, json.encodeToString(ChatRequest.serializer(), request))
+            .map<SseItem<String>, SseItem<ChatEvent?>> { item ->
+                when (item) {
+                    is SseItem.Payload -> SseItem.Payload(EventDecoder.decodeChat(item.value, json))
+                    is SseItem.Failure -> item
+                }
+            }
+            .flowOn(dispatchers.default)
+            .dematerialize()
+            .collect { event ->
+                if (finished || event == null) return@collect
+                emit(event)
+                if (event.isTerminal) finished = true
+            }
+    }
 
     companion object {
         const val CHAT_PATH = "api/chat"
