@@ -11,13 +11,16 @@ import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollScheduler
+import io.github.rupakc.travelplanner.core.notifications.alerts.PollBaseline
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionsToggle
 import io.github.rupakc.travelplanner.core.notifications.reminders.TripReminderScheduler
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -27,6 +30,11 @@ import kotlinx.coroutines.launch
  * the caller's thread): the alert poll follows the session and `/health.push_configured`, trip
  * reminders follow the saved plans (so every save/delete reschedules), the nearby worker follows
  * its toggle, and the FCM token is registered after each sign-in.
+ *
+ * Every process start runs this, including worker, FCM and broadcast starts (performance review
+ * I1/I2): the poll is scheduled only from known capabilities (persisted, or fetched), never from
+ * "unknown"; the `/health` refresh and device registration wait until the UI is shown, and both are
+ * skipped when nothing changed (capabilities TTL, registration fingerprint).
  */
 @Singleton
 class NotificationsInitializer
@@ -42,29 +50,41 @@ class NotificationsInitializer
         private val tripReminders: TripReminderScheduler,
         private val nearby: NearbySuggestionsToggle,
         private val pushRegistrar: PushRegistrar,
-        private val pollBaseline: io.github.rupakc.travelplanner.core.notifications.alerts.PollBaseline,
+        private val pollBaseline: PollBaseline,
+        private val foreground: AppForeground,
     ) {
         private var started = false
+
+        /** Overridable in tests (Robolectric has no FirebaseApp). */
+        internal var firebaseConfigured: () -> Boolean = { isFirebaseConfigured(context) }
 
         @Synchronized
         fun start() {
             if (started) return
             started = true
-            val firebase = isFirebaseConfigured(context)
             scope.launch {
-                val signedIn = auth.session.map { it != null }.distinctUntilChanged()
-                combine(signedIn, health.capabilities.map { it?.pushConfigured == true }) { inSession, push -> inSession to push }
-                    .distinctUntilChanged()
-                    .collect { (inSession, push) ->
-                        if (inSession) {
-                            if (health.capabilities.value == null) health.refresh()
-                            alertPoll.schedule(pushActive = push && firebase)
-                        } else {
-                            alertPoll.cancel()
-                            // Sign-out clears the seen table: the next sign-in starts a fresh baseline.
-                            pollBaseline.set(null)
-                        }
+                val firebase = firebaseConfigured()
+                auth.session.map { it != null }.distinctUntilChanged().collectLatest { inSession ->
+                    if (!inSession) {
+                        alertPoll.cancel()
+                        // Sign-out clears the seen table: the next sign-in starts a fresh baseline.
+                        pollBaseline.set(null)
+                        return@collectLatest
                     }
+                    coroutineScope {
+                        health.restore()
+                        launch {
+                            foreground.awaitForeground()
+                            health.refreshIfStale()
+                        }
+                        // Unknown capabilities keep whatever is scheduled; the first known value decides.
+                        health.capabilities
+                            .filterNotNull()
+                            .map { it.pushConfigured && firebase }
+                            .distinctUntilChanged()
+                            .collect { push -> alertPoll.schedule(pushActive = push) }
+                    }
+                }
             }
             scope.launch { plans.plans.distinctUntilChanged().collect { tripReminders.reschedule(it) } }
             scope.launch {
