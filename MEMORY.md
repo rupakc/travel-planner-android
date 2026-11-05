@@ -1,6 +1,9 @@
 # Decision log
 
-One line per decision: what, and why. Newest last. Builders add to this file for every call the spec leaves open.
+How to use: one line per decision, newest last in its section: `- YYYY-MM-DD what was decided - why` (a bold topic first is welcome). Add a line for every call the spec leaves open;
+never delete an entry, supersede it with a new line that says "supersedes". The design spec wins over this file; the code wins over both.
+
+## Foundation (build, core, shell)
 
 - 2026-11-05 Package/applicationId `io.github.rupakc.travelplanner` (+ `.local`, `.debug` suffixes) — matches the public GitHub owner; flavours/debug installable side by side.
 - 2026-11-05 Kept all pinned versions (AGP 9.5.0, Kotlin 2.4.21, KSP 2.3.13, Compose BOM 2026.09.00, …); KSP 2.3.x is versioned independently of Kotlin and works with AGP 9 built-in Kotlin.
@@ -48,3 +51,14 @@ One line per decision: what, and why. Newest last. Builders add to this file for
 - 2026-11-05 (fix r3, R3-I1) Tink 1.24 writes the keyset in clear when the Keystore is broken (no exception). After every build we check `isUsingKeystore()`; if false the keyset prefs + alias are deleted and the session stays in memory only. Decision logic sits behind `SessionKeysetSource` so it is unit-testable.
 - 2026-11-05 (fix r3, R3-M3) Accepted trade-off: a transient Keystore error at creation resets the keyset and signs the user out (sign-out over crash or cleartext key). Documented in Foundation-Interfaces §4c.
 - 2026-11-05 (fix r3, R3-M1) `searchKey` treats empty `must_include` and single-city `destinations` as absent. R3-M2 accepted: the key is persisted with the draft and may go stale across app updates that add request fields until the next `attachSearch`.
+
+## Documentation and tooling
+
+- 2026-11-05 **Docs home** - `docs/*.md` (TitleCase) are the wiki source; `wiki-sync.yml` publishes them on push to main. Pages for unmerged features say "Planned" instead of describing code that does not exist.
+- 2026-11-05 **Doc link check** - `scripts/check-doc-links.sh` verifies relative links (CI runs it); pages owned by other teams (Firebase-Setup, Onboarding-and-Traveller-Types) are allowed to be missing until they merge.
+- 2026-11-05 **Claude Code settings** - `.claude/settings.json` allows only read-only gradle/adb/git commands; build and install commands still prompt.
+- 2026-11-05 **Pseudo-locales** - enabled on the debug build type by the convention plugin; documented in Localization.
+
+## Open items
+
+- Baseline profile module (see Performance).
