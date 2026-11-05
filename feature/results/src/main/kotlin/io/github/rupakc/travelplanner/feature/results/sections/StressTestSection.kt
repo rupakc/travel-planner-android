@@ -1,42 +1,39 @@
 package io.github.rupakc.travelplanner.feature.results.sections
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.domain.itinerary.ItineraryLayouts
 import io.github.rupakc.travelplanner.core.domain.itinerary.StressTestPayloads
 import io.github.rupakc.travelplanner.core.model.section.ItineraryData
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.StressTestData
 import io.github.rupakc.travelplanner.feature.results.sections.info.HealthBody
-import io.github.rupakc.travelplanner.feature.results.sections.info.RecheckFailure
-import io.github.rupakc.travelplanner.feature.results.sections.info.RecheckResult
-import io.github.rupakc.travelplanner.feature.results.sections.info.RecheckState
+import io.github.rupakc.travelplanner.feature.results.sections.info.StressRecheckController
 import io.github.rupakc.travelplanner.feature.results.sections.info.healthView
-import kotlinx.coroutines.launch
-
-private val RecheckSaver = Saver<RecheckState, String>(save = { it.encode() }, restore = { RecheckState.decode(it) })
 
 /**
  * Trip Health Check: score ring, verdict, findings sorted by severity, and — once the itinerary
  * layout was edited — "Re-check my edited plan" (`POST /api/stress-test` with the edited itinerary,
- * web stressTestPayload) with stale/original notes (web StressTestSection).
+ * web stressTestPayload) with stale/original notes (web StressTestSection). The re-check lives in
+ * [SectionActions.stressRecheck] so it survives scrolling and rotation.
  */
 @Composable
 internal fun StressTestSectionContent(data: StressTestData, actions: SectionActions, modifier: Modifier = Modifier) {
     val selections by actions.selections.collectAsStateWithLifecycle()
     val results by actions.results.collectAsStateWithLifecycle()
     val itinerary = results.sections[SectionId.ITINERARY]?.data as? ItineraryData
-    var state by rememberSaveable(stateSaver = RecheckSaver) { mutableStateOf(RecheckState()) }
     val scope = rememberCoroutineScope()
+    val controller = actions.stressRecheck ?: remember(actions) { StressRecheckController(scope) { actions.recheckStressTest(it) } }
+    val state by controller.state.collectAsStateWithLifecycle()
+
+    // A result from another search (different original itinerary) is forgotten, like the web's clearRecheck.
+    val base = remember(itinerary) { itinerary?.let(ItineraryLayouts::fingerprint) }
+    LaunchedEffect(base, state.base) { if (state.base != null && state.base != base) controller.clear() }
 
     val layoutMoved = itinerary != null && ItineraryLayouts.layoutChangeCount(itinerary, selections.itineraryLayout) > 0
     val needsFingerprint = state.result != null || state.failure != null
@@ -50,7 +47,7 @@ internal fun StressTestSectionContent(data: StressTestData, actions: SectionActi
         rechecking = state.running,
         onRecheck = {
             val request = results.request
-            if (state.running || itinerary == null || request == null) return@HealthBody
+            if (itinerary == null || request == null) return@HealthBody
             val sections = results.sections
             val payload =
                 StressTestPayloads.build(
@@ -61,24 +58,7 @@ internal fun StressTestSectionContent(data: StressTestData, actions: SectionActi
                     visa = sections[SectionId.VISA]?.raw,
                     weather = sections[SectionId.WEATHER]?.raw,
                 )
-            val forFingerprint = StressTestPayloads.recheckFingerprint(itinerary, selections)
-            state = state.copy(running = true, failure = null)
-            scope.launch {
-                state =
-                    when (val r = actions.recheckStressTest(payload)) {
-                        is AppResult.Success -> {
-                            if (r.value.isError) {
-                                state.copy(running = false, failure = RecheckFailure(null, forFingerprint))
-                            } else {
-                                RecheckState(result = RecheckResult(r.value, forFingerprint))
-                            }
-                        }
-
-                        is AppResult.Failure -> {
-                            state.copy(running = false, failure = RecheckFailure(r.error.message, forFingerprint))
-                        }
-                    }
-            }
+            controller.start(payload, StressTestPayloads.recheckFingerprint(itinerary, selections), base)
         },
         modifier = modifier,
     )

@@ -34,12 +34,10 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.section.StressFinding
 import io.github.rupakc.travelplanner.core.model.section.StressTestData
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.feature.results.R
-import kotlinx.serialization.Serializable
 
 /** Overall verdict (web STRESS_OVERALL_STYLES); unknown values read as amber. */
 internal enum class HealthOverall(val label: Int) {
@@ -80,24 +78,6 @@ internal fun healthCategoryEmoji(category: String?): String =
         "logistics" -> "🧭"
         else -> "🔎"
     }
-
-/** A re-check result and the edited itinerary it ran against (see `StressTestPayloads.recheckFingerprint`). */
-@Serializable
-internal data class RecheckResult(val data: StressTestData, val fingerprint: String)
-
-/** A failed re-check: the server's message (null → generic copy) for the plan it ran against. */
-@Serializable
-internal data class RecheckFailure(val message: String?, val fingerprint: String)
-
-/** Re-check state kept across scrolling/rotation (saved as JSON text). */
-@Serializable
-internal data class RecheckState(val result: RecheckResult? = null, val failure: RecheckFailure? = null, val running: Boolean = false) {
-    fun encode(): String = TravelJson.encodeToString(serializer(), copy(running = false))
-
-    companion object {
-        fun decode(text: String): RecheckState = runCatching { TravelJson.decodeFromString(serializer(), text) }.getOrDefault(RecheckState())
-    }
-}
 
 /** What the card shows for the current plan (web StressTestSection rules). */
 internal enum class RecheckNote { NONE, ORIGINAL, EDITED, STALE }

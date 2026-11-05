@@ -44,6 +44,9 @@ internal class FakeSectionActions(
     sections: Map<SectionId, SectionResult> = emptyMap(),
     override val itineraryEditingLocked: Boolean = false,
     var recheckResult: AppResult<StressTestData> = AppResult.Failure(AppError.Network()),
+    /** When true the observed [selections] flow never catches up (a slow store), to prove fields don't read it back. */
+    private val laggingFlow: Boolean = false,
+    override val stressRecheck: StressRecheckController? = null,
 ) : SectionActions {
     private var current by mutableStateOf(initial)
     private val flow = MutableStateFlow(initial)
@@ -57,7 +60,7 @@ internal class FakeSectionActions(
 
     override fun onUpdateSelections(transform: (PlanSelections) -> PlanSelections) {
         current = transform(current)
-        flow.value = current
+        if (!laggingFlow) flow.value = current
     }
 
     override fun onToggle(item: PlanItem) = onUpdateSelections { PlanSelectionRules.toggle(it, item) }
