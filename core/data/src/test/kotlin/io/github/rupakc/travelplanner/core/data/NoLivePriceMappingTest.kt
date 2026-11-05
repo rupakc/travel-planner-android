@@ -46,6 +46,50 @@ class NoLivePriceMappingTest {
         }
 
     private companion object {
-        const val BODY = "{\"detail\": \"We couldn't find live prices for this hotel on Google Hotels.\", \"code\": \"no_live_price\", \"message\": \"We couldn't find live prices for this hotel on Google Hotels.\", \"suggestions\": [{\"title\": \"Tandem Palacio Alfama Suites\", \"subtitle\": \"4.6/5 (837 reviews) · ${"$"}131 a night · total for 3 nights\", \"price\": 522.0, \"nightly\": 131.0, \"currency\": \"USD\", \"link\": \"https://www.google.com/travel/search?q=hotels+in+Lisbon&hl=en&gl=us\", \"spec\": {\"name\": \"Tandem Palacio Alfama Suites\", \"city\": \"Lisbon\", \"check_in\": \"2026-12-01\", \"check_out\": \"2026-12-04\", \"adults\": 2, \"rooms\": 1, \"property_token\": \"ChkQxtHgp5Ga0L44Gg0vZy8xMXliN3NyZ3Z4EAI\"}}, {\"title\": \"Brown's | Avenue Hotel\", \"subtitle\": \"4.6/5 (284 reviews) · ${"$"}157 a night · total for 3 nights\", \"price\": 626.0, \"nightly\": 157.0, \"currency\": \"USD\", \"link\": \"https://www.brownshotelgroup.com/browns-avenue/\", \"spec\": {\"name\": \"Brown's | Avenue Hotel\", \"city\": \"Lisbon\", \"check_in\": \"2026-12-01\", \"check_out\": \"2026-12-04\", \"adults\": 2, \"rooms\": 1, \"property_token\": \"ChkIhLCQwvjO2IYWGg0vZy8xMXE0bTZieDkyEAE\"}}], \"estimate\": null}"
+        val BODY =
+            """
+            {
+              "detail": "We couldn't find live prices for this hotel on Google Hotels.",
+              "code": "no_live_price",
+              "message": "We couldn't find live prices for this hotel on Google Hotels.",
+              "suggestions": [
+                {
+                  "title": "Tandem Palacio Alfama Suites",
+                  "subtitle": "4.6/5 (837 reviews) · ${"$"}131 a night · total for 3 nights",
+                  "price": 522.0,
+                  "nightly": 131.0,
+                  "currency": "USD",
+                  "link": "https://www.google.com/travel/search?q=hotels+in+Lisbon&hl=en&gl=us",
+                  "spec": {
+                    "name": "Tandem Palacio Alfama Suites",
+                    "city": "Lisbon",
+                    "check_in": "2026-12-01",
+                    "check_out": "2026-12-04",
+                    "adults": 2,
+                    "rooms": 1,
+                    "property_token": "ChkQxtHgp5Ga0L44Gg0vZy8xMXliN3NyZ3Z4EAI"
+                  }
+                },
+                {
+                  "title": "Brown's | Avenue Hotel",
+                  "subtitle": "4.6/5 (284 reviews) · ${"$"}157 a night · total for 3 nights",
+                  "price": 626.0,
+                  "nightly": 157.0,
+                  "currency": "USD",
+                  "link": "https://www.brownshotelgroup.com/browns-avenue/",
+                  "spec": {
+                    "name": "Brown's | Avenue Hotel",
+                    "city": "Lisbon",
+                    "check_in": "2026-12-01",
+                    "check_out": "2026-12-04",
+                    "adults": 2,
+                    "rooms": 1,
+                    "property_token": "ChkIhLCQwvjO2IYWGg0vZy8xMXE0bTZieDkyEAE"
+                  }
+                }
+              ],
+              "estimate": null
+            }
+            """.trimIndent()
     }
 }
