@@ -22,8 +22,9 @@ class TravelPlannerApplication :
 
     /**
      * Lazy (performance M1): building it constructs the session DataStore, Retrofit, Room and the push
-     * registrar. `get()` runs on [appScope] (Dispatchers.Default), so none of that graph is built on the
-     * main thread before the first frame, nor in worker/FCM process starts.
+     * registrar. `get()` runs on [appScope] (Dispatchers.Default), so that graph is built off the main thread
+     * in every process start (UI, worker, FCM, broadcast); it is still built in each of them. Avoiding the
+     * network calls in non-UI starts is NotificationsInitializer's foreground gate, not this.
      */
     @Inject lateinit var notifications: dagger.Lazy<NotificationsInitializer>
 
