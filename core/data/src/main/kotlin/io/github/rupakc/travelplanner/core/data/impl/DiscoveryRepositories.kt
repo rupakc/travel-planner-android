@@ -27,6 +27,7 @@ import io.github.rupakc.travelplanner.core.model.search.DiscoveryRequest
 import io.github.rupakc.travelplanner.core.model.search.DiscoveryResponse
 import io.github.rupakc.travelplanner.core.model.search.FareCalendar
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.network.BaseUrlProvider
 import io.github.rupakc.travelplanner.core.network.HttpErrorMapper
 import io.github.rupakc.travelplanner.core.network.api.HealthApi
 import io.github.rupakc.travelplanner.core.network.api.ImportApi
@@ -79,6 +80,11 @@ class FareCalendarRepositoryImpl
         override suspend fun fareCalendar(request: TravelSearchRequest): AppResult<FareCalendar> = apiCall { api.fareCalendar(request) }
     }
 
+/**
+ * `/health` capabilities, persisted per server with a [TTL] (performance review I1): [restore] seeds a fresh
+ * process from the last answer without a call, and [refreshIfStale] calls `/health` only when that answer is
+ * missing or older than [TTL]. A server change makes the old answer unknown, never applied to the new server.
+ */
 @Singleton
 class HealthRepositoryImpl
     @Inject
@@ -86,9 +92,16 @@ class HealthRepositoryImpl
         private val api: HealthApi,
         @param:DefaultHttp private val client: OkHttpClient,
         private val dispatchers: AppDispatchers,
+        private val baseUrlProvider: BaseUrlProvider,
+        private val cache: HealthCacheStore,
+        private val clock: AppClock,
     ) : HealthRepository {
         private val state = MutableStateFlow<Health?>(null)
         override val capabilities: StateFlow<Health?> = state.asStateFlow()
+
+        /** Which server [state] belongs to and when it was fetched; guarded by [mutex]. */
+        private var known: CachedHealth? = null
+        private val mutex = Mutex()
 
         /** Same timeouts and pool, but without the base-URL and auth interceptors: never sends the token elsewhere. */
         private val bareClient: OkHttpClient by lazy {
@@ -98,7 +111,46 @@ class HealthRepositoryImpl
             }.build()
         }
 
-        override suspend fun refresh(): AppResult<Health> = apiCall { api.health() }.onSuccess { state.value = it }
+        override suspend fun refresh(): AppResult<Health> {
+            val server = currentServer()
+            return apiCall { api.health() }.onSuccess { health ->
+                if (server == null) {
+                    state.value = health
+                    return@onSuccess
+                }
+                val entry = CachedHealth(server, health, clock.now().toEpochMilli())
+                mutex.withLock {
+                    known = entry
+                    state.value = health
+                }
+                withContext(dispatchers.io) { cache.write(entry) }
+            }
+        }
+
+        override suspend fun restore() {
+            val server = currentServer() ?: return
+            mutex.withLock {
+                if (known?.server == server) return
+                val stored = withContext(dispatchers.io) { cache.read() }?.takeIf { it.server == server }
+                known = stored
+                // Another server's capabilities must not stand for this one: unknown until fetched.
+                state.value = stored?.health
+            }
+        }
+
+        override suspend fun refreshIfStale(): Health? {
+            restore()
+            val server = currentServer()
+            val entry = mutex.withLock { known }
+            val fresh = entry != null && entry.server == server && Duration.between(Instant.ofEpochMilli(entry.savedAtMillis), clock.now()) < TTL
+            if (fresh) return state.value
+            return when (val result = refresh()) {
+                is AppResult.Success -> result.value
+                is AppResult.Failure -> state.value
+            }
+        }
+
+        private suspend fun currentServer(): String? = baseUrlProvider.current()?.toString()?.trimEnd('/')
 
         override suspend fun probe(baseUrl: String): AppResult<Health> {
             val url =
@@ -115,8 +167,10 @@ class HealthRepositoryImpl
             }
         }
 
-        private companion object {
-            const val CODE_INVALID_URL = "invalid_url"
+        companion object {
+            /** How long a `/health` answer is trusted before [refreshIfStale] asks again. */
+            val TTL: Duration = Duration.ofHours(6)
+            private const val CODE_INVALID_URL = "invalid_url"
         }
     }
 

@@ -330,6 +330,19 @@ interface HealthRepository {
     suspend fun refresh(): AppResult<Health>
 
     /**
+     * Puts the capabilities last persisted for the current server into [capabilities] when nothing is
+     * known for it yet. No network: safe in worker and FCM process starts (performance review I1).
+     */
+    suspend fun restore() = Unit
+
+    /**
+     * [restore], then [refresh] only when the current server's capabilities are unknown or older than
+     * the TTL (about 6 h). Returns the capabilities in effect afterwards: a failed refresh keeps the
+     * last known (possibly stale) value for this server; null only when nothing was ever known.
+     */
+    suspend fun refreshIfStale(): Health? = capabilities.value ?: (refresh() as? AppResult.Success)?.value
+
+    /**
      * One-off `GET <baseUrl>/health` of a candidate server (Settings → Server "Test connection"):
      * no session token, no change to settings or [capabilities]. An unparseable URL fails with
      * `AppError.Client(code = "invalid_url")`.
