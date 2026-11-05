@@ -62,7 +62,7 @@ interface CurrentPlanStore {
      */
     suspend fun save(name: String? = null): AppResult<Plan>
 
-    /** For undo: capture, then [restore] (which starts a new generation). */
+    /** For undo within the same draft: capture, then [restore] (same generation). Use [replace]/[load] to switch trips. */
     fun snapshot(): PlanDraft
 
     fun restore(snapshot: PlanDraft)

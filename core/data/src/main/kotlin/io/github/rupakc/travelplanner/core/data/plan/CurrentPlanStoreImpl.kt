@@ -49,7 +49,7 @@ import kotlinx.serialization.json.buildJsonObject
  * - every Room call is guarded: a failed write is logged and the next change retries; a failed read
  *   deletes the bad rows and starts empty.
  * `save`/`load`/`reset` are serialised with a mutex (review I5). Every whole-draft replacement (`newPlan`,
- * `replace`, `load`, `restore`, `reset`) bumps a generation counter under [lock]; `save` applies the returned
+ * `replace`, `load`, `reset`; not the undo `restore`) bumps a generation counter under [lock]; `save` applies the returned
  * plan id only when the generation is unchanged, so a slow save can never stamp its id on a different trip
  * (architecture review I2). Replacements don't wait for the save mutex, so opening a trip never blocks
  * behind a slow network save.
@@ -174,7 +174,10 @@ class CurrentPlanStoreImpl
 
         override fun snapshot(): PlanDraft = state.value
 
-        override fun restore(snapshot: PlanDraft) = replace(snapshot)
+        /** Undo within the same draft: keeps the generation, so an in-flight save of this trip still applies. */
+        override fun restore(snapshot: PlanDraft) {
+            state.value = snapshot
+        }
 
         /**
          * Sections recoverable from a saved plan, in the stream-snapshot shape (`{"itinerary":{…},…}`).
