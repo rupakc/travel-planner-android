@@ -108,13 +108,16 @@ def main():
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
     tap("My trips")
     time.sleep(3)
-    trip = next((t for t, _, _ in nodes(dump()) if t.startswith(("E2E Lisbon", "The "))), None)
+    texts = [t for t, _, _ in nodes(dump())]
+    # A trip saved with an itinerary snapshot by the E2E flows (Results then shows the Itinerary section).
+    trip = next((t for t in texts if t.startswith("E2E Lisbon itinerary")), None)
     if trip is None:
         print("skip results case: no saved trip on the server")
     else:
         tap(trip)
         tap("Open in results")
-        wait_for("Itinerary", 30)
+        if not wait_for("Itinerary", 30):
+            raise SystemExit(f"FAIL: '{trip}' opened in results without an Itinerary section")
         kill_and_restore()
         ok = wait_for("Itinerary", 20)
         print(("ok  " if ok else "FAIL") + f" results of '{trip}' come back after process death")
