@@ -19,7 +19,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
-import io.github.rupakc.travelplanner.core.model.navigation.CompareRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
@@ -29,7 +28,6 @@ import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.Flight
 import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.StressTestData
-import io.github.rupakc.travelplanner.core.ui.FeaturePlaceholder
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.core.ui.watch.FareWatchSheet
 import io.github.rupakc.travelplanner.core.ui.watch.PriceWatchSheet
@@ -56,13 +54,6 @@ fun NavGraphBuilder.resultsGraph(
     onOpenAlerts: () -> Unit = {},
 ) {
     composable<ResultsRoute> { ResultsRoute(onBack = onBack, onOpenMyPlan = onOpenMyPlan, onOpenAlerts = onOpenAlerts) }
-    composable<CompareRoute> {
-        FeaturePlaceholder(
-            title = stringResource(R.string.results_compare_title),
-            message = stringResource(R.string.results_compare_message),
-            onBack = onBack,
-        )
-    }
 }
 
 /** Wires [ResultsViewModel] to [ResultsScreen]: state, snackbar messages, Custom Tabs and section actions. */
