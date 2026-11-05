@@ -1,0 +1,116 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Voyager Travel Planner//Plan Export//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Lisbon long weekend
+X-WR-CALDESC:Inspired by 48 hours in Lisbon — https://example.com/lisbon-
+ 48h
+BEGIN:VEVENT
+UID:plan-101-hotel@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART;VALUE=DATE:20270514
+DTEND;VALUE=DATE:20270517
+SUMMARY:🏨 Memmo Alfama
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-1-afternoon@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270514T090000
+DTEND:20270514T103000
+SUMMARY:Tram 28 (early\, before the crowds)
+LOCATION:Martim Moniz
+DESCRIPTION:Day 1: Alfama and the river\nEst. cost: $3.1
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-1-morning@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270514T133000
+DTEND:20270514T160000
+SUMMARY:São Jorge Castle
+LOCATION:Castelo\, Lisbon
+DESCRIPTION:Day 1: Alfama and the river\nBuy tickets online\; the queue bui
+ lds after 10:00.\nEst. cost: $15
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-2-evening@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270514T183000
+DTEND:20270514T203000
+SUMMARY:LX Factory
+LOCATION:Alcântara
+DESCRIPTION:Day 1: Alfama and the river
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-2-morning@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270515T090000
+DTEND:20270515T110000
+SUMMARY:Jerónimos Monastery
+LOCATION:Belém\, Lisbon
+DESCRIPTION:Day 2: Belém\nEst. cost: $12
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-2-lunch@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270515T112000
+DTEND:20270515T132000
+SUMMARY:Pastéis de Belém
+LOCATION:Rua de Belém 84
+DESCRIPTION:Day 2: Belém\nEst. cost: $6
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-2-afternoon@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270515T134000
+DTEND:20270515T164000
+SUMMARY:MAAT and the riverside walk
+LOCATION:Av. Brasília\, Lisbon
+DESCRIPTION:Day 2: Belém\nFrom your link: “the riverside walk to MAAT is
+  the best sunset spot”
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-1-evening@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270515T183000
+DTEND:20270515T213000
+SUMMARY:Fado dinner in Alfama
+LOCATION:Rua de São Miguel\, Lisbon
+DESCRIPTION:Day 2: Belém\nBook Clube de Fado for 20:30\nEst. cost: $55
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-extras-2@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART;VALUE=DATE:20270515
+DTEND;VALUE=DATE:20270516
+SUMMARY:Also from your link: Time Out Market
+DESCRIPTION:Time Out Market — Mentioned for lunch\, no free slot
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-3-morning@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270516T090000
+DTEND:20270516T130000
+SUMMARY:Pena Palace
+LOCATION:Sintra
+DESCRIPTION:Day 3: Day trip\nEst. cost: $20
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-3-evening@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270516T183000
+DTEND:20270517T003000
+SUMMARY:Sunset at Cabo da Roca\, then late dinner in Cascais
+LOCATION:Cascais marina
+DESCRIPTION:Day 3: Day trip\nEst. cost: $45
+END:VEVENT
+BEGIN:VEVENT
+UID:plan-101-slot-4-morning@voyager-travel-planner
+DTSTAMP:20270115T083000Z
+DTSTART:20270517T090000
+DTEND:20270517T103000
+SUMMARY:Time Out Market brunch
+LOCATION:Cais do Sodré
+DESCRIPTION:Day 4: Departure\nLeave bags at the hotel\nEst. cost: $18
+END:VEVENT
+END:VCALENDAR
