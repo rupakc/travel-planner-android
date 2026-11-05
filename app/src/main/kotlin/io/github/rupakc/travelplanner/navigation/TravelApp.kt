@@ -112,7 +112,7 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 onPlanTrip = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
                 onOpenNearby = { navController.navigate(NearbyRoute) },
                 onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
-                onNavigate = { route -> navController.navigate(route) },
+                onNavigate = { route -> navController.navigateTo(route) },
                 onBack = { navController.popBackStack() },
             )
             searchGraph(onSearchStarted = {
@@ -135,7 +135,7 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
                 onSignOut = {},
                 // feature:auth (team A1) registers AccountChangePasswordRoute.
                 onChangePassword = { navController.navigate(AccountChangePasswordRoute) },
-                onNavigate = { route -> navController.navigate(route) },
+                onNavigate = { route -> navController.navigateTo(route) },
             )
             nearbyGraph(onBack = { navController.popBackStack() })
             shareGraph(onBack = {
@@ -216,10 +216,29 @@ internal fun gateTarget(gate: AuthGate, current: NavDestination, retakingQuiz: B
 private fun NavDestination.isGateScreen(): Boolean =
     hasRoute(LoginRoute::class) || hasRoute(ChangePasswordRoute::class) || hasRoute(OnboardingRoute::class)
 
-private fun NavHostController.navigateToTopLevel(dest: TopLevelDestination) {
-    navigate(dest.route) {
+private fun NavHostController.navigateToTopLevel(dest: TopLevelDestination) = navigateToTopLevel(dest.route)
+
+/**
+ * Switches to a top-level tab (popUpTo start with saveState, launchSingleTop, restoreState). A route
+ * with arguments (e.g. `SearchRoute(mode = "compare")`) is not restored from the tab's saved state,
+ * so its arguments arrive.
+ */
+private fun NavHostController.navigateToTopLevel(route: AppRoute) {
+    val restore = restoresTabState(route)
+    navigate(route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
+        launchSingleTop = restore
+        restoreState = restore
     }
 }
+
+/** Top-level routes switch tabs; everything else is pushed. */
+private fun NavHostController.navigateTo(route: AppRoute) {
+    if (isTopLevelRoute(route)) navigateToTopLevel(route) else navigate(route)
+}
+
+/** True when [route] is one of the navigation-suite destinations (with or without arguments). */
+internal fun isTopLevelRoute(route: AppRoute): Boolean = TopLevelDestination.entries.any { it.routeClass.isInstance(route) }
+
+/** True when [route] is a tab's plain route, so its saved state may be restored. */
+internal fun restoresTabState(route: AppRoute): Boolean = TopLevelDestination.entries.any { it.route == route }
