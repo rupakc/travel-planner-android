@@ -31,7 +31,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** True only when the app was built with google-services.json (FirebaseApp auto-initialised). */
 fun isFirebaseConfigured(context: Context): Boolean = runCatching { FirebaseApp.getApps(context).isNotEmpty() }.getOrDefault(false)
@@ -151,6 +153,13 @@ fun withPushDeepLink(intent: Intent): Intent {
     return intent
 }
 
+/** How long a push may take to post on the FCM thread (well inside FCM's ~10–20 s window). */
+internal const val PUSH_TIMEOUT_MILLIS = 8_000L
+
+/** Runs [PushAlertHandler.handle] synchronously with [PUSH_TIMEOUT_MILLIS]; false when it timed out. */
+internal fun handleBlocking(handler: PushAlertHandler, data: Map<String, String>): Boolean =
+    runBlocking { withTimeoutOrNull(PUSH_TIMEOUT_MILLIS) { handler.handle(data) } } ?: false
+
 /**
  * FCM entry point. Disabled in the manifest unless Firebase is configured. Messages are
  * data-only, so this always runs, in the foreground and the background ([PushAlertHandler]).
@@ -182,6 +191,7 @@ class TravelMessagingService : FirebaseMessagingService() {
                     message.notification?.title?.let { PushAlertHandler.KEY_TITLE to it }.takeIf { data[PushAlertHandler.KEY_TITLE] == null },
                     message.notification?.body?.let { PushAlertHandler.KEY_BODY to it }.takeIf { data[PushAlertHandler.KEY_BODY] == null },
                 )
-        scope.launch { handler.handle(withText) }
+        // Post before returning: FCM may stop the process right after this call (it allows ~10–20 s).
+        handleBlocking(handler, withText)
     }
 }

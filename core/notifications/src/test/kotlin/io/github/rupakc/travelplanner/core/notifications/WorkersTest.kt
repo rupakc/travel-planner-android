@@ -50,6 +50,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -396,6 +397,55 @@ class WorkersTest {
         assertEquals(before.size, after.size)
         assertTrue(after.none { it.id in before })
     }
+
+    @Test
+    fun `a push posts synchronously on the FCM thread`() {
+        val repo = FakeNotificationsRepository()
+        val data = mapOf("kind" to "fare_drop", "notification_id" to "70", "link" to "/alerts?watch=7", "title" to "Berlin → Lisbon dropped")
+        // No coroutine scope involved: the notification exists when the call returns.
+        assertTrue(handleBlocking(PushAlertHandler(repo, FakeSettingsRepository(), notifier), data))
+        assertEquals("travelplanner://alerts?watch=7", notifier.posts.single().deepLink)
+    }
+
+    @Test
+    fun `turning nearby suggestions off forgets the remembered location`() =
+        runBlocking {
+            val settings = FakeSettingsRepository(AppSettings(nearbyNotifications = true))
+            val nearbyRepo = FakeNearbyRepository().apply { last = LocationCell(38.725, -9.125, 0) }
+            val auth = FakeAuthRepository(null)
+            val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined)
+            val initializer =
+                NotificationsInitializer(
+                    context,
+                    scope,
+                    auth,
+                    io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository(null),
+                    FakePlansRepository(),
+                    settings,
+                    object : io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollScheduler {
+                        override fun schedule(pushActive: Boolean) = Unit
+
+                        override fun cancel() = Unit
+                    },
+                    object : io.github.rupakc.travelplanner.core.notifications.reminders.TripReminderScheduler {
+                        override fun reschedule(plans: List<Plan>, clockChanged: Boolean) = Unit
+                    },
+                    io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionsToggle(
+                        object : io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionScheduler {
+                            override fun setEnabled(enabled: Boolean) = Unit
+                        },
+                        nearbyRepo,
+                    ),
+                    PushRegistrar(auth, { null }, io.github.rupakc.travelplanner.core.testing.fake.FakeDevicesRepository()),
+                    baseline,
+                )
+            initializer.start()
+            assertTrue(nearbyRepo.last != null)
+            settings.setNotificationToggles(nearby = false)
+            assertNull(nearbyRepo.last)
+            scope.coroutineContext[kotlinx.coroutines.Job]?.cancel()
+            Unit
+        }
 
     private fun notificationLinkOf(n: AppNotification) =
         io.github.rupakc.travelplanner.core.domain.alerts

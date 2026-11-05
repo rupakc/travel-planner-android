@@ -170,6 +170,21 @@ class WorkManagerNearbySuggestionScheduler
         }
     }
 
+/** The Nearby suggestions toggle: runs or stops the worker, and forgets the remembered location when off. */
+@Singleton
+class NearbySuggestionsToggle
+    @Inject
+    constructor(
+        private val scheduler: NearbySuggestionScheduler,
+        private val nearby: NearbyRepository,
+    ) {
+        suspend fun apply(on: Boolean) {
+            scheduler.setEnabled(on)
+            // The remembered location exists only for these suggestions: off = forget it.
+            if (!on) nearby.forgetLocation()
+        }
+    }
+
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class NearbyNotificationsModule {

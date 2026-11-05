@@ -11,7 +11,7 @@ import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollScheduler
-import io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionScheduler
+import io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionsToggle
 import io.github.rupakc.travelplanner.core.notifications.reminders.TripReminderScheduler
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,7 +40,7 @@ class NotificationsInitializer
         private val settings: SettingsRepository,
         private val alertPoll: AlertPollScheduler,
         private val tripReminders: TripReminderScheduler,
-        private val nearby: NearbySuggestionScheduler,
+        private val nearby: NearbySuggestionsToggle,
         private val pushRegistrar: PushRegistrar,
         private val pollBaseline: io.github.rupakc.travelplanner.core.notifications.alerts.PollBaseline,
     ) {
@@ -67,7 +67,9 @@ class NotificationsInitializer
                     }
             }
             scope.launch { plans.plans.distinctUntilChanged().collect { tripReminders.reschedule(it) } }
-            scope.launch { settings.settings.map { it.nearbyNotifications }.distinctUntilChanged().collect(nearby::setEnabled) }
+            scope.launch {
+                settings.settings.map { it.nearbyNotifications }.distinctUntilChanged().collect(nearby::apply)
+            }
             scope.launch { pushRegistrar.run() }
         }
 
