@@ -212,6 +212,10 @@ class FakeNearbyRepository(var result: AppResult<NearbyResponse> = AppResult.Suc
     }
 
     override suspend fun lastLocation() = last
+
+    override suspend fun forgetLocation() {
+        last = null
+    }
 }
 
 class FakeCompareRepository(var result: AppResult<CompareSummary> = AppResult.Success(CompareSummary())) : CompareRepository {

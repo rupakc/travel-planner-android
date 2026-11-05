@@ -114,6 +114,8 @@ class NearbyRepositoryImpl
 
         override suspend fun lastLocation() = lastLocationStore.get()
 
+        override suspend fun forgetLocation() = lastLocationStore.clear()
+
         private companion object {
             const val HALF = 0.5
             const val CELL_DEGREES = 0.05

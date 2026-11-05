@@ -283,6 +283,9 @@ interface NearbyRepository {
 
     /** The last remembered cell, or null (never set, or cleared on sign-out). */
     suspend fun lastLocation(): LocationCell?
+
+    /** Deletes the remembered cell (nearby suggestions turned off). */
+    suspend fun forgetLocation()
 }
 
 interface CompareRepository {
