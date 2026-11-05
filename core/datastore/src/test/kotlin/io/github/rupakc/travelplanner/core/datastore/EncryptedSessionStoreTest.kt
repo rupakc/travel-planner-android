@@ -19,6 +19,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -58,7 +59,7 @@ class EncryptedSessionStoreTest {
     private fun TestScope.newStore(cipher: SessionCipher = AeadSessionCipher(aead), startSeconds: Long = 1_000): Pair<EncryptedSessionStore, java.io.File> {
         val file = tmp.newFile("session-${System.nanoTime()}.preferences_pb").also { it.delete() }
         val ds = PreferenceDataStoreFactory.create(scope = backgroundScope) { file }
-        return EncryptedSessionStore(ds, { cipher }, SchedulerClock(this, startSeconds)) to file
+        return EncryptedSessionStore(ds, { cipher }, SchedulerClock(this, startSeconds), StandardTestDispatcher(testScheduler)) to file
     }
 
     @Test
@@ -96,7 +97,7 @@ class EncryptedSessionStoreTest {
                 it[stringPreferencesKey("token")] = "legacy-token"
                 it[stringPreferencesKey("user_json")] = """{"username":"alice"}"""
             }
-            val store = EncryptedSessionStore(ds, { AeadSessionCipher(aead) }, SchedulerClock(this, 0))
+            val store = EncryptedSessionStore(ds, { AeadSessionCipher(aead) }, SchedulerClock(this, 0), StandardTestDispatcher(testScheduler))
             assertEquals("legacy-token", store.session.first()?.token)
             val raw = ds.data.first()
             assertNull(raw[stringPreferencesKey("token")])
