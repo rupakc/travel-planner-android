@@ -225,7 +225,13 @@ class FakeCompareRepository(var result: AppResult<CompareSummary> = AppResult.Su
 }
 
 class FakeDiscoverRepository(var result: AppResult<DiscoveryResponse> = AppResult.Success(DiscoveryResponse())) : DiscoverRepository {
-    override suspend fun discover(request: DiscoveryRequest) = result
+    /** Every request sent, oldest first. */
+    val requests = mutableListOf<DiscoveryRequest>()
+
+    override suspend fun discover(request: DiscoveryRequest): AppResult<DiscoveryResponse> {
+        requests += request
+        return result
+    }
 }
 
 class FakeImportRepository : ImportRepository {

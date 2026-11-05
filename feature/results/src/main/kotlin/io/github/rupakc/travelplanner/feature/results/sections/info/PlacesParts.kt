@@ -16,8 +16,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.json.EmptyJsonObject
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.section.PlaceToSee
@@ -26,6 +26,8 @@ import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.WeatherData
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.results.R
 import java.text.NumberFormat
 import kotlinx.serialization.json.JsonObject
@@ -97,7 +99,7 @@ private fun PlaceCard(
                 place.bestTimeToVisit?.takeIf { it.isNotBlank() }?.let { MetaText(it) }
                 when {
                     place.admissionFeeUsd == 0.0 -> MetaText(stringResource(R.string.places_free_entry), TravelTheme.extendedColors.success)
-                    (place.admissionFeeUsd ?: 0.0) > 0 -> MetaText(stringResource(R.string.places_fee, formatPrice(place.admissionFeeUsd)))
+                    (place.admissionFeeUsd ?: 0.0) > 0 -> MetaText(stringResource(R.string.places_fee, localPrice(place.admissionFeeUsd)))
                 }
             }
             if (place.highlights.isNotEmpty()) {
@@ -134,7 +136,7 @@ private fun PlaceCard(
 
 @Composable
 internal fun MetaText(text: String, color: androidx.compose.ui.graphics.Color = TravelTheme.colors.onSurfaceVariant) {
-    Text(text, style = TravelTheme.typography.labelMedium, color = color)
+    Text(text, style = TravelTheme.typography.labelMedium, color = color, modifier = Modifier.readsWithoutEmoji(text))
 }
 
 /** "★ 4.6 (1,234)" read by TalkBack as "Rated 4.6 (1,234)". */

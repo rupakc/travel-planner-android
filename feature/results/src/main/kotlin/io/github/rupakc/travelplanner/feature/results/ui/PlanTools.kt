@@ -69,6 +69,8 @@ import io.github.rupakc.travelplanner.core.domain.results.flightNo
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.SectionId
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.results.BestValueUi
 import io.github.rupakc.travelplanner.feature.results.BudgetUi
 import io.github.rupakc.travelplanner.feature.results.PlanSummary
@@ -102,15 +104,15 @@ internal fun BestValueCard(ui: BestValueUi, onEvent: (ResultsEvent) -> Unit, onO
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             Text(stringResource(R.string.results_package_total), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.onSurfaceVariant)
-            Text(formatPrice(pkg.total), style = TravelTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(localPrice(pkg.total), style = TravelTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             pkg.budget?.let { b ->
                 Pill(
-                    stringResource(if (b.over) R.string.results_over_budget else R.string.results_under_budget, formatPrice(b.amount.toDouble())),
+                    stringResource(if (b.over) R.string.results_over_budget else R.string.results_under_budget, localPrice(b.amount.toDouble())),
                     tone = if (b.over) PillTone.Warning else PillTone.Positive,
                 )
             }
         }
-        ui.planTotal?.let { Text(stringResource(R.string.results_plan_total, formatPrice(it)), style = TravelTheme.typography.bodySmall) }
+        ui.planTotal?.let { Text(stringResource(R.string.results_plan_total, localPrice(it)), style = TravelTheme.typography.bodySmall) }
         if (pkg.items.any { it.type == PackageItemType.FLIGHT || it.type == PackageItemType.FLIGHTS }) {
             Text(stringResource(R.string.results_flight_prices_pp), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
         }
@@ -200,12 +202,12 @@ private fun describe(entry: PackageItem): Triple<String, String?, String?> =
                 listOfNotNull(item.flight.airlineName, item.flight.flightNo).joinToString(" ")
                     .ifBlank { stringResource(R.string.results_flight_fallback_name) },
                 item.flight.bookingUrl,
-                item.flight.priceUsd?.let { formatPrice(it) },
+                item.flight.priceUsd?.let { localPrice(it) },
             )
         }
 
         is PlanItem.HotelItem -> {
-            val nightly = item.hotel.pricePerNightUsd?.let { stringResource(R.string.results_hotel_per_night, formatPrice(it)) }
+            val nightly = item.hotel.pricePerNightUsd?.let { stringResource(R.string.results_hotel_per_night, localPrice(it)) }
             Triple(item.hotel.name.orEmpty(), item.hotel.bookingUrl, nightly)
         }
 
@@ -213,7 +215,7 @@ private fun describe(entry: PackageItem): Triple<String, String?, String?> =
             Triple(
                 item.activity.name.orEmpty(),
                 item.activity.bookingUrl,
-                item.activity.priceUsd?.let { if (it == 0.0) stringResource(R.string.results_free) else formatPrice(it) },
+                item.activity.priceUsd?.let { if (it == 0.0) stringResource(R.string.results_free) else localPrice(it) },
             )
         }
 
@@ -229,7 +231,7 @@ private fun describe(entry: PackageItem): Triple<String, String?, String?> =
             Triple(
                 listOfNotNull(item.plan.provider, item.plan.planName).joinToString(" ").ifBlank { stringResource(R.string.results_sim_fallback_name) },
                 item.plan.url,
-                item.plan.priceUsd?.let { formatPrice(it) },
+                item.plan.priceUsd?.let { localPrice(it) },
             )
         }
 
@@ -246,11 +248,11 @@ private fun reasonText(reason: PickReason): String =
         }
 
         is PickReason.FewerStops -> {
-            stringResource(R.string.results_reason_fewer_stops, formatPrice(reason.extra.toDouble()))
+            stringResource(R.string.results_reason_fewer_stops, localPrice(reason.extra.toDouble()))
         }
 
         is PickReason.SavesTime -> {
-            stringResource(R.string.results_reason_saves_time, durationText(reason.minutes), formatPrice(reason.extra.toDouble()))
+            stringResource(R.string.results_reason_saves_time, durationText(reason.minutes), localPrice(reason.extra.toDouble()))
         }
 
         is PickReason.BestReviewed -> {
@@ -272,8 +274,8 @@ private fun reasonText(reason: PickReason): String =
             val base =
                 when {
                     reason.price == 0.0 -> stringResource(R.string.results_free)
-                    reason.typical -> stringResource(R.string.results_reason_typical, formatPrice(reason.price.roundToLong().toDouble()))
-                    else -> formatPrice(reason.price.roundToLong().toDouble())
+                    reason.typical -> stringResource(R.string.results_reason_typical, localPrice(reason.price.roundToLong().toDouble()))
+                    else -> localPrice(reason.price.roundToLong().toDouble())
                 }
             if (reason.matchesInterests) stringResource(R.string.results_reason_interests, base) else base
         }
@@ -341,9 +343,9 @@ internal fun BudgetPlannerCard(ui: BudgetUi, onEvent: (ResultsEvent) -> Unit, mo
             Column(Modifier.padding(top = TravelTheme.spacing.sm)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(label, style = TravelTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-                    Text(formatPrice(value), style = TravelTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text(localPrice(value), style = TravelTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 }
-                val valueText = stringResource(R.string.results_budget_slider_value, formatPrice(value), label)
+                val valueText = stringResource(R.string.results_budget_slider_value, localPrice(value), label)
                 Slider(
                     value = value.toFloat(),
                     onValueChange = { onEvent(ResultsEvent.BudgetShare(category, (Math.round(it / BUDGET_STEP) * BUDGET_STEP).toDouble())) },
@@ -367,7 +369,7 @@ internal fun BudgetPlannerCard(ui: BudgetUi, onEvent: (ResultsEvent) -> Unit, mo
                 Text(stringResource(R.string.results_budget_other), style = TravelTheme.typography.labelLarge)
                 Text(stringResource(R.string.results_budget_other_hint), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
             }
-            Text(formatPrice(a.other), style = TravelTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(localPrice(a.other), style = TravelTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
         }
         Row(
             Modifier
@@ -429,16 +431,16 @@ private fun categoryColor(c: BudgetCategory): Color =
 private fun fitText(c: BudgetCategory, ui: BudgetUi): String =
     when (c) {
         BudgetCategory.FLIGHTS -> {
-            pluralStringResource(R.plurals.results_budget_flights_fit, ui.fit.flights.total, ui.fit.flights.count, ui.fit.flights.total)
+            stringResource(R.string.results_budget_flights_fit, ui.fit.flights.count, ui.fit.flights.total)
         }
 
         BudgetCategory.STAY -> {
-            pluralStringResource(R.plurals.results_budget_hotels_fit, ui.fit.hotels.total, ui.fit.hotels.count, ui.fit.hotels.total)
+            stringResource(R.string.results_budget_hotels_fit, ui.fit.hotels.count, ui.fit.hotels.total)
         }
 
         BudgetCategory.ACTIVITIES -> {
             val n = ui.fit.activities.picked.size
-            pluralStringResource(R.plurals.results_budget_activities_fit, n, n, formatPrice(ui.fit.activities.spent))
+            pluralStringResource(R.plurals.results_budget_activities_fit, n, n, localPrice(ui.fit.activities.spent))
         }
     }
 
@@ -454,7 +456,8 @@ private fun StackedBar(ui: BudgetUi) {
             categoryLabel(BudgetCategory.ACTIVITIES) to (a.activities to categoryColor(BudgetCategory.ACTIVITIES)),
             stringResource(R.string.results_budget_other) to (a.other to TravelTheme.colors.outline),
         )
-    val a11y = parts.joinToString(", ") { (label, v) -> "$label ${formatPrice(v.first)}" }
+    val locale = currentLocale()
+    val a11y = parts.joinToString(", ") { (label, v) -> "$label ${formatPrice(v.first, locale = locale)}" }
     Row(
         Modifier
             .fillMaxWidth()
@@ -553,7 +556,9 @@ private fun MetricTile(row: MetricDiff) {
             },
         )
 
-    fun fmt(v: Double) = if (row.metric.isMoney) formatPrice(v.roundToLong().toDouble()) else v.roundToLong().toString()
+    val locale = currentLocale()
+
+    fun fmt(v: Double) = if (row.metric.isMoney) formatPrice(v.roundToLong().toDouble(), locale = locale) else v.roundToLong().toString()
     val change =
         when (row.improved) {
             null -> stringResource(R.string.results_metric_same)
@@ -585,7 +590,7 @@ private fun MetricTile(row: MetricDiff) {
 internal fun PlanBar(plan: PlanSummary, onOpen: () -> Unit, modifier: Modifier = Modifier) {
     val count = pluralStringResource(R.plurals.results_plan_items, plan.count, plan.count)
     val budget =
-        plan.budget?.let { stringResource(if (it.over) R.string.results_over_budget else R.string.results_under_budget, formatPrice(it.amount.toDouble())) }
+        plan.budget?.let { stringResource(if (it.over) R.string.results_over_budget else R.string.results_under_budget, localPrice(it.amount.toDouble())) }
     val colors = TravelTheme.colors
     Surface(modifier.fillMaxWidth(), color = colors.inverseSurface, contentColor = colors.inverseOnSurface, tonalElevation = TravelTheme.spacing.xs) {
         Row(
@@ -595,7 +600,7 @@ internal fun PlanBar(plan: PlanSummary, onOpen: () -> Unit, modifier: Modifier =
             Column(Modifier.weight(1f).semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }) {
                 Text(stringResource(R.string.results_my_plan), style = TravelTheme.typography.titleSmall)
                 Text(
-                    listOfNotNull(count, plan.total.takeIf { it > 0 }?.let { formatPrice(it) }, budget).joinToString(" · "),
+                    listOfNotNull(count, plan.total.takeIf { it > 0 }?.let { localPrice(it) }, budget).joinToString(" · "),
                     style = TravelTheme.typography.bodySmall,
                 )
             }

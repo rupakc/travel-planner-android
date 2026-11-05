@@ -28,6 +28,7 @@ import java.time.ZoneId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -146,6 +147,23 @@ class AlertsViewModelTest {
             advanceUntilIdle()
             assertNull(vm.state.value.undo)
             assertEquals(listOf(2L), fares.watches.value.map { it.id })
+        }
+
+    @Test
+    fun `undo still works after a long accessibility timeout (no fixed timer)`() =
+        runTest {
+            fares.watches.value = listOf(fare(1), fare(2))
+            val vm = vm(appScope = this)
+            advanceUntilIdle()
+            vm.onEvent(AlertsEvent.Delete("watch-1"))
+            // TalkBack / "Time to take action" can keep the snackbar up for minutes.
+            advanceTimeBy(120_000)
+            advanceUntilIdle()
+            assertEquals(2, fares.watches.value.size)
+            vm.onEvent(AlertsEvent.Undo)
+            advanceUntilIdle()
+            assertEquals(setOf(1L, 2L), vm.state.value.fares!!.map { it.id }.toSet())
+            assertEquals(2, fares.watches.value.size)
         }
 
     @Test

@@ -42,6 +42,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVarian
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
+import io.github.rupakc.travelplanner.core.domain.search.formatTripDates
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.search.R
 import io.github.rupakc.travelplanner.feature.search.RecentNotice
 import io.github.rupakc.travelplanner.feature.search.RecentSearchCard
@@ -108,7 +110,11 @@ private fun RecentCard(card: RecentSearchCard, onLoad: (String) -> Unit, onRerun
             ) {
                 Text(summary.route, style = TravelTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Row {
-                    Text(summary.dates, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+                    Text(
+                        formatTripDates(card.entry.search.departureDate, card.entry.search.returnDate, currentLocale()),
+                        style = TravelTheme.typography.bodySmall,
+                        color = TravelTheme.colors.onSurfaceVariant,
+                    )
                     if (card.datesPassed) {
                         Text(
                             " " + stringResource(R.string.search_recent_dates_passed),

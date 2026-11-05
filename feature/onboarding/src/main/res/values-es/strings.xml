@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_title">Te damos la bienvenida a Voyager</string>
+    <string name="onboarding_title">Te damos la bienvenida a %1$s</string>
     <string name="onboarding_message">Seis preguntas rápidas adaptan tu inicio y tus funciones a tu forma de viajar.</string>
     <string name="onboarding_retake_title">Repite el cuestionario</string>
     <string name="onboarding_retake_message">Tus respuestas actuales ya están marcadas. Cambia lo que sea distinto y actualizaremos tu tipo de viajero y tus funciones.</string>

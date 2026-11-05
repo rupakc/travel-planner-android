@@ -58,11 +58,12 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.chat.ChatItinerary
 import io.github.rupakc.travelplanner.core.model.chat.ChatItineraryDay
 import io.github.rupakc.travelplanner.core.model.chat.ChatSlot
 import io.github.rupakc.travelplanner.core.model.section.SectionId
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.chat.R
 import io.github.rupakc.travelplanner.feature.chat.model.ChatTripMap
 import java.time.LocalDate
@@ -126,7 +127,7 @@ private fun RouteCard(tripMap: ChatTripMap, itinerary: ChatItinerary?, generatin
             }
             summary?.totalCostUsd?.takeIf { it > 0 }?.let { total ->
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(formatPrice(total), style = TravelTheme.typography.titleLarge, color = TravelTheme.colors.primary, fontWeight = FontWeight.Bold)
+                    Text(localPrice(total), style = TravelTheme.typography.titleLarge, color = TravelTheme.colors.primary, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.chat_est_per_person), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
                 }
             }
@@ -159,7 +160,7 @@ private fun RouteCard(tripMap: ChatTripMap, itinerary: ChatItinerary?, generatin
 private fun TripFacts(tripMap: ChatTripMap, itinerary: ChatItinerary?) {
     val facts =
         buildList {
-            val dates = listOfNotNull(formatDay(tripMap.departureDate), formatDay(tripMap.returnDate)).joinToString(" – ")
+            val dates = listOfNotNull(formatDay(tripMap.departureDate, currentLocale()), formatDay(tripMap.returnDate, currentLocale())).joinToString(" – ")
             if (dates.isNotEmpty()) add(dates)
             itinerary?.tripSummary?.totalNights?.takeIf { it > 0 }?.let { add(pluralStringResource(R.plurals.chat_trip_nights, it, it)) }
             val days = itinerary?.days.orEmpty()
@@ -224,7 +225,7 @@ private fun IntercityRow(itinerary: ChatItinerary) {
                             opt.duration?.let { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
                             opt.priceUsd?.takeIf { it > 0 }?.let {
                                 Text(
-                                    formatPrice(it),
+                                    localPrice(it),
                                     style = TravelTheme.typography.bodySmall,
                                     color = TravelTheme.colors.primary,
                                     fontWeight = FontWeight.Bold,
@@ -287,7 +288,7 @@ private fun DayCard(day: ChatItineraryDay, number: Int, open: Boolean, cityIndex
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        listOfNotNull(stringResource(R.string.chat_day, number), formatDay(day.date)).joinToString(" · "),
+                        listOfNotNull(stringResource(R.string.chat_day, number), formatDay(day.date, currentLocale())).joinToString(" · "),
                         style = TravelTheme.typography.titleSmall,
                         modifier = Modifier.semantics { heading() },
                     )
@@ -305,7 +306,7 @@ private fun DayCard(day: ChatItineraryDay, number: Int, open: Boolean, cityIndex
                 }
                 day.dailyCostUsd?.takeIf {
                     it > 0
-                }?.let { Text(formatPrice(it), style = TravelTheme.typography.labelLarge, color = TravelTheme.colors.primary) }
+                }?.let { Text(localPrice(it), style = TravelTheme.typography.labelLarge, color = TravelTheme.colors.primary) }
                 Icon(if (open) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = null)
             }
             if (open) DayBody(day)
@@ -331,12 +332,12 @@ private fun DayBody(day: ChatItineraryDay) {
                     val stars = hotel.stars?.takeIf { it > 0 }?.let { " " + "★".repeat(it.toInt().coerceIn(1, MAX_STARS)) }.orEmpty()
                     Text(hotel.name.orEmpty() + stars, style = TravelTheme.typography.titleSmall)
                     listOfNotNull(hotel.tier, hotel.neighbourhood).takeIf { it.isNotEmpty() }?.let {
-                        Text(it.joinToString(" · "), style = TravelTheme.typography.bodySmall, color = accent.icon)
+                        Text(it.joinToString(" · "), style = TravelTheme.typography.bodySmall, color = accent.text)
                     }
                     hotel.highlight?.let { Text("“$it”", style = TravelTheme.typography.bodySmall, fontStyle = FontStyle.Italic) }
                 }
                 hotel.pricePerNightUsd?.takeIf { it > 0 }?.let {
-                    Text(stringResource(R.string.chat_per_night, formatPrice(it)), style = TravelTheme.typography.labelLarge, color = accent.icon)
+                    Text(stringResource(R.string.chat_per_night, localPrice(it)), style = TravelTheme.typography.labelLarge, color = accent.text)
                 }
             }
         }
@@ -348,7 +349,7 @@ private fun DayBody(day: ChatItineraryDay) {
                 stringResource(R.string.chat_must_see),
                 day.placesToSee.mapNotNull { p ->
                     val name = p.name ?: return@mapNotNull null
-                    val price = p.entryUsd?.let { if (it == 0.0) stringResource(R.string.chat_free) else formatPrice(it) }
+                    val price = p.entryUsd?.let { if (it == 0.0) stringResource(R.string.chat_free) else localPrice(it) }
                     listOfNotNull(name, price).joinToString(" · ")
                 },
             )
@@ -379,7 +380,7 @@ private fun SlotLine(labelRes: Int, slot: ChatSlot?) {
             Text(activity, style = TravelTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
             slot.place?.takeIf { it != activity }?.let { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
         }
-        slot.costUsd?.takeIf { it > 0 }?.let { Text(formatPrice(it), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.primary) }
+        slot.costUsd?.takeIf { it > 0 }?.let { Text(localPrice(it), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.primary) }
     }
 }
 
@@ -411,10 +412,11 @@ private fun DayCardSkeleton() {
     }
 }
 
-/** "2026-04-01" → "Wed, Apr 1" in the device locale; unparseable dates are shown as received. */
-internal fun formatDay(date: String?): String? {
+/** "2026-04-01" → "Wed, Apr 1" / "mié, 1 abr" in [locale] (best pattern for it); unparseable dates are shown as received. */
+internal fun formatDay(date: String?, locale: Locale): String? {
     if (date.isNullOrBlank()) return null
-    return runCatching { LocalDate.parse(date).format(DateTimeFormatter.ofPattern("EEE, MMM d", Locale.getDefault())) }.getOrDefault(date)
+    val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, "EEEMMMd")
+    return runCatching { LocalDate.parse(date).format(DateTimeFormatter.ofPattern(pattern, locale)) }.getOrDefault(date)
 }
 
 /** Opens [label] in the Maps app (geo: intent); coordinates when the API gave them, else a place search. */

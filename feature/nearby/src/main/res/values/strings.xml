@@ -5,7 +5,7 @@
     <string name="nearby_rationale_title">See things to do near you</string>
     <string name="nearby_rationale_precise">Approximate location is enough. You can share your precise location if you like; we never track you in the background for this screen.</string>
     <string name="nearby_allow">Allow location</string>
-    <string name="nearby_denied_title">Location is off for Voyager</string>
+    <string name="nearby_denied_title">Location is off for %1$s</string>
     <string name="nearby_denied_body">Near me needs your approximate location to find things to do around you. You can allow it in Settings.</string>
     <string name="nearby_open_settings">Open settings</string>
     <string name="nearby_try_again">Try again</string>

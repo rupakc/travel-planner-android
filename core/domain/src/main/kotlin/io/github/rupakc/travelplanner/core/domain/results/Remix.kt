@@ -64,10 +64,10 @@ object Remix {
         RemixPreset.entries.firstOrNull { it.id == presetId }?.let { apply(search, it) } ?: search
 
     /** Web `formatMetricValue`: "$1,235" for money, the plain number for counts, "—" for unknown. */
-    fun formatMetricValue(value: Double?, isMoney: Boolean): String =
+    fun formatMetricValue(value: Double?, isMoney: Boolean, locale: java.util.Locale = java.util.Locale.US): String =
         when {
             value == null -> "—"
-            isMoney -> "$" + "%,d".format(java.util.Locale.US, jsRound(value).toLong())
+            isMoney -> io.github.rupakc.travelplanner.core.domain.format.formatWholeUsd(value, locale)
             value == Math.floor(value) -> value.toLong().toString()
             else -> value.toString()
         }

@@ -7,15 +7,19 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-/** Material 3 light scheme from the web tokens (spec §5): teal primary, sky secondary, violet tertiary. */
+/**
+ * Material 3 light scheme from the web tokens (spec §5): teal primary, sky secondary, violet tertiary.
+ * Primary is teal-700 (the web's hover shade) and secondary sky-700 so text on and in them meets WCAG AA;
+ * outline is gray-500 so input borders reach 3:1. ContrastTest guards every pair.
+ */
 internal val LightColors: ColorScheme =
     lightColorScheme(
-        primary = Palette.Teal600,
+        primary = Palette.Teal700,
         onPrimary = Palette.White,
         primaryContainer = Palette.Teal100,
         onPrimaryContainer = Palette.Teal900,
         inversePrimary = Palette.Teal400,
-        secondary = Palette.Sky600,
+        secondary = Palette.Sky700,
         onSecondary = Palette.White,
         secondaryContainer = Palette.Sky100,
         onSecondaryContainer = Palette.Sky900,
@@ -33,10 +37,10 @@ internal val LightColors: ColorScheme =
         onSurface = Palette.Gray900,
         surfaceVariant = Palette.Slate100,
         onSurfaceVariant = Palette.Gray600,
-        surfaceTint = Palette.Teal600,
+        surfaceTint = Palette.Teal700,
         inverseSurface = Palette.Slate800,
         inverseOnSurface = Palette.Slate100,
-        outline = Palette.Gray300,
+        outline = Palette.Gray500,
         outlineVariant = Palette.Gray200,
         surfaceBright = Palette.White,
         surfaceDim = Palette.Gray100,
@@ -52,7 +56,7 @@ internal val DarkColors: ColorScheme =
     darkColorScheme(
         primary = Palette.Teal400,
         onPrimary = Palette.Teal950,
-        primaryContainer = Palette.Teal800,
+        primaryContainer = Palette.Teal900,
         onPrimaryContainer = Palette.Teal100,
         inversePrimary = Palette.Teal600,
         secondary = Palette.Sky400,
@@ -72,11 +76,11 @@ internal val DarkColors: ColorScheme =
         surface = Palette.Slate900,
         onSurface = Palette.Slate100,
         surfaceVariant = Palette.Slate800,
-        onSurfaceVariant = Palette.Slate400,
+        onSurfaceVariant = Palette.Slate300,
         surfaceTint = Palette.Teal400,
         inverseSurface = Palette.Slate100,
         inverseOnSurface = Palette.Slate800,
-        outline = Palette.Slate600,
+        outline = Palette.Slate500,
         outlineVariant = Palette.Slate700,
         surfaceBright = Palette.Slate800,
         surfaceDim = Palette.Slate950,
@@ -105,14 +109,14 @@ data class ExtendedColors(
 
 internal val LightExtendedColors =
     ExtendedColors(
-        success = Palette.Green600,
+        success = Palette.Emerald700,
         onSuccessContainer = Palette.Emerald700,
         successContainer = Palette.Green50,
         warning = Palette.Amber700,
         onWarningContainer = Palette.Amber700,
         warningContainer = Palette.Amber50,
         warningBorder = Palette.Amber200,
-        info = Palette.Sky600,
+        info = Palette.Sky700,
         infoContainer = Palette.Sky50,
         skeletonBase = Palette.Slate100,
         skeletonHighlight = Palette.Slate200,
@@ -128,7 +132,7 @@ internal val DarkExtendedColors =
         warningContainer = Palette.Amber900,
         warningBorder = Palette.Amber700,
         info = Palette.Sky400,
-        infoContainer = Palette.Sky900,
+        infoContainer = Palette.Sky950,
         skeletonBase = Palette.Slate800,
         skeletonHighlight = Palette.Slate700,
     )

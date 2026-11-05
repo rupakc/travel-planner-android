@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.results.R
@@ -68,7 +69,7 @@ fun Pill(text: String, modifier: Modifier = Modifier, tone: PillTone = PillTone.
             horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs),
         ) {
             if (icon != null) Icon(icon, contentDescription = null, modifier = Modifier.size(PILL_ICON))
-            Text(text, style = TravelTheme.typography.labelSmall)
+            Text(text, style = TravelTheme.typography.labelSmall, modifier = Modifier.readsWithoutEmoji(text))
         }
     }
 }

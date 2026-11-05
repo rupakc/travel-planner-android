@@ -18,11 +18,11 @@ const val MAX_COMPARE_DESTINATIONS = 3
  * run the exact compared request). Blank and case-insensitive duplicate destinations are
  * dropped, names are trimmed, multi-city fields are cleared.
  */
-fun buildCompareRequests(shared: SearchForm, destinations: List<String>): List<TravelSearchRequest> {
+fun buildCompareRequests(shared: SearchForm, destinations: List<String>, locale: Locale): List<TravelSearchRequest> {
     val seen = HashSet<String>()
     val unique =
         destinations.map(String::trim).filter { it.isNotEmpty() && seen.add(it.lowercase(Locale.ROOT)) }
-    val base = buildSearchRequest(shared.copy(mustInclude = null, importSource = null), emptyList())
+    val base = buildSearchRequest(shared.copy(mustInclude = null, importSource = null), emptyList(), locale)
     return unique.map { base.copy(destination = it, destinations = null, destinationNights = null) }
 }
 
@@ -70,10 +70,10 @@ fun bestByRow(summaries: List<CompareSummary?>): Map<CompareRow, Set<Int>> =
         row to values.filter { it.second == best }.map { it.first }.toSet()
     }.toMap()
 
-/** Web `fmtUsd`: "$1,234" (rounded), "—" when unknown. */
-fun fmtUsd(value: Double?): String {
+/** Web `fmtUsd`: "$1,234" (rounded; "1234 US$" for a Spanish [locale]), "—" when unknown. */
+fun fmtUsd(value: Double?, locale: Locale = Locale.US): String {
     if (value == null || !value.isFinite()) return DASH
-    return "$" + NumberFormat.getIntegerInstance(Locale.US).format(value.roundToLong())
+    return io.github.rupakc.travelplanner.core.domain.format.formatWholeUsd(value, locale)
 }
 
 /** Web `fmtDuration`: "2h 5m", null when unknown or not positive. */

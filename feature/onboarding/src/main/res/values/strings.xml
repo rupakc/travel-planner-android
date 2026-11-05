@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Welcome -->
-    <string name="onboarding_title">Welcome to Voyager</string>
+    <string name="onboarding_title">Welcome to %1$s</string>
     <string name="onboarding_message">Six quick questions tailor your home screen and features to how you travel.</string>
     <string name="onboarding_retake_title">Retake the quiz</string>
     <string name="onboarding_retake_message">Your current answers are filled in. Change what\'s different and we\'ll update your traveller type and features.</string>

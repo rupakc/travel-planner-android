@@ -39,10 +39,8 @@ import java.time.Instant
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -174,7 +172,6 @@ class AlertsViewModel
         val state: StateFlow<AlertsUiState> = mutable.asStateFlow()
         private val effects = Channel<AlertsEffect>(Channel.BUFFERED)
         val effect: Flow<AlertsEffect> = effects.receiveAsFlow()
-        private var pendingDelete: Job? = null
 
         init {
             load()
@@ -362,7 +359,11 @@ class AlertsViewModel
             }
         }
 
-        /** Hides the watch at once and deletes it when the Undo snackbar closes (or the screen goes). */
+        /**
+         * Hides the watch at once and deletes it when the Undo snackbar closes without Undo
+         * ([AlertsEvent.UndoExpired]), when another watch is deleted, or when the screen goes ([onCleared]).
+         * No timer of our own: the snackbar stays up for the user's accessibility timeout (TalkBack can make it minutes).
+         */
         private fun delete(key: String) {
             commitDelete()
             val w = find(key) ?: return
@@ -372,15 +373,9 @@ class AlertsViewModel
                     is AnyWatch.Price -> s.copy(prices = s.prices?.filterNot { it.id == w.id }, undo = w)
                 }
             }
-            pendingDelete =
-                viewModelScope.launch {
-                    delay(UNDO_WINDOW_MILLIS)
-                    commitDelete()
-                }
         }
 
         private fun undo() {
-            pendingDelete?.cancel()
             val w = mutable.value.undo ?: return
             mutable.update { s ->
                 when (w) {
@@ -391,8 +386,6 @@ class AlertsViewModel
         }
 
         private fun commitDelete() {
-            pendingDelete?.cancel()
-            pendingDelete = null
             val w = mutable.value.undo ?: return
             mutable.update { it.copy(undo = null) }
             // Outlives the screen: a delete the user didn't undo must reach the server.
@@ -442,7 +435,6 @@ class AlertsViewModel
             /** SavedStateHandle keys of [AlertsRoute]. */
             const val ARG_KIND = "kind"
             const val ARG_WATCH = "watchId"
-            private const val UNDO_WINDOW_MILLIS = 6_000L
             private const val FLEXIBLE_DAYS = 3
         }
     }

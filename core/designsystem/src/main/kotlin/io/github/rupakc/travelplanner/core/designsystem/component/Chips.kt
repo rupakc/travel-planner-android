@@ -24,7 +24,8 @@ fun TpChip(
     FilterChip(
         selected = selected,
         onClick = onClick,
-        label = { Text(label) },
+        // Decorative emoji ("🍜 Food") are shown but not read aloud.
+        label = { Text(label, Modifier.readsWithoutEmoji(label)) },
         modifier = modifier,
         enabled = enabled,
         shape = TravelShape.Pill,

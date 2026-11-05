@@ -41,11 +41,11 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVarian
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
 import io.github.rupakc.travelplanner.core.domain.plan.CostCategory
 import io.github.rupakc.travelplanner.core.domain.plan.CostPart
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
 import io.github.rupakc.travelplanner.feature.plan.model.PlanItineraryUi
@@ -151,7 +151,7 @@ private fun NameBlock(content: MyPlanContent, onEvent: (MyPlanEvent) -> Unit) {
             }
             content.budgetUsd?.takeIf { it > 0 }?.let {
                 Text(
-                    stringResource(R.string.plan_budget, formatPrice(it)),
+                    stringResource(R.string.plan_budget, localPrice(it)),
                     style = TravelTheme.typography.labelLarge,
                     color = TravelTheme.colors.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.CenterVertically),

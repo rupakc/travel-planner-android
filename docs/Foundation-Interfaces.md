@@ -645,7 +645,7 @@ are declared in the manifest; the plan/chat teams add their `navDeepLink`s).
 ## 6. Design system (`….core.designsystem`) and shared UI (`….core.ui`)
 
 - Theme: `TravelTheme(themeMode, dynamicColor) { … }` (app root only). Accessors:
-  `TravelTheme.colors` (M3 `ColorScheme`: primary teal-600/teal-400 dark, secondary sky, tertiary violet, error red-700),
+  `TravelTheme.colors` (M3 `ColorScheme`: primary teal-700 (WCAG AA; the web hover shade)/teal-400 dark, secondary sky-700, tertiary violet, error red-700),
   `TravelTheme.typography` (Sora display/headline, Inter title/body/label via Google downloadable fonts, system fallback),
   `TravelTheme.shapes`, `TravelTheme.extendedColors` (`success`, `warning` (Estimate/over budget), `info`,
   `skeletonBase/Highlight`, containers), `TravelTheme.spacing` (`xxs 2, xs 4, sm 8, md 12, lg 16, xl 24, xxl 32,

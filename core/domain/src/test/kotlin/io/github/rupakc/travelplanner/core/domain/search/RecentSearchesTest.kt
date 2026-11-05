@@ -4,6 +4,7 @@ import io.github.rupakc.travelplanner.core.model.preferences.RecentSearchIn
 import io.github.rupakc.travelplanner.core.model.preferences.RecentStop
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import java.time.LocalDate
+import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -171,7 +172,7 @@ class RecentSearchesTest {
                 travellers = TravellerCounts(adults = 1, seniors = 1),
             )
         val stops = listOf(ExtraStop("Seoul", "2"))
-        val restored = recentSearchToForm(toRecentSearch(buildSearchRequest(form, stops)), LocalDate.parse("2027-01-01"))
+        val restored = recentSearchToForm(toRecentSearch(buildSearchRequest(form, stops, Locale.US)), LocalDate.parse("2027-01-01"))
         assertEquals(form, restored.form)
         assertEquals(stops, restored.stops)
     }

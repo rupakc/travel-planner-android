@@ -256,7 +256,7 @@
     <string name="search_import_typical_short">Usually 5–10 seconds</string>
     <string name="search_import_elapsed">%1$s · %2$ds so far</string>
     <string name="search_import_cancel">Cancel</string>
-    <string name="search_import_network">We couldn\'t reach Voyager. Check your connection and try again.</string>
+    <string name="search_import_network">We couldn\'t reach %1$s. Check your connection and try again.</string>
     <string name="search_import_unknown">Something went wrong while reading that. Try again in a moment.</string>
     <string name="search_import_too_large">That upload is too big — use up to 4 screenshots of 5 MB or less.</string>
     <string name="search_import_action_text">Paste the text</string>

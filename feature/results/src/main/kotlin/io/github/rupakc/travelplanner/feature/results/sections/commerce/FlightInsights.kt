@@ -43,11 +43,12 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.domain.results.FareCalendarRules
 import io.github.rupakc.travelplanner.core.domain.results.PriceLevel
 import io.github.rupakc.travelplanner.core.model.search.FareCalendarDate
 import io.github.rupakc.travelplanner.core.model.section.PricingAdvisorData
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.feature.results.FareCalendarUi
 import io.github.rupakc.travelplanner.feature.results.LoadStatus
 import io.github.rupakc.travelplanner.feature.results.R
@@ -162,7 +163,7 @@ fun PriceInsightsChip(insights: JsonObject?, modifier: Modifier = Modifier) {
         )
     val range =
         if (chip.typicalLow != null && chip.typicalHigh != null) {
-            stringResource(R.string.results_insight_range, formatPrice(chip.typicalLow), formatPrice(chip.typicalHigh))
+            stringResource(R.string.results_insight_range, localPrice(chip.typicalLow), localPrice(chip.typicalHigh))
         } else {
             null
         }
@@ -220,7 +221,14 @@ fun FareCalendarStrip(state: FareCalendarUi, onEvent: (ResultsEvent) -> Unit, mo
                 }
             }
             state.pending?.let { pending ->
-                val range = listOfNotNull(pending.departureDate?.let(::formatDay), pending.returnDate?.let(::formatDay)).joinToString(" – ")
+                val locale = currentLocale()
+                val range =
+                    listOfNotNull(
+                        pending.departureDate?.let {
+                            formatDay(it, locale)
+                        },
+                        pending.returnDate?.let { formatDay(it, locale) },
+                    ).joinToString(" – ")
                 Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
                     Text(stringResource(R.string.results_fare_replan_prompt, range), style = TravelTheme.typography.bodySmall)
                     Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
@@ -241,6 +249,8 @@ private const val FARE_SKELETON_CELLS = 7
 private fun FareCells(dates: List<FareCalendarDate>, onPick: (FareCalendarDate) -> Unit) {
     val selected = dates.firstOrNull { it.isSelected == true }
     val cheapest = FareCalendarRules.cheapestDeparture(dates)
+    val locale = currentLocale()
+    val cheapestLabel = stringResource(R.string.results_fare_cheapest)
     LazyRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
         items(dates, key = { it.departureDate ?: it.hashCode().toString() }, contentType = { "fare" }) { entry ->
             val isSelected = entry.isSelected == true
@@ -251,12 +261,13 @@ private fun FareCells(dates: List<FareCalendarDate>, onPick: (FareCalendarDate) 
                     isSelected -> stringResource(R.string.results_fare_yours)
                     delta == null -> ""
                     delta == 0L -> stringResource(R.string.results_fare_same)
-                    delta < 0 -> stringResource(R.string.results_fare_less, formatPrice(abs(delta).toDouble()))
-                    else -> stringResource(R.string.results_fare_more, formatPrice(delta.toDouble()))
+                    delta < 0 -> stringResource(R.string.results_fare_less, localPrice(abs(delta).toDouble()))
+                    else -> stringResource(R.string.results_fare_more, localPrice(delta.toDouble()))
                 }
-            val price = entry.cheapestUsd?.let { formatPrice(it) } ?: "—"
-            val day = entry.departureDate?.let(::formatDay).orEmpty()
-            val a11y = listOf(day, price, deltaText).filter(String::isNotEmpty).joinToString(", ")
+            val price = entry.cheapestUsd?.let { localPrice(it) } ?: "—"
+            val day = entry.departureDate?.let { formatDay(it, locale) }.orEmpty()
+            // Cheapest is said and shown in words, not by the green fill alone.
+            val a11y = listOf(day, price, deltaText, if (isCheapest) cheapestLabel else "").filter(String::isNotEmpty).joinToString(", ")
             OutlinedCard(
                 onClick = { if (!isSelected) onPick(entry) },
                 modifier =
@@ -278,6 +289,14 @@ private fun FareCells(dates: List<FareCalendarDate>, onPick: (FareCalendarDate) 
                 Column(Modifier.fillMaxWidth().padding(all = TravelTheme.spacing.sm), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(day, style = TravelTheme.typography.labelSmall)
                     Text(price, style = TravelTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    if (isCheapest) {
+                        Text(
+                            cheapestLabel,
+                            style = TravelTheme.typography.labelSmall,
+                            color = TravelTheme.extendedColors.onSuccessContainer,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                     Text(
                         deltaText,
                         style = TravelTheme.typography.labelSmall,
@@ -296,9 +315,9 @@ private fun FareCells(dates: List<FareCalendarDate>, onPick: (FareCalendarDate) 
     }
 }
 
-/** "Tue 3 Nov" in the user's locale. */
-internal fun formatDay(iso: String): String = FareCalendarRules.formatDay(iso, java.util.Locale.getDefault())
+/** "Tue 3 Nov" in [locale] (the UI passes `currentLocale()`). */
+internal fun formatDay(iso: String, locale: java.util.Locale): String = FareCalendarRules.formatDay(iso, locale)
 
-/** Medium localized date ("Dec 10, 2026"). */
-internal fun formatDate(iso: String?): String? =
-    iso?.let { runCatching { LocalDate.parse(it).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) }.getOrDefault(it) }
+/** Medium localized date in [locale] ("Dec 10, 2026" / "10 dic 2026"). */
+internal fun formatDate(iso: String?, locale: java.util.Locale): String? =
+    iso?.let { runCatching { LocalDate.parse(it).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)) }.getOrDefault(it) }

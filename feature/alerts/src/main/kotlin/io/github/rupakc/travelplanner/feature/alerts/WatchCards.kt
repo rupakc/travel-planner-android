@@ -86,6 +86,8 @@ import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatchKinds
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.format.localUsd
 import io.github.rupakc.travelplanner.core.ui.watch.AlertModeGroup
 import io.github.rupakc.travelplanner.core.ui.watch.EmailOption
 import io.github.rupakc.travelplanner.core.ui.watch.FlexibleOption
@@ -168,7 +170,8 @@ internal fun WatchCard(
 
             val history = fare?.history?.map { it.price } ?: price?.history?.map { it.price }.orEmpty()
             val target = if ((fare?.alertMode ?: price?.alertMode) == AlertMode.BELOW_TARGET.wire) fare?.targetPrice ?: price?.targetPrice else null
-            Sparkline(history, target) { v -> if (fare != null) formatUsd(v) else formatPrice(v, price?.currency) }
+            val locale = currentLocale()
+            Sparkline(history, target) { v -> if (fare != null) formatUsd(v, locale) else formatPrice(v, price?.currency, locale = locale) }
             MetaLine(item, now)
 
             if (item.status ==
@@ -287,8 +290,8 @@ private fun subtitleOf(item: AnyWatch): String =
 private fun alertRuleOf(item: AnyWatch): String {
     val (mode, target, email) =
         when (item) {
-            is AnyWatch.Fare -> Triple(item.watch.alertMode, item.watch.targetPrice?.let(::formatUsd), item.watch.emailEnabled)
-            is AnyWatch.Price -> Triple(item.watch.alertMode, item.watch.targetPrice?.let { formatPrice(it, item.watch.currency) }, item.watch.emailEnabled)
+            is AnyWatch.Fare -> Triple(item.watch.alertMode, item.watch.targetPrice?.let { localUsd(it) }, item.watch.emailEnabled)
+            is AnyWatch.Price -> Triple(item.watch.alertMode, item.watch.targetPrice?.let { localPrice(it, item.watch.currency) }, item.watch.emailEnabled)
         }
     val rule =
         if (mode == AlertMode.BELOW_TARGET.wire && target != null) {
@@ -316,7 +319,7 @@ private fun PriceHero(item: AnyWatch, past: Boolean) {
     }
     Column {
         Text(
-            if (fare != null) formatUsd(amount) else formatPrice(amount, price?.currency),
+            if (fare != null) localUsd(amount) else localPrice(amount, price?.currency),
             style = TravelTheme.typography.displaySmall,
             color = TravelTheme.colors.onSurface,
         )
@@ -330,7 +333,7 @@ private fun PriceHero(item: AnyWatch, past: Boolean) {
         } else {
             price?.lastObservation.num("unit_price")?.let { unit ->
                 Text(
-                    formatPrice(unit, price?.currency) + " " + stringResource(unitLabel(price?.kind)),
+                    localPrice(unit, price?.currency) + " " + stringResource(unitLabel(price?.kind)),
                     style = TravelTheme.typography.labelSmall,
                     color = TravelTheme.colors.onSurfaceVariant,
                 )
@@ -338,7 +341,7 @@ private fun PriceHero(item: AnyWatch, past: Boolean) {
         }
         val change: PriceChange? = if (fare != null) priceChange(fare) else price?.let(::priceWatchChange)
         change?.let { c ->
-            val formatted = if (fare != null) formatUsd(c.amount) else formatPrice(c.amount, price?.currency)
+            val formatted = if (fare != null) localUsd(c.amount) else localPrice(c.amount, price?.currency)
             val (text, color) =
                 when (c.direction) {
                     Direction.DOWN -> stringResource(R.string.alerts_change_down, formatted) to TravelTheme.extendedColors.success
@@ -374,7 +377,7 @@ private fun MetaLine(item: AnyWatch, now: Instant) {
     val parts = mutableListOf<String>()
     val lowest = fare?.lowestPrice ?: price?.lowestPrice
     if (lowest != null) {
-        val text = if (fare != null) formatUsd(lowest) else formatPrice(lowest, price?.currency)
+        val text = if (fare != null) localUsd(lowest) else localPrice(lowest, price?.currency)
         var lowestText = stringResource(R.string.alerts_lowest_seen, text)
         val otherDay = fare?.lowestPriceDate?.takeIf { (fare.flexibleDays ?: 0) > 0 && it != fare.departureDate }
         if (otherDay != null) {
@@ -490,10 +493,10 @@ private fun ActivityDetails(watch: PriceWatch) {
             }
         Muted(listOfNotNull(provider, ratingText).joinToString(" · "))
         if (!isUnavailable(watch) && unit != null) {
-            val pp = stringResource(R.string.alerts_from_pp, formatPrice(unit, currency))
+            val pp = stringResource(R.string.alerts_from_pp, localPrice(unit, currency))
             Text(
                 if (n > 1 && total != null) {
-                    stringResource(R.string.alerts_times_travellers, pp, pluralStringResource(R.plurals.alerts_travellers, n, n), formatPrice(total, currency))
+                    stringResource(R.string.alerts_times_travellers, pp, pluralStringResource(R.plurals.alerts_travellers, n, n), localPrice(total, currency))
                 } else {
                     pp
                 },
@@ -570,7 +573,7 @@ private fun CardActions(
             TpButton(stringResource(R.string.alerts_replan_fare), { callbacks.onReplan(false) })
             cheaperNearby(fare)?.let { c ->
                 TpButton(
-                    stringResource(R.string.alerts_leave_and_save, formatDay(c.departureDate, currentLocale()).orEmpty(), formatUsd(c.saving)),
+                    stringResource(R.string.alerts_leave_and_save, formatDay(c.departureDate, currentLocale()).orEmpty(), localUsd(c.saving)),
                     { callbacks.onReplan(true) },
                     variant = TpButtonVariant.Tonal,
                 )
@@ -656,7 +659,13 @@ private fun EditPanel(
     var touched by rememberSaveable(item.key) { mutableStateOf(false) }
     var flexible by rememberSaveable(item.key) { mutableStateOf((fare?.flexibleDays ?: 0) > 0) }
     var email by rememberSaveable(item.key) { mutableStateOf((fare?.emailEnabled ?: price?.emailEnabled) == true) }
-    val check = if (mode == AlertMode.BELOW_TARGET) (if (fare != null) checkTarget(target, fare.lastPrice) else checkPriceTarget(target)) else null
+    val locale = io.github.rupakc.travelplanner.core.ui.watch.currentLocale()
+    val check =
+        if (mode == AlertMode.BELOW_TARGET) {
+            if (fare != null) checkTarget(target, fare.lastPrice, locale) else checkPriceTarget(target, locale)
+        } else {
+            null
+        }
     val error = check?.error?.let { stringResource(R.string.alerts_target_error) }
     val currency = price?.currency ?: "USD"
     Surface(color = TravelTheme.colors.surfaceContainerLow, shape = TravelShape.ItemCard) {

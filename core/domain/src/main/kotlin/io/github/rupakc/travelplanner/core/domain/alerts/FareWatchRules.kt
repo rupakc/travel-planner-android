@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.core.domain.alerts
 
+import io.github.rupakc.travelplanner.core.domain.format.parseLocalizedAmount
 import io.github.rupakc.travelplanner.core.model.alerts.CreateFareWatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatchMatchRequest
@@ -9,6 +10,7 @@ import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import java.time.LocalDate
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -172,14 +174,14 @@ private fun round2(v: Double): Float = (jsRound(v * HUNDRED) / HUNDRED).toFloat(
 enum class TargetError { NOT_A_PRICE, }
 
 /**
- * Fare target check (web `checkTarget`): "$1,200" → 1200. [alreadyUnder] = today's [price] is
+ * Fare target check (web `checkTarget`): "$1,200" → 1200, "450,50" → 450.5 (read in [locale]). [alreadyUnder] = today's [price] is
  * already at or under the target (note "Today's fare ($X) is already under this…").
  */
 data class TargetCheck(val value: Double?, val error: TargetError?, val alreadyUnder: Boolean = false)
 
-fun checkTarget(raw: String?, price: Double?): TargetCheck {
+fun checkTarget(raw: String?, price: Double?, locale: Locale): TargetCheck {
     val text = raw.orEmpty()
-    val value = text.replace(Regex("[$,\\s]"), "").toDoubleOrNull()?.takeIf { it.isFinite() && it > 0 }
+    val value = parseLocalizedAmount(text, locale)?.takeIf { it > 0 }
     if (text.isBlank() || value == null) return TargetCheck(null, TargetError.NOT_A_PRICE)
     return TargetCheck(value, null, alreadyUnder = price != null && value >= price)
 }

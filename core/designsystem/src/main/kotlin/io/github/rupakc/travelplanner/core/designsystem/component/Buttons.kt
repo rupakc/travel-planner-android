@@ -79,6 +79,6 @@ private fun ButtonContent(text: String, loading: Boolean, leadingIcon: ImageVect
             Icon(leadingIcon, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(TravelTheme.spacing.sm))
         }
-        Text(text)
+        Text(text, Modifier.readsWithoutEmoji(text))
     }
 }

@@ -224,6 +224,7 @@ private fun ErrorCard(error: ImportErrorView, onEvent: (ImportEvent) -> Unit) {
                 "too_large" -> R.string.search_import_too_large
                 else -> R.string.search_import_unknown
             },
+            stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name),
         )
     Surface(shape = TravelShape.ItemCard, color = TravelTheme.colors.errorContainer, contentColor = TravelTheme.colors.onErrorContainer) {
         Column(

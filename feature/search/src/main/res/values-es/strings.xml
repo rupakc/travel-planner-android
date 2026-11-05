@@ -14,7 +14,7 @@
 
     <!-- Fields -->
     <string name="search_from">Desde</string>
-    <string name="search_to">A</string>
+    <string name="search_to">Destino</string>
     <string name="search_flying_from">Salgo desde</string>
     <string name="search_city_or_airport">Ciudad o aeropuerto…</string>
     <string name="search_stopover_city">Ciudad de escala…</string>
@@ -23,7 +23,7 @@
     <string name="search_stop_nights_placeholder">auto</string>
     <string name="search_remove_stop">Quitar la parada %1$d</string>
     <string name="search_add_stop">Añadir una parada de camino (varias ciudades)</string>
-    <string name="search_route_summary">Tu ruta: %1$s. Las paradas se visitan de camino; la ciudad «A» es tu destino final. Las noches en blanco se reparten automáticamente.</string>
+    <string name="search_route_summary">Tu ruta: %1$s. Las paradas se visitan de camino; la ciudad de «Destino» es tu destino final. Las noches en blanco se reparten automáticamente.</string>
     <string name="search_route_origin">Origen</string>
     <string name="search_route_destination">tu destino</string>
     <string name="search_route_stops">paradas</string>
@@ -121,8 +121,8 @@
     <string name="search_recent_loaded">Se cargó %1$s. Cambia lo que quieras y planifica.</string>
     <string name="search_recent_loaded_shifted">Se cargó %1$s. Sus fechas ya habían pasado, así que ahora empiezan la semana que viene con la misma duración: revísalas y planifica.</string>
     <string name="search_dismiss">Descartar</string>
-    <string name="search_expanded">Desplegado</string>
-    <string name="search_collapsed">Plegado</string>
+    <string name="search_expanded">Expandido</string>
+    <string name="search_collapsed">Contraído</string>
     <plurals name="search_more_interests">
         <item quantity="one">+%1$d</item>
         <item quantity="many">+%1$d</item>
@@ -265,7 +265,7 @@
     <string name="search_import_typical_short">Suele tardar 5–10 segundos</string>
     <string name="search_import_elapsed">%1$s · %2$d s hasta ahora</string>
     <string name="search_import_cancel">Cancelar</string>
-    <string name="search_import_network">No pudimos conectar con Voyager. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="search_import_network">No pudimos conectar con %1$s. Comprueba tu conexión e inténtalo de nuevo.</string>
     <string name="search_import_unknown">Algo falló al leerlo. Inténtalo de nuevo en un momento.</string>
     <string name="search_import_too_large">El archivo es demasiado grande: usa hasta 4 capturas de 5 MB o menos.</string>
     <string name="search_import_action_text">Pegar el texto</string>

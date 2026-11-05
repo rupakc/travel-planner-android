@@ -56,12 +56,13 @@ import io.github.rupakc.travelplanner.core.domain.alerts.titleDiffers
 import io.github.rupakc.travelplanner.core.domain.alerts.totalDifference
 import io.github.rupakc.travelplanner.core.domain.alerts.tripRows
 import io.github.rupakc.travelplanner.core.domain.alerts.watchCurrency
-import io.github.rupakc.travelplanner.core.domain.format.formatPrice
 import io.github.rupakc.travelplanner.core.model.alerts.PriceSuggestion
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatchKinds
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.R
+import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.format.localUsd
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import kotlin.math.abs
 import kotlinx.coroutines.CoroutineScope
@@ -80,7 +81,7 @@ fun WatchSheetEvent.applyTo(controller: PriceWatchDialogController, scope: Corou
         }
 
         is WatchSheetEvent.SetTarget -> {
-            controller.setTarget(text)
+            controller.setTarget(text, locale)
         }
 
         is WatchSheetEvent.SetEmail -> {
@@ -192,11 +193,12 @@ private fun PriceForm(state: PriceWatchDialogState, noun: String, userEmail: Str
         PriceWatchKinds.TRIP -> TripBefore(state.preview.parts)
         else -> GenericBefore(state)
     }
+    val locale = currentLocale()
     AlertModeGroup(
         mode = state.mode,
         onMode = { onEvent(WatchSheetEvent.SetMode(it)) },
         target = state.target,
-        onTarget = { onEvent(WatchSheetEvent.SetTarget(it)) },
+        onTarget = { onEvent(WatchSheetEvent.SetTarget(it, locale)) },
         currency = state.currency,
         anyDropHint = stringResource(R.string.watch_price_any_drop_hint),
         targetError = targetErrorText(state.shownTargetError),
@@ -208,7 +210,7 @@ private fun PriceForm(state: PriceWatchDialogState, noun: String, userEmail: Str
             Text(noMatch.message ?: noMatch.detail.orEmpty(), style = TravelTheme.typography.titleSmall)
             noMatch.estimateInfo()?.let { e ->
                 val label = e.label?.let { " $it" }.orEmpty()
-                Text(stringResource(R.string.watch_no_live_estimate, formatPrice(e.price, e.currency), label), style = TravelTheme.typography.bodySmall)
+                Text(stringResource(R.string.watch_no_live_estimate, localPrice(e.price, e.currency), label), style = TravelTheme.typography.bodySmall)
             }
             if (noMatch.suggestions.isNotEmpty()) {
                 Text(stringResource(R.string.watch_suggestions_heading), style = TravelTheme.typography.labelLarge)
@@ -242,7 +244,7 @@ internal fun SuggestionRow(s: PriceSuggestion, busy: Boolean, onWatch: () -> Uni
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                 s.price?.let {
                     Text(
-                        listOfNotNull(formatPrice(it, s.currency), s.priceLabel).joinToString(" "),
+                        listOfNotNull(localPrice(it, s.currency), s.priceLabel).joinToString(" "),
                         style = TravelTheme.typography.titleSmall,
                         color = TravelTheme.colors.onSurface,
                         modifier = Modifier.weight(1f),
@@ -272,11 +274,11 @@ private fun HotelBefore(state: PriceWatchDialogState) {
             val rooms = spec.int("rooms") ?: 1
             val note =
                 if (rooms > 1) {
-                    pluralStringResource(R.plurals.watch_hotel_estimate_rooms, rooms, rooms, formatPrice(estimate / rooms, preview.currency))
+                    pluralStringResource(R.plurals.watch_hotel_estimate_rooms, rooms, rooms, localPrice(estimate / rooms, preview.currency))
                 } else {
                     stringResource(R.string.watch_hotel_estimate_one_room)
                 }
-            PriceLead(stringResource(R.string.watch_shown_now), formatPrice(estimate, preview.currency), note)
+            PriceLead(stringResource(R.string.watch_shown_now), localPrice(estimate, preview.currency), note)
         }
         val city = spec.str("city")?.substringBefore(',')
         val name = spec.str("name") ?: stringResource(R.string.watch_noun_hotel)
@@ -303,7 +305,7 @@ private fun ActivityBefore(spec: JsonObject) {
             Text(stringResource(R.string.watch_activity_find, name, spec.str("city").orEmpty(), travellers))
         }
         spec.str("date")?.let { Muted(stringResource(R.string.watch_activity_date, formatDay(it, currentLocale()) ?: it)) }
-        spec.num("estimate_price")?.let { Muted(stringResource(R.string.watch_activity_estimate, formatPrice(it, "USD"))) }
+        spec.num("estimate_price")?.let { Muted(stringResource(R.string.watch_activity_estimate, localPrice(it, "USD"))) }
     }
 }
 
@@ -321,7 +323,7 @@ private fun TripBefore(parts: List<TripPart>) {
                         null -> Unit
                     }
                 }
-                Text(formatPrice(p.amount), style = TravelTheme.typography.bodyMedium)
+                Text(localPrice(p.amount), style = TravelTheme.typography.bodyMedium)
             }
         }
         InfoNote(stringResource(R.string.watch_trip_how) + " " + stringResource(R.string.watch_trip_estimates_fixed))
@@ -340,7 +342,7 @@ private fun TripPart.Key.labelRes(): Int =
 private fun GenericBefore(state: PriceWatchDialogState) {
     val price = state.preview.price ?: return
     ToneBox(Tone.NEUTRAL) {
-        PriceLead(stringResource(R.string.watch_shown_now), formatPrice(price, state.preview.currency), stringResource(R.string.watch_generic_lookup))
+        PriceLead(stringResource(R.string.watch_shown_now), localPrice(price, state.preview.currency), stringResource(R.string.watch_generic_lookup))
     }
 }
 
@@ -367,7 +369,7 @@ private fun PriceDone(
                 val price = watch.baselinePrice ?: watch.lastPrice
                 Text(
                     if (price != null) {
-                        stringResource(R.string.watch_price_done_price, formatPrice(price, watch.currency))
+                        stringResource(R.string.watch_price_done_price, localPrice(price, watch.currency))
                     } else {
                         stringResource(R.string.watch_price_done_pending)
                     },
@@ -400,8 +402,8 @@ private fun HotelTracked(state: PriceWatchDialogState, watch: PriceWatch, onEven
         Text(stringResource(R.string.watch_hotel_tracking, watch.title.orEmpty()))
         val parts =
             listOfNotNull(
-                total?.let { formatPrice(it, watch.currency) + (nights?.let { n -> " " + pluralStringResource(R.plurals.watch_for_nights, n, n) } ?: "") },
-                unit?.let { stringResource(R.string.watch_hotel_nightly, formatPrice(it, watch.currency)) },
+                total?.let { localPrice(it, watch.currency) + (nights?.let { n -> " " + pluralStringResource(R.plurals.watch_for_nights, n, n) } ?: "") },
+                unit?.let { stringResource(R.string.watch_hotel_nightly, localPrice(it, watch.currency)) },
                 watch.subtitle,
             )
         if (parts.isNotEmpty()) Muted(parts.joinToString(" · "))
@@ -455,10 +457,10 @@ private fun ActivityMatched(watch: PriceWatch) {
             )
         }
         if (unit != null) {
-            val perPersonText = stringResource(R.string.watch_activity_from_pp, formatPrice(unit, currency))
+            val perPersonText = stringResource(R.string.watch_activity_from_pp, localPrice(unit, currency))
             Text(
                 if (n > 1 && total != null) {
-                    perPersonText + " × " + pluralStringResource(R.plurals.watch_travellers, n, n) + " = " + formatPrice(total, currency)
+                    perPersonText + " × " + pluralStringResource(R.plurals.watch_travellers, n, n) + " = " + localPrice(total, currency)
                 } else {
                     perPersonText
                 },
@@ -493,19 +495,19 @@ private fun TripTracked(watch: PriceWatch, planTotal: Double?) {
         HorizontalDivider()
         Row(Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.watch_trip_total), style = TravelTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-            Text(formatPrice(total), style = TravelTheme.typography.titleSmall)
+            Text(localPrice(total), style = TravelTheme.typography.titleSmall)
         }
         totalDifference(watch, planTotal)?.let { diff ->
             val reasons = diff.reasons.map { reasonText(it, diff.travellers) }
             val base =
                 stringResource(
                     if (diff.delta < 0) R.string.watch_trip_diff_less else R.string.watch_trip_diff_more,
-                    formatPrice(abs(diff.delta)),
-                    formatPrice(diff.plan),
+                    localPrice(abs(diff.delta)),
+                    localPrice(diff.plan),
                 )
             Muted(if (reasons.isEmpty()) "$base." else "$base: ${reasons.joinToString("; ")}.")
         }
-        InfoNote(stringResource(R.string.watch_trip_estimates_fixed) + " " + stringResource(R.string.watch_trip_alert_rule))
+        InfoNote(stringResource(R.string.watch_trip_estimates_fixed) + " " + stringResource(R.string.watch_trip_alert_rule, localUsd(TRIP_ALERT_STEP_USD)))
     }
 }
 
@@ -528,7 +530,7 @@ fun TripRowLine(row: TripRow, modifier: Modifier = Modifier) {
         }
         TripBadge(rowBadge(row))
         Column(horizontalAlignment = Alignment.End) {
-            Text(formatPrice(row.price, row.currency), style = TravelTheme.typography.bodyMedium)
+            Text(localPrice(row.price, row.currency), style = TravelTheme.typography.bodyMedium)
             if (!row.inTotal) Muted(stringResource(R.string.watch_trip_not_in_total))
         }
     }

@@ -18,7 +18,7 @@
     <string name="settings_taste_empty">Aún no hemos aprendido nada: guarda algunos planes de viaje y tus próximas búsquedas se personalizarán automáticamente.</string>
     <string name="settings_taste_load_failed">No se pudo cargar tu Taste Graph.</string>
     <string name="settings_taste_reset">Restablecer</string>
-    <string name="settings_taste_reset_confirm">¿Restablecer tu perfil de gustos? Las próximas búsquedas ya no se personalizarán con tus planes anteriores.</string>
+    <string name="settings_taste_reset_confirm">¿Restablecer tu Taste Graph? Las próximas búsquedas ya no se personalizarán con tus planes anteriores.</string>
     <string name="settings_taste_reset_failed">No se pudo restablecer tu Taste Graph. Inténtalo de nuevo.</string>
     <string name="settings_taste_value">%1$s ×%2$d</string>
     <string name="settings_signal_activity_category">Tipos de actividad favoritos</string>
@@ -36,7 +36,7 @@
     <string name="settings_features_intro">Activa o desactiva cualquier función. Búsqueda, resultados, Mi plan y Ajustes siempre están disponibles.</string>
     <string name="settings_features_default_on">Activada para tu tipo. %1$s</string>
     <string name="settings_features_reset">Restablecer los valores de mi tipo</string>
-    <string name="settings_features_group_plan">Planear y descubrir</string>
+    <string name="settings_features_group_plan">Planificar y descubrir</string>
     <string name="settings_features_group_results">Herramientas de resultados</string>
     <string name="settings_features_group_info">Información del viaje</string>
     <string name="settings_appearance">Apariencia</string>
@@ -48,7 +48,7 @@
     <string name="settings_dynamic_color">Color dinámico</string>
     <string name="settings_dynamic_color_sub">Usa los colores de tu fondo de pantalla</string>
     <string name="settings_dynamic_color_unsupported">Requiere Android 12 o posterior</string>
-    <string name="settings_dynamic_color_note">Desactivado por defecto para mantener el verde azulado de Voyager. Los colores de cada sección no cambian.</string>
+    <string name="settings_dynamic_color_note">Desactivado por defecto para mantener el verde azulado de %1$s. Los colores de cada sección no cambian.</string>
     <string name="settings_language">Idioma</string>
     <string name="settings_language_system">Predeterminado del sistema</string>
     <string name="settings_language_en">English</string>
@@ -123,7 +123,7 @@
     <string name="settings_prefs_nationality_clear">Borrar nacionalidad</string>
     <string name="settings_prefs_residence">Residencia actual</string>
     <string name="settings_prefs_residence_placeholder">p. ej., Múnich, Alemania</string>
-    <string name="settings_prefs_residence_help">Se usa como ciudad de salida por defecto al planear viajes</string>
+    <string name="settings_prefs_residence_help">Se usa como ciudad de salida por defecto al planificar viajes</string>
     <string name="settings_prefs_email">Correo para alertas de precio</string>
     <string name="settings_prefs_email_placeholder">nombre@ejemplo.com</string>
     <string name="settings_prefs_email_save">Guardar correo</string>
@@ -175,11 +175,7 @@
     <string name="settings_prefs_saved">¡Preferencias guardadas!</string>
     <string name="settings_prefs_save_error">Error: %1$s</string>
     <string name="settings_prefs_save_failed">No se pudo guardar</string>
-    <plurals name="settings_features_on">
-        <item quantity="one">%1$d de %2$d función activada</item>
-        <item quantity="many">%1$d de %2$d funciones activadas</item>
-        <item quantity="other">%1$d de %2$d funciones activadas</item>
-    </plurals>
+    <string name="settings_features_on">Activadas: %1$d de %2$d</string>
     <plurals name="settings_taste_built_from">
         <item quantity="one">Creado a partir de %d señal de tus planes guardados. Las búsquedas con sesión iniciada se personalizan automáticamente con este perfil.</item>
         <item quantity="many">Creado a partir de %d señales de tus planes guardados. Las búsquedas con sesión iniciada se personalizan automáticamente con este perfil.</item>

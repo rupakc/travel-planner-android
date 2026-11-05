@@ -5,7 +5,7 @@
     <string name="nearby_rationale_title">Descubre qué hacer cerca de ti</string>
     <string name="nearby_rationale_precise">Basta con la ubicación aproximada. Puedes compartir la exacta si quieres; esta pantalla nunca te sigue en segundo plano.</string>
     <string name="nearby_allow">Permitir ubicación</string>
-    <string name="nearby_denied_title">La ubicación está desactivada para Voyager</string>
+    <string name="nearby_denied_title">La ubicación está desactivada para %1$s</string>
     <string name="nearby_denied_body">Cerca de mí necesita tu ubicación aproximada para encontrar qué hacer a tu alrededor. Puedes permitirla en Ajustes.</string>
     <string name="nearby_open_settings">Abrir ajustes</string>
     <string name="nearby_try_again">Reintentar</string>

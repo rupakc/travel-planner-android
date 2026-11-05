@@ -24,7 +24,7 @@
     <string name="feature_budget_planner_title">Planificador de presupuesto</string>
     <string name="feature_budget_planner_description">Divide tu presupuesto por persona y mira qué encaja en tus resultados.</string>
     <string name="feature_compare_title">Comparar</string>
-    <string name="feature_compare_description">Compara 2–3 destinos: coste, vuelo, hotel, clima y visado.</string>
+    <string name="feature_compare_description">Compara 2–3 destinos: coste, vuelo, hotel, tiempo y visado.</string>
     <string name="feature_surprise_me_title">Sorpréndeme</string>
     <string name="feature_surprise_me_description">Cinco ideas de destino cuando aún no sabes adónde ir.</string>
     <string name="feature_import_link_title">Desde un enlace</string>
@@ -34,7 +34,7 @@
     <string name="feature_near_me_title">Cerca de mí</string>
     <string name="feature_near_me_description">Cosas que hacer cerca de donde estás ahora.</string>
     <string name="feature_packing_list_title">Lista de equipaje</string>
-    <string name="feature_packing_list_description">Una lista de equipaje según tus actividades y el clima.</string>
+    <string name="feature_packing_list_description">Una lista de equipaje según tus actividades y el tiempo previsto.</string>
     <string name="feature_emergency_card_title">Tarjeta de emergencia</string>
     <string name="feature_emergency_card_description">Números de emergencia y contactos clave de tu destino.</string>
     <string name="feature_walking_tours_title">Free tours a pie</string>
@@ -48,7 +48,7 @@
     <string name="feature_sim_title">Tarjetas SIM</string>
     <string name="feature_sim_description">Opciones de SIM local y eSIM para estar conectado.</string>
     <string name="feature_trip_health_check_title">Revisión del viaje</string>
-    <string name="feature_trip_health_check_description">Una auditoría de tu itinerario: ritmo, horarios, plazos de visado y choques con el clima.</string>
+    <string name="feature_trip_health_check_description">Una auditoría de tu itinerario: ritmo, horarios, plazos de visado y choques con el tiempo previsto.</string>
     <string name="feature_itinerary_editor_title">Editor de itinerario</string>
     <string name="feature_itinerary_editor_description">Mueve, quita y anota actividades del itinerario.</string>
     <string name="feature_accessibility_info_title">Información de accesibilidad</string>

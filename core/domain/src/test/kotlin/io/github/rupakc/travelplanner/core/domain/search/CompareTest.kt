@@ -7,6 +7,7 @@ import io.github.rupakc.travelplanner.core.model.search.CompareFlight
 import io.github.rupakc.travelplanner.core.model.search.CompareHotel
 import io.github.rupakc.travelplanner.core.model.search.CompareSummary
 import io.github.rupakc.travelplanner.core.model.search.CompareWeather
+import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -28,7 +29,7 @@ class CompareTest {
 
     @Test
     fun `shares fields and differs only in destination`() {
-        val reqs = buildCompareRequests(base, listOf("Tokyo", "Paris"))
+        val reqs = buildCompareRequests(base, listOf("Tokyo", "Paris"), Locale.US)
         assertEquals(listOf("Tokyo", "Paris"), reqs.map { it.destination })
         assertEquals(reqs[0].copy(destination = ""), reqs[1].copy(destination = ""))
         with(reqs[0]) {
@@ -42,19 +43,19 @@ class CompareTest {
 
     @Test
     fun `drops blanks and case-insensitive duplicates, trims`() {
-        val reqs = buildCompareRequests(base, listOf("Tokyo", "  ", "tokyo ", "Paris", ""))
+        val reqs = buildCompareRequests(base, listOf("Tokyo", "  ", "tokyo ", "Paris", ""), Locale.US)
         assertEquals(listOf("Tokyo", "Paris"), reqs.map { it.destination })
     }
 
     @Test
     fun `empty budget becomes null`() {
-        assertNull(buildCompareRequests(base.copy(budgetUsd = ""), listOf("Rome"))[0].budgetUsd)
+        assertNull(buildCompareRequests(base.copy(budgetUsd = ""), listOf("Rome"), Locale.US)[0].budgetUsd)
     }
 
     @Test
     fun `blank return date becomes null (one-way), set one is kept`() {
-        assertNull(buildCompareRequests(base.copy(returnDate = ""), listOf("Rome"))[0].returnDate)
-        assertEquals("2026-04-08", buildCompareRequests(base, listOf("Rome"))[0].returnDate)
+        assertNull(buildCompareRequests(base.copy(returnDate = ""), listOf("Rome"), Locale.US)[0].returnDate)
+        assertEquals("2026-04-08", buildCompareRequests(base, listOf("Rome"), Locale.US)[0].returnDate)
     }
 
     private fun s(
