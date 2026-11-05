@@ -41,6 +41,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,6 +62,7 @@ import io.github.rupakc.travelplanner.feature.chat.ChatUiState
 import io.github.rupakc.travelplanner.feature.chat.R
 import io.github.rupakc.travelplanner.feature.chat.ReplyAnnouncement
 import io.github.rupakc.travelplanner.feature.chat.model.ChatTurn
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** Test tags used by the Compose tests. */
@@ -81,8 +83,11 @@ internal fun ConversationPane(state: ChatUiState, onEvent: (ChatUiEvent) -> Unit
     Column(modifier.fillMaxSize()) {
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when {
-                state.loadingMessages -> SkeletonList(Modifier.padding(TravelTheme.spacing.gutter), lines = SKELETON_LINES)
+                // A reply streaming into a just-created thread shows at once, not behind a skeleton.
+                state.loadingMessages && state.streaming == null -> SkeletonList(Modifier.padding(TravelTheme.spacing.gutter), lines = SKELETON_LINES)
+
                 state.isEmptyConversation -> EmptyConversation(onSend = { onEvent(ChatUiEvent.Send(it)) })
+
                 else -> MessageList(state, plan, onEvent)
             }
         }
@@ -104,7 +109,11 @@ private fun MessageList(state: ChatUiState, plan: PlanCallbacks, onEvent: (ChatU
     }
     val newestKey = state.streaming?.let(::itemKey) ?: state.turns.lastOrNull()?.let(::itemKey)
     LaunchedEffect(newestKey) { if (stickToBottom) listState.scrollToItem(0) }
-    val showJump by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+    // Also inside a long newest item (a trip plan scrolled up to Day 1).
+    val threshold = with(LocalDensity.current) { TravelTheme.spacing.minTouchTarget.roundToPx() }
+    val showJump by remember(threshold) {
+        derivedStateOf { listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > threshold }
+    }
     val reversed = remember(state.turns) { state.turns.asReversed() }
 
     Box(Modifier.fillMaxSize()) {
@@ -149,7 +158,7 @@ private fun Turn(turn: ChatTurn, plan: PlanCallbacks, saving: Boolean, onEvent: 
 /** Polite live region: announces each finished reply once (spec §9). */
 @Composable
 private fun ReplyAnnouncer(announcement: ReplyAnnouncement?) {
-    val text =
+    val announced =
         when (announcement) {
             is ReplyAnnouncement.Text -> {
                 stringResource(R.string.chat_reply_announce, announcement.text)
@@ -168,6 +177,15 @@ private fun ReplyAnnouncer(announcement: ReplyAnnouncement?) {
                 ""
             }
         }
+    // Cleared after a few seconds, so swipe navigation doesn't land on a stale announcement.
+    var text by remember { mutableStateOf("") }
+    LaunchedEffect(announcement?.seq) {
+        text = announced
+        if (announced.isNotEmpty()) {
+            delay(ANNOUNCE_CLEAR_MILLIS)
+            text = ""
+        }
+    }
     Box(
         Modifier
             .size(ChatDimens.A11yNode)
@@ -286,4 +304,5 @@ internal fun Composer(isStreaming: Boolean, onSend: (String) -> Unit, onStop: ()
 }
 
 private const val SKELETON_LINES = 4
+private const val ANNOUNCE_CLEAR_MILLIS = 5_000L
 private const val COMPOSER_MAX_LINES = 6

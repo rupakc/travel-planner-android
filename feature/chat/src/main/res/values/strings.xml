@@ -15,8 +15,7 @@
     <string name="chat_disclaimer">AI-powered travel assistant. Verify important details with official sources.</string>
 
     <!-- Messages -->
-    <string name="chat_you">You</string>
-    <string name="chat_assistant">Travel assistant</string>
+    <string name="chat_user_message">You: %1$s</string>
     <string name="chat_thinking">Thinking…</string>
     <string name="chat_planning">Planning your trip…</string>
     <string name="chat_searching">Searching %1$s…</string>
@@ -45,7 +44,6 @@
     </plurals>
     <string name="chat_threads">Chats</string>
     <string name="chat_threads_show">Show chats</string>
-    <string name="chat_threads_hide">Back to conversation</string>
     <string name="chat_new">New chat</string>
     <string name="chat_threads_search">Search chats</string>
     <string name="chat_threads_clear_search">Clear search</string>
@@ -53,7 +51,6 @@
     <string name="chat_threads_empty_message">Your conversations are kept on this device.</string>
     <string name="chat_threads_no_match">No chats match “%1$s”</string>
     <string name="chat_thread_menu">More options for %1$s</string>
-    <string name="chat_thread_selected">Open</string>
     <string name="chat_rename">Rename</string>
     <string name="chat_delete">Delete</string>
     <string name="chat_rename_title">Rename chat</string>
@@ -117,7 +114,6 @@
         <item quantity="other">%d travelers</item>
     </plurals>
     <string name="chat_est_per_person">est. per person</string>
-    <string name="chat_stops">Stops</string>
     <string name="chat_departure_city">Departure city</string>
     <string name="chat_open_in_maps">Open %1$s in Maps</string>
     <string name="chat_getting_there">Getting there</string>

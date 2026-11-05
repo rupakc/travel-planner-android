@@ -54,10 +54,29 @@ object Markdown {
     private const val MIN_TABLE_LINES = 2
     private const val MIN_BOLD_LENGTH = 4
 
-    fun parse(text: String): List<Block> {
+    fun parse(text: String): List<Block> = chunks(text).map(::block)
+
+    private fun chunks(text: String): List<String> {
         if (text.isBlank()) return emptyList()
-        val normalized = text.replace(HEADING_NEWLINE, "$1\n\n")
-        return normalized.split(BLOCK_SPLIT).filter { it.isNotEmpty() }.map(::block)
+        return text.replace(HEADING_NEWLINE, "$1\n\n").split(BLOCK_SPLIT).filter { it.isNotEmpty() }
+    }
+
+    /**
+     * Same result as [parse], but blocks whose source text is unchanged since the previous
+     * call are reused — a streaming reply only re-parses its growing last block.
+     * Not thread-safe; one instance per rendered message.
+     */
+    class IncrementalParser {
+        private var cache: Map<String, Block> = emptyMap()
+
+        fun parse(text: String): List<Block> {
+            val chunks = chunks(text)
+            val previous = cache
+            val next = HashMap<String, Block>(chunks.size)
+            val blocks = chunks.map { chunk -> next.getOrPut(chunk) { previous[chunk] ?: block(chunk) } }
+            cache = next
+            return blocks
+        }
     }
 
     private fun block(block: String): Block {

@@ -10,7 +10,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.heading
@@ -35,11 +37,14 @@ import io.github.rupakc.travelplanner.feature.chat.markdown.Markdown
 /**
  * Renders the chat markdown subset (web `MarkdownContent`). Links open through
  * [onOpenLink] (Custom Tabs); non-http(s) links render as plain text.
- * Parsing is remembered per [text], so a finished message parses once.
+ * Parsing is incremental (unchanged blocks are reused) and each block's styled text is
+ * remembered, so a streaming reply only re-parses and re-styles its last block.
  */
 @Composable
 internal fun MarkdownText(text: String, onOpenLink: (String) -> Unit, modifier: Modifier = Modifier, color: Color = LocalContentColor.current) {
-    val blocks = remember(text) { Markdown.parse(text) }
+    // Streaming appends only change the last block: unchanged blocks come from the parser's cache.
+    val parser = remember { Markdown.IncrementalParser() }
+    val blocks = remember(text) { parser.parse(text) }
     val linkColor = TravelTheme.colors.primary
     val codeBackground = TravelTheme.colors.surfaceVariant
     val body = TravelTheme.typography.bodyLarge.copy(color = color)
@@ -53,15 +58,18 @@ internal fun MarkdownText(text: String, onOpenLink: (String) -> Unit, modifier: 
                             2 -> TravelTheme.typography.titleMedium
                             else -> TravelTheme.typography.titleSmall
                         }
-                    Text(
-                        annotated(block.inlines, linkColor, codeBackground, onOpenLink),
+                    InlineText(
+                        block.inlines,
+                        linkColor,
+                        codeBackground,
+                        onOpenLink,
                         style = style.copy(color = color),
                         modifier = Modifier.semantics { heading() },
                     )
                 }
 
                 is Block.Paragraph -> {
-                    Text(annotated(block.inlines, linkColor, codeBackground, onOpenLink), style = body)
+                    InlineText(block.inlines, linkColor, codeBackground, onOpenLink, style = body)
                 }
 
                 is Block.Bullets -> {
@@ -96,7 +104,7 @@ private fun ListBlock(
         items.forEach { (marker, inlines) ->
             Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                 Text(marker, style = style)
-                Text(annotated(inlines, linkColor, codeBackground, onOpenLink), style = style)
+                InlineText(inlines, linkColor, codeBackground, onOpenLink, style = style)
             }
         }
     }
@@ -108,8 +116,11 @@ private fun TableBlock(table: Block.Table, style: TextStyle, linkColor: Color, c
     Column(Modifier.horizontalScroll(rememberScrollState())) {
         Row {
             table.header.forEach { h ->
-                Text(
-                    annotated(h, linkColor, codeBackground, onOpenLink),
+                InlineText(
+                    h,
+                    linkColor,
+                    codeBackground,
+                    onOpenLink,
                     style = cell.copy(fontWeight = FontWeight.SemiBold),
                     modifier = Modifier.padding(TravelTheme.spacing.sm),
                 )
@@ -119,11 +130,25 @@ private fun TableBlock(table: Block.Table, style: TextStyle, linkColor: Color, c
         table.rows.forEach { row ->
             Row {
                 row.forEach { c ->
-                    Text(annotated(c, linkColor, codeBackground, onOpenLink), style = cell, modifier = Modifier.padding(TravelTheme.spacing.sm))
+                    InlineText(c, linkColor, codeBackground, onOpenLink, style = cell, modifier = Modifier.padding(TravelTheme.spacing.sm))
                 }
             }
         }
     }
+}
+
+@Composable
+private fun InlineText(
+    inlines: List<Inline>,
+    linkColor: Color,
+    codeBackground: Color,
+    onOpenLink: (String) -> Unit,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+) {
+    val open by rememberUpdatedState(onOpenLink)
+    val text = remember(inlines, linkColor, codeBackground) { annotated(inlines, linkColor, codeBackground) { open(it) } }
+    Text(text, style = style, modifier = modifier)
 }
 
 private fun annotated(inlines: List<Inline>, linkColor: Color, codeBackground: Color, onOpenLink: (String) -> Unit): AnnotatedString =

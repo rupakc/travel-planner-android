@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppException
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.repository.ChatRepository
 import io.github.rupakc.travelplanner.core.domain.chat.applyPlanAction
@@ -28,10 +29,12 @@ import io.github.rupakc.travelplanner.feature.chat.model.encodeExtras
 import io.github.rupakc.travelplanner.feature.chat.model.toTurn
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -66,6 +69,7 @@ class ChatViewModel
         private val chat: ChatRepository,
         private val planStore: CurrentPlanStore,
         private val dispatchers: AppDispatchers,
+        @param:ApplicationScope private val appScope: CoroutineScope,
     ) : ViewModel() {
         private val currentThread = MutableStateFlow<Long?>(null)
         private val query = MutableStateFlow("")
@@ -81,6 +85,7 @@ class ChatViewModel
         private var sessionContext: JsonObject = EmptyJsonObject
         private var opened = false
         private var announcementSeq = 0
+        private val pendingDeletes = mutableMapOf<Long, Job>()
 
         private val messages: Flow<MessagesLoad> =
             currentThread.flatMapLatest { id ->
@@ -94,9 +99,13 @@ class ChatViewModel
                 }
             }
 
+        /** Threads whose messages contain the query (Room LIKE search), empty for a blank query. */
+        private val contentMatches: Flow<Set<Long>> =
+            query.flatMapLatest { q -> if (q.isBlank()) flowOf(emptySet()) else chat.threadIdsMatching(q.trim()) }
+
         private val threadList =
-            combine(chat.threads, query, hiddenThreads) { threads, q, hidden ->
-                threads.filter { it.id !in hidden && (q.isBlank() || it.title.contains(q.trim(), ignoreCase = true)) }
+            combine(chat.threads, query, hiddenThreads, contentMatches) { threads, q, hidden, matches ->
+                threads.filter { it.id !in hidden && (q.isBlank() || it.title.contains(q.trim(), ignoreCase = true) || it.id in matches) }
             }
 
         val uiState: StateFlow<ChatUiState> =
@@ -143,7 +152,7 @@ class ChatViewModel
                 is ChatUiEvent.SearchThreads -> setQuery(event.query)
                 is ChatUiEvent.RenameThread -> rename(event.threadId, event.title)
                 is ChatUiEvent.DeleteThread -> delete(event.threadId)
-                is ChatUiEvent.UndoDelete -> hiddenThreads.update { it - event.threadId }
+                is ChatUiEvent.UndoDelete -> undoDelete(event.threadId)
                 is ChatUiEvent.CommitDelete -> commitDelete(event.threadId)
             }
         }
@@ -176,15 +185,37 @@ class ChatViewModel
             if (isStreaming() && threadId == currentThread.value) return
             hiddenThreads.update { it + threadId }
             if (threadId == currentThread.value) viewModelScope.launch { switchTo(null) }
+            // Commits on its own after the undo window, so a dismissed or cancelled snackbar never leaves it pending.
+            pendingDeletes.put(
+                threadId,
+                viewModelScope.launch {
+                    delay(UNDO_WINDOW_MILLIS)
+                    commitDelete(threadId)
+                },
+            )?.cancel()
             effects.trySend(ChatEffect.ThreadDeleted(threadId))
         }
 
+        private fun undoDelete(threadId: Long) {
+            pendingDeletes.remove(threadId)?.cancel()
+            hiddenThreads.update { it - threadId }
+        }
+
+        /** Deletes on the application scope so the delete survives this screen. */
         private fun commitDelete(threadId: Long) {
             if (threadId !in hiddenThreads.value) return
-            viewModelScope.launch {
+            pendingDeletes.remove(threadId)?.cancel()
+            appScope.launch {
                 chat.deleteThread(threadId)
                 hiddenThreads.update { it - threadId }
             }
+        }
+
+        override fun onCleared() {
+            // Deletes still inside their undo window are committed: the user never undid them.
+            val pending = hiddenThreads.value
+            if (pending.isNotEmpty()) appScope.launch { pending.forEach { chat.deleteThread(it) } }
+            super.onCleared()
         }
 
         // --- streaming ------------------------------------------------------
@@ -208,22 +239,19 @@ class ChatViewModel
             job.invokeOnCompletion { streamingTurn.update { turn -> turn?.takeUnless { it.streaming } } }
         }
 
+        /**
+         * Web parity: re-asks the question behind the failed reply [turnId] as a new message at
+         * the end of the thread, with the full history. The failed reply stays, marked failed.
+         */
         private fun retry(turnId: Long) {
             if (isStreaming()) return
             val threadId = currentThread.value ?: return
-            streamingTurn.value = ChatStreamReducer.start().turn
-            streamJob =
-                viewModelScope.launch {
-                    val turns = loadTurns(threadId)
-                    val index = turns.indexOfFirst { it.id == turnId }
-                    val history = if (index < 0) emptyList() else turns.subList(0, index)
-                    if (history.none { it.isUser }) {
-                        streamingTurn.value = null
-                        return@launch
-                    }
-                    chat.deleteMessage(turnId)
-                    stream(threadId, history)
-                }.also(::clearPlaceholderOnEnd)
+            viewModelScope.launch {
+                val turns = loadTurns(threadId)
+                val index = turns.indexOfFirst { it.id == turnId }
+                if (index < 0) return@launch
+                turns.subList(0, index).lastOrNull { it.isUser }?.let { send(it.content) }
+            }
         }
 
         private suspend fun loadTurns(threadId: Long): List<ChatTurn> =
@@ -352,6 +380,9 @@ class ChatViewModel
             private const val STOP_TIMEOUT_MILLIS = 5_000L
             private const val MAX_TITLE = 60
             private const val MAX_ANNOUNCE = 280
+
+            /** Longer than the snackbar's short duration, so Undo is always possible while it shows. */
+            internal const val UNDO_WINDOW_MILLIS = 10_000L
 
             /** Web `getLatestSearchResults`: the sections of the latest turn that has any. */
             internal fun latestSections(turns: List<ChatTurn>): JsonObject =

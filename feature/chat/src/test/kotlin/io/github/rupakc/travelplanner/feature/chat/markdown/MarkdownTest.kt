@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.feature.chat.markdown
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -55,6 +56,16 @@ class MarkdownTest {
         assertTrue(Markdown.isSafeUrl("http://x.y"))
         assertFalse(Markdown.isSafeUrl("javascript:alert(1)"))
         assertFalse(Markdown.isSafeUrl("intent://x"))
+    }
+
+    @Test
+    fun `incremental parser matches parse and reuses unchanged blocks`() {
+        val parser = Markdown.IncrementalParser()
+        val first = parser.parse("## Day 1\nArrive.\n\n- Ramen")
+        val second = parser.parse("## Day 1\nArrive.\n\n- Ramen\n- Sushi")
+        assertEquals(Markdown.parse("## Day 1\nArrive.\n\n- Ramen\n- Sushi"), second)
+        assertSame(first[0], second[0])
+        assertSame(first[1], second[1])
     }
 
     @Test

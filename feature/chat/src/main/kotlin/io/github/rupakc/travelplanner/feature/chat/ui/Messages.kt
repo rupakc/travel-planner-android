@@ -58,7 +58,7 @@ import kotlinx.coroutines.launch
 /** The user's message: a teal bubble at the end edge. */
 @Composable
 internal fun UserBubble(turn: ChatTurn, modifier: Modifier = Modifier) {
-    val you = stringResource(R.string.chat_you)
+    val description = stringResource(R.string.chat_user_message, turn.content)
     val shape = RoundedCornerShape(ChatDimens.BubbleCorner, ChatDimens.BubbleCorner, ChatDimens.BubbleTail, ChatDimens.BubbleCorner)
     BoxWithConstraints(modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
         Surface(
@@ -68,7 +68,7 @@ internal fun UserBubble(turn: ChatTurn, modifier: Modifier = Modifier) {
             modifier =
                 Modifier
                     .widthIn(max = maxWidth * ChatDimens.BUBBLE_MAX_FRACTION)
-                    .semantics(mergeDescendants = true) { contentDescription = "$you: ${turn.content}" },
+                    .semantics(mergeDescendants = true) { contentDescription = description },
         ) {
             Text(
                 turn.content,

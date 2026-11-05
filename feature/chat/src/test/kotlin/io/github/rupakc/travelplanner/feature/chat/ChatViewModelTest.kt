@@ -14,11 +14,13 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
 import io.github.rupakc.travelplanner.feature.chat.model.TurnError
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
@@ -37,7 +39,9 @@ class ChatViewModelTest {
     private val plans = FakePlansRepository()
     private val store = FakeCurrentPlanStore(plans)
 
-    private fun viewModel() = ChatViewModel(repo, store, TestAppDispatchers(main.testDispatcher))
+    private val appScope = CoroutineScope(main.testDispatcher)
+
+    private fun viewModel() = ChatViewModel(repo, store, TestAppDispatchers(main.testDispatcher), appScope)
 
     @Test
     fun `send streams a reply, persists both turns and creates a titled thread`() =
@@ -118,7 +122,7 @@ class ChatViewModelTest {
         }
 
     @Test
-    fun `request failure shows the backend detail and retry re-asks`() =
+    fun `request failure shows the backend detail and retry re-asks at the end of the thread`() =
         runTest {
             repo.failure = AppError.RateLimited("Too many requests — please wait 30 seconds and try again.", 30)
             val vm = viewModel()
@@ -132,11 +136,15 @@ class ChatViewModelTest {
 
                 repo.failure = null
                 vm.onEvent(ChatUiEvent.Retry(reply.id))
-                val retried = expectMostRecentItemMatching { it.turns.size == 2 && it.turns[1].error == null && it.streaming == null }
-                assertTrue(retried.turns[1].content.contains("visa-free"))
+                val retried = expectMostRecentItemMatching { it.turns.size == 4 && it.streaming == null }
+                // Web parity: the failed reply stays; the question is asked again at the end.
+                assertEquals(TurnError.REQUEST, retried.turns[1].error)
+                assertEquals("hello", retried.turns[2].content)
+                assertTrue(retried.turns[3].content.contains("visa-free"))
                 cancelAndIgnoreRemainingEvents()
             }
-            assertEquals(listOf(ChatMessage("user", "hello")), repo.sent.last().messages)
+            // The failed reply has no text, so the history holds the question twice (as the web sends it).
+            assertEquals(listOf(ChatMessage("user", "hello"), ChatMessage("user", "hello")), repo.sent.last().messages)
         }
 
     @Test
@@ -152,7 +160,7 @@ class ChatViewModelTest {
                             emit(ChatEvent.Done)
                         }
                 }
-            val vm = ChatViewModel(slow, store, TestAppDispatchers(main.testDispatcher))
+            val vm = ChatViewModel(slow, store, TestAppDispatchers(main.testDispatcher), appScope)
             vm.uiState.test {
                 vm.onEvent(ChatUiEvent.Send("tell me about Rome"))
                 val streaming = expectMostRecentItemMatching { it.isStreaming && it.streaming?.content == "Half an answer" }
@@ -174,7 +182,7 @@ class ChatViewModelTest {
                     override fun send(request: io.github.rupakc.travelplanner.core.model.chat.ChatRequest): Flow<ChatEvent> =
                         flow { gate.await() }
                 }
-            val vm = ChatViewModel(silent, store, TestAppDispatchers(main.testDispatcher))
+            val vm = ChatViewModel(silent, store, TestAppDispatchers(main.testDispatcher), appScope)
             vm.uiState.test {
                 vm.onEvent(ChatUiEvent.Send("hello"))
                 expectMostRecentItemMatching { it.isStreaming }
@@ -203,6 +211,54 @@ class ChatViewModelTest {
                 cancelAndIgnoreRemainingEvents()
             }
             assertTrue(repo.threads.first().none { it.id == first })
+        }
+
+    @Test
+    fun `a delete commits by itself when the undo window passes`() =
+        runTest(main.testDispatcher) {
+            val first = repo.createThread("Tokyo")
+            val vm = viewModel()
+            vm.uiState.test {
+                expectMostRecentItemMatching { it.threads.size == 1 }
+                vm.onEvent(ChatUiEvent.DeleteThread(first))
+                expectMostRecentItemMatching { it.threads.isEmpty() }
+                advanceTimeBy(ChatViewModel.UNDO_WINDOW_MILLIS + 1)
+                cancelAndIgnoreRemainingEvents()
+            }
+            assertTrue(repo.threads.first().isEmpty())
+        }
+
+    @Test
+    fun `search matches message text as well as titles`() =
+        runTest {
+            val japan = repo.createThread("Plan 5 days in Japan")
+            repo.appendMessage(japan, "assistant", "Day 3: Kyoto temples")
+            repo.createThread("Lisbon")
+            val vm = viewModel()
+            vm.uiState.test {
+                vm.onEvent(ChatUiEvent.SearchThreads("kyoto"))
+                expectMostRecentItemMatching { it.threads.map { t -> t.title } == listOf("Plan 5 days in Japan") }
+                vm.onEvent(ChatUiEvent.SearchThreads("lis"))
+                expectMostRecentItemMatching { it.threads.map { t -> t.title } == listOf("Lisbon") }
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `a new view model restores the thread's session context`() =
+        runTest {
+            val id = repo.createThread("Thailand")
+            val stored = kotlinx.serialization.json.buildJsonObject { put("destination", JsonPrimitive("Thailand")) }
+            repo.saveSessionContext(id, stored)
+            val vm = viewModel()
+            vm.uiState.test {
+                vm.open(id)
+                expectMostRecentItemMatching { it.currentThreadId == id }
+                vm.onEvent(ChatUiEvent.Send("Best time to go?"))
+                expectMostRecentItemMatching { it.turns.size == 2 && it.streaming == null }
+                cancelAndIgnoreRemainingEvents()
+            }
+            assertEquals(stored, repo.sent.last().sessionContext)
         }
 
     @Test

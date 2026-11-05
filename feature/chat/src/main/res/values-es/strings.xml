@@ -12,8 +12,7 @@
     <string name="chat_stop">Detener</string>
     <string name="chat_disclaimer">Asistente de viajes con IA. Comprueba los datos importantes en fuentes oficiales.</string>
 
-    <string name="chat_you">Tú</string>
-    <string name="chat_assistant">Asistente de viajes</string>
+    <string name="chat_user_message">Tú: %1$s</string>
     <string name="chat_thinking">Pensando…</string>
     <string name="chat_planning">Planificando tu viaje…</string>
     <string name="chat_searching">Buscando %1$s…</string>
@@ -42,7 +41,6 @@
     </plurals>
     <string name="chat_threads">Chats</string>
     <string name="chat_threads_show">Mostrar chats</string>
-    <string name="chat_threads_hide">Volver a la conversación</string>
     <string name="chat_new">Nuevo chat</string>
     <string name="chat_threads_search">Buscar chats</string>
     <string name="chat_threads_clear_search">Borrar búsqueda</string>
@@ -50,7 +48,6 @@
     <string name="chat_threads_empty_message">Tus conversaciones se guardan en este dispositivo.</string>
     <string name="chat_threads_no_match">Ningún chat coincide con «%1$s»</string>
     <string name="chat_thread_menu">Más opciones para %1$s</string>
-    <string name="chat_thread_selected">Abierto</string>
     <string name="chat_rename">Cambiar nombre</string>
     <string name="chat_delete">Eliminar</string>
     <string name="chat_rename_title">Cambiar nombre del chat</string>
@@ -118,7 +115,6 @@
         <item quantity="other">%d viajeros</item>
     </plurals>
     <string name="chat_est_per_person">est. por persona</string>
-    <string name="chat_stops">Paradas</string>
     <string name="chat_departure_city">Ciudad de salida</string>
     <string name="chat_open_in_maps">Abrir %1$s en Mapas</string>
     <string name="chat_getting_there">Cómo llegar</string>
