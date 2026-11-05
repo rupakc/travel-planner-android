@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.feature.results
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
@@ -18,6 +19,7 @@ import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.DataSource
 import io.github.rupakc.travelplanner.core.model.section.FlightsData
+import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
@@ -83,11 +85,11 @@ class ResultsViewModelTest {
     private val priceWatches = FakePriceWatchesRepository()
     private val visibility = FakeFeatureVisibility()
 
-    private fun vm() =
+    private fun vm(store: io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore = plan) =
         ResultsViewModel(
             search = search,
-            searchLauncher = FakeSearchLauncher(plan, search),
-            plan = plan,
+            searchLauncher = FakeSearchLauncher(store, search),
+            plan = store,
             health = health,
             fareCalendar = FakeFareCalendarRepository(),
             fareWatches = fareWatches,
@@ -452,6 +454,63 @@ class ResultsViewModelTest {
                 val s = expectMostRecentItem()
                 assertEquals(listOf("Cheap Inn"), (s.section(SectionId.HOTELS).data as HotelsData).results.map { it.name })
                 assertEquals(2, s.section(SectionId.HOTELS).activeFilterCount)
+            }
+        }
+
+    @Test
+    fun `two Results screens share one filter result and stop writing the draft (single writer)`() =
+        runTest {
+            search.hotelsResult =
+                AppResult.Success(
+                    SectionDecoder.decode(SectionId.HOTELS, Json.parseToJsonElement("""{"results":[{"name":"Cheap Inn"}]}""").jsonObject) as HotelsData,
+                )
+            var attaches = 0
+            val counting =
+                object : io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore by plan {
+                    override fun attachSearch(request: TravelSearchRequest, data: kotlinx.serialization.json.JsonObject?) {
+                        attaches++
+                        plan.attachSearch(request, data)
+                    }
+                }
+            val first = vm(counting)
+            val second = vm(counting) // e.g. Results kept alive on another tab's back stack
+            turbineScope {
+                val a = first.state.testIn(backgroundScope)
+                val b = second.state.testIn(backgroundScope)
+                search.start(request)
+                first.onEvent(ResultsEvent.ApplyHotelFilters(HotelFilters(numBeds = 2)))
+                assertEquals(listOf("Cheap Inn"), (a.expectMostRecentItem().section(SectionId.HOTELS).data as HotelsData).results.map { it.name })
+                assertEquals(listOf("Cheap Inn"), (b.expectMostRecentItem().section(SectionId.HOTELS).data as HotelsData).results.map { it.name })
+                val settled = attaches
+                assertTrue("attachSearch ran $settled times", settled <= 4)
+                // Unrelated changes (a toggle, typing in the filter box) do not write the draft again.
+                first.onEvent(ResultsEvent.Query("inn"))
+                plan.toggle(PlanItem.HotelItem(Hotel(name = "Cheap Inn")))
+                a.expectMostRecentItem()
+                b.expectMostRecentItem()
+                assertEquals(settled, attaches)
+                val stored = plan.draft.value.searchData!!["hotels"]!!.jsonObject["results"] as kotlinx.serialization.json.JsonArray
+                assertEquals("\"Cheap Inn\"", stored.single().jsonObject["name"].toString())
+                a.cancel()
+                b.cancel()
+            }
+        }
+
+    @Test
+    fun `a new search from Search replaces a draft that holds another trip's sections and Results shows it live`() =
+        runTest {
+            val paris = request.copy(destination = "Paris")
+            plan.attachSearch(paris, Json.parseToJsonElement("""{"hotels":{"results":[{"name":"Paris hotel"}]}}""").jsonObject)
+            plan.toggle(PlanItem.HotelItem(Hotel(name = "Paris hotel")))
+            val vm = vm()
+            vm.state.test {
+                assertEquals("Paris", expectMostRecentItem().request?.destination)
+                FakeSearchLauncher(plan, search).startNewSearch(request) // what Search submit does
+                val s = expectMostRecentItem()
+                assertEquals("Tokyo", s.request?.destination)
+                assertEquals(ResultsSource.LIVE, ResultsStateBuilder.selectSource(search.current.value, plan.draft.value))
+                assertFalse((s.section(SectionId.HOTELS).data as HotelsData).results.any { it.name == "Paris hotel" })
+                assertNull(plan.draft.value.selections.hotel)
             }
         }
 

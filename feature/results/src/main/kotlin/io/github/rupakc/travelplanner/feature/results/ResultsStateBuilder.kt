@@ -62,8 +62,6 @@ internal data class SourcedResults(val results: SearchResultsState, val source: 
 internal data class LocalState(
     /** [TravelSearchRequest.searchKey] of the search these fields belong to; a new search resets them. */
     val key: String? = null,
-    /** Section data replaced by a filter / single-section retry (web `setResults`). */
-    val overrides: Map<SectionId, SectionResult> = emptyMap(),
     val loading: Set<SectionId> = emptySet(),
     val errors: Map<SectionId, FilterError> = emptyMap(),
     val flightFilters: FlightFilters? = null,
@@ -110,11 +108,12 @@ internal class ResultsStateBuilder {
         }
 
     /**
-     * Effective section data: overrides, journey order (not flights/weather, web parity), resolved
+     * Effective section data (filter / retry results are already in [results]: SearchRepository or the
+     * draft snapshot hold them for every screen): journey order (not flights/weather, web parity), resolved
      * pending chips. Each section is ordered and decoded once per original JSON object (M5).
      */
     fun effectiveSections(results: SearchResultsState, local: LocalState): Map<SectionId, Pair<SectionData, JsonObject>> {
-        val merged = results.sections + local.overrides
+        val merged = results.sections
         val destinations = results.request?.destinations
         val streaming = results.phase == StreamPhase.STREAMING
         return merged.mapValues { (id, r) ->

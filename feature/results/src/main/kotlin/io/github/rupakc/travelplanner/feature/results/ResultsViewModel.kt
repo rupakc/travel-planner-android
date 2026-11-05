@@ -8,7 +8,6 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
-import io.github.rupakc.travelplanner.core.data.impl.SearchResultsReducer
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.FareCalendarRepository
@@ -96,7 +95,7 @@ class ResultsViewModel
         private val priceWatches: PriceWatchesRepository,
         featureVisibility: FeatureVisibility,
         private val clock: AppClock,
-        dispatchers: AppDispatchers,
+        private val dispatchers: AppDispatchers,
         private val savedState: SavedStateHandle,
     ) : ViewModel() {
         private val local = MutableStateFlow(LocalState())
@@ -141,7 +140,7 @@ class ResultsViewModel
         init {
             viewModelScope.launch { if (health.capabilities.value == null) health.refresh() }
             viewModelScope.launch { resetOnNewSearch() }
-            viewModelScope.launch { attachToDraft() }
+            viewModelScope.launch(dispatchers.default) { attachToDraft() }
             viewModelScope.launch { rememberExtras() }
         }
 
@@ -157,34 +156,25 @@ class ResultsViewModel
         }
 
         /**
-         * Keeps the draft's `searchData` = the sections on screen (plan snapshot, chat context,
-         * process death). Only for the draft's own search: a stream for another trip is never written.
+         * Keeps the draft's `searchData` = the draft's own live search (plan snapshot, chat context, process
+         * death). A stream for another trip is never written. Every Results screen computes the same target
+         * from the shared state (filter/retry results live in SearchRepository), and "already written" is
+         * checked per section by reference, so several screens converge after one write instead of
+         * ping-ponging (architecture review I1) and nothing deep-compares the snapshot (performance review I3).
+         * Runs on the default dispatcher.
          */
         private suspend fun attachToDraft() {
-            combine(search.current, plan.draft, local) { live, draft, l -> Triple(live, draft, l.overrides) }
-                .collect { (live, draft, overrides) ->
-                    val target =
-                        when (ResultsStateBuilder.selectSource(live, draft)) {
-                            ResultsSource.LIVE -> {
-                                if (live.phase == StreamPhase.FAILED) return@collect
-                                SearchResultsReducer.sectionsJson(SearchResultsState(request = live.request, sections = live.sections + overrides))
-                            }
-
-                            ResultsSource.SNAPSHOT -> {
-                                if (overrides.isEmpty()) return@collect
-                                JsonObject(draft.searchData.orEmpty() + overrides.map { (id, r) -> id.wire to r.raw })
-                            }
-
-                            else -> {
-                                return@collect
-                            }
-                        }
-                    val request =
-                        (if (live.request != null && live.request?.searchKey() == draft.searchRequest?.searchKey()) live.request else null)
-                            ?: draft.searchRequest ?: live.request ?: return@collect
-                    if (draft.searchData != target || draft.searchRequest != request) plan.attachSearch(request, target)
+            combine(search.current, plan.draft) { live, draft -> live to draft }
+                .collect { (live, draft) ->
+                    if (ResultsStateBuilder.selectSource(live, draft) != ResultsSource.LIVE || live.phase == StreamPhase.FAILED) return@collect
+                    val request = live.request ?: return@collect
+                    if (draft.searchRequest == request && draft.searchData.holdsSameSections(live)) return@collect
+                    plan.attachSearch(request, live.sectionsJson())
                 }
         }
+
+        private fun JsonObject?.holdsSameSections(live: SearchResultsState): Boolean =
+            this != null && size == live.sections.size && live.sections.all { (id, r) -> this[id.wire] === r.raw }
 
         /** Travel Ease and the pricing advisor are not sections; keep them across process death (M1). */
         private suspend fun rememberExtras() {
@@ -464,17 +454,8 @@ class ResultsViewModel
                     when (result) {
                         is AppResult.Success -> {
                             val (data, raw) = result.value
-                            local.update {
-                                if (it.key != key) {
-                                    it
-                                } else {
-                                    it.copy(
-                                        loading = it.loading - id,
-                                        overrides = it.overrides + (id to SectionResult(id, data, raw, null)),
-                                        findingCheaperHotels = false,
-                                    )
-                                }
-                            }
+                            publish(key, SectionResult(id, data, raw, null))
+                            local.update { if (it.key != key) it else it.copy(loading = it.loading - id, findingCheaperHotels = false) }
                         }
 
                         is AppResult.Failure -> {
@@ -487,6 +468,29 @@ class ResultsViewModel
         }
 
         private fun encode(data: SectionData): JsonObject = ResultsStateBuilder.encode(data)
+
+        /**
+         * One writer per source (architecture review I1): the live search's result goes to SearchRepository,
+         * a saved plan's snapshot is updated once in the draft. Either way every Results screen sees it.
+         */
+        private fun publish(key: String, result: SectionResult) {
+            val live = search.current.value
+            val draft = plan.draft.value
+            when (ResultsStateBuilder.selectSource(live, draft)) {
+                ResultsSource.LIVE -> {
+                    search.applySectionResult(key, result)
+                }
+
+                ResultsSource.SNAPSHOT -> {
+                    val request = draft.searchRequest?.takeIf { it.searchKey() == key } ?: return
+                    plan.attachSearch(request, JsonObject(draft.searchData.orEmpty() + (result.id.wire to result.raw)))
+                }
+
+                else -> {
+                    Unit
+                }
+            }
+        }
 
         // ── fare calendar / layover ───────────────────────────────────────────
 
