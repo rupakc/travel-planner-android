@@ -99,6 +99,34 @@ class BackendApi(private val baseUrl: String = E2eConfig.baseUrl) {
         return (body as? JsonArray) ?: (body.jsonObject["plans"] as JsonArray)
     }
 
+    /** Creates a plan the way the web does (`POST /api/plans`); returns its id. */
+    fun createPlan(token: String, name: String, searchData: JsonObject, selections: JsonObject = buildJsonObject { }): String {
+        val r =
+            call(
+                "POST",
+                "/api/plans",
+                token,
+                buildJsonObject {
+                    put("name", name)
+                    put("search_data", searchData)
+                    put("selections", selections)
+                },
+            )
+        check(r.code == 200) { "create plan -> ${r.code} ${r.body}" }
+        return r.json().jsonObject.getValue("id").jsonPrimitive.content
+    }
+
+    fun lisbonSearchData(): JsonObject =
+        buildJsonObject {
+            put("origin", "JFK")
+            put("destination", "LIS")
+            put("departure_date", "2026-12-01")
+            put("return_date", "2026-12-04")
+            put("nationality", "American")
+            put("num_travelers", 2)
+            put("adults", 2)
+        }
+
     fun plan(token: String, id: String): JsonObject = call("GET", "/api/plans/$id", token).json().jsonObject
 
     fun deletePlan(token: String, id: String) {

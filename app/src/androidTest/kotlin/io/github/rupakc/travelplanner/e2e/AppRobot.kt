@@ -20,6 +20,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import io.github.rupakc.travelplanner.MainActivity
 import io.github.rupakc.travelplanner.feature.auth.R as AuthR
+import io.github.rupakc.travelplanner.feature.chat.R as ChatR
 import io.github.rupakc.travelplanner.feature.onboarding.R as OnboardingR
 import io.github.rupakc.travelplanner.feature.search.R as SearchR
 
@@ -98,6 +99,20 @@ class AppRobot(val rule: AppRule) {
             if (found) return true
         }
         return false
+    }
+
+    /**
+     * Edge-to-edge guard: the first node matching [matcher] must sit below the status bar (screens outside the shell's
+     * top bar have to apply the window insets themselves).
+     */
+    fun assertBelowStatusBar(matcher: SemanticsMatcher) {
+        waitFor(matcher)
+        val decor = rule.activity.window.decorView
+        val statusBar =
+            androidx.core.view.ViewCompat.getRootWindowInsets(decor)
+                ?.getInsets(androidx.core.view.WindowInsetsCompat.Type.statusBars())?.top ?: 0
+        val top = rule.onAllNodes(matcher).onFirst().fetchSemanticsNode().boundsInWindow.top
+        org.junit.Assert.assertTrue("node top $top overlaps the status bar ($statusBar px)", top >= statusBar)
     }
 
     fun back() {
@@ -223,6 +238,24 @@ class AppRobot(val rule: AppRule) {
         val submit = androidx.compose.ui.test.hasTestTag("search_submit")
         rule.onNode(submit).performScrollTo().performClick()
         rule.waitForIdle()
+    }
+
+    /** Sends a chat message and waits until its reply has finished streaming (Stop shows, then goes). */
+    fun chatSend(text: String, timeoutMs: Long = LONG_TIMEOUT * 2) {
+        val input = androidx.compose.ui.test.hasTestTag("chat_input")
+        waitFor(input)
+        rule.onNode(input).performTextInput(text)
+        rule.onAllNodes(hasDescription(str(ChatR.string.chat_send))).onFirst().performClick()
+        val stop = hasDescription(str(ChatR.string.chat_stop))
+        waitFor(stop)
+        rule.waitUntil(timeoutMs) { !exists(stop) }
+    }
+
+    /** Types into the first editable field (for fields identified by placeholder only). */
+    fun typeInFirstField(value: String) {
+        val field = rule.onAllNodes(hasSetTextAction()).onFirst()
+        field.performTextClearance()
+        field.performTextInput(value)
     }
 
     /** A trip for [searchTrip]; dates are MMDDYYYY digits for the en-US date input. */
