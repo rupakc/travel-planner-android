@@ -331,12 +331,12 @@ private fun DayBody(day: ChatItineraryDay) {
                     val stars = hotel.stars?.takeIf { it > 0 }?.let { " " + "★".repeat(it.toInt().coerceIn(1, MAX_STARS)) }.orEmpty()
                     Text(hotel.name.orEmpty() + stars, style = TravelTheme.typography.titleSmall)
                     listOfNotNull(hotel.tier, hotel.neighbourhood).takeIf { it.isNotEmpty() }?.let {
-                        Text(it.joinToString(" · "), style = TravelTheme.typography.bodySmall, color = accent.icon)
+                        Text(it.joinToString(" · "), style = TravelTheme.typography.bodySmall, color = accent.text)
                     }
                     hotel.highlight?.let { Text("“$it”", style = TravelTheme.typography.bodySmall, fontStyle = FontStyle.Italic) }
                 }
                 hotel.pricePerNightUsd?.takeIf { it > 0 }?.let {
-                    Text(stringResource(R.string.chat_per_night, formatPrice(it)), style = TravelTheme.typography.labelLarge, color = accent.icon)
+                    Text(stringResource(R.string.chat_per_night, formatPrice(it)), style = TravelTheme.typography.labelLarge, color = accent.text)
                 }
             }
         }

@@ -10,7 +10,12 @@
 - Works at 200 % font scale: no fixed heights on text containers; lists scroll.
 - No colour-only meaning: verification and status chips carry text or icons, not just colour.
 - Reduce-motion: `rememberReduceMotion()`; shimmer becomes static.
-- Contrast AA in light and dark.
+- Contrast: `ContrastTest` (core:designsystem unit test) checks every colour-token pair the app draws text or a
+  border with, in the light and the dark brand scheme: text pairs ≥ 4.5:1, input borders (`outline`) and section
+  icons ≥ 3:1, section-accent text (`SectionAccent.text`) on the surface and on its tint ≥ 4.5:1. Filled primary is
+  teal-700 (#0F766E), success emerald-700, secondary/info sky-700, light outline gray-500. Use `SectionAccent.text`, never
+  `icon`, for words drawn in an accent. Not covered: dynamic colour (wallpaper-derived) schemes, images, and colours
+  drawn with alpha.
 
 ## How to test
 

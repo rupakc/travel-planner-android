@@ -111,7 +111,7 @@ private fun EventCard(event: TravelEvent, selected: Boolean, onToggle: () -> Uni
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), itemVerticalAlignment = Alignment.CenterVertically) {
                 InfoPill("${eventEmoji(event.category)} ${event.category.orEmpty()}".trim(), tone = Tone.Accent, section = SectionId.EVENTS)
-                EventDates(event, accent.icon)
+                EventDates(event, accent.text)
             }
             Text(event.name.orEmpty(), style = TravelTheme.typography.titleMedium)
             event.description?.let { Text(it, style = TravelTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis) }

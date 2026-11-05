@@ -85,7 +85,7 @@ internal fun HotelCard(hotel: Hotel, selected: Boolean, over: Boolean, actions: 
                             stringResource(R.string.results_hotel_per_night, formatPrice(it)),
                             style = TravelTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = TravelTheme.sectionAccents[SectionId.HOTELS].icon,
+                            color = TravelTheme.sectionAccents[SectionId.HOTELS].text,
                         )
                     }
                     hotel.totalPriceUsd?.let {

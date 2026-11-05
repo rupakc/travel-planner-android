@@ -107,7 +107,7 @@ private fun TransportCard(option: TransportOption, selected: Boolean, onToggle: 
                 Text(
                     transportTag(option.type),
                     style = TravelTheme.typography.labelMedium,
-                    color = accent.icon,
+                    color = accent.text,
                     textAlign = TextAlign.Center,
                     modifier =
                         Modifier
@@ -141,7 +141,7 @@ private fun TransportCard(option: TransportOption, selected: Boolean, onToggle: 
             LabeledLine(stringResource(R.string.transport_coverage), option.coverage)
             LabeledLine(stringResource(R.string.transport_price), option.priceInfo)
             LabeledLine(stringResource(R.string.transport_hours), option.operatingHours)
-            LabeledLine(stringResource(R.string.transport_tourist_pass), option.touristPass, valueColor = accent.icon)
+            LabeledLine(stringResource(R.string.transport_tourist_pass), option.touristPass, valueColor = accent.text)
             option.tips?.takeIf {
                 it.isNotBlank()
             }?.let { Text(it, style = TravelTheme.typography.bodySmall, fontStyle = FontStyle.Italic, color = TravelTheme.colors.onSurfaceVariant) }
@@ -250,7 +250,7 @@ private fun CurrencyHeader(currency: LocalCurrency, rates: List<ExchangeRate>) {
                 },
                 currency.symbol,
             ).joinToString(" "),
-            color = TravelTheme.sectionAccents[SectionId.FOREX].icon,
+            color = TravelTheme.sectionAccents[SectionId.FOREX].text,
         )
         if (rates.isNotEmpty()) {
             AdaptiveGrid(rates) { rate, cell -> RateTile(rate, cell) }
@@ -261,7 +261,7 @@ private fun CurrencyHeader(currency: LocalCurrency, rates: List<ExchangeRate>) {
 @Composable
 private fun RateTile(rate: ExchangeRate, modifier: Modifier) {
     val home = isHomeRate(rate)
-    val colors = if (home) toneColors(Tone.Warning) else ToneColors(TravelTheme.colors.surface, TravelTheme.sectionAccents[SectionId.FOREX].icon)
+    val colors = if (home) toneColors(Tone.Warning) else ToneColors(TravelTheme.colors.surface, TravelTheme.sectionAccents[SectionId.FOREX].text)
     Column(modifier.background(colors.container, TravelShape.Input).padding(TravelTheme.spacing.md)) {
         if (home) Text(stringResource(R.string.forex_your_currency), style = TravelTheme.typography.labelSmall, color = colors.content)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), itemVerticalAlignment = Alignment.CenterVertically) {
