@@ -45,7 +45,12 @@ The build applies the Google Services plugin and sets the resource `fcm_enabled=
 - After every sign-in (and at app start while signed in) the app sends its FCM token with `POST /api/devices` (`PushRegistrar`). Tokens go only in request bodies, never in URLs.
 - On sign-out it calls `POST /api/devices/unregister` before dropping the session (`AuthRepository.logout`).
 - `onNewToken` re-registers while signed in.
-- With the app in the background, Android shows the push itself, and tapping it opens the app. In the foreground, `TravelMessagingService` posts it on the **Price alerts** channel if that toggle is on, with a deep link to `travelplanner://alerts?kind=…&watch=…`. It also marks the id as seen, so the poller never posts it twice.
+- Messages are **data-only** (no `notification` block): keys `kind`, `notification_id`, `link`, `watch_id`, `watch_kind`, `title`, `body`, all strings, `android.priority` high for alerts. `TravelMessagingService.onMessageReceived` therefore runs in the foreground and the background (`PushAlertHandler`). It:
+  - marks `notification_id` as seen, so the poller never posts it twice;
+  - posts nothing if the in-app **Price alerts** toggle is off;
+  - otherwise posts on the **Price alerts** channel, quietly for `watch_expired` / `watch_error`;
+  - makes the tap open `travelplanner://alerts?kind=…&watch=…`, mapped from the web `link`.
+- Safety net for an older server that still sends a `notification` block: MainActivity maps a `link` / `watch_id` extra on the launch intent to the same deep link (`withPushDeepLink`).
 - When both `/health.push_configured` and the app's Firebase are on, `AlertPollWorker` runs every 6 h instead of every 30 min.
 
 ## 5. Verify end to end
@@ -57,6 +62,7 @@ The build applies the Google Services plugin and sets the resource `fcm_enabled=
 
 ## Troubleshooting
 
+- **First sign-in on a device:** the first poll marks the alerts that already exist as seen without posting them, so you only get notifications for new alerts.
 - **No push, but alerts appear in the app after a while:** the poller is working, so push isn't. Check `push_configured` and that both files come from the same project.
 - **Backend logs `UNREGISTERED`:** the server prunes that token. The app registers a fresh one on its next start or sign-in.
 - **A bare 404 from FCM:** usually the project ids don't match. The token is kept; fix the key.

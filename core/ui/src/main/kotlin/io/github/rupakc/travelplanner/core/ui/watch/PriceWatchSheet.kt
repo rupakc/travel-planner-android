@@ -115,6 +115,11 @@ fun WatchSheetEvent.applyTo(controller: PriceWatchDialogController, scope: Corou
  * "Watch this hotel / activity / trip" bottom sheet (web `PriceWatchDialog`). Build the controller
  * with `PriceWatchesRepository::create` / `::delete`; mark your own card as watched only when
  * [WatchedOutcome.viaSuggestion] is false.
+ *
+ * Requests run in this composable's scope, so closing the sheet mid-request cancels the callback
+ * (the watch may still be created server-side). Hosts that must always learn the outcome should
+ * own the controller in their ViewModel and call `submit()` / `pickSuggestion()` / `swapTo()` from
+ * `viewModelScope`, rendering the stateless `*SheetContent` themselves.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

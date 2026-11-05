@@ -96,4 +96,18 @@ class PriceWatchRulesTest {
         assertEquals(AlertAction.CHECK_TRIP, alertKindFor(tripPaused).action)
         assertEquals("Lisbon (−⁠$70)", keepDeltaTogether("Lisbon (−$70)"))
     }
+
+    @Test
+    fun `edge cases from the web suite`() {
+        val now = java.time.Instant.parse("2026-11-04T12:00:00Z")
+        // untilTime rounds like Math.round: 89 min → 1 h, 90 min → 2 h, 36 h → 2 days.
+        assertEquals(TimeUntil.Hours(1), timeUntil("2026-11-04T13:29:00Z", now))
+        assertEquals(TimeUntil.Hours(2), timeUntil("2026-11-04T13:30:00Z", now))
+        assertEquals(TimeUntil.Days(2), timeUntil("2026-11-06T00:00:00Z", now))
+        assertEquals(TargetError.NOT_A_PRICE, checkPriceTarget("1.2.3").error)
+        assertEquals(TargetCheck(9.5, null), checkPriceTarget("9.5"))
+        assertEquals("28 Dec 2026 – 4 Jan 2027", formatDateRange("2026-12-28", "2027-01-04"))
+        assertNull(formatDateRange("not a date", null))
+        assertEquals("100%", percent(1.0))
+    }
 }
