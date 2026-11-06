@@ -130,11 +130,14 @@ fun PriceWatchSheet(
     onDismiss: () -> Unit,
     onSeeAlerts: (PriceWatch) -> Unit,
     onWatched: (WatchedOutcome) -> Unit = {},
+    /** A host that owns [controller] passes its own handler (e.g. `applyTo(controller, viewModelScope)`). */
+    onEvent: ((WatchSheetEvent) -> Unit)? = null,
 ) {
     val state by controller.state.collectAsState()
     val scope = rememberCoroutineScope()
+    val handle = onEvent ?: { event: WatchSheetEvent -> event.applyTo(controller, scope, onWatched) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
-        PriceWatchSheetContent(state, userEmail, { it.applyTo(controller, scope, onWatched) }, onDismiss, onSeeAlerts)
+        PriceWatchSheetContent(state, userEmail, handle, onDismiss, onSeeAlerts)
     }
 }
 

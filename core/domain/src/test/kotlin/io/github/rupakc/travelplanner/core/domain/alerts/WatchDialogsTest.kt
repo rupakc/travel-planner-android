@@ -8,6 +8,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import java.util.Locale
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import org.junit.Assert.assertEquals
@@ -215,5 +216,26 @@ class WatchDialogsTest {
             c.setTarget("450,50", Locale.forLanguageTag("es-ES"))
             assertNotNull(c.submit())
             assertEquals(450.5, sent.single().targetPrice)
+        }
+
+    @Test
+    fun `a request cancelled mid-flight leaves the sheet ready to try again`() =
+        runTest {
+            val started = kotlinx.coroutines.CompletableDeferred<Unit>()
+            val c =
+                PriceWatchDialogController(
+                    PriceWatchDialogState("hotel", json("""{"name":"Memmo","city":"Lisbon"}""")),
+                    create = {
+                        started.complete(Unit)
+                        kotlinx.coroutines.awaitCancellation()
+                    },
+                    delete = { AppResult.Success(Unit) },
+                )
+            val job = launch { c.submit() }
+            started.await()
+            assertTrue(c.state.value.saving)
+            job.cancel()
+            job.join()
+            assertFalse(c.state.value.saving)
         }
 }

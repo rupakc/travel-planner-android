@@ -13,6 +13,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.PriceWatchKinds
 import io.github.rupakc.travelplanner.core.model.alerts.TargetCurrencyMismatchError
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import java.util.Locale
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -217,7 +218,15 @@ class PriceWatchDialogController(
                 targetCurrency = s.currency.takeIf { below },
                 emailEnabled = s.email && s.emailAvailable,
             )
-        return when (val result = create(request)) {
+        // A cancelled request (the sheet's scope went away) must not leave the sheet "saving" forever.
+        val result =
+            try {
+                create(request)
+            } catch (e: CancellationException) {
+                mutable.update { it.copy(saving = false) }
+                throw e
+            }
+        return when (result) {
             is AppResult.Success -> {
                 val via = watchSpec != s.spec
                 mutable.update { it.copy(saving = false, noMatch = null, usedSpec = watchSpec, done = result.value, viaSuggestion = via) }
