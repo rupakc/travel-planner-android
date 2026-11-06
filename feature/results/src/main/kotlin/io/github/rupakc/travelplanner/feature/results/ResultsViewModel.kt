@@ -8,6 +8,7 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
@@ -114,6 +115,7 @@ class ResultsViewModel
         private val clock: AppClock,
         private val dispatchers: AppDispatchers,
         private val savedState: SavedStateHandle,
+        private val placeNames: PlaceNameLookup,
     ) : ViewModel() {
         private val local = MutableStateFlow(LocalState())
         private val builder = ResultsStateBuilder()
@@ -205,11 +207,8 @@ class ResultsViewModel
         private suspend fun resolvePlaceNames() {
             source.map { it.results.request }.distinctUntilChanged().collect { req ->
                 req ?: return@collect
-                val codes = (listOf(req.origin, req.destination) + req.destinations.orEmpty()).filter(WatchSpecs::isAirportCode)
-                val missing = codes.map(String::trim).distinct().filter { it !in local.value.placeNames }
-                if (missing.isEmpty()) return@collect
-                val found = missing.mapNotNull { code -> cityName(code)?.takeIf { it != code }?.let { code to it } }.toMap()
-                if (found.isNotEmpty()) local.update { it.copy(placeNames = it.placeNames + found) }
+                val found = placeNames.resolve(listOf(req.origin, req.destination) + req.destinations.orEmpty())
+                if (!local.value.placeNames.entries.containsAll(found.entries)) local.update { it.copy(placeNames = it.placeNames + found) }
             }
         }
 
@@ -660,17 +659,13 @@ class ResultsViewModel
                     trip = trip,
                     price = WatchSpecs.cheapestFlightPrice(shown),
                     emailAvailable = health.capabilities.value?.emailAlertsAvailable == true,
+                    placeNames = local.value.placeNames,
                 )
             sheet.value = WatchSheet.Fare(FareWatchDialogController(initial) { fareWatches.create(it) })
         }
 
-        /** Airport codes → city names, as the web's `useAirportCities` (local airport data, no live price calls). */
-        private suspend fun cityName(value: String?): String? {
-            if (value == null || !WatchSpecs.isAirportCode(value)) return value
-            val code = value.trim()
-            val rows = (search.airports(code, AIRPORT_LOOKUP_LIMIT) as? AppResult.Success)?.value.orEmpty()
-            return rows.firstOrNull { it.iataCode.equals(code, ignoreCase = true) }?.city ?: value
-        }
+        /** Airport codes → city names (shared [PlaceNameLookup], web `useAirportCities`); other text unchanged. */
+        private suspend fun cityName(value: String?): String? = value?.let { placeNames.displayName(it) }
 
         private suspend fun withCityNames(req: TravelSearchRequest): TravelSearchRequest =
             req.copy(destination = cityName(req.destination) ?: req.destination, destinations = req.destinations?.map { cityName(it) ?: it })
@@ -726,7 +721,6 @@ class ResultsViewModel
 
         private companion object {
             const val STOP_TIMEOUT_MS = 5_000L
-            const val AIRPORT_LOOKUP_LIMIT = 5
             const val KEY_EXTRAS_SEARCH = "results_extras_search"
             const val KEY_CONFIDENCE = "results_confidence"
             const val KEY_ADVISOR = "results_pricing_advisor"

@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.core.domain.alerts
 
 import io.github.rupakc.travelplanner.core.domain.format.parseLocalizedAmount
+import io.github.rupakc.travelplanner.core.domain.place.placeName
 import io.github.rupakc.travelplanner.core.model.alerts.CreateFareWatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatchMatchRequest
@@ -81,12 +82,13 @@ fun cheapestFlightPrice(flights: FlightsData?): Double? {
 private fun cityOf(label: String?, code: String?): String =
     label.orEmpty().substringBefore(',').trim().ifEmpty { code.orEmpty().substringBefore(',') }
 
-/** "Berlin → Lisbon". */
-fun routeLabel(watch: FareWatch): String =
-    "${cityOf(watch.originLabel, watch.originCode)} → ${cityOf(watch.destinationLabel, watch.destinationCode)}"
+/** "Berlin → Lisbon"; an airport-code label ("LIS") shows the city [names] holds for it. */
+fun routeLabel(watch: FareWatch, names: Map<String, String> = emptyMap()): String =
+    "${cityOf(placeName(watch.originLabel, names), watch.originCode)} → ${cityOf(placeName(watch.destinationLabel, names), watch.destinationCode)}"
 
-/** "Berlin → Lisbon" for a trip being watched (labels are what the search typed). */
-fun routeLabel(trip: WatchTrip): String = "${cityOf(trip.origin, null)} → ${cityOf(trip.destination, null)}"
+/** "Berlin → Lisbon" for a trip being watched (labels are what the search typed; codes shown by [names]). */
+fun routeLabel(trip: WatchTrip, names: Map<String, String> = emptyMap()): String =
+    "${cityOf(placeName(trip.origin, names), null)} → ${cityOf(placeName(trip.destination, names), null)}"
 
 /** Card status chip (web `watchStatus`): shared by fare and price watches. */
 enum class WatchStatusKey(val tone: Tone) {

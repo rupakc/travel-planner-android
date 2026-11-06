@@ -139,6 +139,15 @@ class FareWatchRulesTest {
         assertEquals("Berlin → Lisbon", routeLabel(watch()))
         assertEquals("LHR → Lisbon", routeLabel(watch(originLabel = "", originCode = "LHR,LGW")))
         assertEquals("Tue 3 Nov", formatDay("2026-11-03"))
+    }
+
+    @Test
+    fun `route labels name the cities of airport codes the lookup knows`() {
+        val names = mapOf("JFK" to "New York", "LIS" to "Lisbon")
+        assertEquals("New York → Lisbon", routeLabel(watch(originLabel = "JFK", originCode = "JFK"), names))
+        assertEquals("BER → Lisbon", routeLabel(watch(originLabel = "BER", originCode = "BER"), names))
+        assertEquals("New York → Lisbon", routeLabel(WatchTrip("JFK", "LIS", "2026-12-01", null, 1), names))
+        assertEquals("JFK → LIS", routeLabel(WatchTrip("JFK", "LIS", "2026-12-01", null, 1)))
         assertEquals("$1,235", formatUsd(1234.6))
     }
 

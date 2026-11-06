@@ -16,11 +16,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.common.AppClock
-import io.github.rupakc.travelplanner.core.common.AppResult
-import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.domain.alerts.parseIsoDate
-import io.github.rupakc.travelplanner.core.domain.results.WatchSpecs
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.notifications.NotificationAction
 import io.github.rupakc.travelplanner.core.notifications.NotificationIds
@@ -159,7 +157,7 @@ class TripReminderWorker
         private val settings: SettingsRepository,
         private val notifier: Notifier,
         private val posted: ReminderPostLog,
-        private val search: SearchRepository,
+        private val placeNames: PlaceNameLookup,
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
             val name = inputData.getString(KEY_UNIQUE)
@@ -167,7 +165,7 @@ class TripReminderWorker
             val type = runCatching { ReminderType.valueOf(inputData.getString(KEY_TYPE).orEmpty()) }.getOrNull()
             val skip = (name != null && posted.wasPosted(name)) || !settings.settings.first().tripNotifications
             if (planId == null || type == null || skip) return Result.success()
-            val place = cityName(inputData.getString(KEY_DESTINATION).orEmpty())
+            val place = placeNames.displayName(inputData.getString(KEY_DESTINATION).orEmpty())
             val day = inputData.getInt(KEY_DAY, 0)
             val res = applicationContext.resources
             val (title, body) =
@@ -195,24 +193,12 @@ class TripReminderWorker
             return Result.success()
         }
 
-        /**
-         * Plans store the search form's airport code ("LIS"): name the city ("Your Lisbon trip starts today"), looked
-         * up like the web's `useAirportCities`. If the lookup fails the code stays (nothing invented).
-         */
-        private suspend fun cityName(place: String): String {
-            if (!WatchSpecs.isAirportCode(place)) return place
-            val code = place.trim()
-            val rows = (search.airports(code, AIRPORT_LOOKUP_LIMIT) as? AppResult.Success)?.value.orEmpty()
-            return rows.firstOrNull { it.iataCode.equals(code, ignoreCase = true) }?.city?.substringBefore(',')?.trim()?.takeIf(String::isNotEmpty) ?: place
-        }
-
         companion object {
             const val KEY_PLAN_ID = "plan_id"
             const val KEY_TYPE = "type"
             const val KEY_DAY = "day"
             const val KEY_DESTINATION = "destination"
             const val KEY_UNIQUE = "unique"
-            private const val AIRPORT_LOOKUP_LIMIT = 5
         }
     }
 

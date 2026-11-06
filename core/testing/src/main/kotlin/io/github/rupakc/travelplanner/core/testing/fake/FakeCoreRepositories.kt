@@ -98,6 +98,12 @@ class FakeSearchRepository(var events: List<SearchEvent> = Fixtures.searchEvents
     var layoverResult: AppResult<LayoverPlan> = NotStubbed
     var syncResult: AppResult<JsonObject> = AppResult.Success(EmptyJsonObject)
     var airports: List<Airport> = emptyList()
+
+    /** When set, [airports] fails with it (a lookup that cannot reach the backend). */
+    var airportsFailure: AppError? = null
+
+    /** Every `airports` query, in order. */
+    val airportQueries = mutableListOf<String>()
     var nationalities: List<Nationality> = emptyList()
 
     override fun applySectionResult(searchKey: String, result: io.github.rupakc.travelplanner.core.model.search.SectionResult) {
@@ -163,7 +169,10 @@ class FakeSearchRepository(var events: List<SearchEvent> = Fixtures.searchEvents
 
     override suspend fun searchSync(request: TravelSearchRequest) = syncResult
 
-    override suspend fun airports(query: String, limit: Int): AppResult<List<Airport>> = AppResult.Success(airports.take(limit))
+    override suspend fun airports(query: String, limit: Int): AppResult<List<Airport>> {
+        airportQueries += query
+        return airportsFailure?.let { AppResult.Failure(it) } ?: AppResult.Success(airports.take(limit))
+    }
 
     override suspend fun nationalities(query: String, limit: Int): AppResult<List<Nationality>> =
         AppResult.Success(

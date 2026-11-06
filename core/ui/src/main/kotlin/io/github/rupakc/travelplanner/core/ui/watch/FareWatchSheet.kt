@@ -147,7 +147,7 @@ fun FareWatchSheetContent(
             }
         Text(stringResource(title), style = TravelTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
         Text(
-            listOfNotNull(routeLabel(trip), formatDateRange(trip.departureDate, trip.returnDate, currentLocale())).joinToString(" · "),
+            listOfNotNull(routeLabel(trip, state.placeNames), formatDateRange(trip.departureDate, trip.returnDate, currentLocale())).joinToString(" · "),
             style = TravelTheme.typography.bodyMedium,
             color = TravelTheme.colors.onSurfaceVariant,
         )
