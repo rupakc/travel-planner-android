@@ -5,7 +5,7 @@
     <string name="channel_price_alerts">Price alerts</string>
     <string name="channel_price_alerts_desc">When a watched fare, hotel, activity or trip price drops or hits your target.</string>
     <string name="channel_nearby">Nearby suggestions</string>
-    <string name="channel_nearby_desc">Things to do near you during a trip, based on your location from the last time you opened Near me.</string>
+    <string name="channel_nearby_desc">A reminder to look at Near me during a trip, if you used it recently. Nothing is looked up until you open it.</string>
     <string name="channel_account">Account</string>
     <string name="channel_account_desc">Sign-in and account messages.</string>
     <!-- Trip reminders (spec 7). %1$s = destination city. -->
@@ -23,6 +23,6 @@
     <string name="reminder_action_emergency">Emergency card</string>
     <string name="reminder_action_nearby">Near me</string>
     <!-- Nearby suggestions -->
-    <string name="nearby_notification_title">Something to do near you</string>
-    <string name="nearby_notification_title_place">Something to do near you in %1$s</string>
+    <string name="nearby_notification_title">See what’s near you</string>
+    <string name="nearby_notification_body">Places to see, eat, shop and stay around you. Tap to look.</string>
 </resources>

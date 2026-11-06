@@ -13,6 +13,7 @@ import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
+import io.github.rupakc.travelplanner.core.data.repository.LiveCheckRepository
 import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
 import io.github.rupakc.travelplanner.core.data.repository.PriceWatchesRepository
@@ -31,7 +32,10 @@ import io.github.rupakc.travelplanner.core.domain.alerts.mergeWatches
 import io.github.rupakc.travelplanner.core.domain.alerts.replanRequest
 import io.github.rupakc.travelplanner.core.domain.alerts.routeLabel
 import io.github.rupakc.travelplanner.core.domain.alerts.tripReplanRequest
+import io.github.rupakc.travelplanner.core.domain.live.LiveError
+import io.github.rupakc.travelplanner.core.domain.live.toLiveError
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
+import io.github.rupakc.travelplanner.core.model.alerts.LiveCheckResult
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.alerts.UpdateFareWatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.UpdatePriceWatchRequest
@@ -40,6 +44,7 @@ import java.time.Instant
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -68,6 +73,13 @@ sealed interface CardMessage {
     data object Saved : CardMessage
 }
 
+/**
+ * "Search the web now" for one watch ([key]). Held in ViewModel memory only: never written to Room or
+ * DataStore and never merged into the watch, its price history or its alerts.
+ */
+@Immutable
+data class LiveCheckUi(val key: String, val loading: Boolean = true, val result: LiveCheckResult? = null, val error: LiveError? = null)
+
 /** Alert settings typed in a card's edit panel. */
 data class WatchEdit(val mode: AlertMode, val target: Double?, val flexible: Boolean?, val email: Boolean, val targetChanged: Boolean)
 
@@ -93,6 +105,8 @@ data class AlertsUiState(
     val now: Instant = Instant.EPOCH,
     /** Airport code → city for fare routes saved with codes ("LIS" → "Lisbon"); codes not found stay codes. */
     val placeNames: Map<String, String> = emptyMap(),
+    /** The open "Search the web now" panel, if any. */
+    val liveCheck: LiveCheckUi? = null,
 ) {
     val loading: Boolean get() = fares == null && prices == null && !faresFailed
     val loaded: Boolean get() = fares != null && prices != null
@@ -145,6 +159,14 @@ sealed interface AlertsEvent {
     data class Replan(val key: String, val cheapest: Boolean = false) : AlertsEvent
 
     data object FocusHandled : AlertsEvent
+
+    /** "Search the web now" on a card. */
+    data class LiveCheck(val key: String) : AlertsEvent
+
+    data object RetryLiveCheck : AlertsEvent
+
+    /** The panel closed: the answer is dropped. */
+    data object DismissLiveCheck : AlertsEvent
 }
 
 /** One-off effects for the route. */
@@ -156,6 +178,7 @@ sealed interface AlertsEffect {
 /** Watched prices (web AlertsPage): fare and price watches together, with tabs, search and card actions. */
 @HiltViewModel
 class AlertsViewModel
+    @Suppress("LongParameterList") // Hilt-injected collaborators, one per concern (as ResultsViewModel)
     @Inject
     constructor(
         savedState: SavedStateHandle,
@@ -169,6 +192,7 @@ class AlertsViewModel
         private val clock: AppClock,
         @param:ApplicationScope private val appScope: CoroutineScope,
         private val placeNames: PlaceNameLookup,
+        private val liveChecks: LiveCheckRepository,
     ) : ViewModel() {
         /** Deep-link arguments (`AlertsRoute` property names). */
         private val link = AlertsRoute(kind = savedState.get<String>(ARG_KIND), watchId = savedState.get<Long>(ARG_WATCH))
@@ -176,6 +200,7 @@ class AlertsViewModel
         val state: StateFlow<AlertsUiState> = mutable.asStateFlow()
         private val effects = Channel<AlertsEffect>(Channel.BUFFERED)
         val effect: Flow<AlertsEffect> = effects.receiveAsFlow()
+        private var liveJob: Job? = null
 
         init {
             load()
@@ -202,6 +227,9 @@ class AlertsViewModel
                 AlertsEvent.UndoExpired -> commitDelete()
                 is AlertsEvent.Replan -> replan(event.key, event.cheapest)
                 AlertsEvent.FocusHandled -> mutable.update { it.copy(focusKey = null) }
+                is AlertsEvent.LiveCheck -> liveCheck(event.key)
+                AlertsEvent.RetryLiveCheck -> mutable.value.liveCheck?.let { liveCheck(it.key) }
+                AlertsEvent.DismissLiveCheck -> dismissLiveCheck()
             }
         }
 
@@ -438,6 +466,30 @@ class AlertsViewModel
                 searchLauncher.startNewSearch(request)
                 effects.send(AlertsEffect.Replanned)
             }
+        }
+
+        /** One live search at a time; its answer goes only into [AlertsUiState.liveCheck]. */
+        private fun liveCheck(key: String) {
+            val w = find(key) ?: return
+            // A double tap (or Retry) while this watch's search is running starts nothing new.
+            if (mutable.value.liveCheck?.let { it.key == key && it.loading } == true) return
+            liveJob?.cancel()
+            mutable.update { it.copy(liveCheck = LiveCheckUi(key)) }
+            liveJob =
+                viewModelScope.launch {
+                    val ui =
+                        when (val result = liveChecks.check(w.kind, w.id)) {
+                            is AppResult.Success -> LiveCheckUi(key, loading = false, result = result.value)
+                            is AppResult.Failure -> LiveCheckUi(key, loading = false, error = result.error.toLiveError())
+                        }
+                    mutable.update { s -> if (s.liveCheck?.key == key) s.copy(liveCheck = ui) else s }
+                }
+        }
+
+        private fun dismissLiveCheck() {
+            liveJob?.cancel()
+            liveJob = null
+            mutable.update { it.copy(liveCheck = null) }
         }
 
         override fun onCleared() {

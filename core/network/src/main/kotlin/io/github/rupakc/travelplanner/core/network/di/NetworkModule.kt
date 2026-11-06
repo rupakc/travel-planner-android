@@ -22,6 +22,7 @@ import io.github.rupakc.travelplanner.core.network.api.FareWatchApi
 import io.github.rupakc.travelplanner.core.network.api.FeedbackApi
 import io.github.rupakc.travelplanner.core.network.api.HealthApi
 import io.github.rupakc.travelplanner.core.network.api.ImportApi
+import io.github.rupakc.travelplanner.core.network.api.LiveCheckApi
 import io.github.rupakc.travelplanner.core.network.api.NearbyApi
 import io.github.rupakc.travelplanner.core.network.api.NotificationsApi
 import io.github.rupakc.travelplanner.core.network.api.PlansApi
@@ -186,6 +187,11 @@ object NetworkModule {
     fun nearbyApi(
         @AiHttp r: Retrofit,
     ): NearbyApi = r.create(NearbyApi::class.java)
+
+    @Provides @Singleton
+    fun liveCheckApi(
+        @AiHttp r: Retrofit,
+    ): LiveCheckApi = r.create(LiveCheckApi::class.java)
 
     @Provides @Singleton
     fun feedbackApi(

@@ -40,8 +40,10 @@ Parity with the traveller-facing web flows, plus what a phone is good at (design
 - Chat with plan commands, streamed.
 - Alerts: fare and hotel/activity/trip price watches, notification inbox.
 - Traveller-type onboarding, a personalised Home and per-feature visibility (device-local).
-- Notifications: an in-app inbox with an unread bell, a jittered WorkManager alert poll, local trip reminders and opt-in Near me suggestions; Firebase Cloud Messaging is wired but inert until configured.
-- Near me recommendations, public share-link viewer (deep link), English and Spanish, dark theme, dynamic colour.
+- Notifications: an in-app inbox with an unread bell, a jittered WorkManager alert poll, local trip reminders and an opt-in "See what's near you" invitation (no background lookup); Firebase Cloud Messaging is wired but inert until configured.
+- Near me: places to see, eat, shop and stay around you (Google Maps–grounded, `POST /api/nearby` with `sections: true`), with "Open in Google Maps" links; kept in memory only.
+- "Search the web now" on every watched price: a user-initiated Google Search–grounded answer with its sources, never stored and never used for alerts.
+- Public share-link viewer (deep link), English and Spanish, dark theme, dynamic colour.
 - Booking is always "open the provider's page in a Custom Tab"; there are no in-app payments.
 
 ## Architecture

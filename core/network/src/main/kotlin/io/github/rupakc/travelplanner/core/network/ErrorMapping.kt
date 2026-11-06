@@ -117,7 +117,8 @@ fun Throwable.toAppError(): AppError =
         }
 
         is SerializationException, is IllegalArgumentException -> {
-            AppLogger.w(TAG, "Response could not be decoded", this)
+            // Class name only: a decoding message quotes the response body (grounded answers, user data).
+            AppLogger.w(TAG, "Response could not be decoded: ${this::class.java.simpleName}")
             AppError.Decoding(null)
         }
 

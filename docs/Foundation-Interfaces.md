@@ -72,7 +72,8 @@ sealed interface AppError { val message: String? }   // message = backend `detai
 `AppError.Client.code`/`extras` carry structured details: `/api/import/*` codes (`empty_page`, `no_places`, …),
 price-watch 422s (`no_live_price` with `suggestions`/`estimate` in `extras` as raw JSON text — decode with
 `TravelJson` into `NoLivePriceError`; `target_currency_mismatch`), nearby `NotFound(code = "no_place")`,
-`Server(code = "agent_error")`. 401 anywhere clears the session automatically (the shell shows Login and a snackbar).
+`Server(code = "agent_error")`; grounded calls (`/api/nearby` v2, `/api/live-check`) also return `Server(503, code = "ai_limit" | "ai_billing" |
+"grounding_unavailable")` and `Server(502, code = "live_check_failed")`, `Client(409, code = "watch_expired")` — `core:domain` `live/toLiveError()` classifies them. 401 anywhere clears the session automatically (the shell shows Login and a snackbar).
 A 401 or an expired token only signs out: the draft, cached plans, recent searches and chat survive. Local data is
 wiped (`SessionCleaner`: draft, search, caches, recent searches, seen notifications and the traveller profile with its
 feature toggles) only on explicit logout, on login as a different user, and on a server change.
@@ -299,9 +300,17 @@ interface DevicesRepository {
     suspend fun unregister(token: String): AppResult<Unit>
 }
 
-/** Near-me recommendations, cached 1 h per ~5 km cell (spec §8). */
+/** Near me v2 (Google Maps grounding): never cached; the ViewModel holds the answer. */
 interface NearbyRepository {
-    suspend fun nearby(lat: Double, lng: Double, interests: List<String>? = null, limit: Int = 10): AppResult<NearbyResponse>
+    suspend fun nearby(lat: Double, lng: Double, limit: Int = NearbyRequest.DEFAULT_LIMIT, language: String? = null): AppResult<NearbyResponse>
+    suspend fun rememberLocation(lat: Double, lng: Double)   // ~5 km cell, gates the background invitation
+    suspend fun lastLocation(): LocationCell?
+    suspend fun forgetLocation()
+}
+
+/** "Search the web now" (`POST /api/live-check`); never cached or stored. */
+interface LiveCheckRepository {
+    suspend fun check(kind: String, watchId: Long): AppResult<LiveCheckResult>
 }
 
 interface CompareRepository {
@@ -486,7 +495,7 @@ the share page, Alerts (fare cards) and trip reminders. Chat needs none: the bac
 - Request models: `TravelSearchRequest` (+ `MustIncludePlace`, `ImportSource`, `FlightFilters`, `HotelFilters`,
   `ActivityFilters`), `DiscoveryRequest`, `LayoverRequest`, `StressTestPayload`, `ChatRequest`/`ChatMessage`,
   `CreateFareWatchRequest`, `CreatePriceWatchRequest` (+ `HotelWatchSpec`, `ActivityWatchSpec`, `TripWatchSpec`
-  encoded to `JsonObject`), `ImportRequest`, `ResolvePlaceRequest`, `NearbyRequest`, `RecentSearchIn`, `Preferences`.
+  encoded to `JsonObject`), `ImportRequest`, `ResolvePlaceRequest`, `NearbyRequest`, `LiveCheckRequest`, `RecentSearchIn`, `Preferences`.
 - Section data (`….core.model.section`, all `SectionData` with `error` + `verification`): `FlightsData`(`Flight`,
   `FlightLeg`, `FlightLegGroup`), `WeatherData`, `HotelsData`(`Hotel`), `ActivitiesData`(`Activity`),
   `PlacesData`(`PlaceToSee`), `WalkingToursData`, `EventsData`(`TravelEvent`), `VisaData`, `SimData`(`SimPlan`),
@@ -500,7 +509,7 @@ the share page, Alerts (fare cards) and trip reminders. Chat needs none: the bac
   `Unknown`; `isTerminal` = Done or PlanningDone.
 - Others: `Plan`, `SharedPlan`, `FareWatch`, `PriceWatch`, `AppNotification`(+`watchId`, `watchKind`),
   `NotificationsPage`, `Health` (capability flags incl. `pushConfigured`), `CompareSummary`, `DiscoveryResponse`,
-  `FareCalendar`, `LayoverPlan`, `ImportPreview`, `ResolvedPlace`, `NearbyResponse`(`NearbyPlace`), `Device`,
+  `FareCalendar`, `LayoverPlan`, `ImportPreview`, `ResolvedPlace`, `NearbyResponse`(`NearbyPlace`, `NearbySection`, `NearbyPlaceItem`), `LiveCheckResult`(`LiveQuote`), `GroundingSource`, `Device`,
   `TasteProfile`, `RecentSearch`, `AppSettings`, `ThemeMode`, `TravellerProfile`, `FeatureOverrides`, `Session`.
 
 ## 4b. API additions in fix round 1 (all additive)
@@ -818,7 +827,7 @@ The schema is exported to `core/database/schemas/`. Every `version` bump ships a
   `FakeChatRepository(replies = fixture)` (`sent`, `failure`, in-memory history), `FakePlansRepository(initial)`
   (`failNext`, `sharedPlans`), `FakeCurrentPlanStore(plans)`, `FakePreferencesRepository`, `FakeRecentSearchesRepository`,
   `FakeFareWatchesRepository`, `FakePriceWatchesRepository`, `FakeNotificationsRepository`, `FakeDevicesRepository`,
-  `FakeNearbyRepository(result)`, `FakeCompareRepository`, `FakeDiscoverRepository`, `FakeImportRepository`,
+  `FakeNearbyRepository(result)` (`requests`), `FakeLiveCheckRepository(result)` (`requests`), `FakeCompareRepository`, `FakeDiscoverRepository`, `FakeImportRepository`,
   `FakeFareCalendarRepository`, `FakeHealthRepository(initial)`, `FakeSettingsRepository`, `FakeProfileRepository`,
   `FakeFeedbackRepository`; store fakes for core tests (`FakeSessionStore` (tracks `lastUser`), `FakeSettingsStore`, …); `TestUser`, `NotStubbed`.
   `FakeCurrentPlanStore` implements `reset()`.

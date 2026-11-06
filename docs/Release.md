@@ -28,7 +28,7 @@ Before the first store release:
 ## Play Console steps
 
 1. Create the app, enable Play App Signing, upload the AAB to an internal testing track first.
-2. Fill the store listing (EN and ES), content rating, target audience, and Data safety (account credentials, plan content, optional coarse/precise location for Near me, optional FCM token; data goes to the user's own backend).
+2. Fill the store listing (EN and ES), content rating, target audience, and Data safety (account credentials, plan content, optional coarse/precise location for Near me, optional FCM token; data goes to the user's own backend). Location: declare it as shared with a third party — when the user opens Near me, the coordinates (rounded to ~100 m) go via the backend to Google Maps (Gemini Grounding with Google Maps) to find nearby places; not stored, not used for ads, not collected in the background.
 3. Declare permissions in context: `POST_NOTIFICATIONS`, location (foreground only, Near me).
 4. Provide a test account (the backend has no self-registration) in the App access section.
 5. Review the pre-launch report (accessibility, crashes), then promote to production.

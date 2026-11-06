@@ -32,8 +32,10 @@ Alert notifications link to `alerts?kind=&watch=`, mirroring the web's `/alerts?
 - **Trip reminders**: `TripReminderScheduler` re-plans one-time WorkManager work from the cached plans whenever they change and after
   `BOOT_COMPLETED` / `MY_PACKAGE_REPLACED`. Device wall clock: 09:00 a week before, 18:00 the day before, 08:00 each trip morning (up to 31 days),
   08:00 on the return day (`TripReminderPlanner`, pure and unit-tested).
-- **Near me suggestions** (opt-in in Settings → Notifications): `NearbySuggestionWorker` posts at most one suggestion per 4 h, during a trip
-  unless "always" is chosen, using the last location from the Near me screen (no background location permission).
+- **Near me invitation** (opt-in in Settings → Notifications): `NearbySuggestionWorker` posts at most one "See what's near you" invitation per local day, never in quiet hours (22:00–08:00 local),
+  during a trip unless "always" is chosen, and only if Near me was used in the last 24 h (its coarse `last_location` cell). It makes **no network
+  call**: Google Maps grounding may only answer the user's own request, so the notification just deep-links to `travelplanner://nearby`, where
+  the user's request runs. No background location permission.
 - **In-app inbox**: the bell in the top bar shows the unread count (`GET /api/notifications/unread-count`); `NotificationsRoute` lists, marks read and opens alerts.
 - **Trip reminder text** names the city: a plan's search stores an airport code ("LIS"), so `TripReminderWorker` looks it up with the shared
   `PlaceNameLookup` when it posts ("Your Lisbon trip starts today"); if the lookup finds nothing the code stays (never an invented name).

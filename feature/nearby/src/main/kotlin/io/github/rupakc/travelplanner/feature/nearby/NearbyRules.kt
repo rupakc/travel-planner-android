@@ -1,34 +1,43 @@
 package io.github.rupakc.travelplanner.feature.nearby
 
+import androidx.compose.runtime.Immutable
+import io.github.rupakc.travelplanner.core.domain.live.safeWebUri
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
-import io.github.rupakc.travelplanner.core.model.section.Activity
-import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
-import java.util.Locale
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
+import io.github.rupakc.travelplanner.core.model.nearby.NearbySectionIds
 
-/** The web's 10 interest ids (SearchPage `INTERESTS`); onboarding answers map onto them (spec §6.1). */
-internal val WEB_INTEREST_IDS = listOf("food", "history", "adventure", "culture", "nature", "shopping", "nightlife", "wellness", "art", "family")
+/** One place card: [mapsUri] is already checked (http/https only) or null. */
+@Immutable
+data class NearbyCard(val key: String, val name: String, val summary: String?, val mapsUri: String?)
 
-/**
- * Interests from the device-local traveller profile: every quiz answer that is a web interest id,
- * in the web's order. Used only when the server Preferences have none (the backend falls back
- * to "general sightseeing" otherwise).
- */
-internal fun profileInterests(profile: TravellerProfile): List<String> {
-    val chosen = profile.answers.values.flatten().map { it.lowercase(Locale.ROOT) }.toSet()
-    return WEB_INTEREST_IDS.filter { it in chosen }
-}
+/** One of the four sections, always present (maybe empty) and always in see/eat/shop/stay order. */
+@Immutable
+data class NearbySectionUi(val id: String, val cards: List<NearbyCard>)
 
 /**
- * "Why this?": the asked-for interests the item's own data mentions (its category, name or
- * description). Nothing is inferred beyond the API fields; empty = no reason shown.
+ * The four sections from a v2 answer: unknown section ids are ignored, a missing section is empty,
+ * nameless items are dropped, and a place appears once (same `place_id` or same Maps link), in the
+ * first section that lists it (see, eat, shop, stay order). Text is kept exactly as the server sent it.
  */
-internal fun whyThis(item: Activity, interests: List<String>): List<String> {
-    val category = item.category?.lowercase(Locale.ROOT)
-    val text = listOfNotNull(item.name, item.description).joinToString(" ").lowercase(Locale.ROOT)
-    return interests.filter { i ->
-        val word = i.lowercase(Locale.ROOT)
-        // Whole words only (an optional plural "s"): "art" never matches "artificial".
-        category == word || Regex("\\b${Regex.escape(word)}s?\\b").containsMatchIn(text)
+internal fun sectionsOf(response: NearbyResponse): List<NearbySectionUi> {
+    val seenPlaces = mutableSetOf<String>()
+    val seenKeys = mutableSetOf<String>()
+    return NearbySectionIds.ALL.map { id ->
+        val items = response.sections.filter { it.id == id }.flatMap { it.items }
+        val cards =
+            items.mapIndexedNotNull { i, item ->
+                val name = item.name?.trim()?.takeIf(String::isNotEmpty) ?: return@mapIndexedNotNull null
+                val mapsUri = safeWebUri(item.mapsUri)
+                // A place is known by its place_id and by its Maps link; either one seen before = a duplicate.
+                val ids = listOfNotNull(item.placeId?.trim()?.takeIf(String::isNotEmpty)?.let { "p:$it" }, mapsUri?.let { "u:$it" })
+                if (ids.any { it in seenPlaces }) return@mapIndexedNotNull null
+                seenPlaces += ids
+                val identity = ids.firstOrNull()
+                val base = "$id-" + (identity ?: "$i-$name")
+                val key = if (seenKeys.add(base)) base else "$base-$i".also { seenKeys += it }
+                NearbyCard(key, name, item.summary?.takeIf(String::isNotBlank), mapsUri)
+            }
+        NearbySectionUi(id, cards)
     }
 }
 
@@ -38,8 +47,5 @@ internal fun placeLabel(place: NearbyPlace): String =
         .filter(String::isNotBlank)
         .joinToString(", ")
 
-/** A Maps search for the item near the resolved place (`geo:` URI, any maps app). */
-internal fun mapsQuery(item: Activity, place: NearbyPlace?): String {
-    val near = place?.let(::placeLabel)
-    return listOfNotNull(item.name, item.location, near).filter(String::isNotBlank).joinToString(", ")
-}
+/** Fallback Maps search when the item's link can't be opened: the name near the resolved place (`geo:` URI). */
+internal fun mapsQuery(name: String, place: NearbyPlace?): String = listOfNotNull(name, place?.let(::placeLabel)).filter(String::isNotBlank).joinToString(", ")

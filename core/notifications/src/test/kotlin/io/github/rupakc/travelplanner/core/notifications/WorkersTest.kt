@@ -25,7 +25,6 @@ import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.reference.Airport
-import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollIntervals
@@ -263,6 +262,9 @@ class WorkersTest {
         }
     }
 
+    /** Every nearby repository the worker got; none may ever see a `/api/nearby` call. */
+    private val nearbyRepos = mutableListOf<FakeNearbyRepository>()
+
     private fun nearbyWorker(settings: AppSettings, plans: List<Plan>, log: NearbyPostLog, cellAgeHours: Long? = 1) =
         build({ c, p ->
             NearbySuggestionWorker(
@@ -271,10 +273,9 @@ class WorkersTest {
                 FakeSettingsRepository(settings),
                 FakeCurrentPlanStore(),
                 FakePlansRepository(plans),
-                FakeNearbyRepository(
-                    AppResult.Success(NearbyResponse(NearbyPlace(name = "Lisbon"), listOf(Activity(name = "Tram 28", description = "Ride the old tram")))),
-                ).apply {
+                FakeNearbyRepository(AppResult.Success(NearbyResponse(NearbyPlace(name = "Lisbon")))).apply {
                     last = cellAgeHours?.let { LocationCell(38.725, -9.125, clock.instant.minus(Duration.ofHours(it)).toEpochMilli()) }
+                    nearbyRepos += this
                 },
                 log,
                 notifier,
@@ -283,18 +284,24 @@ class WorkersTest {
         })
 
     @Test
-    fun `nearby suggestion only when enabled, during a trip and at most every 4 h`() =
+    fun `nearby invitation only when enabled, during a trip and at most once a day`() =
         runBlocking {
             val onTrip = listOf(plan(1, "2026-12-10", "2026-12-14"))
             val log = MemoryLog()
             nearbyWorker(AppSettings(nearbyNotifications = false), onTrip, log).doWork()
             assertTrue(notifier.posts.isEmpty())
             nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, log).doWork()
-            assertEquals("Something to do near you in Lisbon", notifier.posts.single().title)
+            assertEquals("See what’s near you", notifier.posts.single().title)
+            assertEquals("Places to see, eat, shop and stay around you. Tap to look.", notifier.posts.single().body)
             assertEquals("travelplanner://nearby", notifier.posts.single().deepLink)
             nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, log).doWork()
             assertEquals(1, notifier.posts.size)
+            // 4 h later is still the same day: nothing.
             clock.instant = clock.instant.plus(Duration.ofHours(4))
+            nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, log).doWork()
+            assertEquals(1, notifier.posts.size)
+            // Next morning (10:00 Lisbon): allowed again.
+            clock.instant = Instant.parse("2026-12-12T10:00:00Z")
             nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, log).doWork()
             assertEquals(2, notifier.posts.size)
         }
@@ -321,14 +328,32 @@ class WorkersTest {
         }
 
     @Test
+    fun `the nearby invitation never calls the nearby API`() =
+        runBlocking {
+            val onTrip = listOf(plan(1, "2026-12-10", "2026-12-14"))
+            nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, MemoryLog()).doWork()
+            nearbyWorker(AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true), emptyList(), MemoryLog()).doWork()
+            nearbyWorker(AppSettings(nearbyNotifications = false), onTrip, MemoryLog()).doWork()
+            assertEquals(2, notifier.posts.size)
+            assertEquals(3, nearbyRepos.size)
+            assertTrue(nearbyRepos.all { it.requests.isEmpty() })
+        }
+
+    @Test
     fun `nearby policy rules`() {
+        val zone = ZoneId.of("Europe/Lisbon")
         val now = Instant.parse("2026-12-11T10:00:00Z")
-        assertFalse(NearbyNotificationPolicy.shouldNotify(enabled = true, always = false, onTrip = false, lastPostedAt = null, now = now))
-        assertTrue(NearbyNotificationPolicy.shouldNotify(enabled = true, always = true, onTrip = false, lastPostedAt = null, now = now))
-        assertFalse(NearbyNotificationPolicy.shouldNotify(true, false, true, now.minus(Duration.ofHours(3)), now))
-        // WorkManager flex may start the 4 h run a few minutes early.
-        assertTrue(NearbyNotificationPolicy.shouldNotify(true, false, true, now.minus(Duration.ofMinutes(230)), now))
-        assertTrue(NearbyNotificationPolicy.shouldNotify(true, false, true, now.minus(Duration.ofHours(4)), now))
+        assertFalse(NearbyNotificationPolicy.shouldNotify(enabled = true, always = false, onTrip = false, lastPostedAt = null, now = now, zone = zone))
+        assertTrue(NearbyNotificationPolicy.shouldNotify(enabled = true, always = true, onTrip = false, lastPostedAt = null, now = now, zone = zone))
+        // Once per local day.
+        assertFalse(NearbyNotificationPolicy.shouldNotify(true, false, true, Instant.parse("2026-12-11T08:30:00Z"), now, zone))
+        assertTrue(NearbyNotificationPolicy.shouldNotify(true, false, true, Instant.parse("2026-12-10T21:00:00Z"), now, zone))
+        // Quiet hours 22:00–08:00 local (Tokyo is UTC+9: 10:00Z is 19:00, 14:00Z is 23:00, 22:59Z is 07:59).
+        val tokyo = ZoneId.of("Asia/Tokyo")
+        assertTrue(NearbyNotificationPolicy.shouldNotify(true, true, false, null, now, tokyo))
+        assertFalse(NearbyNotificationPolicy.shouldNotify(true, true, false, null, Instant.parse("2026-12-11T14:00:00Z"), tokyo))
+        assertFalse(NearbyNotificationPolicy.shouldNotify(true, true, false, null, Instant.parse("2026-12-11T22:59:00Z"), tokyo))
+        assertTrue(NearbyNotificationPolicy.shouldNotify(true, true, false, null, Instant.parse("2026-12-11T23:00:00Z"), tokyo))
         val trip = plan(1, "2026-12-10", "2026-12-14").searchRequest!!
         assertTrue(NearbyNotificationPolicy.isOnTrip(listOf(trip), LocalDate.parse("2026-12-14")))
         assertFalse(NearbyNotificationPolicy.isOnTrip(listOf(trip), LocalDate.parse("2026-12-15")))

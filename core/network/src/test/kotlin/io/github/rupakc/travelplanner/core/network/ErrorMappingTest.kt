@@ -59,15 +59,25 @@ class ErrorMappingTest {
     @Test
     fun `decoding and unknown failures carry no exception text but are logged`() {
         val logged = mutableListOf<Throwable?>()
+        val messages = mutableListOf<String>()
         val previous = AppLogger.sink
-        AppLogger.sink = AppLogger.Sink { _, _, _, t -> logged += t }
+        AppLogger.sink =
+            AppLogger.Sink { _, _, m, t ->
+                logged += t
+                messages += m
+            }
         try {
             val html = SerializationException("Unexpected JSON token at offset 0: <!DOCTYPE html>")
             assertEquals(AppError.Decoding(null), html.toAppError())
             assertEquals(AppError.Decoding(null), IllegalArgumentException("Expected start of the object").toAppError())
             assertEquals(AppError.Unknown(null), IllegalStateException("java internals").toAppError())
             assertEquals(3, logged.size)
-            assertTrue(logged.first() === html)
+            // Decoding logs the exception class only: its message quotes the response body.
+            assertNull(logged[0])
+            assertNull(logged[1])
+            assertEquals("Response could not be decoded: SerializationException", messages[0])
+            assertTrue(messages.none { it.contains("DOCTYPE") || it.contains("Expected start") })
+            assertTrue(logged[2] is IllegalStateException)
         } finally {
             AppLogger.sink = previous
         }

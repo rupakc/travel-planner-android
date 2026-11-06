@@ -9,6 +9,8 @@ import io.github.rupakc.travelplanner.core.model.alerts.DeletedResponse
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatchMatch
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatchMatchRequest
+import io.github.rupakc.travelplanner.core.model.alerts.LiveCheckRequest
+import io.github.rupakc.travelplanner.core.model.alerts.LiveCheckResult
 import io.github.rupakc.travelplanner.core.model.alerts.MarkReadRequest
 import io.github.rupakc.travelplanner.core.model.alerts.MarkReadResponse
 import io.github.rupakc.travelplanner.core.model.alerts.NotificationsPage
@@ -417,12 +419,20 @@ interface DevicesApi {
     ): Response<Unit>
 }
 
-/** Spec §7 (new): near-me recommendations; cache miss takes 10–40 s. */
+/** Near me v2 (`sections: true`): four Google Maps–grounded sections; never cached. */
 interface NearbyApi {
     @POST("api/nearby")
     suspend fun nearby(
         @Body body: NearbyRequest,
     ): NearbyResponse
+}
+
+/** "Search the web now" for one watch (Google Search grounding); the answer is never stored. */
+interface LiveCheckApi {
+    @POST("api/live-check")
+    suspend fun check(
+        @Body body: LiveCheckRequest,
+    ): LiveCheckResult
 }
 
 /** §2.7 */

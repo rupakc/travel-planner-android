@@ -118,6 +118,17 @@ fun AlertsScreen(state: AlertsUiState, onEvent: (AlertsEvent) -> Unit, onSearch:
         }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
+
+    state.liveCheck?.let { live ->
+        val watch = state.watches.firstOrNull { it.key == live.key }
+        LiveCheckSheet(
+            live = live,
+            title = watch?.let { watchTitle(it, state.placeNames) },
+            onRetry = { onEvent(AlertsEvent.RetryLiveCheck) },
+            onDismiss = { onEvent(AlertsEvent.DismissLiveCheck) },
+            onOpen = open,
+        )
+    }
 }
 
 private fun LazyGridScope.full(key: String, content: @Composable () -> Unit) =
@@ -260,6 +271,7 @@ private fun LazyGridScope.section(
                     onDelete = { onEvent(AlertsEvent.Delete(item.key)) },
                     onReplan = { onEvent(AlertsEvent.Replan(item.key, it)) },
                     onOpenLink = open,
+                    onLiveCheck = { onEvent(AlertsEvent.LiveCheck(item.key)) },
                 ),
         )
     }

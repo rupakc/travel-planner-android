@@ -224,4 +224,24 @@
         <item quantity="one">Price over %1$d check: from %2$s to %3$s, low %4$s.</item>
         <item quantity="other">Price over %1$d checks: from %2$s to %3$s, low %4$s.</item>
     </plurals>
+    <!-- Search the web now (live, grounded; never stored, never used for alerts) -->
+    <string name="alerts_live_check">Search the web now</string>
+    <string name="alerts_live_check_a11y">Search the web now for %1$s</string>
+    <string name="alerts_live_title">Live web search</string>
+    <string name="alerts_live_searching">Searching the web…</string>
+    <string name="alerts_live_quotes">Prices found</string>
+    <string name="alerts_live_quote_source">Source: %1$s</string>
+    <string name="alerts_live_searched_for">Searched for</string>
+    <string name="alerts_live_sources">Sources</string>
+    <string name="alerts_live_disclaimer">From a live web search just now. Prices change quickly — check the provider before booking. Not used for your price alerts.</string>
+    <string name="alerts_live_no_summary">The search didn’t return an answer.</string>
+    <string name="alerts_live_failed">The web search didn’t work. Try again.</string>
+    <string name="alerts_live_offline">You’re offline. Check your connection and try again.</string>
+    <string name="alerts_live_rate_limited">Too many requests. Please wait a moment and try again.</string>
+    <string name="alerts_live_ai_limit">AI limit reached for this month — try again on the 1st.</string>
+    <string name="alerts_live_ai_billing">AI features are switched off on this server right now.</string>
+    <string name="alerts_live_search_unavailable">Live web search isn’t available on this server.</string>
+    <string name="alerts_live_not_found">This watch no longer exists.</string>
+    <string name="alerts_live_expired">This trip’s dates have passed, so there’s nothing live to check.</string>
+    <string name="alerts_live_close">Close</string>
 </resources>

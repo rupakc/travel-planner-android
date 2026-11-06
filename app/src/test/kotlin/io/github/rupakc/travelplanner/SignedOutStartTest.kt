@@ -2,12 +2,16 @@ package io.github.rupakc.travelplanner
 
 import android.os.Looper
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
+import dagger.hilt.android.testing.UninstallModules
+import io.github.rupakc.travelplanner.core.common.AppBuildInfo
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.di.AppModule
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
@@ -31,10 +35,28 @@ import org.robolectric.annotation.Config
  * endpoint that needs a session.
  */
 @HiltAndroidTest
+@UninstallModules(AppModule::class)
 @RunWith(AndroidJUnit4::class)
 @Config(application = HiltTestApplication::class)
 class SignedOutStartTest {
     @get:Rule val hilt = HiltAndroidRule(this)
+
+    /**
+     * The real build info, except cleartext is allowed: MockWebServer speaks plain HTTP, and the prod flavour
+     * (HTTPS only, `CLEARTEXT_ALLOWED=false`) rightly refuses an http server URL, which failed `setBaseUrl` under
+     * `testProdDebugUnitTest`. What this test checks (the signed-out gate) does not depend on the scheme.
+     */
+    @BindValue
+    @JvmField
+    val buildInfo: AppBuildInfo =
+        AppBuildInfo(
+            defaultBaseUrl = BuildConfig.DEFAULT_BASE_URL,
+            flavor = BuildConfig.FLAVOR,
+            versionName = BuildConfig.VERSION_NAME,
+            debug = BuildConfig.DEBUG,
+            cleartextAllowed = true,
+            webBaseUrl = BuildConfig.WEB_BASE_URL,
+        )
 
     @Inject lateinit var settings: SettingsRepository
 
