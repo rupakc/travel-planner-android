@@ -69,6 +69,12 @@ def wait_for(label, timeout=60):
     return False
 
 
+def scroll_to_top():
+    for _ in range(3):
+        adb("shell", "input", "swipe", "540", "700", "540", "1900", "300")
+        time.sleep(1)
+
+
 def kill_and_restore():
     adb("shell", "input", "keyevent", "KEYCODE_HOME")
     time.sleep(2)
@@ -97,10 +103,18 @@ def main():
     # 1. Search form: the tab and a typed origin survive process death.
     tap("Search")
     tap("From")
-    adb("shell", "input", "text", "Lisbo")
+    time.sleep(1.5)  # let the keyboard and the scroll-into-view settle
+    # One key at a time: `input text` bursts faster than a typeahead field takes them (characters get dropped).
+    for ch in "Lisbo":
+        adb("shell", "input", "text", ch)
+        time.sleep(0.4)
     time.sleep(2)
+    if not visible("Lisbo"):
+        raise SystemExit("FAIL: could not type the origin before the process-death check")
     kill_and_restore()
-    ok = wait_for("Lisbo", 20)
+    # The form's scroll position is restored too: with a "Recent searches" block above it the From field can sit
+    # just above the viewport, and uiautomator only lists what is on screen. Scroll to the top before looking.
+    ok = wait_for("Lisbo", 10) or (scroll_to_top() or wait_for("Lisbo", 10))
     print(("ok  " if ok else "FAIL") + " search form keeps the typed origin after process death")
     failures += not ok
 

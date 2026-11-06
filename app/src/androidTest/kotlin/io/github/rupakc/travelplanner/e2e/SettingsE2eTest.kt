@@ -16,6 +16,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -85,12 +86,15 @@ class SettingsE2eTest {
         assertNotEquals("Compare tile should flip", before, robot.scrollToFind(compare))
         Screenshots.capture("home-light")
 
-        // Dark theme.
+        // Dark theme (the emulator is in light mode, so the light app has dark status-bar icons first).
+        assertTrue("light app: dark status-bar icons", robot.darkStatusBarIcons())
         robot.openSettings()
         robot.tap(SettingsR.string.settings_appearance)
         robot.tap(SettingsR.string.settings_theme_dark)
         robot.back()
         robot.waitForText(robot.str(SettingsR.string.settings_title))
+        // The emulator runs in light mode: the app's Dark setting must still give light status-bar icons (E2E O1).
+        rule.waitUntil(AppRobot.DEFAULT_TIMEOUT) { !robot.darkStatusBarIcons() }
         Screenshots.capture("settings-dark")
 
         // Language: Español -> the UI switches (activity is recreated with the per-app locale).

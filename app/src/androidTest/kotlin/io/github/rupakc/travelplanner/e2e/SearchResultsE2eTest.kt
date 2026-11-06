@@ -3,6 +3,8 @@ package io.github.rupakc.travelplanner.e2e
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasStateDescription
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
@@ -16,6 +18,8 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -76,6 +80,36 @@ class SearchResultsE2eTest {
         return name
     }
 
+    /**
+     * "Watch price" on the first hotel -> Start watching: exactly one POST /api/price-watches per tap, and an AI-named
+     * hotel without a live price shows the backend's live suggestions ("Watch this instead"); E2E O4.
+     */
+    private fun watchFirstHotel() {
+        rule.onNode(androidx.compose.ui.test.hasTestTag(LIST)).performScrollToKey("HOTELS")
+        val watch = robot.hasDescription(robot.prefixOf(ResultsR.string.results_watch_price_a11y), substring = true)
+        rule.waitUntil(AppRobot.DEFAULT_TIMEOUT) { robot.existsMerged(watch) || robot.scrollListTo(LIST, watch) }
+        rule.onAllNodes(watch).onFirst().performClick()
+        robot.waitForText(robot.str(UiR.string.watch_start))
+        // OkHttp BASIC: "--> POST http://…/api/price-watches (123-byte body)".
+        val create = Regex("""--> POST \S+/api/price-watches(\s|$)""")
+        val posts = { robot.httpRequests().count { create.containsMatchIn(it) } }
+        val before = posts()
+        robot.tap(UiR.string.watch_start)
+        val hotelNoun = robot.str(UiR.string.watch_noun_hotel)
+        val outcome =
+            robot.waitForAny(
+                hasText(robot.str(UiR.string.watch_suggestions_heading)),
+                hasText(robot.str(UiR.string.watch_price_title_done, hotelNoun)),
+                hasText(robot.str(UiR.string.watch_price_title_already, hotelNoun)),
+                timeoutMs = AppRobot.LONG_TIMEOUT,
+            )
+        if (outcome == 0) assertTrue("suggestions offered", robot.scrollToFind(hasText(robot.str(UiR.string.watch_this_instead))))
+        Thread.sleep(POST_SETTLE_MS)
+        assertEquals("one POST /api/price-watches per tap", before + 1, posts())
+        robot.back() // close the sheet
+        robot.waitFor(androidx.compose.ui.test.hasTestTag(LIST))
+    }
+
     @Test fun searchStreamsResults_addToPlan_save() {
         val token = api.adminToken()
         val plansBefore = api.plans(token).size
@@ -91,6 +125,12 @@ class SearchResultsE2eTest {
             UiR.string.section_weather,
             UiR.string.section_visa,
         ).forEach(::awaitTerminal)
+
+        // The search stores the airport code ("LIS"); the summary names the city (E2E O9).
+        robot.waitFor(hasText("Lisbon") and isHeading())
+        assertFalse("airport code shown as a heading", robot.exists(hasText("LIS") and isHeading()))
+
+        watchFirstHotel()
 
         val hotel = addFirstUnder(UiR.string.section_hotels, "HOTELS")
         val activity = addFirstUnder(UiR.string.section_activities, "ACTIVITIES")
@@ -119,5 +159,6 @@ class SearchResultsE2eTest {
     private companion object {
         const val LIST = "results_list"
         const val STREAM_TIMEOUT = 300_000L
+        const val POST_SETTLE_MS = 2_000L
     }
 }
