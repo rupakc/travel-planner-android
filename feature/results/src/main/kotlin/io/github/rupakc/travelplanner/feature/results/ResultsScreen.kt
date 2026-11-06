@@ -108,7 +108,7 @@ fun ResultsScreen(
         )
     Scaffold(
         modifier = modifier,
-        topBar = { TpTopBar(state.request?.destinationName() ?: stringResource(R.string.results_title), onBack = onBack) },
+        topBar = { TpTopBar(state.request?.destinationName(state.placeNames) ?: stringResource(R.string.results_title), onBack = onBack) },
         bottomBar = { if (state.request != null) PlanBar(state.plan, onOpen = onOpenMyPlan) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->

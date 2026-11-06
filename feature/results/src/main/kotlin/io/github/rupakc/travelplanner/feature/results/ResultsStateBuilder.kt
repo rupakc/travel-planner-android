@@ -82,10 +82,20 @@ internal data class LocalState(
     val watches: WatchesUi = WatchesUi(),
     val verificationFor: SectionId? = null,
     val selected: SectionId? = null,
+    /** Airport code → city ("LIS" → "Lisbon") for the request's places, from the airport lookup (web `useAirportCities`). */
+    val placeNames: Map<String, String> = emptyMap(),
 ) {
     /** Keeps what outlives a new search (filters text, expand choices, remix banner, undo). */
     fun forNewSearch(key: String?): LocalState =
-        LocalState(key = key, query = query, expanded = expanded, remix = remix, newPlanUndo = newPlanUndo, watches = WatchesUi())
+        LocalState(
+            key = key,
+            query = query,
+            expanded = expanded,
+            remix = remix,
+            newPlanUndo = newPlanUndo,
+            watches = WatchesUi(),
+            placeNames = placeNames,
+        )
 }
 
 /**
@@ -196,6 +206,7 @@ internal class ResultsStateBuilder {
                     effective[id]?.first?.verification?.let { VerificationDetail(id, it) }
                 },
             selectedSection = local.selected,
+            placeNames = local.placeNames,
             sectionStatuses = sections.associate { it.id to it.status },
             daysUntilDeparture = daysUntil(request, today),
             flightFilters = local.flightFilters,

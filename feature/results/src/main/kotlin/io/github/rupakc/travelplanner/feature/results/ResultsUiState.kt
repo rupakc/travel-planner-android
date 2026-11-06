@@ -57,6 +57,8 @@ data class ResultsUiState(
     val watches: WatchesUi = WatchesUi(),
     val verificationDetail: VerificationDetail? = null,
     val selectedSection: SectionId? = null,
+    /** Airport code → city name for the request's origin and destinations (the search form stores codes). */
+    val placeNames: Map<String, String> = emptyMap(),
     /** Every section's stream status (for the "<Section> ready" announcer). */
     val sectionStatuses: Map<SectionId, SectionStatus> = emptyMap(),
     /** Days from today to departure (pricing advisor "Now" marker). */
