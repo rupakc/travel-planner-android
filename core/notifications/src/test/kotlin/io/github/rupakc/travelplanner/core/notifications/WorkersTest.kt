@@ -284,7 +284,7 @@ class WorkersTest {
         })
 
     @Test
-    fun `nearby suggestion only when enabled, during a trip and at most every 4 h`() =
+    fun `nearby invitation only when enabled, during a trip and at most once a day`() =
         runBlocking {
             val onTrip = listOf(plan(1, "2026-12-10", "2026-12-14"))
             val log = MemoryLog()
@@ -296,7 +296,12 @@ class WorkersTest {
             assertEquals("travelplanner://nearby", notifier.posts.single().deepLink)
             nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, log).doWork()
             assertEquals(1, notifier.posts.size)
+            // 4 h later is still the same day: nothing.
             clock.instant = clock.instant.plus(Duration.ofHours(4))
+            nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, log).doWork()
+            assertEquals(1, notifier.posts.size)
+            // Next morning (10:00 Lisbon): allowed again.
+            clock.instant = Instant.parse("2026-12-12T10:00:00Z")
             nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, log).doWork()
             assertEquals(2, notifier.posts.size)
         }
@@ -336,13 +341,19 @@ class WorkersTest {
 
     @Test
     fun `nearby policy rules`() {
+        val zone = ZoneId.of("Europe/Lisbon")
         val now = Instant.parse("2026-12-11T10:00:00Z")
-        assertFalse(NearbyNotificationPolicy.shouldNotify(enabled = true, always = false, onTrip = false, lastPostedAt = null, now = now))
-        assertTrue(NearbyNotificationPolicy.shouldNotify(enabled = true, always = true, onTrip = false, lastPostedAt = null, now = now))
-        assertFalse(NearbyNotificationPolicy.shouldNotify(true, false, true, now.minus(Duration.ofHours(3)), now))
-        // WorkManager flex may start the 4 h run a few minutes early.
-        assertTrue(NearbyNotificationPolicy.shouldNotify(true, false, true, now.minus(Duration.ofMinutes(230)), now))
-        assertTrue(NearbyNotificationPolicy.shouldNotify(true, false, true, now.minus(Duration.ofHours(4)), now))
+        assertFalse(NearbyNotificationPolicy.shouldNotify(enabled = true, always = false, onTrip = false, lastPostedAt = null, now = now, zone = zone))
+        assertTrue(NearbyNotificationPolicy.shouldNotify(enabled = true, always = true, onTrip = false, lastPostedAt = null, now = now, zone = zone))
+        // Once per local day.
+        assertFalse(NearbyNotificationPolicy.shouldNotify(true, false, true, Instant.parse("2026-12-11T08:30:00Z"), now, zone))
+        assertTrue(NearbyNotificationPolicy.shouldNotify(true, false, true, Instant.parse("2026-12-10T21:00:00Z"), now, zone))
+        // Quiet hours 22:00–08:00 local (Tokyo is UTC+9: 10:00Z is 19:00, 14:00Z is 23:00, 22:59Z is 07:59).
+        val tokyo = ZoneId.of("Asia/Tokyo")
+        assertTrue(NearbyNotificationPolicy.shouldNotify(true, true, false, null, now, tokyo))
+        assertFalse(NearbyNotificationPolicy.shouldNotify(true, true, false, null, Instant.parse("2026-12-11T14:00:00Z"), tokyo))
+        assertFalse(NearbyNotificationPolicy.shouldNotify(true, true, false, null, Instant.parse("2026-12-11T22:59:00Z"), tokyo))
+        assertTrue(NearbyNotificationPolicy.shouldNotify(true, true, false, null, Instant.parse("2026-12-11T23:00:00Z"), tokyo))
         val trip = plan(1, "2026-12-10", "2026-12-14").searchRequest!!
         assertTrue(NearbyNotificationPolicy.isOnTrip(listOf(trip), LocalDate.parse("2026-12-14")))
         assertFalse(NearbyNotificationPolicy.isOnTrip(listOf(trip), LocalDate.parse("2026-12-15")))

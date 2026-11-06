@@ -32,23 +32,37 @@ import io.github.rupakc.travelplanner.core.notifications.TravelChannel
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
 
-/** When a nearby suggestion may be posted (spec §7/§8): opt-in, during a trip unless "always", at most 1 per 4 h. */
+/**
+ * When the "See what's near you" invitation may be posted: opt-in, during a trip unless "always", at most once per
+ * local calendar day, and never in quiet hours ([QUIET_START]–[QUIET_END] local time).
+ */
 object NearbyNotificationPolicy {
+    /** How often the worker wakes to see whether an invitation is allowed (not how often one is posted). */
     val MIN_GAP: Duration = Duration.ofHours(4)
 
-    /** WorkManager's flex can start a 4 h periodic run a little early; don't skip it for that. */
-    val TOLERANCE: Duration = Duration.ofMinutes(15)
+    /** Quiet hours start (inclusive), local time. */
+    val QUIET_START: LocalTime = LocalTime.of(22, 0)
 
-    fun shouldNotify(enabled: Boolean, always: Boolean, onTrip: Boolean, lastPostedAt: Instant?, now: Instant): Boolean {
+    /** Quiet hours end (exclusive), local time. */
+    val QUIET_END: LocalTime = LocalTime.of(8, 0)
+
+    fun shouldNotify(enabled: Boolean, always: Boolean, onTrip: Boolean, lastPostedAt: Instant?, now: Instant, zone: ZoneId): Boolean {
         if (!enabled) return false
         if (!always && !onTrip) return false
-        return lastPostedAt == null || Duration.between(lastPostedAt, now) >= MIN_GAP.minus(TOLERANCE)
+        val local = now.atZone(zone)
+        if (isQuiet(local.toLocalTime())) return false
+        return lastPostedAt == null || lastPostedAt.atZone(zone).toLocalDate() != local.toLocalDate()
     }
+
+    /** 22:00–08:00 local. */
+    fun isQuiet(time: LocalTime): Boolean = !time.isBefore(QUIET_START) || time.isBefore(QUIET_END)
 
     /** [today] falls within a trip's dates (departure..return, one-way = the departure day). */
     fun isOnTrip(trips: List<TravelSearchRequest>, today: LocalDate): Boolean =
@@ -133,7 +147,14 @@ class NearbySuggestionWorker
             val s = settings.settings.first()
             val trips = listOfNotNull(currentPlan.draftRequest()) + plans.plans.first().mapNotNull { it.searchRequest }
             val onTrip = NearbyNotificationPolicy.isOnTrip(trips, clock.today())
-            return NearbyNotificationPolicy.shouldNotify(s.nearbyNotifications, s.nearbyNotificationsAlways, onTrip, log.lastPostedAt(), clock.now())
+            return NearbyNotificationPolicy.shouldNotify(
+                s.nearbyNotifications,
+                s.nearbyNotificationsAlways,
+                onTrip,
+                log.lastPostedAt(),
+                clock.now(),
+                clock.zone(),
+            )
         }
     }
 
