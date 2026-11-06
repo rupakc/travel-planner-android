@@ -35,6 +35,20 @@ Alert notifications link to `alerts?kind=&watch=`, mirroring the web's `/alerts?
 - **Near me suggestions** (opt-in in Settings → Notifications): `NearbySuggestionWorker` posts at most one suggestion per 4 h, during a trip
   unless "always" is chosen, using the last location from the Near me screen (no background location permission).
 - **In-app inbox**: the bell in the top bar shows the unread count (`GET /api/notifications/unread-count`); `NotificationsRoute` lists, marks read and opens alerts.
+- **Trip reminder text** names the city: a plan's search stores an airport code ("LIS"), so `TripReminderWorker` looks it up in the airport
+  search when it posts ("Your Lisbon trip starts today"); if the lookup finds nothing the code stays (never an invented name).
+
+### "Check now" drops: in-app and inbox, no system notification (product ruling, web parity)
+
+A drop found by the in-app **Check now** on an Alerts card is shown on that card (its "Checked" message and updated price) and stored
+in the inbox (the bell's unread count), exactly as on the web. It is **not** posted as a system notification: `AlertsViewModel` marks the
+alert returned by the check as seen (`NotificationsRepository.markSeen`), so `AlertPollWorker` skips it. Drops found by the backend's
+scheduled checks are posted by the poller (or FCM) as usual. The E2E price-drop flow therefore triggers its drop with a server-side check
+(`POST /api/price-watches/{id}/check` from the test, what the scheduler does) and then runs the poller.
+
+Caveat with FCM configured: the backend pushes every alert it stores, including one found by Check now. `PushAlertHandler` marks it seen
+but still posts it, so with Firebase on, a Check-now drop can also appear in the shade. Full parity there needs the backend to skip the
+push for user-triggered checks (not verifiable here: Firebase is not configured in this project's test setup).
 
 ## Path 2: FCM (wired, inert until configured)
 

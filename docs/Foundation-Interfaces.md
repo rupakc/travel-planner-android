@@ -638,6 +638,8 @@ screens must **not** draw their own top bar. Other screens use `TpTopBar(title, 
 Auth gate (in `app`): no session → Login; `requires_password_change` → Change password; onboarding not
 completed on this device → Onboarding; else Home. It reacts to the session/profile flows: just call
 `AuthRepository.login/logout/changePassword` or `ProfileRepository.saveProfile(profile.copy(onboardingCompleted = true))`.
+Nothing is composed while the gate is LOADING (the splash covers it), and the NavHost then starts on the gate's own screen
+(`startDestinationFor`: Login when signed out), so no screen that fetches with a session is composed signed out (E2E O3).
 The share viewer stays reachable signed-out. Deep links: `travelplanner://share/{token}`,
 `travelplanner://alerts?kind={kind}&watch={watchId}`, `travelplanner://nearby` (`plan/{id}` and `chat`
 are declared in the manifest; the plan/chat teams add their `navDeepLink`s).
