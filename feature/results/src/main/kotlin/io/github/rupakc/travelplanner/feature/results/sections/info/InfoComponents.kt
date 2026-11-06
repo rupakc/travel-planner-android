@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -173,6 +174,24 @@ internal fun CityChip(city: String?, modifier: Modifier = Modifier) {
 internal fun LinkButton(label: String, url: String?, onOpen: (String) -> Unit, modifier: Modifier = Modifier) {
     val safe = safeHttpUrl(url) ?: return
     TpButton(label, onClick = { onOpen(safe) }, modifier = modifier, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp)
+}
+
+/**
+ * A card's footer: its [link] (usually a [LinkButton]) and its `AddToPlanButton`, on one line when both fit, otherwise the
+ * button wraps onto the next line at its full width. A plain Row measured the link first, so a long label
+ * ("View on Free Tours by Foot ↗", 200 % font) left the button no width at all.
+ */
+@Composable
+internal fun LinkAndAddRow(link: @Composable () -> Unit, add: @Composable () -> Unit, modifier: Modifier = Modifier) {
+    FlowRow(
+        modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs),
+        itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
+        link()
+        add()
+    }
 }
 
 /**

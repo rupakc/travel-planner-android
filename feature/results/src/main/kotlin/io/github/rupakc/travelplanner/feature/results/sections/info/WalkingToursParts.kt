@@ -97,10 +97,10 @@ private fun TourCard(tour: WalkingTour, selected: Boolean, onToggle: () -> Unit,
                 Text(it, style = TravelTheme.typography.bodySmall, fontStyle = FontStyle.Italic, color = TravelTheme.colors.onSurfaceVariant)
             }
             if (showCity) CityChip(cityName(tour.city).ifEmpty { null })
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                LinkButton(stringResource(R.string.tours_view_on, tour.provider.orEmpty()), tour.url, onOpenLink)
-                AddToPlanButton(selected, tour.name.orEmpty(), onToggle)
-            }
+            LinkAndAddRow(
+                link = { LinkButton(stringResource(R.string.tours_view_on, tour.provider.orEmpty()), tour.url, onOpenLink) },
+                add = { AddToPlanButton(selected, tour.name.orEmpty(), onToggle) },
+            )
         }
     }
 }

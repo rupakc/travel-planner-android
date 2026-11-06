@@ -82,10 +82,10 @@ private fun SimCard(plan: SimPlan, selected: Boolean, onToggle: () -> Unit, onOp
             MetaText(plan.dataGb?.takeIf { it.isNotBlank() }?.let { stringResource(R.string.sim_data, it) } ?: stringResource(R.string.sim_unlimited))
             plan.validityDays?.takeIf { it > 0 }?.let { MetaText(pluralStringResource(R.plurals.sim_validity, it, it)) }
             plan.networkQuality?.let { NetworkLine(it) }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                LinkButton(stringResource(R.string.sim_get_plan), plan.url, onOpenLink)
-                AddToPlanButton(selected, listOfNotNull(plan.provider, plan.planName).joinToString(" "), onToggle)
-            }
+            LinkAndAddRow(
+                link = { LinkButton(stringResource(R.string.sim_get_plan), plan.url, onOpenLink) },
+                add = { AddToPlanButton(selected, listOfNotNull(plan.provider, plan.planName).joinToString(" "), onToggle) },
+            )
         }
     }
 }
@@ -165,10 +165,10 @@ private fun TipRow(tip: Tip, selected: Boolean, onToggle: () -> Unit, onOpenLink
                     CityChip(cityOf(tip.raw))
                 }
                 tip.body?.let { Text(it, style = TravelTheme.typography.bodyMedium, color = colors.content) }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                    LinkButton(stringResource(R.string.info_source), tip.sourceUrl, onOpenLink)
-                    AddToPlanButton(selected, tip.title.orEmpty(), onToggle)
-                }
+                LinkAndAddRow(
+                    link = { LinkButton(stringResource(R.string.info_source), tip.sourceUrl, onOpenLink) },
+                    add = { AddToPlanButton(selected, tip.title.orEmpty(), onToggle) },
+                )
             }
         }
     }
