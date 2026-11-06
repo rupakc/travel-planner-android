@@ -217,6 +217,14 @@ class AlertsScreenTest {
     }
 
     @Test
+    fun `an expired watch gets our copy and no retry`() {
+        showLive(LiveCheckUi("watch-7", loading = false, error = LiveError(LiveFailure.WATCH_EXPIRED, "Watch expired.", "watch_expired")))
+        compose.onNodeWithText("This trip’s dates have passed, so there’s nothing live to check.").assertIsDisplayed()
+        compose.onNodeWithText("Watch expired.").assertDoesNotExist()
+        compose.onNodeWithText("Retry").assertDoesNotExist()
+    }
+
+    @Test
     fun `live errors show the backend words or our copy, with retry`() {
         var retried = false
         showLive(LiveCheckUi("watch-7", loading = false, error = LiveError(LiveFailure.GROUNDING_UNAVAILABLE, null)), onRetry = { retried = true })

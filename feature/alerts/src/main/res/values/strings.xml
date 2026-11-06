@@ -242,5 +242,6 @@
     <string name="alerts_live_ai_billing">AI features are switched off on this server right now.</string>
     <string name="alerts_live_search_unavailable">Live web search isn’t available on this server.</string>
     <string name="alerts_live_not_found">This watch no longer exists.</string>
+    <string name="alerts_live_expired">This trip’s dates have passed, so there’s nothing live to check.</string>
     <string name="alerts_live_close">Close</string>
 </resources>

@@ -26,6 +26,9 @@ enum class LiveFailure {
     /** 404 `no_place` (Near me) or "Watch not found" (live check). */
     NOT_FOUND,
 
+    /** 409 `watch_expired` (live check): the watch expired or its dates passed; nothing to retry. */
+    WATCH_EXPIRED,
+
     /** 502 (`agent_error`, `live_check_failed`) and other 5xx. */
     SERVER,
 
@@ -44,6 +47,7 @@ object LiveErrorCodes {
     const val NO_PLACE = "no_place"
     const val AGENT_ERROR = "agent_error"
     const val LIVE_CHECK_FAILED = "live_check_failed"
+    const val WATCH_EXPIRED = "watch_expired"
 }
 
 /** Maps an [AppError] from `/api/nearby` or `/api/live-check` to a [LiveError]. */
@@ -71,6 +75,10 @@ fun AppError.toLiveError(): LiveError {
                     else -> LiveFailure.SERVER
                 }
             LiveError(failure, text, code)
+        }
+
+        is AppError.Client -> {
+            if (code == LiveErrorCodes.WATCH_EXPIRED) LiveError(LiveFailure.WATCH_EXPIRED, text, code) else LiveError(LiveFailure.OTHER, text, code)
         }
 
         else -> {

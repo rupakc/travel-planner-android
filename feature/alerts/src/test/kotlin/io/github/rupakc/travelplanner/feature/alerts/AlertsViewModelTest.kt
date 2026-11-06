@@ -328,6 +328,10 @@ class AlertsViewModelTest {
             vm.onEvent(AlertsEvent.RetryLiveCheck)
             advanceUntilIdle()
             assertEquals(LiveFailure.OFFLINE, vm.state.value.liveCheck?.error?.failure)
-            assertEquals(2, liveChecks.requests.size)
+            liveChecks.result = AppResult.Failure(AppError.Client(409, "This watch has expired.", "watch_expired"))
+            vm.onEvent(AlertsEvent.RetryLiveCheck)
+            advanceUntilIdle()
+            assertEquals(LiveFailure.WATCH_EXPIRED, vm.state.value.liveCheck?.error?.failure)
+            assertEquals(3, liveChecks.requests.size)
         }
 }

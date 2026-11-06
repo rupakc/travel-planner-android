@@ -35,5 +35,7 @@ class LiveRulesTest {
         assertEquals(LiveFailure.SERVER, AppError.Server(502, null, "live_check_failed").toLiveError().failure)
         assertEquals(LiveError(LiveFailure.RATE_LIMITED, "Wait 30 s"), AppError.RateLimited("Wait 30 s", 30).toLiveError())
         assertEquals(LiveError(LiveFailure.NOT_FOUND, "Watch not found"), AppError.NotFound("Watch not found").toLiveError())
+        assertEquals(LiveFailure.WATCH_EXPIRED, AppError.Client(409, "Expired", "watch_expired").toLiveError().failure)
+        assertEquals(LiveFailure.OTHER, AppError.Client(409, "Busy", "other").toLiveError().failure)
     }
 }

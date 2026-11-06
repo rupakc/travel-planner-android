@@ -90,7 +90,7 @@ internal fun LiveCheckContent(live: LiveCheckUi, title: String?, onRetry: () -> 
                     style = TravelTheme.typography.bodyMedium,
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
-                if (error.failure != LiveFailure.NOT_FOUND) {
+                if (error.failure != LiveFailure.NOT_FOUND && error.failure != LiveFailure.WATCH_EXPIRED) {
                     TpButton(stringResource(R.string.alerts_retry), onRetry, variant = TpButtonVariant.Secondary, leadingIcon = Icons.Filled.Refresh)
                 }
             }
@@ -156,10 +156,12 @@ private fun LiveResult(result: LiveCheckResult, onOpen: (String) -> Unit) {
     )
 }
 
-/** The backend's words when it sent any, else our copy for the failure (offline is always ours). */
+/** The backend's words when it sent any, else our copy for the failure (offline and expired are always ours). */
 @Composable
 private fun liveErrorText(failure: LiveFailure, message: String?): String {
     if (failure == LiveFailure.OFFLINE) return stringResource(R.string.alerts_live_offline)
+    // Always our (translated) copy: the dates passed, so there is nothing live to look up.
+    if (failure == LiveFailure.WATCH_EXPIRED) return stringResource(R.string.alerts_live_expired)
     message?.let { return it }
     return stringResource(
         when (failure) {

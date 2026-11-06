@@ -73,7 +73,7 @@ sealed interface AppError { val message: String? }   // message = backend `detai
 price-watch 422s (`no_live_price` with `suggestions`/`estimate` in `extras` as raw JSON text — decode with
 `TravelJson` into `NoLivePriceError`; `target_currency_mismatch`), nearby `NotFound(code = "no_place")`,
 `Server(code = "agent_error")`; grounded calls (`/api/nearby` v2, `/api/live-check`) also return `Server(503, code = "ai_limit" | "ai_billing" |
-"grounding_unavailable")` and `Server(502, code = "live_check_failed")` — `core:domain` `live/toLiveError()` classifies them. 401 anywhere clears the session automatically (the shell shows Login and a snackbar).
+"grounding_unavailable")` and `Server(502, code = "live_check_failed")`, `Client(409, code = "watch_expired")` — `core:domain` `live/toLiveError()` classifies them. 401 anywhere clears the session automatically (the shell shows Login and a snackbar).
 A 401 or an expired token only signs out: the draft, cached plans, recent searches and chat survive. Local data is
 wiped (`SessionCleaner`: draft, search, caches, recent searches, seen notifications and the traveller profile with its
 feature toggles) only on explicit logout, on login as a different user, and on a server change.

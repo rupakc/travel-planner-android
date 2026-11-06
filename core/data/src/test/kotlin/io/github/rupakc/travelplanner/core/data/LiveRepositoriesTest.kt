@@ -179,8 +179,10 @@ class LiveRepositoriesTest {
             respond(404, """{"detail":"Watch not found"}""")
             respond(502, """{"detail":{"code":"live_check_failed","message":"The web search returned no answer."}}""")
             respond(503, """{"detail":{"code":"ai_limit","message":"AI limit reached for this month — try again on the 1st."}}""")
-            val errors = List(3) { (live.check("flight", 9) as AppResult.Failure).error.toLiveError() }
-            assertEquals(listOf(LiveFailure.NOT_FOUND, LiveFailure.SERVER, LiveFailure.AI_LIMIT), errors.map { it.failure })
+            respond(409, """{"detail":{"code":"watch_expired","message":"This watch has expired."}}""")
+            val errors = List(4) { (live.check("flight", 9) as AppResult.Failure).error.toLiveError() }
+            assertEquals(listOf(LiveFailure.NOT_FOUND, LiveFailure.SERVER, LiveFailure.AI_LIMIT, LiveFailure.WATCH_EXPIRED), errors.map { it.failure })
+            assertEquals("watch_expired", errors[3].code)
             assertEquals("Watch not found", errors[0].message)
             assertEquals("live_check_failed", errors[1].code)
         }
