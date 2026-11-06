@@ -29,6 +29,9 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("implementation", libs.lib("androidx-hilt-lifecycle-viewmodel-compose"))
                 add("implementation", libs.lib("androidx-lifecycle-runtime-compose"))
                 add("implementation", libs.lib("androidx-lifecycle-viewmodel-compose"))
+                // Feature ViewModels inject SavedStateHandle; declare it directly so Hilt's KSP step
+                // always sees it (transitively it is implementation-scoped and KSP intermittently missed it).
+                add("implementation", libs.lib("androidx-lifecycle-viewmodel-savedstate"))
                 add("implementation", libs.lib("kotlinx-serialization-json"))
                 add("testImplementation", libs.lib("androidx-navigation-testing"))
             }
