@@ -131,6 +131,12 @@ class FakeFareWatchesRepository : FareWatchesRepository {
 class FakePriceWatchesRepository : PriceWatchesRepository {
     val watches = MutableStateFlow<List<PriceWatch>>(emptyList())
     var createResult: AppResult<PriceWatch>? = null
+
+    /** Every create request, in order (one per POST the app would send). */
+    val createRequests = mutableListOf<CreatePriceWatchRequest>()
+
+    /** When set, create suspends until it completes (to test taps while a request is in flight). */
+    var createGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
     private var nextId = 1L
 
     override suspend fun list(kind: String?): AppResult<List<PriceWatch>> =
@@ -138,11 +144,14 @@ class FakePriceWatchesRepository : PriceWatchesRepository {
 
     override suspend fun match(kind: String, spec: JsonObject): AppResult<PriceWatch?> = AppResult.Success(null)
 
-    override suspend fun create(request: CreatePriceWatchRequest): AppResult<PriceWatch> =
-        createResult ?: AppResult.Success(
+    override suspend fun create(request: CreatePriceWatchRequest): AppResult<PriceWatch> {
+        createRequests += request
+        createGate?.await()
+        return createResult ?: AppResult.Success(
             PriceWatch(id = nextId++, kind = request.kind, planId = request.planId, alertMode = request.alertMode, status = "active")
                 .also { w -> watches.update { it + w } },
         )
+    }
 
     override suspend fun get(id: Long): AppResult<PriceWatch> =
         watches.value.firstOrNull { it.id == id }?.let { AppResult.Success(it) } ?: NotStubbed
