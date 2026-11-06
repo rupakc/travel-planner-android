@@ -169,7 +169,8 @@ fun NearbyScreen(
                 is NearbyPhase.NoPlace -> {
                     EmptyState(
                         title = stringResource(R.string.nearby_no_place_title),
-                        message = phase.message ?: stringResource(R.string.nearby_no_place),
+                        // Our translated copy; the backend's English detail is not shown (review M1).
+                        message = stringResource(R.string.nearby_no_place),
                         icon = Icons.Filled.Place,
                         actionLabel = stringResource(R.string.nearby_try_again),
                         onAction = { onEvent(NearbyEvent.Refresh) },
@@ -228,13 +229,14 @@ private fun Waiting(message: String) {
     SkeletonList(Modifier.padding(TravelTheme.spacing.gutter), message = message, lines = SKELETON_LINES)
 }
 
-/** The backend's words when it sent any (429, 503, 502), else our copy for the failure. */
+/** Our translated copy for the failure; a 429 keeps the backend's words (they carry the wait time). */
 @Composable
 private fun failureText(phase: NearbyPhase.Failed): String {
-    if (phase.failure == LiveFailure.OFFLINE) return stringResource(R.string.nearby_offline)
-    phase.message?.let { return it }
+    // Only a 429's text is the backend's: it says how long to wait. Everything else uses our translated copy.
+    if (phase.failure == LiveFailure.RATE_LIMITED) phase.message?.let { return it }
     return stringResource(
         when (phase.failure) {
+            LiveFailure.OFFLINE -> R.string.nearby_offline
             LiveFailure.RATE_LIMITED -> R.string.nearby_rate_limited
             LiveFailure.AI_LIMIT -> R.string.nearby_ai_limit
             LiveFailure.AI_BILLING -> R.string.nearby_ai_billing

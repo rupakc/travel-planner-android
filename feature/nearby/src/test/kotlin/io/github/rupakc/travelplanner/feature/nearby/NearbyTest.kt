@@ -246,9 +246,28 @@ class NearbyTest {
     }
 
     @Test
-    fun `ai limit without a message uses the friendly copy`() {
-        show(NearbyUiState(NearbyPhase.Failed(null, LiveFailure.AI_LIMIT)))
+    fun `ai limit shows our copy even when the backend sent text`() {
+        show(NearbyUiState(NearbyPhase.Failed("Backend English text", LiveFailure.AI_LIMIT)))
         compose.onNodeWithText("AI limit reached for this month — try again on the 1st.").assertIsDisplayed()
+        compose.onNodeWithText("Backend English text").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a 429 keeps the backend words with the wait time`() {
+        show(NearbyUiState(NearbyPhase.Failed("Too many requests — please wait 30 seconds and try again.", LiveFailure.RATE_LIMITED)))
+        compose.onNodeWithText("Too many requests — please wait 30 seconds and try again.").assertIsDisplayed()
+    }
+
+    @Test
+    fun `no place and server errors use our copy`() {
+        show(NearbyUiState(NearbyPhase.NoPlace("We don't know a town or city near you yet (backend).")))
+        compose.onNodeWithText("We don’t know a town or city near you yet.").assertIsDisplayed()
+    }
+
+    @Test
+    fun `a 502 with backend text shows our copy`() {
+        show(NearbyUiState(NearbyPhase.Failed("agent exploded", LiveFailure.SERVER)))
+        compose.onNodeWithText("We couldn’t find places near you. Try again.").assertIsDisplayed()
     }
 
     private fun scrollTo(matcher: SemanticsMatcher) {

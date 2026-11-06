@@ -138,7 +138,7 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-06 "Open in Google Maps": ACTION_VIEW on the item's `maps_uri` (http/https only via `safeWebUri`), else a `geo:` search for the name near the place, else a toast; sources open in a Custom Tab.
 - 2026-11-06 Nearby worker makes no API call: it posts "See what's near you" (deep link to Near me) with the same opt-in, trip/always, 4 h throttle and 24 h recent-Near-me gate (supersedes the 2026-11-05 suggestion lines).
 - 2026-11-06 "Search the web now" on every non-past watch card (fare + price kinds), result in a bottom sheet, held in AlertsUiState.liveCheck only; one at a time (a new one cancels the previous); NOT_FOUND hides Retry. Summary/disclaimer shown as sent; our disclaimer copy only when the server omits it.
-- 2026-11-06 Grounded-call failures share `core:domain` `LiveFailure` (offline, 429, ai_limit, ai_billing, grounding_unavailable, not found, 5xx); the backend message wins, except offline (client text never shown).
+- 2026-11-06 Grounded-call failures share `core:domain` `LiveFailure` (offline, 429, ai_limit, ai_billing, grounding_unavailable, not found, 5xx); screens show our translated copy for each failure; only a 429 keeps the backend text (it carries the wait time) (review M1/M2).
 
 ## Documentation and tooling
 

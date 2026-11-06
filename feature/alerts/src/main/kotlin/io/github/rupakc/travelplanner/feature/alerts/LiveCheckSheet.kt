@@ -156,15 +156,15 @@ private fun LiveResult(result: LiveCheckResult, onOpen: (String) -> Unit) {
     )
 }
 
-/** The backend's words when it sent any, else our copy for the failure (offline and expired are always ours). */
+/** Our translated copy for the failure; a 429 keeps the backend's words (they carry the wait time). */
 @Composable
 private fun liveErrorText(failure: LiveFailure, message: String?): String {
-    if (failure == LiveFailure.OFFLINE) return stringResource(R.string.alerts_live_offline)
-    // Always our (translated) copy: the dates passed, so there is nothing live to look up.
-    if (failure == LiveFailure.WATCH_EXPIRED) return stringResource(R.string.alerts_live_expired)
-    message?.let { return it }
+    // Only a 429's text is the backend's: it says how long to wait. Everything else uses our translated copy.
+    if (failure == LiveFailure.RATE_LIMITED) message?.let { return it }
     return stringResource(
         when (failure) {
+            LiveFailure.OFFLINE -> R.string.alerts_live_offline
+            LiveFailure.WATCH_EXPIRED -> R.string.alerts_live_expired
             LiveFailure.RATE_LIMITED -> R.string.alerts_live_rate_limited
             LiveFailure.AI_LIMIT -> R.string.alerts_live_ai_limit
             LiveFailure.AI_BILLING -> R.string.alerts_live_ai_billing

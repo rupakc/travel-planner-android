@@ -225,7 +225,20 @@ class AlertsScreenTest {
     }
 
     @Test
-    fun `live errors show the backend words or our copy, with retry`() {
+    fun `live errors use our copy except a 429, which keeps the wait time`() {
+        showLive(LiveCheckUi("watch-7", loading = false, error = LiveError(LiveFailure.AI_BILLING, "Billing is disabled (backend)", "ai_billing")))
+        compose.onNodeWithText("AI features are switched off on this server right now.").assertIsDisplayed()
+        compose.onNodeWithText("Billing is disabled (backend)").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a live 429 shows the backend wait time`() {
+        showLive(LiveCheckUi("watch-7", loading = false, error = LiveError(LiveFailure.RATE_LIMITED, "Please wait 42 seconds.")))
+        compose.onNodeWithText("Please wait 42 seconds.").assertIsDisplayed()
+    }
+
+    @Test
+    fun `live errors show our copy, with retry`() {
         var retried = false
         showLive(LiveCheckUi("watch-7", loading = false, error = LiveError(LiveFailure.GROUNDING_UNAVAILABLE, null)), onRetry = { retried = true })
         compose.onNodeWithText("Live web search isn’t available on this server.").assertIsDisplayed()
