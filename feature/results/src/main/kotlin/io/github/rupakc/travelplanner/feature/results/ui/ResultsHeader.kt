@@ -5,12 +5,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -24,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -31,13 +35,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -47,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.search.StreamPhase
@@ -295,18 +304,59 @@ internal fun ResultsSearchField(query: String, hidden: Int, onQuery: (String) ->
     }
 }
 
-/** Section quick-jump chips with each section's status (web AgentBadge strip). */
+/**
+ * Section quick-jump chips (web sticky AgentBadge strip). The chip of the [active] section is selected and
+ * scrolled into view; TalkBack reads the row as a group of tabs ("Hotels, tab, selected; double-tap to jump to Hotels").
+ */
 @Composable
-internal fun QuickJumpRow(sections: List<SectionUi>, onJump: (SectionId) -> Unit, modifier: Modifier = Modifier) {
-    LazyRow(modifier, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
+internal fun QuickJumpRow(
+    sections: List<SectionUi>,
+    active: SectionId?,
+    onJump: (SectionId) -> Unit,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(),
+) {
+    val rowState = rememberLazyListState()
+    val reduceMotion = rememberReduceMotion()
+    LaunchedEffect(active, sections) {
+        val i = sections.indexOfFirst { it.id == active }
+        if (i < 0) return@LaunchedEffect
+        val info = rowState.layoutInfo
+        val chip = info.visibleItemsInfo.firstOrNull { it.index == i }
+        val whole = chip != null && chip.offset >= info.viewportStartOffset && chip.offset + chip.size <= info.viewportEndOffset
+        if (!whole) {
+            // Keep the previous chip in sight so the row reads as a position, not a single chip.
+            val target = (i - 1).coerceAtLeast(0)
+            if (reduceMotion) rowState.scrollToItem(target) else rowState.animateScrollToItem(target)
+        }
+    }
+    LazyRow(
+        modifier = modifier.selectableGroup().testTag("results_jump_row"),
+        state = rowState,
+        contentPadding = contentPadding,
+        horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs),
+    ) {
         items(sections, key = { it.id.name }, contentType = { "jump" }) { s ->
             val title = stringResource(s.id.titleRes())
+            val jump = stringResource(R.string.results_jump_to, title)
+            val enabled = s.status != SectionStatus.WAITING
             TpChip(
                 label = title,
-                selected = false,
+                selected = s.id == active,
                 onClick = { onJump(s.id) },
-                enabled = s.status != SectionStatus.WAITING,
-                modifier = Modifier.semantics { contentDescription = title },
+                enabled = enabled,
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = title
+                        role = Role.Tab
+                        selected = s.id == active
+                        if (enabled) {
+                            onClick(label = jump) {
+                                onJump(s.id)
+                                true
+                            }
+                        }
+                    },
             )
         }
     }
