@@ -4,6 +4,9 @@ import androidx.compose.runtime.Immutable
 import io.github.rupakc.travelplanner.core.domain.itinerary.PlanItinerary
 import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledDay
 import io.github.rupakc.travelplanner.core.domain.itinerary.SlotEdit
+import io.github.rupakc.travelplanner.core.domain.place.airportCodesIn
+import io.github.rupakc.travelplanner.core.domain.place.placeName
+import io.github.rupakc.travelplanner.core.domain.place.placeRoute
 import io.github.rupakc.travelplanner.core.domain.plan.computePlanCost
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.plan.SharedPlan
@@ -52,15 +55,20 @@ internal data class SharedTrip(
     val selections: PlanSelections,
 ) {
     companion object {
-        fun from(plan: SharedPlan): SharedTrip {
+        /** The airport codes among [plan]'s origin, destination and stops (for the shared city lookup). */
+        fun places(plan: SharedPlan): List<String> =
+            airportCodesIn(listOf(plan.searchData.origin, plan.searchData.destination) + plan.searchData.destinations.orEmpty())
+
+        /** [plan] as the share page shows it; airport codes [names] knows show as cities ("LIS" → "Lisbon"). */
+        fun from(plan: SharedPlan, names: Map<String, String> = emptyMap()): SharedTrip {
             val sd = plan.searchData
             val sel = plan.selections
             val stops = sd.destinations.orEmpty()
             val full = sel.itinerarySnapshot?.get("days") is JsonArray && (sel.itinerarySnapshot?.get("days") as JsonArray).isNotEmpty()
             return SharedTrip(
                 name = plan.name,
-                destination = if (stops.size > 1) stops.joinToString(" → ") else sd.destination,
-                origin = sd.origin,
+                destination = if (stops.size > 1) placeRoute(stops, names) else sd.destination?.let { placeName(it, names) },
+                origin = sd.origin?.let { placeName(it, names) },
                 startDate = sd.departureDate?.let(::date),
                 endDate = sd.returnDate?.let(::date),
                 travellers = sd.numTravelers?.takeIf { it > 0 } ?: 1,

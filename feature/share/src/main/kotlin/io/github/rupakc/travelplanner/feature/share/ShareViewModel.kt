@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
@@ -66,6 +67,7 @@ internal class ShareViewModel
         private val plans: PlansRepository,
         auth: AuthRepository,
         private val dispatchers: AppDispatchers,
+        private val placeNames: PlaceNameLookup,
     ) : ViewModel() {
         private val token: String? = savedStateHandle.get<String>(TOKEN_ARG)
         private val status = MutableStateFlow(ShareUiState())
@@ -98,8 +100,15 @@ internal class ShareViewModel
                 when (val result = plans.shared(t)) {
                     is AppResult.Success -> {
                         shared = result.value
-                        val trip = withContext(dispatchers.default) { SharedTrip.from(result.value) }
-                        status.update { it.copy(isLoading = false, trip = trip) }
+                        val plan = result.value
+                        val known = placeNames.names.value
+                        status.update { it.copy(isLoading = false, trip = withContext(dispatchers.default) { SharedTrip.from(plan, known) }) }
+                        // Airport codes → cities (shared lookup); a code it cannot name stays a code.
+                        val names = placeNames.resolve(SharedTrip.places(plan))
+                        if (!known.entries.containsAll(names.entries)) {
+                            val named = withContext(dispatchers.default) { SharedTrip.from(plan, known + names) }
+                            status.update { it.copy(trip = named) }
+                        }
                     }
 
                     is AppResult.Failure -> {
