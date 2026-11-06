@@ -3,9 +3,12 @@ package io.github.rupakc.travelplanner.feature.plan.list
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.feature.plan.FixedClock
 import io.github.rupakc.travelplanner.feature.plan.model.TripFilter
 import io.github.rupakc.travelplanner.feature.plan.model.TripSort
@@ -33,7 +36,20 @@ class PlansViewModelTest {
         )
 
     private fun TestScope.viewModel(repo: FakePlansRepository) =
-        PlansViewModel(SavedStateHandle(), repo, FixedClock(), TestAppDispatchers(main.testDispatcher), backgroundScope)
+        PlansViewModel(SavedStateHandle(), repo, FixedClock(), TestAppDispatchers(main.testDispatcher), backgroundScope, PlaceNameLookup(search))
+
+    private val search = FakeSearchRepository().apply { airports = listOf(Airport(iataCode = "LIS", city = "Lisbon")) }
+
+    @Test
+    fun `an airport-code destination shows the city and is found by it`() =
+        runTest {
+            val vm = viewModel(FakePlansRepository(listOf(plan(9, "Weekend", "LIS", "2027-04-01"))))
+            vm.state.test {
+                assertEquals("Lisbon", expectMostRecentItem().trips.single().destination)
+                vm.onEvent(PlansEvent.QueryChanged("lisbon"))
+                assertEquals(listOf(9L), expectMostRecentItem().trips.map { it.id })
+            }
+        }
 
     @Test
     fun `shows cached trips, then search, filter and sort narrow them`() =
@@ -162,6 +178,7 @@ class PlansViewModelTest {
                 FixedClock(),
                 TestAppDispatchers(main.testDispatcher),
                 backgroundScope,
+                PlaceNameLookup(FakeSearchRepository()),
             )
             assertEquals(listOf(1L, 2L), repo.plans.first().map { it.id })
         }

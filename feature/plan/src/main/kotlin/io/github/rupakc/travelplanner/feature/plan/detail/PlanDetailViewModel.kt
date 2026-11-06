@@ -10,6 +10,7 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.domain.export.PlanCalendarEvent
@@ -144,6 +145,7 @@ internal class PlanDetailViewModel
         private val buildInfo: AppBuildInfo,
         private val clock: AppClock,
         private val dispatchers: AppDispatchers,
+        private val placeNames: PlaceNameLookup,
     ) : ViewModel() {
         private val planId = MutableStateFlow(savedStateHandle.get<Long>(PLAN_ID_ARG))
         private val status = MutableStateFlow(Status())
@@ -189,7 +191,14 @@ internal class PlanDetailViewModel
         val currentPlan: Plan? get() = cachedPlan
 
         private val content: Flow<Pair<Boolean, PlanDetailContent?>> =
-            cache.map { c -> (c is CacheState.Loaded) to (c as? CacheState.Loaded)?.plan?.let(::contentOf) }.flowOn(dispatchers.default)
+            cache.flatMapLatest { c ->
+                val plan = (c as? CacheState.Loaded)?.plan
+                if (plan == null) {
+                    flowOf((c is CacheState.Loaded) to null)
+                } else {
+                    placeNames.namesFor(TripSummary.places(listOf(plan))).map { names -> true to contentOf(plan, names) }
+                }
+            }.flowOn(dispatchers.default)
 
         val state: StateFlow<PlanDetailUiState> =
             combine(content, status) { (loaded, cached), s ->
@@ -253,8 +262,8 @@ internal class PlanDetailViewModel
             }
         }
 
-        private fun contentOf(plan: Plan): PlanDetailContent {
-            val summary = TripSummary.from(plan, clock.today())
+        private fun contentOf(plan: Plan, names: Map<String, String> = placeNames.names.value): PlanDetailContent {
+            val summary = TripSummary.from(plan, clock.today(), names)
             val sd = plan.searchData
             val parts = computePlanCostBreakdown(plan.selections, sd.str("departure_date"), sd.str("return_date"))
             return PlanDetailContent(

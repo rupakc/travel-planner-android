@@ -64,6 +64,18 @@ class PlanModelsTest {
     }
 
     @Test
+    fun `airport codes show as the cities the lookup found`() {
+        val names = mapOf("LIS" to "Lisbon", "JFK" to "New York", "OPO" to "Porto")
+        val p = plan(1, "Weekend", "LIS", "2027-04-01").let { it.copy(searchData = searchData("""{"origin":"JFK","destination":"LIS"}""")) }
+        val s = TripSummary.from(p, today, names)
+        assertEquals("Lisbon", s.destination)
+        assertEquals("New York", s.origin)
+        assertEquals("Porto → Lisbon", TripSummary.destinationLabel(searchData("""{"destination":"LIS","destinations":["OPO","LIS"]}"""), names))
+        assertEquals("FAO", TripSummary.destinationLabel(searchData("""{"destination":"FAO"}"""), names))
+        assertEquals(listOf("JFK", "LIS"), TripSummary.places(listOf(p, plan(2, "x", "Tokyo"))))
+    }
+
+    @Test
     fun `multi-city destinations join with arrows`() {
         val sd = searchData("""{"destination":"Rome","destinations":["Paris","Rome"]}""")
         assertEquals("Paris → Rome", TripSummary.destinationLabel(sd))

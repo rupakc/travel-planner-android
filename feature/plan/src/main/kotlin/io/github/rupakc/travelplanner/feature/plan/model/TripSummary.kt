@@ -1,6 +1,9 @@
 package io.github.rupakc.travelplanner.feature.plan.model
 
 import androidx.compose.runtime.Immutable
+import io.github.rupakc.travelplanner.core.domain.place.airportCodesIn
+import io.github.rupakc.travelplanner.core.domain.place.placeName
+import io.github.rupakc.travelplanner.core.domain.place.placeRoute
 import io.github.rupakc.travelplanner.core.domain.plan.computePlanCost
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import java.text.Normalizer
@@ -42,15 +45,16 @@ internal data class TripSummary(
     companion object {
         private val SQLITE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-        fun from(plan: Plan, today: LocalDate): TripSummary {
+        /** [plan] as My trips shows it; airport codes [names] knows show as cities ("LIS" → "Lisbon"). */
+        fun from(plan: Plan, today: LocalDate, names: Map<String, String> = emptyMap()): TripSummary {
             val sd = plan.searchData
             val start = sd.string("departure_date")?.let(::parseDate)
             val end = sd.string("return_date")?.let(::parseDate) ?: start
             return TripSummary(
                 id = plan.id,
                 name = plan.name,
-                destination = destinationLabel(sd),
-                origin = sd.string("origin"),
+                destination = destinationLabel(sd, names),
+                origin = sd.string("origin")?.let { placeName(it, names) },
                 startDate = start,
                 endDate = end,
                 travellers = sd.number("num_travelers")?.toInt()?.takeIf { it > 0 },
@@ -65,10 +69,17 @@ internal data class TripSummary(
         }
 
         /** Web share page `destinationLabel`: multi-city stops joined with arrows, else the destination. */
-        fun destinationLabel(sd: JsonObject): String? {
-            val stops = (sd["destinations"] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }.orEmpty()
-            return if (stops.size > 1) stops.joinToString(" → ") else sd.string("destination")
+        fun destinationLabel(sd: JsonObject, names: Map<String, String> = emptyMap()): String? {
+            val stops = stops(sd)
+            return if (stops.size > 1) placeRoute(stops, names) else sd.string("destination")?.let { placeName(it, names) }
         }
+
+        /** The airport codes among [plans]' origins, destinations and stops (for the shared city lookup). */
+        fun places(plans: List<Plan>): List<String> =
+            airportCodesIn(plans.flatMap { p -> listOf(p.searchData.string("origin"), p.searchData.string("destination")) + stops(p.searchData) })
+
+        private fun stops(sd: JsonObject): List<String> =
+            (sd["destinations"] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }.orEmpty()
 
         fun timing(start: LocalDate?, end: LocalDate?, today: LocalDate): TripTiming =
             when {
