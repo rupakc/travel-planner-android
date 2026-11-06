@@ -7,8 +7,12 @@ import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertMode
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertTab
+import io.github.rupakc.travelplanner.core.domain.live.LiveError
+import io.github.rupakc.travelplanner.core.domain.live.LiveFailure
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
+import io.github.rupakc.travelplanner.core.model.alerts.LiveCheckResult
+import io.github.rupakc.travelplanner.core.model.alerts.LiveQuote
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.reference.Airport
@@ -19,6 +23,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeLiveCheckRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
@@ -56,6 +61,7 @@ class AlertsViewModelTest {
     private val plan = FakeCurrentPlanStore()
     private val launcher = FakeSearchLauncher(plan, search)
     private val notifications = FakeNotificationsRepository()
+    private val liveChecks = FakeLiveCheckRepository()
 
     private fun fare(id: Long, status: String = "active") =
         FareWatch(
@@ -83,6 +89,7 @@ class AlertsViewModelTest {
             clock,
             appScope,
             PlaceNameLookup(search),
+            liveChecks,
         )
 
     @Test
@@ -202,6 +209,7 @@ class AlertsViewModelTest {
                     clock,
                     backgroundScope,
                     PlaceNameLookup(search),
+                    liveChecks,
                 )
             advanceUntilIdle()
             val s = vm.state.value
@@ -256,6 +264,7 @@ class AlertsViewModelTest {
                     clock,
                     backgroundScope,
                     PlaceNameLookup(search),
+                    liveChecks,
                 )
             advanceUntilIdle()
             vm.onEvent(AlertsEvent.Check("watch-1"))
@@ -271,5 +280,54 @@ class AlertsViewModelTest {
             NotificationsViewModel(repo, clock)
             advanceUntilIdle()
             assertEquals(setOf(5L, 6L), repo.seen)
+        }
+
+    @Test
+    fun `search the web now sends the watch kind and id and keeps the answer in memory only`() =
+        runTest {
+            fares.watches.value = listOf(fare(1))
+            prices.watches.value = listOf(PriceWatch(id = 4, kind = "hotel", title = "Lumen Hotel", status = "active", lastPrice = 398.0))
+            val answer = LiveCheckResult(summary = "From €412 on Booking.com.", quotes = listOf(LiveQuote("Booking.com", 412.0, "EUR", 0)))
+            liveChecks.result = AppResult.Success(answer)
+            val vm = vm()
+            advanceUntilIdle()
+            val before = vm.state.value.watches
+            vm.onEvent(AlertsEvent.LiveCheck("price-watch-4"))
+            advanceUntilIdle()
+            assertEquals(listOf("hotel" to 4L), liveChecks.requests)
+            val live = vm.state.value.liveCheck!!
+            assertEquals("price-watch-4", live.key)
+            assertFalse(live.loading)
+            assertEquals(answer, live.result)
+            // Never merged into the watch, its history or its alerts.
+            assertEquals(before, vm.state.value.watches)
+            assertEquals(listOf(398.0), prices.watches.value.map { it.lastPrice })
+            assertTrue(notifications.seen.isEmpty())
+            assertTrue(vm.state.value.messages.isEmpty())
+            vm.onEvent(AlertsEvent.LiveCheck("watch-1"))
+            advanceUntilIdle()
+            assertEquals("flight" to 1L, liveChecks.requests.last())
+            vm.onEvent(AlertsEvent.DismissLiveCheck)
+            assertNull(vm.state.value.liveCheck)
+        }
+
+    @Test
+    fun `search the web now failures are classified and can be retried`() =
+        runTest {
+            fares.watches.value = listOf(fare(1))
+            liveChecks.result = AppResult.Failure(AppError.Server(503, "AI limit reached for this month — try again on the 1st.", "ai_limit"))
+            val vm = vm()
+            advanceUntilIdle()
+            vm.onEvent(AlertsEvent.LiveCheck("watch-1"))
+            advanceUntilIdle()
+            assertEquals(
+                LiveError(LiveFailure.AI_LIMIT, "AI limit reached for this month — try again on the 1st.", "ai_limit"),
+                vm.state.value.liveCheck?.error,
+            )
+            liveChecks.result = AppResult.Failure(AppError.Network())
+            vm.onEvent(AlertsEvent.RetryLiveCheck)
+            advanceUntilIdle()
+            assertEquals(LiveFailure.OFFLINE, vm.state.value.liveCheck?.error?.failure)
+            assertEquals(2, liveChecks.requests.size)
         }
 }

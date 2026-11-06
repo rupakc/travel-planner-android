@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -112,6 +113,8 @@ internal data class CardCallbacks(
     val onDelete: () -> Unit,
     val onReplan: (cheapest: Boolean) -> Unit,
     val onOpenLink: (String) -> Unit,
+    /** "Search the web now" (a user-initiated live web search; never feeds alerts). */
+    val onLiveCheck: () -> Unit = {},
 )
 
 private fun JsonObject?.str(k: String) = (this?.get(k) as? JsonPrimitive)?.contentOrNull
@@ -602,6 +605,16 @@ private fun CardActions(
                 variant = TpButtonVariant.Text,
                 loading = busy == CardAction.CHECK,
                 leadingIcon = Icons.Filled.Refresh,
+            )
+        }
+        if (!past) {
+            val a11y = stringResource(R.string.alerts_live_check_a11y, title)
+            TpButton(
+                stringResource(R.string.alerts_live_check),
+                callbacks.onLiveCheck,
+                variant = TpButtonVariant.Text,
+                leadingIcon = Icons.Filled.Search,
+                modifier = Modifier.semantics { contentDescription = a11y },
             )
         }
         if (item.status == WatchStatuses.ACTIVE) {

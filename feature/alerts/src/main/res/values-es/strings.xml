@@ -241,4 +241,23 @@
         <item quantity="many">Precio en %1$d revisiones: de %2$s a %3$s, mínimo %4$s.</item>
         <item quantity="other">Precio en %1$d revisiones: de %2$s a %3$s, mínimo %4$s.</item>
     </plurals>
+    <!-- Buscar en la web ahora -->
+    <string name="alerts_live_check">Buscar en la web ahora</string>
+    <string name="alerts_live_check_a11y">Buscar en la web ahora: %1$s</string>
+    <string name="alerts_live_title">Búsqueda web en directo</string>
+    <string name="alerts_live_searching">Buscando en la web…</string>
+    <string name="alerts_live_quotes">Precios encontrados</string>
+    <string name="alerts_live_quote_source">Fuente: %1$s</string>
+    <string name="alerts_live_searched_for">Se buscó</string>
+    <string name="alerts_live_sources">Fuentes</string>
+    <string name="alerts_live_disclaimer">De una búsqueda web hecha ahora mismo. Los precios cambian rápido: compruébalo con el proveedor antes de reservar. No se usa para tus alertas de precio.</string>
+    <string name="alerts_live_no_summary">La búsqueda no devolvió una respuesta.</string>
+    <string name="alerts_live_failed">La búsqueda web no funcionó. Inténtalo de nuevo.</string>
+    <string name="alerts_live_offline">No tienes conexión. Compruébala y vuelve a intentarlo.</string>
+    <string name="alerts_live_rate_limited">Demasiadas solicitudes. Espera un momento y vuelve a intentarlo.</string>
+    <string name="alerts_live_ai_limit">Se alcanzó el límite de IA de este mes. Vuelve a intentarlo el día 1.</string>
+    <string name="alerts_live_ai_billing">Las funciones de IA están desactivadas en este servidor ahora mismo.</string>
+    <string name="alerts_live_search_unavailable">La búsqueda web en directo no está disponible en este servidor.</string>
+    <string name="alerts_live_not_found">Esta vigilancia ya no existe.</string>
+    <string name="alerts_live_close">Cerrar</string>
 </resources>
