@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.feature.nearby
 
 import android.app.Application
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollAction
@@ -67,8 +68,27 @@ class NearbyTest {
             place = lisbon,
             sections =
                 listOf(
-                    NearbySection("eat", "Places to eat", listOf(market, NearbyPlaceItem(name = " "), market.copy(summary = null))),
-                    NearbySection("see", "Places to see", listOf(NearbyPlaceItem("Castelo", null, "javascript:alert(1)", null))),
+                    NearbySection(
+                        "eat",
+                        "Places to eat",
+                        listOf(
+                            market,
+                            NearbyPlaceItem(name = " "),
+                            market.copy(summary = null),
+                            NearbyPlaceItem("Mercado da Ribeira", null, "https://maps.google.com/?cid=3", "ChIJ3"),
+                            NearbyPlaceItem("Unlinked", null, null, null),
+                        ),
+                    ),
+                    NearbySection(
+                        "see",
+                        "Places to see",
+                        listOf(
+                            NearbyPlaceItem("Castelo", null, "javascript:alert(1)", null),
+                            // Also listed under "eat" below: shown once, here (see comes first).
+                            NearbyPlaceItem("Mercado da Ribeira", "Market hall", "https://maps.google.com/?cid=3", "ChIJ3"),
+                        ),
+                    ),
+                    NearbySection("shop", "Places to shop", listOf(NearbyPlaceItem("Ribeira again", null, "https://maps.google.com/?cid=3", null))),
                     NearbySection("nightlife", "Bars", listOf(NearbyPlaceItem("Bar", null, "https://maps.google.com/?cid=9"))),
                 ),
             attribution = "Google Maps",
@@ -79,12 +99,16 @@ class NearbyTest {
     fun `sections are always the four, in order, with checked links and unique keys`() {
         val sections = sectionsOf(v2)
         assertEquals(listOf("see", "eat", "shop", "stay"), sections.map { it.id })
-        assertNull(sections[0].cards.single().mapsUri)
+        assertEquals(listOf("Castelo", "Mercado da Ribeira"), sections[0].cards.map { it.name })
+        assertNull(sections[0].cards.first().mapsUri)
+        // Deduped by place_id within the section and across sections (first wins); kept without an identity.
         val eat = sections[1].cards
-        assertEquals(listOf("Time Out Market", "Time Out Market"), eat.map { it.name })
-        assertEquals(eat.size, eat.map { it.key }.toSet().size)
+        assertEquals(listOf("Time Out Market", "Unlinked"), eat.map { it.name })
         assertEquals("https://maps.google.com/?cid=1", eat.first().mapsUri)
+        // Same Maps link as a place already shown (no place_id): dropped.
         assertTrue(sections[2].cards.isEmpty() && sections[3].cards.isEmpty())
+        val keys = sections.flatMap { s -> s.cards.map { it.key } }
+        assertEquals(keys.size, keys.toSet().size)
         // A v1-shaped answer (no sections) gives four empty sections.
         assertTrue(sectionsOf(NearbyResponse(place = lisbon)).all { it.cards.isEmpty() })
         assertEquals("Lisbon, Portugal", placeLabel(lisbon))
@@ -237,6 +261,14 @@ class NearbyTest {
         scrollTo(hasText("Time Out Market source"))
         compose.onNodeWithText("Time Out Market source").performClick()
         assertEquals("https://maps.google.com/?cid=1", source)
+    }
+
+    @Test
+    fun `all sections empty shows only the page-level empty state`() {
+        show(NearbyUiState(NearbyPhase.Loaded, lisbon, sectionsOf(NearbyResponse(place = lisbon)), "Google Maps"))
+        compose.onNodeWithText("Nothing found nearby").assertIsDisplayed()
+        compose.onNodeWithText("Places to see").assertDoesNotExist()
+        compose.onAllNodesWithText("Nothing found nearby for this one.").assertCountEquals(0)
     }
 
     @Test

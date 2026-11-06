@@ -16,22 +16,30 @@ data class NearbySectionUi(val id: String, val cards: List<NearbyCard>)
 
 /**
  * The four sections from a v2 answer: unknown section ids are ignored, a missing section is empty,
- * nameless items are dropped and keys stay unique. Text is kept exactly as the server sent it.
+ * nameless items are dropped, and a place appears once (same `place_id` or same Maps link), in the
+ * first section that lists it (see, eat, shop, stay order). Text is kept exactly as the server sent it.
  */
-internal fun sectionsOf(response: NearbyResponse): List<NearbySectionUi> =
-    NearbySectionIds.ALL.map { id ->
+internal fun sectionsOf(response: NearbyResponse): List<NearbySectionUi> {
+    val seenPlaces = mutableSetOf<String>()
+    val seenKeys = mutableSetOf<String>()
+    return NearbySectionIds.ALL.map { id ->
         val items = response.sections.filter { it.id == id }.flatMap { it.items }
-        val seen = mutableSetOf<String>()
         val cards =
             items.mapIndexedNotNull { i, item ->
                 val name = item.name?.trim()?.takeIf(String::isNotEmpty) ?: return@mapIndexedNotNull null
-                val base = "$id-" + (item.placeId?.takeIf(String::isNotBlank) ?: "$i-$name")
-                val key = if (seen.add(base)) base else "$base-$i"
-                seen += key
-                NearbyCard(key, name, item.summary?.takeIf(String::isNotBlank), safeWebUri(item.mapsUri))
+                val mapsUri = safeWebUri(item.mapsUri)
+                // A place is known by its place_id and by its Maps link; either one seen before = a duplicate.
+                val ids = listOfNotNull(item.placeId?.trim()?.takeIf(String::isNotEmpty)?.let { "p:$it" }, mapsUri?.let { "u:$it" })
+                if (ids.any { it in seenPlaces }) return@mapIndexedNotNull null
+                seenPlaces += ids
+                val identity = ids.firstOrNull()
+                val base = "$id-" + (identity ?: "$i-$name")
+                val key = if (seenKeys.add(base)) base else "$base-$i".also { seenKeys += it }
+                NearbyCard(key, name, item.summary?.takeIf(String::isNotBlank), mapsUri)
             }
         NearbySectionUi(id, cards)
     }
+}
 
 /** "Kyoto, Japan" / "Portland, Maine, United States": region only when it adds something. */
 internal fun placeLabel(place: NearbyPlace): String =

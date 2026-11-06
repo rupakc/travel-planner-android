@@ -255,11 +255,12 @@ private fun Results(state: NearbyUiState, onOpenMaps: (NearbyCard) -> Unit, onOp
     ) {
         item(key = "place", contentType = "place") { PlaceHeader(state) }
         if (state.isEmpty) {
+            // One page-level empty state, not four section ones as well.
             item(key = "empty", contentType = "empty") {
                 EmptyState(title = stringResource(R.string.nearby_empty_title), message = stringResource(R.string.nearby_empty))
             }
         }
-        state.sections.forEach { section ->
+        state.sections.takeUnless { state.isEmpty }.orEmpty().forEach { section ->
             item(key = "h-${section.id}", contentType = "section") {
                 Text(
                     stringResource(sectionTitle(section.id)),
