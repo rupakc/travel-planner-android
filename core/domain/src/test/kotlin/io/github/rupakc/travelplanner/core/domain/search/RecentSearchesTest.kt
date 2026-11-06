@@ -147,6 +147,11 @@ class RecentSearchesTest {
     @Test
     fun `handles one-way trips and dates across years`() {
         assertEquals("Dec 30, 2027", describeRecentSearch(RecentSearchIn("A", "B", "2027-12-30")).dates)
+        assertEquals(
+            "New York → Lisbon",
+            describeRecentSearch(RecentSearchIn("JFK", "LIS", "2027-12-30"), names = mapOf("JFK" to "New York", "LIS" to "Lisbon")).route,
+        )
+        assertEquals("JFK → OPO", describeRecentSearch(RecentSearchIn("JFK", "OPO", "2027-12-30")).route)
         assertEquals("Dec 30, 2027 – Jan 4, 2028", describeRecentSearch(RecentSearchIn("A", "B", "2027-12-30", "2028-01-04")).dates)
     }
 

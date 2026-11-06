@@ -15,12 +15,14 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.feature.plan.detail.DetailConfirm
 import io.github.rupakc.travelplanner.feature.plan.detail.PlanDetailContent
 import io.github.rupakc.travelplanner.feature.plan.detail.PlanDetailEvent
@@ -42,6 +44,8 @@ import java.time.LocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -77,7 +81,14 @@ class PlanScreensTest {
                 ),
             )
         val vm =
-            PlansViewModel(androidx.lifecycle.SavedStateHandle(), repo, FixedClock(), TestAppDispatchers(Dispatchers.Main), CoroutineScope(SupervisorJob()))
+            PlansViewModel(
+                androidx.lifecycle.SavedStateHandle(),
+                repo,
+                FixedClock(),
+                TestAppDispatchers(Dispatchers.Main),
+                CoroutineScope(SupervisorJob()),
+                PlaceNameLookup(FakeSearchRepository()),
+            )
         compose.setContent {
             val state by vm.state.collectAsStateWithLifecycle()
             TravelTheme(themeMode = ThemeMode.DARK) { PlansScreen(state, vm::onEvent, {}, {}) }
@@ -92,6 +103,23 @@ class PlanScreensTest {
         compose.onNodeWithText("Andalucía").assertIsDisplayed()
         compose.onNodeWithText("Spring in Japan").assertDoesNotExist()
         compose.onNodeWithText("Showing 1 trip").assertExists()
+    }
+
+    @Test
+    fun `trip rows and the detail header show the city of an airport code`() {
+        val names = mapOf("LIS" to "Lisbon", "JFK" to "New York")
+        val p =
+            plan(5, "Weekend", "LIS", "2026-12-01", "2026-12-03").let {
+                it.copy(searchData = JsonObject(it.searchData + ("origin" to JsonPrimitive("JFK"))))
+            }
+        val trip = TripSummary.from(p, today, names)
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                PlansScreen(PlansUiState(isLoading = false, trips = listOf(trip), totalCount = 1), {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("Lisbon").assertIsDisplayed()
+        compose.onNodeWithText("LIS").assertDoesNotExist()
     }
 
     @Test

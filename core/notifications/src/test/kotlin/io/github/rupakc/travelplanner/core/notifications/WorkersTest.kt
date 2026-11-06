@@ -14,6 +14,7 @@ import androidx.work.workDataOf
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.MarkReadResponse
@@ -216,7 +217,7 @@ class WorkersTest {
                     TripReminderWorker.KEY_DAY to 1,
                     TripReminderWorker.KEY_DESTINATION to "Lisbon",
                 )
-            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, FakeSearchRepository()) }, input).doWork()
+            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, PlaceNameLookup(FakeSearchRepository())) }, input).doWork()
             val posted = notifier.posts.single()
             assertEquals(TravelChannel.TRIP_REMINDERS, posted.channel)
             assertEquals("Your Lisbon trip starts today", posted.title)
@@ -224,7 +225,14 @@ class WorkersTest {
             assertEquals(listOf("travelplanner://plan/4", "travelplanner://plan/4", "travelplanner://nearby"), posted.actions.map { it.deepLink })
             notifier.posts.clear()
             build({ c, p ->
-                TripReminderWorker(c, p, FakeSettingsRepository(AppSettings(tripNotifications = false)), notifier, postLog, FakeSearchRepository())
+                TripReminderWorker(
+                    c,
+                    p,
+                    FakeSettingsRepository(AppSettings(tripNotifications = false)),
+                    notifier,
+                    postLog,
+                    PlaceNameLookup(FakeSearchRepository()),
+                )
             }, input).doWork()
             assertTrue(notifier.posts.isEmpty())
         }
@@ -240,10 +248,10 @@ class WorkersTest {
                     TripReminderWorker.KEY_DESTINATION to "LIS",
                 )
             val search = FakeSearchRepository().apply { airports = listOf(Airport(iataCode = "LIS", name = "Humberto Delgado", city = "Lisbon")) }
-            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, search) }, input).doWork()
+            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, PlaceNameLookup(search)) }, input).doWork()
             assertEquals("Your Lisbon trip starts today", notifier.posts.single().title)
             notifier.posts.clear()
-            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, FakeSearchRepository()) }, input).doWork()
+            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, PlaceNameLookup(FakeSearchRepository())) }, input).doWork()
             assertEquals("Your LIS trip starts today", notifier.posts.single().title)
         }
 
@@ -417,7 +425,11 @@ class WorkersTest {
                     TripReminderWorker.KEY_DESTINATION to "Lisbon",
                     TripReminderWorker.KEY_UNIQUE to name,
                 )
-            repeat(2) { build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, FakeSearchRepository()) }, input).doWork() }
+            repeat(2) {
+                build({ c, p ->
+                    TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, PlaceNameLookup(FakeSearchRepository()))
+                }, input).doWork()
+            }
             assertEquals(1, notifier.posts.size)
         }
 

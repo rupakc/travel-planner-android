@@ -466,6 +466,18 @@ helper `state.section<HotelsData>(SectionId.HOTELS)`. Replace-by-type, keep-old-
 without `done` are already applied. `SearchResultsReducer.sectionsJson(state)` (in `….core.data.impl`)
 gives the `{"flights":{…}}` object for chat `search_results` and `CurrentPlanStore.attachSearch`.
 
+### 3.3 Airport code → city names (`….core.data.place.PlaceNameLookup`)
+
+The search form stores airport codes ("LIS"); every screen that shows a request's origin, destination or stops names
+the city instead ("Lisbon"), like the web's `useAirportCities`. One `@Singleton` does the lookup for the whole app:
+`resolve(places)` (suspend, code → city for the codes it found), `namesFor(places)` (a `Flow` that emits the names
+already known, then the looked-up ones — for `flatMapLatest` in a ViewModel), `displayName(place)` and the shared
+`names` cache. Lookups go to `GET /api/airports/search` (local airport data, public, no paid calls); found cities are
+cached for the process, misses are asked again next time. Display with the pure helpers in `….core.domain.place`
+(`placeName`, `placeRoute`, `airportCodesIn`, `cityForCode`): a code the lookup does not know stays a code — never an
+invented name. Used by Home, global search, Search (recent cards, Compare), Results, My trips, trip detail, My Plan,
+the share page, Alerts (fare cards) and trip reminders. Chat needs none: the backend already sends "City, Country".
+
 ## 4. Models (`core:model`) and streams
 
 - Decode JSON only with `TravelJson` (`….core.model.json`): ignores unknown keys, coerces, lenient.

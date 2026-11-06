@@ -4,20 +4,26 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppBuildInfo
 import io.github.rupakc.travelplanner.core.common.AppError
+import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
+import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.feature.plan.FixedClock
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
 import io.github.rupakc.travelplanner.feature.plan.model.plan
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -63,7 +69,22 @@ class PlanDetailViewModelTest {
             ),
             FixedClock(),
             TestAppDispatchers(main.testDispatcher),
+            PlaceNameLookup(search),
         )
+
+    private val search = FakeSearchRepository()
+
+    @Test
+    fun `the header names the cities of airport codes`() =
+        runTest {
+            search.airports = listOf(Airport(iataCode = "LIS", city = "Lisbon"), Airport(iataCode = "JFK", city = "New York"))
+            val created = repo.create("Weekend", TravelJson.parseToJsonElement("""{"origin":"JFK","destination":"LIS"}""") as JsonObject, PlanSelections())
+            viewModel(id = (created as AppResult.Success).value.id).state.test {
+                val summary = expectMostRecentItem().content!!.summary
+                assertEquals("Lisbon", summary.destination)
+                assertEquals("New York", summary.origin)
+            }
+        }
 
     @Test
     fun `shows the cached plan with groups, cost and summary`() =
@@ -212,6 +233,7 @@ class PlanDetailViewModelTest {
                     AppBuildInfo("", "local", "t", true, true, webBaseUrl = "https://voyager.example"),
                     FixedClock(),
                     TestAppDispatchers(main.testDispatcher),
+                    PlaceNameLookup(search),
                 )
             vm.exportRequests.test {
                 vm.onEvent(PlanDetailEvent.ShareLink)
@@ -231,6 +253,7 @@ class PlanDetailViewModelTest {
                     AppBuildInfo("", "local", "t", true, true, webBaseUrl = "https://voyager.example"),
                     FixedClock(),
                     TestAppDispatchers(main.testDispatcher),
+                    PlaceNameLookup(search),
                 )
             vm.state.test { expectMostRecentItem() }
             offline.failNext = AppError.Network()

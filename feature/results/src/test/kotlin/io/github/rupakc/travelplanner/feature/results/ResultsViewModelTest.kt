@@ -6,6 +6,7 @@ import app.cash.turbine.turbineScope
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureDescriptor
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
@@ -103,6 +104,7 @@ class ResultsViewModelTest {
             clock = clock,
             dispatchers = TestAppDispatchers(main.testDispatcher),
             savedState = SavedStateHandle(),
+            placeNames = PlaceNameLookup(search),
         )
 
     private fun ResultsUiState.section(id: SectionId) = sections.first { it.id == id }
@@ -336,6 +338,7 @@ class ResultsViewModelTest {
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     SavedStateHandle(),
+                    PlaceNameLookup(slow),
                 )
             vm.state.test {
                 search.start(request)
@@ -368,6 +371,7 @@ class ResultsViewModelTest {
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     saved,
+                    PlaceNameLookup(search),
                 )
             first.state.test {
                 search.start(request)
@@ -390,6 +394,7 @@ class ResultsViewModelTest {
                     clock,
                     TestAppDispatchers(main.testDispatcher),
                     saved,
+                    PlaceNameLookup(FakeSearchRepository()),
                 )
             restored.state.test {
                 val s = expectMostRecentItem()

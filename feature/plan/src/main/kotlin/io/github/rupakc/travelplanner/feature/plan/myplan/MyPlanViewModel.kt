@@ -8,9 +8,12 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.domain.export.PlanExportInput
 import io.github.rupakc.travelplanner.core.domain.export.PlanIcs
+import io.github.rupakc.travelplanner.core.domain.place.placeName
+import io.github.rupakc.travelplanner.core.domain.place.placeRoute
 import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
 import io.github.rupakc.travelplanner.core.domain.plan.CostPart
 import io.github.rupakc.travelplanner.core.domain.plan.computePlanCostBreakdown
@@ -29,12 +32,14 @@ import io.github.rupakc.travelplanner.feature.plan.model.SelectionGroups
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.random.Random
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -114,6 +119,7 @@ internal sealed interface MyPlanEvent {
 }
 
 /** My Plan: the shared draft (CurrentPlanStore) with save, save as new, new plan, removal with undo and export. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 internal class MyPlanViewModel
     @Inject
@@ -121,6 +127,7 @@ internal class MyPlanViewModel
         private val store: CurrentPlanStore,
         private val clock: AppClock,
         dispatchers: AppDispatchers,
+        private val placeNames: PlaceNameLookup,
     ) : ViewModel() {
         private val status = MutableStateFlow(MyPlanUiState())
         private val exports = Channel<ExportRequest>(Channel.BUFFERED)
@@ -131,7 +138,13 @@ internal class MyPlanViewModel
 
         val exportRequests: Flow<ExportRequest> = exports.receiveAsFlow()
 
-        private val content = store.draft.map(::contentOf).flowOn(dispatchers.default)
+        private val content =
+            store.draft
+                .flatMapLatest { draft ->
+                    val request = draft.searchRequest
+                    val places = listOfNotNull(request?.origin, request?.destination) + request?.destinations.orEmpty()
+                    placeNames.namesFor(places).map { names -> contentOf(draft, names) }
+                }.flowOn(dispatchers.default)
 
         val state: StateFlow<MyPlanUiState> =
             combine(content, status) { c, s -> s.copy(content = c) }
@@ -155,24 +168,26 @@ internal class MyPlanViewModel
 
         /** Synchronised: content is built on the default dispatcher, save/export run on main. */
         @Synchronized
-        private fun displayName(draft: PlanDraft): String {
+        private fun displayName(draft: PlanDraft, names: Map<String, String> = placeNames.names.value): String {
             draft.name?.let { return it }
             val request = draft.searchRequest ?: return PlanDraft.DEFAULT_NAME
-            val seed = request.destination to request.departureDate
+            // "The Sunny Lisbon Getaway", not "… LIS …": the auto name uses the city of an airport code.
+            val destination = placeName(request.destination, names)
+            val seed = destination to request.departureDate
             generatedName?.takeIf { it.first == seed }?.let { return it.second }
-            return generatePlanName(request.destination, request.interests, request.departureDate, Random(clock.now().toEpochMilli()))
+            return generatePlanName(destination, request.interests, request.departureDate, Random(clock.now().toEpochMilli()))
                 .also { generatedName = seed to it }
         }
 
-        private fun contentOf(draft: PlanDraft): MyPlanContent {
+        private fun contentOf(draft: PlanDraft, names: Map<String, String>): MyPlanContent {
             val request = draft.searchRequest
             val parts = computePlanCostBreakdown(draft.selections, request?.departureDate, request?.returnDate)
             val total = parts.sumOf { it.amount }
             return MyPlanContent(
                 planId = draft.planId,
-                name = displayName(draft),
+                name = displayName(draft, names),
                 dirty = draft.dirty,
-                destination = request?.destination,
+                destination = request?.destination?.let { placeName(it, names) },
                 budgetUsd = request?.budgetUsd,
                 groups = SelectionGroups.of(draft.selections),
                 itinerary = PlanItineraryUi.of(draft.selections, liveItinerary(draft)),
@@ -253,8 +268,10 @@ internal class MyPlanViewModel
                 ExportRequest.Text(
                     ShareTextInput(
                         planName = input.planName.orEmpty(),
-                        origin = request?.origin,
-                        destination = request?.destinations?.takeIf { it.size > 1 }?.joinToString(" → ") ?: request?.destination,
+                        origin = request?.origin?.let { placeName(it, placeNames.names.value) },
+                        destination =
+                            request?.destinations?.takeIf { it.size > 1 }?.let { placeRoute(it, placeNames.names.value) }
+                                ?: request?.destination?.let { placeName(it, placeNames.names.value) },
                         startDate = request?.departureDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
                         endDate = request?.returnDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() },
                         travellers = request?.numTravelers,

@@ -9,6 +9,7 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.getOrNull
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
@@ -90,6 +91,8 @@ data class AlertsUiState(
     /** A removed watch the snackbar can still bring back. */
     val undo: AnyWatch? = null,
     val now: Instant = Instant.EPOCH,
+    /** Airport code → city for fare routes saved with codes ("LIS" → "Lisbon"); codes not found stay codes. */
+    val placeNames: Map<String, String> = emptyMap(),
 ) {
     val loading: Boolean get() = fares == null && prices == null && !faresFailed
     val loaded: Boolean get() = fares != null && prices != null
@@ -101,17 +104,17 @@ data class AlertsUiState(
     val counts: Map<AlertTab, Int> = countByTab(watches)
 
     /** In the tab and matching the search box (route, title, subtitle, city). */
-    val shown: List<AnyWatch> = watches.filter { inTab(it, tab) && it.matches(query) }
+    val shown: List<AnyWatch> = watches.filter { inTab(it, tab) && it.matches(query, placeNames) }
     val active: List<AnyWatch> get() = shown.filterNot(::isPast)
     val past: List<AnyWatch> get() = shown.filter(::isPast)
 }
 
-internal fun AnyWatch.matches(query: String): Boolean {
+internal fun AnyWatch.matches(query: String, names: Map<String, String> = emptyMap()): Boolean {
     val q = query.trim().lowercase(Locale.ROOT)
     if (q.isEmpty()) return true
     val text =
         when (this) {
-            is AnyWatch.Fare -> listOfNotNull(routeLabel(watch), watch.originLabel, watch.destinationLabel, watch.originCode, watch.destinationCode)
+            is AnyWatch.Fare -> listOfNotNull(routeLabel(watch, names), watch.originLabel, watch.destinationLabel, watch.originCode, watch.destinationCode)
             is AnyWatch.Price -> listOfNotNull(watch.title, watch.subtitle)
         }
     return text.any { it.lowercase(Locale.ROOT).contains(q) }
@@ -165,6 +168,7 @@ class AlertsViewModel
         private val notifications: NotificationsRepository,
         private val clock: AppClock,
         @param:ApplicationScope private val appScope: CoroutineScope,
+        private val placeNames: PlaceNameLookup,
     ) : ViewModel() {
         /** Deep-link arguments (`AlertsRoute` property names). */
         private val link = AlertsRoute(kind = savedState.get<String>(ARG_KIND), watchId = savedState.get<Long>(ARG_WATCH))
@@ -209,6 +213,7 @@ class AlertsViewModel
                 when (val result = f.await()) {
                     is AppResult.Success -> {
                         mutable.update { it.copy(fares = result.value) }
+                        nameFarePlaces(result.value)
                     }
 
                     is AppResult.Failure -> {
@@ -217,6 +222,15 @@ class AlertsViewModel
                 }
                 p.await()
                 focusDeepLink()
+            }
+        }
+
+        /** Fare routes saved with airport codes ("JFK → LIS") show the cities (shared lookup). */
+        private fun nameFarePlaces(list: List<FareWatch>) {
+            val places = list.flatMap { listOf(it.originLabel, it.destinationLabel) }
+            viewModelScope.launch {
+                val names = placeNames.resolve(places)
+                if (names.isNotEmpty()) mutable.update { it.copy(placeNames = it.placeNames + names) }
             }
         }
 

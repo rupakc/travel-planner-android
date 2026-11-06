@@ -2,8 +2,10 @@ package io.github.rupakc.travelplanner.feature.plan.myplan
 
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.section.Hotel
@@ -11,6 +13,7 @@ import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.feature.plan.FixedClock
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
@@ -40,7 +43,22 @@ class MyPlanViewModelTest {
             budgetUsd = 3000.0,
         )
 
-    private fun viewModel() = MyPlanViewModel(store, FixedClock(), TestAppDispatchers(main.testDispatcher))
+    private val search = FakeSearchRepository()
+
+    private fun viewModel() = MyPlanViewModel(store, FixedClock(), TestAppDispatchers(main.testDispatcher), PlaceNameLookup(search))
+
+    @Test
+    fun `the generated name uses the city of an airport code`() =
+        runTest {
+            search.airports = listOf(Airport(iataCode = "LIS", city = "Lisbon"))
+            store.attachSearch(request.copy(destination = "LIS"), null)
+            viewModel().state.test {
+                val c = expectMostRecentItem().content!!
+                assertTrue(c.name, c.name.contains("Lisbon"))
+                assertFalse(c.name, c.name.contains("LIS "))
+                assertEquals("Lisbon", c.destination)
+            }
+        }
 
     private fun seed() {
         store.attachSearch(request, null)

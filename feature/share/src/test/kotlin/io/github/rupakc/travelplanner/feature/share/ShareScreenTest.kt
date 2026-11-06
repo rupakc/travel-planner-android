@@ -65,6 +65,17 @@ class ShareScreenTest {
     }
 
     @Test
+    fun `the poster shows the city of an airport code`() {
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                ShareScreen(ShareUiState(isLoading = false, trip = SharedTrip.from(sharedFixture, mapOf("NYC" to "New York"))), {}, {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("from New York", substring = true).assertExists()
+        compose.onNodeWithText("from NYC", substring = true).assertDoesNotExist()
+    }
+
+    @Test
     fun `shared itinerary renders through the shared day cards with derived times and notes`() {
         compose.setContent {
             TravelTheme(themeMode = ThemeMode.LIGHT) {

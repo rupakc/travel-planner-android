@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Instrumentation
 import android.content.Intent
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intending
@@ -20,6 +21,7 @@ import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -66,8 +68,10 @@ class TripsE2eTest {
         robot.waitForText(name)
         robot.tap(name)
 
-        // Trip detail renders the itinerary.
+        // Trip detail renders the itinerary; the header names the city, not the stored airport code.
         robot.waitForText(robot.prefixOf(PlanR.string.plan_full_itinerary), substring = true)
+        robot.waitFor(hasText("Lisbon") and isHeading())
+        assertFalse("airport code shown as the trip heading", robot.exists(hasText("LIS") and isHeading()))
         assertTrue(robot.scrollToFind(hasText(robot.str(PlanR.string.plan_full_itinerary, "").substringBefore("(").trim(), substring = true)))
         Screenshots.capture("trip-detail")
 

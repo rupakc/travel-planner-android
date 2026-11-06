@@ -57,6 +57,12 @@ class WatchSheetsTest {
     }
 
     @Test
+    fun `fare sheet names the cities of airport codes`() {
+        fare(FareWatchDialogState(WatchTrip("JFK", "LIS", "2026-12-01", null, 1), placeNames = mapOf("JFK" to "New York", "LIS" to "Lisbon")))
+        compose.onNodeWithText("New York → Lisbon", substring = true).assertIsDisplayed()
+    }
+
+    @Test
     fun `fare sheet shows a target error once typed`() {
         fare(FareWatchDialogState(trip, price = 454.0, mode = AlertMode.BELOW_TARGET, target = "abc", targetTouched = true))
         compose.onNodeWithText("Enter a price, like 450.").performScrollTo().assertIsDisplayed()

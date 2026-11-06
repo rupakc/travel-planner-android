@@ -3,13 +3,16 @@ package io.github.rupakc.travelplanner.feature.share
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.SharedPlan
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -72,7 +75,24 @@ class ShareLogicTest {
             repo,
             FakeAuthRepository(if (signedIn) Session("t", TestUser) else null),
             TestAppDispatchers(main.testDispatcher),
+            PlaceNameLookup(search),
         )
+
+    private val search = FakeSearchRepository()
+
+    @Test
+    fun `the poster names the cities of airport codes`() =
+        runTest {
+            search.airports = listOf(Airport(iataCode = "NYC", city = "New York"))
+            val withCodes = sharedFixture.copy(searchData = sharedFixture.searchData.copy(destination = "HND"))
+            val repo = FakePlansRepository().apply { sharedPlans["tok"] = withCodes }
+            vm("tok", repo, signedIn = false).state.test {
+                val trip = expectMostRecentItem().trip!!
+                assertEquals("New York", trip.origin)
+                assertEquals("HND", trip.destination)
+            }
+            assertEquals(listOf("NYC", "HND"), SharedTrip.places(withCodes))
+        }
 
     @Test
     fun `loads signed out without save a copy`() =

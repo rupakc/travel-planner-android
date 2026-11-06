@@ -10,6 +10,7 @@ import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.feature.plan.model.TripFilter
 import io.github.rupakc.travelplanner.feature.plan.model.TripQuery
@@ -17,10 +18,12 @@ import io.github.rupakc.travelplanner.feature.plan.model.TripSort
 import io.github.rupakc.travelplanner.feature.plan.model.TripSummary
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -82,6 +85,7 @@ internal sealed interface PlansEvent {
 }
 
 /** "My trips": the offline cache of saved plans, refreshed from the server. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 internal class PlansViewModel
     @Inject
@@ -91,6 +95,7 @@ internal class PlansViewModel
         private val clock: AppClock,
         private val dispatchers: AppDispatchers,
         @param:ApplicationScope private val appScope: CoroutineScope,
+        private val placeNames: PlaceNameLookup,
     ) : ViewModel() {
         private val controls = MutableStateFlow(TripControls())
         private val status = MutableStateFlow(Status())
@@ -106,7 +111,9 @@ internal class PlansViewModel
 
         private val summaries =
             plans.plans
-                .map { list -> list.map { TripSummary.from(it, clock.today()) } }
+                .flatMapLatest { list ->
+                    placeNames.namesFor(TripSummary.places(list)).map { names -> list.map { TripSummary.from(it, clock.today(), names) } }
+                }
                 .flowOn(dispatchers.default)
                 .onStart { refresh() }
 

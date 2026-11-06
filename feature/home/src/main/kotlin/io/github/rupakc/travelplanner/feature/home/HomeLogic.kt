@@ -1,6 +1,8 @@
 package io.github.rupakc.travelplanner.feature.home
 
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
+import io.github.rupakc.travelplanner.core.domain.place.airportCodesIn
+import io.github.rupakc.travelplanner.core.domain.place.placeName
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
 import io.github.rupakc.travelplanner.core.model.preferences.TasteProfile
@@ -123,15 +125,15 @@ internal object HomePersonalisation {
 
 /** Picks the trip on Home: a trip under way first, else the nearest future departure. */
 internal object UpcomingTrips {
-    fun nearest(plans: List<Plan>, today: LocalDate): UpcomingTrip? =
-        plans.mapNotNull { plan -> toTrip(plan, today) }
+    fun nearest(plans: List<Plan>, today: LocalDate, names: Map<String, String> = emptyMap()): UpcomingTrip? =
+        plans.mapNotNull { plan -> toTrip(plan, today, names) }
             .filter { trip -> !trip.departure.isBefore(today) || (trip.returnDate != null && !trip.returnDate.isBefore(today)) }
             .minWithOrNull(compareBy<UpcomingTrip> { if (it.ongoing) 0 else 1 }.thenBy { it.departure }.thenBy { it.planId })
 
-    private fun toTrip(plan: Plan, today: LocalDate): UpcomingTrip? {
+    private fun toTrip(plan: Plan, today: LocalDate, names: Map<String, String>): UpcomingTrip? {
         val request = plan.searchRequest ?: return null
         val departure = parseDate(request.departureDate) ?: return null
-        val destination = request.destinations?.lastOrNull()?.takeIf(String::isNotBlank) ?: request.destination
+        val destination = placeName(request.destinations?.lastOrNull()?.takeIf(String::isNotBlank) ?: request.destination, names)
         return UpcomingTrip(
             planId = plan.id,
             name = plan.name.ifBlank { destination },
@@ -145,4 +147,13 @@ internal object UpcomingTrips {
     private fun parseDate(text: String): LocalDate? = runCatching { LocalDate.parse(text.take(ISO_DATE_LENGTH)) }.getOrNull()
 
     private const val ISO_DATE_LENGTH = 10
+}
+
+/** The places Home shows (saved trips' and recent searches' origins, stops and destinations), for the city lookup. */
+internal object HomePlaces {
+    fun of(plans: List<Plan>, recent: List<RecentSearch>): List<String> =
+        airportCodesIn(
+            plans.flatMap { p -> p.searchRequest?.let { listOf(it.origin, it.destination) + it.destinations.orEmpty() }.orEmpty() } +
+                recent.flatMap { r -> listOf(r.search.origin, r.search.destination) + r.search.stops.map { it.city } },
+        )
 }

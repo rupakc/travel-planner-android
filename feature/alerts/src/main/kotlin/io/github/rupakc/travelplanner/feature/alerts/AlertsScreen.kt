@@ -251,6 +251,7 @@ private fun LazyGridScope.section(
             emailAvailable = state.emailAvailable,
             userEmail = state.userEmail,
             now = state.now,
+            placeNames = state.placeNames,
             callbacks =
                 CardCallbacks(
                     onCheck = { onEvent(AlertsEvent.Check(item.key)) },

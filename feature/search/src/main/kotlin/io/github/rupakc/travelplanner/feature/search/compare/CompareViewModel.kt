@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.CompareRepository
+import io.github.rupakc.travelplanner.core.domain.place.placeName
 import io.github.rupakc.travelplanner.core.domain.search.CompareErrorReason
 import io.github.rupakc.travelplanner.core.domain.search.CompareRow
 import io.github.rupakc.travelplanner.core.domain.search.MAX_COMPARE_DESTINATIONS
@@ -33,6 +35,7 @@ import kotlinx.coroutines.launch
 /** One compared destination (web column: loading / error + Retry / done). */
 @Immutable
 data class CompareColumn(
+    /** The destination as shown until the summary's label arrives (an airport code shows its city). */
     val destination: String,
     val status: Status,
     val summary: CompareSummary? = null,
@@ -91,6 +94,7 @@ class CompareViewModel
     constructor(
         private val compareRepository: CompareRepository,
         private val clock: AppClock,
+        private val placeNames: PlaceNameLookup,
     ) : ViewModel() {
         private val _state = MutableStateFlow(CompareUiState(today = clock.today()))
         val state: StateFlow<CompareUiState> = _state.asStateFlow()
@@ -170,8 +174,19 @@ class CompareViewModel
             if (issue != null || dateIssues.isNotEmpty()) return
             run++
             requests = built
-            _state.update { it.copy(columns = built.map { r -> CompareColumn(r.destination, CompareColumn.Status.LOADING) }) }
+            val known = placeNames.names.value
+            _state.update { it.copy(columns = built.map { r -> CompareColumn(placeName(r.destination, known), CompareColumn.Status.LOADING) }) }
             built.indices.forEach(::load)
+            nameColumns(built.map { it.destination }, run)
+        }
+
+        /** Column headers name the city of an airport code (shared lookup) while the summaries load. */
+        private fun nameColumns(destinations: List<String>, thisRun: Int) {
+            viewModelScope.launch {
+                val names = placeNames.resolve(destinations)
+                if (thisRun != run || names.isEmpty()) return@launch
+                _state.update { s -> s.copy(columns = s.columns?.mapIndexed { i, c -> c.copy(destination = placeName(destinations[i], names)) }) }
+            }
         }
 
         private fun load(index: Int) {

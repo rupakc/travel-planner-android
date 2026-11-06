@@ -59,6 +59,8 @@ data class FareWatchDialogState(
     val saving: Boolean = false,
     val error: DialogError? = null,
     val done: FareWatch? = null,
+    /** Airport code → city for the trip's places ("LIS" → "Lisbon"), so the sheet names the cities. */
+    val placeNames: Map<String, String> = emptyMap(),
 ) {
     val targetCheck: TargetCheck get() = if (mode == AlertMode.BELOW_TARGET) checkTarget(target, price, targetLocale) else TargetCheck(null, null)
 

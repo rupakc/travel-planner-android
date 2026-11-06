@@ -3,6 +3,7 @@ package io.github.rupakc.travelplanner.feature.home
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.profile.ProfileFeatureVisibility
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
@@ -15,6 +16,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsEntryRoute
 import io.github.rupakc.travelplanner.core.model.preferences.TasteProfile
 import io.github.rupakc.travelplanner.core.model.preferences.TasteSignal
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
@@ -24,6 +26,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeRecentSearchesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import java.time.LocalDate
 import kotlinx.coroutines.test.runTest
@@ -39,12 +42,48 @@ class HomeViewModelTest {
     private val auth = FakeAuthRepository(Session("t", TestUser))
     private val profile =
         FakeProfileRepository(TravellerProfile(onboardingCompleted = true, primaryType = "CULTURE_FOODIE", secondaryTypes = listOf("ACCESSIBLE")))
-    private val plans = FakePlansRepository(listOf(plan(7, "Tokyo spring", "Tokyo", "2027-04-01", "2027-04-08")))
+    private var plans = FakePlansRepository(listOf(plan(7, "Tokyo spring", "Tokyo", "2027-04-01", "2027-04-08")))
     private val recent = FakeRecentSearchesRepository()
     private val prefs = FakePreferencesRepository()
+    private val search = FakeSearchRepository()
 
     private fun vm(catalogue: FeatureCatalogue = FakeFeatureCatalogue(setOf(FeatureId.CHAT, FeatureId.COMPARE, FeatureId.BUDGET_PLANNER))) =
-        HomeViewModel(auth, profile, plans, recent, prefs, catalogue, ProfileFeatureVisibility(profile, catalogue), FixedClock(LocalDate.of(2027, 3, 10)))
+        HomeViewModel(
+            auth,
+            profile,
+            plans,
+            recent,
+            prefs,
+            catalogue,
+            ProfileFeatureVisibility(profile, catalogue),
+            FixedClock(LocalDate.of(2027, 3, 10)),
+            PlaceNameLookup(search),
+        )
+
+    @Test
+    fun `the next trip and recent searches name the city of an airport code`() =
+        runTest {
+            search.airports = listOf(Airport(iataCode = "LIS", city = "Lisbon"), Airport(iataCode = "JFK", city = "New York"))
+            plans = FakePlansRepository(listOf(plan(8, "", "LIS", "2027-04-01", "2027-04-04")))
+            recent.add(recent("x", "LIS").search.copy(origin = "JFK"))
+            vm().state.test {
+                val s = expectMostRecentItem()
+                assertEquals("Lisbon", s.upcomingTrip?.destination)
+                assertEquals("Lisbon", s.upcomingTrip?.name)
+                assertEquals(mapOf("LIS" to "Lisbon", "JFK" to "New York"), s.placeNames)
+            }
+        }
+
+    @Test
+    fun `a code the lookup cannot name stays a code`() =
+        runTest {
+            plans = FakePlansRepository(listOf(plan(8, "Weekend", "OPO", "2027-04-01")))
+            vm().state.test {
+                val s = expectMostRecentItem()
+                assertEquals("OPO", s.upcomingTrip?.destination)
+                assertEquals(emptyMap<String, String>(), s.placeNames)
+            }
+        }
 
     @Test
     fun `state combines user, type, trip and visible tiles`() =
@@ -118,6 +157,7 @@ class HomeViewModelTest {
                     DefaultFeatureCatalogue,
                     FakeFeatureVisibility(),
                     FixedClock(LocalDate.of(2027, 3, 10)),
+                    PlaceNameLookup(search),
                 )
             model.state.test {
                 val s = expectMostRecentItem()

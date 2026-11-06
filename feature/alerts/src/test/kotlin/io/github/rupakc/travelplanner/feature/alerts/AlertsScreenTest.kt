@@ -68,6 +68,15 @@ class AlertsScreenTest {
     }
 
     @Test
+    fun `a fare card saved with airport codes names the cities`() {
+        val coded = fare.copy(originLabel = "JFK", destinationLabel = "LIS", originCode = "JFK", destinationCode = "LIS")
+        val names = mapOf("JFK" to "New York", "LIS" to "Lisbon")
+        show(AlertsUiState(fares = listOf(coded), prices = emptyList(), livePrices = true, now = now, placeNames = names))
+        compose.onNodeWithText("New York → Lisbon").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("JFK → LIS").assertDoesNotExist()
+    }
+
+    @Test
     fun `fare card shows the price hero, change and actions`() {
         show(AlertsUiState(fares = listOf(fare), prices = emptyList(), livePrices = true, now = now))
         compose.onNodeWithText("Berlin → Lisbon").performScrollTo().assertIsDisplayed()
