@@ -1,28 +1,34 @@
 package io.github.rupakc.travelplanner.feature.nearby
 
 import android.app.Application
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
-import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
+import io.github.rupakc.travelplanner.core.domain.live.LiveFailure
+import io.github.rupakc.travelplanner.core.model.grounding.GroundingSource
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlaceItem
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
-import io.github.rupakc.travelplanner.core.model.preferences.Preferences
-import io.github.rupakc.travelplanner.core.model.section.Activity
+import io.github.rupakc.travelplanner.core.model.nearby.NearbySection
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
-import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
-import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
-import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
-import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeNearbyRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -40,127 +46,156 @@ class NearbyTest {
 
     @get:Rule val compose = createComposeRule()
 
-    private class FakeLocation(var permitted: Boolean, var fix: LocationFix = LocationFix.Found(35.0, 135.7)) : LocationClient {
+    private class FakeLocation(var permitted: Boolean, var fix: LocationFix = LocationFix.Found(38.72, -9.14)) : LocationClient {
+        /** When set, [current] waits for it (to observe the Locating phase). */
+        var gate: CompletableDeferred<Unit>? = null
+
         override fun hasPermission() = permitted
 
-        override suspend fun current() = if (permitted) fix else LocationFix.NoPermission
-    }
-
-    private class RecordingNearby(var result: AppResult<NearbyResponse>) : NearbyRepository {
-        var interests: List<String>? = listOf("unset")
-
-        var remembered: Pair<Double, Double>? = null
-
-        override suspend fun nearby(lat: Double, lng: Double, interests: List<String>?, limit: Int): AppResult<NearbyResponse> {
-            this.interests = interests
-            return result
-        }
-
-        override suspend fun rememberLocation(lat: Double, lng: Double) {
-            remembered = lat to lng
-        }
-
-        override suspend fun lastLocation() = null
-
-        override suspend fun forgetLocation() {
-            remembered = null
+        override suspend fun current(): LocationFix {
+            gate?.await()
+            return if (permitted) fix else LocationFix.NoPermission
         }
     }
 
     private val nearbyOn = FakeSettingsRepository(AppSettings(nearbyNotifications = true))
 
-    private val kyoto = NearbyPlace(name = "Kyoto", region = "Kyoto", country = "Japan", distanceKm = 1.4)
-    private val hike =
-        Activity(name = "Fushimi Inari Hike", description = "Temples and street food at dawn", category = "culture", bookingUrl = "https://example.com")
+    private val lisbon = NearbyPlace(name = "Lisbon", country = "Portugal", distanceKm = 0.4)
+    private val market = NearbyPlaceItem("Time Out Market", "Food hall with local chefs", "https://maps.google.com/?cid=1", "ChIJ1", "eat")
+    private val v2 =
+        NearbyResponse(
+            place = lisbon,
+            sections =
+                listOf(
+                    NearbySection("eat", "Places to eat", listOf(market, NearbyPlaceItem(name = " "), market.copy(summary = null))),
+                    NearbySection("see", "Places to see", listOf(NearbyPlaceItem("Castelo", null, "javascript:alert(1)", null))),
+                    NearbySection("nightlife", "Bars", listOf(NearbyPlaceItem("Bar", null, "https://maps.google.com/?cid=9"))),
+                ),
+            attribution = "Google Maps",
+            sources = listOf(GroundingSource("Time Out Market", "https://maps.google.com/?cid=1"), GroundingSource("bad", "intent://x")),
+        )
 
     @Test
-    fun `rules derive interests, why-this and labels from data only`() {
-        val profile = TravellerProfile(answers = mapOf("loves" to listOf("food", "beaches"), "pace" to listOf("relaxed"), "x" to listOf("Culture")))
-        assertEquals(listOf("food", "culture"), profileInterests(profile))
-        assertEquals(listOf("food", "culture"), whyThis(hike, listOf("food", "culture", "nightlife")))
-        assertTrue(whyThis(hike, listOf("art")).isEmpty())
-        // Whole words only; a plural still counts.
-        assertTrue(whyThis(Activity(name = "Artificial intelligence museum"), listOf("art")).isEmpty())
-        assertEquals(listOf("art"), whyThis(Activity(name = "Street arts walk"), listOf("art")))
-        assertEquals("Kyoto, Japan", placeLabel(kyoto))
+    fun `sections are always the four, in order, with checked links and unique keys`() {
+        val sections = sectionsOf(v2)
+        assertEquals(listOf("see", "eat", "shop", "stay"), sections.map { it.id })
+        assertNull(sections[0].cards.single().mapsUri)
+        val eat = sections[1].cards
+        assertEquals(listOf("Time Out Market", "Time Out Market"), eat.map { it.name })
+        assertEquals(eat.size, eat.map { it.key }.toSet().size)
+        assertEquals("https://maps.google.com/?cid=1", eat.first().mapsUri)
+        assertTrue(sections[2].cards.isEmpty() && sections[3].cards.isEmpty())
+        // A v1-shaped answer (no sections) gives four empty sections.
+        assertTrue(sectionsOf(NearbyResponse(place = lisbon)).all { it.cards.isEmpty() })
+        assertEquals("Lisbon, Portugal", placeLabel(lisbon))
         assertEquals("Portland, Maine, United States", placeLabel(NearbyPlace(name = "Portland", region = "Maine", country = "United States")))
-        assertEquals("Fushimi Inari Hike, Kyoto, Japan", mapsQuery(hike, kyoto))
+        assertEquals("Castelo, Lisbon, Portugal", mapsQuery("Castelo", lisbon))
     }
 
     @Test
-    fun `without permission it asks, and a grant loads suggestions with profile interests`() =
+    fun `without permission it asks, and a grant loads v2 sections into memory`() =
         runTest {
             val location = FakeLocation(permitted = false)
-            val repo = RecordingNearby(AppResult.Success(NearbyResponse(kyoto, listOf(hike))))
-            val profile = FakeProfileRepository(TravellerProfile(answers = mapOf("loves" to listOf("food"))))
-            val vm = NearbyViewModel(location, repo, FakePreferencesRepository(), profile, FakeCurrentPlanStore(), nearbyOn)
+            val repo = FakeNearbyRepository(AppResult.Success(v2))
+            val vm = NearbyViewModel(location, repo, nearbyOn)
             assertEquals(NearbyPhase.NeedsPermission, vm.state.value.phase)
             vm.onEvent(NearbyEvent.PermissionResult(granted = false))
             assertEquals(NearbyPhase.Denied, vm.state.value.phase)
             location.permitted = true
             vm.onEvent(NearbyEvent.PermissionResult(granted = true))
             advanceUntilIdle()
-            assertEquals(NearbyPhase.Loaded, vm.state.value.phase)
-            assertEquals(listOf("food"), repo.interests)
-            // The foreground fix is remembered for background suggestions.
-            assertEquals(35.0 to 135.7, repo.remembered)
-            assertEquals(listOf("food"), vm.state.value.items.single().why)
-            vm.onEvent(NearbyEvent.TogglePlan(vm.state.value.items.single().key))
-            advanceUntilIdle()
-            assertTrue(vm.state.value.items.single().inPlan)
+            val s = vm.state.value
+            assertEquals(NearbyPhase.Loaded, s.phase)
+            assertEquals(1, repo.requests.size)
+            assertEquals(38.72, repo.requests.single().lat, 0.0)
+            assertEquals(6, repo.requests.single().limit)
+            assertEquals(lisbon, s.place)
+            assertEquals("Google Maps", s.attribution)
+            // Only http(s) sources are listed.
+            assertEquals(listOf("https://maps.google.com/?cid=1"), s.sources.map { it.uri })
+            // The foreground fix is remembered (as a cell) only for the background invitation.
+            assertTrue(repo.last != null)
         }
 
     @Test
-    fun `the location is remembered only while nearby suggestions are on`() =
+    fun `refresh always asks the server again (no cache)`() =
         runTest {
-            val repo = RecordingNearby(AppResult.Success(NearbyResponse(kyoto, listOf(hike))))
-            NearbyViewModel(FakeLocation(true), repo, FakePreferencesRepository(), FakeProfileRepository(), FakeCurrentPlanStore(), FakeSettingsRepository())
+            val repo = FakeNearbyRepository(AppResult.Success(v2))
+            val vm = NearbyViewModel(FakeLocation(true), repo, FakeSettingsRepository())
             advanceUntilIdle()
-            assertNull(repo.remembered)
-            NearbyViewModel(FakeLocation(true), repo, FakePreferencesRepository(), FakeProfileRepository(), FakeCurrentPlanStore(), nearbyOn)
+            vm.onEvent(NearbyEvent.Refresh)
             advanceUntilIdle()
-            assertEquals(35.0 to 135.7, repo.remembered)
+            assertEquals(2, repo.requests.size)
+            // Not remembered while nearby suggestions are off.
+            assertNull(repo.last)
         }
 
     @Test
-    fun `server interests win and are not resent`() =
+    fun `phases follow with Turbine`() =
         runTest {
-            val repo = RecordingNearby(AppResult.Success(NearbyResponse(kyoto, listOf(hike))))
-            val prefs = FakePreferencesRepository(Preferences(username = "alice", interests = listOf("culture")))
-            val vm = NearbyViewModel(FakeLocation(true), repo, prefs, FakeProfileRepository(), FakeCurrentPlanStore(), FakeSettingsRepository())
-            advanceUntilIdle()
-            assertNull(repo.interests)
-            assertEquals(listOf("culture"), vm.state.value.interests)
+            val gate = CompletableDeferred<Unit>()
+            val location = FakeLocation(false).apply { this.gate = gate }
+            val vm = NearbyViewModel(location, FakeNearbyRepository(AppResult.Success(v2)), FakeSettingsRepository())
+            vm.state.test {
+                assertEquals(NearbyPhase.NeedsPermission, awaitItem().phase)
+                location.permitted = true
+                vm.onEvent(NearbyEvent.PermissionResult(granted = true))
+                assertEquals(NearbyPhase.Locating, awaitItem().phase)
+                gate.complete(Unit)
+                var next = awaitItem()
+                if (next.phase == NearbyPhase.Loading) next = awaitItem()
+                assertEquals(NearbyPhase.Loaded, next.phase)
+                assertEquals(4, next.sections.size)
+                cancelAndIgnoreRemainingEvents()
+            }
         }
 
     @Test
-    fun `no place, location off and errors map to their states`() =
+    fun `no place, rate limit, AI limit, offline and location off map to their states`() =
         runTest {
-            val repo = RecordingNearby(AppResult.Failure(AppError.NotFound("We don't know a town or city near you yet.", "no_place")))
+            val repo = FakeNearbyRepository(AppResult.Failure(AppError.NotFound("We don't know a town or city near you yet.", "no_place")))
             val location = FakeLocation(true)
-            val vm = NearbyViewModel(location, repo, FakePreferencesRepository(), FakeProfileRepository(), FakeCurrentPlanStore(), FakeSettingsRepository())
+            val vm = NearbyViewModel(location, repo, FakeSettingsRepository())
             advanceUntilIdle()
             assertEquals(NearbyPhase.NoPlace("We don't know a town or city near you yet."), vm.state.value.phase)
             repo.result = AppResult.Failure(AppError.RateLimited("Too many requests — please wait 30 seconds and try again.", 30))
             vm.onEvent(NearbyEvent.Refresh)
             advanceUntilIdle()
-            assertEquals(NearbyPhase.Failed("Too many requests — please wait 30 seconds and try again."), vm.state.value.phase)
+            assertEquals(NearbyPhase.Failed("Too many requests — please wait 30 seconds and try again.", LiveFailure.RATE_LIMITED), vm.state.value.phase)
+            repo.result = AppResult.Failure(AppError.Server(503, "AI limit reached for this month — try again on the 1st.", "ai_limit"))
+            vm.onEvent(NearbyEvent.Refresh)
+            advanceUntilIdle()
+            assertEquals(LiveFailure.AI_LIMIT, (vm.state.value.phase as NearbyPhase.Failed).failure)
+            repo.result = AppResult.Failure(AppError.Server(503, null, "grounding_unavailable"))
+            vm.onEvent(NearbyEvent.Refresh)
+            advanceUntilIdle()
+            assertEquals(NearbyPhase.Failed(null, LiveFailure.GROUNDING_UNAVAILABLE), vm.state.value.phase)
+            repo.result = AppResult.Failure(AppError.Network("Unable to resolve host"))
+            vm.onEvent(NearbyEvent.Refresh)
+            advanceUntilIdle()
+            assertEquals(NearbyPhase.Failed(null, LiveFailure.OFFLINE), vm.state.value.phase)
+            assertTrue(vm.state.value.sections.isEmpty())
             location.fix = LocationFix.Off
             vm.onEvent(NearbyEvent.Refresh)
             advanceUntilIdle()
             assertEquals(NearbyPhase.LocationOff, vm.state.value.phase)
         }
 
-    private fun show(state: NearbyUiState, onPermission: () -> Unit = {}, onSettings: () -> Unit = {}) =
-        compose.setContent {
-            TravelTheme(themeMode = ThemeMode.LIGHT) { NearbyScreen(state, {}, {}, onPermission, onSettings, {}, {}) }
-        }
+    private fun show(
+        state: NearbyUiState,
+        onPermission: () -> Unit = {},
+        onSettings: () -> Unit = {},
+        onMaps: (NearbyCard) -> Unit = {},
+        onSource: (String) -> Unit = {},
+    ) = compose.setContent {
+        TravelTheme(themeMode = ThemeMode.LIGHT) { NearbyScreen(state, {}, {}, onPermission, onSettings, {}, onMaps, onSource) }
+    }
 
     @Test
     fun `permission rationale asks in context`() {
         var asked = false
         show(NearbyUiState(NearbyPhase.NeedsPermission), onPermission = { asked = true })
-        compose.onNodeWithText("See things to do near you").assertIsDisplayed()
+        compose.onNodeWithText("See what’s near you").assertIsDisplayed()
         compose.onNodeWithText("Allow location").performScrollTo().performClick()
         assertTrue(asked)
     }
@@ -175,12 +210,48 @@ class NearbyTest {
     }
 
     @Test
-    fun `loaded list shows the place, why this and actions`() {
-        show(NearbyUiState(NearbyPhase.Loaded, kyoto, listOf(NearbyItem("0", hike, listOf("culture"), false)), listOf("culture")))
-        compose.onNodeWithText("Kyoto, Japan").assertIsDisplayed()
-        compose.onNodeWithText("1.4 km from you · 1 suggestion").assertIsDisplayed()
-        compose.onNodeWithText("Why this? It matches culture.").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Open in Maps").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Add to plan").performScrollTo().assertIsDisplayed()
+    fun `loaded screen shows four sections, empty states, attribution, maps button and sources`() {
+        var opened: NearbyCard? = null
+        var source: String? = null
+        val state =
+            NearbyUiState(
+                NearbyPhase.Loaded,
+                lisbon,
+                sectionsOf(v2),
+                "Google Maps",
+                listOf(GroundingSource("Time Out Market source", "https://maps.google.com/?cid=1")),
+            )
+        show(state, onMaps = { opened = it }, onSource = { source = it })
+        compose.onNodeWithText("Lisbon, Portugal").assertIsDisplayed()
+        compose.onNodeWithText("0.4 km from you").assertIsDisplayed()
+        compose.onNodeWithText("Places from Google Maps").assertIsDisplayed()
+        compose.onNodeWithText("Places to see").assertIsDisplayed()
+        scrollTo(hasText("Food hall with local chefs"))
+        scrollTo(hasContentDescription("Open Time Out Market in Google Maps"))
+        compose.onAllNodes(hasContentDescription("Open Time Out Market in Google Maps"))[0].performClick()
+        assertEquals("Time Out Market", opened?.name)
+        assertEquals("https://maps.google.com/?cid=1", opened?.mapsUri)
+        scrollTo(hasText("Places to stay"))
+        compose.onNodeWithText("Places to stay").assertIsDisplayed()
+        compose.onAllNodesWithText("Nothing found nearby for this one.")[0].assertExists()
+        scrollTo(hasText("Time Out Market source"))
+        compose.onNodeWithText("Time Out Market source").performClick()
+        assertEquals("https://maps.google.com/?cid=1", source)
+    }
+
+    @Test
+    fun `failures show the backend words, or our copy when there are none`() {
+        show(NearbyUiState(NearbyPhase.Failed(null, LiveFailure.OFFLINE)))
+        compose.onNodeWithText("You’re offline. Check your connection and try again.").assertIsDisplayed()
+    }
+
+    @Test
+    fun `ai limit without a message uses the friendly copy`() {
+        show(NearbyUiState(NearbyPhase.Failed(null, LiveFailure.AI_LIMIT)))
+        compose.onNodeWithText("AI limit reached for this month — try again on the 1st.").assertIsDisplayed()
+    }
+
+    private fun scrollTo(matcher: SemanticsMatcher) {
+        compose.onNode(hasScrollAction()).performScrollToNode(matcher)
     }
 }

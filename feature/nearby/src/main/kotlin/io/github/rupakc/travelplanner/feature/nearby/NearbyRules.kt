@@ -1,36 +1,37 @@
 package io.github.rupakc.travelplanner.feature.nearby
 
+import androidx.compose.runtime.Immutable
+import io.github.rupakc.travelplanner.core.domain.live.safeWebUri
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
-import io.github.rupakc.travelplanner.core.model.section.Activity
-import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
-import java.util.Locale
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
+import io.github.rupakc.travelplanner.core.model.nearby.NearbySectionIds
 
-/** The web's 10 interest ids (SearchPage `INTERESTS`); onboarding answers map onto them (spec §6.1). */
-internal val WEB_INTEREST_IDS = listOf("food", "history", "adventure", "culture", "nature", "shopping", "nightlife", "wellness", "art", "family")
+/** One place card: [mapsUri] is already checked (http/https only) or null. */
+@Immutable
+data class NearbyCard(val key: String, val name: String, val summary: String?, val mapsUri: String?)
 
-/**
- * Interests from the device-local traveller profile: every quiz answer that is a web interest id,
- * in the web's order. Used only when the server Preferences have none (the backend falls back
- * to "general sightseeing" otherwise).
- */
-internal fun profileInterests(profile: TravellerProfile): List<String> {
-    val chosen = profile.answers.values.flatten().map { it.lowercase(Locale.ROOT) }.toSet()
-    return WEB_INTEREST_IDS.filter { it in chosen }
-}
+/** One of the four sections, always present (maybe empty) and always in see/eat/shop/stay order. */
+@Immutable
+data class NearbySectionUi(val id: String, val cards: List<NearbyCard>)
 
 /**
- * "Why this?": the asked-for interests the item's own data mentions (its category, name or
- * description). Nothing is inferred beyond the API fields; empty = no reason shown.
+ * The four sections from a v2 answer: unknown section ids are ignored, a missing section is empty,
+ * nameless items are dropped and keys stay unique. Text is kept exactly as the server sent it.
  */
-internal fun whyThis(item: Activity, interests: List<String>): List<String> {
-    val category = item.category?.lowercase(Locale.ROOT)
-    val text = listOfNotNull(item.name, item.description).joinToString(" ").lowercase(Locale.ROOT)
-    return interests.filter { i ->
-        val word = i.lowercase(Locale.ROOT)
-        // Whole words only (an optional plural "s"): "art" never matches "artificial".
-        category == word || Regex("\\b${Regex.escape(word)}s?\\b").containsMatchIn(text)
+internal fun sectionsOf(response: NearbyResponse): List<NearbySectionUi> =
+    NearbySectionIds.ALL.map { id ->
+        val items = response.sections.filter { it.id == id }.flatMap { it.items }
+        val seen = mutableSetOf<String>()
+        val cards =
+            items.mapIndexedNotNull { i, item ->
+                val name = item.name?.trim()?.takeIf(String::isNotEmpty) ?: return@mapIndexedNotNull null
+                val base = "$id-" + (item.placeId?.takeIf(String::isNotBlank) ?: "$i-$name")
+                val key = if (seen.add(base)) base else "$base-$i"
+                seen += key
+                NearbyCard(key, name, item.summary?.takeIf(String::isNotBlank), safeWebUri(item.mapsUri))
+            }
+        NearbySectionUi(id, cards)
     }
-}
 
 /** "Kyoto, Japan" / "Portland, Maine, United States": region only when it adds something. */
 internal fun placeLabel(place: NearbyPlace): String =
@@ -38,8 +39,5 @@ internal fun placeLabel(place: NearbyPlace): String =
         .filter(String::isNotBlank)
         .joinToString(", ")
 
-/** A Maps search for the item near the resolved place (`geo:` URI, any maps app). */
-internal fun mapsQuery(item: Activity, place: NearbyPlace?): String {
-    val near = place?.let(::placeLabel)
-    return listOfNotNull(item.name, item.location, near).filter(String::isNotBlank).joinToString(", ")
-}
+/** Fallback Maps search when the item's link can't be opened: the name near the resolved place (`geo:` URI). */
+internal fun mapsQuery(name: String, place: NearbyPlace?): String = listOfNotNull(name, place?.let(::placeLabel)).filter(String::isNotBlank).joinToString(", ")
