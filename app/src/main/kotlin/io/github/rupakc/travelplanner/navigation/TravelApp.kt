@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -233,6 +234,9 @@ fun TravelAppScaffold(
                             bell()
                             TopBarAction(Icons.Filled.Settings, stringResource(R.string.nav_settings), onOpenSettings)
                         },
+                        // Above the screen below it: a list item scrolled under the bar must not count as covering
+                        // the bar's 48 dp actions (accessibility services read the z-order, not the clip).
+                        modifier = Modifier.zIndex(1f),
                     )
                 }
                 content()
