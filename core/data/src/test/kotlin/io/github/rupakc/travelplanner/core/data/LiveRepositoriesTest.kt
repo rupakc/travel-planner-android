@@ -57,11 +57,13 @@ class LiveRepositoriesTest {
     fun `nearby sends sections true with the language and decodes the four sections`() =
         runTest {
             respond(200, V2_BODY)
-            val result = nearby.nearby(38.72, -9.14, limit = 6, language = "es")
+            val result = nearby.nearby(38.723456, -9.139876, limit = 6, language = "es")
             val (target, body) = request()
             assertEquals("/api/nearby", target)
             assertTrue(body.getValue("sections").jsonPrimitive.boolean)
-            assertEquals(38.72, body.getValue("lat").jsonPrimitive.double, 0.0)
+            // Rounded to 3 decimals (~100 m) before it leaves the phone.
+            assertEquals(38.723, body.getValue("lat").jsonPrimitive.double, 0.0)
+            assertEquals(-9.14, body.getValue("lng").jsonPrimitive.double, 0.0)
             assertEquals(6, body.getValue("limit").jsonPrimitive.int)
             assertEquals("es", body.getValue("language").jsonPrimitive.content)
             val value = (result as AppResult.Success).value

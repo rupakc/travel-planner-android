@@ -3,7 +3,7 @@
     <string name="nearby_title">Near me</string>
     <string name="nearby_message">Places to see, eat, shop and stay around where you are, from Google Maps. Location is asked for here, only while you use this screen.</string>
     <string name="nearby_rationale_title">See what’s near you</string>
-    <string name="nearby_rationale_precise">Approximate location is enough. You can share your precise location if you like; we never track you in the background for this screen.</string>
+    <string name="nearby_rationale_precise">Approximate location is enough. When you open this screen, your position (rounded to about 100 m) goes through your server to Google Maps to find places nearby; it isn’t stored. We never track you in the background.</string>
     <string name="nearby_allow">Allow location</string>
     <string name="nearby_denied_title">Location is off for %1$s</string>
     <string name="nearby_denied_body">Near me needs your approximate location to find places around you. You can allow it in Settings.</string>

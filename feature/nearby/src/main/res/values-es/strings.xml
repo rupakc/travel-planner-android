@@ -3,7 +3,7 @@
     <string name="nearby_title">Cerca de mí</string>
     <string name="nearby_message">Lugares para ver, comer, comprar y alojarte cerca de donde estás, de Google Maps. La ubicación se pide aquí y solo mientras usas esta pantalla.</string>
     <string name="nearby_rationale_title">Mira qué hay cerca de ti</string>
-    <string name="nearby_rationale_precise">Basta con la ubicación aproximada. Puedes compartir la exacta si quieres; esta pantalla nunca te sigue en segundo plano.</string>
+    <string name="nearby_rationale_precise">Basta con la ubicación aproximada. Al abrir esta pantalla, tu posición (redondeada a unos 100 m) pasa por tu servidor a Google Maps para encontrar lugares cercanos; no se guarda. Nunca te seguimos en segundo plano.</string>
     <string name="nearby_allow">Permitir ubicación</string>
     <string name="nearby_denied_title">La ubicación está desactivada para %1$s</string>
     <string name="nearby_denied_body">Cerca de mí necesita tu ubicación aproximada para encontrar lugares a tu alrededor. Puedes permitirla en Ajustes.</string>

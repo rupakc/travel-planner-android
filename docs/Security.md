@@ -45,6 +45,8 @@ The FCM token only travels in request bodies. Pass `PROD_BASE_URL` via Gradle pr
 
 ## Data minimisation
 
-Location is coarse by default, foreground only and used for Near me; it is sent only to the user's own backend, and only when the user opens Near me
-(the background invitation makes no request). Grounded links (Maps `maps_uri`, Search sources) open only if they are absolute http(s) URLs
+Location is coarse by default, foreground only and used for Near me, and only when the user opens Near me (the background invitation makes no
+request). The coordinates are rounded to 3 decimals (~100 m) on the phone and sent to the user's own backend, which passes them to Google Maps
+(Gemini Grounding with Google Maps) to find nearby places; neither the app nor the backend stores them or the results (the device keeps only a
+~5 km cell, for 24 h, to gate the invitation). Grounded links (Maps `maps_uri`, Search sources) open only if they are absolute http(s) URLs
 (`core:domain` `safeWebUri`); Near me results and live web answers are never persisted.

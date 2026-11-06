@@ -192,7 +192,7 @@ class NearbyRepositoryImpl
         private val lastLocationStore: LastLocationStore,
     ) : NearbyRepository {
         override suspend fun nearby(lat: Double, lng: Double, limit: Int, language: String?): AppResult<NearbyResponse> =
-            apiCall { api.nearby(NearbyRequest(lat = lat, lng = lng, limit = limit, sections = true, language = language)) }
+            apiCall { api.nearby(NearbyRequest(lat = roundCoordinate(lat), lng = roundCoordinate(lng), limit = limit, sections = true, language = language)) }
 
         override suspend fun rememberLocation(lat: Double, lng: Double) {
             // The cell's centre: precise coordinates are never stored.
@@ -209,6 +209,14 @@ class NearbyRepositoryImpl
             const val CELL_DEGREES = 0.05
         }
     }
+
+/**
+ * Coordinates sent for Near me are rounded to 3 decimals (~100 m), as the web does: they travel via the backend
+ * to Google Maps grounding, which needs no more precision to find nearby places.
+ */
+internal fun roundCoordinate(degrees: Double): Double = Math.round(degrees * COORD_SCALE) / COORD_SCALE
+
+private const val COORD_SCALE = 1000.0
 
 /** `POST /api/live-check`: passes the answer straight through; nothing is cached or stored. */
 @Singleton

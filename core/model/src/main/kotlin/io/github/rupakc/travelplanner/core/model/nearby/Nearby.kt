@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * `POST /api/nearby` v2 body (auth, light_ai bucket): `sections: true` asks for the four
- * Google Maps–grounded sections. [limit] is per section (1..10). [language] is the UI language
+ * Google Maps–grounded sections. [lat]/[lng] are rounded to 3 decimals (~100 m) by the repository. [limit] is per section (1..10). [language] is the UI language
  * for the one-line summaries (null = the server default).
  */
 @Serializable
