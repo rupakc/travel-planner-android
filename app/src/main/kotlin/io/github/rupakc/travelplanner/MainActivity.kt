@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,6 +32,8 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
+            // Status/navigation bar icons follow the app's theme setting, not only the system's.
+            EdgeToEdgeSystemBars(dark = state.settings.themeMode.isDark(isSystemInDarkTheme()))
             TravelTheme(themeMode = state.settings.themeMode, dynamicColor = state.settings.dynamicColor) {
                 TravelApp(gate = state.gate)
             }

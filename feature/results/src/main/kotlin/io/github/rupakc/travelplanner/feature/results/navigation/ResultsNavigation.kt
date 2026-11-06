@@ -121,6 +121,7 @@ internal fun ResultsRoute(onBack: () -> Unit, onOpenMyPlan: () -> Unit, onOpenAl
                     onOpenAlerts()
                 },
                 onWatched = { viewModel.onPriceWatched(current.kind, current.itemName, it) },
+                onEvent = viewModel::onPriceSheetEvent,
             )
         }
 

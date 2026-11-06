@@ -52,8 +52,9 @@ class AlertsE2eTest {
         robot.completeOnboarding()
         robot.finishOnboarding(allowNotifications = true)
 
-        // Watch a hotel the fake SerpAPI knows. (Watching from a Results card reaches the sheet, but the AI hotels
-        // are not in the fixtures and the no-live-price suggestions don't render; see the E2E report.)
+        // Watch a hotel the fake SerpAPI knows, through the API: the AI-named hotels on a Results card are not in the
+        // fixtures (no live price). Watching from a Results card, incl. the no-live-price suggestions, is covered by
+        // SearchResultsE2eTest.
         val created = api.createFixtureHotelWatch(api.adminToken())
         check(created.code == 200) { "create watch -> ${created.code} ${created.body}" }
 

@@ -6,6 +6,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -42,6 +44,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.github.rupakc.travelplanner.AuthGate
 import io.github.rupakc.travelplanner.R
+import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.navigation.AccountChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
@@ -74,6 +77,14 @@ import io.github.rupakc.travelplanner.feature.share.navigation.shareGraph
 /** Root of the UI: auth gate + NavHost + adaptive navigation suite. */
 @Composable
 fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavController()) {
+    // Nothing is composed until the gate has decided (the splash covers LOADING): a NavHost composed now would start
+    // Home, whose screens fetch plans / recent searches / taste profile without a session (E2E O3).
+    val start = startDestinationFor(gate) ?: return
+    TravelAppContent(gate, remember { start }, navController)
+}
+
+@Composable
+private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navController: NavHostController) {
     val shellViewModel: ShellViewModel = hiltViewModel()
     val backStack by navController.currentBackStackEntryAsState()
     val destination = backStack?.destination
@@ -121,7 +132,7 @@ fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavCont
         bell = { NotificationBellAction(onOpen = { navController.navigate(NotificationsRoute) }) },
         snackbarHostState = snackbarHostState,
     ) {
-        NavHost(navController = navController, startDestination = HomeRoute, modifier = Modifier.fillMaxSize()) {
+        NavHost(navController = navController, startDestination = startDestination, modifier = Modifier.fillMaxSize()) {
             authGraph(onLoggedIn = {}, onPasswordChanged = {}, onBack = { navController.popBackStack() })
             // First run: onboarding marks itself complete and the gate opens Home; a Settings re-run pops back.
             onboardingGraph(onFinished = { fromSettings -> if (fromSettings) navController.popBackStack() })
@@ -218,13 +229,9 @@ fun TravelAppScaffold(
                     TopAppBar(
                         title = { Text(stringResource(currentTopLevel.labelRes), modifier = Modifier.semantics { heading() }) },
                         actions = {
-                            IconButton(onClick = onOpenSearch) {
-                                Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.nav_global_search))
-                            }
+                            TopBarAction(Icons.Filled.Search, stringResource(R.string.nav_global_search), onOpenSearch)
                             bell()
-                            IconButton(onClick = onOpenSettings) {
-                                Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.nav_settings))
-                            }
+                            TopBarAction(Icons.Filled.Settings, stringResource(R.string.nav_settings), onOpenSettings)
                         },
                     )
                 }
@@ -251,8 +258,32 @@ fun TravelAppScaffold(
     ) { body() }
 }
 
+/**
+ * One top-bar action. Its layout bounds are the full 48 x 48 dp target (Material's IconButton is a 40 dp container
+ * with the rest as touch padding, which the Accessibility Test Framework measured as too small; E2E O2).
+ */
+@Composable
+private fun TopBarAction(icon: ImageVector, label: String, onClick: () -> Unit) {
+    IconButton(onClick = onClick, modifier = Modifier.size(TravelTheme.spacing.minTouchTarget)) {
+        Icon(icon, contentDescription = label)
+    }
+}
+
 private fun NavDestination?.isOn(dest: TopLevelDestination): Boolean =
     this?.hierarchy?.any { it.hasRoute(dest.routeClass) } == true
+
+/**
+ * The NavHost's start: the screen the decided gate shows first, so a signed-out start never composes Home (whose
+ * screens make authed requests). Null while the gate is LOADING: compose nothing yet. Later gate changes navigate.
+ */
+internal fun startDestinationFor(gate: AuthGate): AppRoute? =
+    when (gate) {
+        AuthGate.LOADING -> null
+        AuthGate.SIGNED_OUT -> LoginRoute
+        AuthGate.MUST_CHANGE_PASSWORD -> ChangePasswordRoute
+        AuthGate.NEEDS_ONBOARDING -> OnboardingRoute()
+        AuthGate.READY -> HomeRoute
+    }
 
 /** Where the gate must send the user from [current], or null to stay. The public share viewer is always allowed. */
 internal fun gateTarget(gate: AuthGate, current: NavDestination, retakingQuiz: Boolean): AppRoute? {

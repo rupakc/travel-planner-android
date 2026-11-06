@@ -73,8 +73,11 @@ private const val GREEN_MIN = 71
 private const val AMBER_MIN = 41
 private const val BORDER_ALPHA = 0.4f
 
+/** [place]'s display name: the city for an airport code [names] knows ("LIS" → "Lisbon"), else the text itself. */
+fun placeName(place: String, names: Map<String, String> = emptyMap()): String = shortCity(names[place.trim()] ?: place)
+
 /** The final destination's display name: last multi-city stop, else the destination. */
-fun TravelSearchRequest.destinationName(): String = shortCity(destinations?.lastOrNull() ?: destination)
+fun TravelSearchRequest.destinationName(names: Map<String, String> = emptyMap()): String = placeName(destinations?.lastOrNull() ?: destination, names)
 
 /**
  * Trip summary — the one bold moment of the screen: the destination set large in
@@ -85,16 +88,17 @@ internal fun TripSummary(state: ResultsUiState, modifier: Modifier = Modifier) {
     val request = state.request ?: return
     val total = SectionId.entries.size
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
+        val names = state.placeNames
         Text(
-            request.destinationName(),
+            request.destinationName(names),
             style = TravelTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
             color = TravelTheme.colors.primary,
             modifier = Modifier.semantics { heading() },
         )
-        val stops = request.destinations?.takeIf { it.size > 1 }?.joinToString(" → ") { shortCity(it) }
+        val stops = request.destinations?.takeIf { it.size > 1 }?.joinToString(" → ") { placeName(it, names) }
         Text(
-            stringResource(R.string.results_route, shortCity(request.origin), stops ?: request.destinationName()),
+            stringResource(R.string.results_route, placeName(request.origin, names), stops ?: request.destinationName(names)),
             style = TravelTheme.typography.titleMedium,
         )
         val travellers = request.numTravelers.coerceAtLeast(1)
@@ -140,7 +144,7 @@ internal fun StreamBanner(state: ResultsUiState, onRetry: () -> Unit, onRunSaved
         }
 
         state.phase == StreamPhase.STREAMING -> {
-            val name = state.request?.destinationName().orEmpty()
+            val name = state.request?.destinationName(state.placeNames).orEmpty()
             val sub =
                 if (state.readyCount == 0) {
                     stringResource(R.string.results_planning_sub_start)

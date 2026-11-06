@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(projects.core.testing)
+    testImplementation(libs.okhttp.mockwebserver)
 }
 
 // Review M8 / R2-M3: fail if R8 removed anything kotlinx.serialization needs from core:model in the prod release:

@@ -4,6 +4,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.rupakc.travelplanner.MainActivity
+import io.github.rupakc.travelplanner.feature.auth.R as AuthR
 import io.github.rupakc.travelplanner.feature.home.R as HomeR
 import io.github.rupakc.travelplanner.feature.onboarding.R as OnboardingR
 import kotlinx.serialization.json.jsonArray
@@ -34,7 +35,15 @@ class OnboardingE2eTest {
     }
 
     @Test fun loginOnboardingHome_updatesServerPreferences() {
+        // Signed-out cold start (clearPackageData): the Login screen, and not one request that needs a session (E2E O3:
+        // Home used to be composed first and fetched plans, recent searches and the taste profile).
+        robot.waitForText(robot.str(AuthR.string.auth_login_title))
+        Thread.sleep(SETTLE_MS)
+        val authed = robot.httpRequests().filter { "/api/" in it && "/api/auth/" !in it }
+        assertTrue("authed requests while signed out: $authed", authed.isEmpty())
         robot.signIn()
+        // The HTTP log is readable (so the check above is not vacuous): the sign-in request is in it.
+        assertTrue("sign-in request logged", robot.httpRequests().any { "/api/auth/login" in it })
         // Admin has no forced password change: the gate goes straight to onboarding.
         robot.waitForText(robot.str(OnboardingR.string.onboarding_title, robot.brand))
         robot.completeOnboarding(
@@ -64,5 +73,9 @@ class OnboardingE2eTest {
         assertEquals("high", prefs.getValue("budget_category").jsonPrimitive.content)
         val interests = prefs.getValue("interests").jsonArray.map { it.jsonPrimitive.content }
         assertTrue("interests=$interests", "food" in interests)
+    }
+
+    private companion object {
+        const val SETTLE_MS = 3_000L
     }
 }

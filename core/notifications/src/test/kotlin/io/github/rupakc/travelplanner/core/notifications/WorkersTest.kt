@@ -23,6 +23,7 @@ import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.plan.Plan
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.Session
@@ -41,6 +42,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNearbyRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import java.time.Duration
@@ -214,15 +216,35 @@ class WorkersTest {
                     TripReminderWorker.KEY_DAY to 1,
                     TripReminderWorker.KEY_DESTINATION to "Lisbon",
                 )
-            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog) }, input).doWork()
+            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, FakeSearchRepository()) }, input).doWork()
             val posted = notifier.posts.single()
             assertEquals(TravelChannel.TRIP_REMINDERS, posted.channel)
             assertEquals("Your Lisbon trip starts today", posted.title)
             assertEquals("travelplanner://plan/4", posted.deepLink)
             assertEquals(listOf("travelplanner://plan/4", "travelplanner://plan/4", "travelplanner://nearby"), posted.actions.map { it.deepLink })
             notifier.posts.clear()
-            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(AppSettings(tripNotifications = false)), notifier, postLog) }, input).doWork()
+            build({ c, p ->
+                TripReminderWorker(c, p, FakeSettingsRepository(AppSettings(tripNotifications = false)), notifier, postLog, FakeSearchRepository())
+            }, input).doWork()
             assertTrue(notifier.posts.isEmpty())
+        }
+
+    @Test
+    fun `trip reminder names the city of an airport code, or keeps the code when the lookup has nothing`() =
+        runBlocking {
+            val input =
+                workDataOf(
+                    TripReminderWorker.KEY_PLAN_ID to 5L,
+                    TripReminderWorker.KEY_TYPE to "TRIP_START",
+                    TripReminderWorker.KEY_DAY to 1,
+                    TripReminderWorker.KEY_DESTINATION to "LIS",
+                )
+            val search = FakeSearchRepository().apply { airports = listOf(Airport(iataCode = "LIS", name = "Humberto Delgado", city = "Lisbon")) }
+            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, search) }, input).doWork()
+            assertEquals("Your Lisbon trip starts today", notifier.posts.single().title)
+            notifier.posts.clear()
+            build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, FakeSearchRepository()) }, input).doWork()
+            assertEquals("Your LIS trip starts today", notifier.posts.single().title)
         }
 
     private class MemoryLog(var last: Instant? = null) : NearbyPostLog {
@@ -395,7 +417,7 @@ class WorkersTest {
                     TripReminderWorker.KEY_DESTINATION to "Lisbon",
                     TripReminderWorker.KEY_UNIQUE to name,
                 )
-            repeat(2) { build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog) }, input).doWork() }
+            repeat(2) { build({ c, p -> TripReminderWorker(c, p, FakeSettingsRepository(), notifier, postLog, FakeSearchRepository()) }, input).doWork() }
             assertEquals(1, notifier.posts.size)
         }
 

@@ -66,6 +66,8 @@ import io.github.rupakc.travelplanner.core.model.section.SectionDecoder
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
 import io.github.rupakc.travelplanner.core.model.section.StressTestData
+import io.github.rupakc.travelplanner.core.ui.watch.WatchSheetEvent
+import io.github.rupakc.travelplanner.core.ui.watch.applyTo
 import io.github.rupakc.travelplanner.feature.results.sections.info.StressRecheckController
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -193,6 +195,22 @@ class ResultsViewModel
             viewModelScope.launch { resetOnNewSearch() }
             viewModelScope.launch(dispatchers.default) { attachToDraft() }
             viewModelScope.launch { rememberExtras() }
+            viewModelScope.launch { resolvePlaceNames() }
+        }
+
+        /**
+         * The search form stores airport codes ("LIS"); the title and summary show the city ("Lisbon"), looked up
+         * like the web's `useAirportCities` (local airport data). A failed lookup keeps the code: nothing is invented.
+         */
+        private suspend fun resolvePlaceNames() {
+            source.map { it.results.request }.distinctUntilChanged().collect { req ->
+                req ?: return@collect
+                val codes = (listOf(req.origin, req.destination) + req.destinations.orEmpty()).filter(WatchSpecs::isAirportCode)
+                val missing = codes.map(String::trim).distinct().filter { it !in local.value.placeNames }
+                if (missing.isEmpty()) return@collect
+                val found = missing.mapNotNull { code -> cityName(code)?.takeIf { it != code }?.let { code to it } }.toMap()
+                if (found.isNotEmpty()) local.update { it.copy(placeNames = it.placeNames + found) }
+            }
         }
 
         /** A different search on screen: cancel its filter/retry jobs and reset the per-search state. */
@@ -611,6 +629,16 @@ class ResultsViewModel
             }
         }
 
+        /**
+         * Events from the open price-watch sheet. Requests run in [viewModelScope] (the sheet only renders), so a
+         * recomposition or rotation mid-request cannot drop the answer — a 422 `no_live_price` keeps its
+         * suggestions — and the controller sends at most one request at a time however often the button is tapped.
+         */
+        fun onPriceSheetEvent(event: WatchSheetEvent) {
+            val current = sheet.value as? WatchSheet.Price ?: return
+            event.applyTo(current.controller, viewModelScope) { onPriceWatched(current.kind, current.itemName, it) }
+        }
+
         /** A price watch was created; only the card's own item is marked (not a suggestion picked instead). */
         fun onPriceWatched(kind: String, itemName: String, outcome: WatchedOutcome) {
             if (outcome.viaSuggestion) return
@@ -659,7 +687,9 @@ class ResultsViewModel
                     return@launch
                 }
                 val body = TravelJson.encodeToJsonElement(HotelWatchSpec.serializer(), spec) as JsonObject
-                openPriceSheet(PriceWatchKinds.HOTEL, name, body, PricePreview(title = name, subtitle = hotel.city, estimate = hotel.pricePerNightUsd))
+                // The estimate the sheet labels "AI estimate for 1 room, whole stay" is the spec's whole-stay total (web
+                // `hotelPreview`), not the card's nightly price.
+                openPriceSheet(PriceWatchKinds.HOTEL, name, body, PricePreview(title = name, estimate = spec.estimateTotal))
             }
         }
 

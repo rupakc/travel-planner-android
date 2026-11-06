@@ -42,6 +42,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchLauncher
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
+import io.github.rupakc.travelplanner.feature.results.ui.destinationName
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -688,6 +689,83 @@ class ResultsViewModelTest {
                 assertEquals("verified", expectMostRecentItem().verificationDetail?.verification?.level)
                 vm.onEvent(ResultsEvent.DismissVerification)
                 assertNull(expectMostRecentItem().verificationDetail)
+            }
+        }
+
+    /** E2E finding O4: the backend's 422 `no_live_price` for an AI-named hotel. */
+    private val noLivePrice =
+        AppResult.Failure(
+            AppError.Client(
+                status = 422,
+                message = "We couldn't find live prices for this hotel on Google Hotels.",
+                code = "no_live_price",
+                extras =
+                    mapOf(
+                        "message" to "We couldn't find live prices for this hotel on Google Hotels.",
+                        "suggestions" to
+                            """[{"title":"Lumen Hotel","subtitle":"4.6/5","price":398.0,"currency":"USD",""" +
+                            """"spec":{"name":"Lumen Hotel","city":"Tokyo","check_in":"2026-12-01","check_out":"2026-12-08","adults":1,"rooms":1}}]""",
+                        "estimate" to """{"price":4550.0,"source":"ai_estimate","label":"AI estimate"}""",
+                    ),
+            ),
+        )
+
+    @Test
+    fun `hotel watch with no live price keeps its suggestions and sends one request per tap`() =
+        runTest {
+            val vm = vm()
+            vm.state.test {
+                search.start(request)
+                val hotel = (expectMostRecentItem().section(SectionId.HOTELS).data as HotelsData).results.first()
+                vm.onEvent(ResultsEvent.WatchHotel(hotel))
+                val sheet = vm.watchSheet.value as WatchSheet.Price
+                // The sheet's "Shown now" estimate is the whole-stay total the spec sends, never the nightly price.
+                val spec = sheet.controller.state.value.spec
+                assertEquals(spec["estimate_total"]?.toString()?.toDouble(), sheet.controller.state.value.preview.estimate)
+
+                priceWatches.createResult = noLivePrice
+                val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+                priceWatches.createGate = gate
+                // A double tap while the first request is in flight sends nothing more.
+                vm.onPriceSheetEvent(io.github.rupakc.travelplanner.core.ui.watch.WatchSheetEvent.Submit)
+                vm.onPriceSheetEvent(io.github.rupakc.travelplanner.core.ui.watch.WatchSheetEvent.Submit)
+                assertEquals(1, priceWatches.createRequests.size)
+                gate.complete(Unit)
+
+                val noMatch = requireNotNull(sheet.controller.state.value.noMatch)
+                assertEquals(listOf("Lumen Hotel"), noMatch.suggestions.map { it.title })
+                assertNotNull(noMatch.estimate)
+                assertFalse(sheet.controller.state.value.saving)
+                // Start watching is gone (no live price); another Submit is ignored.
+                vm.onPriceSheetEvent(io.github.rupakc.travelplanner.core.ui.watch.WatchSheetEvent.Submit)
+                assertEquals(1, priceWatches.createRequests.size)
+
+                // "Watch this instead" sends exactly one request for the suggestion.
+                priceWatches.createResult = null
+                priceWatches.createGate = null
+                vm.onPriceSheetEvent(io.github.rupakc.travelplanner.core.ui.watch.WatchSheetEvent.PickSuggestion(0))
+                assertEquals(2, priceWatches.createRequests.size)
+                assertEquals("Lumen Hotel", priceWatches.createRequests.last().spec["name"]?.toString()?.trim('"'))
+                assertTrue(sheet.controller.state.value.viaSuggestion)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `airport codes resolve to city names, unknown codes stay as they are`() =
+        runTest {
+            search.airports =
+                listOf(
+                    io.github.rupakc.travelplanner.core.model.reference.Airport(iataCode = "JFK", city = "New York"),
+                    io.github.rupakc.travelplanner.core.model.reference.Airport(iataCode = "LIS", city = "Lisbon"),
+                )
+            val vm = vm()
+            vm.state.test {
+                search.start(request.copy(origin = "JFK", destination = "LIS", destinations = listOf("OPO", "LIS")))
+                val s = expectMostRecentItem()
+                assertEquals(mapOf("JFK" to "New York", "LIS" to "Lisbon"), s.placeNames)
+                assertEquals("Lisbon", s.request!!.destinationName(s.placeNames))
+                assertEquals("OPO", io.github.rupakc.travelplanner.feature.results.ui.placeName("OPO", s.placeNames))
             }
         }
 }

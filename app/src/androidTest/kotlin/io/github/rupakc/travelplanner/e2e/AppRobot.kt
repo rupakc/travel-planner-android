@@ -126,6 +126,27 @@ class AppRobot(val rule: AppRule) {
         org.junit.Assert.assertTrue("node top $top overlaps the status bar ($statusBar px)", top >= statusBar)
     }
 
+    /** True when the status bar draws dark icons (a light app); false for light icons on a dark app. */
+    fun darkStatusBarIcons(): Boolean {
+        var dark = false
+        rule.runOnUiThread {
+            val window = rule.activity.window
+            dark = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars
+        }
+        return dark
+    }
+
+    /**
+     * The app's own debug HTTP log (OkHttp BASIC, logcat tag `OkHttp`) request lines ("--> GET http://…/api/plans") of this
+     * process. The instrumentation runs in the app's process, so `--pid` selects exactly the app under test.
+     */
+    fun httpRequests(): List<String> {
+        val pid = android.os.Process.myPid()
+        val pfd = InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("logcat -d --pid=$pid -s OkHttp:I")
+        return android.os.ParcelFileDescriptor.AutoCloseInputStream(pfd).bufferedReader().use { it.readLines() }
+            .filter { "--> " in it && "--> END" !in it }
+    }
+
     /** System Back; an open soft keyboard is closed first so Back navigates. */
     fun back() {
         runCatching { androidx.test.espresso.Espresso.closeSoftKeyboard() }
