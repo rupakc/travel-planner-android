@@ -23,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -174,6 +176,46 @@ internal fun LinkButton(label: String, url: String?, onOpen: (String) -> Unit, m
     val safe = safeHttpUrl(url) ?: return
     TpButton(label, onClick = { onOpen(safe) }, modifier = modifier, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp)
 }
+
+/**
+ * A card's footer: its [link] (usually a [LinkButton]) and its `AddToPlanButton`. Both are measured at their full
+ * width; they share a line only when both fit at least `spacing.sm` apart, otherwise the button moves to the next
+ * line. A plain Row measured the link first, so a long label ("View on Free Tours by Foot ↗", 200 % font) left the
+ * button no width at all. [addAtEnd]: the button sits at the end of its line, also once it wraps (cards); false keeps
+ * it right after the link (tips).
+ */
+@Composable
+internal fun LinkAndAddRow(link: @Composable () -> Unit, add: @Composable () -> Unit, modifier: Modifier = Modifier, addAtEnd: Boolean = true) {
+    val gap = TravelTheme.spacing.sm
+    val lineGap = TravelTheme.spacing.xs
+    Layout(contents = listOf(link, add), modifier = modifier.fillMaxWidth().testTag(CARD_FOOTER_TAG)) { (links, adds), constraints ->
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val linkPlaceable = links.firstOrNull()?.measure(loose)
+        val addPlaceable = adds.firstOrNull()?.measure(loose)
+        val linkWidth = linkPlaceable?.width ?: 0
+        val addWidth = addPlaceable?.width ?: 0
+        val gapPx = if (linkPlaceable != null && addPlaceable != null) gap.roundToPx() else 0
+        val width = constraints.maxWidth
+        val oneLine = linkWidth + gapPx + addWidth <= width
+        val linkHeight = linkPlaceable?.height ?: 0
+        val addHeight = addPlaceable?.height ?: 0
+        val height =
+            if (oneLine) maxOf(linkHeight, addHeight) else linkHeight + addHeight + if (linkPlaceable != null) lineGap.roundToPx() else 0
+        layout(width, height.coerceIn(constraints.minHeight, constraints.maxHeight)) {
+            if (oneLine) {
+                linkPlaceable?.placeRelative(0, (height - linkHeight) / 2)
+                val x = if (addAtEnd) width - addWidth else linkWidth + gapPx
+                addPlaceable?.placeRelative(x, (height - addHeight) / 2)
+            } else {
+                linkPlaceable?.placeRelative(0, 0)
+                addPlaceable?.placeRelative(if (addAtEnd) width - addWidth else 0, height - addHeight)
+            }
+        }
+    }
+}
+
+/** Test tag of [LinkAndAddRow]. */
+internal const val CARD_FOOTER_TAG = "card_footer"
 
 /**
  * Lays [items] out in one column on compact widths and two from [InfoDimens.TwoColumnMinWidth] (web `md:grid-cols-2`).

@@ -145,10 +145,10 @@ private fun TransportCard(option: TransportOption, selected: Boolean, onToggle: 
             option.tips?.takeIf {
                 it.isNotBlank()
             }?.let { Text(it, style = TravelTheme.typography.bodySmall, fontStyle = FontStyle.Italic, color = TravelTheme.colors.onSurfaceVariant) }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                LinkButton(stringResource(R.string.transport_more_info), option.bookingUrl, onOpenLink)
-                AddToPlanButton(selected, option.name.orEmpty(), onToggle)
-            }
+            LinkAndAddRow(
+                link = { LinkButton(stringResource(R.string.transport_more_info), option.bookingUrl, onOpenLink) },
+                add = { AddToPlanButton(selected, option.name.orEmpty(), onToggle) },
+            )
         }
     }
 }

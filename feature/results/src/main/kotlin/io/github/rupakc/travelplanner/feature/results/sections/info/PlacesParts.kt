@@ -126,10 +126,10 @@ private fun PlaceCard(
                     null -> Unit
                 }
             }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                LinkButton(stringResource(R.string.info_view_details), place.infoUrl, onOpenLink)
-                AddToPlanButton(selected, place.name.orEmpty(), onToggle)
-            }
+            LinkAndAddRow(
+                link = { LinkButton(stringResource(R.string.info_view_details), place.infoUrl, onOpenLink) },
+                add = { AddToPlanButton(selected, place.name.orEmpty(), onToggle) },
+            )
         }
     }
 }
