@@ -471,6 +471,8 @@ class AlertsViewModel
         /** One live search at a time; its answer goes only into [AlertsUiState.liveCheck]. */
         private fun liveCheck(key: String) {
             val w = find(key) ?: return
+            // A double tap (or Retry) while this watch's search is running starts nothing new.
+            if (mutable.value.liveCheck?.let { it.key == key && it.loading } == true) return
             liveJob?.cancel()
             mutable.update { it.copy(liveCheck = LiveCheckUi(key)) }
             liveJob =

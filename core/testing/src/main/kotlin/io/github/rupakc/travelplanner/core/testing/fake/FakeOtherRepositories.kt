@@ -241,8 +241,12 @@ class FakeLiveCheckRepository(var result: AppResult<LiveCheckResult> = AppResult
     /** (kind, watchId) of every call, oldest first. */
     val requests = mutableListOf<Pair<String, Long>>()
 
+    /** When set, [check] waits for it (to test in-flight behaviour). */
+    var gate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
     override suspend fun check(kind: String, watchId: Long): AppResult<LiveCheckResult> {
         requests += kind to watchId
+        gate?.await()
         return result
     }
 }

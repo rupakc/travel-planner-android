@@ -107,6 +107,12 @@ class LiveRepositoriesTest {
         assertTrue(partial.sources.isEmpty())
         val empty = json.decodeFromString(NearbyResponse.serializer(), "{}")
         assertTrue(empty.sections.isEmpty())
+        val nulls = json.decodeFromString(NearbyResponse.serializer(), """{"place":null,"sections":null,"sources":null,"attribution":null}""")
+        assertTrue(nulls.sections.isEmpty())
+        assertTrue(nulls.sources.isEmpty())
+        val nullItems = json.decodeFromString(NearbyResponse.serializer(), """{"sections":[{"id":"see","items":null},null]}""")
+        assertEquals(listOf("see"), nullItems.sections.map { it.id })
+        assertTrue(nullItems.sections.single().items.isEmpty())
     }
 
     @Test
@@ -173,6 +179,9 @@ class LiveRepositoriesTest {
         assertEquals(99.0, r.quotes.single().amount!!, 0.0)
         assertTrue(r.sources.isEmpty())
         assertEquals(listOf("one query"), r.searchedFor)
+        val nulls = json.decodeFromString(LiveCheckResult.serializer(), """{"summary":null,"quotes":null,"sources":null,"searched_for":null}""")
+        assertNull(nulls.summary)
+        assertTrue(nulls.quotes.isEmpty() && nulls.sources.isEmpty() && nulls.searchedFor.isEmpty())
     }
 
     @Test

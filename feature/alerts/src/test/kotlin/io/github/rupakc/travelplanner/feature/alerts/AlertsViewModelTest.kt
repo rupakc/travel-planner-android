@@ -312,6 +312,32 @@ class AlertsViewModelTest {
         }
 
     @Test
+    fun `a double tap starts one search, and closing the sheet drops a late answer`() =
+        runTest {
+            fares.watches.value = listOf(fare(1))
+            val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+            liveChecks.gate = gate
+            liveChecks.result = AppResult.Success(LiveCheckResult(summary = "Late"))
+            val vm = vm()
+            advanceUntilIdle()
+            vm.onEvent(AlertsEvent.LiveCheck("watch-1"))
+            vm.onEvent(AlertsEvent.LiveCheck("watch-1"))
+            vm.onEvent(AlertsEvent.RetryLiveCheck)
+            advanceUntilIdle()
+            assertEquals(1, liveChecks.requests.size)
+            assertTrue(vm.state.value.liveCheck!!.loading)
+            vm.onEvent(AlertsEvent.DismissLiveCheck)
+            gate.complete(Unit)
+            advanceUntilIdle()
+            assertNull(vm.state.value.liveCheck)
+            // After closing, a new tap searches again.
+            vm.onEvent(AlertsEvent.LiveCheck("watch-1"))
+            advanceUntilIdle()
+            assertEquals(2, liveChecks.requests.size)
+            assertEquals("Late", vm.state.value.liveCheck?.result?.summary)
+        }
+
+    @Test
     fun `search the web now failures are classified and can be retried`() =
         runTest {
             fares.watches.value = listOf(fare(1))
