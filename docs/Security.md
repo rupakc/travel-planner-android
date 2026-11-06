@@ -45,4 +45,6 @@ The FCM token only travels in request bodies. Pass `PROD_BASE_URL` via Gradle pr
 
 ## Data minimisation
 
-Location is coarse by default, foreground only and used for Near me; it is sent only to the user's own backend.
+Location is coarse by default, foreground only and used for Near me; it is sent only to the user's own backend, and only when the user opens Near me
+(the background invitation makes no request). Grounded links (Maps `maps_uri`, Search sources) open only if they are absolute http(s) URLs
+(`core:domain` `safeWebUri`); Near me results and live web answers are never persisted.

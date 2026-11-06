@@ -29,10 +29,13 @@ SharedPreferences (`alert_poll`, `trip_reminders`, `nearby_notifications`, `push
 
 - Plans are offline-first: `PlansRepository.plans` / `plan(id)` read Room; network calls refresh it.
 - Result items and plan selections keep their original JSON (`RawBacked`, `extras` for unknown keys), so a plan saved on the web and re-saved on the phone loses nothing.
-- Sign-out, a different user signing in and a server change run `SessionCleaner`: the current search, the Near me cache and last location,
+- Sign-out, a different user signing in and a server change run `SessionCleaner`: the current search, the last Near me location cell,
   the My Plan draft, cached plans, recent searches, seen notifications and every contributed `UserStateCleaner` (e.g. the alert-poll baseline).
   Chat history is kept: it is stored per username and only that user can list or open it. A 401 or an expired token keeps all local data.
-- Near-me results are cached in memory (not Room) for 1 hour per roughly 5 km cell (0.05 degree grid) in `NearbyRepository`; the cache is lost with the process.
+- Near me results (Google Maps grounding) are **never cached**: not in Room, DataStore or a repository cache. Only `NearbyViewModel` holds the
+  answer, so leaving the screen forgets it and Refresh asks the server again. The only nearby data on disk is the coarse ~5 km `last_location` cell.
+- "Search the web now" answers (`POST /api/live-check`, Google Search grounding) live only in `AlertsViewModel` state (`AlertsUiState.liveCheck`);
+  they are never written to Room/DataStore and never touch a watch, its price history or alerts (Google Search grounding terms).
 - Search results are held in memory (`SearchRepository.current`), not persisted; the 30-minute server cache makes a repeat search cheap.
 
 ## CurrentPlanStore

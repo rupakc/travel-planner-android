@@ -20,7 +20,8 @@ Retrofit declarations are in `core/network/.../api/Apis.kt`; wire models in `cor
 | `/api/price-watches*` | `PriceWatchApi` | `PriceWatchesRepository` |
 | `GET /api/notifications`, `/unread-count`, `POST /read` | `NotificationsApi` | `NotificationsRepository` |
 | `POST /api/devices`, `GET /api/devices`, `DELETE /api/devices/{id}`, `POST /api/devices/unregister` | `DevicesApi` | `DevicesRepository` |
-| `POST /api/nearby` | `NearbyApi` | `NearbyRepository` |
+| `POST /api/nearby` (v2: `sections: true`) | `NearbyApi` | `NearbyRepository` (no cache) |
+| `POST /api/live-check` | `LiveCheckApi` | `LiveCheckRepository` (no cache) |
 | `POST /api/discover`, `POST /api/compare/destination` | `SearchApi` | `DiscoverRepository`, `CompareRepository` |
 | `POST /api/import/extract`, `/import/resolve-place` | `ImportApi` | `ImportRepository` |
 | `POST /api/feedback`, `POST /api/analytics/events` | `FeedbackApi` | `FeedbackRepository` |
