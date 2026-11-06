@@ -372,8 +372,9 @@ fun NotificationBell(unread: Int, onOpen: () -> Unit, modifier: Modifier = Modif
     // The label carries the count; as a polite live region it is announced when the count changes.
     IconButton(
         onClick = onOpen,
+        // Full 48 dp layout bounds as a top-bar action (E2E O2); the badge stays inside them.
         modifier =
-            modifier.semantics {
+            modifier.size(TravelTheme.spacing.minTouchTarget).semantics {
                 contentDescription = label
                 liveRegion = LiveRegionMode.Polite
             },
