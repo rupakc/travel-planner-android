@@ -6,6 +6,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.CreateFareWatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.CreatePriceWatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatchMatchRequest
+import io.github.rupakc.travelplanner.core.model.alerts.LiveCheckResult
 import io.github.rupakc.travelplanner.core.model.alerts.MarkReadResponse
 import io.github.rupakc.travelplanner.core.model.alerts.NotificationsPage
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
@@ -22,6 +23,7 @@ import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
 import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyRequest
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
@@ -291,9 +293,13 @@ interface DevicesRepository {
     suspend fun unregister(token: String): AppResult<Unit>
 }
 
-/** Near-me recommendations, cached 1 h per ~5 km cell (spec §8). */
+/**
+ * Near me v2: places to see / eat / shop / stay around a position (Google Maps grounding). Never
+ * cached here or on disk: the caller keeps the answer in ViewModel memory only.
+ */
 interface NearbyRepository {
-    suspend fun nearby(lat: Double, lng: Double, interests: List<String>? = null, limit: Int = 10): AppResult<NearbyResponse>
+    /** `POST /api/nearby` with `sections: true`; [limit] per section, [language] for the summaries. */
+    suspend fun nearby(lat: Double, lng: Double, limit: Int = NearbyRequest.DEFAULT_LIMIT, language: String? = null): AppResult<NearbyResponse>
 
     /** Remembers a foreground fix, rounded to its ~5 km cell, with the time (device-only). */
     suspend fun rememberLocation(lat: Double, lng: Double)
@@ -303,6 +309,15 @@ interface NearbyRepository {
 
     /** Deletes the remembered cell (nearby suggestions turned off). */
     suspend fun forgetLocation()
+}
+
+/**
+ * "Search the web now" for one watch (`POST /api/live-check`). The answer is never cached or stored
+ * and never touches the watch's price history or alerts.
+ */
+interface LiveCheckRepository {
+    /** [kind] is `flight` for a fare watch, else the price watch kind. */
+    suspend fun check(kind: String, watchId: Long): AppResult<LiveCheckResult>
 }
 
 interface CompareRepository {

@@ -9,6 +9,7 @@ import io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.FeedbackRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.ImportRepository
+import io.github.rupakc.travelplanner.core.data.repository.LiveCheckRepository
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
 import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
@@ -21,6 +22,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.CreateFareWatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.CreatePriceWatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatchMatchRequest
+import io.github.rupakc.travelplanner.core.model.alerts.LiveCheckResult
 import io.github.rupakc.travelplanner.core.model.alerts.MarkReadResponse
 import io.github.rupakc.travelplanner.core.model.alerts.NotificationsPage
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
@@ -214,7 +216,15 @@ class FakeNearbyRepository(var result: AppResult<NearbyResponse> = AppResult.Suc
     var last: LocationCell? = null
     var now: () -> Long = { System.currentTimeMillis() }
 
-    override suspend fun nearby(lat: Double, lng: Double, interests: List<String>?, limit: Int) = result
+    /** Every `/api/nearby` call made through this fake (lat, lng, limit, language), oldest first. */
+    val requests = mutableListOf<NearbyCall>()
+
+    data class NearbyCall(val lat: Double, val lng: Double, val limit: Int, val language: String?)
+
+    override suspend fun nearby(lat: Double, lng: Double, limit: Int, language: String?): AppResult<NearbyResponse> {
+        requests += NearbyCall(lat, lng, limit, language)
+        return result
+    }
 
     override suspend fun rememberLocation(lat: Double, lng: Double) {
         last = LocationCell(lat, lng, now())
@@ -224,6 +234,16 @@ class FakeNearbyRepository(var result: AppResult<NearbyResponse> = AppResult.Suc
 
     override suspend fun forgetLocation() {
         last = null
+    }
+}
+
+class FakeLiveCheckRepository(var result: AppResult<LiveCheckResult> = AppResult.Success(LiveCheckResult())) : LiveCheckRepository {
+    /** (kind, watchId) of every call, oldest first. */
+    val requests = mutableListOf<Pair<String, Long>>()
+
+    override suspend fun check(kind: String, watchId: Long): AppResult<LiveCheckResult> {
+        requests += kind to watchId
+        return result
     }
 }
 

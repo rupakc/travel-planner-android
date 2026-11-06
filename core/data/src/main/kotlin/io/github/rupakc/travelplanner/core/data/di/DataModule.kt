@@ -17,6 +17,7 @@ import io.github.rupakc.travelplanner.core.data.impl.FeedbackRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.HealthCacheStore
 import io.github.rupakc.travelplanner.core.data.impl.HealthRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.ImportRepositoryImpl
+import io.github.rupakc.travelplanner.core.data.impl.LiveCheckRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.NearbyRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.NotificationsRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.PlansRepositoryImpl
@@ -40,6 +41,7 @@ import io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.FeedbackRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.ImportRepository
+import io.github.rupakc.travelplanner.core.data.repository.LiveCheckRepository
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
 import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
@@ -81,6 +83,8 @@ abstract class DataModule {
     @Binds abstract fun devices(impl: DevicesRepositoryImpl): DevicesRepository
 
     @Binds abstract fun nearby(impl: NearbyRepositoryImpl): NearbyRepository
+
+    @Binds abstract fun liveCheck(impl: LiveCheckRepositoryImpl): LiveCheckRepository
 
     @Binds abstract fun compare(impl: CompareRepositoryImpl): CompareRepository
 

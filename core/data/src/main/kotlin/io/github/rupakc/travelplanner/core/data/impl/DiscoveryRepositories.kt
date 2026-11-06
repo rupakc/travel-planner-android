@@ -11,8 +11,11 @@ import io.github.rupakc.travelplanner.core.data.repository.DiscoverRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareCalendarRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.ImportRepository
+import io.github.rupakc.travelplanner.core.data.repository.LiveCheckRepository
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
 import io.github.rupakc.travelplanner.core.datastore.LastLocationStore
+import io.github.rupakc.travelplanner.core.model.alerts.LiveCheckRequest
+import io.github.rupakc.travelplanner.core.model.alerts.LiveCheckResult
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.importlink.ImportPreview
 import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
@@ -31,6 +34,7 @@ import io.github.rupakc.travelplanner.core.network.BaseUrlProvider
 import io.github.rupakc.travelplanner.core.network.HttpErrorMapper
 import io.github.rupakc.travelplanner.core.network.api.HealthApi
 import io.github.rupakc.travelplanner.core.network.api.ImportApi
+import io.github.rupakc.travelplanner.core.network.api.LiveCheckApi
 import io.github.rupakc.travelplanner.core.network.api.NearbyApi
 import io.github.rupakc.travelplanner.core.network.api.SearchApi
 import io.github.rupakc.travelplanner.core.network.apiCall
@@ -174,7 +178,11 @@ class HealthRepositoryImpl
         }
     }
 
-/** In-memory cache: 1 h per ~5 km cell (0.05° grid), keyed with interests and limit. */
+/**
+ * Near me v2. No cache at all (Google Maps grounding terms): every call asks the server and the
+ * screen's ViewModel is the only holder of the answer. Only the coarse ~5 km cell of the last
+ * foreground fix is kept (DataStore), for the background invitation's gate.
+ */
 @Singleton
 class NearbyRepositoryImpl
     @Inject
@@ -183,26 +191,8 @@ class NearbyRepositoryImpl
         private val clock: AppClock,
         private val lastLocationStore: LastLocationStore,
     ) : NearbyRepository {
-        private data class Key(val latCell: Long, val lngCell: Long, val interests: List<String>, val limit: Int)
-
-        private data class Entry(val at: Instant, val value: NearbyResponse)
-
-        private val cache = mutableMapOf<Key, Entry>()
-        private val mutex = Mutex()
-
-        override suspend fun nearby(lat: Double, lng: Double, interests: List<String>?, limit: Int): AppResult<NearbyResponse> {
-            val key = Key(cell(lat), cell(lng), interests.orEmpty().sorted(), limit)
-            mutex.withLock {
-                cache[key]?.takeIf { Duration.between(it.at, clock.now()) < TTL }?.let { return AppResult.Success(it.value) }
-            }
-            return apiCall { api.nearby(NearbyRequest(lat, lng, interests, limit)) }
-                .onSuccess { mutex.withLock { cache[key] = Entry(clock.now(), it) } }
-        }
-
-        /** Drops cached results (user change). */
-        suspend fun clearCache() = mutex.withLock { cache.clear() }
-
-        private fun cell(degrees: Double): Long = floor(degrees / CELL_DEGREES).toLong()
+        override suspend fun nearby(lat: Double, lng: Double, limit: Int, language: String?): AppResult<NearbyResponse> =
+            apiCall { api.nearby(NearbyRequest(lat = lat, lng = lng, limit = limit, sections = true, language = language)) }
 
         override suspend fun rememberLocation(lat: Double, lng: Double) {
             // The cell's centre: precise coordinates are never stored.
@@ -217,6 +207,13 @@ class NearbyRepositoryImpl
         private companion object {
             const val HALF = 0.5
             const val CELL_DEGREES = 0.05
-            val TTL: Duration = Duration.ofHours(1)
         }
+    }
+
+/** `POST /api/live-check`: passes the answer straight through; nothing is cached or stored. */
+@Singleton
+class LiveCheckRepositoryImpl
+    @Inject
+    constructor(private val api: LiveCheckApi) : LiveCheckRepository {
+        override suspend fun check(kind: String, watchId: Long): AppResult<LiveCheckResult> = apiCall { api.check(LiveCheckRequest(kind, watchId)) }
     }

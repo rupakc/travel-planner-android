@@ -16,7 +16,7 @@ import kotlinx.coroutines.CancellationException
 
 /**
  * Wipes everything that belongs to the signed-in user on this device (review I6): the My Plan draft
- * (memory + Room), the app-wide search, the nearby cache and the last Near me location, cached plans,
+ * (memory + Room), the app-wide search, the last Near me location cell, cached plans,
  * recent searches, posted notification ids, every contributed [UserStateCleaner] (e.g. the alert
  * poll baseline) and the traveller profile (type, quiz answers, feature toggles), so the next account on this
  * phone onboards with its own. Chat history is kept: it is stored per username and only that user sees it.
@@ -37,7 +37,6 @@ class SessionCleanerImpl
     ) : SessionCleaner {
         override suspend fun clearUserData() {
             step("search") { searchRepository.clear() }
-            step("nearby cache") { nearbyRepository.clearCache() }
             // The next user's background "near you" checks must never use this user's whereabouts (security S-I1).
             step("last location") { nearbyRepository.forgetLocation() }
             step("plan draft") { currentPlanStore.reset() }
