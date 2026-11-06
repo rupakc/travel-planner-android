@@ -17,14 +17,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.common.AppClock
-import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.domain.alerts.parseIsoDate
 import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
-import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.notifications.NotificationIds
 import io.github.rupakc.travelplanner.core.notifications.NotificationLinks
@@ -62,13 +60,13 @@ object NearbyNotificationPolicy {
 }
 
 /**
- * Where background suggestions look: the last foreground fix from Near me (a ~5 km cell), only
- * while it is under [MAX_AGE] old. Background location is never requested (spec §8: foreground only).
+ * The last foreground fix from Near me (a ~5 km cell), only while it is under [MAX_AGE] old: the
+ * invitation is posted only to someone who used Near me recently. Background location is never requested.
  */
 fun usableLocation(cell: LocationCell?, now: Instant): LocationCell? =
     cell?.takeIf { Duration.between(Instant.ofEpochMilli(it.atEpochMillis), now) < MAX_AGE }
 
-/** How old the remembered Near me fix may be for a background suggestion. */
+/** How old the remembered Near me fix may be for a background invitation. */
 val MAX_AGE: Duration = Duration.ofHours(24)
 
 /** Remembers when the last nearby suggestion was posted (device-local, survives restarts). */
@@ -96,7 +94,12 @@ class SharedPrefsNearbyPostLog
         }
     }
 
-/** Posts one "near you" suggestion from `/api/nearby` when [NearbyNotificationPolicy] allows; opens Near me. */
+/**
+ * Posts one "See what's near you" invitation when [NearbyNotificationPolicy] allows; it opens Near me,
+ * where the user's own request runs. Makes **no** network call: Google Maps grounding may only answer a
+ * user's request, never a background job. The remembered ~5 km cell is read only to check that Near me
+ * was used in the last [MAX_AGE] (it is never sent anywhere from here).
+ */
 @HiltWorker
 class NearbySuggestionWorker
     @AssistedInject
@@ -113,13 +116,15 @@ class NearbySuggestionWorker
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
             if (!allowed() || !notifier.canPost()) return Result.success()
-            val response = suggestions() ?: return Result.success()
-            val top = response.items.firstOrNull { !it.name.isNullOrBlank() } ?: return Result.success()
+            usableLocation(nearby.lastLocation(), clock.now()) ?: return Result.success()
             val res = applicationContext.resources
-            val place = response.place?.name
-            val title = if (place != null) res.getString(R.string.nearby_notification_title_place, place) else res.getString(R.string.nearby_notification_title)
-            val body = listOfNotNull(top.name, top.description?.takeIf(String::isNotBlank)).joinToString(" — ")
-            notifier.post(TravelChannel.NEARBY, NotificationIds.NEARBY, title, body, NotificationLinks.NEARBY)
+            notifier.post(
+                TravelChannel.NEARBY,
+                NotificationIds.NEARBY,
+                res.getString(R.string.nearby_notification_title),
+                res.getString(R.string.nearby_notification_body),
+                NotificationLinks.NEARBY,
+            )
             log.markPosted(clock.now())
             return Result.success()
         }
@@ -129,15 +134,6 @@ class NearbySuggestionWorker
             val trips = listOfNotNull(currentPlan.draftRequest()) + plans.plans.first().mapNotNull { it.searchRequest }
             val onTrip = NearbyNotificationPolicy.isOnTrip(trips, clock.today())
             return NearbyNotificationPolicy.shouldNotify(s.nearbyNotifications, s.nearbyNotificationsAlways, onTrip, log.lastPostedAt(), clock.now())
-        }
-
-        private suspend fun suggestions(): NearbyResponse? {
-            val cell = usableLocation(nearby.lastLocation(), clock.now()) ?: return null
-            return (nearby.nearby(cell.lat, cell.lng, limit = SUGGESTIONS) as? AppResult.Success)?.value
-        }
-
-        private companion object {
-            const val SUGGESTIONS = 3
         }
     }
 

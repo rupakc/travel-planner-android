@@ -25,7 +25,6 @@ import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.reference.Airport
-import io.github.rupakc.travelplanner.core.model.section.Activity
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollIntervals
@@ -263,6 +262,9 @@ class WorkersTest {
         }
     }
 
+    /** Every nearby repository the worker got; none may ever see a `/api/nearby` call. */
+    private val nearbyRepos = mutableListOf<FakeNearbyRepository>()
+
     private fun nearbyWorker(settings: AppSettings, plans: List<Plan>, log: NearbyPostLog, cellAgeHours: Long? = 1) =
         build({ c, p ->
             NearbySuggestionWorker(
@@ -271,10 +273,9 @@ class WorkersTest {
                 FakeSettingsRepository(settings),
                 FakeCurrentPlanStore(),
                 FakePlansRepository(plans),
-                FakeNearbyRepository(
-                    AppResult.Success(NearbyResponse(NearbyPlace(name = "Lisbon"), listOf(Activity(name = "Tram 28", description = "Ride the old tram")))),
-                ).apply {
+                FakeNearbyRepository(AppResult.Success(NearbyResponse(NearbyPlace(name = "Lisbon")))).apply {
                     last = cellAgeHours?.let { LocationCell(38.725, -9.125, clock.instant.minus(Duration.ofHours(it)).toEpochMilli()) }
+                    nearbyRepos += this
                 },
                 log,
                 notifier,
@@ -290,7 +291,8 @@ class WorkersTest {
             nearbyWorker(AppSettings(nearbyNotifications = false), onTrip, log).doWork()
             assertTrue(notifier.posts.isEmpty())
             nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, log).doWork()
-            assertEquals("Something to do near you in Lisbon", notifier.posts.single().title)
+            assertEquals("See what’s near you", notifier.posts.single().title)
+            assertEquals("Places to see, eat, shop and stay around you. Tap to look.", notifier.posts.single().body)
             assertEquals("travelplanner://nearby", notifier.posts.single().deepLink)
             nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, log).doWork()
             assertEquals(1, notifier.posts.size)
@@ -318,6 +320,18 @@ class WorkersTest {
             assertTrue(notifier.posts.isEmpty())
             nearbyWorker(AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true), emptyList(), MemoryLog(), cellAgeHours = 23).doWork()
             assertEquals(1, notifier.posts.size)
+        }
+
+    @Test
+    fun `the nearby invitation never calls the nearby API`() =
+        runBlocking {
+            val onTrip = listOf(plan(1, "2026-12-10", "2026-12-14"))
+            nearbyWorker(AppSettings(nearbyNotifications = true), onTrip, MemoryLog()).doWork()
+            nearbyWorker(AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true), emptyList(), MemoryLog()).doWork()
+            nearbyWorker(AppSettings(nearbyNotifications = false), onTrip, MemoryLog()).doWork()
+            assertEquals(2, notifier.posts.size)
+            assertEquals(3, nearbyRepos.size)
+            assertTrue(nearbyRepos.all { it.requests.isEmpty() })
         }
 
     @Test
