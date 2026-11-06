@@ -62,6 +62,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
+import io.github.rupakc.travelplanner.core.domain.place.placeName
 import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
@@ -128,7 +129,7 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
                 val trip = state.upcomingTrip
                 if (trip != null) UpcomingTripCard(trip, onClick = { onEvent(HomeEvent.OpenTrip(trip.planId)) }) else PlanNextTripCard(onEvent)
             }
-            state.becauseYouSearched?.let { because -> full("because") { BecauseYouSearchedRow(because, onEvent) } }
+            state.becauseYouSearched?.let { because -> full("because") { BecauseYouSearchedRow(because, state.placeNames, onEvent) } }
             full("tools_heading") { SectionHeading(stringResource(R.string.home_tools_heading)) }
             if (state.tiles.isEmpty()) {
                 full("tools_empty") {
@@ -145,7 +146,7 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
                 }
             }
             if (state.tasteHighlights.isNotEmpty()) full("taste") { TasteRow(state.tasteHighlights, onEvent) }
-            if (state.recentSearches.isNotEmpty()) full("recent") { RecentSearchesRow(state.recentSearches, onEvent) }
+            if (state.recentSearches.isNotEmpty()) full("recent") { RecentSearchesRow(state.recentSearches, state.placeNames, onEvent) }
         }
     }
 }
@@ -358,9 +359,9 @@ internal fun TileReason.labelRes(): Int =
     }
 
 @Composable
-private fun BecauseYouSearchedRow(because: BecauseYouSearched, onEvent: (HomeEvent) -> Unit) {
+private fun BecauseYouSearchedRow(because: BecauseYouSearched, names: Map<String, String>, onEvent: (HomeEvent) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-        SectionHeading(stringResource(R.string.home_because_heading, because.destination))
+        SectionHeading(stringResource(R.string.home_because_heading, placeName(because.destination, names)))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
             items(because.tiles, key = { "because-${it.feature.id}" }, contentType = { "suggestion" }) { tile ->
                 TpCard(onClick = { onEvent(HomeEvent.OpenFeature(tile.feature)) }, modifier = Modifier.width(HomeDimens.SuggestionCardWidth)) {
@@ -404,12 +405,13 @@ private fun TasteRow(values: List<String>, onEvent: (HomeEvent) -> Unit) {
 }
 
 /** "A → B → C" for a recent search (stops in journey order). */
-internal fun RecentSearchIn.routeLabel(): String = (listOf(origin) + stops.map { it.city } + destination).joinToString(" → ")
+internal fun RecentSearchIn.routeLabel(names: Map<String, String> = emptyMap()): String =
+    (listOf(origin) + stops.map { it.city } + destination).joinToString(" → ") { placeName(it, names) }
 
 internal val RecentSearchIn.travellerCount: Int get() = maxOf(1, adults + children + seniors + infants)
 
 @Composable
-private fun RecentSearchesRow(recent: List<RecentSearch>, onEvent: (HomeEvent) -> Unit) {
+private fun RecentSearchesRow(recent: List<RecentSearch>, names: Map<String, String>, onEvent: (HomeEvent) -> Unit) {
     val formatter = rememberDateFormatter()
     Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
         SectionHeading(stringResource(R.string.home_recent_heading))
@@ -421,7 +423,7 @@ private fun RecentSearchesRow(recent: List<RecentSearch>, onEvent: (HomeEvent) -
                     s.returnDate?.let { r -> stringResource(R.string.home_date_range, departure, r.toDateOrNull()?.let(formatter::format) ?: r) } ?: departure
                 TpCard(onClick = { onEvent(HomeEvent.OpenRecentSearch(item.id)) }, modifier = Modifier.width(HomeDimens.RecentCardWidth)) {
                     Column(Modifier.padding(TravelTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
-                        Text(s.routeLabel(), style = TravelTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(s.routeLabel(names), style = TravelTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         Text(dates, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
                         Text(
                             pluralStringResource(R.plurals.home_travellers, s.travellerCount, s.travellerCount),

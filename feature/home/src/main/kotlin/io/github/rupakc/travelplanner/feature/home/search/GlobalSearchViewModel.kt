@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.ChatRepository
 import io.github.rupakc.travelplanner.core.data.repository.ChatThread
@@ -21,6 +22,7 @@ import io.github.rupakc.travelplanner.core.domain.globalsearch.GlobalSearchResul
 import io.github.rupakc.travelplanner.core.domain.globalsearch.PreparedItem
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SearchableItem
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
+import io.github.rupakc.travelplanner.core.domain.place.placeName
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChatRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlanDetailRoute
@@ -28,6 +30,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsEntryRoute
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
+import io.github.rupakc.travelplanner.feature.home.HomePlaces
 import io.github.rupakc.travelplanner.feature.home.destination
 import io.github.rupakc.travelplanner.feature.home.routeLabel
 import javax.inject.Inject
@@ -39,10 +42,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -85,6 +91,7 @@ class GlobalSearchViewModel
         featureVisibility: FeatureVisibility,
         private val labels: SearchLabels,
         dispatchers: AppDispatchers,
+        private val placeNameLookup: PlaceNameLookup,
     ) : ViewModel() {
         private val query = savedStateHandle.getStateFlow(KEY_QUERY, "")
         private val filter =
@@ -104,10 +111,17 @@ class GlobalSearchViewModel
                 .debounce(CHAT_DEBOUNCE_MILLIS)
                 .mapLatest { threads -> threads.take(MAX_THREADS).map { t -> chatItem(t, chatRepository.messages(t.id).first()) } }
 
+        /** City names for the trips' and recent searches' airport codes (shared lookup): titles name the city, both match. */
+        private val placeNames: Flow<Map<String, String>> =
+            combine(plansRepository.plans, recentSearchesRepository.recent) { plans, recent -> HomePlaces.of(plans, recent) }
+                .distinctUntilChanged()
+                .flatMapLatest { placeNameLookup.namesFor(it) }
+                .onStart { emit(emptyMap()) }
+
         /** The index, normalised once per source change (not per keystroke). */
         private val index: Flow<List<PreparedItem>> =
-            combine(plansRepository.plans, chatItems, recentSearchesRepository.recent) { plans, chats, recent ->
-                GlobalSearch.prepare(plans.map(::tripItem) + chats + recent.map(::recentItem) + staticItems())
+            combine(plansRepository.plans, chatItems, recentSearchesRepository.recent, placeNames) { plans, chats, recent, names ->
+                GlobalSearch.prepare(plans.map { tripItem(it, names) } + chats + recent.map { recentItem(it, names) } + staticItems())
             }.flowOn(dispatchers.default)
 
         val state: StateFlow<GlobalSearchUiState> =
@@ -175,16 +189,17 @@ class GlobalSearchViewModel
             }
         }
 
-        private fun tripItem(plan: Plan): SearchableItem {
+        private fun tripItem(plan: Plan, names: Map<String, String>): SearchableItem {
             val request = plan.searchRequest
-            val destinations = request?.destinations.orEmpty().ifEmpty { listOfNotNull(request?.destination) }
+            val codes = request?.destinations.orEmpty().ifEmpty { listOfNotNull(request?.destination) }
+            val destinations = codes.map { placeName(it, names) }
             val subtitle = listOfNotNull(destinations.joinToString(" → ").takeIf(String::isNotEmpty), request?.departureDate).joinToString(", ")
             return SearchableItem(
                 kind = GlobalSearchKind.TRIP,
                 id = plan.id.toString(),
                 title = plan.name.ifBlank { destinations.lastOrNull().orEmpty() },
                 subtitle = subtitle.ifEmpty { null },
-                keywords = listOfNotNull(request?.origin) + destinations,
+                keywords = (listOfNotNull(request?.origin, request?.origin?.let { placeName(it, names) }) + codes + destinations).distinct(),
             )
         }
 
@@ -197,14 +212,14 @@ class GlobalSearchViewModel
                 keywords = messages.map { it.content.take(MAX_MESSAGE_CHARS) },
             )
 
-        private fun recentItem(recent: RecentSearch): SearchableItem {
+        private fun recentItem(recent: RecentSearch, names: Map<String, String>): SearchableItem {
             val s = recent.search
             return SearchableItem(
                 kind = GlobalSearchKind.RECENT_SEARCH,
                 id = recent.id,
-                title = s.routeLabel(),
+                title = s.routeLabel(names),
                 subtitle = listOfNotNull(s.departureDate, s.returnDate).filter(String::isNotBlank).joinToString(" – ").ifEmpty { null },
-                keywords = s.interests,
+                keywords = s.interests + s.routeLabel(),
             )
         }
 

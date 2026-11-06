@@ -59,6 +59,20 @@ class HomeScreenTest {
     }
 
     @Test
+    fun `recent searches and the because row name the cities of airport codes`() {
+        show(
+            full.copy(
+                becauseYouSearched = full.becauseYouSearched?.copy(destination = "LIS"),
+                recentSearches = listOf(recent("rs-1", "LIS").let { it.copy(search = it.search.copy(origin = "JFK")) }),
+                placeNames = mapOf("LIS" to "Lisbon", "JFK" to "New York"),
+            ),
+        )
+        compose.onNodeWithText("Because you searched Lisbon").assertExists()
+        compose.onNodeWithText("New York → Lisbon").assertExists()
+        compose.onNodeWithText("JFK → LIS").assertDoesNotExist()
+    }
+
+    @Test
     fun `tiles and recent searches send their events`() {
         show(full, dark = true)
         compose.onNodeWithText("Chat").performClick()

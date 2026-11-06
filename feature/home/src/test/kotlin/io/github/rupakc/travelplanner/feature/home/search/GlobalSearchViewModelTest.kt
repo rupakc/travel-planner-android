@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.feature.home.search
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.profile.ProfileFeatureVisibility
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.globalsearch.GlobalSearchKind
@@ -11,12 +12,14 @@ import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlanDetailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsEntryRoute
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakeChatRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeRecentSearchesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.feature.home.FakeFeatureCatalogue
 import io.github.rupakc.travelplanner.feature.home.plan
 import io.github.rupakc.travelplanner.feature.home.recent
@@ -50,11 +53,12 @@ class GlobalSearchViewModelTest {
 
     @get:Rule val main = MainDispatcherRule()
 
-    private val plans = FakePlansRepository(listOf(plan(7, "Spring break", "Tokyo", "2027-04-01")))
+    private var plans = FakePlansRepository(listOf(plan(7, "Spring break", "Tokyo", "2027-04-01")))
     private val chat = FakeChatRepository()
     private val recentRepo = FakeRecentSearchesRepository()
     private val profile = FakeProfileRepository()
     private val handle = SavedStateHandle()
+    private val search = FakeSearchRepository()
 
     private fun vm() =
         GlobalSearchViewModel(
@@ -66,7 +70,27 @@ class GlobalSearchViewModelTest {
             ProfileFeatureVisibility(profile, FakeFeatureCatalogue(setOf(FeatureId.CHAT))),
             FakeLabels,
             TestAppDispatchers(main.testDispatcher),
+            PlaceNameLookup(search),
         )
+
+    @Test
+    fun `trips and recent searches show city names and match the city or the code`() =
+        runTest {
+            search.airports = listOf(Airport(iataCode = "LIS", city = "Lisbon"))
+            plans = FakePlansRepository(listOf(plan(9, "", "LIS", "2027-04-01")))
+            recentRepo.add(recent("y", "LIS").search)
+            val model = vm()
+            model.state.test {
+                model.onEvent(GlobalSearchEvent.QueryChanged("lisbon"))
+                settle()
+                val hits = expectMostRecentItem().results.groups.flatMap { it.hits }.map { it.item }
+                assertEquals("Lisbon", hits.first { it.kind == GlobalSearchKind.TRIP }.title)
+                assertEquals("New York → Lisbon", hits.first { it.kind == GlobalSearchKind.RECENT_SEARCH }.title)
+                model.onEvent(GlobalSearchEvent.QueryChanged("LIS"))
+                settle()
+                assertTrue(expectMostRecentItem().results.groups.flatMap { it.hits }.any { it.item.kind == GlobalSearchKind.TRIP })
+            }
+        }
 
     @Test
     fun `indexes trips, chat content, recent searches, features and settings`() =

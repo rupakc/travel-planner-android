@@ -9,6 +9,7 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.errorOrNull
 import io.github.rupakc.travelplanner.core.common.getOrNull
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
@@ -23,12 +24,16 @@ import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
 import io.github.rupakc.travelplanner.core.model.preferences.TasteProfile
 import io.github.rupakc.travelplanner.core.model.settings.FeatureOverrides
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -44,6 +49,8 @@ data class HomeUiState(
     val tiles: List<FeatureTile> = emptyList(),
     val becauseYouSearched: BecauseYouSearched? = null,
     val recentSearches: List<RecentSearch> = emptyList(),
+    /** Airport code → city for the places on screen ("LIS" → "Lisbon"); codes not found stay codes. */
+    val placeNames: Map<String, String> = emptyMap(),
     /** Top Taste Graph values (`GET /api/taste-profile`). */
     val tasteHighlights: List<String> = emptyList(),
     val refreshing: Boolean = false,
@@ -72,6 +79,7 @@ sealed interface HomeEvent {
     data class OpenRecentSearch(val id: String) : HomeEvent
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel
     @Inject
@@ -84,6 +92,7 @@ class HomeViewModel
         private val catalogue: FeatureCatalogue,
         featureVisibility: FeatureVisibility,
         private val clock: AppClock,
+        private val placeNameLookup: PlaceNameLookup,
     ) : ViewModel() {
         private val taste = MutableStateFlow<TasteProfile?>(null)
         private val refresh = MutableStateFlow(RefreshState())
@@ -94,8 +103,15 @@ class HomeViewModel
         /** The shared visibility rule (core:data), same as Search, Settings and Results. */
         private val visible = featureVisibility.visible()
 
+        /** City names for the airport codes of saved trips and recent searches (shared lookup). */
+        private val placeNames =
+            combine(plansRepository.plans, recentSearchesRepository.recent) { plans, recent -> HomePlaces.of(plans, recent) }
+                .distinctUntilChanged()
+                .flatMapLatest { placeNameLookup.namesFor(it) }
+                .onStart { emit(emptyMap()) }
+
         private val personal =
-            combine(visible, recentSearchesRepository.recent, taste) { features, recent, tasteProfile ->
+            combine(visible, recentSearchesRepository.recent, taste, placeNames) { features, recent, tasteProfile, names ->
                 val icons = catalogue.iconNames()
                 Personal(
                     tiles =
@@ -108,6 +124,7 @@ class HomeViewModel
                         },
                     recent = recent,
                     taste = HomePersonalisation.tasteHighlights(tasteProfile),
+                    names = names,
                 )
             }
 
@@ -117,10 +134,11 @@ class HomeViewModel
                     loading = false,
                     userName = session?.user?.username,
                     travellerTypes = types,
-                    upcomingTrip = UpcomingTrips.nearest(plans, clock.today()),
+                    upcomingTrip = UpcomingTrips.nearest(plans, clock.today(), p.names),
                     tiles = p.tiles,
                     becauseYouSearched = p.because,
                     recentSearches = p.recent,
+                    placeNames = p.names,
                     tasteHighlights = p.taste,
                     refreshing = r.running,
                     refreshError = r.error,
@@ -161,6 +179,7 @@ class HomeViewModel
             val because: BecauseYouSearched?,
             val recent: List<RecentSearch>,
             val taste: List<String>,
+            val names: Map<String, String>,
         )
 
         private companion object {
