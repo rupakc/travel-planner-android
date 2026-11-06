@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.results
 
 import android.app.Application
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -234,6 +235,26 @@ class ResultsScreenTest {
     }
 
     @Test
+    fun `dragging during a jump animation hands the highlight back to the scroll spy`() {
+        scrollTo("HOTELS")
+        val target = jumpChip("Packing List")
+        compose.mainClock.autoAdvance = false
+        target.performClick()
+        repeat(JUMP_FRAMES) { compose.mainClock.advanceTimeByFrame() }
+        // The user grabs the list mid-animation and drags it a little: the drag takes over from the jump.
+        compose.onNodeWithTag("results_list").performTouchInput {
+            down(center)
+            repeat(DRAG_STEPS) { moveBy(Offset(0f, DRAG_STEP_PX), delayMillis = 0) }
+            up()
+        }
+        compose.mainClock.autoAdvance = true
+        compose.waitForIdle()
+        // The spy's section is selected (and scrolled into the chip row), not the abandoned jump target.
+        compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab).and(selected(true))).assertCountEquals(1)
+        compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab).and(selected(true))).assert(hasContentDescription("Packing List").not())
+    }
+
+    @Test
     fun `scroll spy selects the chip of the section in view and scrolls it into the row`() {
         compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab).and(selected(true))).assertCountEquals(0)
         scrollTo("HOTELS")
@@ -270,5 +291,11 @@ class ResultsScreenTest {
         compose.onNode(chip("Visa & Entry")).assert(selected(true))
         compose.onNodeWithTag("results_detail_pane").assertIsDisplayed()
         sectionHeading("Visa & Entry").assertIsDisplayed()
+    }
+
+    private companion object {
+        const val JUMP_FRAMES = 6
+        const val DRAG_STEPS = 12
+        const val DRAG_STEP_PX = 40f
     }
 }

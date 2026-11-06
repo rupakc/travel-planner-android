@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -318,9 +319,15 @@ internal fun QuickJumpRow(
 ) {
     val rowState = rememberLazyListState()
     val reduceMotion = rememberReduceMotion()
-    LaunchedEffect(active, sections) {
-        val i = sections.indexOfFirst { it.id == active }
+    // Keyed on the ids, not the sections: those change with every streamed update and must not undo a sideways swipe.
+    val ids = remember(sections) { sections.map { it.id } }
+    // The active section the row last brought into view; it follows only a change of active section.
+    val shown = remember { mutableStateOf<SectionId?>(null) }
+    LaunchedEffect(active, ids) {
+        if (active == shown.value) return@LaunchedEffect
+        val i = ids.indexOf(active)
         if (i < 0) return@LaunchedEffect
+        shown.value = active
         val info = rowState.layoutInfo
         val chip = info.visibleItemsInfo.firstOrNull { it.index == i }
         val whole = chip != null && chip.offset >= info.viewportStartOffset && chip.offset + chip.size <= info.viewportEndOffset

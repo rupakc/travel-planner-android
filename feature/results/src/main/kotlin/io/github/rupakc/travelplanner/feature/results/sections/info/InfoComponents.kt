@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -177,22 +178,31 @@ internal fun LinkButton(label: String, url: String?, onOpen: (String) -> Unit, m
 }
 
 /**
- * A card's footer: its [link] (usually a [LinkButton]) and its `AddToPlanButton`, on one line when both fit, otherwise the
- * button wraps onto the next line at its full width. A plain Row measured the link first, so a long label
- * ("View on Free Tours by Foot ↗", 200 % font) left the button no width at all.
+ * A card's footer: its [link] (usually a [LinkButton]) and its `AddToPlanButton`, on one line when both fit (at least
+ * `spacing.sm` apart), otherwise the button wraps onto the next line at its full width. A plain Row measured the link
+ * first, so a long label ("View on Free Tours by Foot ↗", 200 % font) left the button no width at all.
+ * [addAtEnd]: the button sits at the end of its line, also when it wraps (cards); false keeps it right after the link (tips).
  */
 @Composable
-internal fun LinkAndAddRow(link: @Composable () -> Unit, add: @Composable () -> Unit, modifier: Modifier = Modifier) {
+internal fun LinkAndAddRow(link: @Composable () -> Unit, add: @Composable () -> Unit, modifier: Modifier = Modifier, addAtEnd: Boolean = true) {
     FlowRow(
-        modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier.fillMaxWidth().testTag(CARD_FOOTER_TAG),
+        horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
         verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs),
         itemVerticalAlignment = Alignment.CenterVertically,
     ) {
         link()
-        add()
+        if (addAtEnd) {
+            // Takes the rest of its line (the whole line once wrapped) and puts the button at its end.
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) { add() }
+        } else {
+            add()
+        }
     }
 }
+
+/** Test tag of [LinkAndAddRow]. */
+internal const val CARD_FOOTER_TAG = "card_footer"
 
 /**
  * Lays [items] out in one column on compact widths and two from [InfoDimens.TwoColumnMinWidth] (web `md:grid-cols-2`).

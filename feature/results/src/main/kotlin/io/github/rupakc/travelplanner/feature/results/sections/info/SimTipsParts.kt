@@ -168,6 +168,7 @@ private fun TipRow(tip: Tip, selected: Boolean, onToggle: () -> Unit, onOpenLink
                 LinkAndAddRow(
                     link = { LinkButton(stringResource(R.string.info_source), tip.sourceUrl, onOpenLink) },
                     add = { AddToPlanButton(selected, tip.title.orEmpty(), onToggle) },
+                    addAtEnd = false,
                 )
             }
         }

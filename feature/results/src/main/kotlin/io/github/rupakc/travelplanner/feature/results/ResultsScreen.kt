@@ -33,6 +33,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -78,6 +82,7 @@ import io.github.rupakc.travelplanner.feature.results.ui.VerificationSheet
 import io.github.rupakc.travelplanner.feature.results.ui.destinationName
 import io.github.rupakc.travelplanner.feature.results.watch.WatchFareAction
 import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /** Width from which the screen switches to list | detail (Material expanded window class). */
@@ -155,36 +160,70 @@ private fun CompactLayout(state: ResultsUiState, onEvent: (ResultsEvent) -> Unit
     val index = remember(ids, rows) { ResultsListIndex(ids, rows.mapValues { it.value.size }, HEADER_ITEMS) }
     // A tapped chip stays selected until the list scrolls for another reason (drag, fling, TalkBack scroll):
     // the last sections are too short to reach the top, so the spy alone would never pick them.
-    var jumpTarget by remember { mutableStateOf<SectionId?>(null) }
-    val jumping = remember { AtomicInteger(0) }
+    val jumpTarget = remember { mutableStateOf<SectionId?>(null) }
+    val jumps = remember { JumpTracker() }
     LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }.collect { if (it && jumping.get() == 0) jumpTarget = null }
+        // Scrolls that are not a jump (TalkBack scroll actions, programmatic scrolls) start a new scroll.
+        snapshotFlow { listState.isScrollInProgress }.collect { if (it && !jumps.running) jumpTarget.value = null }
     }
+    // A drag or fling is seen directly, even when it takes over from a running jump in the same frame.
+    val userScroll = remember { UserScrollConnection { jumpTarget.value = null } }
     val spied by remember(listState, index) { derivedStateOf { spiedSection(listState.layoutInfo, index) } }
     val scrolled by remember(listState) { derivedStateOf { listState.canScrollBackward } }
     Column(Modifier.fillMaxSize()) {
-        PinnedJumpRow(state.sections, active = activeSection(jumpTarget, spied, ids), divider = scrolled, onJump = { id ->
+        PinnedJumpRow(state.sections, active = activeSection(jumpTarget.value, spied, ids), divider = scrolled, onJump = { id ->
             index.indexOf(id)?.let { target ->
-                jumpTarget = id
-                jumping.incrementAndGet()
+                jumpTarget.value = id
+                val jump = jumps.start()
                 scope.launch {
                     try {
                         if (reduceMotion) listState.scrollToItem(target) else listState.animateScrollToItem(target)
+                    } catch (e: CancellationException) {
+                        // Cut short by the user (not by a newer jump): the spy takes over again.
+                        if (jumps.isLatest(jump)) jumpTarget.value = null
+                        throw e
                     } finally {
-                        jumping.decrementAndGet()
+                        jumps.finish()
                     }
                 }
             }
         })
         LazyColumn(
             state = listState,
-            modifier = Modifier.weight(1f).fillMaxWidth().testTag("results_list"),
+            modifier = Modifier.weight(1f).fillMaxWidth().nestedScroll(userScroll).testTag("results_list"),
             contentPadding = PaddingValues(TravelTheme.spacing.gutter),
             verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
         ) {
             headerItems(state, onEvent, actions)
             state.sections.forEach { section -> sectionItems(section, rows[section.id].orEmpty(), state, onEvent, actions, onOpenFilters) }
         }
+    }
+}
+
+/** Counts running tap-to-jump scrolls; [isLatest] tells a jump cut short by the user from one replaced by a newer jump. */
+private class JumpTracker {
+    private val runningCount = AtomicInteger(0)
+    private val latest = AtomicInteger(0)
+
+    val running: Boolean get() = runningCount.get() > 0
+
+    fun start(): Int {
+        runningCount.incrementAndGet()
+        return latest.incrementAndGet()
+    }
+
+    fun isLatest(jump: Int): Boolean = latest.get() == jump
+
+    fun finish() {
+        runningCount.decrementAndGet()
+    }
+}
+
+/** Calls [onUserScroll] for every drag or fling step the list receives (never for programmatic scrolls). */
+private class UserScrollConnection(private val onUserScroll: () -> Unit) : NestedScrollConnection {
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        if (source == NestedScrollSource.UserInput) onUserScroll()
+        return Offset.Zero
     }
 }
 
