@@ -236,22 +236,23 @@ class ResultsScreenTest {
 
     @Test
     fun `dragging during a jump animation hands the highlight back to the scroll spy`() {
-        scrollTo("HOTELS")
+        // Start deep in the list and jump to the last section; the drag pulls the list back up by about a screen,
+        // so wherever the animation was cut, the list ends among the sections before Packing List.
+        scrollTo("EMERGENCY_CARD")
         val target = jumpChip("Packing List")
         compose.mainClock.autoAdvance = false
         target.performClick()
-        repeat(JUMP_FRAMES) { compose.mainClock.advanceTimeByFrame() }
-        // The user grabs the list mid-animation and drags it a little: the drag takes over from the jump.
+        compose.mainClock.advanceTimeByFrame()
         compose.onNodeWithTag("results_list").performTouchInput {
-            down(center)
-            repeat(DRAG_STEPS) { moveBy(Offset(0f, DRAG_STEP_PX), delayMillis = 0) }
+            down(topCenter)
+            repeat(DRAG_STEPS) { moveBy(Offset(0f, height / DRAG_STEPS.toFloat()), delayMillis = 0) }
             up()
         }
         compose.mainClock.autoAdvance = true
         compose.waitForIdle()
-        // The spy's section is selected (and scrolled into the chip row), not the abandoned jump target.
-        compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab).and(selected(true))).assertCountEquals(1)
-        compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab).and(selected(true))).assert(hasContentDescription("Packing List").not())
+        val tab = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)
+        compose.onAllNodes(tab.and(selected(true))).assertCountEquals(1)
+        compose.onNode(tab.and(selected(true))).assert(hasContentDescription("Packing List").not())
     }
 
     @Test
@@ -294,8 +295,6 @@ class ResultsScreenTest {
     }
 
     private companion object {
-        const val JUMP_FRAMES = 6
         const val DRAG_STEPS = 12
-        const val DRAG_STEP_PX = 40f
     }
 }

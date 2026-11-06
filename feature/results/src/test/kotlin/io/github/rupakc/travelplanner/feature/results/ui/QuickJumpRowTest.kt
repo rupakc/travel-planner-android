@@ -74,4 +74,26 @@ class QuickJumpRowTest {
         compose.waitForIdle()
         chip("Flights").assertIsDisplayed()
     }
+
+    @Test
+    fun `the active chip is revealed again after it was cleared or the chips changed`() {
+        show()
+        active = SectionId.PACKING_LIST
+        compose.waitForIdle()
+        chip("Packing List").assertIsDisplayed()
+        // Cleared (nothing in view) and set again: shown again even though it is the same section.
+        compose.onNodeWithTag("results_jump_row").performScrollToIndex(0)
+        active = null
+        compose.waitForIdle()
+        active = SectionId.PACKING_LIST
+        compose.waitForIdle()
+        chip("Packing List").assertIsDisplayed()
+        // The text filter changes which chips exist: the active one is brought back into view.
+        compose.onNodeWithTag("results_jump_row").performScrollToIndex(0)
+        compose.waitForIdle()
+        chip("Packing List").assertIsNotDisplayed()
+        sections = sectionsWith(SectionStatus.DONE).filter { it.id != SectionId.WEATHER }
+        compose.waitForIdle()
+        chip("Packing List").assertIsDisplayed()
+    }
 }

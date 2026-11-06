@@ -321,13 +321,17 @@ internal fun QuickJumpRow(
     val reduceMotion = rememberReduceMotion()
     // Keyed on the ids, not the sections: those change with every streamed update and must not undo a sideways swipe.
     val ids = remember(sections) { sections.map { it.id } }
-    // The active section the row last brought into view; it follows only a change of active section.
-    val shown = remember { mutableStateOf<SectionId?>(null) }
+    // What the row last brought into view (active section + the chips then): it follows only a new active section
+    // or a different set of chips (text filter), never a data/status update, so a sideways swipe stays put.
+    val shown = remember { mutableStateOf<Pair<SectionId, List<SectionId>>?>(null) }
     LaunchedEffect(active, ids) {
-        if (active == shown.value) return@LaunchedEffect
         val i = ids.indexOf(active)
-        if (i < 0) return@LaunchedEffect
-        shown.value = active
+        if (active == null || i < 0) {
+            shown.value = null
+            return@LaunchedEffect
+        }
+        if (shown.value == (active to ids)) return@LaunchedEffect
+        shown.value = active to ids
         val info = rowState.layoutInfo
         val chip = info.visibleItemsInfo.firstOrNull { it.index == i }
         val whole = chip != null && chip.offset >= info.viewportStartOffset && chip.offset + chip.size <= info.viewportEndOffset
