@@ -1,6 +1,8 @@
 package io.github.rupakc.travelplanner.e2e
 
 import android.os.ParcelFileDescriptor
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -18,6 +20,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -71,6 +74,15 @@ class ScreenshotTourE2eTest {
         ParcelFileDescriptor.AutoCloseInputStream(fd).use { it.readBytes() }
     }
 
+    /**
+     * Results screenshots show loaded sections, not the "Sections ready: 5/16" skeletons: wait for the stream's
+     * end banner (ready, or interrupted / failed so a broken run still finishes the tour).
+     */
+    private fun awaitStreamEnd() {
+        val ends = listOf(ResultsR.string.results_ready, ResultsR.string.results_interrupted, ResultsR.string.results_failed).map { robot.str(it) }
+        rule.waitUntil(PlanFlows.STREAM_TIMEOUT) { ends.any { robot.existsMerged(hasText(it)) } }
+    }
+
     private fun shot(name: String) {
         rule.waitForIdle()
         Thread.sleep(SETTLE_MS)
@@ -93,6 +105,9 @@ class ScreenshotTourE2eTest {
         )
         shot("onboarding-result")
         robot.finishOnboarding()
+        // "Your next trip" names the city of the plan's airport code ("LIS" → "Lisbon").
+        robot.waitFor(hasText("Lisbon") and isHeading())
+        assertFalse("airport code on Home's next-trip card", robot.exists(hasText("LIS") and isHeading()))
         shot("home")
 
         robot.openTab(AppR.string.nav_search)
@@ -101,6 +116,7 @@ class ScreenshotTourE2eTest {
 
         robot.searchTrip(AppRobot.Trip())
         robot.waitForText(robot.str(ResultsR.string.results_ease_title), timeoutMs = PlanFlows.STREAM_TIMEOUT)
+        awaitStreamEnd()
         PlanFlows(robot, api).awaitTerminal(UiR.string.section_hotels)
         PlanFlows(robot, api).scrollToSection("HOTELS")
         shot("results")
@@ -147,6 +163,7 @@ class ScreenshotTourE2eTest {
         shot("search-dark")
         robot.tap(SearchR.string.search_recent_again)
         robot.waitForText(robot.str(ResultsR.string.results_ease_title), timeoutMs = PlanFlows.STREAM_TIMEOUT)
+        awaitStreamEnd()
         shot("results-dark")
         robot.back()
         robot.openTab(AppR.string.nav_chat)
