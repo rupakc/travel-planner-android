@@ -178,6 +178,7 @@ sealed interface AlertsEffect {
 /** Watched prices (web AlertsPage): fare and price watches together, with tabs, search and card actions. */
 @HiltViewModel
 class AlertsViewModel
+    @Suppress("LongParameterList") // Hilt-injected collaborators, one per concern (as ResultsViewModel)
     @Inject
     constructor(
         savedState: SavedStateHandle,
