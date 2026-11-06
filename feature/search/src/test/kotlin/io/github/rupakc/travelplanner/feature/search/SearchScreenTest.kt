@@ -37,6 +37,7 @@ import io.github.rupakc.travelplanner.feature.search.discover.DiscoverUiState
 import io.github.rupakc.travelplanner.feature.search.importlink.ImportUiState
 import kotlinx.coroutines.awaitCancellation
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -147,6 +148,19 @@ class SearchScreenTest {
         assertEquals(SearchFormEvent.RemoveRecent("r1"), events.last())
         compose.onNodeWithText("Search again").performClick()
         assertEquals(SearchFormEvent.RerunRecent("r1"), events.last())
+    }
+
+    @Test
+    fun `a recent search saved with airport codes shows the cities and its traveller count on one line`() {
+        val entry = RecentSearch("r2", RecentSearchIn("JFK", "LIS", "2026-12-01", interests = listOf("food", "history", "culture"), adults = 2))
+        val names = mapOf("JFK" to "New York", "LIS" to "Lisbon")
+        show(SearchUiState(today = TestToday, recent = listOf(RecentSearchCard(entry, describeRecentSearch(entry.search, names = names), false))))
+        compose.onNodeWithText("New York → Lisbon").assertIsDisplayed()
+        compose.onNodeWithText("2 travelers").assertIsDisplayed()
+        val travellers = compose.onNodeWithText("2 travelers").fetchSemanticsNode().boundsInRoot
+        val route = compose.onNodeWithText("New York → Lisbon").fetchSemanticsNode().boundsInRoot
+        // One line of text, not a letter-wide column (the old row squeezed it next to the interest chips).
+        assertTrue(travellers.height < route.height * 2)
     }
 
     @Test

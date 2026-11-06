@@ -10,6 +10,7 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.getOrNull
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.PreferencesRepository
@@ -49,6 +50,7 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,6 +59,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -148,6 +151,7 @@ sealed interface SearchEffect {
  * two-way binding, the mode switcher (chips follow the visible features), recent searches,
  * and the one place every mode starts a search ([startSearch], web `startSearch`).
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class SearchViewModel
     @Inject
@@ -162,6 +166,7 @@ class SearchViewModel
         private val clock: AppClock,
         featureVisibility: FeatureVisibility,
         @ApplicationScope private val appScope: CoroutineScope,
+        private val placeNames: PlaceNameLookup,
     ) : ViewModel() {
         private val route: SearchRoute = runCatching { savedStateHandle.toRoute<SearchRoute>() }.getOrDefault(SearchRoute())
 
@@ -201,8 +206,14 @@ class SearchViewModel
             combine(featureVisibility.visible(), _state.map { it.mode }.distinctUntilChanged()) { visible, mode -> visibleModes(visible, mode) }
                 .onEach { modes -> _state.update { it.copy(visibleModes = modes) } }
                 .launchIn(viewModelScope)
-            combine(recentSearchesRepository.recent, pendingRemoval) { list, hidden -> list.filterNot { it.id in hidden } }
-                .onEach { list -> _state.update { s -> s.copy(recent = list.map(::card)) } }
+            // Recent cards name the city of an airport code ("JFK → LIS" reads "New York → Lisbon"), shared lookup.
+            val named =
+                recentSearchesRepository.recent.flatMapLatest { list ->
+                    val places = list.flatMap { r -> listOf(r.search.origin, r.search.destination) + r.search.stops.map { it.city } }
+                    placeNames.namesFor(places).map { names -> list to names }
+                }
+            combine(named, pendingRemoval) { (list, names), hidden -> list.filterNot { it.id in hidden }.map { card(it, names) } }
+                .onEach { cards -> _state.update { s -> s.copy(recent = cards) } }
                 .launchIn(viewModelScope)
             viewModelScope.launch { recentSearchesRepository.refresh() }
             _state
@@ -419,7 +430,7 @@ class SearchViewModel
                     form = restored.form,
                     stops = restored.stops,
                     issues = emptyList(),
-                    notice = RecentNotice(describeRecentSearch(entry.search).route, restored.datesShifted),
+                    notice = RecentNotice(describeRecentSearch(entry.search, names = placeNames.names.value).route, restored.datesShifted),
                 )
             }
         }
@@ -461,8 +472,8 @@ class SearchViewModel
             }
         }
 
-        private fun card(entry: RecentSearch): RecentSearchCard =
-            RecentSearchCard(entry, describeRecentSearch(entry.search), recentDatesPassed(entry.search, clock.today()))
+        private fun card(entry: RecentSearch, names: Map<String, String>): RecentSearchCard =
+            RecentSearchCard(entry, describeRecentSearch(entry.search, names = names), recentDatesPassed(entry.search, clock.today()))
 
         private companion object {
             const val SAVED_FORM_KEY = "search_form"

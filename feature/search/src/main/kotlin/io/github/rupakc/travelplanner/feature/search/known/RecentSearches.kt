@@ -3,6 +3,8 @@ package io.github.rupakc.travelplanner.feature.search.known
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -97,6 +99,7 @@ internal fun RecentSearchesSection(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun RecentCard(card: RecentSearchCard, onLoad: (String) -> Unit, onRerun: (String) -> Unit, onRemove: (String) -> Unit, modifier: Modifier) {
     val summary = card.summary
@@ -123,10 +126,12 @@ private fun RecentCard(card: RecentSearchCard, onLoad: (String) -> Unit, onRerun
                         )
                     }
                 }
-                Row(
+                // Interests wrap on their own lines; the traveller count gets its own row so a long chip list
+                // can never squeeze it into a one-letter-wide column.
+                FlowRow(
                     Modifier.padding(top = TravelTheme.spacing.sm),
                     horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs),
                 ) {
                     summary.interests.take(MAX_INTEREST_CHIPS).forEach { interest ->
                         Surface(shape = TravelShape.Input, color = TravelTheme.colors.primaryContainer, contentColor = TravelTheme.colors.onPrimaryContainer) {
@@ -141,7 +146,12 @@ private fun RecentCard(card: RecentSearchCard, onLoad: (String) -> Unit, onRerun
                     if (more > 0) {
                         Text(pluralStringResource(R.plurals.search_more_interests, more, more), style = TravelTheme.typography.labelSmall)
                     }
-                    Spacer(Modifier.weight(1f))
+                }
+                Row(
+                    Modifier.padding(top = TravelTheme.spacing.xs),
+                    horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Icon(Icons.Filled.Person, contentDescription = null, tint = TravelTheme.colors.onSurfaceVariant)
                     Text(
                         pluralStringResource(R.plurals.search_traveler_count, summary.travellers, summary.travellers),

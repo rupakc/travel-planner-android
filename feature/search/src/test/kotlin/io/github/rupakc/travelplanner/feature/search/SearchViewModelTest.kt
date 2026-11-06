@@ -10,6 +10,7 @@ import androidx.navigation.testing.invoke
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.search.ExtraStop
 import io.github.rupakc.travelplanner.core.domain.search.SearchFormIssue
@@ -19,6 +20,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearchIn
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.search.searchKey
@@ -73,7 +75,17 @@ class SearchViewModelTest {
     private val appScope = CoroutineScope(main.testDispatcher)
 
     private fun vm(route: SearchRoute = SearchRoute(), handle: SavedStateHandle = SavedStateHandle(route)) =
-        SearchViewModel(handle, search, launcher, plan, prefs, recent, profile, FixedClock, visibility, appScope)
+        SearchViewModel(handle, search, launcher, plan, prefs, recent, profile, FixedClock, visibility, appScope, PlaceNameLookup(search))
+
+    @Test
+    fun `recent search cards name the cities of airport codes`() =
+        runTest {
+            search.airports = listOf(Airport(iataCode = "JFK", city = "New York"), Airport(iataCode = "LIS", city = "Lisbon"))
+            recent.add(RecentSearchIn("JFK", "LIS", "2026-12-01"))
+            recent.add(RecentSearchIn("JFK", "OPO", "2026-12-01"))
+            val routes = vm().state.value.recent.map { it.summary.route }
+            assertEquals(setOf("New York → Lisbon", "New York → OPO"), routes.toSet())
+        }
 
     @Test
     fun `pre-fills the form from preferences`() {

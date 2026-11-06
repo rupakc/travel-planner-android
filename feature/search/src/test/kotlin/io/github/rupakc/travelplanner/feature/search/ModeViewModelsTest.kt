@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.CompareRepository
 import io.github.rupakc.travelplanner.core.domain.search.CompareErrorReason
 import io.github.rupakc.travelplanner.core.domain.search.CompareRow
@@ -17,6 +18,7 @@ import io.github.rupakc.travelplanner.core.model.importlink.PreviewDestination
 import io.github.rupakc.travelplanner.core.model.importlink.PreviewPlace
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.search.CompareEstimate
 import io.github.rupakc.travelplanner.core.model.search.CompareSummary
 import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
@@ -26,6 +28,7 @@ import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeDiscoverRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeImportRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.feature.search.compare.CompareColumn
 import io.github.rupakc.travelplanner.feature.search.compare.CompareEvent
 import io.github.rupakc.travelplanner.feature.search.compare.CompareIssue
@@ -121,7 +124,21 @@ class CompareViewModelTest {
     @get:Rule val main = MainDispatcherRule()
 
     private val repo = ScriptedCompare()
-    private val vm = CompareViewModel(repo, FixedClock)
+    private val airports = FakeSearchRepository()
+    private val vm = CompareViewModel(repo, FixedClock, PlaceNameLookup(airports))
+
+    @Test
+    fun `columns name the city of an airport code until the summary arrives`() {
+        airports.airports = listOf(Airport(iataCode = "OPO", city = "Porto"))
+        vm.seed(known)
+        vm.onEvent(CompareEvent.UpdateDestination(1, "OPO"))
+        repo.answers["Lisbon"] = AppResult.Failure(AppError.Server(502, null))
+        repo.answers["OPO"] = AppResult.Failure(AppError.Server(502, null))
+        vm.onEvent(CompareEvent.Run)
+        assertEquals(listOf("Lisbon", "Porto"), vm.state.value.columns.orEmpty().map { it.destination })
+        assertEquals("OPO", vm.requestAt(1)?.destination)
+    }
+
     private val known = SearchForm.initial(TestToday).copy(origin = "JFK", destination = "Lisbon", nationality = "American", budgetUsd = "3000")
 
     @Test

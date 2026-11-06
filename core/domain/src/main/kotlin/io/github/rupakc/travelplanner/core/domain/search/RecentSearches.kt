@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.core.domain.search
 
+import io.github.rupakc.travelplanner.core.domain.place.placeName
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearchIn
 import io.github.rupakc.travelplanner.core.model.preferences.RecentStop
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
@@ -88,8 +89,9 @@ fun recentSearchToForm(search: RecentSearchIn, today: LocalDate, base: SearchFor
 data class RecentSearchSummary(val route: String, val dates: String, val interests: List<String>, val travellers: Int)
 
 /** Port of web `describeRecentSearch`; dates use [locale]'s month names ("Apr 1 – Apr 8, 2027" in English). */
-fun describeRecentSearch(search: RecentSearchIn, locale: Locale = Locale.US): RecentSearchSummary {
-    val route = (listOf(search.origin) + search.stops.map { it.city } + search.destination).joinToString(" → ", transform = ::shortCity)
+fun describeRecentSearch(search: RecentSearchIn, locale: Locale = Locale.US, names: Map<String, String> = emptyMap()): RecentSearchSummary {
+    // Airport codes ("LIS") read as the city [names] holds for them ("Lisbon"); unknown codes stay codes.
+    val route = (listOf(search.origin) + search.stops.map { it.city } + search.destination).joinToString(" → ") { shortCity(placeName(it, names)) }
     return RecentSearchSummary(
         route = route,
         dates = formatTripDates(search.departureDate, search.returnDate, locale),
