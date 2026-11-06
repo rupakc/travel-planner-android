@@ -138,12 +138,13 @@ internal fun WatchCard(
     now: Instant,
     callbacks: CardCallbacks,
     modifier: Modifier = Modifier,
+    placeNames: Map<String, String> = emptyMap(),
 ) {
     val past = isPast(item)
     val fare = (item as? AnyWatch.Fare)?.watch
     val price = (item as? AnyWatch.Price)?.watch
     val status = if (fare != null) watchStatus(fare) else watchStatus(price!!)
-    val title = if (fare != null) routeLabel(fare) else price?.title.orEmpty()
+    val title = if (fare != null) routeLabel(fare, placeNames) else price?.title.orEmpty()
     var editing by rememberSaveable(item.key) { mutableStateOf(false) }
     var confirmDelete by rememberSaveable(item.key) { mutableStateOf(false) }
     var saveSent by remember(item.key) { mutableStateOf(false) }
@@ -204,7 +205,7 @@ internal fun WatchCard(
             }
 
             HorizontalDivider(color = TravelTheme.colors.outlineVariant)
-            CardActions(item, past, busy, editing, confirmDelete, callbacks, onEdit = { editing = true }, onConfirmDelete = { confirmDelete = it })
+            CardActions(item, title, past, busy, editing, confirmDelete, callbacks, onEdit = { editing = true }, onConfirmDelete = { confirmDelete = it })
         }
     }
 }
@@ -557,6 +558,7 @@ private fun groupColors(): Map<TripGroup, androidx.compose.ui.graphics.Color> {
 @Composable
 private fun CardActions(
     item: AnyWatch,
+    title: String,
     past: Boolean,
     busy: CardAction?,
     editing: Boolean,
@@ -567,7 +569,6 @@ private fun CardActions(
 ) {
     val fare = (item as? AnyWatch.Fare)?.watch
     val price = (item as? AnyWatch.Price)?.watch
-    val title = fare?.let(::routeLabel) ?: price?.title.orEmpty()
     FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
         if (fare != null && !past) {
             TpButton(stringResource(R.string.alerts_replan_fare), { callbacks.onReplan(false) })

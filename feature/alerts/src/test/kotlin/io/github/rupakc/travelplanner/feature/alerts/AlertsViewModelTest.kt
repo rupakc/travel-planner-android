@@ -4,12 +4,14 @@ import androidx.lifecycle.SavedStateHandle
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertMode
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertTab
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.health.Health
+import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
@@ -80,7 +82,20 @@ class AlertsViewModelTest {
             notifications,
             clock,
             appScope,
+            PlaceNameLookup(search),
         )
+
+    @Test
+    fun `fare routes saved with airport codes show the cities and match them`() =
+        runTest {
+            search.airports = listOf(Airport(iataCode = "JFK", city = "New York"), Airport(iataCode = "LIS", city = "Lisbon"))
+            fares.watches.value = listOf(fare(1).copy(originLabel = "JFK", destinationLabel = "LIS", originCode = "JFK", destinationCode = "LIS"))
+            val vm = vm()
+            advanceUntilIdle()
+            assertEquals(mapOf("JFK" to "New York", "LIS" to "Lisbon"), vm.state.value.placeNames)
+            vm.onEvent(AlertsEvent.Query("lisbon"))
+            assertEquals(1, vm.state.value.shown.size)
+        }
 
     @Test
     fun `loads both lists with tab counts, search and capabilities`() =
@@ -186,6 +201,7 @@ class AlertsViewModelTest {
                     notifications,
                     clock,
                     backgroundScope,
+                    PlaceNameLookup(search),
                 )
             advanceUntilIdle()
             val s = vm.state.value
@@ -239,6 +255,7 @@ class AlertsViewModelTest {
                     notifications,
                     clock,
                     backgroundScope,
+                    PlaceNameLookup(search),
                 )
             advanceUntilIdle()
             vm.onEvent(AlertsEvent.Check("watch-1"))
