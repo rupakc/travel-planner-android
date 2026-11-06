@@ -4,8 +4,10 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -113,14 +115,24 @@ fun SectionScaffold(
                     style = TravelTheme.typography.titleMedium,
                     modifier = Modifier.weight(1f).semantics { heading() },
                 )
-                headerActions()
-                badge?.invoke()
                 Spacer(Modifier.width(TravelTheme.spacing.sm))
                 SectionStatusIndicator(status)
                 Icon(
                     if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
                     contentDescription = null,
                 )
+            }
+            // Actions and the badge wrap on their own line under the title: in one row with the weighted title they
+            // left it a few dp wide on phones ("Flights" one letter per line). Empty = zero height.
+            FlowRow(
+                Modifier
+                    .fillMaxWidth()
+                    .background(accent.tint)
+                    .padding(horizontal = TravelTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
+            ) {
+                headerActions()
+                badge?.invoke()
             }
             AnimatedVisibility(visible = expanded) {
                 Box(Modifier.fillMaxWidth().padding(TravelTheme.spacing.lg)) { content() }

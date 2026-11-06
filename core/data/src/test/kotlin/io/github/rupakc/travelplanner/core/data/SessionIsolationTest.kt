@@ -21,7 +21,9 @@ import io.github.rupakc.travelplanner.core.model.search.StreamPhase
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.model.section.Hotel
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
+import io.github.rupakc.travelplanner.core.model.settings.FeatureOverrides
 import io.github.rupakc.travelplanner.core.model.settings.Session
+import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.network.AuthEvent
 import io.github.rupakc.travelplanner.core.network.AuthEvents
 import io.github.rupakc.travelplanner.core.network.BaseUrlProvider
@@ -29,6 +31,7 @@ import io.github.rupakc.travelplanner.core.network.api.AuthApi
 import io.github.rupakc.travelplanner.core.network.api.DevicesApi
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeLastLocationStore
+import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSessionStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsStore
@@ -85,13 +88,48 @@ class SessionIsolationTest {
             val recent = mockk<RecentSearchDao>(relaxed = true)
             val seen = mockk<SeenNotificationDao>(relaxed = true)
             val cleaner =
-                SessionCleanerImpl(plan, search, NearbyRepositoryImpl(mockk(), SystemAppClock(), FakeLastLocationStore()), planDao, recent, seen, emptySet())
+                SessionCleanerImpl(
+                    plan,
+                    search,
+                    NearbyRepositoryImpl(mockk(), SystemAppClock(), FakeLastLocationStore()),
+                    planDao,
+                    recent,
+                    seen,
+                    emptySet(),
+                    FakeProfileRepository(),
+                )
             cleaner.clearUserData()
             assertNull(plan.draft.value.selections.hotel)
             assertEquals(StreamPhase.IDLE, search.current.value.phase)
             coVerify { planDao.clear() }
             coVerify { recent.clear() }
             coVerify { seen.clear() }
+        }
+
+    /**
+     * Regression (E2E flow 10): after admin signed out, a second account on the same phone skipped onboarding and
+     * got admin's traveller type, quiz answers (incl. accessibility/dietary needs) and feature toggles.
+     */
+    @Test
+    fun `cleaner resets the traveller profile so the next account onboards`() =
+        runTest {
+            val profile =
+                FakeProfileRepository(
+                    TravellerProfile(onboardingCompleted = true, answers = mapOf("needs" to listOf("dietary"))),
+                )
+            profile.setFeature("compare", false)
+            SessionCleanerImpl(
+                FakeCurrentPlanStore(),
+                FakeSearchRepository(),
+                NearbyRepositoryImpl(mockk(), SystemAppClock(), FakeLastLocationStore()),
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                mockk(relaxed = true),
+                emptySet(),
+                profile,
+            ).clearUserData()
+            assertEquals(TravellerProfile(), profile.profileState.value)
+            assertEquals(FeatureOverrides(), profile.overridesState.value)
         }
 
     @Test
@@ -110,6 +148,7 @@ class SessionIsolationTest {
                 mockk(relaxed = true),
                 seen,
                 emptySet(),
+                FakeProfileRepository(),
             )
                 .clearUserData()
             coVerify { seen.clear() }
@@ -176,6 +215,7 @@ class SessionIsolationTest {
         mockk(relaxed = true),
         mockk(relaxed = true),
         extra,
+        FakeProfileRepository(),
     )
 
     private fun lisbon() = FakeLastLocationStore().apply { cell = LocationCell(38.725, -9.125, 0L) }

@@ -13,6 +13,9 @@ Usage:
                     (write 0.8 to simulate a 20 % drop; missing file = 1.0)
     <port>          listens on 127.0.0.1:<port>
 
+GET /__scale?value=<number> rewrites the scale file (used by the instrumented E2E suite,
+which reaches the fake from the emulator at http://10.0.2.2:<port>).
+
 Pair it with tools/e2e/run_backend.py. Contains no secrets; the api_key query
 parameter is discarded.
 """
@@ -75,7 +78,21 @@ def pick(params: dict) -> Path | None:
 
 class H(BaseHTTPRequestHandler):
     def do_GET(self):
-        params = {k: v[0] for k, v in parse_qs(urlparse(self.path).query).items()}
+        url = urlparse(self.path)
+        params = {k: v[0] for k, v in parse_qs(url.query).items()}
+        if url.path == "/__scale":
+            # Test control: GET /__scale?value=0.8 sets the price multiplier (the instrumented
+            # E2E suite runs on the emulator and cannot write the host's scale file).
+            try:
+                SCALE_FILE.write_text(str(float(params["value"])))
+                code, body = 200, b"ok"
+            except (KeyError, ValueError):
+                code, body = 400, b"value must be a number"
+            print(json.dumps({"scale_set": params.get("value")}), flush=True)
+            self.send_response(code)
+            self.end_headers()
+            self.wfile.write(body)
+            return
         params.pop("api_key", None)
         path = pick(params)
         print(json.dumps({"engine": params.get("engine"), "q": params.get("q"),

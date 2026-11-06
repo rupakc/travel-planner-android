@@ -7,10 +7,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -87,7 +92,13 @@ fun GlobalSearchScreen(
     if (autoFocus) LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     Surface(modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-            Column(Modifier.widthIn(max = SearchMaxWidth).fillMaxSize()) {
+            // Full-screen destination outside the shell's top bar: keep clear of the status bar / cutout (edge-to-edge).
+            Column(
+                Modifier
+                    .widthIn(max = SearchMaxWidth)
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
+            ) {
                 Row(
                     Modifier.fillMaxWidth().padding(end = TravelTheme.spacing.gutter, top = TravelTheme.spacing.sm),
                     verticalAlignment = Alignment.CenterVertically,
