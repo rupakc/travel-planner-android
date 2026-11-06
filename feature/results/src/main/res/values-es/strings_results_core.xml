@@ -252,6 +252,7 @@
     <string name="results_saved_no_results">Este viaje guardado aún no tiene resultados en este dispositivo.</string>
     <string name="results_search_again">Buscar de nuevo</string>
     <string name="results_search_clear">Borrar búsqueda</string>
+    <string name="results_jump_to">Ir a %1$s</string>
     <string name="results_search_label">Buscar en tus resultados</string>
     <string name="results_section_more">Más</string>
     <string name="results_section_not_loaded">Aún no se ha cargado para este viaje.</string>
