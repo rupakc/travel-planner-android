@@ -4,6 +4,32 @@ There is no release keystore yet. The `release` build type is signed with the **
 `assembleProdRelease` (R8 full mode, resource shrinking) and catch shrinker problems early. That APK must never
 be published.
 
+## Building a release APK
+
+Release APKs for distribution (sideloading, sharing, testers) must come from `scripts/build-release-apk.sh` or from CI,
+**never from an incremental local build**. The script runs `./gradlew clean`, then `assembleProdRelease` with
+`--no-build-cache --rerun-tasks` plus `:app:verifyHiltViewModelsProdRelease` and `:app:verifyReleaseKeepRules`, and prints the APK path,
+version and SHA-256. Extra arguments go to Gradle (e.g. `scripts/build-release-apk.sh -PPROD_BASE_URL=https://host`).
+
+Why: a locally built release APK once crashed right after sign-in (`Cannot create an instance of class sv3` /
+`NoSuchMethodException: <init> []`). The KSP output for `:feature:alerts` lacked the Hilt aggregated deps of
+`NotificationBellViewModel` and `NotificationsViewModel`, so the app's Hilt component never bound them and
+`hiltViewModel()` fell back to the no-arg factory. Root cause: KSP 2.3.13 (KSP2, in-process) silently writes empty or
+partial output when several KSP tasks run at once; the task still succeeds. Reproduced on clean, `--no-build-cache`
+builds locally and in CI; with KSP serialized every output is complete. Defences:
+
+- **KSP tasks are serialized and never build-cached** (`build-logic` `configureKspSafety`: a shared build service with
+  `maxParallelUsages = 1`, `cacheIf { false }`, never up to date with an empty output), so an incomplete output can
+  neither happen nor spread through the build cache (local or CI), and an earlier empty run cannot look up to date
+  after `clean`. Measured cost: none (a clean `--no-build-cache assembleLocalDebug` took 28–29 s serialized vs
+  32–41 s parallel, and every parallel run was broken).
+- `ksp.incremental=false` in `gradle.properties`, as defence in depth (cost within noise).
+- `verifyHiltViewModels<Variant>` (every variant; `assemble`, `bundle` and `package` depend on it) collects every
+  `@HiltViewModel` in all modules' `src/main` and fails unless each one is bound in the variant's generated
+  `*_HiltComponents_SingletonC.java`; release variants also require its R8 name to be a string in the shrunk dex (the
+  key Hilt's `LazyClassKey` map looks up). The failure names the missing ViewModels; fix with `./gradlew clean` and a
+  rebuild. The pure checks live in `build-logic` (`HiltViewModelGuard`, tested by `./gradlew :build-logic:convention:test`).
+
 ## Versioning
 
 `versionCode` and `versionName` are set in `app/build.gradle.kts` (currently 1 and `0.1.0`). Bump `versionCode` on every upload

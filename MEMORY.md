@@ -148,6 +148,7 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-05 **Doc link check** - `scripts/check-doc-links.sh` verifies relative links (CI runs it); pages owned by other teams (Firebase-Setup, Onboarding-and-Traveller-Types) are allowed to be missing until they merge.
 - 2026-11-05 **Doc link check** - both pages are merged; the PENDING list is empty (supersedes the line above), so a missing page now fails CI.
 - 2026-11-05 **Claude Code settings** - `.claude/settings.json` allows only read-only gradle/adb/git commands; build and install commands still prompt.
+- 2026-11-09 **Release build guard** - a local release APK crashed after sign-in: KSP output for :feature:alerts lacked NotificationBellViewModel/NotificationsViewModel. Root cause: KSP 2.3.13 silently writes empty/partial output when KSP tasks run concurrently (reproduced on clean no-cache builds locally and in CI; serialized runs always complete). Fix: KSP tasks share a `maxParallelUsages = 1` build service and are not build-cached (`configureKspSafety`), `ksp.incremental=false` as defence in depth, `verifyHiltViewModels<Variant>` gates every variant's assemble/bundle/package (component source; release also R8 dex). No measurable build-time cost. Release APKs only via `scripts/build-release-apk.sh` or CI.
 - 2026-11-05 **Pseudo-locales** - enabled on the debug build type by the convention plugin; documented in Localization.
 
 ## Open items
