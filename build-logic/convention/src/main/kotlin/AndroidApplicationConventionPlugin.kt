@@ -49,15 +49,22 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
      * the R8 dex.
      */
     private fun Project.registerHiltViewModelGuard() {
-        val sourceTree =
-            rootProject.fileTree(rootProject.layout.projectDirectory) {
-                include("**/src/main/**/*.kt", "**/src/main/**/*.java")
-                exclude("**/build/**", "build-logic/**", ".gradle/**")
-            }
+        // Only the Gradle modules' own directories (never .git, worktrees or other checkouts under the repo root).
+        val moduleDirs = rootProject.allprojects.filter { it != rootProject }.map { it.projectDir }
         extensions.configure<ApplicationAndroidComponentsExtension> {
             onVariants { variant ->
                 val cap = variant.name.replaceFirstChar(Char::uppercase)
-                val minified = variant.buildType == "release"
+                // The source sets that ship in this variant: main, flavour, build type and the variant itself.
+                val sourceSets = listOfNotNull("main", variant.flavorName?.takeIf { it.isNotEmpty() }, variant.buildType, variant.name).distinct()
+                val sourceTree =
+                    files(
+                        moduleDirs.map { dir ->
+                            fileTree(dir) {
+                                sourceSets.forEach { set -> include("src/$set/**/*.kt", "src/$set/**/*.java") }
+                            }
+                        },
+                    )
+                val minified = variant.isMinifyEnabled
                 val guard =
                     tasks.register<VerifyHiltViewModelsTask>("verifyHiltViewModels$cap") {
                         group = "verification"
@@ -74,7 +81,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     }
                 // Packaging too, so a broken APK/AAB is never even written to build/outputs.
                 val gated = setOf("assemble$cap", "bundle$cap", "package$cap", "package${cap}Bundle")
-                tasks.matching { it.name in gated }.configureEach { dependsOn(guard) }
+                tasks.named { it in gated }.configureEach { dependsOn(guard) }
             }
         }
     }

@@ -18,11 +18,11 @@ import org.gradle.api.tasks.TaskAction
 /**
  * Fails a build whose app does not bind every `@HiltViewModel` declared in the project (see [HiltViewModelGuard]).
  * Wired by `travelplanner.android.application` so `assemble`/`bundle`/`package<Variant>` of every variant depend on it;
- * minified (release) variants also get the R8 dex check.
+ * minified variants also get the R8 dex check.
  */
 @CacheableTask
 abstract class VerifyHiltViewModelsTask : DefaultTask() {
-    /** Kotlin/Java sources of every module's `src/main`. */
+    /** Kotlin/Java sources of every module's shipping source sets for this variant (main, flavour, build type, variant). */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sources: ConfigurableFileCollection
@@ -32,7 +32,7 @@ abstract class VerifyHiltViewModelsTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val componentSources: ConfigurableFileCollection
 
-    /** R8 `mapping.txt` of the variant; absent for non-minified (debug) variants, which skip the dex check. */
+    /** R8 `mapping.txt` of the variant; absent for non-minified variants, which skip the dex check. */
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.NONE)

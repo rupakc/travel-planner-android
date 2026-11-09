@@ -18,8 +18,12 @@ abstract class KspSerialService : BuildService<BuildServiceParameters.None>
  *
  * So every KSP task (a) shares [KspSerialService] (`maxParallelUsages = 1`), (b) is never stored in or loaded from
  * the build cache, so an incomplete output can never spread to other builds or CI, and (c) is never up to date with an
- * empty output. Remove both once KSP fixes concurrent
- * execution (check with `verifyHiltViewModels<Variant>` on a parallel build with KSP tasks executing).
+ * empty output. (c) covers only the empty case: a partial but non-empty output from an earlier run still looks up to date
+ * until the inputs change or `clean` runs; `verifyHiltViewModels<Variant>` catches it (missing ViewModels fail the
+ * build) and `scripts/build-release-apk.sh` always cleans and reruns. The empty check looks at the task's declared
+ * outputs, which are only the generated kotlin/java/class/resource dirs: the KSP caches dir is `@LocalState`, not an
+ * output, so it cannot make an empty run look non-empty. Remove all of this once KSP fixes concurrent execution (check
+ * with `verifyHiltViewModels<Variant>` on a parallel build with KSP tasks executing).
  */
 internal fun Project.configureKspSafety() {
     pluginManager.withPlugin("com.google.devtools.ksp") {

@@ -73,7 +73,7 @@ class HiltViewModelGuardTest {
     }
 
     @Test
-    fun `dex check reports R8-removed and unkeyed ViewModels`() {
+    fun `dex check reports R8-removed, missing-class and unkeyed ViewModels`() {
         val mapping =
             HiltViewModelGuard.parseMapping(
                 sequenceOf(
@@ -81,13 +81,74 @@ class HiltViewModelGuardTest {
                     "a.HomeViewModel -> b1:",
                     "    int x -> a",
                     "a.BellViewModel -> sv3:",
+                    "a.ChatViewModel -> x.y.cz9:",
+                    "a.Outer\$InnerViewModel -> qq7:",
                 ),
             )
-        val strings = HiltViewModelGuard.dexStrings(dex("Lb1;", "b1", "Lsv3;", "hello"))
+        // b1 is too short for the key check (only its class must exist); qq7 is fully present.
+        val strings = HiltViewModelGuard.dexStrings(dex("Lb1;", "Lsv3;", "Lqq7;", "qq7", "hello"))
 
-        val missing = HiltViewModelGuard.missingFromDex(listOf("a.HomeViewModel", "a.BellViewModel", "a.GoneViewModel"), mapping, strings)
+        val missing =
+            HiltViewModelGuard.missingFromDex(
+                listOf("a.HomeViewModel", "a.BellViewModel", "a.ChatViewModel", "a.GoneViewModel", "a.Outer\$InnerViewModel"),
+                mapping,
+                strings,
+            )
 
-        assertEquals(listOf("a.BellViewModel (R8 name sv3 is not a dex string)", "a.GoneViewModel (removed by R8)"), missing)
+        assertEquals(
+            listOf(
+                "a.BellViewModel (R8 name sv3 is not a dex string)",
+                "a.ChatViewModel (R8 class x.y.cz9 is not in the dex)",
+                "a.GoneViewModel (removed by R8)",
+            ),
+            missing,
+        )
+    }
+
+    @Test
+    fun `finds nested ViewModels and ignores braces in strings and functions`() {
+        val source =
+            """
+            package io.example
+
+            class Outer {
+                val s = "{ not a scope"
+                fun helper() { if (true) { } }
+
+                @HiltViewModel
+                class InnerViewModel @Inject constructor() : ViewModel() {
+                    companion object {
+                        const val X = '}'
+                    }
+                }
+
+                object Holder {
+                    @HiltViewModel class DeepViewModel @Inject constructor() : ViewModel()
+                }
+            }
+
+            @HiltViewModel
+            class TopViewModel @Inject constructor() : ViewModel()
+            """.trimIndent()
+
+        assertEquals(
+            listOf("io.example.Outer\$InnerViewModel", "io.example.Outer\$Holder\$DeepViewModel", "io.example.TopViewModel"),
+            HiltViewModelGuard.findHiltViewModels(source),
+        )
+    }
+
+    @Test
+    fun `component check maps nested ViewModels to Hilt's underscore names`() {
+        val component =
+            """
+            package app;
+            import io.example.Outer_InnerViewModel_HiltModules_KeyModule_Provide_LazyMapKey;
+            """.trimIndent()
+
+        val missing =
+            HiltViewModelGuard.missingFromComponent(listOf("io.example.Outer\$InnerViewModel", "io.example.Outer\$OtherViewModel"), component)
+
+        assertEquals(listOf("io.example.Outer\$OtherViewModel"), missing)
     }
 
     @Test

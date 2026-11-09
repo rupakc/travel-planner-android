@@ -13,34 +13,69 @@ import java.nio.ByteOrder
 object HiltViewModelGuard {
     private val blockComment = Regex("""/\*[\s\S]*?\*/""")
     private val lineComment = Regex("""//[^\n]*""")
+    private val stringLiteral = Regex("\"\"\"[\\s\\S]*?\"\"\"|\"(?:\\\\.|[^\"\\\\\n])*\"|'(?:\\\\.|[^'\\\\\n])+'")
     private val packageDecl = Regex("""^\s*package\s+([\w.]+)""", RegexOption.MULTILINE)
 
-    // The annotation, optional arguments (e.g. assistedFactory = X::class), then the next class declaration.
-    private val hiltViewModel = Regex("""@(?:dagger\.hilt\.android\.lifecycle\.)?HiltViewModel\b(?:\s*\([^)]*\))?[\s\S]*?(?<!::)\bclass\s+(\w+)""")
+    // Tokens that matter for nesting: the annotation, type declarations (with the name, or `companion object`),
+    // functions (their braces are not a class body) and braces.
+    private val token =
+        Regex(
+            """@(?:dagger\.hilt\.android\.lifecycle\.)?HiltViewModel\b|(?<![\w:])(?:class|interface|object)\s+(\w+)|""" +
+                """\bcompanion\s+object\b|\bfun\b|[{}]""",
+        )
     private val mappingClass = Regex("""^(\S+) -> (\S+):$""")
+    private const val KEY_SUFFIX = "_HiltModules_KeyModule_Provide_LazyMapKey"
 
-    /** Fully qualified names of the `@HiltViewModel` classes declared in one Kotlin or Java [source] file. */
+    /**
+     * Binary names (`pkg.Outer${'$'}Inner`) of the `@HiltViewModel` classes declared in one Kotlin or Java [source] file,
+     * nested classes included. Comments and string literals are ignored.
+     */
     fun findHiltViewModels(source: String): List<String> {
-        val code = source.replace(blockComment, "").replace(lineComment, "")
-        val pkg = packageDecl.find(code)?.groupValues?.get(1)
-        return hiltViewModel.findAll(code).map { m ->
-            val name = m.groupValues[1]
-            if (pkg.isNullOrEmpty()) name else "$pkg.$name"
-        }.toList()
+        val code = source.replace(blockComment, " ").replace(lineComment, " ").replace(stringLiteral, "\"\"")
+        val scanner = NestingScanner(packageDecl.find(code)?.groupValues?.get(1).orEmpty())
+        token.findAll(code).forEach(scanner::accept)
+        return scanner.found
+    }
+
+    /** Tracks enclosing type names through braces; records annotated classes as binary names. */
+    private class NestingScanner(private val pkg: String) {
+        val found = mutableListOf<String>()
+        private val scopes = ArrayDeque<String?>() // enclosing brace scopes: a type name, or null for any other block
+        private var pending: String? = null // declared type whose body `{` has not been seen yet
+        private var annotated = false
+
+        fun accept(m: MatchResult) {
+            when (val text = m.value) {
+                "{" -> scopes.addLast(pending).also { pending = null }
+                "}" -> scopes.removeLastOrNull().also { pending = null }
+                "fun" -> pending = null
+                else -> if (text.startsWith("@")) annotated = true else declare(text, m.groupValues[1].ifEmpty { "Companion" })
+            }
+        }
+
+        private fun declare(text: String, name: String) {
+            if (annotated && text.startsWith("class")) {
+                val path = (scopes.filterNotNull() + name).joinToString("$")
+                found += if (pkg.isEmpty()) path else "$pkg.$path"
+            }
+            annotated = false
+            pending = name
+        }
     }
 
     /**
      * ViewModels that the generated `*_HiltComponents_SingletonC.java` ([componentSource]) does not bind. Dagger writes
-     * `<fqn>_HiltModules_KeyModule_Provide_LazyMapKey` as an import, or inline when the simple name clashes; a ViewModel in
-     * the component's own package is referenced by its simple name only.
+     * `<pkg>.<Outer_Inner>_HiltModules_KeyModule_Provide_LazyMapKey` as an import, or inline when the simple name clashes;
+     * a ViewModel in the component's own package is referenced by its simple name only.
      */
     fun missingFromComponent(viewModels: Collection<String>, componentSource: String): List<String> {
         val componentPackage = packageDecl.find(componentSource)?.groupValues?.get(1).orEmpty()
         return viewModels.filterNot { vm ->
-            val key = "_HiltModules_KeyModule_Provide_LazyMapKey"
-            val samePackage = vm.substringBeforeLast('.', "") == componentPackage
-            componentSource.contains("$vm$key") ||
-                (samePackage && Regex("""(?<![\w.])${Regex.escape(vm.substringAfterLast('.') + key)}\b""").containsMatchIn(componentSource))
+            val pkg = vm.substringBeforeLast('.', "")
+            val hiltName = vm.substringAfterLast('.').replace('$', '_')
+            val qualified = if (pkg.isEmpty()) hiltName else "$pkg.$hiltName"
+            componentSource.contains("$qualified$KEY_SUFFIX") ||
+                (pkg == componentPackage && Regex("""(?<![\w.])${Regex.escape(hiltName + KEY_SUFFIX)}\b""").containsMatchIn(componentSource))
         }.sorted()
     }
 
@@ -49,19 +84,25 @@ object HiltViewModelGuard {
         mapping.mapNotNull { mappingClass.matchEntire(it) }.associate { it.groupValues[1] to it.groupValues[2] }
 
     /**
-     * ViewModels missing from the shrunk app: removed by R8, or whose (obfuscated) name is not a dex string. Hilt looks
-     * ViewModels up by that string (R8 rewrites `lazyClassKeyName` through `-identifiernamestring`), so a missing string
-     * means the factory cannot find the class at runtime.
+     * ViewModels missing from the shrunk app. Each must (a) be kept by R8 (in [mapping]), (b) exist as a class in the dex
+     * (its type descriptor `L<r8/name>;` is a dex string) and (c) have its R8 binary name as an exact dex string: that is
+     * the key Hilt's `LazyClassKey` map looks up (R8 rewrites `lazyClassKeyName` through `-identifiernamestring`). For
+     * R8 names shorter than [MIN_KEY_LENGTH] characters (c) is skipped, because such a short string may exist for an
+     * unrelated reason and would prove nothing; the component check still covers those ViewModels.
      */
     fun missingFromDex(viewModels: Collection<String>, mapping: Map<String, String>, dexStrings: Set<String>): List<String> =
         viewModels.mapNotNull { vm ->
             val obfuscated = mapping[vm]
             when {
                 obfuscated == null -> "$vm (removed by R8)"
-                obfuscated !in dexStrings -> "$vm (R8 name $obfuscated is not a dex string)"
+                "L${obfuscated.replace('.', '/')};" !in dexStrings -> "$vm (R8 class $obfuscated is not in the dex)"
+                obfuscated.length >= MIN_KEY_LENGTH && obfuscated !in dexStrings -> "$vm (R8 name $obfuscated is not a dex string)"
                 else -> null
             }
         }.sorted()
+
+    /** Shortest R8 name for which the exact-string key check is meaningful. */
+    const val MIN_KEY_LENGTH = 3
 
     /**
      * Every entry of a dex file's string table (header `string_ids_size` at 0x38, `string_ids_off` at 0x3C; each id
