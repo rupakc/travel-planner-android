@@ -14,9 +14,10 @@ if (hasGoogleServices) apply(plugin = libs.plugins.google.services.get().pluginI
 
 val prodBaseUrl: String = providers.gradleProperty("PROD_BASE_URL").orElse("").get()
 
-// Release signing (docs/Release.md): environment variables (CI) or a git-ignored keystore.properties (local). Without
-// either, release stays signed with the debug key so local and PR builds keep working. CI release builds pass
-// -PVOYAGER_REQUIRE_RELEASE_SIGNING=true, which turns that fallback into a build failure.
+// Release signing (docs/Release.md): environment variables or a git-ignored keystore.properties (local). Without either,
+// release stays signed with the debug key so local and PR builds keep working; -PVOYAGER_REQUIRE_RELEASE_SIGNING=true
+// turns that fallback into a build failure. -PVOYAGER_UNSIGNED_RELEASE=true builds release unsigned instead: CI does
+// that and signs with apksigner in a separate step, so the key password never reaches Gradle.
 val keystoreProps =
     Properties().apply {
         providers.fileContents(rootProject.layout.projectDirectory.file("keystore.properties")).asText.orNull?.let { load(it.reader()) }
@@ -31,7 +32,9 @@ val releaseKeyAlias = signingValue("VOYAGER_KEY_ALIAS", "keyAlias")
 val releaseKeyPassword = signingValue("VOYAGER_KEY_PASSWORD", "keyPassword") ?: releaseStorePassword
 val hasReleaseKey = releaseStoreFile != null && releaseStorePassword != null && releaseKeyAlias != null
 val requireReleaseKey = providers.gradleProperty("VOYAGER_REQUIRE_RELEASE_SIGNING").orNull == "true"
-check(hasReleaseKey || !requireReleaseKey) {
+val unsignedRelease = providers.gradleProperty("VOYAGER_UNSIGNED_RELEASE").orNull == "true"
+check(!(unsignedRelease && requireReleaseKey)) { "VOYAGER_UNSIGNED_RELEASE and VOYAGER_REQUIRE_RELEASE_SIGNING are mutually exclusive" }
+check(unsignedRelease || hasReleaseKey || !requireReleaseKey) {
     "VOYAGER_REQUIRE_RELEASE_SIGNING=true but no release key: set VOYAGER_KEYSTORE_FILE, VOYAGER_KEYSTORE_PASSWORD and VOYAGER_KEY_ALIAS"
 }
 
@@ -57,7 +60,9 @@ android {
         resValues = true
     }
 
-    if (hasReleaseKey) {
+    if (unsignedRelease) {
+        buildTypes.getByName("release").signingConfig = null
+    } else if (hasReleaseKey) {
         signingConfigs {
             create("release") {
                 storeFile = rootProject.file(releaseStoreFile!!)

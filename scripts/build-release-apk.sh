@@ -35,15 +35,15 @@ echo "APK:     $(cd "$(dirname "$apk")" && pwd)/$(basename "$apk")"
 echo "Version: ${version:-?} (versionCode ${code:-?})"
 echo "SHA-256: $sha"
 
-# Signer: apksigner from the newest installed build-tools, when available.
-sdk=${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}
-if [[ -z "$sdk" && -f local.properties ]]; then
-  sdk=$(sed -n 's/^sdk.dir=//p' local.properties)
+if [[ "$apk" == *-unsigned.apk ]]; then
+  echo "Unsigned (-PVOYAGER_UNSIGNED_RELEASE=true): sign it with scripts/sign-release-apk.sh."
+  exit 0
 fi
-apksigner=$(find "${sdk:-/nonexistent}/build-tools" -name apksigner -type f 2>/dev/null | sort -V | tail -n 1 || true)
-if [[ -n "$apksigner" ]]; then
-  cert=$("$apksigner" verify --print-certs "$apk" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')
-  echo "Signer:  SHA-256 $cert"
+# shellcheck source=scripts/lib/build-tools.sh
+source scripts/lib/build-tools.sh
+if bt=$(build_tools_dir 2>/dev/null); then
+  cert=$("$bt/apksigner" verify --print-certs "$apk" 2>/dev/null | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' || true)
+  echo "Signer:  SHA-256 ${cert:-?}"
 fi
 if [[ -n "${VOYAGER_KEYSTORE_FILE:-}" || -f keystore.properties ]]; then
   echo "Signed with the release key (VOYAGER_KEYSTORE_FILE or keystore.properties)."
