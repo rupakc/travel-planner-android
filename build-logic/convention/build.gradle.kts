@@ -15,6 +15,7 @@ dependencies {
     compileOnly(libs.compose.gradle.plugin)
     compileOnly(libs.ksp.gradle.plugin)
     compileOnly(libs.room.gradle.plugin)
+    testImplementation(libs.junit)
 }
 
 tasks {
