@@ -18,17 +18,26 @@ expected=$(tr -d ':' <<<"$2" | tr '[:lower:]' '[:upper:]')
 source "$(dirname "$0")/lib/build-tools.sh"
 bt=$(build_tools_dir)
 
+out=""
 fail() {
   echo "::error::$*" >&2
+  # Signer and scheme lines only (public certificate data, never key material), so a failure explains itself
+  if [[ -n "$out" ]]; then
+    grep -E '^(Verified using|Number of signers|Signer)' <<<"$out" | grep -vE 'public key|MD5|SHA-1' >&2 || true
+  fi
   exit 1
 }
 
-out=$("$bt/apksigner" verify --verbose --print-certs "$apk" 2>/dev/null) || fail "apksigner verify failed for $apk"
+echo "apksigner: $bt/apksigner" >&2
+out=$("$bt/apksigner" verify --verbose --print-certs "$apk" 2>&1) || fail "apksigner verify failed for $apk"
 grep -qx 'Verified using v2 scheme (APK Signature Scheme v2): true' <<<"$out" || fail "APK is not signed with scheme v2"
 grep -qx 'Verified using v3 scheme (APK Signature Scheme v3): true' <<<"$out" || fail "APK is not signed with scheme v3"
 signers=$(sed -n 's/^Number of signers: //p' <<<"$out")
 [[ "$signers" == 1 ]] || fail "expected exactly one signer, found '${signers:-0}'"
-digests=$(sed -nE 's/^Signer( #[0-9]+| \([^)]*\))? certificate SHA-256 digest: ([0-9a-fA-F]+)$/\2/p' <<<"$out" | tr '[:lower:]' '[:upper:]')
+# Hex with or without colons, CRLF-safe (apksigner versions differ in format)
+digests=$(tr -d '\r' <<<"$out" |
+  sed -nE 's/^Signer( #[0-9]+| \([^)]*\))? certificate SHA-256 digest: *([0-9a-fA-F:]+) *$/\2/p' |
+  tr -d ':' | tr '[:lower:]' '[:upper:]')
 count=$(grep -c . <<<"$digests" || true)
 [[ "$count" -ge 1 ]] || fail "no signer certificate found"
 while read -r digest; do
