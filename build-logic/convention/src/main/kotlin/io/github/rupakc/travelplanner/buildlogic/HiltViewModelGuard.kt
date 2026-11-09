@@ -7,8 +7,8 @@ import java.nio.ByteOrder
  * Pure checks behind `verifyHiltViewModels<Variant>`: every `@HiltViewModel` declared in the sources must be bound in
  * the variant's generated Hilt component and survive R8 as a key in Hilt's `LazyClassKey` map.
  *
- * Background: a stale incremental KSP output once dropped two ViewModels from the release component; the APK built,
- * then crashed on the home screen (`NoSuchMethodException: <init> []` from the default ViewModel factory).
+ * Background: incomplete KSP output (see [configureKspSafety]) once dropped two ViewModels from the release component;
+ * the APK built, then crashed on the home screen (`NoSuchMethodException: <init> []` from the default ViewModel factory).
  */
 object HiltViewModelGuard {
     private val blockComment = Regex("""/\*[\s\S]*?\*/""")
@@ -95,7 +95,7 @@ object HiltViewModelGuard {
             appendLine("Hilt ViewModel guard failed for variant '$variant': this build would crash with")
             appendLine("'Cannot create an instance of class ...' when a missing ViewModel is first shown.")
             if (missingInComponent.isNotEmpty()) {
-                appendLine("Not bound in the generated Hilt component (stale KSP/Hilt output):")
+                appendLine("Not bound in the generated Hilt component (missing or incomplete KSP/Hilt output):")
                 missingInComponent.forEach { appendLine("  - $it") }
             }
             if (missingInDex.isNotEmpty()) {

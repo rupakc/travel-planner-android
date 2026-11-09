@@ -44,8 +44,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
     }
 
     /**
-     * `verifyHiltViewModels<Variant>` for every release variant; `assemble`/`bundle`/`package<Variant>` depend on it,
-     * so an APK/AAB whose Hilt graph lost a ViewModel (stale incremental KSP output) can never be produced.
+     * `verifyHiltViewModels<Variant>` for every variant; `assemble`/`bundle`/`package<Variant>` depend on it, so an
+     * APK/AAB whose Hilt graph lost a ViewModel (incomplete KSP output) is never written. Release variants also check
+     * the R8 dex.
      */
     private fun Project.registerHiltViewModelGuard() {
         val sourceTree =
@@ -54,18 +55,21 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 exclude("**/build/**", "build-logic/**", ".gradle/**")
             }
         extensions.configure<ApplicationAndroidComponentsExtension> {
-            onVariants(selector().withBuildType("release")) { variant ->
+            onVariants { variant ->
                 val cap = variant.name.replaceFirstChar(Char::uppercase)
+                val minified = variant.buildType == "release"
                 val guard =
                     tasks.register<VerifyHiltViewModelsTask>("verifyHiltViewModels$cap") {
                         group = "verification"
-                        description = "Checks that every @HiltViewModel is bound in the ${variant.name} Hilt component and R8 dex."
+                        description = "Checks that every @HiltViewModel is bound in the ${variant.name} Hilt component" + if (minified) " and R8 dex." else "."
                         variantName.set(variant.name)
                         sources.from(sourceTree)
                         componentSources.from(layout.buildDirectory.dir("generated/hilt/component_sources/${variant.name}"))
                         dependsOn("hiltJavaCompile$cap")
-                        mappingFile.set(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
-                        dexFiles.from(files(tasks.named("minify${cap}WithR8")).asFileTree.matching { include("**/*.dex") })
+                        if (minified) {
+                            mappingFile.set(variant.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE))
+                            dexFiles.from(files(tasks.named("minify${cap}WithR8")).asFileTree.matching { include("**/*.dex") })
+                        }
                         report.set(layout.buildDirectory.file("reports/hilt-viewmodels/${variant.name}.txt"))
                     }
                 // Packaging too, so a broken APK/AAB is never even written to build/outputs.

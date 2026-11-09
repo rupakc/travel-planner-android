@@ -54,6 +54,7 @@ internal val LINT_DISABLED =
     )
 
 internal fun Project.configureAndroidCommon(ext: CommonExtension) {
+    configureKspSafety()
     ext.compileSdk = Sdk.COMPILE
     ext.defaultConfig.minSdk = Sdk.MIN
     ext.compileOptions.sourceCompatibility = JavaVersion.VERSION_21
