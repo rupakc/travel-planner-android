@@ -12,6 +12,10 @@ permissions:
   contents: read
 
 # PR runs cancel superseded ones; main runs queue instead, so two pushes never race the same release.
+env:
+  # Expected signer of every published APK (the Voyager upload key). A mismatch fails the publishing jobs.
+  EXPECTED_CERT_SHA256: "1C:B8:29:4D:D5:7B:8D:E7:7D:B2:77:99:F3:1A:86:3C:F8:97:56:D1:CC:E6:02:34:C8:E5:85:50:6E:1E:38:B0"
+
 concurrency:
   group: android-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -94,9 +98,6 @@ jobs:
     outputs:
       version-name: ${{ steps.version.outputs.name }}
       version-code: ${{ steps.version.outputs.code }}
-    env:
-      # Expected signer of every published APK (the Voyager upload key). A mismatch fails the job.
-      EXPECTED_CERT_SHA256: "1C:B8:29:4D:D5:7B:8D:E7:7D:B2:77:99:F3:1A:86:3C:F8:97:56:D1:CC:E6:02:34:C8:E5:85:50:6E:1E:38:B0"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -192,7 +193,8 @@ jobs:
           cp "$RUNNER_TEMP/Voyager-signed.apk" "dist/Voyager-$VERSION_NAME.apk"
           (cd dist && sha256sum "Voyager-$VERSION_NAME.apk" > "Voyager-$VERSION_NAME.apk.sha256")
           cat "dist/Voyager-$VERSION_NAME.apk.sha256"
-          PREV_TAG=$(git describe --tags --abbrev=0 --match 'android-v*' HEAD 2>/dev/null || true)
+          # Excluding this run's own tag: on a re-run it already points at HEAD and would empty the change list.
+          PREV_TAG=$(git describe --tags --abbrev=0 --match 'android-v*' --exclude "android-v$VERSION_NAME" HEAD 2>/dev/null || true)
           APK_SHA256=$(cut -d' ' -f1 "dist/Voyager-$VERSION_NAME.apk.sha256")
           export PREV_TAG APK_SHA256 CERT_SHA256="$EXPECTED_CERT_SHA256"
           scripts/release-notes.sh > dist/notes.md
@@ -232,6 +234,15 @@ jobs:
           name: voyager-release-apk
           path: dist
 
+      # Re-check what was downloaded before publishing it (runner's preinstalled Android SDK).
+      - name: Verify downloaded APK
+        env:
+          VERSION_NAME: ${{ needs.release-apk.outputs.version-name }}
+          VERSION_CODE: ${{ needs.release-apk.outputs.version-code }}
+        run: |
+          (cd dist && sha256sum --check --strict "Voyager-$VERSION_NAME.apk.sha256")
+          scripts/verify-apk.sh "dist/Voyager-$VERSION_NAME.apk" "$EXPECTED_CERT_SHA256" "$VERSION_CODE" "$VERSION_NAME"
+
       - name: Install oras
         run: |
           curl -fsSLo "$RUNNER_TEMP/oras.tar.gz" "https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz"
@@ -256,9 +267,15 @@ jobs:
           head=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
           bodies=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases" --jq ".[] | select(.tag_name != \"android-v$VERSION_NAME\") | .body")
           codes=$(sed -nE 's/^<!-- voyager-version-code: ([0-9]+) -->\r?$/\1/p' <<<"$bodies")
-          # The current :latest (absent on the first push).
-          if manifest=$(oras manifest fetch "$IMAGE:latest" 2>/dev/null); then
+          # The current :latest: "not found" (first push) is fine; any other error fails closed.
+          if manifest=$(oras manifest fetch "$IMAGE:latest" 2>"$RUNNER_TEMP/oras.err"); then
             codes+=$'\n'$(jq -r '.annotations["io.github.rupakc.voyager.version-code"] // empty' <<<"$manifest")
+          elif grep -qiE ': not found$|manifest unknown|name unknown' "$RUNNER_TEMP/oras.err"; then
+            echo "No $IMAGE:latest yet."
+          else
+            cat "$RUNNER_TEMP/oras.err" >&2
+            echo "::error::Could not read $IMAGE:latest; not moving :latest."
+            exit 1
           fi
           mapfile -t published < <(grep -E '^[0-9]+$' <<<"$codes" || true)
           latest=$(scripts/release-decision.sh "$GITHUB_SHA" "$head" "$VERSION_CODE" "${published[@]}")
@@ -314,6 +331,15 @@ jobs:
           name: voyager-release-apk
           path: dist
 
+      # Re-check what was downloaded before publishing it (runner's preinstalled Android SDK).
+      - name: Verify downloaded APK
+        env:
+          VERSION_NAME: ${{ needs.release-apk.outputs.version-name }}
+          VERSION_CODE: ${{ needs.release-apk.outputs.version-code }}
+        run: |
+          (cd dist && sha256sum --check --strict "Voyager-$VERSION_NAME.apk.sha256")
+          scripts/verify-apk.sh "dist/Voyager-$VERSION_NAME.apk" "$EXPECTED_CERT_SHA256" "$VERSION_CODE" "$VERSION_NAME"
+
       - name: Create or update release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -336,7 +362,19 @@ jobs:
           latest=$(scripts/release-decision.sh "$GITHUB_SHA" "$head" "$VERSION_CODE" "${published[@]}")
 
           assets=("dist/Voyager-$VERSION_NAME.apk" "dist/Voyager-$VERSION_NAME.apk.sha256")
-          if tag_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/$tag" --jq .sha 2>/dev/null); then
+          # The tag's commit: 404 means no tag yet; any other API error fails (never reuse a tag blindly).
+          tag_sha=
+          if ref=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" 2>"$RUNNER_TEMP/gh.err"); then
+            tag_sha=$(jq -r .object.sha <<<"$ref")
+            if [[ "$(jq -r .object.type <<<"$ref")" == tag ]]; then # annotated tag: dereference
+              tag_sha=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag_sha" --jq .object.sha)
+            fi
+          elif ! grep -q 'HTTP 404' "$RUNNER_TEMP/gh.err"; then
+            cat "$RUNNER_TEMP/gh.err" >&2
+            echo "::error::Could not check whether tag $tag exists; refusing to publish."
+            exit 1
+          fi
+          if [[ -n "$tag_sha" ]]; then
             if [[ "$tag_sha" != "$GITHUB_SHA" ]]; then
               echo "::error::Tag $tag already exists on $tag_sha, not on this run's commit $GITHUB_SHA; refusing to publish."
               exit 1

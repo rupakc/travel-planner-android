@@ -23,8 +23,7 @@ Check the signer before installing by hand: `apksigner verify --print-certs Voya
    a wrong certificate, a wrong versionCode and an unsigned APK are rejected. So a broken release config fails on the PR.
    The publishing jobs `need` `build`, so nothing is published if any check fails. `main` runs queue (no cancellation).
 2. The three publishing jobs run in the GitHub Environment **`release`**, whose deployment branch policy allows only
-   `main`. The secrets are still repository secrets referenced from those jobs; the owner can move them into the
-   environment (Settings -> Environments -> release) for extra hardening without changing the workflow.
+   `main`. The signing secrets are environment secrets of `release` (no repository-level copies).
 3. `release-apk` (`contents: read`):
    - optionally decodes `GOOGLE_SERVICES_JSON_BASE64` to `app/google-services.json`;
    - builds **unsigned** with `scripts/build-release-apk.sh -PVOYAGER_UNSIGNED_RELEASE=true` (clean, `--no-build-cache
@@ -48,12 +47,19 @@ is still the tip of `main` **and** its versionCode is greater than every publish
 for GHCR the current `:latest`'s annotation): `scripts/release-decision.sh`. Otherwise the versioned release/tag is
 published without "latest". API errors fail the job; they never default to "latest".
 
+**Partial failures.** If the GHCR push succeeds but the Release then fails, `:latest` already points at the new version
+while the Releases page does not have it yet; re-running the failed job publishes the Release (same version, same
+commit). If GHCR fails, the Release is published without the `oras pull` line; "Re-run failed jobs" re-runs `ghcr` and
+its dependent `github-release`, which then adds the line. The publishing jobs re-verify the downloaded APK (checksum,
+signer, version) before publishing it. A tag or registry lookup that errors (other than "not found") fails the job.
+
 **Re-runs are safe.** Re-running a run (or only its failed jobs) rebuilds the same version. GHCR overwrites
 `:<versionName>`. If the tag exists on the same commit, the release's assets and notes are replaced (`--clobber`); if the
 tag exists on another commit, the job fails without publishing.
 
-Secrets: `VOYAGER_KEYSTORE_BASE64` (base64 PKCS12), `VOYAGER_KEYSTORE_PASSWORD` (store and key password),
-`VOYAGER_KEY_ALIAS`; optional `GOOGLE_SERVICES_JSON_BASE64`. Without it, push notifications are inactive in that build and
+Secrets (environment secrets of `release`, so only jobs in that environment on `main` can read them):
+`VOYAGER_KEYSTORE_BASE64` (base64 PKCS12), `VOYAGER_KEYSTORE_PASSWORD` (store and key password), `VOYAGER_KEY_ALIAS`;
+optional `GOOGLE_SERVICES_JSON_BASE64`. Without it, push notifications are inactive in that build and
 the release notes say so.
 
 ## Building a release APK

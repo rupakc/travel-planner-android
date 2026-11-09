@@ -34,4 +34,5 @@ else
   range=$GITHUB_SHA
 fi
 echo
-git log --no-merges --pretty='- %s (%h)' "$range" | head -n 200 | neutralise
+# -n 200, not `| head`: head closing the pipe early would kill git log with SIGPIPE (exit 141 under pipefail).
+git log --no-merges -n 200 --pretty='- %s (%h)' "$range" | neutralise

@@ -30,6 +30,22 @@ check "notes carry the versionCode marker" "<!-- voyager-version-code: 105 -->" 
 check "notes neutralise @mentions" "- thanks @${zwj}someone and @${zwj}org/team (abc1234)" "$(tail -n 1 <<<"$notes")"
 check "notes say push is inactive without Firebase" 1 "$(grep -c 'Push notifications: \*\*inactive\*\*' <<<"$notes")"
 
+# First release: no PREV_TAG and more than 200 commits. `git log | head` used to die of SIGPIPE (exit 141) here.
+repo=$(mktemp -d)
+trap 'rm -rf "$repo"' EXIT
+git -C "$repo" init -q
+for i in $(seq 1 230); do
+  git -C "$repo" -c user.name=t -c user.email=t@example.invalid commit -q --allow-empty -m "change $i by @dev"
+done
+set +e
+long=$(cd "$repo" && VERSION_NAME=0.1.1 VERSION_CODE=101 APK_SHA256=x CERT_SHA256=y FCM=enabled \
+  REPO_URL=https://github.com/example/repo GITHUB_SHA=$(git rev-parse HEAD) PREV_TAG='' \
+  "$OLDPWD/scripts/release-notes.sh")
+rc=$?
+set -e
+check "first release with 230 commits exits 0 (no SIGPIPE)" 0 "$rc"
+check "first release lists at most 200 commits" 200 "$(grep -c '^- change ' <<<"$long")"
+
 if [[ $failures -gt 0 ]]; then
   echo "$failures failure(s)"
   exit 1
