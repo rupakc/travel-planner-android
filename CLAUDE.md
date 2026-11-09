@@ -59,7 +59,7 @@ Never run `./gradlew --stop` or kill other Java processes. Run the backend with 
 - Flavours `local` (cleartext, `http://10.0.2.2:8001`) and `prod` (HTTPS only, `-PPROD_BASE_URL=`) exist in every Android module; root tasks `lintLocalDebug`/`testLocalDebugUnitTest` run everywhere.
 - AGP 9 built-in Kotlin: no `org.jetbrains.kotlin.android` plugin.
 - `prodRelease` is debug-signed so CI can assemble it; never publish it ([docs/Release.md](docs/Release.md)).
-- Release APKs only from `scripts/build-release-apk.sh` (clean, `--no-build-cache`) or CI, never an incremental build: stale KSP output once dropped two ViewModels from Hilt and the APK crashed after sign-in. `ksp.incremental=false`; `verifyHiltViewModels<Variant>` gates every release `assemble`/`bundle`/`package`.
+- KSP 2.3 writes incomplete output when KSP tasks run concurrently (once dropped two ViewModels from Hilt; the APK crashed after sign-in). `configureKspSafety` serializes KSP tasks and keeps them out of the build cache; `ksp.incremental=false`; `verifyHiltViewModels<Variant>` gates every `assemble`/`bundle`/`package`. Do not remove these. Release APKs only from `scripts/build-release-apk.sh` or CI.
 - Firebase is optional: the google-services plugin applies only if `app/google-services.json` exists; never commit it, `local.properties`, keystores or secrets.
 - Search/chat SSE: do not throw inside the upstream flow (events get dropped); failures travel as values. Search retries once without `done`; chat ends on `done` or `planning_done`.
 - Icons: `material-icons-core` only.

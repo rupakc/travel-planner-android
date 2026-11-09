@@ -8,9 +8,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# `clean` runs as its own invocation so nothing from the previous build survives into the release build.
+# `clean` runs as its own invocation so nothing from the previous build survives into the release build;
+# --rerun-tasks also ignores Gradle's execution history (an earlier broken run can otherwise look up to date).
 ./gradlew clean
-./gradlew --no-build-cache "$@" \
+./gradlew --no-build-cache --rerun-tasks "$@" \
   :app:assembleProdRelease :app:verifyHiltViewModelsProdRelease :app:verifyReleaseKeepRules
 
 apk_dir=app/build/outputs/apk/prod/release
