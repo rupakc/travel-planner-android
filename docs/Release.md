@@ -1,8 +1,37 @@
 # Release
 
-There is no release keystore yet. The `release` build type is signed with the **debug** key so CI can run
-`assembleProdRelease` (R8 full mode, resource shrinking) and catch shrinker problems early. That APK must never
-be published.
+Every green push to `main` (and a manual **Run workflow** of *Android CI* on `main`) publishes a signed release APK.
+PR and local builds without a key are still signed with the **debug** key (so `assembleProdRelease` always works and
+catches shrinker problems early); those APKs must never be published.
+
+## Download
+
+- **GitHub Releases**: the latest `android-v<versionName>` release has `Voyager-<versionName>.apk` and a `.sha256` file.
+- **GitHub Packages (GHCR)**, as an OCI artifact: `oras pull ghcr.io/rupakc/voyager-android:latest` (or `:<versionName>`),
+  then `sha256sum -c Voyager-*.apk.sha256`. If the package is private, `oras login ghcr.io` first, or make it public once
+  in the package settings.
+- The CI run's `voyager-release-apk` artifact (kept 90 days).
+
+Check the signer before installing by hand: `apksigner verify --print-certs Voyager-*.apk` must show certificate SHA-256
+`1C:B8:29:4D:D5:7B:8D:E7:7D:B2:77:99:F3:1A:86:3C:F8:97:56:D1:CC:E6:02:34:C8:E5:85:50:6E:1E:38:B0`.
+
+## How CI publishes (`.github/workflows/android.yml`)
+
+1. `build` runs every check (Spotless, detekt, lint, unit tests, debug + release assembles, guards). The release jobs
+   `need` it, so nothing is published if any check fails. `main` runs queue (no cancellation), so two pushes never race a version.
+2. `release-apk` (read-only token): decodes `VOYAGER_KEYSTORE_BASE64` to `$RUNNER_TEMP` (mode 0600), optionally
+   `GOOGLE_SERVICES_JSON_BASE64` to `app/google-services.json`, runs `scripts/build-release-apk.sh` (clean,
+   `--no-build-cache`, Hilt guard, keep-rule check) with `-PVOYAGER_REQUIRE_RELEASE_SIGNING=true`, verifies the APK with
+   `apksigner` against the expected certificate (fails on mismatch), writes the SHA-256 and release notes, deletes the
+   key and Firebase file in an `always()` step, and uploads the artifact.
+3. `github-release` (`contents: write` only): creates the release `android-v<versionName>`, marked latest.
+4. `ghcr` (`packages: write` only): pushes the same files with `oras` (pinned 1.3.6, checksum-verified) to
+   `ghcr.io/rupakc/voyager-android:<versionName>` and `:latest`, with `org.opencontainers.image.source` pointing at this
+   repo so the package shows under its Packages.
+
+Secrets: `VOYAGER_KEYSTORE_BASE64` (base64 PKCS12), `VOYAGER_KEYSTORE_PASSWORD` (store and key password),
+`VOYAGER_KEY_ALIAS`; optional `GOOGLE_SERVICES_JSON_BASE64`. Without it, push notifications are inactive in that build and
+the release notes say so.
 
 ## Building a release APK
 
@@ -32,8 +61,10 @@ builds locally and in CI; with KSP serialized every output is complete. Defences
 
 ## Versioning
 
-`versionCode` and `versionName` are set in `app/build.gradle.kts` (currently 1 and `0.1.0`). Bump `versionCode` on every upload
-(Play rejects reuse) and use semantic `versionName`. Tag releases `v<versionName>` and list changes in the GitHub release notes.
+Local builds use `versionCode` 1 and `versionName` `0.1.0`. CI passes `-PVOYAGER_VERSION_CODE=<100 + run number>` and
+`-PVOYAGER_VERSION_NAME=0.1.<run number>`, so every published build has a higher `versionCode` (Android refuses to
+install a lower one over a higher one) and a tag `android-v0.1.<run number>`. Changing the minor/major version means
+editing the `Version` step in the workflow; `versionCode` must never go down.
 
 ## Flavours and the production URL
 
@@ -43,13 +74,23 @@ builds locally and in CI; with KSP serialized every output is complete. Defences
 
 ## Signing
 
-Before the first store release:
+`app/build.gradle.kts` has a `release` signing config, used when a key is configured:
 
-1. Create an upload keystore **outside the repo** (`*.jks`, `*.keystore` and `keystore.properties` are git-ignored) and keep passwords in CI secrets or a local `keystore.properties`.
-2. Add a `release` signing config to `app/build.gradle.kts` that reads `keystore.properties` or environment variables
-   (`TP_KEYSTORE_FILE`, `TP_KEYSTORE_PASSWORD`, `TP_KEY_ALIAS`, `TP_KEY_PASSWORD`; names are a recommendation, pick and document one set) and point `buildTypes.release.signingConfig` at it, removing the debug fallback.
-3. Build the bundle: `./gradlew bundleProdRelease -PPROD_BASE_URL=https://...` (output `app/build/outputs/bundle/prodRelease/`).
-4. Optional: add `app/google-services.json` to enable FCM (the google-services plugin applies automatically; see [Firebase-Setup](Firebase-Setup.md)). Without it the build is identical but push stays inert.
+- environment variables `VOYAGER_KEYSTORE_FILE` (path), `VOYAGER_KEYSTORE_PASSWORD`, `VOYAGER_KEY_ALIAS`
+  (optional `VOYAGER_KEY_PASSWORD`, default: the store password), or
+- a git-ignored `keystore.properties` in the repo root with `storeFile`, `storePassword`, `keyAlias` (optional `keyPassword`).
+
+Without either, release falls back to the debug key; `-PVOYAGER_REQUIRE_RELEASE_SIGNING=true` (CI) turns that into a
+build failure. Keystores (`*.jks`, `*.keystore`, `*.p12`) and `keystore.properties` are git-ignored; never commit them.
+
+**Key backup and rotation.** The signing key is the app's identity: Android only installs an update signed with the same
+key. If the key is lost or replaced, every user must uninstall the app (losing local data) and install the new build.
+Keep the offline backup of the keystore and its password safe and separate from the repo; rotating is a deliberate,
+announced break (update the secrets and the expected certificate in the workflow and in this page together).
+
+For Play: `./gradlew bundleProdRelease -PPROD_BASE_URL=https://...` with the key configured (output
+`app/build/outputs/bundle/prodRelease/`); enrol in Play App Signing with this key as the upload key. Optional: add
+`app/google-services.json` to enable FCM (see [Firebase-Setup](Firebase-Setup.md)); without it push stays inert.
 
 ## Play Console steps
 

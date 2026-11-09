@@ -6,6 +6,15 @@ account, the same backend, the same saved plans. Kotlin, Jetpack Compose, Materi
 Status: every feature module is merged and integrated on `main` (sign-in, onboarding, Home, Search, Results, My Plan,
 Chat, Alerts, Settings, Near me, share viewer); review fixes are landing as separate PRs. See [Modules](docs/Modules.md).
 
+## Download
+
+Signed APKs are published on every green push to `main`:
+
+- [Latest release](https://github.com/rupakc/travel-planner-android/releases/latest): `Voyager-<version>.apk` plus a `.sha256` file.
+- GitHub Packages: `oras pull ghcr.io/rupakc/voyager-android:latest`
+
+Signer certificate SHA-256 and details: [Release](docs/Release.md).
+
 ## Screenshots
 
 Real emulator screenshots (Pixel, API 36) from the instrumented E2E suite against the local backend
