@@ -29,7 +29,7 @@ Targets (spec): cold start under 1 s on a mid-range device in release, 60 fps sc
 ## Measuring startup
 
 ```bash
-./gradlew installProdRelease -PPROD_BASE_URL=https://example.invalid   # release-like build (debug-signed in CI only)
+./gradlew installProdRelease -PPROD_BASE_URL=https://example.invalid   # release-like build (debug-signed unless a release key is configured)
 adb shell am force-stop io.github.rupakc.travelplanner
 adb shell am start -W -n io.github.rupakc.travelplanner/.MainActivity   # TotalTime = cold start (prodRelease; localDebug is io.github.rupakc.travelplanner.local.debug)
 ```

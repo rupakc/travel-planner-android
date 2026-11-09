@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.travelplanner.android.application)
     alias(libs.plugins.travelplanner.android.compose)
@@ -11,6 +13,34 @@ val hasGoogleServices = file("google-services.json").exists()
 if (hasGoogleServices) apply(plugin = libs.plugins.google.services.get().pluginId)
 
 val prodBaseUrl: String = providers.gradleProperty("PROD_BASE_URL").orElse("").get()
+
+// Release signing (docs/Release.md): environment variables or a git-ignored keystore.properties (local). Without either,
+// release stays signed with the debug key so local and PR builds keep working; -PVOYAGER_REQUIRE_RELEASE_SIGNING=true
+// turns that fallback into a build failure. -PVOYAGER_UNSIGNED_RELEASE=true builds release unsigned instead: CI does
+// that and signs with apksigner in a separate step, so the key password never reaches Gradle.
+val keystoreProps =
+    Properties().apply {
+        providers.fileContents(rootProject.layout.projectDirectory.file("keystore.properties")).asText.orNull?.let { load(it.reader()) }
+    }
+
+fun signingValue(env: String, prop: String): String? =
+    providers.environmentVariable(env).orNull?.takeIf { it.isNotBlank() } ?: keystoreProps.getProperty(prop)?.takeIf { it.isNotBlank() }
+
+val releaseStoreFile = signingValue("VOYAGER_KEYSTORE_FILE", "storeFile")
+val releaseStorePassword = signingValue("VOYAGER_KEYSTORE_PASSWORD", "storePassword")
+val releaseKeyAlias = signingValue("VOYAGER_KEY_ALIAS", "keyAlias")
+val releaseKeyPassword = signingValue("VOYAGER_KEY_PASSWORD", "keyPassword") ?: releaseStorePassword
+val hasReleaseKey = releaseStoreFile != null && releaseStorePassword != null && releaseKeyAlias != null
+val requireReleaseKey = providers.gradleProperty("VOYAGER_REQUIRE_RELEASE_SIGNING").orNull == "true"
+val unsignedRelease = providers.gradleProperty("VOYAGER_UNSIGNED_RELEASE").orNull == "true"
+check(!(unsignedRelease && requireReleaseKey)) { "VOYAGER_UNSIGNED_RELEASE and VOYAGER_REQUIRE_RELEASE_SIGNING are mutually exclusive" }
+check(unsignedRelease || hasReleaseKey || !requireReleaseKey) {
+    "VOYAGER_REQUIRE_RELEASE_SIGNING=true but no release key: set VOYAGER_KEYSTORE_FILE, VOYAGER_KEYSTORE_PASSWORD and VOYAGER_KEY_ALIAS"
+}
+
+// Published builds pass a strictly increasing versionCode and a matching versionName; local builds keep the defaults.
+val appVersionCode: Int = providers.gradleProperty("VOYAGER_VERSION_CODE").orNull?.toInt() ?: 1
+val appVersionName: String = providers.gradleProperty("VOYAGER_VERSION_NAME").orNull ?: "0.1.0"
 val webBaseUrl: String = providers.gradleProperty("WEB_BASE_URL").orElse("").get()
 
 android {
@@ -18,8 +48,8 @@ android {
 
     defaultConfig {
         applicationId = "io.github.rupakc.travelplanner"
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
         resValue("bool", "fcm_enabled", hasGoogleServices.toString())
         buildConfigField("String", "WEB_BASE_URL", "\"$webBaseUrl\"")
         // Resource configs shipped (spec §5: en default + es).
@@ -28,6 +58,21 @@ android {
 
     buildFeatures {
         resValues = true
+    }
+
+    if (unsignedRelease) {
+        buildTypes.getByName("release").signingConfig = null
+    } else if (hasReleaseKey) {
+        signingConfigs {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+                storeType = if (releaseStoreFile.endsWith(".jks")) "JKS" else "PKCS12"
+            }
+        }
+        buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
     }
 
     productFlavors {

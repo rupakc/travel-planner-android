@@ -4,27 +4,34 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Manual release from main (the release jobs below only run on main, after the full build job passes).
+  workflow_dispatch:
 
-# Security S-M4: the build only reads the repository; nothing in CI needs a write token.
+# Security S-M4: read-only by default; only the two publishing jobs get a write scope (contents / packages).
 permissions:
   contents: read
 
+# PR runs cancel superseded ones; main runs queue instead, so two pushes never race the same release.
+env:
+  # Expected signer of every published APK (the Voyager upload key). A mismatch fails the publishing jobs.
+  EXPECTED_CERT_SHA256: "1C:B8:29:4D:D5:7B:8D:E7:7D:B2:77:99:F3:1A:86:3C:F8:97:56:D1:CC:E6:02:34:C8:E5:85:50:6E:1E:38:B0"
+
 concurrency:
   group: android-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Check documentation links
         run: scripts/check-doc-links.sh
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
           distribution: temurin
           java-version: "21"
@@ -48,9 +55,25 @@ jobs:
       - name: Check release keep rules
         run: ./gradlew :app:verifyReleaseKeepRules
 
+      - name: Release script tests
+        run: scripts/tests/test-release-scripts.sh
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: apks
+          path: app/build/outputs/apk/**/*.apk
+          retention-days: 7
+
+      # The release path without secrets (throwaway key, dummy google-services.json): clean unsigned build with Firebase
+      # applied, apksigner v2+v3 signing, signature/version verification. A broken release config fails before merge.
+      # Runs after "Upload APKs" because it cleans the build.
+      - name: Release config check (no secrets)
+        run: scripts/ci-release-config-check.sh --stacktrace
+
       - name: Upload reports
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reports
           path: |
@@ -58,9 +81,313 @@ jobs:
             **/build/test-results/
           retention-days: 7
 
-      - name: Upload APKs
-        uses: actions/upload-artifact@v4
+  # Publishing: main only, after `build` (every check) passed. The three jobs run in the `release` environment
+  # (deployment branch policy: main only). Order: signed APK -> GHCR -> GitHub Release, so the notes only advertise
+  # `oras pull` when the push worked. "latest" (Release) and ":latest" (GHCR) move only when this run's commit is still
+  # the tip of main and its versionCode beats everything already published (scripts/release-decision.sh), so re-running
+  # an older run can never move them backwards. Every job is safe to re-run.
+  release-apk:
+    name: Signed release APK
+    needs: build
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: release
+    permissions:
+      contents: read
+    outputs:
+      version-name: ${{ steps.version.outputs.name }}
+      version-code: ${{ steps.version.outputs.code }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          name: apks
-          path: app/build/outputs/apk/**/*.apk
-          retention-days: 7
+          fetch-depth: 0 # tags and history for the release notes
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3.2.2
+        with:
+          packages: "platform-tools platforms;android-36 platforms;android-37.0 build-tools;36.0.0"
+
+      # Dependency cache only (read-only); the release build itself runs clean with --no-build-cache --rerun-tasks.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
+        with:
+          cache-read-only: true
+
+      # versionCode must grow with every published build (Android refuses downgrades); 100 + run number > today's 1.
+      - name: Version
+        id: version
+        run: |
+          echo "name=0.1.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "code=$((100 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
+
+      # Optional: with google-services.json push notifications work; without it FCM stays inert (said in the notes).
+      - name: Firebase config (optional)
+        id: firebase
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [[ -n "$GOOGLE_SERVICES_JSON_BASE64" ]]; then
+            umask 077
+            printf '%s' "$GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > app/google-services.json
+            echo "fcm=enabled" >> "$GITHUB_OUTPUT"
+          else
+            echo "fcm=inert" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Unsigned: Gradle never sees the key or its password. Clean, --no-build-cache --rerun-tasks, Hilt guard, keep rules.
+      - name: Build unsigned release APK
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+        run: >-
+          scripts/build-release-apk.sh --stacktrace
+          -PVOYAGER_UNSIGNED_RELEASE=true
+          -PVOYAGER_VERSION_CODE="$VERSION_CODE"
+          -PVOYAGER_VERSION_NAME="$VERSION_NAME"
+
+      - name: Decode signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.VOYAGER_KEYSTORE_BASE64 }}
+        run: |
+          if [[ -z "$KEYSTORE_BASE64" ]]; then
+            echo "::error::VOYAGER_KEYSTORE_BASE64 is not set; refusing to publish an unsigned or debug-signed APK."
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/voyager-release.p12"
+          chmod 600 "$RUNNER_TEMP/voyager-release.p12"
+
+      # The only step that receives the key password (apksigner reads it from the environment by name).
+      - name: Sign (apksigner, v2 + v3)
+        env:
+          VOYAGER_KEYSTORE_FILE: ${{ runner.temp }}/voyager-release.p12
+          VOYAGER_KEYSTORE_PASSWORD: ${{ secrets.VOYAGER_KEYSTORE_PASSWORD }}
+          VOYAGER_KEY_ALIAS: ${{ secrets.VOYAGER_KEY_ALIAS }}
+        run: scripts/sign-release-apk.sh app/build/outputs/apk/prod/release/app-prod-release-unsigned.apk "$RUNNER_TEMP/Voyager-signed.apk"
+
+      - name: Remove signing key and Firebase config
+        if: always()
+        run: rm -f "$RUNNER_TEMP/voyager-release.p12" app/google-services.json
+
+      - name: Verify signature and version
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+        run: scripts/verify-apk.sh "$RUNNER_TEMP/Voyager-signed.apk" "$EXPECTED_CERT_SHA256" "$VERSION_CODE" "$VERSION_NAME"
+
+      - name: Package and release notes
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.name }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+          FCM: ${{ steps.firebase.outputs.fcm }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          mkdir -p dist
+          cp "$RUNNER_TEMP/Voyager-signed.apk" "dist/Voyager-$VERSION_NAME.apk"
+          (cd dist && sha256sum "Voyager-$VERSION_NAME.apk" > "Voyager-$VERSION_NAME.apk.sha256")
+          cat "dist/Voyager-$VERSION_NAME.apk.sha256"
+          # Excluding this run's own tag: on a re-run it already points at HEAD and would empty the change list.
+          PREV_TAG=$(git describe --tags --abbrev=0 --match 'android-v*' --exclude "android-v$VERSION_NAME" HEAD 2>/dev/null || true)
+          APK_SHA256=$(cut -d' ' -f1 "dist/Voyager-$VERSION_NAME.apk.sha256")
+          export PREV_TAG APK_SHA256 CERT_SHA256="$EXPECTED_CERT_SHA256"
+          scripts/release-notes.sh > dist/notes.md
+          cat dist/notes.md
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: voyager-release-apk
+          path: dist/
+          if-no-files-found: error
+          retention-days: 90
+          overwrite: true
+
+  # The APK as an OCI artifact on GHCR (linked to this repo's Packages): always :<versionName>; :latest only when
+  # scripts/release-decision.sh says so (also comparing with the versionCode annotation on the current :latest).
+  ghcr:
+    name: Push APK to GHCR
+    needs: release-apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: release
+    permissions:
+      contents: read
+      packages: write
+    env:
+      ORAS_VERSION: "1.3.6"
+      ORAS_SHA256: "66fb0ad7206f3f6fa77ed5b552049d364ccf4b50b1684554f731f76302b52ca0" # oras_1.3.6_linux_amd64.tar.gz
+      IMAGE: ghcr.io/rupakc/voyager-android
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          sparse-checkout: scripts
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: voyager-release-apk
+          path: dist
+
+      # Re-check what was downloaded before publishing it (runner's preinstalled Android SDK).
+      - name: Verify downloaded APK
+        env:
+          VERSION_NAME: ${{ needs.release-apk.outputs.version-name }}
+          VERSION_CODE: ${{ needs.release-apk.outputs.version-code }}
+        run: |
+          (cd dist && sha256sum --check --strict "Voyager-$VERSION_NAME.apk.sha256")
+          scripts/verify-apk.sh "dist/Voyager-$VERSION_NAME.apk" "$EXPECTED_CERT_SHA256" "$VERSION_CODE" "$VERSION_NAME"
+
+      - name: Install oras
+        run: |
+          curl -fsSLo "$RUNNER_TEMP/oras.tar.gz" "https://github.com/oras-project/oras/releases/download/v${ORAS_VERSION}/oras_${ORAS_VERSION}_linux_amd64.tar.gz"
+          echo "$ORAS_SHA256  $RUNNER_TEMP/oras.tar.gz" | sha256sum --check --strict
+          mkdir -p "$RUNNER_TEMP/oras"
+          tar -xzf "$RUNNER_TEMP/oras.tar.gz" -C "$RUNNER_TEMP/oras" oras
+          echo "$RUNNER_TEMP/oras" >> "$GITHUB_PATH"
+
+      - name: Log in to GHCR
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: oras login ghcr.io --username "$GITHUB_ACTOR" --password-stdin <<<"$GITHUB_TOKEN"
+
+      - name: Decide :latest
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION_NAME: ${{ needs.release-apk.outputs.version-name }}
+          VERSION_CODE: ${{ needs.release-apk.outputs.version-code }}
+        run: |
+          # API failures fail the step (never default to "latest").
+          head=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+          bodies=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases" --jq ".[] | select(.tag_name != \"android-v$VERSION_NAME\") | .body")
+          codes=$(sed -nE 's/^<!-- voyager-version-code: ([0-9]+) -->\r?$/\1/p' <<<"$bodies")
+          # The current :latest: "not found" (first push) is fine; any other error fails closed.
+          if manifest=$(oras manifest fetch "$IMAGE:latest" 2>"$RUNNER_TEMP/oras.err"); then
+            codes+=$'\n'$(jq -r '.annotations["io.github.rupakc.voyager.version-code"] // empty' <<<"$manifest")
+          elif grep -qiE ': not found$|manifest unknown|name unknown' "$RUNNER_TEMP/oras.err"; then
+            echo "No $IMAGE:latest yet."
+          else
+            cat "$RUNNER_TEMP/oras.err" >&2
+            echo "::error::Could not read $IMAGE:latest; not moving :latest."
+            exit 1
+          fi
+          mapfile -t published < <(grep -E '^[0-9]+$' <<<"$codes" || true)
+          latest=$(scripts/release-decision.sh "$GITHUB_SHA" "$head" "$VERSION_CODE" "${published[@]}")
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+
+      - name: Push
+        env:
+          VERSION_NAME: ${{ needs.release-apk.outputs.version-name }}
+          VERSION_CODE: ${{ needs.release-apk.outputs.version-code }}
+          LATEST: ${{ steps.decide.outputs.latest }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          tags=$VERSION_NAME
+          if [[ "$LATEST" == true ]]; then tags="$tags,latest"; fi
+          cd dist
+          oras push "$IMAGE:$tags" \
+            --artifact-type application/vnd.android.package-archive \
+            --annotation "org.opencontainers.image.source=$REPO_URL" \
+            --annotation "org.opencontainers.image.url=$REPO_URL/releases/tag/android-v$VERSION_NAME" \
+            --annotation "org.opencontainers.image.title=Voyager $VERSION_NAME" \
+            --annotation "org.opencontainers.image.description=Voyager (Travel Planner) Android APK, signed release build" \
+            --annotation "org.opencontainers.image.version=$VERSION_NAME" \
+            --annotation "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --annotation "org.opencontainers.image.licenses=MIT" \
+            --annotation "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --annotation "io.github.rupakc.voyager.version-code=$VERSION_CODE" \
+            "Voyager-$VERSION_NAME.apk:application/vnd.android.package-archive" \
+            "Voyager-$VERSION_NAME.apk.sha256:text/plain"
+          echo "Pushed $IMAGE:$tags"
+
+      - name: Log out
+        if: always()
+        run: rm -f "$HOME/.docker/config.json"
+
+  # GitHub Release android-v<versionName> with the APK + .sha256. Runs even if the GHCR push failed (the notes then do
+  # not mention GHCR). Idempotent: re-running for the same commit updates assets and notes; a tag on another commit fails.
+  github-release:
+    name: GitHub Release
+    needs: [release-apk, ghcr]
+    if: always() && needs.release-apk.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          sparse-checkout: scripts
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: voyager-release-apk
+          path: dist
+
+      # Re-check what was downloaded before publishing it (runner's preinstalled Android SDK).
+      - name: Verify downloaded APK
+        env:
+          VERSION_NAME: ${{ needs.release-apk.outputs.version-name }}
+          VERSION_CODE: ${{ needs.release-apk.outputs.version-code }}
+        run: |
+          (cd dist && sha256sum --check --strict "Voyager-$VERSION_NAME.apk.sha256")
+          scripts/verify-apk.sh "dist/Voyager-$VERSION_NAME.apk" "$EXPECTED_CERT_SHA256" "$VERSION_CODE" "$VERSION_NAME"
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION_NAME: ${{ needs.release-apk.outputs.version-name }}
+          VERSION_CODE: ${{ needs.release-apk.outputs.version-code }}
+          GHCR_RESULT: ${{ needs.ghcr.result }}
+        run: |
+          tag="android-v$VERSION_NAME"
+          if [[ "$GHCR_RESULT" == success ]]; then
+            ghcr_line="- Also on GHCR: \`oras pull ghcr.io/rupakc/voyager-android:$VERSION_NAME\`"
+            awk -v line="$ghcr_line" '{print} /^- Signer certificate SHA-256:/{print line}' dist/notes.md > dist/notes.final.md
+          else
+            cp dist/notes.md dist/notes.final.md
+          fi
+
+          # API failures fail the step (never default to "latest").
+          head=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+          bodies=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases" --jq ".[] | select(.tag_name != \"$tag\") | .body")
+          mapfile -t published < <(sed -nE 's/^<!-- voyager-version-code: ([0-9]+) -->\r?$/\1/p' <<<"$bodies")
+          latest=$(scripts/release-decision.sh "$GITHUB_SHA" "$head" "$VERSION_CODE" "${published[@]}")
+
+          assets=("dist/Voyager-$VERSION_NAME.apk" "dist/Voyager-$VERSION_NAME.apk.sha256")
+          # The tag's commit: 404 means no tag yet; any other API error fails (never reuse a tag blindly).
+          tag_sha=
+          if ref=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" 2>"$RUNNER_TEMP/gh.err"); then
+            tag_sha=$(jq -r .object.sha <<<"$ref")
+            if [[ "$(jq -r .object.type <<<"$ref")" == tag ]]; then # annotated tag: dereference
+              tag_sha=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag_sha" --jq .object.sha)
+            fi
+          elif ! grep -q 'HTTP 404' "$RUNNER_TEMP/gh.err"; then
+            cat "$RUNNER_TEMP/gh.err" >&2
+            echo "::error::Could not check whether tag $tag exists; refusing to publish."
+            exit 1
+          fi
+          if [[ -n "$tag_sha" ]]; then
+            if [[ "$tag_sha" != "$GITHUB_SHA" ]]; then
+              echo "::error::Tag $tag already exists on $tag_sha, not on this run's commit $GITHUB_SHA; refusing to publish."
+              exit 1
+            fi
+            if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "Release $tag exists for this commit: replacing assets and notes (re-run)."
+              gh release upload "$tag" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+              edit=(--notes-file dist/notes.final.md --title "Voyager $VERSION_NAME")
+              if [[ "$latest" == true ]]; then edit+=(--latest); fi
+              gh release edit "$tag" --repo "$GITHUB_REPOSITORY" "${edit[@]}"
+              exit 0
+            fi
+          fi
+          gh release create "$tag" "${assets[@]}" \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Voyager $VERSION_NAME" --notes-file dist/notes.final.md --latest="$latest"
