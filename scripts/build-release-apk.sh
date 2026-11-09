@@ -34,4 +34,19 @@ echo
 echo "APK:     $(cd "$(dirname "$apk")" && pwd)/$(basename "$apk")"
 echo "Version: ${version:-?} (versionCode ${code:-?})"
 echo "SHA-256: $sha"
-echo "Signed with the debug key (no release keystore yet; see docs/Release.md)."
+
+# Signer: apksigner from the newest installed build-tools, when available.
+sdk=${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}
+if [[ -z "$sdk" && -f local.properties ]]; then
+  sdk=$(sed -n 's/^sdk.dir=//p' local.properties)
+fi
+apksigner=$(find "${sdk:-/nonexistent}/build-tools" -name apksigner -type f 2>/dev/null | sort -V | tail -n 1 || true)
+if [[ -n "$apksigner" ]]; then
+  cert=$("$apksigner" verify --print-certs "$apk" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p')
+  echo "Signer:  SHA-256 $cert"
+fi
+if [[ -n "${VOYAGER_KEYSTORE_FILE:-}" || -f keystore.properties ]]; then
+  echo "Signed with the release key (VOYAGER_KEYSTORE_FILE or keystore.properties)."
+else
+  echo "Signed with the debug key: no release key configured (docs/Release.md)."
+fi
