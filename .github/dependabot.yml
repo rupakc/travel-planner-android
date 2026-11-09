@@ -1,4 +1,6 @@
-# Keeps the SHA-pinned GitHub Actions current (security review S-M4). Gradle dependencies are bumped by hand
+# Keeps the SHA-pinned GitHub Actions current (security review S-M4): Dependabot rewrites both the SHA and the
+# "# vX.Y.Z" comment, and groups every action update into one PR (actions that pair up, such as
+# upload-/download-artifact, must move together). Gradle dependencies are bumped by hand
 # (versions live in gradle/libs.versions.toml and pinned toolchains need checking together).
 version: 2
 updates:
@@ -6,5 +8,9 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     commit-message:
       prefix: ci
