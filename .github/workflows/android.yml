@@ -40,8 +40,9 @@ jobs:
 
       # No google-services.json in CI: FCM stays inert (spec §7).
       # assembleProdRelease is signed with the debug key for CI only (docs/Release.md); never publish it.
+      # assembleProdRelease also runs :app:verifyHiltViewModelsProdRelease (every @HiltViewModel bound by Hilt and in the R8 dex).
       - name: Verify
-        run: ./gradlew spotlessCheck detekt lintLocalDebug testLocalDebugUnitTest assembleLocalDebug assembleProdRelease --stacktrace
+        run: ./gradlew spotlessCheck detekt lintLocalDebug testLocalDebugUnitTest assembleLocalDebug assembleProdRelease :build-logic:convention:test --stacktrace
 
       # Review M8: R8 must not strip kotlinx.serialization models that Retrofit reaches reflectively.
       - name: Check release keep rules

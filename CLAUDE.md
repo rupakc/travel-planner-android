@@ -33,7 +33,8 @@ export JAVA_HOME=$HOME/Library/Java/temurin-21/Contents/Home ANDROID_HOME=$HOME/
 ./gradlew assembleLocalDebug                          # local flavour, backend http://10.0.2.2:8001
 ./gradlew :feature:search:testLocalDebugUnitTest      # one module
 ./gradlew spotlessApply                               # format (ktlint via Spotless)
-./gradlew spotlessCheck detekt lintLocalDebug testLocalDebugUnitTest assembleLocalDebug assembleProdRelease   # exactly what CI runs
+./gradlew spotlessCheck detekt lintLocalDebug testLocalDebugUnitTest assembleLocalDebug assembleProdRelease :build-logic:convention:test   # exactly what CI runs
+scripts/build-release-apk.sh                          # the only way to build a release APK locally
 scripts/check-doc-links.sh                            # relative links in README/docs
 ```
 
@@ -58,6 +59,7 @@ Never run `./gradlew --stop` or kill other Java processes. Run the backend with 
 - Flavours `local` (cleartext, `http://10.0.2.2:8001`) and `prod` (HTTPS only, `-PPROD_BASE_URL=`) exist in every Android module; root tasks `lintLocalDebug`/`testLocalDebugUnitTest` run everywhere.
 - AGP 9 built-in Kotlin: no `org.jetbrains.kotlin.android` plugin.
 - `prodRelease` is debug-signed so CI can assemble it; never publish it ([docs/Release.md](docs/Release.md)).
+- Release APKs only from `scripts/build-release-apk.sh` (clean, `--no-build-cache`) or CI, never an incremental build: stale KSP output once dropped two ViewModels from Hilt and the APK crashed after sign-in. `ksp.incremental=false`; `verifyHiltViewModels<Variant>` gates every release `assemble`/`bundle`/`package`.
 - Firebase is optional: the google-services plugin applies only if `app/google-services.json` exists; never commit it, `local.properties`, keystores or secrets.
 - Search/chat SSE: do not throw inside the upstream flow (events get dropped); failures travel as values. Search retries once without `done`; chat ends on `done` or `planning_done`.
 - Icons: `material-icons-core` only.

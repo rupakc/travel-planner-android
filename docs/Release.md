@@ -4,6 +4,26 @@ There is no release keystore yet. The `release` build type is signed with the **
 `assembleProdRelease` (R8 full mode, resource shrinking) and catch shrinker problems early. That APK must never
 be published.
 
+## Building a release APK
+
+Release APKs for distribution (sideloading, sharing, testers) must come from `scripts/build-release-apk.sh` or from CI,
+**never from an incremental local build**. The script runs `./gradlew clean`, then `assembleProdRelease` with
+`--no-build-cache` plus `:app:verifyHiltViewModelsProdRelease` and `:app:verifyReleaseKeepRules`, and prints the APK path,
+version and SHA-256. Extra arguments go to Gradle (e.g. `scripts/build-release-apk.sh -PPROD_BASE_URL=https://host`).
+
+Why: a locally built release APK once crashed right after sign-in (`Cannot create an instance of class sv3` /
+`NoSuchMethodException: <init> []`). A stale incremental KSP output for `:feature:alerts` had dropped
+`NotificationBellViewModel` and `NotificationsViewModel` from Hilt's aggregated deps, so the app's Hilt component never
+bound them and `hiltViewModel()` fell back to the no-arg factory. CI builds from scratch and was green. Two defences:
+
+- `ksp.incremental=false` in `gradle.properties` (KSP 2.3 reads it; it is an `@Input` of the KSP task, so build-cache
+  entries are always from full runs). Measured cost on a debug build: none beyond noise.
+- `verifyHiltViewModels<Variant>` (every release variant; `assemble`, `bundle` and `package` depend on it) collects every
+  `@HiltViewModel` in all modules' `src/main` and fails unless each one is bound in the variant's generated
+  `*_HiltComponents_SingletonC.java` **and** its R8 name is a string in the shrunk dex (the key Hilt's `LazyClassKey` map
+  looks up). The failure names the missing ViewModels; fix with `./gradlew clean` and a `--no-build-cache` build.
+  The pure checks live in `build-logic` (`HiltViewModelGuard`, tested by `./gradlew :build-logic:convention:test`).
+
 ## Versioning
 
 `versionCode` and `versionName` are set in `app/build.gradle.kts` (currently 1 and `0.1.0`). Bump `versionCode` on every upload

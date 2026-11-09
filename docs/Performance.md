@@ -7,6 +7,8 @@ Targets (spec): cold start under 1 s on a mid-range device in release, 60 fps sc
 - **R8 full mode** (`android.enableR8.fullMode=true`) and resource shrinking in release; `app/proguard-rules.pro` keeps the serializable route classes,
   the `core:model` serializers and the Retrofit API interfaces except `AdminApi` (no admin UI, so R8 removes it). CI builds `assembleProdRelease` and runs
   `:app:verifyReleaseKeepRules`, which fails if R8 strips a model serializer or keeps `AdminApi`.
+- **Build**: `ksp.incremental=false` (a stale incremental KSP output once broke a release APK; the measured cost on debug
+  builds was within noise). Release variants are gated by `verifyHiltViewModels<Variant>` ([Release](Release.md)).
 - **Startup**: `TravelPlannerApplication.onCreate` creates the notification channels and starts `NotificationsInitializer` lazily on the
   application scope (Dispatchers.Default), so the session DataStore, Retrofit, Room and push graph are not built on the main thread; Retrofit uses
   a lazy call factory, so OkHttp initialises on the first request.
