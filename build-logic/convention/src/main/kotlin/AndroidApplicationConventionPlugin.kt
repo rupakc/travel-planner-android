@@ -30,8 +30,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         getDefaultProguardFile("proguard-android-optimize.txt"),
                         "proguard-rules.pro",
                     )
-                    // No release keystore exists yet: CI's assembleProdRelease is debug-signed
-                    // (see docs/Release.md). Never ship this build to a store.
+                    // Fallback: app/build.gradle.kts switches to the release key when one is configured
+                    // (docs/Release.md). A debug-signed build is never published.
                     signingConfig = signingConfigs.getByName("debug")
                 }
                 buildTypes.getByName("debug").apply {

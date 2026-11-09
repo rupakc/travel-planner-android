@@ -13,6 +13,7 @@ captures/
 local.properties
 *.keystore
 *.jks
+*.p12
 keystore.properties
 
 # Firebase (optional, supplied per developer / CI secret)
