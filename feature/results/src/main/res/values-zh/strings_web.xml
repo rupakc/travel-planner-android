@@ -160,7 +160,6 @@
         <item quantity="other">%1$d 位旅客总价</item>
     </plurals>
     <string name="results_fare_watched_pending">我们稍后会获取今日价格，之后每天检查约两次，只在值得时通知你。</string>
-    <string name="results_fare_yours">当前</string>
     <string name="results_filter_activities_title">活动筛选</string>
     <string name="results_filter_any">不限</string>
     <string name="results_filter_apply">应用筛选</string>
@@ -220,10 +219,7 @@
     <string name="results_hotel_total">共 %1$s</string>
     <string name="results_hotels_empty">没有找到酒店，请放宽预算或清除筛选</string>
     <string name="results_hours">%1$s 小时</string>
-    <string name="results_insight_high">高</string>
-    <string name="results_insight_low">低</string>
     <string name="results_insight_range">常规 %1$s–%2$s</string>
-    <string name="results_insight_typical">通常</string>
     <string name="results_interest_adventure">🧗 探险</string>
     <string name="results_interest_art">🎨 艺术</string>
     <string name="results_interest_culture">🎭 文化</string>

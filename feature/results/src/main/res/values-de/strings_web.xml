@@ -163,7 +163,6 @@
         <item quantity="other">Gesamtpreis für %1$d Reisende</item>
     </plurals>
     <string name="results_fare_watched_pending">Wir erfassen den heutigen Preis in Kürze, prüfen dann etwa zweimal täglich und melden uns nur, wenn es sich lohnt.</string>
-    <string name="results_fare_yours">Deine</string>
     <string name="results_filter_activities_title">Aktivitätsfilter</string>
     <string name="results_filter_any">Beliebig</string>
     <string name="results_filter_apply">Filter anwenden</string>
@@ -226,10 +225,7 @@
     <string name="results_hotel_total">%1$s gesamt</string>
     <string name="results_hotels_empty">Keine Hotels gefunden – erhöhe dein Budget oder setze die Filter zurück</string>
     <string name="results_hours">%1$s Std.</string>
-    <string name="results_insight_high">hoch</string>
-    <string name="results_insight_low">niedrig</string>
     <string name="results_insight_range">üblich %1$s–%2$s</string>
-    <string name="results_insight_typical">üblich</string>
     <string name="results_interest_adventure">🧗 Abenteuer</string>
     <string name="results_interest_art">🎨 Kunst</string>
     <string name="results_interest_culture">🎭 Kultur</string>

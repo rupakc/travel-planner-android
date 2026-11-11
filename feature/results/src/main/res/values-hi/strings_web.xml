@@ -163,7 +163,6 @@
         <item quantity="other">%1$d यात्रियों के लिए कुल</item>
     </plurals>
     <string name="results_fare_watched_pending">हम जल्द ही आज की कीमत लेंगे, फिर दिन में लगभग दो बार जाँचेंगे और सिर्फ़ काम की बात होने पर बताएँगे।</string>
-    <string name="results_fare_yours">आपकी</string>
     <string name="results_filter_activities_title">गतिविधि फ़िल्टर</string>
     <string name="results_filter_any">कोई भी</string>
     <string name="results_filter_apply">फ़िल्टर लगाएँ</string>
@@ -226,10 +225,7 @@
     <string name="results_hotel_total">कुल %1$s</string>
     <string name="results_hotels_empty">कोई होटल नहीं मिला — बजट बढ़ाएँ या फ़िल्टर हटाएँ</string>
     <string name="results_hours">%1$s घंटे</string>
-    <string name="results_insight_high">ज़्यादा</string>
-    <string name="results_insight_low">कम</string>
     <string name="results_insight_range">सामान्य %1$s–%2$s</string>
-    <string name="results_insight_typical">सामान्य</string>
     <string name="results_interest_adventure">🧗 एडवेंचर</string>
     <string name="results_interest_art">🎨 कला</string>
     <string name="results_interest_culture">🎭 संस्कृति</string>

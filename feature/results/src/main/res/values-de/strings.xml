@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="results_title">Deine Reise</string>
+    <string name="results_message">Die Ergebnisse erscheinen hier Abschnitt für Abschnitt.</string>
     <plurals name="results_items">
         <item quantity="one">%1$d Eintrag</item>
         <item quantity="other">%1$d Einträge</item>
     </plurals>
-    <string name="results_message">Die Ergebnisse erscheinen hier Abschnitt für Abschnitt.</string>
     <string name="results_section_error">Dieser Abschnitt konnte nicht geladen werden.</string>
-    <string name="results_title">Deine Reise</string>
 </resources>

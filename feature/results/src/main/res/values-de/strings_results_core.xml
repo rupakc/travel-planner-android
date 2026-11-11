@@ -12,12 +12,6 @@
     <string name="results_badge_good_weather">☀️ Gutes Wetter</string>
     <string name="results_badge_hidden_gem">💎 Geheimtipp</string>
     <string name="results_book_a11y">%1$s ansehen und buchen</string>
-    <string name="results_budget_flights_fit">Flüge im Budget: %1$d von %2$d</string>
-    <plurals name="results_budget_hidden">
-        <item quantity="one">%1$d ausgeblendet – alle anzeigen</item>
-        <item quantity="other">%1$d ausgeblendet – alle anzeigen</item>
-    </plurals>
-    <string name="results_budget_hotels_fit">Hotels im Budget: %1$d von %2$d</string>
     <string name="results_check_note">Hinweis</string>
     <string name="results_ease_score_a11y">Wert: %1$d/100</string>
     <string name="results_ease_sub">%1$s %2$d/%3$d</string>
@@ -26,29 +20,28 @@
     <string name="results_failed">Die Suche konnte nicht gestartet werden. Versuche es gleich noch einmal.</string>
     <string name="results_fare_calendar_error">Der Preiskalender konnte nicht geladen werden.</string>
     <string name="results_fare_calendar_sub">Günstigster Live-Preis je Abflugdatum · gleiche Reisedauer · Google Flights</string>
-    <string name="results_fare_cheapest">Günstigster</string>
     <string name="results_fare_less">−%1$s</string>
     <string name="results_fare_more">+%1$s</string>
     <string name="results_fare_watched">Der heutige Preis liegt bei %1$s (%2$s). Wir prüfen etwa zweimal täglich und melden uns nur, wenn es sich lohnt.</string>
+    <string name="results_fare_yours">Dein Datum</string>
+    <string name="results_fare_cheapest">Günstigster</string>
     <string name="results_filter_apply_count">Filter anwenden (%1$d)</string>
     <string name="results_filter_beds_plus">%1$d+</string>
     <string name="results_filter_dates_invalid">Das Enddatum darf nicht vor dem Startdatum liegen.</string>
     <string name="results_filter_error">Filter konnten nicht angewendet werden – versuche es noch einmal</string>
     <string name="results_filter_max_night">Max. Preis pro Nacht</string>
     <string name="results_filter_one_stop">1 Stopp</string>
-    <string name="results_filter_pick_date">%1$s-Datum wählen</string>
+    <string name="results_filter_pick_date">Datum wählen (%1$s)</string>
     <string name="results_filter_rating_plus">%1$s+</string>
     <string name="results_filter_time_range">%1$s – %2$s</string>
     <string name="results_filter_two_stops">2 Stopps</string>
-    <plurals name="results_filters_active">
-        <item quantity="one">%1$d Filter aktiv</item>
-        <item quantity="other">%1$d Filter aktiv</item>
-    </plurals>
     <string name="results_flights_multi_banner">✈️ Reise mit mehreren Stationen – wähle einen Flug pro Teilstrecke (gewählt: %1$d/%2$d)</string>
     <string name="results_hotel_review">%1$s/10</string>
     <string name="results_insight">Die Preise sind derzeit %1$s</string>
+    <string name="results_insight_high">hoch</string>
+    <string name="results_insight_low">niedrig</string>
     <string name="results_insight_source">Google Flights</string>
-    <string name="results_jump_to">Zu %1$s springen</string>
+    <string name="results_insight_typical">üblich</string>
     <string name="results_layover_airside_alt">Lieber drinnen bleiben? %1$s</string>
     <string name="results_layover_error">Dieser Zwischenstopp konnte gerade nicht geplant werden – bitte versuche es noch einmal.</string>
     <string name="results_layover_hours">🛬 %1$s Std. in %2$s</string>
@@ -82,12 +75,8 @@
     <string name="results_new_plan_started">Neue Suche, neuer Plan – deine bisherigen Auswahlen wurden gelöscht.</string>
     <string name="results_no_live_price">Dafür konnten wir keinen Live-Preis finden.</string>
     <string name="results_ok">OK</string>
-    <string name="results_open_my_plan">Mein Plan öffnen</string>
+    <string name="results_open_my_plan">„Mein Plan“ öffnen</string>
     <string name="results_package_disabled">Ein gespeicherter Plan ist geöffnet. Starte in „Mein Plan“ einen neuen Plan, um ein Paket hinzuzufügen.</string>
-    <plurals name="results_plan_items">
-        <item quantity="one">%1$d Eintrag</item>
-        <item quantity="other">%1$d Einträge</item>
-    </plurals>
     <string name="results_planning_sub_progress">Gleich geschafft! Fertige Abschnitte: %1$d/%2$d</string>
     <string name="results_planning_sub_start">Wir bereiten alles für dich vor …</string>
     <string name="results_price_watched">Der Live-Preis liegt bei %1$s. Wir prüfen etwa zweimal täglich und melden uns nur, wenn es sich lohnt.</string>
@@ -106,10 +95,7 @@
     <string name="results_run_search">Diese Suche ausführen</string>
     <string name="results_saved_no_results">Für diese gespeicherte Reise gibt es auf diesem Gerät noch keine Ergebnisse.</string>
     <string name="results_search_clear">Suche löschen</string>
-    <plurals name="results_search_hidden">
-        <item quantity="one">%1$d Abschnitt ohne Treffer ausgeblendet</item>
-        <item quantity="other">%1$d Abschnitte ohne Treffer ausgeblendet</item>
-    </plurals>
+    <string name="results_jump_to">Zu %1$s springen</string>
     <string name="results_search_label">Ergebnisse durchsuchen</string>
     <string name="results_section_more">Mehr</string>
     <string name="results_section_not_loaded">Für diese Reise noch nicht geladen.</string>
@@ -122,4 +108,22 @@
     <string name="results_watch_fare_a11y">Diesen Preis beobachten – wir melden uns, wenn er sinkt</string>
     <string name="results_watch_this_instead">Stattdessen diesen beobachten</string>
     <string name="results_watch_unavailable">Das lässt sich nicht beobachten – wir brauchen die Reisedaten und die Stadt, mit Abflug nach heute.</string>
+    <string name="results_budget_flights_fit">Flüge im Budget: %1$d von %2$d</string>
+    <plurals name="results_budget_hidden">
+        <item quantity="one">%1$d ausgeblendet – alle anzeigen</item>
+        <item quantity="other">%1$d ausgeblendet – alle anzeigen</item>
+    </plurals>
+    <string name="results_budget_hotels_fit">Hotels im Budget: %1$d von %2$d</string>
+    <plurals name="results_filters_active">
+        <item quantity="one">%1$d Filter aktiv</item>
+        <item quantity="other">%1$d Filter aktiv</item>
+    </plurals>
+    <plurals name="results_plan_items">
+        <item quantity="one">%1$d Eintrag</item>
+        <item quantity="other">%1$d Einträge</item>
+    </plurals>
+    <plurals name="results_search_hidden">
+        <item quantity="one">%1$d Abschnitt ohne Treffer ausgeblendet</item>
+        <item quantity="other">%1$d Abschnitte ohne Treffer ausgeblendet</item>
+    </plurals>
 </resources>

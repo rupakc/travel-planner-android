@@ -166,7 +166,6 @@
         <item quantity="other">total pour %1$d voyageurs</item>
     </plurals>
     <string name="results_fare_watched_pending">Nous relèverons bientôt le prix du jour, puis vérifierons environ deux fois par jour et ne vous préviendrons que si cela vaut la peine.</string>
-    <string name="results_fare_yours">Les vôtres</string>
     <string name="results_filter_activities_title">Filtres d’activités</string>
     <string name="results_filter_any">Peu importe</string>
     <string name="results_filter_apply">Appliquer les filtres</string>
@@ -232,10 +231,7 @@
     <string name="results_hotel_total">%1$s au total</string>
     <string name="results_hotels_empty">Aucun hôtel trouvé — élargissez votre budget ou retirez les filtres</string>
     <string name="results_hours">%1$s h</string>
-    <string name="results_insight_high">élevée</string>
-    <string name="results_insight_low">faible</string>
     <string name="results_insight_range">habituel %1$s–%2$s</string>
-    <string name="results_insight_typical">typique</string>
     <string name="results_interest_adventure">🧗 Aventure</string>
     <string name="results_interest_art">🎨 Art</string>
     <string name="results_interest_culture">🎭 Culture</string>
