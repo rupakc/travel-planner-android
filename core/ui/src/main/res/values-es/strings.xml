@@ -185,4 +185,11 @@
         <item quantity="many">%d en directo</item>
         <item quantity="other">%d en directo</item>
     </plurals>
+
+    <string name="privacy_prompt_title">Ayuda a mejorar %1$s</string>
+    <string name="privacy_prompt_body">Recopilamos datos de uso (pantallas, toques, tiempos) vinculados a un ID aleatorio o, si has iniciado sesión, a tu cuenta, para corregir errores y mejorar la app. Nunca lo que escribes, tu ubicación ni tu correo.</string>
+    <string name="privacy_allow">Permitir</string>
+    <string name="privacy_deny">No, gracias</string>
+    <string name="privacy_policy">Política de privacidad</string>
+    <string name="privacy_close">Cerrar</string>
 </resources>
