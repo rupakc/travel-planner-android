@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_trip_reminders">Reiseerinnerungen</string>
+    <string name="channel_trip_reminders_desc">Visa- und Packlisten-Checks sowie Erinnerungen am Flugtag und für den Tagesplan deiner gespeicherten Reisen.</string>
+    <string name="channel_price_alerts_desc">Wenn der Preis eines beobachteten Flugs, Hotels, Erlebnisses oder einer Reise sinkt oder dein Zielpreis erreicht wird.</string>
+    <string name="channel_nearby">Vorschläge in der Nähe</string>
+    <string name="channel_nearby_desc">Eine Erinnerung, während einer Reise „In meiner Nähe“ anzusehen, falls du es kürzlich genutzt hast. Nichts wird abgefragt, bevor du es öffnest.</string>
+    <string name="channel_account">Konto</string>
+    <string name="channel_account_desc">Anmelde- und Kontonachrichten.</string>
+    <string name="reminder_week_title">%1$s in einer Woche</string>
+    <string name="reminder_week_body">Zeit, dein Visum zu prüfen und die Packliste zu beginnen.</string>
+    <string name="reminder_day_before_title">%1$s morgen</string>
+    <string name="reminder_day_before_body">Prüfe vor der Abreise deinen Flug und das Wetter.</string>
+    <string name="reminder_start_title">Deine %1$s-Reise beginnt heute</string>
+    <string name="reminder_start_body">Der heutige Tagesplan, deine Notfallkarte und Aktivitäten in deiner Nähe sind nur einen Tipp entfernt.</string>
+    <string name="reminder_day_title">Tag %1$d in %2$s</string>
+    <string name="reminder_day_body">Sieh dir den heutigen Tagesplan an.</string>
+    <string name="reminder_last_title">Letzter Tag in %1$s</string>
+    <string name="reminder_last_body">Prüfe deine Check-out-Zeit und deine Rückreise.</string>
+    <string name="reminder_action_emergency">Notfallkarte</string>
+    <string name="nearby_notification_title">Entdecke, was in deiner Nähe ist</string>
+    <string name="nearby_notification_body">Sehenswertes, Restaurants, Shopping und Unterkünfte in deiner Umgebung. Tippe zum Ansehen.</string>
+</resources>

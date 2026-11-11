@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">Accueil</string>
+    <string name="nav_plans">Mes voyages</string>
+    <string name="nav_settings">Paramètres</string>
+    <string name="nav_global_search">Tout rechercher</string>
+    <string name="session_expired">Vous avez été déconnecté. Veuillez vous reconnecter.</string>
+</resources>
