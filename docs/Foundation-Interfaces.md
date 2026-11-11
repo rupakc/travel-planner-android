@@ -689,6 +689,15 @@ are declared in the manifest; the plan/chat teams add their `navDeepLink`s).
   module if you need more. Every icon-only button needs a `contentDescription` string resource.
 - Price formatting: `formatPrice(amount, currency = "USD", cents = false)` (`….core.domain.format`, web parity).
 
+## 6b. Telemetry and consent (`….core.data.telemetry`, `….core.model`)
+Everything is Hilt-injected; details in [Telemetry-and-Privacy](Telemetry-and-Privacy.md).
+- `Telemetry`: `emit(event: String, props: Map<String, Any?> = emptyMap())`, `screenView(routeTemplate: String)`, `currentRoute(): String`. Non-suspending, never throws, no I/O on the caller's thread; dropped when off or without consent. Event names: `TelemetryEvents` (`core:domain`).
+- `TelemetryLifecycle`: `start()`, `onForeground()`, `onBackground()` (called by `app`).
+- `ConsentRepository`: `allowed: Flow<Boolean>`, `allowedNow()`, `choices: Flow<ConsentChoice>`, `prompt: StateFlow<ConsentPromptState>` (`Hidden`, `FirstRun`, `Reopened(allowed)`), `choose(ConsentChoice)`, `openChoices()`, `closeChoices()`. `ConsentChoice` is `GRANTED` / `DENIED` (`core:model`).
+- `ClientConfigRepository.telemetrySettings(): TelemetrySettings?` (null = off).
+- `UiEventSink` (`core:designsystem`, `fun interface`): `onUiEvent(kind: UiEventKind, tid: String, on: Boolean?)`, provided through `LocalUiEventSink` (default drops). `TpButton` reports `TAP`, `TpChip` reports `TOGGLE`; the app's sink forwards to `Telemetry`.
+- `ConsentPrompt` (`core:ui/privacy`): the non-modal consent card; `PrivacyLinks.POLICY_URL` is the policy link. Features open "Privacy choices" with `ConsentRepository.openChoices()`.
+
 ## 7. Strings
 
 - All UI text in your module's `src/main/res/values/strings.xml` **and** `values-es/strings.xml`
