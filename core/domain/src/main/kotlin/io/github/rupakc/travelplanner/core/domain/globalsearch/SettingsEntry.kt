@@ -27,6 +27,7 @@ enum class SettingsEntry(val key: String, val page: SettingsPage) {
     SERVER("server", SettingsPage.SERVER),
     CHANGE_PASSWORD("change_password", SettingsPage.ROOT),
     SIGN_OUT("sign_out", SettingsPage.ROOT),
+    PRIVACY("privacy", SettingsPage.ROOT),
     ABOUT("about", SettingsPage.ROOT),
     ;
 

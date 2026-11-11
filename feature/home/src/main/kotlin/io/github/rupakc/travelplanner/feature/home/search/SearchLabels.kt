@@ -62,6 +62,7 @@ internal fun SettingsEntry.titleRes(): Int =
         SettingsEntry.SERVER -> R.string.home_setting_server
         SettingsEntry.CHANGE_PASSWORD -> R.string.home_setting_change_password
         SettingsEntry.SIGN_OUT -> R.string.home_setting_sign_out
+        SettingsEntry.PRIVACY -> R.string.home_setting_privacy
         SettingsEntry.ABOUT -> R.string.home_setting_about
     }
 
@@ -85,6 +86,8 @@ internal fun SettingsEntry.sectionRes(): Int =
 
         SettingsEntry.CHANGE_PASSWORD, SettingsEntry.SIGN_OUT -> R.string.home_setting_section_account
 
+        SettingsEntry.PRIVACY -> R.string.home_setting_privacy
+
         SettingsEntry.ABOUT -> R.string.home_setting_section_about
     }
 
@@ -93,6 +96,7 @@ private fun SettingsEntry.keywordsRes(): Int? =
         SettingsEntry.THEME -> R.string.home_setting_theme_keywords
         SettingsEntry.TRAVELLER_TYPE -> R.string.home_setting_traveller_type_keywords
         SettingsEntry.SERVER -> R.string.home_setting_server_keywords
+        SettingsEntry.PRIVACY -> R.string.home_setting_privacy_keywords
         SettingsEntry.ABOUT -> R.string.home_setting_about_keywords
         SettingsEntry.NOTIFICATIONS -> R.string.home_setting_notifications_keywords
         SettingsEntry.TRAVEL_GROUP -> R.string.home_setting_travel_group_keywords

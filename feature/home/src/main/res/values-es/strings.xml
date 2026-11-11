@@ -101,4 +101,6 @@
     <string name="home_setting_section_server">Servidor</string>
     <string name="home_setting_section_account">Cuenta</string>
     <string name="home_setting_section_about">Acerca de</string>
+    <string name="home_setting_privacy">Privacidad</string>
+    <string name="home_setting_privacy_keywords">analítica, datos de uso, consentimiento, telemetría, política de privacidad</string>
 </resources>
