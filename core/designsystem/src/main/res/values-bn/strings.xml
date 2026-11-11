@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ds_loading">লোড হচ্ছে</string>
+    <string name="ds_back">ফিরে যান</string>
+</resources>
