@@ -54,13 +54,9 @@ internal fun QueuedEvent.toStoredJson(): JsonObject =
 /** Parses one stored event; null when a required field is missing or mistyped. */
 internal fun JsonObject.toQueuedEvent(): QueuedEvent? {
     fun str(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content
-    val strings = listOf("event", "screen", "sid").map(::str)
-    val ts = (this["ts"] as? JsonPrimitive)?.longOrNull
-    val props = (this["props"] as? JsonObject)?.toProps() ?: emptyMap()
-    val (event, screen, sid) = strings
-    return if (strings.any { it == null } || ts == null) {
-        null
-    } else {
-        QueuedEvent(event = event!!, ts = ts, props = props, screen = screen!!, sessionId = sid!!)
-    }
+    val event = str("event") ?: return null
+    val screen = str("screen") ?: return null
+    val sid = str("sid") ?: return null
+    val ts = (this["ts"] as? JsonPrimitive)?.longOrNull ?: return null
+    return QueuedEvent(event = event, ts = ts, props = (this["props"] as? JsonObject)?.toProps() ?: emptyMap(), screen = screen, sessionId = sid)
 }

@@ -16,7 +16,9 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * Events pending delivery, kept in `noBackupFilesDir/telemetry/queue.json` as `{"v":1,"events":[...]}`
@@ -66,6 +68,7 @@ internal class TelemetryQueueFile
             if (!f.exists()) return emptyList()
             return try {
                 val root = TravelJson.parseToJsonElement(f.readText()).jsonObject
+                check(root["v"]?.jsonPrimitive?.intOrNull == VERSION) { "unknown queue version" }
                 root["events"]!!.jsonArray.mapNotNull { (it as? JsonObject)?.toQueuedEvent() }
             } catch (_: Exception) {
                 f.delete()
@@ -86,10 +89,7 @@ internal class TelemetryQueueFile
             // Write beside, then rename, so a kill mid-write leaves the old file whole.
             val tmp = File(f.parentFile, "$FILE.tmp")
             tmp.writeText(TravelJson.encodeToString(JsonObject.serializer(), body))
-            if (!tmp.renameTo(f)) {
-                f.delete()
-                check(tmp.renameTo(f)) { "telemetry queue rename failed" }
-            }
+            check(tmp.renameTo(f)) { "telemetry queue rename failed" }
         }
 
         private companion object {

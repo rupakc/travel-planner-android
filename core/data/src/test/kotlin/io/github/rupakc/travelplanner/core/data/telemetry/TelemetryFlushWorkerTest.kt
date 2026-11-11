@@ -14,6 +14,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeClientConfigReposito
 import io.github.rupakc.travelplanner.core.testing.fake.FakeConsentRepository
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -36,7 +37,10 @@ class TelemetryFlushWorkerTest {
         store = TelemetryQueueFile(context, TestAppDispatchers(Dispatchers.IO))
     }
 
-    private fun worker(attempt: Int = 0): TelemetryFlushWorker =
+    private fun worker(
+        attempt: Int = 0,
+        using: TelemetrySender = sender,
+    ): TelemetryFlushWorker =
         TestListenableWorkerBuilder<TelemetryFlushWorker>(context)
             .setRunAttemptCount(attempt)
             .setWorkerFactory(
@@ -45,7 +49,7 @@ class TelemetryFlushWorkerTest {
                         appContext: Context,
                         workerClassName: String,
                         workerParameters: WorkerParameters,
-                    ) = TelemetryFlushWorker(appContext, workerParameters, store, sender, consent, config, FixedClock())
+                    ) = TelemetryFlushWorker(appContext, workerParameters, store, using, consent, config, FixedClock())
                 },
             ).build()
 
@@ -106,5 +110,30 @@ class TelemetryFlushWorkerTest {
             sender.outcome = { SendOutcome.Disabled }
             assertEquals(ListenableWorker.Result.success(), worker().doWork())
             assertTrue(store.claim(NOW_MS).isEmpty())
+        }
+
+    @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+    @Test
+    fun `cancellation puts the unsent events back and drops only the in-flight batch`() =
+        runBlocking {
+            store.append(listOf(event(sid = "a", ts = NOW_MS - 3), event(sid = "a", ts = NOW_MS - 2), event(sid = "b", ts = NOW_MS - 1)))
+            val started = kotlinx.coroutines.CompletableDeferred<Unit>()
+            val hanging =
+                object : TelemetrySender {
+                    override suspend fun send(
+                        sessionId: String,
+                        events: List<io.github.rupakc.travelplanner.core.domain.telemetry.QueuedEvent>,
+                    ): SendOutcome {
+                        started.complete(Unit)
+                        kotlinx.coroutines.awaitCancellation()
+                    }
+                }
+            val w = worker(using = hanging)
+            val job = kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) { w.doWork() }
+            started.await()
+            job.cancel()
+            job.join()
+            // The batch [a, a] was in flight (dropped, at most once); b never reached the sender and is back on disk.
+            assertEquals(listOf("b"), store.claim(NOW_MS).map { it.sessionId })
         }
 }
