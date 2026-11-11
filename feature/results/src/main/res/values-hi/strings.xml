@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="results_items">
+        <item quantity="one">%1$d आइटम</item>
+        <item quantity="other">%1$d आइटम</item>
+    </plurals>
+    <string name="results_message">नतीजे यहाँ सेक्शन-दर-सेक्शन दिखेंगे।</string>
+    <string name="results_section_error">यह सेक्शन लोड नहीं हो सका।</string>
+    <string name="results_title">आपकी यात्रा</string>
+</resources>

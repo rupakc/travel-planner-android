@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="results_items">
+        <item quantity="one">%1$dটি আইটেম</item>
+        <item quantity="other">%1$dটি আইটেম</item>
+    </plurals>
+    <string name="results_message">ফলাফল এখানে সেকশন ধরে ধরে আসবে।</string>
+    <string name="results_section_error">এই সেকশন লোড করা যায়নি।</string>
+    <string name="results_title">আপনার ভ্রমণ</string>
+</resources>

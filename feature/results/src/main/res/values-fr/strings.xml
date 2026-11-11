@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="results_items">
+        <item quantity="one">%1$d élément</item>
+        <item quantity="many">%1$d éléments</item>
+        <item quantity="other">%1$d éléments</item>
+    </plurals>
+    <string name="results_message">Les résultats s’affichent ici section par section.</string>
+    <string name="results_section_error">Impossible de charger cette section.</string>
+    <string name="results_title">Votre voyage</string>
+</resources>
