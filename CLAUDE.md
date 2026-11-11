@@ -43,7 +43,7 @@ Never run `./gradlew --stop` or kill other Java processes. Run the backend with 
 
 ## Conventions
 
-- Strings: every user-facing string in the module's `res/values/strings.xml` plus `values-es/strings.xml` (MissingTranslation is a lint error); prefix names with the feature; `<plurals>` for counts; reuse the web's English copy; backend `detail` is shown as-is.
+- Strings: every user-facing string in the module's `res/values/strings.xml`, `values-es/strings.xml` (hand-maintained) and de/fr/hi/zh/bn (matching web keys generated into `values-<lang>/strings_web.xml` by `tools/web-sync/gen_strings.py`, the rest hand-translated; see docs/Localization.md) (MissingTranslation is a lint error); prefix names with the feature; `<plurals>` for counts; reuse the web's English copy; backend `detail` is shown as-is.
 - Accessibility: contentDescription on icon-only controls (`null` if decorative), 48 dp targets, `heading()` on section titles, state descriptions on toggles, live regions for async results, works at 200 % font scale, no colour-only meaning.
 - Every network screen has loading (skeleton), empty and error-with-retry states; 429 shows the backend message.
 - Adaptive: compact = bottom bar, medium = rail, expanded = list-detail where specified.
@@ -54,6 +54,8 @@ Never run `./gradlew --stop` or kill other Java processes. Run the backend with 
 - Commits small and logical; PRs via `gh`.
 
 ## Gotchas (deliberate)
+
+- `Palette.kt`, `DarkPalette.kt` and `values-*/strings_web.xml` are generated; edit the web and bump `config/web-source.properties`, then regenerate and run `scripts/check-web-sync.sh <web git dir>`.
 
 - compileSdk 37 (AndroidX/OkHttp AARs require it), targetSdk 36, minSdk 26, JDK 21. Robolectric runs on **SDK 35** (36 fails on JDK 21).
 - Flavours `local` (cleartext, `http://10.0.2.2:8001`) and `prod` (HTTPS only, `-PPROD_BASE_URL=`) exist in every Android module; root tasks `lintLocalDebug`/`testLocalDebugUnitTest` run everywhere.
