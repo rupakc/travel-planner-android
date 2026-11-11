@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_no_registration">खाते एडमिन बनाता है। अपने एडमिन से यूज़रनेम और अस्थायी पासवर्ड माँगें।</string>
+    <string name="auth_password_shown">पासवर्ड दिख रहा है</string>
+    <string name="auth_password_hidden">पासवर्ड छिपा है</string>
+    <string name="auth_error_network">सर्वर तक नहीं पहुँच सके। अपना कनेक्शन या “सर्वर” के तहत पता जाँचें।</string>
+    <string name="auth_change_password_welcome">स्वागत है, %1$s! आगे बढ़ने के लिए नया पासवर्ड सेट करें।</string>
+    <string name="auth_change_password_voluntary_title">पासवर्ड बदलें</string>
+    <string name="auth_change_password_voluntary_message">अपना मौजूदा पासवर्ड दर्ज करें, फिर नया चुनें।</string>
+    <string name="auth_current_password">मौजूदा पासवर्ड</string>
+    <string name="auth_update_password">पासवर्ड अपडेट करें</string>
+    <string name="auth_password_updated">पासवर्ड अपडेट हो गया</string>
+    <string name="auth_error_not_configured">कोई सर्वर सेट नहीं है। उसका पता दर्ज करने के लिए “सर्वर” पर टैप करें।</string>
+    <string name="auth_server">सर्वर</string>
+    <string name="auth_server_button">सर्वर: %1$s</string>
+    <string name="auth_server_button_unset">सर्वर सेट करें</string>
+    <string name="auth_server_title">सर्वर</string>
+    <string name="auth_server_message">आपके %1$s सर्वर का पता, जैसे http://192.168.1.20:8001।</string>
+    <string name="auth_server_url">सर्वर पता</string>
+    <string name="auth_server_default">डिफ़ॉल्ट: %1$s</string>
+    <string name="auth_server_no_default">इस बिल्ड में कोई डिफ़ॉल्ट सर्वर नहीं है।</string>
+    <string name="auth_server_test">कनेक्शन जाँचें</string>
+    <string name="auth_server_testing">जाँच हो रही है…</string>
+    <string name="auth_server_reset">डिफ़ॉल्ट पर रीसेट करें</string>
+    <string name="auth_server_reachable">कनेक्ट हो गया। सर्वर उपलब्ध है।</string>
+    <string name="auth_server_serpapi_on">लाइव कीमतें: उपलब्ध</string>
+    <string name="auth_server_serpapi_off">लाइव कीमतें: इस सर्वर पर सेट नहीं हैं</string>
+    <string name="auth_server_push_on">पुश सूचनाएँ: उपलब्ध</string>
+    <string name="auth_server_push_off">पुश सूचनाएँ: इस सर्वर पर सेट नहीं हैं</string>
+    <string name="auth_server_unreachable">इस पते पर कोई सर्वर नहीं मिला। पता और अपना कनेक्शन जाँचें।</string>
+    <string name="auth_server_error_blank">सर्वर पता दर्ज करें।</string>
+    <string name="auth_server_error_malformed">यह वेब पता नहीं लगता। http:// या https:// से शुरू करें।</string>
+    <string name="auth_server_error_scheme">http:// या https:// वाला पता इस्तेमाल करें।</string>
+    <string name="auth_server_error_host">सर्वर का होस्ट नाम या IP पता जोड़ें।</string>
+    <string name="auth_server_error_https">यह बिल्ड केवल HTTPS से कनेक्ट होता है। https:// पता इस्तेमाल करें।</string>
+</resources>

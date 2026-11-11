@@ -1,0 +1,23 @@
+{
+  "strings": {
+    "home_dismiss": "misc:linkPlan.dismiss",
+    "home_recent_heading": "search:recent.title",
+    "home_retry": "misc:compare.retry",
+    "home_search_open_result": "alerts:trip.open",
+    "home_setting_email": "alerts:email.label",
+    "home_setting_interests": "account:prefs.style.interests",
+    "home_setting_language": "common:language.label",
+    "home_setting_nationality": "account:prefs.identity.nationality",
+    "home_setting_notifications": "alerts:bell.notifications",
+    "home_setting_privacy": "privacy:section.privacy",
+    "home_setting_section_appearance": "privacy:section.appearance",
+    "home_setting_section_language": "common:language.label",
+    "home_setting_section_notifications": "alerts:bell.notifications",
+    "home_setting_sign_out": "common:nav.signOut",
+    "home_setting_theme": "common:theme.label",
+    "home_taste_heading": "account:prefs.taste.heading"
+  },
+  "plurals": {
+    "home_travellers": "misc:share.travelers"
+  }
+}

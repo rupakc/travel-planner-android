@@ -1,0 +1,39 @@
+{
+  "strings": {
+    "share_activities": "plan:modal.section.activities",
+    "share_brand": "misc:share.posterTag",
+    "share_data_gb": "plan:modal.sim.data",
+    "share_depart": "misc:share.depart",
+    "share_destination_fallback": "misc:share.defaultDestination",
+    "share_events": "misc:share.eventsTitle",
+    "share_flight": "plan:best.flight",
+    "share_flights": "plan:budget.cat.flights",
+    "share_flights_total": "misc:share.totalFlights",
+    "share_footer": "misc:share.readOnly",
+    "share_from": "misc:share.fromOrigin",
+    "share_getting_around": "plan:modal.section.gettingAround",
+    "share_hotel": "plan:cost.cat.hotel",
+    "share_inspired_by": "plan:print.inspiredBy",
+    "share_itinerary_picks": "misc:share.itineraryPicks",
+    "share_leg": "misc:share.leg",
+    "share_open_saved": "alerts:trip.open",
+    "share_per_night": "plan:best.perNight",
+    "share_plan_own": "misc:share.planOwn",
+    "share_planned": "misc:share.planned",
+    "share_privacy_choices": "privacy:choices",
+    "share_return": "misc:share.return",
+    "share_saving": "account:changePassword.saving",
+    "share_sim": "misc:share.simTitle",
+    "share_tips": "misc:share.tipsTitle",
+    "share_total": "plan:print.hotelTotal",
+    "share_tours": "misc:share.walkingToursTitle",
+    "share_unavailable_message": "misc:share.unavailableBody",
+    "share_unavailable_title": "misc:share.unavailableTitle",
+    "share_unlimited": "misc:share.unlimitedData"
+  },
+  "plurals": {
+    "share_days": "plan:modal.sim.days",
+    "share_travellers": "plan:print.travelers",
+    "share_validity": "plan:modal.sim.days"
+  }
+}

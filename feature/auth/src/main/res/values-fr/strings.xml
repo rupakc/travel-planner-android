@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_no_registration">Les comptes sont créés par un administrateur. Demandez-lui un nom d’utilisateur et un mot de passe temporaire.</string>
+    <string name="auth_password_shown">Mot de passe affiché</string>
+    <string name="auth_password_hidden">Mot de passe masqué</string>
+    <string name="auth_error_network">Impossible de joindre le serveur. Vérifiez votre connexion ou l’adresse sous « Serveur ».</string>
+    <string name="auth_change_password_welcome">Bienvenue, %1$s ! Définissez un nouveau mot de passe pour continuer.</string>
+    <string name="auth_change_password_voluntary_title">Changer le mot de passe</string>
+    <string name="auth_change_password_voluntary_message">Saisissez votre mot de passe actuel, puis choisissez-en un nouveau.</string>
+    <string name="auth_current_password">Mot de passe actuel</string>
+    <string name="auth_update_password">Mettre à jour le mot de passe</string>
+    <string name="auth_password_updated">Mot de passe mis à jour</string>
+    <string name="auth_error_not_configured">Aucun serveur n’est défini. Touchez « Serveur » pour saisir son adresse.</string>
+    <string name="auth_server">Serveur</string>
+    <string name="auth_server_button">Serveur : %1$s</string>
+    <string name="auth_server_button_unset">Configurer le serveur</string>
+    <string name="auth_server_title">Serveur</string>
+    <string name="auth_server_message">L’adresse de votre serveur %1$s, par exemple http://192.168.1.20:8001.</string>
+    <string name="auth_server_url">Adresse du serveur</string>
+    <string name="auth_server_default">Par défaut : %1$s</string>
+    <string name="auth_server_no_default">Cette version n’a pas de serveur par défaut.</string>
+    <string name="auth_server_test">Tester la connexion</string>
+    <string name="auth_server_testing">Test en cours…</string>
+    <string name="auth_server_reset">Rétablir la valeur par défaut</string>
+    <string name="auth_server_reachable">Connecté. Le serveur est joignable.</string>
+    <string name="auth_server_serpapi_on">Prix en direct : disponibles</string>
+    <string name="auth_server_serpapi_off">Prix en direct : non configurés sur ce serveur</string>
+    <string name="auth_server_push_on">Notifications push : disponibles</string>
+    <string name="auth_server_push_off">Notifications push : non configurées sur ce serveur</string>
+    <string name="auth_server_unreachable">Impossible de joindre un serveur à cette adresse. Vérifiez-la, ainsi que votre connexion.</string>
+    <string name="auth_server_error_blank">Saisissez l’adresse du serveur.</string>
+    <string name="auth_server_error_malformed">Ceci ne ressemble pas à une adresse web. Commencez par http:// ou https://.</string>
+    <string name="auth_server_error_scheme">Utilisez une adresse en http:// ou https://.</string>
+    <string name="auth_server_error_host">Ajoutez le nom d’hôte ou l’adresse IP du serveur.</string>
+    <string name="auth_server_error_https">Cette version se connecte uniquement en HTTPS. Utilisez une adresse https://.</string>
+</resources>

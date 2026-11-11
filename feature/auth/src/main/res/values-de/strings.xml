@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_no_registration">Konten werden von einem Admin angelegt. Frage dort nach einem Benutzernamen und einem temporären Passwort.</string>
+    <string name="auth_password_shown">Passwort wird angezeigt</string>
+    <string name="auth_password_hidden">Passwort verborgen</string>
+    <string name="auth_error_network">Server nicht erreichbar. Prüfe deine Verbindung oder die Adresse unter „Server“.</string>
+    <string name="auth_change_password_welcome">Willkommen, %1$s! Lege ein neues Passwort fest, um fortzufahren.</string>
+    <string name="auth_change_password_voluntary_title">Passwort ändern</string>
+    <string name="auth_change_password_voluntary_message">Gib dein aktuelles Passwort ein und wähle dann ein neues.</string>
+    <string name="auth_current_password">Aktuelles Passwort</string>
+    <string name="auth_update_password">Passwort aktualisieren</string>
+    <string name="auth_password_updated">Passwort aktualisiert</string>
+    <string name="auth_error_not_configured">Es ist kein Server festgelegt. Tippe auf „Server“, um die Adresse einzugeben.</string>
+    <string name="auth_server">Server</string>
+    <string name="auth_server_button">Server: %1$s</string>
+    <string name="auth_server_button_unset">Server einrichten</string>
+    <string name="auth_server_title">Server</string>
+    <string name="auth_server_message">Die Adresse deines %1$s-Servers, zum Beispiel http://192.168.1.20:8001.</string>
+    <string name="auth_server_url">Serveradresse</string>
+    <string name="auth_server_default">Standard: %1$s</string>
+    <string name="auth_server_no_default">Diese Version hat keinen Standardserver.</string>
+    <string name="auth_server_test">Verbindung testen</string>
+    <string name="auth_server_testing">Test läuft…</string>
+    <string name="auth_server_reset">Auf Standard zurücksetzen</string>
+    <string name="auth_server_reachable">Verbunden. Der Server ist erreichbar.</string>
+    <string name="auth_server_serpapi_on">Live-Preise: verfügbar</string>
+    <string name="auth_server_serpapi_off">Live-Preise: auf diesem Server nicht eingerichtet</string>
+    <string name="auth_server_push_on">Push-Benachrichtigungen: verfügbar</string>
+    <string name="auth_server_push_off">Push-Benachrichtigungen: auf diesem Server nicht eingerichtet</string>
+    <string name="auth_server_unreachable">Unter dieser Adresse ist kein Server erreichbar. Prüfe die Adresse und deine Verbindung.</string>
+    <string name="auth_server_error_blank">Gib die Serveradresse ein.</string>
+    <string name="auth_server_error_malformed">Das sieht nicht nach einer Webadresse aus. Beginne mit http:// oder https://.</string>
+    <string name="auth_server_error_scheme">Verwende eine Adresse mit http:// oder https://.</string>
+    <string name="auth_server_error_host">Ergänze den Hostnamen oder die IP-Adresse des Servers.</string>
+    <string name="auth_server_error_https">Diese Version verbindet sich nur über HTTPS. Verwende eine https://-Adresse.</string>
+</resources>

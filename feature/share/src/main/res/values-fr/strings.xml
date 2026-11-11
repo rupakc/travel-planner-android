@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_title">Voyage partagé</string>
+    <string name="share_dates">%1$s → %2$s</string>
+    <string name="share_save_copy">Enregistrer une copie</string>
+    <string name="share_hours">%1$s h</string>
+    <string name="share_open_copy">Ouvrir ma copie</string>
+    <string name="share_saved">Enregistré dans Mes voyages</string>
+    <string name="share_save_failed">Impossible d’enregistrer une copie.</string>
+    <string name="share_offline">Vous êtes hors connexion. Connectez-vous pour ouvrir ce voyage partagé.</string>
+    <string name="share_itinerary">Programme jour par jour (%1$s)</string>
+    <string name="share_stars">Hôtel %1$d étoiles</string>
+    <string name="share_review">%1$s/10</string>
+    <string name="share_open_link_a11y">Ouvrir %1$s</string>
+    <string name="share_unnamed">Élément sans nom</string>
+</resources>

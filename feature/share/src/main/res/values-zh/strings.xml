@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_title">分享的行程</string>
+    <string name="share_dates">%1$s → %2$s</string>
+    <string name="share_save_copy">保存副本</string>
+    <string name="share_hours">%1$s 小时</string>
+    <string name="share_open_copy">打开我的副本</string>
+    <string name="share_saved">已保存到“我的行程”</string>
+    <string name="share_save_failed">无法保存副本。</string>
+    <string name="share_offline">你已离线。请联网后再打开此分享的行程。</string>
+    <string name="share_itinerary">每日行程（%1$s）</string>
+    <string name="share_stars">%1$d 星级酒店</string>
+    <string name="share_review">%1$s/10</string>
+    <string name="share_open_link_a11y">打开 %1$s</string>
+    <string name="share_unnamed">未命名项目</string>
+</resources>
