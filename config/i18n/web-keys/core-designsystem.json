@@ -1,6 +1,5 @@
 {
   "strings": {
-    "ds_back": "misc:tour.back",
     "ds_close": "misc:feedback.close",
     "ds_error_generic": "account:changePassword.generic",
     "ds_retry": "misc:nearby.tryAgain"

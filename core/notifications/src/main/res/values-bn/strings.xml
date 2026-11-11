@@ -13,9 +13,9 @@
     <string name="reminder_day_before_body">যাওয়ার আগে আপনার ফ্লাইট ও আবহাওয়া দেখে নিন।</string>
     <string name="reminder_start_title">আপনার %1$s ভ্রমণ আজ শুরু</string>
     <string name="reminder_start_body">আজকের ভ্রমণসূচি, আপনার জরুরি কার্ড এবং কাছাকাছি করণীয় মাত্র এক ট্যাপ দূরে।</string>
-    <string name="reminder_day_title">%2$s-এ দিন %1$d</string>
+    <string name="reminder_day_title">দিন %1$d · %2$s</string>
     <string name="reminder_day_body">আজকের ভ্রমণসূচি দেখুন।</string>
-    <string name="reminder_last_title">%1$s-এ শেষ দিন</string>
+    <string name="reminder_last_title">শেষ দিন · %1$s</string>
     <string name="reminder_last_body">আপনার চেকআউটের সময় ও ফেরার পথ দেখে নিন।</string>
     <string name="reminder_action_emergency">জরুরি কার্ড</string>
     <string name="nearby_notification_title">দেখুন আপনার আশেপাশে কী আছে</string>
