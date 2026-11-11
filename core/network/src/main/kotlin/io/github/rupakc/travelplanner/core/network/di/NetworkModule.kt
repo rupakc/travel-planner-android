@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.DefaultAppDispatchers
 import io.github.rupakc.travelplanner.core.common.SystemAppClock
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import io.github.rupakc.travelplanner.core.network.AiLocaleInterceptor
 import io.github.rupakc.travelplanner.core.network.AuthInterceptor
 import io.github.rupakc.travelplanner.core.network.BaseUrlInterceptor
 import io.github.rupakc.travelplanner.core.network.PLACEHOLDER_BASE_URL
@@ -78,12 +79,20 @@ object NetworkModule {
     fun clock(): AppClock = SystemAppClock()
 
     @Provides @Singleton @DefaultHttp
-    fun okHttp(baseUrl: BaseUrlInterceptor, auth: AuthInterceptor, buildInfo: AppBuildInfo): OkHttpClient =
+    fun okHttp(
+        baseUrl: BaseUrlInterceptor,
+        auth: AuthInterceptor,
+        aiLocale: AiLocaleInterceptor,
+        buildInfo: AppBuildInfo,
+    ): OkHttpClient =
         OkHttpClient.Builder()
             .connectTimeout(Duration.ofSeconds(CONNECT_SECONDS))
             .readTimeout(Duration.ofSeconds(READ_SECONDS))
             // Auth first: it must see the placeholder host to scope the token to our backend (review I3).
             .addInterceptor(auth)
+            // Adds `locale` to AI bodies; before baseUrl so the host is still the placeholder. @AiHttp and
+            // @StreamingHttp derive from this client, so all three carry it.
+            .addInterceptor(aiLocale)
             .addInterceptor(baseUrl)
             .apply {
                 if (buildInfo.debug) {
