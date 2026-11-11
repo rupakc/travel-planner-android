@@ -14,6 +14,7 @@ import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryProps
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryQueue
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetrySession
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetrySettings
+import io.github.rupakc.travelplanner.core.domain.telemetry.fromServer
 import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
 import java.util.Collections
 import java.util.IdentityHashMap
@@ -24,6 +25,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -42,6 +44,10 @@ import kotlinx.coroutines.launch
  * [store], never both. Writing events to the store hands them over (they leave memory), and claiming takes
  * them back. In-flight events are never written. That way a process death loses at most an in-flight batch
  * and nothing is ever sent twice (by the engine and the worker, or by the engine itself).
+ *
+ * app_open: activation (config on + allowed, at start or on a grant) sends it once; [onForeground] sends it
+ * only on a return from the background, so the lifecycle observer's first `onStart` at a cold start does not
+ * add a second one (and is a no-op before activation).
  */
 @Singleton
 internal class TelemetryEngine
@@ -80,7 +86,7 @@ internal class TelemetryEngine
 
         // ── confined state (touched only on [confinement]) ──
         private var state = State.PENDING
-        private var settings = TelemetrySettings(DEFAULT_INTERVAL_MS, DEFAULT_BATCH)
+        private var settings = TelemetrySettings.fromServer(null, null) // replaced before state is ON
         private val queue = TelemetryQueue()
         private val inFlight: MutableSet<QueuedEvent> = Collections.newSetFromMap(IdentityHashMap())
         private val session = TelemetrySession { UUID.randomUUID().toString() }
@@ -91,6 +97,7 @@ internal class TelemetryEngine
         private var foreground = true
         private var wasBackgrounded = false
         private var handedOver = false
+        private var grantedWhilePending = false
         private var sending = false
         private var epoch = 0
         private var timer: Job? = null
@@ -124,6 +131,13 @@ internal class TelemetryEngine
 
         override fun start() {
             if (!started.compareAndSet(false, true)) return
+            // Subscribe before the config call: `choices` does not replay, and the user may answer the
+            // first-run prompt while /api/config is still pending.
+            scope.launch(confinement, start = CoroutineStart.UNDISPATCHED) {
+                consent.choices.collect { choice ->
+                    if (state == State.PENDING) safely { onChoiceWhilePending(choice) } else commands.trySend(Command.Consent(choice))
+                }
+            }
             scope.launch(confinement) {
                 safely { resolveConfig() }
                 for (command in commands) safely { handle(command) }
@@ -156,11 +170,36 @@ internal class TelemetryEngine
             }
             settings = resolved
             state = State.ON
-            prefs.session()?.let { session.restore(it.id, it.lastMs) }
-            scope.launch(confinement) {
-                consent.choices.collect { commands.trySend(Command.Consent(it)) }
+            try {
+                prefs.session()?.let { session.restore(it.id, it.lastMs) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "session restore failed", e)
             }
-            if (consent.allowedNow()) activate()
+            if (grantedWhilePending) {
+                grantedWhilePending = false
+                onConsent(ConsentChoice.GRANTED)
+            } else if (consent.allowedNow()) {
+                activate()
+            }
+        }
+
+        /**
+         * A choice made before /api/config answered (web parity: a grant is kept and sent once on, a denial
+         * clears memory and storage at once). Runs on the confinement while [resolveConfig] is suspended.
+         */
+        private suspend fun onChoiceWhilePending(choice: ConsentChoice) {
+            when (choice) {
+                ConsentChoice.GRANTED -> {
+                    grantedWhilePending = true
+                }
+
+                ConsentChoice.DENIED -> {
+                    grantedWhilePending = false
+                    deny()
+                }
+            }
         }
 
         private suspend fun handle(command: Command) {
@@ -204,12 +243,16 @@ internal class TelemetryEngine
                 }
 
                 ConsentChoice.DENIED -> {
-                    dropEverything()
-                    active = false
-                    scheduler.cancel()
-                    store.clear()
+                    deny()
                 }
             }
+        }
+
+        private suspend fun deny() {
+            dropEverything()
+            active = false
+            scheduler.cancel()
+            store.clear()
         }
 
         private suspend fun activate() {
@@ -300,7 +343,11 @@ internal class TelemetryEngine
             if (sending || state != State.ON) return
             sending = true
             try {
-                if (handedOver && foreground) reclaim()
+                if (handedOver && foreground) {
+                    reclaim()
+                    // Backgrounded while the claim ran: the worker owns stored events, so give them back.
+                    if (!foreground) handOver()
+                }
                 while (state == State.ON && nowMs() >= backoff.blockedUntil) {
                     val batch = queue.takeBatch(settings.maxBatch, inFlight)
                     if (batch.isEmpty() || !sendOne(batch)) break
@@ -341,8 +388,9 @@ internal class TelemetryEngine
                 }
 
                 is SendOutcome.RetryAfter -> {
-                    backoff.block(nowMs() + outcome.ms)
+                    // onFailure first: from the 3rd failure it assigns blockedUntil; block keeps the later time.
                     onFailure()
+                    backoff.block(nowMs() + outcome.ms)
                     false
                 }
 
@@ -395,7 +443,5 @@ internal class TelemetryEngine
             const val TAG = "Telemetry"
             const val ROOT = "/"
             const val COMMAND_CAPACITY = 1000
-            const val DEFAULT_INTERVAL_MS = 15_000L
-            const val DEFAULT_BATCH = 50
         }
     }

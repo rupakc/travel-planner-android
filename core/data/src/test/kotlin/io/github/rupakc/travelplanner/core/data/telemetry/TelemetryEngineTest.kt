@@ -112,6 +112,13 @@ private class FakePrefs : TelemetryPrefsStore {
     }
 }
 
+/** A config call that stays pending until [answer] completes. */
+private class GatedConfig : ClientConfigRepository {
+    val answer = CompletableDeferred<TelemetrySettings?>()
+
+    override suspend fun telemetrySettings(): TelemetrySettings? = answer.await()
+}
+
 private class VirtualClock(private val scope: TestScope) : AppClock {
     override fun now(): Instant = Instant.ofEpochMilli(BASE_MS + scope.testScheduler.currentTime)
 
@@ -119,13 +126,14 @@ private class VirtualClock(private val scope: TestScope) : AppClock {
 }
 
 class TelemetryEngineTest {
-    private class Rig(scope: TestScope, settings: TelemetrySettings?, allowed: Boolean) {
+    private class Rig(scope: TestScope, settings: TelemetrySettings?, allowed: Boolean, gated: Boolean = false) {
         val sender = FakeSender(scope)
         val store = FakeStore()
         val scheduler = FakeScheduler()
         val prefs = FakePrefs()
         val consent = FakeConsentRepository(initiallyAllowed = allowed)
-        val config = FakeClientConfigRepository(settings)
+        val gatedConfig = GatedConfig()
+        val config: ClientConfigRepository = if (gated) gatedConfig else FakeClientConfigRepository(settings)
         val engine =
             TelemetryEngine(
                 config = config,
@@ -144,8 +152,9 @@ class TelemetryEngineTest {
         settings: TelemetrySettings? = TelemetrySettings(flushIntervalMs = 15_000, maxBatch = 50),
         allowed: Boolean = true,
         start: Boolean = true,
+        gated: Boolean = false,
     ): Rig =
-        Rig(this, settings, allowed).also {
+        Rig(this, settings, allowed, gated).also {
             if (start) {
                 it.engine.start()
                 runCurrent()
@@ -268,7 +277,7 @@ class TelemetryEngineTest {
             runCurrent()
 
             assertTrue(r.sender.batches.isEmpty())
-            assertTrue(r.store.appends.all { it.isEmpty() })
+            assertTrue(r.store.appends.isEmpty())
             assertTrue(r.prefs.writes.isEmpty())
             assertEquals(0, r.scheduler.scheduled)
         }
@@ -459,5 +468,61 @@ class TelemetryEngineTest {
 
             val tap = r.sender.events.single { it.event == "ui_tap" }
             assertEquals(mapOf<String, Any>("id" to "search_button", "count" to 3L, "on" to true), tap.props)
+        }
+
+    @Test
+    fun `Retry-After after repeated failures is not shortened by the backoff`() =
+        runTest {
+            val r = rig(settings = TelemetrySettings(flushIntervalMs = 1_000, maxBatch = 50))
+            r.sender.outcomes += SendOutcome.Retry
+            r.sender.outcomes += SendOutcome.Retry
+            r.sender.outcomes += SendOutcome.RetryAfter(60 * MIN)
+            advanceTimeBy(3_001)
+            runCurrent()
+            assertEquals(listOf(1_000L, 2_000L, 3_000L), r.sender.times)
+
+            advanceTimeBy(60 * MIN - 2)
+            runCurrent()
+            assertEquals(3, r.sender.batches.size)
+
+            advanceTimeBy(2_000)
+            runCurrent()
+            assertEquals(4, r.sender.batches.size)
+            assertTrue(r.sender.times[3] >= 3_000L + 60 * MIN)
+        }
+
+    @Test
+    fun `grant while the config is pending sends consent granted then app_open`() =
+        runTest {
+            val r = rig(allowed = false, gated = true)
+            r.consent.choose(ConsentChoice.GRANTED)
+            runCurrent()
+            r.gatedConfig.answer.complete(TelemetrySettings(flushIntervalMs = 15_000, maxBatch = 50))
+            runCurrent()
+            advanceTimeBy(16_000)
+            runCurrent()
+
+            assertEquals(listOf("session_start", "consent", "app_open"), r.sender.names)
+            assertEquals(mapOf<String, Any>("choice" to "granted"), r.sender.events[1].props)
+        }
+
+    @Test
+    fun `deny while the config is pending clears the store and cancels the worker at once`() =
+        runTest {
+            val r = rig(gated = true)
+            r.store.items += QueuedEvent("ui_tap", BASE_MS, emptyMap(), "/", "22222222-2222-4222-8222-222222222222")
+            r.engine.emit("ui_tap", mapOf("id" to "before"))
+            r.consent.choose(ConsentChoice.DENIED)
+            runCurrent()
+            assertTrue(r.store.items.isEmpty())
+            assertEquals(1, r.store.clears)
+            assertEquals(1, r.scheduler.cancelled)
+
+            r.gatedConfig.answer.complete(TelemetrySettings(flushIntervalMs = 15_000, maxBatch = 50))
+            r.engine.onBackground()
+            advanceTimeBy(60 * MIN)
+            runCurrent()
+            assertTrue(r.sender.batches.isEmpty())
+            assertTrue(r.store.appends.isEmpty())
         }
 }
