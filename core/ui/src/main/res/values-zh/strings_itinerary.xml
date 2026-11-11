@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="itinerary_day_unknown">某一天</string>
+    <string name="itinerary_warning_late">%1$s 于 %2$s 开始——比计划晚</string>
+    <string name="itinerary_warning_an_activity">某项活动</string>
+    <string name="itinerary_warning_runs_late">第 %1$s 天的安排超过 23:00</string>
+    <string name="itinerary_transit_walk">🚶 步行 %1$d 分钟 · %2$s 公里</string>
+    <string name="itinerary_transit_walk_short">🚶 步行 %1$d 分钟</string>
+    <string name="itinerary_transit_ride">🚇 乘公共交通约 %1$d 分钟</string>
+    <string name="itinerary_user_note">📝 %1$s</string>
+    <string name="itinerary_time_range_a11y">%1$s 至 %2$s</string>
+    <plurals name="itinerary_link_extras">
+        <item quantity="other">也来自你的链接：%1$s——请在当天行程中安排进去。</item>
+    </plurals>
+</resources>

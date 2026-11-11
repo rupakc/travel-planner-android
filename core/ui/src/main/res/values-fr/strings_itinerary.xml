@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="itinerary_day_unknown">Jour</string>
+    <string name="itinerary_warning_late">%1$s commence à %2$s — plus tard que prévu</string>
+    <string name="itinerary_warning_an_activity">Une activité</string>
+    <string name="itinerary_warning_runs_late">Le jour %1$s se prolonge après 23:00</string>
+    <string name="itinerary_transit_walk">🚶 %1$d min à pied · %2$s km</string>
+    <string name="itinerary_transit_walk_short">🚶 %1$d min à pied</string>
+    <string name="itinerary_transit_ride">🚇 ~%1$d min en transports</string>
+    <string name="itinerary_user_note">📝 %1$s</string>
+    <string name="itinerary_time_range_a11y">de %1$s à %2$s</string>
+    <plurals name="itinerary_link_extras">
+        <item quantity="one">Aussi issu de votre lien : %1$s — à intégrer dans la journée.</item>
+        <item quantity="many">Aussi issus de votre lien : %1$s — à intégrer dans la journée.</item>
+        <item quantity="other">Aussi issus de votre lien : %1$s — à intégrer dans la journée.</item>
+    </plurals>
+</resources>

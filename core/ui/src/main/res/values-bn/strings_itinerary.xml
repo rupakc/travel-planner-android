@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="itinerary_day_unknown">দিন</string>
+    <string name="itinerary_warning_late">%1$s শুরু হচ্ছে %2$s-এ — পরিকল্পনার চেয়ে দেরিতে</string>
+    <string name="itinerary_warning_an_activity">একটি অ্যাক্টিভিটি</string>
+    <string name="itinerary_warning_runs_late">দিন %1$s 23:00-এর পরও চলে</string>
+    <string name="itinerary_transit_walk">🚶 %1$d মিনিট হাঁটা · %2$s কিমি</string>
+    <string name="itinerary_transit_walk_short">🚶 %1$d মিনিট হাঁটা</string>
+    <string name="itinerary_transit_ride">🚇 ~%1$d মিনিট গণপরিবহনে</string>
+    <string name="itinerary_user_note">📝 %1$s</string>
+    <string name="itinerary_time_range_a11y">%1$s থেকে %2$s</string>
+    <plurals name="itinerary_link_extras">
+        <item quantity="one">আপনার লিংক থেকেও: %1$s — দিনের মধ্যে এটি জুড়ে নিন।</item>
+        <item quantity="other">আপনার লিংক থেকেও: %1$s — দিনের মধ্যে এগুলো জুড়ে নিন।</item>
+    </plurals>
+</resources>

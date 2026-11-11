@@ -29,4 +29,8 @@ enum class TopLevelDestination(
     CHAT(ChatRoute(), ChatRoute::class, Icons.AutoMirrored.Filled.Send, R.string.nav_chat),
     PLANS(PlansRoute, PlansRoute::class, Icons.AutoMirrored.Filled.List, R.string.nav_plans),
     ALERTS(AlertsRoute(), AlertsRoute::class, Icons.Filled.Notifications, R.string.nav_alerts),
+    ;
+
+    /** The `ui_tap` tid of this bar / rail item: `nav.<key lowercase>`. */
+    val telemetryId: String get() = "nav.${name.lowercase()}"
 }
