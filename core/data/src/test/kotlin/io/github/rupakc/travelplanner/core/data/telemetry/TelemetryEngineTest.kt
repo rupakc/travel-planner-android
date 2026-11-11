@@ -133,7 +133,8 @@ class TelemetryEngineTest {
         val prefs = EngineFakePrefs()
         val consent = FakeConsentRepository(initiallyAllowed = allowed)
         val gatedConfig = EngineGatedConfig()
-        val config: ClientConfigRepository = if (gated) gatedConfig else FakeClientConfigRepository(settings)
+        val fakeConfig = FakeClientConfigRepository(settings)
+        val config: ClientConfigRepository = if (gated) gatedConfig else fakeConfig
         val engine =
             TelemetryEngine(
                 config = config,
@@ -524,5 +525,85 @@ class TelemetryEngineTest {
             runCurrent()
             assertTrue(r.sender.batches.isEmpty())
             assertTrue(r.store.appends.isEmpty())
+        }
+
+    @Test
+    fun `events emitted before a grant made while the config is pending are never sent`() =
+        runTest {
+            val r = rig(allowed = false, gated = true)
+            r.engine.emit("ui_tap", mapOf("id" to "before_grant"))
+            r.engine.screenView("/search")
+            r.consent.choose(ConsentChoice.GRANTED)
+            runCurrent()
+            r.gatedConfig.answer.complete(TelemetrySettings(flushIntervalMs = 15_000, maxBatch = 50))
+            runCurrent()
+            advanceTimeBy(16_000)
+            runCurrent()
+
+            assertEquals(listOf("session_start", "consent", "app_open"), r.sender.names)
+            assertEquals("/search", r.engine.currentRoute())
+        }
+
+    @Test
+    fun `an event emitted just before a grant is not collected`() =
+        runTest {
+            val r = rig(allowed = false)
+            r.engine.emit("ui_tap", mapOf("id" to "before_grant"))
+            r.consent.choose(ConsentChoice.GRANTED)
+            r.engine.emit("ui_tap", mapOf("id" to "after_grant"))
+            advanceTimeBy(16_000)
+            runCurrent()
+
+            assertEquals(listOf("session_start", "consent", "app_open"), r.sender.names.take(3))
+            assertTrue(r.sender.events.none { it.props["id"] == "before_grant" })
+        }
+
+    @Test
+    fun `switching to a server without telemetry stops sending and clears`() =
+        runTest {
+            val r = rig()
+            r.engine.emit("ui_tap", mapOf("id" to "a"))
+            runCurrent()
+            r.fakeConfig.settings = null // Settings → Server now points at a backend whose /api/config is 404
+            advanceTimeBy(60 * MIN)
+            runCurrent()
+
+            assertTrue(r.sender.batches.isEmpty())
+            assertEquals(1, r.store.clears)
+            assertTrue(r.scheduler.cancelled >= 1)
+            r.engine.emit("ui_tap", mapOf("id" to "b"))
+            r.engine.onBackground()
+            advanceTimeBy(60 * MIN)
+            runCurrent()
+            assertTrue(r.sender.batches.isEmpty())
+            assertTrue(r.store.appends.isEmpty())
+        }
+
+    @Test
+    fun `a foreground re-asks the config and follows a server switch both ways`() =
+        runTest {
+            val r = rig()
+            r.engine.emit("ui_tap", mapOf("id" to "a"))
+            r.engine.onBackground()
+            runCurrent()
+            assertEquals(4, r.store.items.size)
+
+            r.fakeConfig.settings = null
+            r.engine.onForeground()
+            runCurrent()
+            assertTrue(r.store.items.isEmpty())
+            advanceTimeBy(60 * MIN)
+            runCurrent()
+            assertTrue(r.sender.batches.isEmpty())
+
+            r.fakeConfig.settings = TelemetrySettings(flushIntervalMs = 15_000, maxBatch = 50)
+            r.engine.onBackground()
+            r.engine.onForeground()
+            runCurrent()
+            r.engine.emit("ui_tap", mapOf("id" to "c"))
+            advanceTimeBy(16_000)
+            runCurrent()
+            assertEquals(listOf("session_start", "app_open", "ui_tap"), r.sender.names)
+            assertEquals(1, r.sender.names.count { it == "app_open" })
         }
 }

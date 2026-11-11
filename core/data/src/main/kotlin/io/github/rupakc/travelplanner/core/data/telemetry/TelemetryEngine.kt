@@ -64,9 +64,10 @@ internal class TelemetryEngine
         @param:TelemetryConfinement private val confinement: CoroutineDispatcher,
     ) : Telemetry, TelemetryLifecycle {
         private sealed interface Command {
-            class Emit(val event: String, val props: Map<String, Any?>, val ts: Long) : Command
+            /** [allowed] is the consent snapshot when the caller emitted (null: not known yet). */
+            class Emit(val event: String, val props: Map<String, Any?>, val ts: Long, val allowed: Boolean?) : Command
 
-            class ScreenView(val route: String, val ts: Long) : Command
+            class ScreenView(val route: String, val ts: Long, val allowed: Boolean?) : Command
 
             class Consent(val choice: ConsentChoice) : Command
 
@@ -84,6 +85,9 @@ internal class TelemetryEngine
 
         @Volatile private var lastRoute: String? = null
 
+        /** Latest [ConsentRepository.allowed] (it follows the device zone), read by callers at capture time. */
+        @Volatile private var allowedSnapshot: Boolean? = null
+
         // ── confined state (touched only on [confinement]) ──
         private var state = State.PENDING
         private var settings = TelemetrySettings.fromServer(null, null) // replaced before state is ON
@@ -98,6 +102,7 @@ internal class TelemetryEngine
         private var wasBackgrounded = false
         private var handedOver = false
         private var grantedWhilePending = false
+        private var grantTs = Long.MIN_VALUE
         private var sending = false
         private var epoch = 0
         private var timer: Job? = null
@@ -109,7 +114,7 @@ internal class TelemetryEngine
         ) {
             if (off) return
             try {
-                commands.trySend(Command.Emit(event, props.toMap(), nowMs()))
+                commands.trySend(Command.Emit(event, props.toMap(), nowMs(), allowedSnapshot))
             } catch (e: Exception) {
                 AppLogger.w(TAG, "emit dropped", e)
             }
@@ -117,11 +122,8 @@ internal class TelemetryEngine
 
         override fun screenView(routeTemplate: String) {
             try {
-                if (off) {
-                    lastRoute = routeTemplate
-                    return
-                }
-                commands.trySend(Command.ScreenView(routeTemplate, nowMs()))
+                // Sent even when off: the route is tracked in every state.
+                commands.trySend(Command.ScreenView(routeTemplate, nowMs(), allowedSnapshot))
             } catch (e: Exception) {
                 AppLogger.w(TAG, "screen view dropped", e)
             }
@@ -134,7 +136,12 @@ internal class TelemetryEngine
             // Subscribe before the config call: `choices` does not replay, and the user may answer the
             // first-run prompt while /api/config is still pending.
             scope.launch(confinement, start = CoroutineStart.UNDISPATCHED) {
+                consent.allowed.collect { allowedSnapshot = it }
+            }
+            scope.launch(confinement, start = CoroutineStart.UNDISPATCHED) {
                 consent.choices.collect { choice ->
+                    // Events captured before a grant are never collected (see [enqueue]).
+                    if (choice == ConsentChoice.GRANTED) grantTs = nowMs()
                     if (state == State.PENDING) safely { onChoiceWhilePending(choice) } else commands.trySend(Command.Consent(choice))
                 }
             }
@@ -145,7 +152,8 @@ internal class TelemetryEngine
         }
 
         override fun onForeground() {
-            if (!off) commands.trySend(Command.Foreground)
+            // Sent even when off: a foreground re-asks the config (Settings → Server change).
+            commands.trySend(Command.Foreground)
         }
 
         override fun onBackground() {
@@ -154,22 +162,23 @@ internal class TelemetryEngine
 
         // ── consumer ──
 
+        private suspend fun fetchSettings(): TelemetrySettings? =
+            try {
+                config.telemetrySettings()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                AppLogger.w(TAG, "config failed", e)
+                null
+            }
+
         private suspend fun resolveConfig() {
-            val resolved =
-                try {
-                    config.telemetrySettings()
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    AppLogger.w(TAG, "config failed", e)
-                    null
-                }
+            val resolved = fetchSettings()
             if (resolved == null) {
                 turnOff()
                 return
             }
-            settings = resolved
-            state = State.ON
+            turnOn(resolved)
             try {
                 prefs.session()?.let { session.restore(it.id, it.lastMs) }
             } catch (e: CancellationException) {
@@ -183,6 +192,35 @@ internal class TelemetryEngine
             } else if (consent.allowedNow()) {
                 activate()
             }
+        }
+
+        /**
+         * Re-asks the config, which [ClientConfigRepository] caches per base URL (so this is cheap and makes no
+         * request for the same server). A Settings → Server change to a server without telemetry turns it off
+         * and clears; one with telemetry turns it back on. Called on every foreground and before every drain.
+         */
+        private suspend fun recheckConfig() {
+            val resolved = fetchSettings()
+            when {
+                resolved == null -> {
+                    if (state == State.ON) turnOff()
+                }
+
+                state == State.ON -> {
+                    settings = resolved
+                }
+
+                else -> {
+                    turnOn(resolved)
+                    if (consent.allowedNow()) activate()
+                }
+            }
+        }
+
+        private fun turnOn(resolved: TelemetrySettings) {
+            settings = resolved
+            state = State.ON
+            off = false
         }
 
         /**
@@ -205,10 +243,10 @@ internal class TelemetryEngine
         private suspend fun handle(command: Command) {
             // The route is tracked in every state (currentRoute, screen_time); events only when on.
             if (command is Command.ScreenView) return onScreenView(command)
-            if (state != State.ON) return
+            if (state != State.ON && command !is Command.Foreground) return
             when (command) {
                 // `consent` comes only from [ConsentRepository.choices], never from a caller.
-                is Command.Emit -> if (command.event != TelemetryEvents.CONSENT) enqueue(command.event, command.props, command.ts)
+                is Command.Emit -> if (command.event != TelemetryEvents.CONSENT) enqueue(command.event, command.props, command.ts, command.allowed)
 
                 is Command.Consent -> onConsent(command.choice)
 
@@ -229,10 +267,10 @@ internal class TelemetryEngine
             screenSince = command.ts
             if (state != State.ON) return
             if (previous != null) {
-                enqueue(TelemetryEvents.SCREEN_TIME, mapOf("route" to previous, "ms" to (command.ts - since).coerceAtLeast(0L)), command.ts)
+                enqueue(TelemetryEvents.SCREEN_TIME, mapOf("route" to previous, "ms" to (command.ts - since).coerceAtLeast(0L)), command.ts, command.allowed)
             }
             val props = if (previous != null) mapOf("route" to command.route, "referrer_route" to previous) else mapOf("route" to command.route)
-            enqueue(TelemetryEvents.SCREEN_VIEW, props, command.ts)
+            enqueue(TelemetryEvents.SCREEN_VIEW, props, command.ts, command.allowed)
         }
 
         private suspend fun onConsent(choice: ConsentChoice) {
@@ -265,8 +303,11 @@ internal class TelemetryEngine
         private suspend fun onForegroundCommand() {
             foreground = true
             screenSince = nowMs()
+            val wasActive = active
+            recheckConfig() // may turn off, or turn on and activate (which sends its own app_open)
             if (!active) return
             scheduler.cancel()
+            if (!wasActive) return
             reclaim()
             // Cold start already sent app_open on activation; this is a return from the background.
             if (wasBackgrounded) enqueue(TelemetryEvents.APP_OPEN, emptyMap(), nowMs())
@@ -284,11 +325,18 @@ internal class TelemetryEngine
             scheduler.schedule()
         }
 
+        /**
+         * [allowedAtCapture] is the caller's consent snapshot (engine-made events pass true). An event captured
+         * while not allowed is never queued, even if a grant arrived before it was handled; with no snapshot
+         * yet, anything captured before the latest grant is dropped.
+         */
         private suspend fun enqueue(
             event: String,
             props: Map<String, Any?>,
             ts: Long,
+            allowedAtCapture: Boolean? = true,
         ) {
+            if (allowedAtCapture == false || (allowedAtCapture == null && ts < grantTs)) return
             if (!TelemetryProps.isToken(event) || !consent.allowedNow()) return
             val touch = session.touch(ts)
             val screen = screenRoute ?: ROOT
@@ -343,6 +391,8 @@ internal class TelemetryEngine
             if (sending || state != State.ON) return
             sending = true
             try {
+                recheckConfig()
+                if (state != State.ON) return
                 if (handedOver && foreground) {
                     reclaim()
                     // Backgrounded while the claim ran: the worker owns stored events, so give them back.
