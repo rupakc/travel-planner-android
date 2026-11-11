@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="auth_no_registration">Konten werden von einem Admin angelegt. Frage dort nach einem Benutzernamen und einem temporären Passwort.</string>
+    <string name="auth_no_registration">Konten werden von einem Admin angelegt. Frag deinen Admin nach einem Benutzernamen und einem temporären Passwort.</string>
     <string name="auth_password_shown">Passwort wird angezeigt</string>
     <string name="auth_password_hidden">Passwort verborgen</string>
     <string name="auth_error_network">Server nicht erreichbar. Prüfe deine Verbindung oder die Adresse unter „Server“.</string>

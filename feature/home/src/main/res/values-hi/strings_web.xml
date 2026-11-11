@@ -15,6 +15,7 @@
     <string name="home_setting_section_language">भाषा</string>
     <string name="home_setting_section_notifications">सूचनाएँ</string>
     <string name="home_setting_sign_out">साइन आउट करें</string>
+    <string name="home_setting_taste_graph">पसंद का ग्राफ़</string>
     <string name="home_setting_theme">थीम</string>
     <string name="home_taste_heading">आपकी यात्रा की पसंद के बारे में हमने क्या सीखा</string>
     <plurals name="home_travellers">

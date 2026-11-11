@@ -14,6 +14,7 @@
     "home_setting_section_language": "common:language.label",
     "home_setting_section_notifications": "alerts:bell.notifications",
     "home_setting_sign_out": "common:nav.signOut",
+    "home_setting_taste_graph": "account:prefs.taste.title",
     "home_setting_theme": "common:theme.label",
     "home_taste_heading": "account:prefs.taste.heading"
   },

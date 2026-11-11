@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home_title">Start</string>
-    <string name="home_loading">Dein Start wird geladen</string>
+    <string name="home_loading">Startseite wird geladen</string>
     <string name="home_greeting">Hallo, %1$s</string>
     <string name="home_greeting_anonymous">Hallo</string>
     <string name="home_type_unset">Wähle deinen Reisetyp</string>
@@ -32,7 +32,7 @@
     <string name="home_reason_multi_city">Du hast eine Reise mit mehreren Städten gesucht</string>
     <string name="home_reason_several">Du hast mehrere Reiseziele gesucht</string>
     <string name="home_reason_destination">Preise für diese Reise beobachten</string>
-    <string name="home_reason_taste">Aus deinem Taste Graph</string>
+    <string name="home_reason_taste">Aus deinem Geschmacksprofil</string>
     <string name="home_because_heading">Weil du nach %1$s gesucht hast</string>
     <string name="home_because_again">Diese Suche laden</string>
     <string name="home_search_back">Zurück</string>
@@ -54,7 +54,6 @@
         <item quantity="other">%d Ergebnisse</item>
     </plurals>
     <string name="home_setting_travel_preferences">Reisepräferenzen</string>
-    <string name="home_setting_taste_graph">Taste Graph</string>
     <string name="home_setting_budget">Budgetkategorie</string>
     <string name="home_setting_residence">Aktueller Wohnort</string>
     <string name="home_setting_documents">Aufenthaltstitel und Visa</string>

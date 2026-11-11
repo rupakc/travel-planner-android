@@ -15,6 +15,7 @@
     <string name="home_setting_section_language">Langue</string>
     <string name="home_setting_section_notifications">Notifications</string>
     <string name="home_setting_sign_out">Se déconnecter</string>
+    <string name="home_setting_taste_graph">Profil de goûts</string>
     <string name="home_setting_theme">Thème</string>
     <string name="home_taste_heading">Ce que nous avons appris sur vos goûts de voyage</string>
     <plurals name="home_travellers">

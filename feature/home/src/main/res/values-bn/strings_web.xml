@@ -15,6 +15,7 @@
     <string name="home_setting_section_language">ভাষা</string>
     <string name="home_setting_section_notifications">বিজ্ঞপ্তি</string>
     <string name="home_setting_sign_out">সাইন আউট</string>
+    <string name="home_setting_taste_graph">রুচির গ্রাফ</string>
     <string name="home_setting_theme">থিম</string>
     <string name="home_taste_heading">আপনার ভ্রমণের রুচি সম্পর্কে আমরা যা শিখেছি</string>
     <plurals name="home_travellers">

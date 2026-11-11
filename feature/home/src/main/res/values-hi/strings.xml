@@ -32,7 +32,7 @@
     <string name="home_reason_multi_city">आपने बहु-शहर यात्रा खोजी</string>
     <string name="home_reason_several">आपने कई गंतव्य खोजे</string>
     <string name="home_reason_destination">इस यात्रा की कीमतों पर नज़र रखें</string>
-    <string name="home_reason_taste">आपके Taste Graph से</string>
+    <string name="home_reason_taste">आपके पसंद के ग्राफ़ से</string>
     <string name="home_because_heading">क्योंकि आपने %1$s खोजा</string>
     <string name="home_because_again">यह खोज लोड करें</string>
     <string name="home_search_back">वापस</string>
@@ -54,7 +54,6 @@
         <item quantity="other">%d नतीजे</item>
     </plurals>
     <string name="home_setting_travel_preferences">यात्रा की पसंद</string>
-    <string name="home_setting_taste_graph">Taste Graph</string>
     <string name="home_setting_budget">बजट श्रेणी</string>
     <string name="home_setting_residence">वर्तमान निवास</string>
     <string name="home_setting_documents">निवास परमिट और वीज़ा</string>
@@ -66,7 +65,7 @@
     <string name="home_setting_theme_keywords">डार्क मोड, लाइट मोड</string>
     <string name="home_setting_dynamic_color">डायनामिक रंग</string>
     <string name="home_setting_notifications_keywords">यात्रा रिमाइंडर, कीमत अलर्ट, आस-पास के सुझाव</string>
-    <string name="home_setting_server">सर्वर पता</string>
+    <string name="home_setting_server">सर्वर का पता</string>
     <string name="home_setting_server_keywords">बैकएंड, URL, कनेक्शन जाँचें</string>
     <string name="home_setting_change_password">पासवर्ड बदलें</string>
     <string name="home_setting_about">ऐप के बारे में</string>

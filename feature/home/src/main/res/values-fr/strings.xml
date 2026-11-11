@@ -6,8 +6,8 @@
     <string name="home_greeting_anonymous">Bonjour</string>
     <string name="home_type_unset">Choisissez votre profil de voyageur</string>
     <string name="home_type_joiner">" + "</string>
-    <string name="home_type_a11y">Votre profil de voyageur : %1$s. Ouvre les réglages.</string>
-    <string name="home_search_hint">Rechercher voyages, discussions, fonctionnalités et réglages</string>
+    <string name="home_type_a11y">Votre profil de voyageur : %1$s. Ouvre les paramètres.</string>
+    <string name="home_search_hint">Rechercher voyages, discussions, fonctionnalités et paramètres</string>
     <string name="home_search_open">Ouvrir la recherche</string>
     <string name="home_refresh_failed">Actualisation impossible. Affichage des données enregistrées sur cet appareil.</string>
     <string name="home_next_trip">Votre prochain voyage</string>
@@ -24,8 +24,8 @@
     <string name="home_plan_trip">Planifier un voyage</string>
     <string name="home_tools_heading">Vos outils</string>
     <string name="home_tools_empty_title">Aucun outil activé</string>
-    <string name="home_tools_empty_message">Activez des fonctionnalités dans les réglages, ou refaites le quiz du voyageur.</string>
-    <string name="home_tools_empty_action">Ouvrir les réglages</string>
+    <string name="home_tools_empty_message">Activez des fonctionnalités dans les paramètres, ou refaites le quiz du voyageur.</string>
+    <string name="home_tools_empty_action">Ouvrir les paramètres</string>
     <string name="home_in_results">Dans les résultats de votre voyage</string>
     <string name="home_reason_budget">Vous avez cherché avec un budget</string>
     <string name="home_reason_accessibility">Vous avez cherché avec des besoins d’accessibilité</string>
@@ -33,14 +33,14 @@
     <string name="home_reason_multi_city">Vous avez cherché un voyage multi-villes</string>
     <string name="home_reason_several">Vous avez cherché plusieurs destinations</string>
     <string name="home_reason_destination">Surveiller les prix de ce voyage</string>
-    <string name="home_reason_taste">D’après votre Taste Graph</string>
+    <string name="home_reason_taste">D’après votre profil de goûts</string>
     <string name="home_because_heading">Parce que vous avez cherché %1$s</string>
     <string name="home_because_again">Charger cette recherche</string>
     <string name="home_search_back">Retour</string>
     <string name="home_search_clear">Effacer la recherche</string>
     <string name="home_search_clear_filters">Afficher tous les résultats</string>
     <string name="home_search_empty_title">Tout rechercher</string>
-    <string name="home_search_empty_message">Retrouvez voyages enregistrés, discussions, recherches récentes, fonctionnalités et réglages. Fonctionne hors connexion.</string>
+    <string name="home_search_empty_message">Retrouvez voyages enregistrés, discussions, recherches récentes, fonctionnalités et paramètres. Fonctionne hors connexion.</string>
     <string name="home_search_none_title">Aucun résultat pour « %1$s »</string>
     <string name="home_search_none_message">Essayez un autre mot ou vérifiez l’orthographe.</string>
     <string name="home_search_feature_off">Désactivée : l’ouvrir l’activera</string>
@@ -49,14 +49,13 @@
     <string name="home_search_filter_chats">Discussions (%1$d)</string>
     <string name="home_search_filter_recent">Recherches récentes (%1$d)</string>
     <string name="home_search_filter_features">Fonctionnalités (%1$d)</string>
-    <string name="home_search_filter_settings">Réglages (%1$d)</string>
+    <string name="home_search_filter_settings">Paramètres (%1$d)</string>
     <plurals name="home_search_result_count">
         <item quantity="one">%d résultat</item>
         <item quantity="many">%d résultats</item>
         <item quantity="other">%d résultats</item>
     </plurals>
     <string name="home_setting_travel_preferences">Préférences de voyage</string>
-    <string name="home_setting_taste_graph">Taste Graph</string>
     <string name="home_setting_budget">Catégorie de budget</string>
     <string name="home_setting_residence">Résidence actuelle</string>
     <string name="home_setting_documents">Titres de séjour et visas</string>
@@ -69,7 +68,7 @@
     <string name="home_setting_dynamic_color">Couleurs dynamiques</string>
     <string name="home_setting_notifications_keywords">rappels de voyage, alertes de prix, suggestions à proximité</string>
     <string name="home_setting_server">Adresse du serveur</string>
-    <string name="home_setting_server_keywords">serveur, URL, tester la connexion</string>
+    <string name="home_setting_server_keywords">backend, serveur, URL, tester la connexion</string>
     <string name="home_setting_change_password">Changer le mot de passe</string>
     <string name="home_setting_about">À propos</string>
     <string name="home_setting_about_keywords">version, licences, GeoNames</string>

@@ -32,7 +32,7 @@
     <string name="home_reason_multi_city">আপনি একাধিক শহরের ভ্রমণ সার্চ করেছেন</string>
     <string name="home_reason_several">আপনি একাধিক গন্তব্য সার্চ করেছেন</string>
     <string name="home_reason_destination">এই ভ্রমণের দামের উপর নজর রাখুন</string>
-    <string name="home_reason_taste">আপনার Taste Graph থেকে</string>
+    <string name="home_reason_taste">আপনার রুচির গ্রাফ থেকে</string>
     <string name="home_because_heading">কারণ আপনি %1$s সার্চ করেছেন</string>
     <string name="home_because_again">এই সার্চ লোড করুন</string>
     <string name="home_search_back">পিছনে</string>
@@ -54,7 +54,6 @@
         <item quantity="other">%d টি ফলাফল</item>
     </plurals>
     <string name="home_setting_travel_preferences">ভ্রমণের পছন্দ</string>
-    <string name="home_setting_taste_graph">Taste Graph</string>
     <string name="home_setting_budget">বাজেটের বিভাগ</string>
     <string name="home_setting_residence">বর্তমান বাসস্থান</string>
     <string name="home_setting_documents">বসবাসের অনুমতি ও ভিসা</string>
@@ -68,7 +67,7 @@
     <string name="home_setting_notifications_keywords">ভ্রমণের রিমাইন্ডার, দামের অ্যালার্ট, কাছাকাছি পরামর্শ</string>
     <string name="home_setting_server">সার্ভারের ঠিকানা</string>
     <string name="home_setting_server_keywords">ব্যাকএন্ড, URL, সংযোগ পরীক্ষা</string>
-    <string name="home_setting_change_password">পাসওয়ার্ড পরিবর্তন</string>
+    <string name="home_setting_change_password">পাসওয়ার্ড বদলান</string>
     <string name="home_setting_about">সম্পর্কে</string>
     <string name="home_setting_about_keywords">ভার্সন, লাইসেন্স, GeoNames</string>
     <string name="home_setting_section_preferences">ভ্রমণের পছন্দ</string>
