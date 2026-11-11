@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_title">Chat %1$s</string>
+    <string name="chat_starter_1">Planifier un voyage de 5 jours à Tokyo avec un budget %1$s</string>
+    <string name="chat_input_placeholder">Posez une question sur votre prochain voyage…</string>
+    <string name="chat_user_message">Vous : %1$s</string>
+    <string name="chat_thinking">Réflexion…</string>
+    <string name="chat_planning">Planification de votre voyage…</string>
+    <string name="chat_error_request">Désolé, une erreur s’est produite. Veuillez réessayer.</string>
+    <string name="chat_stopped">Arrêté</string>
+    <string name="chat_jump_latest">Aller au dernier message</string>
+    <string name="chat_suggestions">Questions suggérées</string>
+    <string name="chat_reply_announce">Assistant : %1$s</string>
+    <string name="chat_plan_ready_announce">Plan de voyage prêt pour %1$s</string>
+    <string name="chat_plan_ready_announce_generic">Plan de voyage prêt</string>
+    <string name="chat_reply_failed_announce">L’assistant n’a pas pu répondre. Vous pouvez réessayer.</string>
+    <plurals name="chat_my_plan_a11y">
+        <item quantity="one">Mon plan, %d élément</item>
+        <item quantity="many">Mon plan, %d éléments</item>
+        <item quantity="other">Mon plan, %d éléments</item>
+    </plurals>
+    <string name="chat_threads">Discussions</string>
+    <string name="chat_threads_show">Afficher les discussions</string>
+    <string name="chat_new">Nouvelle discussion</string>
+    <string name="chat_threads_search">Rechercher dans les discussions</string>
+    <string name="chat_threads_clear_search">Effacer la recherche</string>
+    <string name="chat_threads_empty">Aucune discussion</string>
+    <string name="chat_threads_empty_message">Vos conversations sont conservées sur cet appareil.</string>
+    <string name="chat_threads_no_match">Aucune discussion ne correspond à « %1$s »</string>
+    <string name="chat_thread_menu">Plus d’options pour %1$s</string>
+    <string name="chat_rename">Renommer</string>
+    <string name="chat_rename_title">Renommer la discussion</string>
+    <string name="chat_rename_label">Nom de la discussion</string>
+    <string name="chat_deleted">Discussion supprimée</string>
+    <plurals name="chat_show_more">
+        <item quantity="one">Voir %d de plus</item>
+        <item quantity="many">Voir %d de plus</item>
+        <item quantity="other">Voir %d de plus</item>
+    </plurals>
+    <string name="chat_progress">Prêt : %1$d/%2$d</string>
+    <string name="chat_route">%1$s → %2$s</string>
+    <plurals name="chat_visa_max_stay">
+        <item quantity="one">Séjour max. : %d jour</item>
+        <item quantity="many">Séjour max. : %d jours</item>
+        <item quantity="other">Séjour max. : %d jours</item>
+    </plurals>
+    <string name="chat_sim_data">%1$s GB</string>
+    <string name="chat_hours">%1$s h</string>
+    <string name="chat_open_in_maps">Ouvrir %1$s dans Maps</string>
+    <plurals name="chat_day_itinerary">
+        <item quantity="one">Itinéraire de %d jour</item>
+        <item quantity="many">Itinéraire de %d jours</item>
+        <item quantity="other">Itinéraire de %d jours</item>
+    </plurals>
+    <string name="chat_travel_day">Voyage</string>
+    <string name="chat_city_country">%1$s, %2$s</string>
+    <string name="chat_must_see">À ne pas manquer</string>
+    <string name="chat_day_expanded">développé</string>
+    <string name="chat_day_collapsed">réduit</string>
+    <string name="chat_save_as_plan">Enregistrer comme plan</string>
+    <string name="chat_replace_title">Commencer un nouveau plan ?</string>
+    <string name="chat_replace_message">Mon plan contient des modifications non enregistrées. L’enregistrement de cet itinéraire crée un nouveau plan à la place.</string>
+    <string name="chat_replace_confirm">Commencer un nouveau plan</string>
+</resources>

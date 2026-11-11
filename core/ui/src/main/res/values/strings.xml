@@ -181,4 +181,12 @@
         <item quantity="one">%d live</item>
         <item quantity="other">%d live</item>
     </plurals>
+
+    <!-- Consent prompt (web privacy.json prompt.*, policy; misc feedback.close) -->
+    <string name="privacy_prompt_title">Help improve %1$s</string>
+    <string name="privacy_prompt_body">We collect usage data (screens, taps, timings), tied to a random ID or to your account when signed in, to fix bugs and improve the app. Never what you type, your location or your email.</string>
+    <string name="privacy_allow">Allow</string>
+    <string name="privacy_deny">No thanks</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="privacy_close">Close</string>
 </resources>

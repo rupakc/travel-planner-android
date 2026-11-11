@@ -30,6 +30,24 @@ jobs:
       - name: Check documentation links
         run: scripts/check-doc-links.sh
 
+      - name: Read the pinned web commit
+        id: web-pin
+        run: echo "sha=$(sed -n 's/^web\.sha=//p' config/web-source.properties)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the pinned web commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: rupakc/travel-planner
+          ref: ${{ steps.web-pin.outputs.sha }}
+          path: .web-source
+          persist-credentials: false
+          sparse-checkout: |
+            frontend/design/tokens.json
+            frontend/src/i18n/locales
+
+      - name: Check generated tokens and strings against the pinned web commit
+        run: scripts/check-web-sync.sh .web-source
+
       - name: Set up JDK 21
         uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:

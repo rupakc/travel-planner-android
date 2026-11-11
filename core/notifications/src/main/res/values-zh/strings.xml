@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_trip_reminders">行程提醒</string>
+    <string name="channel_trip_reminders_desc">已保存行程的签证和行李检查、航班当天及每日行程提醒。</string>
+    <string name="channel_price_alerts_desc">当关注的机票、酒店、活动或行程价格下降或达到你的目标价时通知你。</string>
+    <string name="channel_nearby">附近推荐</string>
+    <string name="channel_nearby_desc">如果你最近使用过“附近”，旅途中会提醒你查看。在你打开之前不会查询任何内容。</string>
+    <string name="channel_account">账户</string>
+    <string name="channel_account_desc">登录和账户消息。</string>
+    <string name="reminder_week_title">一周后前往%1$s</string>
+    <string name="reminder_week_body">该检查签证并开始准备行李清单了。</string>
+    <string name="reminder_day_before_title">明天前往%1$s</string>
+    <string name="reminder_day_before_body">出发前请确认航班和天气。</string>
+    <string name="reminder_start_title">你的%1$s之旅今天开始</string>
+    <string name="reminder_start_body">今日行程、紧急卡片和附近的活动，轻点即可查看。</string>
+    <string name="reminder_day_title">%2$s第%1$d天</string>
+    <string name="reminder_day_body">查看今日行程。</string>
+    <string name="reminder_last_title">%1$s的最后一天</string>
+    <string name="reminder_last_body">请确认退房时间和返程安排。</string>
+    <string name="reminder_action_emergency">紧急卡片</string>
+    <string name="nearby_notification_title">看看你附近有什么</string>
+    <string name="nearby_notification_body">你周边值得看、吃、买和住的地方。点按查看。</string>
+</resources>

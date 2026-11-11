@@ -1,0 +1,22 @@
+{
+  "title": "Voyager",
+  "exact": "Save trip",
+  "brand": "Help improve Voyager",
+  "order": "{{a}} of {{b}}",
+  "hello": "Hello, {{name}}",
+  "esc": "Itinerary & plan",
+  "handle": "Your handle",
+  "pct": {
+    "plain": "100% free",
+    "args": "{{n}}% off",
+    "two": "Up to 50% off"
+  },
+  "apostrophe": "Can't load",
+  "markup": "Welcome <b>back</b>",
+  "items_one": "{{count}} item",
+  "items_other": "{{count}} items",
+  "stops_one": "{{count}} stop in {{city}}",
+  "stops_other": "{{count}} stops in {{city}}",
+  "half": "Same trip on 50% of the budget",
+  "pair": "{{a}} · {{b}}"
+}

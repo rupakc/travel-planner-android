@@ -1,0 +1,20 @@
+{
+  "strings": {
+    "onboarding_back": "misc:tour.back",
+    "onboarding_get_started": "misc:tour.start",
+    "onboarding_next": "misc:tour.next",
+    "onboarding_notifications_later": "alerts:dialog.browser.notNow",
+    "onboarding_opt_budget_luxury": "account:prefs.budget.high.label",
+    "onboarding_opt_budget_luxury_hint": "account:prefs.budget.high.desc",
+    "onboarding_opt_budget_mid_range": "account:prefs.budget.medium.label",
+    "onboarding_opt_budget_mid_range_hint": "account:prefs.budget.medium.desc",
+    "onboarding_opt_budget_shoestring_hint": "account:prefs.budget.low.desc",
+    "onboarding_opt_interests_food": "account:prefs.interest.food",
+    "onboarding_opt_interests_nightlife": "account:prefs.interest.nightlife",
+    "onboarding_opt_interests_shopping": "account:prefs.interest.shopping",
+    "onboarding_opt_interests_wellness": "account:prefs.interest.wellness",
+    "onboarding_retry": "misc:compare.retry",
+    "onboarding_saving": "account:changePassword.saving"
+  },
+  "plurals": {}
+}
