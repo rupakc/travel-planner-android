@@ -34,6 +34,11 @@
     <string name="settings_language_system">Réglage du système</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_es">Español</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_hi">हिन्दी</string>
+    <string name="settings_language_zh">中文（简体）</string>
+    <string name="settings_language_bn">বাংলা</string>
     <string name="settings_language_system_only">Sur cette version d’Android, l’application suit la langue de l’appareil. Modifiez-la dans les paramètres système.</string>
     <string name="settings_language_open_system">Ouvrir les paramètres système</string>
     <string name="settings_notifications_sub">Rappels de voyage, alertes de prix et suggestions à proximité</string>

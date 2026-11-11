@@ -34,6 +34,11 @@
     <string name="settings_language_system">Systemstandard</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_es">Español</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_hi">हिन्दी</string>
+    <string name="settings_language_zh">中文（简体）</string>
+    <string name="settings_language_bn">বাংলা</string>
     <string name="settings_language_system_only">Auf dieser Android-Version folgt die App der Gerätesprache. Ändere sie in den Systemeinstellungen.</string>
     <string name="settings_language_open_system">Systemeinstellungen öffnen</string>
     <string name="settings_notifications_sub">Reiseerinnerungen, Preisalarme und Vorschläge in der Nähe</string>

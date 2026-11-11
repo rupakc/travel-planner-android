@@ -34,6 +34,11 @@
     <string name="settings_language_system">跟随系统</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_es">Español</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_hi">हिन्दी</string>
+    <string name="settings_language_zh">中文（简体）</string>
+    <string name="settings_language_bn">বাংলা</string>
     <string name="settings_language_system_only">在此 Android 版本上，应用会跟随设备语言。请在系统设置中更改。</string>
     <string name="settings_language_open_system">打开系统设置</string>
     <string name="settings_notifications_sub">行程提醒、价格提醒和附近推荐</string>

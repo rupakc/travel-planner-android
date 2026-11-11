@@ -3,8 +3,6 @@
 Seven languages ship: `en` (default), `es`, `de`, `fr`, `hi`, `zh`, `bn`. The picker lists them by their native names (English, Español,
 Deutsch, Français, हिन्दी, 中文（简体）, বাংলা). The per-app language list is `app/src/main/res/xml/locales_config.xml`, referenced by
 `android:localeConfig` in the manifest, and the build keeps only those resources (`androidResources.localeFilters` in `app/build.gradle.kts`).
-The five new languages are switched on in one final change (locale filters, `locales_config`, picker entries), so until it lands the
-translated files exist in the repo but are not in the APK.
 
 ## Folders and fonts
 
