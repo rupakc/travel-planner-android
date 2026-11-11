@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_title">%1$s 聊天</string>
+    <string name="chat_starter_1">按%1$s预算规划一趟 5 天的东京之旅</string>
+    <string name="chat_input_placeholder">询问你的下一次旅行…</string>
+    <string name="chat_user_message">你：%1$s</string>
+    <string name="chat_thinking">思考中…</string>
+    <string name="chat_planning">正在规划你的行程…</string>
+    <string name="chat_error_request">抱歉，出了点问题，请再试一次。</string>
+    <string name="chat_stopped">已停止</string>
+    <string name="chat_jump_latest">跳到最新</string>
+    <string name="chat_suggestions">建议的后续问题</string>
+    <string name="chat_reply_announce">助手：%1$s</string>
+    <string name="chat_plan_ready_announce">%1$s 的行程计划已就绪</string>
+    <string name="chat_plan_ready_announce_generic">行程计划已就绪</string>
+    <string name="chat_reply_failed_announce">助手无法回答，可以重试。</string>
+    <plurals name="chat_my_plan_a11y">
+        <item quantity="other">我的计划，%d 项</item>
+    </plurals>
+    <string name="chat_threads">聊天</string>
+    <string name="chat_threads_show">显示聊天</string>
+    <string name="chat_new">新建聊天</string>
+    <string name="chat_threads_search">搜索聊天</string>
+    <string name="chat_threads_clear_search">清除搜索</string>
+    <string name="chat_threads_empty">还没有聊天</string>
+    <string name="chat_threads_empty_message">你的对话保存在此设备上。</string>
+    <string name="chat_threads_no_match">没有与“%1$s”匹配的聊天</string>
+    <string name="chat_thread_menu">%1$s 的更多选项</string>
+    <string name="chat_rename">重命名</string>
+    <string name="chat_rename_title">重命名聊天</string>
+    <string name="chat_rename_label">聊天名称</string>
+    <string name="chat_deleted">聊天已删除</string>
+    <plurals name="chat_show_more">
+        <item quantity="other">再显示 %d 项</item>
+    </plurals>
+    <string name="chat_progress">已完成：%1$d/%2$d</string>
+    <string name="chat_route">%1$s → %2$s</string>
+    <plurals name="chat_visa_max_stay">
+        <item quantity="other">最长停留：%d 天</item>
+    </plurals>
+    <string name="chat_sim_data">%1$s GB</string>
+    <string name="chat_hours">%1$s 小时</string>
+    <string name="chat_open_in_maps">在地图中打开%1$s</string>
+    <plurals name="chat_day_itinerary">
+        <item quantity="other">%d 天行程</item>
+    </plurals>
+    <string name="chat_travel_day">出行</string>
+    <string name="chat_city_country">%1$s, %2$s</string>
+    <string name="chat_must_see">必看</string>
+    <string name="chat_day_expanded">已展开</string>
+    <string name="chat_day_collapsed">已收起</string>
+    <string name="chat_save_as_plan">保存为计划</string>
+    <string name="chat_replace_title">开始新计划？</string>
+    <string name="chat_replace_message">我的计划中有未保存的更改。保存此行程将改为新建一个计划。</string>
+    <string name="chat_replace_confirm">开始新计划</string>
+</resources>

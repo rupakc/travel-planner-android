@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_title">%1$s চ্যাট</string>
+    <string name="chat_starter_1">%1$s বাজেটে টোকিওতে 5 দিনের ভ্রমণ প্ল্যান করুন</string>
+    <string name="chat_input_placeholder">আপনার পরবর্তী ভ্রমণ সম্পর্কে জিজ্ঞেস করুন…</string>
+    <string name="chat_user_message">আপনি: %1$s</string>
+    <string name="chat_thinking">ভাবা হচ্ছে…</string>
+    <string name="chat_planning">আপনার ভ্রমণ প্ল্যান করা হচ্ছে…</string>
+    <string name="chat_error_request">দুঃখিত, কিছু ভুল হয়েছে। আবার চেষ্টা করুন।</string>
+    <string name="chat_stopped">থামানো হয়েছে</string>
+    <string name="chat_jump_latest">সর্বশেষে যান</string>
+    <string name="chat_suggestions">প্রস্তাবিত পরবর্তী প্রশ্ন</string>
+    <string name="chat_reply_announce">অ্যাসিস্ট্যান্ট: %1$s</string>
+    <string name="chat_plan_ready_announce">%1$s-এর ভ্রমণ প্ল্যান তৈরি</string>
+    <string name="chat_plan_ready_announce_generic">ভ্রমণ প্ল্যান তৈরি</string>
+    <string name="chat_reply_failed_announce">অ্যাসিস্ট্যান্ট উত্তর দিতে পারেনি। আবার চেষ্টা করা যাবে।</string>
+    <plurals name="chat_my_plan_a11y">
+        <item quantity="one">আমার প্ল্যান, %dটি আইটেম</item>
+        <item quantity="other">আমার প্ল্যান, %dটি আইটেম</item>
+    </plurals>
+    <string name="chat_threads">চ্যাট</string>
+    <string name="chat_threads_show">চ্যাট দেখান</string>
+    <string name="chat_new">নতুন চ্যাট</string>
+    <string name="chat_threads_search">চ্যাট খুঁজুন</string>
+    <string name="chat_threads_clear_search">সার্চ মুছুন</string>
+    <string name="chat_threads_empty">এখনও কোনো চ্যাট নেই</string>
+    <string name="chat_threads_empty_message">আপনার কথোপকথন এই ডিভাইসেই রাখা হয়।</string>
+    <string name="chat_threads_no_match">“%1$s” এর সঙ্গে কোনো চ্যাট মেলেনি</string>
+    <string name="chat_thread_menu">%1$s-এর আরও বিকল্প</string>
+    <string name="chat_rename">নাম বদলান</string>
+    <string name="chat_rename_title">চ্যাটের নাম বদলান</string>
+    <string name="chat_rename_label">চ্যাটের নাম</string>
+    <string name="chat_deleted">চ্যাট মুছে ফেলা হয়েছে</string>
+    <plurals name="chat_show_more">
+        <item quantity="one">আরও %dটি দেখান</item>
+        <item quantity="other">আরও %dটি দেখান</item>
+    </plurals>
+    <string name="chat_progress">প্রস্তুত: %1$d/%2$d</string>
+    <string name="chat_route">%1$s → %2$s</string>
+    <plurals name="chat_visa_max_stay">
+        <item quantity="one">সর্বোচ্চ থাকা: %d দিন</item>
+        <item quantity="other">সর্বোচ্চ থাকা: %d দিন</item>
+    </plurals>
+    <string name="chat_sim_data">%1$s GB</string>
+    <string name="chat_hours">%1$s ঘণ্টা</string>
+    <string name="chat_open_in_maps">%1$s Maps-এ খুলুন</string>
+    <plurals name="chat_day_itinerary">
+        <item quantity="one">%d দিনের ভ্রমণসূচি</item>
+        <item quantity="other">%d দিনের ভ্রমণসূচি</item>
+    </plurals>
+    <string name="chat_travel_day">ভ্রমণ</string>
+    <string name="chat_city_country">%1$s, %2$s</string>
+    <string name="chat_must_see">অবশ্যই দেখুন</string>
+    <string name="chat_day_expanded">খোলা</string>
+    <string name="chat_day_collapsed">গুটানো</string>
+    <string name="chat_save_as_plan">প্ল্যান হিসেবে সেভ করুন</string>
+    <string name="chat_replace_title">নতুন প্ল্যান শুরু করবেন?</string>
+    <string name="chat_replace_message">আমার প্ল্যানে সেভ না করা পরিবর্তন আছে। এই ভ্রমণসূচি সেভ করলে বদলে একটি নতুন প্ল্যান তৈরি হবে।</string>
+    <string name="chat_replace_confirm">নতুন প্ল্যান শুরু করুন</string>
+</resources>
