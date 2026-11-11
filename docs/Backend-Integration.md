@@ -25,8 +25,17 @@ Retrofit declarations are in `core/network/.../api/Apis.kt`; wire models in `cor
 | `POST /api/discover`, `POST /api/compare/destination` | `SearchApi` | `DiscoverRepository`, `CompareRepository` |
 | `POST /api/import/extract`, `/import/resolve-place` | `ImportApi` | `ImportRepository` |
 | `POST /api/feedback`, `POST /api/analytics/events` | `FeedbackApi` | `FeedbackRepository` |
+| `GET /api/config` | `ClientConfigApi` | `ClientConfigRepository` (telemetry settings; a 404 means off) |
+| `POST /api/telemetry` (gzip) | `TelemetryApi` | `Telemetry` (queue, uploader, worker); see [Telemetry-and-Privacy](Telemetry-and-Privacy.md) |
+| `GET /api/auth/providers` | `AuthProvidersApi` | `AuthProvidersRepository` (feature-detected; 404 or error = all four providers "coming soon") |
 | `GET /health` | `HealthApi` | `HealthRepository` (capability flags, e.g. `serpapi_configured`, `push_configured`) |
 | `/api/admin/*` | `AdminApi` | none: wire models exist, no admin UI (non-goal); R8 removes it from release builds |
+
+## The `locale` field
+
+`AiLocaleInterceptor` adds `"locale": <base language code>` to the JSON body of POSTs to the AI paths (search, search/sync, chat, discover, compare/destination, stress-test, flights, hotels, activities
+(+ `/filtered`), visa, sim, tips, getting-around, forex, itinerary, events, walking-tours). It runs after auth and before the base-URL interceptor, only for the app's own host, never overrides an existing `locale`,
+and leaves non-JSON bodies (multipart import) alone, so draft `searchKey`s are unchanged. Older backends ignore the unknown field. zh-TW devices resolve to `zh`.
 
 ## Adding an endpoint
 

@@ -141,6 +141,22 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-06 Grounded-call failures share `core:domain` `LiveFailure` (offline, 429, ai_limit, ai_billing, grounding_unavailable, not found, 5xx); screens show our translated copy for each failure; only a 429 keeps the backend text (it carries the wait time) (review M1/M2).
 - 2026-11-06 (results UI fix) The section quick-jump chips are pinned under the top app bar outside the results LazyColumn (web sticky AgentBadge strip): always visible, nothing scrolls under them, so a jump is a plain `scrollToItem` to the section header (`ResultsListIndex`: 8 header items, then header + card rows per visible section). The chip of the section crossing a line a quarter down the list is selected and scrolled into the chip row; a tapped chip stays selected until the list scrolls for any other reason. Expanded: the same row above both panes selects the detail section. Chips are `Role.Tab` in a selectable group with "Jump to {section}" as the click label; reduce motion = no scroll animation.
 - 2026-11-06 (results UI fix) A card's link + Add to plan footer is `LinkAndAddRow` (FlowRow): a plain Row let a long link label ("View on Free Tours by Foot ↗", 200 % font) squeeze the add button to zero width.
+- 2026-11-11 Telemetry lives in `core:data/telemetry` with pure rules in `core:domain/telemetry`; no new module.
+- 2026-11-11 `app_open` is sent on every process foreground and `app_background` on stop. The background flush uses WorkManager unique work `telemetry_flush` (network, KEEP), and the queue file is in `noBackupFilesDir`. The flush worker re-appends unsent events on retry, cancellation or failure; a batch already handed to the sender is dropped on cancellation (at most once).
+- 2026-11-11 Android gzips telemetry (the web sends plain JSON).
+- 2026-11-11 The Phase 0 event set: `app_open`, `app_background`, `session_start`, `screen_view`, `screen_time`, `ui_tap`, `ui_toggle` (also the Settings privacy switch, `tid: privacy.switch`), `theme_change`, `language_change`, `consent` (grant only) and `perf cold_start`. `error` is absent because crashes do not fit the registry's `js|promise|api` kinds (a backend-first follow-up); `feature_used`, `ui_change` and `ui_submit` are absent because they mirror web-only autocapture and `track()` calls.
+- 2026-11-11 Android route templates use the web names where the screen is the same, and `/other` for unmapped routes.
+- 2026-11-11 Light is the default for installs that never chose (supersedes the SYSTEM default).
+- 2026-11-11 Dark surfaces come from the web dark tokens (`onSurfaceVariant` dark gray-700, `outline` dark gray-600 for contrast on every container).
+- 2026-11-11 `Palette.kt`/`DarkPalette.kt` and `strings_web.xml` (4-space indent) are generated from the web commit pinned in `config/web-source.properties` and checked in CI.
+- 2026-11-11 Spanish stays hand-maintained. The 5 new languages are generated where the English matches plus hand files; there is one map file per module; the literal `Voyager` maps to the brand placeholder. "Taste Graph" uses the web catalogue's translated term in de fr hi zh bn. The app ships seven languages (en es de fr hi zh bn) once the final locale change lands.
+- 2026-11-11 `values-zh` is Simplified Chinese (zh-TW falls back, as on the web). Telemetry `locale` uses zh-CN, hi-IN and bn-IN.
+- 2026-11-11 `locale` is added by `AiLocaleInterceptor` from a path allowlist, so draft `searchKey`s are unchanged.
+- 2026-11-11 `GET /api/auth/providers` is called and feature-detected like the web (supersedes the plan's "no call"): a 404, an error or an empty answer shows all four providers "coming soon"; a configured provider with a same-origin `/api/auth/` start path opens a Custom Tab. The PKCE mobile flow is a later task.
+- 2026-11-11 Privacy choices sit on Login, the share viewer and Settings → Privacy. The consent prompt is a non-modal card in the shell; consent is re-evaluated on `ACTION_TIMEZONE_CHANGED`.
+- 2026-11-11 The anon id and the consent choice survive sign-out and are excluded from backup and device transfer.
+- 2026-11-11 `cold_start` is reported only for a process started in the foreground, for its first activity, not restored, and 60 s or less.
+- 2026-11-11 `POST /api/analytics/events` is skipped while telemetry is not allowed.
 
 ## Documentation and tooling
 
@@ -156,3 +172,8 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 ## Open items
 
 - Baseline profile module (see Performance).
+- Web repo: the Android column of `docs/Feature-Parity.md` and the Android path in `docs/Privacy.md`.
+- Play Data safety form (owner).
+- Backend registry `error` kind for native crashes.
+- Native-speaker review of hi, bn and zh.
+- Use `public_base_url` from `/api/config` (Phase 1).
