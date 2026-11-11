@@ -5,16 +5,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppBuildInfo
+import io.github.rupakc.travelplanner.core.common.AppLanguage
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.data.telemetry.ConsentRepository
+import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureCatalogue
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.profile.types
 import io.github.rupakc.travelplanner.core.domain.profile.visibleFeatures
+import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
 import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
+import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
 import javax.inject.Inject
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +48,8 @@ data class SettingsUiState(
     /** Current app language tag (`null` = system): the system per-app locale on API 33+, else the stored setting. */
     val languageTag: String? = null,
     val choosingLanguage: Boolean = false,
+    /** Privacy switch: usage data may be collected (from `ConsentRepository.allowed`). */
+    val privacyAllowed: Boolean = true,
     val confirmingSignOut: Boolean = false,
     val signingOut: Boolean = false,
 )
@@ -57,6 +64,10 @@ sealed interface SettingsEvent {
     data object AskSignOut : SettingsEvent
 
     data object ConfirmSignOut : SettingsEvent
+
+    data class SetPrivacy(val allowed: Boolean) : SettingsEvent
+
+    data object OpenPrivacyChoices : SettingsEvent
 }
 
 /** Settings root: account, traveller type, feature count, appearance, language, server, sign-out. */
@@ -70,6 +81,9 @@ class SettingsViewModel
         catalogue: FeatureCatalogue,
         private val appLocales: AppLocales,
         buildInfo: AppBuildInfo,
+        private val consentRepository: ConsentRepository,
+        private val telemetry: Telemetry,
+        private val appLanguage: AppLanguage,
     ) : ViewModel() {
         private val dialogs = MutableStateFlow(Dialogs())
 
@@ -84,8 +98,8 @@ class SettingsViewModel
                 combine(profileRepository.profile, profileRepository.featureOverrides) { p, o -> p to o },
                 settingsRepository.settings,
                 settingsRepository.effectiveBaseUrl,
-                dialogs,
-            ) { session, (profile, overrides), settings, url, d ->
+                combine(dialogs, consentRepository.allowed) { d, allowed -> d to allowed },
+            ) { session, (profile, overrides), settings, url, (d, allowed) ->
                 val types = profile.types()
                 val visible = catalogue.visibleFeatures(profile, overrides)
                 SettingsUiState(
@@ -98,6 +112,7 @@ class SettingsViewModel
                     versionName = buildInfo.versionName,
                     perAppLanguage = appLocales.perAppSupported,
                     languageTag = if (appLocales.perAppSupported) appLocales.current() else settings.localeTag,
+                    privacyAllowed = allowed,
                     choosingLanguage = d.language,
                     confirmingSignOut = d.signOut,
                     signingOut = d.signingOut,
@@ -112,6 +127,8 @@ class SettingsViewModel
 
                 is SettingsEvent.SetLanguage -> {
                     dialogs.update { it.copy(language = false) }
+                    // The tag is not validated here: the picker only offers supported ones.
+                    telemetry.emit(TelemetryEvents.LANGUAGE_CHANGE, mapOf("lang" to (event.tag ?: appLanguage.current())))
                     viewModelScope.launch {
                         settingsRepository.setLocaleTag(event.tag)
                         appLocales.apply(event.tag)
@@ -128,6 +145,16 @@ class SettingsViewModel
 
                 SettingsEvent.ConfirmSignOut -> {
                     signOut()
+                }
+
+                is SettingsEvent.SetPrivacy -> {
+                    viewModelScope.launch {
+                        consentRepository.choose(if (event.allowed) ConsentChoice.GRANTED else ConsentChoice.DENIED)
+                    }
+                }
+
+                SettingsEvent.OpenPrivacyChoices -> {
+                    consentRepository.openChoices()
                 }
             }
         }

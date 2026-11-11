@@ -188,4 +188,9 @@
     <string name="settings_server_switch_title">Switch servers?</string>
     <string name="settings_server_switch_message">Switching to %1$s signs you out and clears this device\'s cached trips and chats. You\'ll sign in on the new server.</string>
     <string name="settings_server_switch_confirm">Switch and sign out</string>
+    <string name="settings_privacy_heading">Privacy</string>
+    <string name="settings_privacy_switch_label">Help improve %1$s</string>
+    <string name="settings_privacy_switch_hint">Share usage data tied to a random ID, or to your account when signed in. Never what you type, your location or your email.</string>
+    <string name="settings_privacy_policy">Privacy policy</string>
+    <string name="settings_privacy_choices">Privacy choices</string>
 </resources>
