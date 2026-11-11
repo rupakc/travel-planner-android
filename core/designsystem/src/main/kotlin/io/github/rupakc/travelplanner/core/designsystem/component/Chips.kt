@@ -11,7 +11,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 
-/** Pill chip with selected state (web aria-pressed chips: interests, filters, mode toggle). */
+/**
+ * Pill chip with selected state (web aria-pressed chips: interests, filters, mode toggle). A click reports
+ * TOGGLE with `on = !selected` to [LocalUiEventSink] under [tid] (`auto:chip` when null).
+ */
 @Composable
 fun TpChip(
     label: String,
@@ -20,10 +23,15 @@ fun TpChip(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
+    tid: String? = null,
 ) {
+    val sink = LocalUiEventSink.current
     FilterChip(
         selected = selected,
-        onClick = onClick,
+        onClick = {
+            sink.report(UiEventKind.TOGGLE, tid ?: "auto:chip", !selected)
+            onClick()
+        },
         // Decorative emoji ("🍜 Food") are shown but not read aloud.
         label = { Text(label, Modifier.readsWithoutEmoji(label)) },
         modifier = modifier,
