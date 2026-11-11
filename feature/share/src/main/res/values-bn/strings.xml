@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_title">শেয়ার করা ভ্রমণ</string>
+    <string name="share_dates">%1$s → %2$s</string>
+    <string name="share_save_copy">একটি কপি সেভ করুন</string>
+    <string name="share_hours">%1$s ঘণ্টা</string>
+    <string name="share_open_copy">আমার কপি খুলুন</string>
+    <string name="share_saved">“আমার ভ্রমণ”-এ সংরক্ষিত হয়েছে</string>
+    <string name="share_save_failed">কপি সেভ করা যায়নি।</string>
+    <string name="share_offline">আপনি অফলাইনে আছেন। এই শেয়ার করা ভ্রমণ খুলতে সংযোগ করুন।</string>
+    <string name="share_itinerary">দিনভিত্তিক ভ্রমণসূচি (%1$s)</string>
+    <string name="share_stars">%1$d-স্টার হোটেল</string>
+    <string name="share_review">%1$s/10</string>
+    <string name="share_open_link_a11y">%1$s খুলুন</string>
+    <string name="share_unnamed">নামহীন আইটেম</string>
+</resources>

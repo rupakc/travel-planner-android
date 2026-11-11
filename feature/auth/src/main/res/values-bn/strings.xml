@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_no_registration">অ্যাকাউন্ট অ্যাডমিন তৈরি করেন। আপনার অ্যাডমিনের কাছ থেকে ইউজারনেম ও অস্থায়ী পাসওয়ার্ড চেয়ে নিন।</string>
+    <string name="auth_password_shown">পাসওয়ার্ড দেখা যাচ্ছে</string>
+    <string name="auth_password_hidden">পাসওয়ার্ড লুকানো আছে</string>
+    <string name="auth_error_network">সার্ভারে পৌঁছানো যাচ্ছে না। আপনার সংযোগ বা “সার্ভার”-এর ঠিকানা দেখে নিন।</string>
+    <string name="auth_change_password_welcome">স্বাগতম, %1$s! চালিয়ে যেতে একটি নতুন পাসওয়ার্ড সেট করুন।</string>
+    <string name="auth_change_password_voluntary_title">পাসওয়ার্ড পরিবর্তন</string>
+    <string name="auth_change_password_voluntary_message">আপনার বর্তমান পাসওয়ার্ড লিখুন, তারপর একটি নতুন বেছে নিন।</string>
+    <string name="auth_current_password">বর্তমান পাসওয়ার্ড</string>
+    <string name="auth_update_password">পাসওয়ার্ড হালনাগাদ করুন</string>
+    <string name="auth_password_updated">পাসওয়ার্ড হালনাগাদ হয়েছে</string>
+    <string name="auth_error_not_configured">কোনো সার্ভার সেট করা নেই। ঠিকানা লিখতে “সার্ভার”-এ ট্যাপ করুন।</string>
+    <string name="auth_server">সার্ভার</string>
+    <string name="auth_server_button">সার্ভার: %1$s</string>
+    <string name="auth_server_button_unset">সার্ভার সেট করুন</string>
+    <string name="auth_server_title">সার্ভার</string>
+    <string name="auth_server_message">আপনার %1$s সার্ভারের ঠিকানা, যেমন http://192.168.1.20:8001।</string>
+    <string name="auth_server_url">সার্ভারের ঠিকানা</string>
+    <string name="auth_server_default">ডিফল্ট: %1$s</string>
+    <string name="auth_server_no_default">এই বিল্ডে কোনো ডিফল্ট সার্ভার নেই।</string>
+    <string name="auth_server_test">সংযোগ পরীক্ষা করুন</string>
+    <string name="auth_server_testing">পরীক্ষা চলছে…</string>
+    <string name="auth_server_reset">ডিফল্টে ফিরুন</string>
+    <string name="auth_server_reachable">সংযুক্ত হয়েছে। সার্ভারে পৌঁছানো যাচ্ছে।</string>
+    <string name="auth_server_serpapi_on">লাইভ দাম: পাওয়া যাচ্ছে</string>
+    <string name="auth_server_serpapi_off">লাইভ দাম: এই সার্ভারে সেট করা নেই</string>
+    <string name="auth_server_push_on">পুশ বিজ্ঞপ্তি: পাওয়া যাচ্ছে</string>
+    <string name="auth_server_push_off">পুশ বিজ্ঞপ্তি: এই সার্ভারে সেট করা নেই</string>
+    <string name="auth_server_unreachable">এই ঠিকানায় কোনো সার্ভারে পৌঁছানো যাচ্ছে না। ঠিকানা ও আপনার সংযোগ দেখে নিন।</string>
+    <string name="auth_server_error_blank">সার্ভারের ঠিকানা লিখুন।</string>
+    <string name="auth_server_error_malformed">এটি ওয়েব ঠিকানা মনে হচ্ছে না। http:// বা https:// দিয়ে শুরু করুন।</string>
+    <string name="auth_server_error_scheme">http:// বা https:// ঠিকানা ব্যবহার করুন।</string>
+    <string name="auth_server_error_host">সার্ভারের হোস্ট নাম বা IP ঠিকানা যোগ করুন।</string>
+    <string name="auth_server_error_https">এই বিল্ড শুধু HTTPS-এর মাধ্যমে সংযুক্ত হয়। https:// ঠিকানা ব্যবহার করুন।</string>
+</resources>

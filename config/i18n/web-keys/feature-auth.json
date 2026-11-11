@@ -1,0 +1,33 @@
+{
+  "strings": {
+    "auth_change_password_title": "account:changePassword.title",
+    "auth_coming_soon": "auth:comingSoon",
+    "auth_confirm_password": "account:changePassword.confirm",
+    "auth_continue_with": "auth:continueWith",
+    "auth_divider_or": "auth:divider",
+    "auth_done": "alerts:ui.done",
+    "auth_error_change_failed": "account:changePassword.failed",
+    "auth_error_generic": "account:changePassword.generic",
+    "auth_error_login_failed": "account:login.failed",
+    "auth_error_mismatch": "account:changePassword.mismatch",
+    "auth_error_too_short": "account:admin.reset.tooShort",
+    "auth_hide_password": "account:login.hidePassword",
+    "auth_login_title": "account:login.title",
+    "auth_new_password": "account:changePassword.new",
+    "auth_new_password_placeholder": "account:changePassword.newPlaceholder",
+    "auth_password": "account:login.password",
+    "auth_password_placeholder": "account:login.passwordPlaceholder",
+    "auth_privacy_choices": "privacy:choices",
+    "auth_saving": "account:changePassword.saving",
+    "auth_server_save": "alerts:ui.save",
+    "auth_set_password": "account:changePassword.submit",
+    "auth_show_password": "account:login.showPassword",
+    "auth_sign_in": "account:login.submit",
+    "auth_signing_in": "account:login.submitting",
+    "auth_tagline": "account:login.tagline",
+    "auth_temporary_password": "account:changePassword.temporary",
+    "auth_username": "account:admin.table.username",
+    "auth_username_placeholder": "account:login.usernamePlaceholder"
+  },
+  "plurals": {}
+}

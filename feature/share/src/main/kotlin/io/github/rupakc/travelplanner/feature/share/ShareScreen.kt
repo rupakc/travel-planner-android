@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material3.Icon
@@ -96,16 +98,20 @@ internal fun ShareScreen(
                 }
 
                 state.error is AppError.Network -> {
-                    ErrorState(stringResource(R.string.share_offline), onRetry = { onEvent(ShareEvent.Retry) })
+                    WithPrivacyFooter(onEvent) {
+                        ErrorState(stringResource(R.string.share_offline), onRetry = { onEvent(ShareEvent.Retry) })
+                    }
                 }
 
                 state.error != null -> {
-                    EmptyState(
-                        title = stringResource(R.string.share_unavailable_title),
-                        message = stringResource(R.string.share_unavailable_message),
-                        actionLabel = stringResource(R.string.share_plan_own),
-                        onAction = onPlanOwn,
-                    )
+                    WithPrivacyFooter(onEvent) {
+                        EmptyState(
+                            title = stringResource(R.string.share_unavailable_title),
+                            message = stringResource(R.string.share_unavailable_message),
+                            actionLabel = stringResource(R.string.share_plan_own),
+                            onAction = onPlanOwn,
+                        )
+                    }
                 }
 
                 else -> {
@@ -118,6 +124,30 @@ internal fun ShareScreen(
 }
 
 private const val SKELETON_LINES = 6
+
+/** The web share page's footer "Privacy choices" button (tid `privacy.choices`). */
+@Composable
+private fun PrivacyChoicesButton(onEvent: (ShareEvent) -> Unit, modifier: Modifier = Modifier) {
+    TpButton(
+        stringResource(R.string.share_privacy_choices),
+        onClick = { onEvent(ShareEvent.OpenPrivacyChoices) },
+        modifier = modifier,
+        variant = TpButtonVariant.Text,
+        tid = "privacy.choices",
+    )
+}
+
+/** An error/empty state with the privacy footer under it (the web shows the footer on a missing plan too). */
+@Composable
+private fun WithPrivacyFooter(onEvent: (ShareEvent) -> Unit, content: @Composable () -> Unit) {
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        content()
+        PrivacyChoicesButton(onEvent)
+    }
+}
 
 @Composable
 private fun ShareMessages(message: ShareMessage?, snackbar: SnackbarHostState, onEvent: (ShareEvent) -> Unit, onOpenSaved: (Long) -> Unit) {
@@ -189,6 +219,7 @@ private fun TripBody(
                     color = TravelTheme.colors.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth().padding(top = TravelTheme.spacing.sm),
                 )
+                PrivacyChoicesButton(onEvent, Modifier.align(Alignment.CenterHorizontally))
             }
         }
     }
@@ -470,6 +501,12 @@ private fun ShareLightPreview() {
 @Composable
 private fun ShareDarkPreview() {
     TravelTheme(themeMode = ThemeMode.DARK) { ShareScreen(ShareUiState(isLoading = false, trip = previewTrip), {}, {}, {}, {}, {}) }
+}
+
+@Preview(name = "Shared trip — 200 %", fontScale = 2f)
+@Composable
+private fun ShareLargeFontPreview() {
+    TravelTheme(themeMode = ThemeMode.LIGHT) { ShareScreen(ShareUiState(isLoading = false, trip = previewTrip), {}, {}, {}, {}, {}) }
 }
 
 @Preview(name = "Shared trip — unavailable")

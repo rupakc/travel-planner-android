@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -49,8 +50,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.rupakc.travelplanner.core.designsystem.component.LocalUiEventSink
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.UiEventKind
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
@@ -64,6 +67,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.PreferencesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ServerRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TasteProfileRoute
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.privacy.PrivacyLinks
 import io.github.rupakc.travelplanner.core.ui.profile.titleRes
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.feature.settings.R
@@ -72,6 +76,7 @@ import io.github.rupakc.travelplanner.feature.settings.common.SettingsHeading
 import io.github.rupakc.travelplanner.feature.settings.common.SettingsNote
 import io.github.rupakc.travelplanner.feature.settings.common.SettingsRow
 import io.github.rupakc.travelplanner.feature.settings.common.SettingsScaffold
+import io.github.rupakc.travelplanner.feature.settings.common.SettingsSwitchRow
 import io.github.rupakc.travelplanner.feature.settings.common.highlighted
 
 /** Root navigation actions (everything leaving this screen). */
@@ -94,6 +99,7 @@ private object RootDimens {
 private const val LICENCE_URL = "https://github.com/rupakc/travel-planner-android/blob/main/LICENSE"
 private const val GEONAMES_URL = "https://www.geonames.org/"
 private const val CC_BY_URL = "https://creativecommons.org/licenses/by/4.0/"
+
 private const val OURAIRPORTS_URL = "https://ourairports.com/"
 
 /** Row keys in display order (also the global-search scroll targets). */
@@ -114,6 +120,8 @@ private val RootKeys =
         "h_account",
         SettingsEntry.CHANGE_PASSWORD.key,
         SettingsEntry.SIGN_OUT.key,
+        "h_privacy",
+        SettingsEntry.PRIVACY.key,
         "h_about",
         SettingsEntry.ABOUT.key,
     )
@@ -279,6 +287,15 @@ private fun RootItem(key: String, state: SettingsUiState, highlightKey: String?,
             )
         }
 
+        else -> {
+            RootFooterItem(key, state, lit, onEvent, onNav)
+        }
+    }
+}
+
+@Composable
+private fun RootFooterItem(key: String, state: SettingsUiState, lit: Boolean, onEvent: (SettingsEvent) -> Unit, onNav: (SettingsNav) -> Unit) {
+    when (key) {
         "h_account" -> {
             SettingsHeading(stringResource(R.string.settings_section_account))
         }
@@ -294,6 +311,14 @@ private fun RootItem(key: String, state: SettingsUiState, highlightKey: String?,
 
         SettingsEntry.SIGN_OUT.key -> {
             SignOutRow(state.signingOut, lit, onEvent)
+        }
+
+        "h_privacy" -> {
+            SettingsHeading(stringResource(R.string.settings_privacy_heading))
+        }
+
+        SettingsEntry.PRIVACY.key -> {
+            PrivacyBlock(state.privacyAllowed, lit, onEvent, onNav)
         }
 
         "h_about" -> {
@@ -383,6 +408,25 @@ private fun SignOutRow(signingOut: Boolean, highlighted: Boolean, onEvent: (Sett
             highlighted = highlighted,
             onClick = { onEvent(SettingsEvent.AskSignOut) },
         )
+    }
+}
+
+@Composable
+private fun PrivacyBlock(allowed: Boolean, highlighted: Boolean, onEvent: (SettingsEvent) -> Unit, onNav: (SettingsNav) -> Unit) {
+    val sink = LocalUiEventSink.current
+    Column(Modifier.fillMaxWidth().highlighted(highlighted)) {
+        SettingsSwitchRow(
+            title = stringResource(R.string.settings_privacy_switch_label, stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)),
+            subtitle = stringResource(R.string.settings_privacy_switch_hint),
+            checked = allowed,
+            onCheckedChange = {
+                runCatching { sink.onUiEvent(UiEventKind.TOGGLE, "privacy.switch", it) }
+                onEvent(SettingsEvent.SetPrivacy(it))
+            },
+            modifier = Modifier.testTag("privacy.switch"),
+        )
+        SettingsRow(stringResource(R.string.settings_privacy_policy), onClick = { onNav(SettingsNav.OpenLink(PrivacyLinks.POLICY_URL)) })
+        SettingsRow(stringResource(R.string.settings_privacy_choices), onClick = { onEvent(SettingsEvent.OpenPrivacyChoices) })
     }
 }
 

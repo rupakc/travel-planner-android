@@ -189,4 +189,9 @@
     <string name="settings_server_switch_title">¿Cambiar de servidor?</string>
     <string name="settings_server_switch_message">Al cambiar a %1$s se cerrará tu sesión y se borrarán los viajes y chats guardados en este dispositivo. Iniciarás sesión en el nuevo servidor.</string>
     <string name="settings_server_switch_confirm">Cambiar y cerrar sesión</string>
+    <string name="settings_privacy_heading">Privacidad</string>
+    <string name="settings_privacy_switch_label">Ayuda a mejorar %1$s</string>
+    <string name="settings_privacy_switch_hint">Comparte datos de uso vinculados a un ID aleatorio o, con sesión iniciada, a tu cuenta. Nunca lo que escribes, tu ubicación ni tu correo.</string>
+    <string name="settings_privacy_policy">Política de privacidad</string>
+    <string name="settings_privacy_choices">Opciones de privacidad</string>
 </resources>
