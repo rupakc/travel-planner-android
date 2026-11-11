@@ -8,6 +8,7 @@ Run: python3 -m unittest tools/web-sync/test_gen_strings.py -v
 import contextlib
 import io
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -63,9 +64,14 @@ class Repo:
 
     def gen_string(self, lang, name):
         """The raw (still Android-escaped) text of one generated <string>."""
-        text = self.gen_text(lang)
-        start = text.index(f'<string name="{name}">') + len(f'<string name="{name}">')
-        return text[start:text.index("</string>", start)]
+        return self.gen_string_tag(lang, name)[1]
+
+    def gen_string_tag(self, lang, name):
+        """(attributes after name, raw text) of one generated <string>."""
+        m = re.search(f'<string name="{name}"([^>]*)>(.*?)</string>', self.gen_text(lang))
+        if m is None:
+            raise AssertionError(f"{name} not generated for {lang}")
+        return m.group(1), m.group(2)
 
     def gen_plural(self, lang, name):
         root = ET.parse(self.generated(lang)).getroot()
@@ -155,6 +161,65 @@ class GenStringsTest(unittest.TestCase):
         self.assertEqual(self.repo.gen_string("fr", "mod_pct_plain"), "100 % gratuit")
         self.assertEqual(self.repo.gen_string("fr", "mod_pct_args"), "%1$d %% de réduction")
         self.assertEqual(self.repo.gen_string("zh", "mod_pct_args"), "%1$d%% 折扣")
+
+    def test_several_percents_without_args_are_formatted_false(self):
+        self.suggest_and_generate()
+        self.assertEqual(self.repo.gen_string_tag("fr", "mod_pct_two"), (' formatted="false"', "De 10 % à 50 % de réduction"))
+        self.assertEqual(self.repo.gen_string_tag("fr", "mod_pct_plain"), (' formatted="false"', "100 % gratuit"))
+        self.assertEqual(self.repo.gen_string_tag("fr", "mod_pct_args"), ("", "%1$d %% de réduction"))
+        self.assertEqual(self.repo.gen_string_tag("fr", "mod_save"), ("", "Enregistrer le voyage"))
+
+    def test_english_formatted_false_is_carried_over(self):
+        self.suggest_and_generate()
+        self.assertEqual(self.repo.read_map()["strings"]["mod_half"], "x:half")
+        self.assertEqual(self.repo.gen_string_tag("de", "mod_half"), (' formatted="false"', "Dieselbe Reise mit 50 % des Budgets"))
+        self.assertEqual(gen_strings.tokens_android("Type %d now", formatted=False), ["Type %d now"])
+
+    def test_plural_without_args_rejects_percent(self):
+        values = self.repo.res / "values" / "strings.xml"
+        values.write_text(
+            values.read_text(encoding="utf-8").replace(
+                "</resources>",
+                '    <plurals name="mod_full">\n        <item quantity="one">Full</item>\n'
+                '        <item quantity="other">All full</item>\n    </plurals>\n</resources>',
+            ),
+            encoding="utf-8",
+        )
+        for lang, one, other in (("en", "Full", "All full"), ("fr", "Plein", "100 % plein")):
+            (self.repo.web / lang / "y.json").write_text(json.dumps({"full_one": one, "full_other": other}), encoding="utf-8")
+        self.repo.write_map(plurals={"mod_full": "y:full"})
+        code, out = self.repo.run("generate", "--module", "mod")
+        self.assertEqual(code, 1)
+        self.assertIn("plurals/mod_full", out)
+        self.assertIn("no arguments", out)
+        self.assertFalse(self.repo.generated("fr").exists())
+
+    def test_hand_string_with_several_percents_needs_formatted_false(self):
+        self.suggest_and_generate()
+        self.repo.fill_hand_translations()
+        path = self.repo.res / "values-hi" / "strings.xml"
+        text = path.read_text(encoding="utf-8").replace("</resources>", "")
+        # mod_markup is hand-translated; give it two literal percents without formatted="false".
+        text = text.replace("Welcome <b>back</b>", "10 % to 50 % <b>back</b>")
+        path.write_text(text + "</resources>\n", encoding="utf-8")
+        code, out = self.repo.run("check", "--module", "mod")
+        self.assertEqual(code, 1)
+        self.assertIn('formatted="false"', out)
+        self.assertIn("mod_markup", out)
+
+    def test_suggest_skips_placeholder_only_strings(self):
+        self.suggest_and_generate()
+        self.assertNotIn("mod_pair", self.repo.read_map()["strings"])
+
+    def test_check_detects_web_english_drift(self):
+        self.suggest_and_generate()
+        self.repo.fill_hand_translations()
+        path = self.repo.web / "en" / "x.json"
+        path.write_text(path.read_text(encoding="utf-8").replace('"Save trip"', '"Save your trip"'), encoding="utf-8")
+        code, out = self.repo.run("check", "--module", "mod")
+        self.assertEqual(code, 1)
+        self.assertIn("mod_save", out)
+        self.assertIn("Save your trip", out)
 
     def test_plural_categories_per_language(self):
         self.suggest_and_generate()

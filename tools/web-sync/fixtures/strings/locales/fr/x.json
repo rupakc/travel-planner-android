@@ -6,7 +6,11 @@
   "hello": "Bonjour, {{name}}",
   "esc": "l'itinéraire & <plan>",
   "handle": "@votre pseudo",
-  "pct": { "plain": "100 % gratuit", "args": "{{n}} % de réduction" },
+  "pct": {
+    "plain": "100 % gratuit",
+    "args": "{{n}} % de réduction",
+    "two": "De 10 % à 50 % de réduction"
+  },
   "apostrophe": "Impossible de charger \"ça\"",
   "markup": "Bon retour <b>parmi nous</b>",
   "items_one": "{{count}} élément",
@@ -14,5 +18,7 @@
   "items_other": "{{count}} éléments",
   "stops_one": "Une escale à {{city}}",
   "stops_many": "{{count}} d'escales à {{city}}",
-  "stops_other": "{{count}} escales à {{city}}"
+  "stops_other": "{{count}} escales à {{city}}",
+  "half": "Le même voyage avec 50 % du budget",
+  "pair": "{{a}} · {{b}}"
 }

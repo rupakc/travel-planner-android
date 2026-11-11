@@ -143,8 +143,13 @@ def aapt_decode(raw: str) -> str:
     return "".join(c for c, _ in out)
 
 
-def tokens_android(decoded: str) -> list[str | Spec]:
-    """Split decoded Android text into literal text and specifiers (`%%` -> `%`)."""
+def tokens_android(decoded: str, formatted: bool = True) -> list[str | Spec]:
+    """Split decoded Android text into literal text and specifiers (`%%` -> `%`).
+
+    A `formatted="false"` value has no specifiers: every `%` is literal.
+    """
+    if not formatted:
+        return [decoded] if decoded else []
     tokens: list[str | Spec] = []
     lit = ""
     pos = 0
@@ -170,8 +175,13 @@ def tokens_android(decoded: str) -> list[str | Spec]:
     return tokens
 
 
-def spec_set(decoded: str) -> set[tuple[int, str]]:
-    return {(t.index, t.conv) for t in tokens_android(decoded) if isinstance(t, Spec)}
+def spec_set(decoded: str, formatted: bool = True) -> set[tuple[int, str]]:
+    return {(t.index, t.conv) for t in tokens_android(decoded, formatted) if isinstance(t, Spec)}
+
+
+def lone_percents(decoded: str) -> int:
+    """How many `%` are not part of `%%` or a specifier (aapt2 rejects two or more in a formatted string)."""
+    return SPEC_RE.sub("", decoded).count("%")
 
 
 def fmt_specs(specs) -> str:
@@ -190,6 +200,7 @@ class AndroidEntry:
     value: str | None = None  # decoded, strings only
     items: dict[str, str] = field(default_factory=dict)  # quantity -> decoded, plurals only
     raw_items: list[str] = field(default_factory=list)  # quantities in file order (duplicates kept)
+    formatted: bool = True  # False for formatted="false": `%` is literal
 
     @property
     def key(self) -> tuple[str, str]:
@@ -204,8 +215,14 @@ class AndroidEntry:
     def specs(self) -> set[tuple[int, str]]:
         out: set[tuple[int, str]] = set()
         for v in self.all_values():
-            out |= spec_set(v)
+            out |= spec_set(v, self.formatted)
         return out
+
+    def has_words(self) -> bool:
+        """True when the English has literal letters (not only placeholders and punctuation)."""
+        return any(
+            ch.isalpha() for v in self.all_values() for t in tokens_android(v, self.formatted) if isinstance(t, str) for ch in t
+        )
 
 
 def _inner_text(el: ET.Element) -> tuple[str, bool]:
@@ -228,11 +245,12 @@ def read_resource_file(path: Path) -> list[AndroidEntry]:
         if not name:
             raise UsageError(f"{path}: a <{el.tag}> has no name attribute")
         translatable = el.get("translatable", "true") != "false"
+        formatted = el.get("formatted", "true") != "false"
         if el.tag == "string":
             text, markup = _inner_text(el)
-            entries.append(AndroidEntry("string", name, path, translatable, markup, value=aapt_decode(text)))
+            entries.append(AndroidEntry("string", name, path, translatable, markup, value=aapt_decode(text), formatted=formatted))
         else:
-            entry = AndroidEntry("plurals", name, path, translatable, False)
+            entry = AndroidEntry("plurals", name, path, translatable, False, formatted=formatted)
             for item in el.findall("item"):
                 q = item.get("quantity", "")
                 text, markup = _inner_text(item)
@@ -317,6 +335,7 @@ class Binding:
     names: dict[str, Spec] = field(default_factory=dict)  # web {{name}} -> Android spec
     brand: Spec | None = None  # Android spec standing for the literal "Voyager"
     has_args: bool = False  # the Android English has format arguments
+    formatted: bool = True  # False when the Android English is formatted="false"
 
     def merge(self, other: Binding) -> None:
         for name, spec in other.names.items():
@@ -340,11 +359,11 @@ class Binding:
             raise Unmappable(f"%{self.brand.index}$ stands for both {BRAND} and {{{{{seen[self.brand.index]}}}}}")
 
 
-def bind(android: str, web: str) -> Binding:
+def bind(android: str, web: str, formatted: bool = True) -> Binding:
     """Match one decoded Android English value with one web English value."""
     if has_web_markup(web):
         raise Unmappable("the web value has <tag> markup")
-    tokens = tokens_android(android)
+    tokens = tokens_android(android, formatted)
     pattern = ""
     specs: list[Spec] = []
     for t in tokens:
@@ -357,7 +376,7 @@ def bind(android: str, web: str) -> Binding:
     m = re.fullmatch(pattern, web, re.DOTALL)
     if not m:
         raise Unmappable(f"English differs (Android {android!r}, web {web!r})")
-    binding = Binding(has_args=bool(specs))
+    binding = Binding(has_args=bool(specs), formatted=formatted)
     for spec, text in zip(specs, m.groups()):
         if text == BRAND:
             if binding.brand and binding.brand.index != spec.index:
@@ -382,8 +401,8 @@ def bind_entry(entry: AndroidEntry, web: Web, key: str) -> Binding:
         value = web.get("en", key)
         if value is None:
             raise Unmappable(f"web key {key} is missing from en" + (" (it is a plural; map it under \"plurals\")" if key in web.plural_bases else ""))
-        return bind(entry.value or "", value)
-    binding = Binding()
+        return bind(entry.value or "", value, entry.formatted)
+    binding = Binding(formatted=entry.formatted)
     if web.get("en", key + "_other") is None:
         raise Unmappable(f"web plural {key} is missing from en (no {key}_other)")
     for q, text in entry.items.items():
@@ -391,7 +410,7 @@ def bind_entry(entry: AndroidEntry, web: Web, key: str) -> Binding:
         if value is None:
             raise Unmappable(f"web key {key}_{q} is missing from en (Android has quantity {q})")
         try:
-            binding.merge(bind(text, value))
+            binding.merge(bind(text, value, entry.formatted))
         except Unmappable as e:
             raise Unmappable(f"quantity {q}: {e}") from None
     return binding
@@ -413,8 +432,7 @@ def convert(translation: str, binding: Binding, plural_form: bool) -> str:
     parts += _literal_parts(translation[pos:], binding)
     missing = set(binding.names) - used
     if plural_form:
-        count_specs = {n for n in missing if n == "count"}
-        missing -= count_specs
+        missing.discard("count")
     if missing:
         raise Unmappable("drops " + ", ".join(f"{{{{{n}}}}}" for n in sorted(missing)))
     if binding.brand and not any(is_spec and text == binding.brand.positional for text, is_spec in parts):
@@ -593,7 +611,11 @@ def _render(kind: str, name: str, key: str, lang: str, web: Web, binding: Bindin
         value = web.get(lang, key)
         if value is None:
             return None
-        return f'    <string name="{name}">{convert(value, binding, plural_form=False)}</string>\n'
+        converted = convert(value, binding, plural_form=False)
+        # Without arguments `%` stays single, and aapt2 rejects two or more of them in a
+        # formatted string; formatted="false" makes them literal (and is kept from the English).
+        attrs = ' formatted="false"' if not binding.formatted or (not binding.has_args and "%" in converted) else ""
+        return f'    <string name="{name}"{attrs}>{converted}</string>\n'
     items = []
     for q in PLURAL_CATEGORIES[lang]:
         value = web.get(lang, f"{key}_{q}")
@@ -602,7 +624,11 @@ def _render(kind: str, name: str, key: str, lang: str, web: Web, binding: Bindin
         if value is None:
             return None
         try:
-            items.append(f'        <item quantity="{q}">{convert(value, binding, plural_form=True)}</item>\n')
+            converted = convert(value, binding, plural_form=True)
+            if not binding.has_args and "%" in converted:
+                # An <item> cannot carry formatted="false", and %% would show as-is without arguments.
+                raise Unmappable(f'contains "%" but the English plural has no arguments, so aapt2 could reject it; hand-translate {name}')
+            items.append(f'        <item quantity="{q}">{converted}</item>\n')
         except Unmappable as e:
             raise Unmappable(f"({key}_{q}) {e}") from None
     return f'    <plurals name="{name}">\n{"".join(items)}    </plurals>\n'
@@ -633,8 +659,8 @@ def cmd_suggest(root: Path, web: Web, modules: list[str]) -> int:
         added = []
         for entry in sorted(module.english, key=lambda e: e.name):
             target = strings if entry.kind == "string" else plurals
-            if not entry.translatable or entry.markup or entry.name in target:
-                continue
+            if not entry.translatable or entry.markup or entry.name in target or not entry.has_words():
+                continue  # placeholder-only values like "%1$s · %2$s" match any key of the same shape
             for key in string_keys if entry.kind == "string" else plural_keys:
                 try:
                     binding = bind_entry(entry, web, key)
@@ -761,15 +787,18 @@ def check_module(module: Module, web: Web, sha_line: str) -> list[str]:
                 english_specs = source.specs()
                 got: set[tuple[int, str]] = set()
                 for q, v in e.items.items():
-                    s = spec_set(v)
+                    s = spec_set(v, e.formatted)
                     got |= s
                     if not s <= english_specs:
                         problems.append(f"{where}: {e.label()} quantity {q} has specifiers {fmt_specs(s)}, not in the English {fmt_specs(english_specs)}")
                 if got != english_specs and got <= english_specs:
                     problems.append(f"{where}: {e.label()} uses specifiers {fmt_specs(got)}; the English uses {fmt_specs(english_specs)}")
             else:
-                if spec_set(e.value or "") != spec_set(source.value or ""):
-                    problems.append(f"{where}: {e.label()} has specifiers {fmt_specs(spec_set(e.value or ''))}; the English has {fmt_specs(spec_set(source.value or ''))}")
+                got_specs, want_specs = spec_set(e.value or "", e.formatted), source.specs()
+                if got_specs != want_specs:
+                    problems.append(f"{where}: {e.label()} has specifiers {fmt_specs(got_specs)}; the English has {fmt_specs(want_specs)}")
+                elif e.formatted and not got_specs and lone_percents(e.value or "") >= 2:
+                    problems.append(f'{where}: {e.label()} has several literal "%" in a formatted string, which aapt2 rejects; add formatted="false"')
         for key in english:
             if key not in seen:
                 missing.setdefault(key, []).append(lang)

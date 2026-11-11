@@ -6,9 +6,15 @@
   "hello": "你好，{{name}}",
   "esc": "行程与计划",
   "handle": "你的昵称",
-  "pct": { "plain": "100% 免费", "args": "{{n}}% 折扣" },
+  "pct": {
+    "plain": "100% 免费",
+    "args": "{{n}}% 折扣",
+    "two": "最高 50% 折扣"
+  },
   "apostrophe": "无法加载",
   "markup": "欢迎<b>回来</b>",
   "items_other": "{{count}} 项",
-  "stops_other": "在 {{city}} 停靠 {{count}} 次"
+  "stops_other": "在 {{city}} 停靠 {{count}} 次",
+  "half": "用 50% 的预算完成同样的行程",
+  "pair": "{{a}} · {{b}}"
 }

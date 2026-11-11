@@ -6,11 +6,17 @@
   "hello": "Hallo, {{name}}",
   "esc": "Reiseplan & Plan",
   "handle": "Dein Name",
-  "pct": { "plain": "100 % kostenlos", "args": "{{n}} % Rabatt" },
+  "pct": {
+    "plain": "100 % kostenlos",
+    "args": "{{n}} % Rabatt",
+    "two": "Bis zu 50 % Rabatt"
+  },
   "apostrophe": "Kann nicht laden",
   "markup": "Willkommen <b>zurück</b>",
   "items_one": "{{count}} Eintrag",
   "items_other": "{{count}} Einträge",
   "stops_one": "{{count}} Halt in {{city}}",
-  "stops_other": "{{count}} Halte in {{city}}"
+  "stops_other": "{{count}} Halte in {{city}}",
+  "half": "Dieselbe Reise mit 50 % des Budgets",
+  "pair": "{{a}} · {{b}}"
 }

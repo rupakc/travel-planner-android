@@ -9,6 +9,9 @@
     <string name="mod_handle">Your handle</string>
     <string name="mod_pct_plain">100% free</string>
     <string name="mod_pct_args">%1$d%% off</string>
+    <string name="mod_pct_two">Up to 50% off</string>
+    <string name="mod_half" formatted="false">Same trip on 50% of the budget</string>
+    <string name="mod_pair">%1$s · %2$s</string>
     <string name="mod_apostrophe">Can\'t load</string>
     <string name="mod_markup">Welcome <b>back</b></string>
     <string name="mod_open">Open map</string>
