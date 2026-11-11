@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_modes">Mode de recherche</string>
+    <string name="search_paste_link_prompt">Un super voyage vu en ligne ? Collez le lien</string>
+    <string name="search_stop_nights">Nuits (opt.)</string>
+    <string name="search_remove_stop">Supprimer l\'étape %1$d</string>
+    <string name="search_route_summary">Votre itinéraire : %1$s. Les étapes sont visitées en chemin ; la ville « Vers » est votre destination finale. Les nuits laissées vides sont réparties automatiquement.</string>
+    <string name="search_clear_field">Effacer %1$s</string>
+    <string name="search_searching">Recherche…</string>
+    <plurals name="search_suggestions">
+        <item quantity="one">%1$d suggestion</item>
+        <item quantity="many">%1$d suggestions</item>
+        <item quantity="other">%1$d suggestions</item>
+    </plurals>
+    <string name="search_pick_dates">Choisissez vos dates</string>
+    <string name="search_dates_ok">OK</string>
+    <string name="search_dates_hint">Laissez le retour vide pour un aller simple.</string>
+    <string name="search_usd_prefix">$</string>
+    <string name="search_travelers_edit">Modifier les voyageurs et les besoins d\'accessibilité</string>
+    <string name="search_adults_sub">18–64</string>
+    <string name="search_seniors_sub">65+</string>
+    <string name="search_children_sub">5–17</string>
+    <string name="search_infants_sub">0–4</string>
+    <string name="search_add_one">En ajouter un : %1$s</string>
+    <string name="search_remove_one">En retirer un : %1$s</string>
+    <string name="search_pace_relaxed">Tranquille</string>
+    <string name="search_pace_balanced">Équilibré</string>
+    <string name="search_pace_packed">Intense</string>
+    <string name="search_selected">Sélectionné</string>
+    <string name="search_not_selected">Non sélectionné</string>
+    <string name="search_issue_origin">Indiquez d\'où vous partez</string>
+    <string name="search_issue_destination">Indiquez où vous allez</string>
+    <string name="search_issue_nationality">Indiquez votre nationalité : elle détermine les informations de visa</string>
+    <string name="search_issue_stop_city">Ajoutez une ville pour chaque étape, ou supprimez-la</string>
+    <string name="search_issue_stop_nights">Le nombre de nuits par étape doit être compris entre 1 et 30</string>
+    <string name="search_issue_budget">Saisissez le budget sous forme de nombre, ou laissez le champ vide</string>
+    <string name="search_issue_departure_required">Choisissez une date de départ</string>
+    <string name="search_issue_departure_past">Cette date de départ est passée : choisissez aujourd\'hui ou plus tard</string>
+    <string name="search_issue_return_before">La date de retour ne peut pas précéder le départ</string>
+    <string name="search_recent_dates_passed">· dates passées</string>
+    <string name="search_recent_load">Charger %1$s dans le formulaire</string>
+    <string name="search_recent_removed">%1$s supprimé</string>
+    <string name="search_expanded">Développé</string>
+    <string name="search_collapsed">Réduit</string>
+    <plurals name="search_more_interests">
+        <item quantity="one">+%1$d</item>
+        <item quantity="many">+%1$d</item>
+        <item quantity="other">+%1$d</item>
+    </plurals>
+    <string name="search_discover_need_fields">Indiquez d\'où vous partez et votre nationalité pour obtenir des suggestions.</string>
+    <string name="search_plan_trip_to">Planifier un voyage à %1$s</string>
+    <string name="search_cost_range">~%1$s–%2$s</string>
+    <string name="search_visa_unverified">Non vérifié : consultez le site officiel</string>
+    <string name="search_compare_retry_for">Réessayer %1$s</string>
+    <string name="search_compare_loading">Chargement de %1$s</string>
+    <string name="search_compare_typical">%1$s en moyenne</string>
+    <string name="search_compare_temps">%1$s / %2$s</string>
+    <string name="search_compare_celsius_suffix">C</string>
+    <string name="search_compare_ease_value">%1$d/100</string>
+    <string name="search_compare_out_of_20">%1$d/20</string>
+    <string name="search_compare_table">Tableau comparatif</string>
+    <plurals name="search_import_hint_shots">
+        <item quantity="one">Nous lirons votre capture d\'écran (%1$d) : supprimez-la pour utiliser du texte à la place</item>
+        <item quantity="many">Nous lirons vos %1$d captures d\'écran : supprimez-les pour utiliser du texte à la place</item>
+        <item quantity="other">Nous lirons vos %1$d captures d\'écran : supprimez-les pour utiliser du texte à la place</item>
+    </plurals>
+    <string name="search_import_count">%1$s / %2$s</string>
+    <plurals name="search_import_up_to">
+        <item quantity="one">Jusqu\'à %1$d capture d\'écran</item>
+        <item quantity="many">Jusqu\'à %1$d captures d\'écran</item>
+        <item quantity="other">Jusqu\'à %1$d captures d\'écran</item>
+    </plurals>
+    <plurals name="search_import_kept">
+        <item quantity="one">%1$d capture d\'écran maximum à la fois : nous avons gardé les %2$d premières.</item>
+        <item quantity="many">%1$d captures d\'écran maximum à la fois : nous avons gardé les %2$d premières.</item>
+        <item quantity="other">%1$d captures d\'écran maximum à la fois : nous avons gardé les %2$d premières.</item>
+    </plurals>
+    <string name="search_import_heic">%1$s : les photos HEIC de l\'iPhone ne peuvent pas encore être lues. Faites plutôt une capture d\'écran (les captures sont en PNG) ou exportez-la en JPEG.</string>
+    <string name="search_import_not_image">%1$s n\'est pas une image que nous pouvons lire. Utilisez PNG, JPEG, WebP ou GIF.</string>
+    <plurals name="search_import_submit_shots">
+        <item quantity="one">Trouver les lieux dans %1$d capture d\'écran</item>
+        <item quantity="many">Trouver les lieux dans %1$d captures d\'écran</item>
+        <item quantity="other">Trouver les lieux dans %1$d captures d\'écran</item>
+    </plurals>
+    <string name="search_import_step_active">%1$s…</string>
+    <string name="search_import_elapsed">%1$s · %2$d s écoulées</string>
+    <plurals name="search_import_places_found">
+        <item quantity="one">%1$d lieu trouvé</item>
+        <item quantity="many">%1$d lieux trouvés</item>
+        <item quantity="other">%1$d lieux trouvés</item>
+    </plurals>
+    <string name="search_import_open_source">Ouvrir la page source</string>
+    <string name="search_import_left_out">exclu</string>
+    <plurals name="search_import_total_nights">
+        <item quantity="one">%1$d nuit au total.</item>
+        <item quantity="many">%1$d nuits au total.</item>
+        <item quantity="other">%1$d nuits au total.</item>
+    </plurals>
+    <plurals name="search_import_suggested_days">
+        <item quantity="one">La source suggère environ %1$d jour.</item>
+        <item quantity="many">La source suggère environ %1$d jours.</item>
+        <item quantity="other">La source suggère environ %1$d jours.</item>
+    </plurals>
+    <string name="search_import_on_map_rating">Sur la carte · ★ %1$s</string>
+    <string name="search_import_quote">« %1$s »</string>
+    <plurals name="search_import_unplaced_title">
+        <item quantity="one">Impossible de situer %1$d lieu</item>
+        <item quantity="many">Impossible de situer ces %1$d lieux</item>
+        <item quantity="other">Impossible de situer ces %1$d lieux</item>
+    </plurals>
+    <string name="search_import_no_stops">Gardez au moins une étape sur l\'itinéraire.</string>
+    <string name="search_import_past">Choisissez une date de départ à partir d\'aujourd\'hui.</string>
+    <plurals name="search_import_first_25">
+        <item quantity="one">Nous planifierons le premier lieu coché (%1$d) ; décochez-en quelques-uns pour choisir lesquels.</item>
+        <item quantity="many">Nous planifierons les %1$d premiers lieux cochés ; décochez-en quelques-uns pour choisir lesquels.</item>
+        <item quantity="other">Nous planifierons les %1$d premiers lieux cochés ; décochez-en quelques-uns pour choisir lesquels.</item>
+    </plurals>
+    <string name="search_new_plan_title">Commencer un nouveau plan ?</string>
+    <string name="search_new_plan_message">Votre plan contient des sélections non enregistrées. Une nouvelle recherche crée un nouveau plan ; enregistrez d\'abord si vous voulez les conserver.</string>
+    <string name="search_new_plan_confirm">Nouveau plan</string>
+    <string name="search_new_plan_keep">Continuer à modifier</string>
+</resources>

@@ -1,13 +1,21 @@
 package io.github.rupakc.travelplanner.feature.auth.login
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,25 +23,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.rupakc.travelplanner.core.designsystem.component.SocialProvider
+import io.github.rupakc.travelplanner.core.designsystem.component.SocialSignInButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.feature.auth.AuthMessage
 import io.github.rupakc.travelplanner.feature.auth.R
 import io.github.rupakc.travelplanner.feature.auth.server.ServerEvent
@@ -55,7 +72,15 @@ internal fun LoginRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val server by serverViewModel.state.collectAsStateWithLifecycle()
     var showServer by rememberSaveable { mutableStateOf(false) }
+    val openLink = rememberLinkOpener()
     LaunchedEffect(state.signedIn) { if (state.signedIn) onLoggedIn() }
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is LoginEffect.OpenUrl -> openLink(effect.url)
+            }
+        }
+    }
     LaunchedEffect(server.done) { if (server.done) showServer = false }
     LoginScreen(
         state = state,
@@ -78,7 +103,13 @@ internal fun LoginRoute(
     }
 }
 
-/** Web LoginPage: logo, "Travel Planner", "Plan your perfect trip", card with username/password, Sign In. */
+/** Test tag of the always-composed polite live region that holds the "coming soon" note. */
+internal const val COMING_SOON_REGION_TAG = "auth.coming-soon-region"
+
+/**
+ * Web LoginPage: logo, "Travel Planner", "Plan your perfect trip", card with the four social buttons,
+ * the "coming soon" note, an "or" divider, username/password and Sign In; then the footer with Privacy choices.
+ */
 @Composable
 internal fun LoginScreen(
     state: LoginUiState,
@@ -107,6 +138,8 @@ internal fun LoginScreen(
                         TpButton(stringResource(R.string.auth_server), onOpenServer, variant = TpButtonVariant.Tonal)
                     }
                 }
+                SocialSignIn(state.comingSoonProvider, onEvent)
+                OrDivider()
                 AuthTextField(
                     value = state.username,
                     onValueChange = { onEvent(LoginEvent.UsernameChanged(it)) },
@@ -158,6 +191,66 @@ internal fun LoginScreen(
             onClick = onOpenServer,
             variant = TpButtonVariant.Text,
         )
+        TpButton(
+            text = stringResource(R.string.auth_privacy_choices),
+            onClick = { onEvent(LoginEvent.OpenPrivacyChoices) },
+            variant = TpButtonVariant.Text,
+            tid = "privacy.choices",
+        )
+    }
+}
+
+/** The four providers in the web order, then the "coming soon" note in a live region that is always composed. */
+@Composable
+private fun SocialSignIn(comingSoonProvider: String?, onEvent: (LoginEvent) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+        SocialProvider.entries.forEach { provider ->
+            SocialSignInButton(
+                provider = provider,
+                label = stringResource(R.string.auth_continue_with, provider.displayName),
+                onClick = { onEvent(LoginEvent.SocialProviderTapped(provider)) },
+            )
+        }
+        Box(Modifier.fillMaxWidth().testTag(COMING_SOON_REGION_TAG).semantics { liveRegion = LiveRegionMode.Polite }) {
+            comingSoonProvider?.let { ComingSoonNote(it) }
+        }
+    }
+}
+
+@Composable
+private fun ComingSoonNote(provider: String) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(TravelTheme.colors.secondaryContainer, TravelShape.Input)
+            .padding(horizontal = TravelTheme.spacing.md, vertical = TravelTheme.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Icon(Icons.Filled.Info, contentDescription = null, modifier = Modifier.size(16.dp), tint = TravelTheme.colors.secondary)
+        Text(
+            stringResource(R.string.auth_coming_soon, provider),
+            style = TravelTheme.typography.bodyMedium,
+            color = TravelTheme.colors.onSecondaryContainer,
+        )
+    }
+}
+
+/** "— or —" between the social buttons and the form (web `role="separator"`). */
+@Composable
+private fun OrDivider() {
+    Row(
+        Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
+    ) {
+        HorizontalDivider(Modifier.weight(1f), color = TravelTheme.colors.outlineVariant)
+        Text(
+            stringResource(R.string.auth_divider_or),
+            style = TravelTheme.typography.labelSmall,
+            color = TravelTheme.colors.onSurfaceVariant,
+        )
+        HorizontalDivider(Modifier.weight(1f), color = TravelTheme.colors.outlineVariant)
     }
 }
 
@@ -173,6 +266,18 @@ private fun LoginPreviewDarkError() {
     TravelTheme(themeMode = ThemeMode.DARK) {
         LoginScreen(LoginUiState(username = "alice", password = "secret", error = AuthMessage.Server("Invalid username or password")), {})
     }
+}
+
+@Preview(name = "Login – coming soon, dark")
+@Composable
+private fun LoginPreviewDarkComingSoon() {
+    TravelTheme(themeMode = ThemeMode.DARK) { LoginScreen(LoginUiState(comingSoonProvider = "Google"), {}) }
+}
+
+@Preview(name = "Login – coming soon, 200 %", fontScale = 2f)
+@Composable
+private fun LoginPreviewLargeFont() {
+    TravelTheme(themeMode = ThemeMode.LIGHT) { LoginScreen(LoginUiState(comingSoonProvider = "GitHub"), {}) }
 }
 
 @Preview(name = "Login – loading")

@@ -15,6 +15,10 @@
     <string name="auth_password_hidden">Contraseña oculta</string>
     <string name="auth_error_login_failed">No se pudo iniciar sesión. Inténtalo de nuevo.</string>
     <string name="auth_error_network">No se puede conectar con el servidor. Revisa tu conexión o la dirección en Servidor.</string>
+    <string name="auth_continue_with">Continuar con %1$s</string>
+    <string name="auth_coming_soon">El inicio de sesión con %1$s llegará pronto: por ahora usa tu usuario y contraseña.</string>
+    <string name="auth_divider_or">o</string>
+    <string name="auth_privacy_choices">Opciones de privacidad</string>
 
     <string name="auth_change_password_title">Define tu contraseña</string>
     <string name="auth_change_password_welcome">¡Hola, %1$s! Define una contraseña nueva para continuar.</string>

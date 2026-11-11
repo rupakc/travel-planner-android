@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeConsentRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
@@ -76,9 +77,18 @@ class ShareLogicTest {
             FakeAuthRepository(if (signedIn) Session("t", TestUser) else null),
             TestAppDispatchers(main.testDispatcher),
             PlaceNameLookup(search),
+            consent,
         )
 
     private val search = FakeSearchRepository()
+    private val consent = FakeConsentRepository()
+
+    @Test
+    fun `share viewer privacy choices opens the prompt`() {
+        val vm = vm("tok", FakePlansRepository(), signedIn = false)
+        vm.onEvent(ShareEvent.OpenPrivacyChoices)
+        assertEquals(1, consent.openCount)
+    }
 
     @Test
     fun `the poster names the cities of airport codes`() =

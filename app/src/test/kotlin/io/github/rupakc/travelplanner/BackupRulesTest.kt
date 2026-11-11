@@ -20,6 +20,8 @@ class BackupRulesTest {
             "sharedpref" to "nearby_notifications.xml",
             "sharedpref" to "push_registration.xml",
             "sharedpref" to "server_capabilities.xml",
+            // Telemetry anon id, consent choice and session (TelemetryDataStoreFiles.TELEMETRY).
+            "file" to "datastore/telemetry.preferences_pb",
         )
 
     private fun excludes(section: String): Set<Pair<String, String>> =
