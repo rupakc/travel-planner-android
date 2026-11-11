@@ -127,11 +127,11 @@ class SettingsViewModel
 
                 is SettingsEvent.SetLanguage -> {
                     dialogs.update { it.copy(language = false) }
-                    // The tag is not validated here: the picker only offers supported ones.
-                    telemetry.emit(TelemetryEvents.LANGUAGE_CHANGE, mapOf("lang" to (event.tag ?: appLanguage.current())))
                     viewModelScope.launch {
                         settingsRepository.setLocaleTag(event.tag)
                         appLocales.apply(event.tag)
+                        // After apply, so "System" reports the language now in effect. The tag is not validated here.
+                        telemetry.emit(TelemetryEvents.LANGUAGE_CHANGE, mapOf("lang" to (event.tag ?: appLanguage.current())))
                     }
                 }
 

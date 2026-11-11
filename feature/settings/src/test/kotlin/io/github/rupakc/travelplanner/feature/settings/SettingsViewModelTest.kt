@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.settings
 
 import app.cash.turbine.test
+import io.github.rupakc.travelplanner.core.common.AppLanguage
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
 import io.github.rupakc.travelplanner.core.model.settings.Session
@@ -55,6 +56,28 @@ class SettingsViewModelTest {
         runTest {
             vm().onEvent(SettingsEvent.SetLanguage(null))
             assertEquals(listOf("language_change" to mapOf<String, Any?>("lang" to "es")), telemetry.events)
+        }
+
+    @Test
+    fun `SetLanguage system reports the language in effect after apply`() =
+        runTest {
+            val locales = FakeAppLocales()
+            val switching =
+                object : AppLanguage {
+                    override fun current() = if (locales.applied.isEmpty()) "es" else "en"
+                }
+            SettingsViewModel(
+                FakeAuthRepository(Session("t", TestUser)),
+                FakeProfileRepository(TravellerProfile(onboardingCompleted = true, primaryType = "LUXURY")),
+                FakeSettingsRepository(),
+                FakeCatalogue(setOf(FeatureId.CHAT)),
+                locales,
+                TestBuildInfo,
+                consent,
+                telemetry,
+                switching,
+            ).onEvent(SettingsEvent.SetLanguage(null))
+            assertEquals(listOf("language_change" to mapOf<String, Any?>("lang" to "en")), telemetry.events)
         }
 
     @Test

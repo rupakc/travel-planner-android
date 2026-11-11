@@ -50,8 +50,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.rupakc.travelplanner.core.designsystem.component.LocalUiEventSink
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.UiEventKind
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
@@ -411,12 +413,16 @@ private fun SignOutRow(signingOut: Boolean, highlighted: Boolean, onEvent: (Sett
 
 @Composable
 private fun PrivacyBlock(allowed: Boolean, highlighted: Boolean, onEvent: (SettingsEvent) -> Unit, onNav: (SettingsNav) -> Unit) {
+    val sink = LocalUiEventSink.current
     Column(Modifier.fillMaxWidth().highlighted(highlighted)) {
         SettingsSwitchRow(
             title = stringResource(R.string.settings_privacy_switch_label, stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)),
             subtitle = stringResource(R.string.settings_privacy_switch_hint),
             checked = allowed,
-            onCheckedChange = { onEvent(SettingsEvent.SetPrivacy(it)) },
+            onCheckedChange = {
+                runCatching { sink.onUiEvent(UiEventKind.TOGGLE, "privacy.switch", it) }
+                onEvent(SettingsEvent.SetPrivacy(it))
+            },
             modifier = Modifier.testTag("privacy.switch"),
         )
         SettingsRow(stringResource(R.string.settings_privacy_policy), onClick = { onNav(SettingsNav.OpenLink(PrivacyLinks.POLICY_URL)) })
