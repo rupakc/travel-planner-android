@@ -4,12 +4,16 @@ import android.app.Application
 import android.os.StrictMode
 import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
+import io.github.rupakc.travelplanner.core.data.telemetry.TelemetryLifecycle
 import io.github.rupakc.travelplanner.core.notifications.NotificationChannels
 import io.github.rupakc.travelplanner.core.notifications.NotificationsInitializer
+import io.github.rupakc.travelplanner.telemetry.ColdStart
+import io.github.rupakc.travelplanner.telemetry.TelemetryProcessObserver
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -28,6 +32,9 @@ class TravelPlannerApplication :
      */
     @Inject lateinit var notifications: dagger.Lazy<NotificationsInitializer>
 
+    /** Lazy for the same reason: resolved on [appScope] by [TelemetryProcessObserver], never on the main thread. */
+    @Inject lateinit var telemetryLifecycle: dagger.Lazy<TelemetryLifecycle>
+
     @Inject @ApplicationScope
     lateinit var appScope: CoroutineScope
 
@@ -35,6 +42,8 @@ class TravelPlannerApplication :
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
     override fun onCreate() {
+        // First, before anything can raise the process importance: is this start for a foreground UI?
+        ColdStart.captureProcessImportance()
         super.onCreate()
         if (BuildConfig.DEBUG) {
             AppLogger.sink =
@@ -54,5 +63,10 @@ class TravelPlannerApplication :
         NotificationChannels.createAll(this)
         // Alert poll, trip reminders, nearby worker and FCM registration (all off the main thread).
         appScope.launch { notifications.get().start() }
+        // Telemetry: app_open / app_background follow the process lifecycle. A process started for a worker or a
+        // push starts telemetry only when it first comes to the foreground (no config call in the background).
+        val telemetryObserver = TelemetryProcessObserver(appScope) { telemetryLifecycle.get() }
+        if (ColdStart.startedInForeground) telemetryObserver.start()
+        ProcessLifecycleOwner.get().lifecycle.addObserver(telemetryObserver)
     }
 }

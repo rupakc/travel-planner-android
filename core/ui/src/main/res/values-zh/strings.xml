@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_visa">签证与入境</string>
+    <string name="section_sim">SIM 与 eSIM</string>
+    <string name="section_forex">货币与汇兑</string>
+    <string name="section_status_loading">加载中</string>
+    <string name="section_status_enhancing">完善中</string>
+    <string name="section_status_done">已完成</string>
+    <string name="section_status_waiting">等待中</string>
+    <string name="section_expand">展开 %1$s</string>
+    <string name="section_collapse">收起 %1$s</string>
+    <string name="section_ready_announcement">%1$s 已就绪</string>
+    <string name="verification_pending">正在检查链接…</string>
+    <string name="price_unknown">暂无价格</string>
+    <string name="price_estimate_a11y">%1$s，估价</string>
+    <string name="booking_open">打开 %1$s</string>
+    <string name="booking_open_generic">查看并预订</string>
+    <string name="plan_add">加入计划</string>
+    <string name="plan_added">已在你的计划中</string>
+    <string name="plan_add_a11y">将 %1$s 加入我的计划</string>
+    <string name="plan_remove_a11y">将 %1$s 从我的计划中移除</string>
+    <string name="watch_target_error">请输入价格，例如 %1$s。</string>
+    <string name="watch_email_missing">请先在偏好设置中添加电子邮件地址。</string>
+    <string name="watch_expanded">已展开</string>
+    <string name="watch_collapsed">已收起</string>
+    <string name="watch_fare_any_drop_hint">仅在明显降价时提醒：至少降 %1$s 且降幅达 5%%。每天最多一次。</string>
+    <string name="watch_flexible_hint">如果提前或推迟几天出发至少能省 %1$s（行程天数不变），我们也会通知你。</string>
+    <string name="watch_fare_done_price">今日票价为 %1$s（%2$s）。我们每天检查约两次，只在值得时通知你。</string>
+    <string name="watch_noun_hotel">酒店</string>
+    <string name="watch_noun_activity">活动</string>
+    <string name="watch_noun_trip">行程</string>
+    <string name="watch_noun_price">价格</string>
+    <string name="watch_price_title">关注：%1$s</string>
+    <string name="watch_price_title_done">正在关注：%1$s</string>
+    <string name="watch_price_title_already">你已在关注：%1$s</string>
+    <string name="watch_price_error">无法开始关注（%1$s），请稍后再试。</string>
+    <string name="watch_price_done_price">实时价格为 %1$s。我们每天检查约两次，只在值得时通知你。</string>
+    <string name="watch_tracking">正在关注 %1$s</string>
+    <string name="watch_hotel_find">我们会在 Google Hotels 上查找 %2$s 的 %1$s，并关注 %3$s 的实时价格。</string>
+    <string name="watch_hotel_find_no_city">我们会在 Google Hotels 上查找 %1$s，并关注 %2$s 的实时价格。</string>
+    <string name="watch_hotel_tracking">关注中：Google Hotels 上的 %1$s</string>
+    <string name="watch_hotel_nightly">每晚 %1$s</string>
+    <string name="watch_activity_find">我们会在 GetYourGuide 和 Viator 上查找 %2$s 的 %1$s，并关注每人“起”价%3$s。</string>
+    <string name="watch_activity_listing">我们会关注你为 %1$s%2$s 选定的项目。</string>
+    <string name="watch_activity_rating">评分 %1$s</string>
+    <string name="watch_activity_from_pp">每人 %1$s 起</string>
+    <string name="watch_trip_alert_rule">只有实时价格使总价变动至少 %1$s 或 4%% 时才会提醒。</string>
+    <string name="watch_trip_watching_caption">我们关注的内容 · %1$s，%2$s</string>
+    <string name="watch_trip_diff_less">比你“我的计划”的合计（%2$s）少 %1$s</string>
+    <string name="watch_trip_diff_more">比你“我的计划”的合计（%2$s）多 %1$s</string>
+    <plurals name="watch_for_travellers">
+        <item quantity="other">%d 位旅客</item>
+    </plurals>
+    <plurals name="watch_for_nights">
+        <item quantity="other">%d 晚</item>
+    </plurals>
+    <plurals name="watch_reviews">
+        <item quantity="other">%d 条评价</item>
+    </plurals>
+    <plurals name="watch_estimates">
+        <item quantity="other">%d 个估价</item>
+    </plurals>
+    <plurals name="watch_hotel_estimate_rooms">
+        <item quantity="other">AI 估价：%1$d 间房 × %2$s，整段住宿</item>
+    </plurals>
+    <plurals name="watch_live_count">
+        <item quantity="other">%d 个实时</item>
+    </plurals>
+</resources>

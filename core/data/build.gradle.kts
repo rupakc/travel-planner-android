@@ -15,6 +15,10 @@ dependencies {
     implementation(projects.core.network)
     implementation(projects.core.database)
     implementation(projects.core.datastore)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(projects.core.testing)
+    testImplementation(libs.androidx.work.testing)
 }

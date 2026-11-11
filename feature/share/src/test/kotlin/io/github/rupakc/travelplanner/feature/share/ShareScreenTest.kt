@@ -62,6 +62,21 @@ class ShareScreenTest {
         compose.onNodeWithText("Save a copy").performClick()
         assertEquals(ShareEvent.SaveCopy, events.single())
         compose.onNodeWithText("Shared read-only — personal details are never included.").assertExists()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Privacy choices"))
+        compose.onNodeWithText("Privacy choices").performClick()
+        assertEquals(ShareEvent.OpenPrivacyChoices, events.last())
+    }
+
+    @Test
+    fun `an unavailable share still offers privacy choices`() {
+        val events = mutableListOf<ShareEvent>()
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                ShareScreen(ShareUiState(isLoading = false, error = AppError.NotFound()), { events += it }, {}, {}, {}, {})
+            }
+        }
+        compose.onNodeWithText("Privacy choices").performClick()
+        assertEquals(listOf<ShareEvent>(ShareEvent.OpenPrivacyChoices), events)
     }
 
     @Test

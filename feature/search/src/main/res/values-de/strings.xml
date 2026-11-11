@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_modes">Suchmodus</string>
+    <string name="search_paste_link_prompt">Tolle Reise online gesehen? Link einfügen</string>
+    <string name="search_stop_nights">Nächte (opt.)</string>
+    <string name="search_remove_stop">Stopp %1$d entfernen</string>
+    <string name="search_route_summary">Deine Route: %1$s. Die Stopps liegen auf dem Weg, die Stadt bei „Nach“ ist dein Endziel. Leere Nächte werden automatisch verteilt.</string>
+    <string name="search_clear_field">%1$s leeren</string>
+    <string name="search_searching">Suche läuft…</string>
+    <plurals name="search_suggestions">
+        <item quantity="one">%1$d Vorschlag</item>
+        <item quantity="other">%1$d Vorschläge</item>
+    </plurals>
+    <string name="search_pick_dates">Reisedaten wählen</string>
+    <string name="search_dates_ok">OK</string>
+    <string name="search_dates_hint">Rückreisedatum leer lassen für eine einfache Strecke.</string>
+    <string name="search_usd_prefix">$</string>
+    <string name="search_travelers_edit">Reisende und Barrierefreiheit ändern</string>
+    <string name="search_adults_sub">18–64</string>
+    <string name="search_seniors_sub">65+</string>
+    <string name="search_children_sub">5–17</string>
+    <string name="search_infants_sub">0–4</string>
+    <string name="search_add_one">Eine Person hinzufügen: %1$s</string>
+    <string name="search_remove_one">Eine Person entfernen: %1$s</string>
+    <string name="search_pace_relaxed">Entspannt</string>
+    <string name="search_pace_balanced">Ausgewogen</string>
+    <string name="search_pace_packed">Straff</string>
+    <string name="search_selected">Ausgewählt</string>
+    <string name="search_not_selected">Nicht ausgewählt</string>
+    <string name="search_issue_origin">Gib an, von wo du abfliegst</string>
+    <string name="search_issue_destination">Gib an, wohin du reist</string>
+    <string name="search_issue_nationality">Gib deine Staatsangehörigkeit an – sie bestimmt die Visa-Infos</string>
+    <string name="search_issue_stop_city">Gib für jeden Stopp eine Stadt an oder entferne ihn</string>
+    <string name="search_issue_stop_nights">Die Nächte pro Stopp müssen zwischen 1 und 30 liegen</string>
+    <string name="search_issue_budget">Gib das Budget als Zahl ein oder lass das Feld leer</string>
+    <string name="search_issue_departure_required">Wähle ein Abreisedatum</string>
+    <string name="search_issue_departure_past">Dieses Abreisedatum ist vorbei – wähle heute oder später</string>
+    <string name="search_issue_return_before">Das Rückreisedatum darf nicht vor der Abreise liegen</string>
+    <string name="search_recent_dates_passed">· Daten vorbei</string>
+    <string name="search_recent_load">%1$s ins Formular laden</string>
+    <string name="search_recent_removed">%1$s entfernt</string>
+    <string name="search_expanded">Ausgeklappt</string>
+    <string name="search_collapsed">Eingeklappt</string>
+    <plurals name="search_more_interests">
+        <item quantity="one">+%1$d</item>
+        <item quantity="other">+%1$d</item>
+    </plurals>
+    <string name="search_discover_need_fields">Gib an, von wo du abfliegst, und deine Staatsangehörigkeit, um Vorschläge zu erhalten.</string>
+    <string name="search_plan_trip_to">Reise nach %1$s planen</string>
+    <string name="search_cost_range">~%1$s–%2$s</string>
+    <string name="search_visa_unverified">Nicht geprüft – offizielle Website prüfen</string>
+    <string name="search_compare_retry_for">%1$s wiederholen</string>
+    <string name="search_compare_loading">%1$s wird geladen</string>
+    <string name="search_compare_typical">%1$s typisch</string>
+    <string name="search_compare_temps">%1$s / %2$s</string>
+    <string name="search_compare_celsius_suffix">C</string>
+    <string name="search_compare_ease_value">%1$d/100</string>
+    <string name="search_compare_out_of_20">%1$d/20</string>
+    <string name="search_compare_table">Vergleichstabelle</string>
+    <plurals name="search_import_hint_shots">
+        <item quantity="one">Wir lesen deinen Screenshot – entferne ihn, um stattdessen Text zu verwenden</item>
+        <item quantity="other">Wir lesen deine %1$d Screenshots – entferne sie, um stattdessen Text zu verwenden</item>
+    </plurals>
+    <string name="search_import_count">%1$s / %2$s</string>
+    <plurals name="search_import_up_to">
+        <item quantity="one">Bis zu %1$d Screenshot</item>
+        <item quantity="other">Bis zu %1$d Screenshots</item>
+    </plurals>
+    <plurals name="search_import_kept">
+        <item quantity="one">Bis zu %1$d Screenshot auf einmal – wir haben die ersten %2$d behalten.</item>
+        <item quantity="other">Bis zu %1$d Screenshots auf einmal – wir haben die ersten %2$d behalten.</item>
+    </plurals>
+    <string name="search_import_heic">%1$s: iPhone-HEIC-Fotos können noch nicht gelesen werden – mach stattdessen einen Screenshot (Screenshots sind PNG) oder exportiere es als JPEG.</string>
+    <string name="search_import_not_image">%1$s ist kein Bild, das wir lesen können. Verwende PNG, JPEG, WebP oder GIF.</string>
+    <plurals name="search_import_submit_shots">
+        <item quantity="one">Orte im Screenshot finden</item>
+        <item quantity="other">Orte in %1$d Screenshots finden</item>
+    </plurals>
+    <string name="search_import_step_active">%1$s…</string>
+    <string name="search_import_elapsed">%1$s · bisher %2$d s</string>
+    <plurals name="search_import_places_found">
+        <item quantity="one">%1$d Ort gefunden</item>
+        <item quantity="other">%1$d Orte gefunden</item>
+    </plurals>
+    <string name="search_import_open_source">Quellseite öffnen</string>
+    <string name="search_import_left_out">ausgelassen</string>
+    <plurals name="search_import_total_nights">
+        <item quantity="one">Insgesamt %1$d Nacht.</item>
+        <item quantity="other">Insgesamt %1$d Nächte.</item>
+    </plurals>
+    <plurals name="search_import_suggested_days">
+        <item quantity="one">Die Quelle schlägt etwa %1$d Tag vor.</item>
+        <item quantity="other">Die Quelle schlägt etwa %1$d Tage vor.</item>
+    </plurals>
+    <string name="search_import_on_map_rating">Auf der Karte · ★ %1$s</string>
+    <string name="search_import_quote">„%1$s“</string>
+    <plurals name="search_import_unplaced_title">
+        <item quantity="one">Dieser Ort konnte nicht verortet werden</item>
+        <item quantity="other">%1$d Orte konnten nicht verortet werden</item>
+    </plurals>
+    <string name="search_import_no_stops">Behalte mindestens einen Stopp auf der Route.</string>
+    <string name="search_import_past">Wähle ein Abreisedatum ab heute.</string>
+    <plurals name="search_import_first_25">
+        <item quantity="one">Wir planen den ersten angehakten Ort (%1$d) – hake ein paar ab, um die Auswahl zu bestimmen.</item>
+        <item quantity="other">Wir planen die ersten %1$d angehakten Orte – hake ein paar ab, um die Auswahl zu bestimmen.</item>
+    </plurals>
+    <string name="search_new_plan_title">Neuen Plan beginnen?</string>
+    <string name="search_new_plan_message">In „Mein Plan“ sind Auswahlen, die du nicht gespeichert hast. Eine neue Suche beginnt einen neuen Plan; speichere vorher, wenn du sie behalten willst.</string>
+    <string name="search_new_plan_confirm">Neuen Plan beginnen</string>
+    <string name="search_new_plan_keep">Weiter bearbeiten</string>
+</resources>
