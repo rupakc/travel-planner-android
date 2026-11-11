@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="results_title">你的行程</string>
+    <string name="results_message">结果将按板块逐步显示在这里。</string>
+    <plurals name="results_items">
+        <item quantity="other">%1$d 项</item>
+    </plurals>
+    <string name="results_section_error">无法加载此板块。</string>
+</resources>
