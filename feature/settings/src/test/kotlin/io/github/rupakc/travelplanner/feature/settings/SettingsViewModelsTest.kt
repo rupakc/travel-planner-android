@@ -15,10 +15,13 @@ import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
+import io.github.rupakc.travelplanner.core.testing.fake.FakeAppLanguage
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeConsentRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import io.github.rupakc.travelplanner.feature.settings.appearance.AppearanceEvent
 import io.github.rupakc.travelplanner.feature.settings.appearance.AppearanceViewModel
@@ -54,7 +57,18 @@ class SettingsViewModelsTest {
     private val locales = FakeAppLocales()
     private val catalogue = FakeCatalogue(setOf(FeatureId.CHAT, FeatureId.COMPARE))
 
-    private fun root() = SettingsViewModel(auth, profile, settings, catalogue, locales, TestBuildInfo)
+    private fun root() =
+        SettingsViewModel(
+            auth,
+            profile,
+            settings,
+            catalogue,
+            locales,
+            TestBuildInfo,
+            FakeConsentRepository(),
+            FakeTelemetry(),
+            FakeAppLanguage(),
+        )
 
     @Test
     fun `root shows account, type, feature count, url and version`() =
@@ -157,7 +171,7 @@ class SettingsViewModelsTest {
     @Test
     fun `appearance and notification toggles write device settings`() =
         runTest {
-            val appearance = AppearanceViewModel(settings)
+            val appearance = AppearanceViewModel(settings, FakeTelemetry())
             appearance.onEvent(AppearanceEvent.SetTheme(ThemeMode.DARK))
             appearance.onEvent(AppearanceEvent.SetDynamicColor(true))
             val notifications = NotificationSettingsViewModel(settings)
@@ -287,7 +301,18 @@ class SettingsViewModelsTest {
                         cachesCleared = true
                     }
                 }
-            vm = SettingsViewModel(closingAuth, profile, settings, catalogue, locales, TestBuildInfo)
+            vm =
+                SettingsViewModel(
+                    closingAuth,
+                    profile,
+                    settings,
+                    catalogue,
+                    locales,
+                    TestBuildInfo,
+                    FakeConsentRepository(),
+                    FakeTelemetry(),
+                    FakeAppLanguage(),
+                )
             vm.onEvent(SettingsEvent.ConfirmSignOut)
             assertTrue(cachesCleared)
         }
