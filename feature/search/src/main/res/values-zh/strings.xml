@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_modes">搜索模式</string>
+    <string name="search_paste_link_prompt">在网上看到不错的行程？粘贴链接</string>
+    <string name="search_stop_nights">晚数（可选）</string>
+    <string name="search_remove_stop">移除站点 %1$d</string>
+    <string name="search_route_summary">你的路线：%1$s。各站点在途中游览，“目的地”城市为最终目的地。留空的晚数将自动分配。</string>
+    <string name="search_clear_field">清除%1$s</string>
+    <string name="search_searching">正在搜索…</string>
+    <plurals name="search_suggestions">
+        <item quantity="other">%1$d 条推荐</item>
+    </plurals>
+    <string name="search_pick_dates">选择日期</string>
+    <string name="search_dates_ok">确定</string>
+    <string name="search_dates_hint">单程请将返程日期留空。</string>
+    <string name="search_usd_prefix">$</string>
+    <string name="search_travelers_edit">更改出行人员和无障碍需求</string>
+    <string name="search_adults_sub">18–64</string>
+    <string name="search_seniors_sub">65+</string>
+    <string name="search_children_sub">5–17</string>
+    <string name="search_infants_sub">0–4</string>
+    <string name="search_add_one">增加一位：%1$s</string>
+    <string name="search_remove_one">减少一位：%1$s</string>
+    <string name="search_pace_relaxed">轻松</string>
+    <string name="search_pace_balanced">均衡</string>
+    <string name="search_pace_packed">紧凑</string>
+    <string name="search_selected">已选择</string>
+    <string name="search_not_selected">未选择</string>
+    <string name="search_issue_origin">请填写出发地</string>
+    <string name="search_issue_destination">请填写目的地</string>
+    <string name="search_issue_nationality">请填写国籍——它决定签证信息</string>
+    <string name="search_issue_stop_city">请为每个站点填写城市，或将其移除</string>
+    <string name="search_issue_stop_nights">每个站点的晚数须在 1 到 30 之间</string>
+    <string name="search_issue_budget">请以数字填写预算，或留空</string>
+    <string name="search_issue_departure_required">请选择出发日期</string>
+    <string name="search_issue_departure_past">该出发日期已过——请选择今天或之后的日期</string>
+    <string name="search_issue_return_before">返程日期不能早于出发日期</string>
+    <string name="search_recent_dates_passed">· 日期已过</string>
+    <string name="search_recent_load">将%1$s载入表单</string>
+    <string name="search_recent_removed">已移除%1$s</string>
+    <string name="search_expanded">已展开</string>
+    <string name="search_collapsed">已收起</string>
+    <plurals name="search_more_interests">
+        <item quantity="other">+%1$d</item>
+    </plurals>
+    <string name="search_discover_need_fields">请填写出发地和国籍以获取推荐。</string>
+    <string name="search_plan_trip_to">规划前往%1$s的行程</string>
+    <string name="search_cost_range">~%1$s–%2$s</string>
+    <string name="search_visa_unverified">未经核实——请查看官方网站</string>
+    <string name="search_compare_retry_for">重试%1$s</string>
+    <string name="search_compare_loading">正在加载%1$s</string>
+    <string name="search_compare_typical">通常 %1$s</string>
+    <string name="search_compare_temps">%1$s / %2$s</string>
+    <string name="search_compare_celsius_suffix">C</string>
+    <string name="search_compare_ease_value">%1$d/100</string>
+    <string name="search_compare_out_of_20">%1$d/20</string>
+    <string name="search_compare_table">对比表</string>
+    <plurals name="search_import_hint_shots">
+        <item quantity="other">我们将读取你的 %1$d 张截图——移除后可改用文本</item>
+    </plurals>
+    <string name="search_import_count">%1$s / %2$s</string>
+    <plurals name="search_import_up_to">
+        <item quantity="other">最多 %1$d 张截图</item>
+    </plurals>
+    <plurals name="search_import_kept">
+        <item quantity="other">一次最多 %1$d 张截图——已保留前 %2$d 张。</item>
+    </plurals>
+    <string name="search_import_heic">%1$s：暂不支持读取 iPhone 的 HEIC 照片——请改用截图（截图为 PNG），或导出为 JPEG。</string>
+    <string name="search_import_not_image">无法读取%1$s这种图片。请使用 PNG、JPEG、WebP 或 GIF。</string>
+    <plurals name="search_import_submit_shots">
+        <item quantity="other">在 %1$d 张截图中查找地点</item>
+    </plurals>
+    <string name="search_import_step_active">%1$s…</string>
+    <string name="search_import_elapsed">%1$s · 已用 %2$d 秒</string>
+    <plurals name="search_import_places_found">
+        <item quantity="other">找到 %1$d 个地点</item>
+    </plurals>
+    <string name="search_import_open_source">打开来源页面</string>
+    <string name="search_import_left_out">已排除</string>
+    <plurals name="search_import_total_nights">
+        <item quantity="other">共 %1$d 晚。</item>
+    </plurals>
+    <plurals name="search_import_suggested_days">
+        <item quantity="other">来源建议约 %1$d 天。</item>
+    </plurals>
+    <string name="search_import_on_map_rating">地图上 · ★ %1$s</string>
+    <string name="search_import_quote">“%1$s”</string>
+    <plurals name="search_import_unplaced_title">
+        <item quantity="other">有 %1$d 个地点无法定位</item>
+    </plurals>
+    <string name="search_import_no_stops">路线上至少保留一个站点。</string>
+    <string name="search_import_past">请选择今天或之后的出发日期。</string>
+    <plurals name="search_import_first_25">
+        <item quantity="other">我们将规划已勾选的前 %1$d 个地点——取消勾选部分地点即可自行选择。</item>
+    </plurals>
+    <string name="search_new_plan_title">开始新计划？</string>
+    <string name="search_new_plan_message">“我的计划”中有尚未保存的选择。新的搜索会开始新计划；如需保留，请先保存。</string>
+    <string name="search_new_plan_confirm">开始新计划</string>
+    <string name="search_new_plan_keep">继续编辑</string>
+</resources>

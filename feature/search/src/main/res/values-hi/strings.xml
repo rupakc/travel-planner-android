@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_modes">खोज का तरीका</string>
+    <string name="search_paste_link_prompt">ऑनलाइन कोई शानदार यात्रा दिखी? लिंक पेस्ट करें</string>
+    <string name="search_stop_nights">रातें (वैकल्पिक)</string>
+    <string name="search_remove_stop">पड़ाव %1$d हटाएँ</string>
+    <string name="search_route_summary">आपका रूट: %1$s। पड़ाव रास्ते में पड़ते हैं; \"कहाँ\" वाला शहर आपकी अंतिम मंज़िल है। खाली छोड़ी गई रातें अपने-आप बाँट दी जाती हैं।</string>
+    <string name="search_clear_field">%1$s साफ़ करें</string>
+    <string name="search_searching">खोज रहे हैं…</string>
+    <plurals name="search_suggestions">
+        <item quantity="one">%1$d सुझाव</item>
+        <item quantity="other">%1$d सुझाव</item>
+    </plurals>
+    <string name="search_pick_dates">अपनी तारीखें चुनें</string>
+    <string name="search_dates_ok">ठीक है</string>
+    <string name="search_dates_hint">एकतरफ़ा यात्रा के लिए वापसी की तारीख खाली छोड़ें।</string>
+    <string name="search_usd_prefix">$</string>
+    <string name="search_travelers_edit">यात्री और सुगम्यता की ज़रूरतें बदलें</string>
+    <string name="search_adults_sub">18–64</string>
+    <string name="search_seniors_sub">65+</string>
+    <string name="search_children_sub">5–17</string>
+    <string name="search_infants_sub">0–4</string>
+    <string name="search_add_one">एक जोड़ें: %1$s</string>
+    <string name="search_remove_one">एक घटाएँ: %1$s</string>
+    <string name="search_pace_relaxed">आरामदायक</string>
+    <string name="search_pace_balanced">संतुलित</string>
+    <string name="search_pace_packed">व्यस्त</string>
+    <string name="search_selected">चुना गया</string>
+    <string name="search_not_selected">चुना नहीं गया</string>
+    <string name="search_issue_origin">बताएँ कि आप कहाँ से उड़ान भर रहे हैं</string>
+    <string name="search_issue_destination">बताएँ कि आप कहाँ जा रहे हैं</string>
+    <string name="search_issue_nationality">अपनी राष्ट्रीयता बताएँ — इसी से वीज़ा जानकारी तय होती है</string>
+    <string name="search_issue_stop_city">हर पड़ाव के लिए एक शहर जोड़ें, या उसे हटा दें</string>
+    <string name="search_issue_stop_nights">हर पड़ाव की रातें 1 से 30 के बीच होनी चाहिए</string>
+    <string name="search_issue_budget">बजट को संख्या में लिखें, या खाली छोड़ दें</string>
+    <string name="search_issue_departure_required">प्रस्थान की तारीख चुनें</string>
+    <string name="search_issue_departure_past">यह प्रस्थान तिथि बीत चुकी है — आज या उसके बाद की तारीख चुनें</string>
+    <string name="search_issue_return_before">वापसी की तारीख प्रस्थान से पहले नहीं हो सकती</string>
+    <string name="search_recent_dates_passed">· तारीखें बीत चुकीं</string>
+    <string name="search_recent_load">%1$s को फ़ॉर्म में लोड करें</string>
+    <string name="search_recent_removed">%1$s हटा दिया गया</string>
+    <string name="search_expanded">विस्तृत</string>
+    <string name="search_collapsed">संक्षिप्त</string>
+    <plurals name="search_more_interests">
+        <item quantity="one">+%1$d</item>
+        <item quantity="other">+%1$d</item>
+    </plurals>
+    <string name="search_discover_need_fields">सुझाव पाने के लिए बताएँ कि आप कहाँ से उड़ान भर रहे हैं और अपनी राष्ट्रीयता लिखें।</string>
+    <string name="search_plan_trip_to">%1$s की यात्रा प्लान करें</string>
+    <string name="search_cost_range">~%1$s–%2$s</string>
+    <string name="search_visa_unverified">सत्यापित नहीं — आधिकारिक साइट देखें</string>
+    <string name="search_compare_retry_for">%1$s फिर आज़माएँ</string>
+    <string name="search_compare_loading">%1$s लोड हो रहा है</string>
+    <string name="search_compare_typical">आमतौर पर %1$s</string>
+    <string name="search_compare_temps">%1$s / %2$s</string>
+    <string name="search_compare_celsius_suffix">C</string>
+    <string name="search_compare_ease_value">%1$d/100</string>
+    <string name="search_compare_out_of_20">%1$d/20</string>
+    <string name="search_compare_table">तुलना तालिका</string>
+    <plurals name="search_import_hint_shots">
+        <item quantity="one">हम आपका %1$d स्क्रीनशॉट पढ़ेंगे — इसकी जगह टेक्स्ट इस्तेमाल करने के लिए इसे हटाएँ</item>
+        <item quantity="other">हम आपके %1$d स्क्रीनशॉट पढ़ेंगे — इसकी जगह टेक्स्ट इस्तेमाल करने के लिए इन्हें हटाएँ</item>
+    </plurals>
+    <string name="search_import_count">%1$s / %2$s</string>
+    <plurals name="search_import_up_to">
+        <item quantity="one">अधिकतम %1$d स्क्रीनशॉट</item>
+        <item quantity="other">अधिकतम %1$d स्क्रीनशॉट</item>
+    </plurals>
+    <plurals name="search_import_kept">
+        <item quantity="one">एक बार में अधिकतम %1$d स्क्रीनशॉट — हमने पहले %2$d रख लिए हैं।</item>
+        <item quantity="other">एक बार में अधिकतम %1$d स्क्रीनशॉट — हमने पहले %2$d रख लिए हैं।</item>
+    </plurals>
+    <string name="search_import_heic">%1$s: iPhone की HEIC फ़ोटो अभी पढ़ी नहीं जा सकतीं — इसकी जगह स्क्रीनशॉट लें (स्क्रीनशॉट PNG होते हैं) या इसे JPEG में एक्सपोर्ट करें।</string>
+    <string name="search_import_not_image">%1$s ऐसी इमेज नहीं है जिसे हम पढ़ सकें। PNG, JPEG, WebP या GIF इस्तेमाल करें।</string>
+    <plurals name="search_import_submit_shots">
+        <item quantity="one">%1$d स्क्रीनशॉट में जगहें खोजें</item>
+        <item quantity="other">%1$d स्क्रीनशॉट में जगहें खोजें</item>
+    </plurals>
+    <string name="search_import_step_active">%1$s…</string>
+    <string name="search_import_elapsed">%1$s · अब तक %2$d सेकंड</string>
+    <plurals name="search_import_places_found">
+        <item quantity="one">%1$d जगह मिली</item>
+        <item quantity="other">%1$d जगहें मिलीं</item>
+    </plurals>
+    <string name="search_import_open_source">स्रोत पेज खोलें</string>
+    <string name="search_import_left_out">छोड़ा गया</string>
+    <plurals name="search_import_total_nights">
+        <item quantity="one">कुल %1$d रात।</item>
+        <item quantity="other">कुल %1$d रातें।</item>
+    </plurals>
+    <plurals name="search_import_suggested_days">
+        <item quantity="one">स्रोत लगभग %1$d दिन सुझाता है।</item>
+        <item quantity="other">स्रोत लगभग %1$d दिन सुझाता है।</item>
+    </plurals>
+    <string name="search_import_on_map_rating">मानचित्र पर · ★ %1$s</string>
+    <string name="search_import_quote">“%1$s”</string>
+    <plurals name="search_import_unplaced_title">
+        <item quantity="one">%1$d जगह नहीं ढूँढ पाए</item>
+        <item quantity="other">%1$d जगहें नहीं ढूँढ पाए</item>
+    </plurals>
+    <string name="search_import_no_stops">रूट पर कम से कम एक पड़ाव रखें।</string>
+    <string name="search_import_past">आज या उसके बाद की प्रस्थान तिथि चुनें।</string>
+    <plurals name="search_import_first_25">
+        <item quantity="one">हम चुनी गई पहली %1$d जगह प्लान करेंगे — कौन-सी हों, यह तय करने के लिए कुछ का चयन हटाएँ।</item>
+        <item quantity="other">हम चुनी गई पहली %1$d जगहें प्लान करेंगे — कौन-सी हों, यह तय करने के लिए कुछ का चयन हटाएँ।</item>
+    </plurals>
+    <string name="search_new_plan_title">नया प्लान शुरू करें?</string>
+    <string name="search_new_plan_message">मेरा प्लान में कुछ चुनी हुई चीज़ें हैं जो सेव नहीं की गई हैं। नई खोज से नया प्लान शुरू होगा; इन्हें रखना चाहें तो पहले सेव करें।</string>
+    <string name="search_new_plan_confirm">नया प्लान शुरू करें</string>
+    <string name="search_new_plan_keep">संपादन जारी रखें</string>
+</resources>

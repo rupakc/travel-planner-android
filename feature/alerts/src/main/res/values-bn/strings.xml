@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_live_unavailable">এই সার্ভারে এখন লাইভ দাম পাওয়া যাচ্ছে না, তাই আমরা চেক করতে বা নতুন ট্র্যাকিং শুরু করতে পারছি না। আপনার ট্র্যাকিং সংরক্ষিত আছে এবং লাইভ দাম ফিরলে আবার চলবে।</string>
+    <string name="alerts_search_label">আপনার ট্র্যাকিং খুঁজুন</string>
+    <string name="alerts_search_clear">সার্চ মুছুন</string>
+    <string name="alerts_no_match">“%1$s”-এর সঙ্গে কোনো ট্র্যাকিং মেলেনি।</string>
+    <string name="alerts_tab_a11y">%1$s, %2$d</string>
+    <string name="alerts_selected">নির্বাচিত</string>
+    <string name="alerts_not_selected">নির্বাচিত নয়</string>
+    <string name="alerts_active">সক্রিয় (%1$d)</string>
+    <string name="alerts_past">অতীত (%1$d)</string>
+    <string name="alerts_lowest_seen">সবচেয়ে কম দেখা গেছে: %1$s</string>
+    <string name="alerts_spark_target">আপনার লক্ষ্য %1$s।</string>
+    <string name="alerts_from_pp">জনপ্রতি %1$s থেকে</string>
+    <string name="alerts_removed">ট্র্যাকিং সরানো হয়েছে</string>
+    <string name="alerts_check_errored_price">টানা তিনবার চেষ্টার পর চেক স্থগিত আছে। তৈরি হলে আবার চেষ্টা চাপুন।</string>
+    <string name="alerts_read">পড়া হয়েছে</string>
+    <string name="alerts_tab_label">%1$s  %2$d</string>
+    <string name="alerts_rating">★ %1$s</string>
+    <string name="alerts_rating_reviews">★ %1$s (%2$d)</string>
+    <string name="alerts_times_travellers">%1$s × %2$s = %3$s</string>
+    <string name="alerts_save_wait_check">চেক শেষ হলে সেভ করা যাবে।</string>
+    <string name="alerts_save_wait">বর্তমান পরিবর্তন শেষ হলে সেভ করা যাবে।</string>
+    <plurals name="alerts_bell_unread">
+        <item quantity="one">নোটিফিকেশন, %dটি না-পড়া</item>
+        <item quantity="other">নোটিফিকেশন, %dটি না-পড়া</item>
+    </plurals>
+    <plurals name="alerts_spark_summary">
+        <item quantity="one">%1$dটি চেকে দাম: %2$s থেকে %3$s, সর্বনিম্ন %4$s।</item>
+        <item quantity="other">%1$dটি চেকে দাম: %2$s থেকে %3$s, সর্বনিম্ন %4$s।</item>
+    </plurals>
+    <string name="alerts_live_check_a11y">এখনই ওয়েবে %1$s খুঁজুন</string>
+    <string name="alerts_live_quote_source">সূত্র: %1$s</string>
+    <string name="alerts_live_searched_for">যা খোঁজা হয়েছে</string>
+    <string name="alerts_live_no_summary">সার্চ থেকে কোনো উত্তর আসেনি।</string>
+    <string name="alerts_live_failed">ওয়েব সার্চ কাজ করেনি। আবার চেষ্টা করুন।</string>
+    <string name="alerts_live_offline">আপনি অফলাইনে আছেন। কানেকশন দেখে আবার চেষ্টা করুন।</string>
+    <string name="alerts_live_rate_limited">অনেক বেশি অনুরোধ। একটু অপেক্ষা করে আবার চেষ্টা করুন।</string>
+    <string name="alerts_live_ai_billing">এই সার্ভারে এখন AI ফিচার বন্ধ আছে।</string>
+    <string name="alerts_live_search_unavailable">এই সার্ভারে লাইভ ওয়েব সার্চ পাওয়া যায় না।</string>
+    <string name="alerts_live_not_found">এই ট্র্যাকিং আর নেই।</string>
+</resources>
