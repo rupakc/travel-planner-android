@@ -25,7 +25,8 @@ enum class TpButtonVariant { Primary, Secondary, Tonal, Text, Destructive }
 
 /**
  * App button. [text] is a resolved string (`stringResource(...)`). While [loading]
- * it shows a spinner and ignores clicks. Min height 48 dp.
+ * it shows a spinner and ignores clicks. Min height 48 dp. A click reports TAP to
+ * [LocalUiEventSink] under [tid] (`auto:button` when null) before calling [onClick].
  */
 @Composable
 fun TpButton(
@@ -36,10 +37,17 @@ fun TpButton(
     enabled: Boolean = true,
     loading: Boolean = false,
     leadingIcon: ImageVector? = null,
+    tid: String? = null,
 ) {
+    val sink = LocalUiEventSink.current
     val minHeight = Modifier.defaultMinSize(minHeight = TravelTheme.spacing.minTouchTarget)
     val content: @Composable () -> Unit = { ButtonContent(text, loading, leadingIcon) }
-    val click = { if (!loading) onClick() }
+    val click = {
+        if (!loading) {
+            sink.report(UiEventKind.TAP, tid ?: "auto:button")
+            onClick()
+        }
+    }
     when (variant) {
         TpButtonVariant.Primary -> {
             Button(click, modifier.then(minHeight), enabled, shape = TravelShape.Input) { content() }
