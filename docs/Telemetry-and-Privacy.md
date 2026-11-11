@@ -10,15 +10,15 @@ The wire contract is owned by the web repo: [Telemetry](https://github.com/rupak
 |---|---|---|
 | `app_open` | every time the process comes to the foreground | none |
 | `app_background` | the app stops (pending events are persisted and the flush worker scheduled) | none |
-| `session_start` | first event after 30 minutes idle | none |
+| `session_start` | first event of a session (a new one, or after 30 minutes idle) | none |
 | `screen_view` | a route change | `route` (template), `referrer_route` |
 | `screen_time` | leaving a route or going to the background | `route`, `ms` |
 | `ui_tap` | `TpButton`, bottom navigation and the social sign-in buttons | `tid`, `route` |
 | `ui_toggle` | `TpChip`, and the Settings privacy switch (`tid: privacy.switch`, `on`) | `tid`, `route`, `on` |
-| `theme_change` | the theme mode changes | as in the registry |
-| `language_change` | the app language changes | as in the registry |
+| `theme_change` | the theme mode changes | `theme` (`system`, `light`, `dark`) |
+| `language_change` | the app language changes | `lang` (`en es de fr hi zh bn`) |
 | `consent` | the user grants (grant only; a denial sends nothing) | `choice: granted` |
-| `perf` | `cold_start`, only for a process started in the foreground, for its first activity, not restored, and 60 s or less | `kind`, `ms` |
+| `perf` | `cold_start`, only for a process started in the foreground, for its first activity, not restored, and 60 s or less | `metric: cold_start`, `value` (ms), `route` |
 
 `screen` and `route` are route templates (`/results`, `/plans/:id`, `/share/:token`), never ids, tokens or arguments. The web name is used where the screen is the same;
 anything unmapped is `/other` (`core:domain` `TelemetryRoutes`). A prop value is a token (`^[A-Za-z0-9_.:/-]{1,64}$`), an integer, a finite number or a boolean.
@@ -57,7 +57,7 @@ Crashes do not fit the registry's `js|promise|api` error kinds, so they are not 
 
 ## Code map
 
-`core:model` `config/ClientConfig`, `telemetry/TelemetryWire`, `settings/ConsentChoice`; `core:domain/telemetry` the pure rules (consent, queue, session, send policy, props, routes);
+`core:model` `config/ClientConfig`, `telemetry/TelemetryWire`, `settings/ConsentChoice`; `core:domain/telemetry` the pure rules (consent, queue, session, send policy, props, routes, plus `TelemetryEvents` and `TelemetrySettings` in `TelemetryTypes`);
 `core:data/telemetry` `Telemetry`, `TelemetryLifecycle`, `ConsentRepository`, `ClientConfigRepository`, the queue file, uploader and worker;
 `core:network` `ClientConfigApi`, `TelemetryApi`, `AiLocaleInterceptor`; `core:designsystem` `UiEventSink`; `core:ui` `ConsentPrompt`.
 
