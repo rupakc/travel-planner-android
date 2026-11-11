@@ -4,7 +4,7 @@
     <string name="search_paste_link_prompt">ऑनलाइन कोई शानदार यात्रा दिखी? लिंक पेस्ट करें</string>
     <string name="search_stop_nights">रातें (वैकल्पिक)</string>
     <string name="search_remove_stop">पड़ाव %1$d हटाएँ</string>
-    <string name="search_route_summary">आपका रूट: %1$s। पड़ाव रास्ते में पड़ते हैं; \"कहाँ\" वाला शहर आपकी अंतिम मंज़िल है। खाली छोड़ी गई रातें अपने-आप बाँट दी जाती हैं।</string>
+    <string name="search_route_summary">आपका रूट: %1$s। पड़ाव रास्ते में पड़ते हैं; \"कहाँ तक\" वाला शहर आपकी अंतिम मंज़िल है। खाली छोड़ी गई रातें अपने-आप बाँट दी जाती हैं।</string>
     <string name="search_clear_field">%1$s साफ़ करें</string>
     <string name="search_searching">खोज रहे हैं…</string>
     <plurals name="search_suggestions">
@@ -22,9 +22,9 @@
     <string name="search_infants_sub">0–4</string>
     <string name="search_add_one">एक जोड़ें: %1$s</string>
     <string name="search_remove_one">एक घटाएँ: %1$s</string>
-    <string name="search_pace_relaxed">आरामदायक</string>
+    <string name="search_pace_relaxed">आराम से</string>
     <string name="search_pace_balanced">संतुलित</string>
-    <string name="search_pace_packed">व्यस्त</string>
+    <string name="search_pace_packed">ठसाठस</string>
     <string name="search_selected">चुना गया</string>
     <string name="search_not_selected">चुना नहीं गया</string>
     <string name="search_issue_origin">बताएँ कि आप कहाँ से उड़ान भर रहे हैं</string>

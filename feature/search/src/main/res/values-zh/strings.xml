@@ -21,7 +21,7 @@
     <string name="search_infants_sub">0–4</string>
     <string name="search_add_one">增加一位：%1$s</string>
     <string name="search_remove_one">减少一位：%1$s</string>
-    <string name="search_pace_relaxed">轻松</string>
+    <string name="search_pace_relaxed">悠闲</string>
     <string name="search_pace_balanced">均衡</string>
     <string name="search_pace_packed">紧凑</string>
     <string name="search_selected">已选择</string>

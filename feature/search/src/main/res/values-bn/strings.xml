@@ -4,7 +4,7 @@
     <string name="search_paste_link_prompt">অনলাইনে দারুণ কোনো ট্রিপ দেখেছেন? লিংক পেস্ট করুন</string>
     <string name="search_stop_nights">রাত (ঐচ্ছিক)</string>
     <string name="search_remove_stop">স্টপ %1$d সরান</string>
-    <string name="search_route_summary">আপনার রুট: %1$s। স্টপগুলো পথে ঘোরা হবে; \"গন্তব্য\" শহরটিই আপনার শেষ গন্তব্য। ফাঁকা রাখা রাতগুলো নিজে থেকেই ভাগ হয়ে যাবে।</string>
+    <string name="search_route_summary">আপনার রুট: %1$s। স্টপগুলো পথে ঘোরা হবে; \"কোথায়\" ঘরের শহরটিই আপনার শেষ গন্তব্য। ফাঁকা রাখা রাতগুলো নিজে থেকেই ভাগ হয়ে যাবে।</string>
     <string name="search_clear_field">%1$s মুছুন</string>
     <string name="search_searching">খোঁজা হচ্ছে…</string>
     <plurals name="search_suggestions">
@@ -22,7 +22,7 @@
     <string name="search_infants_sub">0–4</string>
     <string name="search_add_one">একজন যোগ করুন: %1$s</string>
     <string name="search_remove_one">একজন কমান: %1$s</string>
-    <string name="search_pace_relaxed">আরামদায়ক</string>
+    <string name="search_pace_relaxed">ধীরে-সুস্থে</string>
     <string name="search_pace_balanced">ভারসাম্যপূর্ণ</string>
     <string name="search_pace_packed">ঠাসা</string>
     <string name="search_selected">নির্বাচিত</string>
