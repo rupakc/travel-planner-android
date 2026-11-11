@@ -458,6 +458,11 @@ internal fun languageLabelRes(tag: String?): Int =
     when (tag) {
         "en" -> R.string.settings_language_en
         "es" -> R.string.settings_language_es
+        "de" -> R.string.settings_language_de
+        "fr" -> R.string.settings_language_fr
+        "hi" -> R.string.settings_language_hi
+        "zh" -> R.string.settings_language_zh
+        "bn" -> R.string.settings_language_bn
         else -> R.string.settings_language_system
     }
 

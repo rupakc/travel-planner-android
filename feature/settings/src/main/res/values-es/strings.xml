@@ -53,6 +53,11 @@
     <string name="settings_language_system">Predeterminado del sistema</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_es">Español</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_hi">हिन्दी</string>
+    <string name="settings_language_zh">中文（简体）</string>
+    <string name="settings_language_bn">বাংলা</string>
     <string name="settings_language_system_only">En esta versión de Android la aplicación sigue el idioma del dispositivo. Cámbialo en los ajustes del sistema.</string>
     <string name="settings_language_open_system">Abrir ajustes del sistema</string>
     <string name="settings_notifications">Notificaciones</string>

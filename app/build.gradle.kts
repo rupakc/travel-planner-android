@@ -53,7 +53,7 @@ android {
         resValue("bool", "fcm_enabled", hasGoogleServices.toString())
         buildConfigField("String", "WEB_BASE_URL", "\"$webBaseUrl\"")
         // Resource configs shipped (spec §5: en default + es).
-        androidResources.localeFilters += listOf("en", "es")
+        androidResources.localeFilters += listOf("en", "es", "de", "fr", "hi", "zh", "bn")
     }
 
     buildFeatures {

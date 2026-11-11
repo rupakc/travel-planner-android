@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Languages offered (must match `locales_config.xml`); null tag = system. */
-val SupportedLanguageTags: List<String?> = listOf(null, "en", "es")
+val SupportedLanguageTags: List<String?> = listOf(null, "en", "es", "de", "fr", "hi", "zh", "bn")
 
 @Immutable
 data class SettingsUiState(

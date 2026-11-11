@@ -34,6 +34,11 @@
     <string name="settings_language_system">सिस्टम डिफ़ॉल्ट</string>
     <string name="settings_language_en">English</string>
     <string name="settings_language_es">Español</string>
+    <string name="settings_language_de">Deutsch</string>
+    <string name="settings_language_fr">Français</string>
+    <string name="settings_language_hi">हिन्दी</string>
+    <string name="settings_language_zh">中文（简体）</string>
+    <string name="settings_language_bn">বাংলা</string>
     <string name="settings_language_system_only">इस Android वर्शन पर ऐप डिवाइस की भाषा का पालन करता है। इसे सिस्टम सेटिंग में बदलें।</string>
     <string name="settings_language_open_system">सिस्टम सेटिंग खोलें</string>
     <string name="settings_notifications_sub">यात्रा रिमाइंडर, कीमत अलर्ट और आस-पास के सुझाव</string>

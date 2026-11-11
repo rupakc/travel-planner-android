@@ -1,7 +1,7 @@
 # Localization
 
-Shipped locales: `en` (default) and `es`. The per-app language list is `app/src/main/res/xml/locales_config.xml`, referenced by
-`android:localeConfig` in the manifest, and the build keeps only those resources (`androidResources.localeFilters += listOf("en", "es")` in `app/build.gradle.kts`).
+Shipped locales: `en` (default), `es`, `de`, `fr`, `hi`, `zh` (Simplified) and `bn`. The per-app language list is `app/src/main/res/xml/locales_config.xml`, referenced by
+`android:localeConfig` in the manifest, and the build keeps only those resources (`androidResources.localeFilters += listOf("en", "es", "de", "fr", "hi", "zh", "bn")` in `app/build.gradle.kts`).
 
 ## Rules
 
