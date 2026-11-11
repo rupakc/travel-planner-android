@@ -12,7 +12,8 @@ permissions:
   contents: read
 
 # PR runs cancel superseded ones. Every push/dispatch on main gets its own group (per sha) and is never cancelled,
-# so each main commit is verified; only the publishing jobs below serialise, via the shared android-release-main group.
+# so each main commit is verified. Each publishing job has its own android-release-<stage> group, so a newer run only
+# supersedes an older run's pending job of the same stage and the newest run always publishes fully.
 env:
   # Expected signer of every published APK (the Voyager upload key). A mismatch fails the publishing jobs.
   EXPECTED_CERT_SHA256: "1C:B8:29:4D:D5:7B:8D:E7:7D:B2:77:99:F3:1A:86:3C:F8:97:56:D1:CC:E6:02:34:C8:E5:85:50:6E:1E:38:B0"
@@ -114,7 +115,7 @@ jobs:
   release-apk:
     name: Signed release APK
     concurrency:
-      group: android-release-main
+      group: android-release-apk
       cancel-in-progress: false
     needs: build
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
@@ -247,7 +248,7 @@ jobs:
   ghcr:
     name: Push APK to GHCR
     concurrency:
-      group: android-release-main
+      group: android-release-ghcr
       cancel-in-progress: false
     needs: release-apk
     runs-on: ubuntu-latest
@@ -351,7 +352,7 @@ jobs:
   github-release:
     name: GitHub Release
     concurrency:
-      group: android-release-main
+      group: android-release-github
       cancel-in-progress: false
     needs: [release-apk, ghcr]
     if: always() && needs.release-apk.result == 'success'
