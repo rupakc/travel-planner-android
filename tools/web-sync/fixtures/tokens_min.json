@@ -1,0 +1,12 @@
+{
+  "$comment": "minimal fixture",
+  "palette": {
+    "teal": {"600": "#0d9488", "700": "#0f766e"},
+    "white": "#ffffff"
+  },
+  "dark": {
+    "teal": {"600": "#2dd4bf", "700": "#5eead4"},
+    "white": "#121a2b"
+  },
+  "semantic": {"surface": "gray-50"}
+}
