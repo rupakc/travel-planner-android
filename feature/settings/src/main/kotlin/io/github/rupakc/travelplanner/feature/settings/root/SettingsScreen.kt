@@ -65,6 +65,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.PreferencesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ServerRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TasteProfileRoute
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.privacy.PrivacyLinks
 import io.github.rupakc.travelplanner.core.ui.profile.titleRes
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.feature.settings.R
@@ -97,8 +98,6 @@ private const val LICENCE_URL = "https://github.com/rupakc/travel-planner-androi
 private const val GEONAMES_URL = "https://www.geonames.org/"
 private const val CC_BY_URL = "https://creativecommons.org/licenses/by/4.0/"
 
-// TODO(T11): use PrivacyLinks.POLICY_URL
-private const val PRIVACY_POLICY_URL = "https://github.com/rupakc/travel-planner/blob/main/docs/Privacy.md"
 private const val OURAIRPORTS_URL = "https://ourairports.com/"
 
 /** Row keys in display order (also the global-search scroll targets). */
@@ -420,7 +419,7 @@ private fun PrivacyBlock(allowed: Boolean, highlighted: Boolean, onEvent: (Setti
             onCheckedChange = { onEvent(SettingsEvent.SetPrivacy(it)) },
             modifier = Modifier.testTag("privacy.switch"),
         )
-        SettingsRow(stringResource(R.string.settings_privacy_policy), onClick = { onNav(SettingsNav.OpenLink(PRIVACY_POLICY_URL)) })
+        SettingsRow(stringResource(R.string.settings_privacy_policy), onClick = { onNav(SettingsNav.OpenLink(PrivacyLinks.POLICY_URL)) })
         SettingsRow(stringResource(R.string.settings_privacy_choices), onClick = { onEvent(SettingsEvent.OpenPrivacyChoices) })
     }
 }
