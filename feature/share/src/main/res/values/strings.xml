@@ -42,6 +42,7 @@
     <string name="share_unlimited">Unlimited data</string>
     <string name="share_open_link_a11y">Open %1$s</string>
     <string name="share_unnamed">Unnamed item</string>
+    <string name="share_privacy_choices">Privacy choices</string>
     <plurals name="share_days">
         <item quantity="one">%1$d day</item>
         <item quantity="other">%1$d days</item>

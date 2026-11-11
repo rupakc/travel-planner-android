@@ -7,7 +7,9 @@ import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeConsentRepository
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
+import io.github.rupakc.travelplanner.feature.auth.login.FakeAuthProvidersRepository
 import io.github.rupakc.travelplanner.feature.auth.login.LoginEvent
 import io.github.rupakc.travelplanner.feature.auth.login.LoginViewModel
 import io.github.rupakc.travelplanner.feature.auth.password.ChangePasswordEvent
@@ -26,7 +28,7 @@ class LoginViewModelTest {
 
     private val auth = FakeAuthRepository()
 
-    private fun vm(saved: SavedStateHandle = SavedStateHandle()) = LoginViewModel(auth, saved)
+    private fun vm(saved: SavedStateHandle = SavedStateHandle()) = LoginViewModel(auth, saved, FakeAuthProvidersRepository(), FakeConsentRepository())
 
     private fun LoginViewModel.fill(user: String = "alice", pass: String = "secret") {
         onEvent(LoginEvent.UsernameChanged(user))

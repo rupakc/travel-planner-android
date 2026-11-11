@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
+import io.github.rupakc.travelplanner.core.data.telemetry.ConsentRepository
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.SharedPlan
 import io.github.rupakc.travelplanner.core.model.plan.SharedSearchData
@@ -52,6 +53,9 @@ internal sealed interface ShareEvent {
     data object SaveCopy : ShareEvent
 
     data object MessageShown : ShareEvent
+
+    /** The footer "Privacy choices" button (web AttributionFooter on the share page). */
+    data object OpenPrivacyChoices : ShareEvent
 }
 
 /**
@@ -68,6 +72,7 @@ internal class ShareViewModel
         auth: AuthRepository,
         private val dispatchers: AppDispatchers,
         private val placeNames: PlaceNameLookup,
+        private val consent: ConsentRepository,
     ) : ViewModel() {
         private val token: String? = savedStateHandle.get<String>(TOKEN_ARG)
         private val status = MutableStateFlow(ShareUiState())
@@ -86,6 +91,7 @@ internal class ShareViewModel
                 ShareEvent.Retry -> load()
                 ShareEvent.SaveCopy -> saveCopy()
                 ShareEvent.MessageShown -> status.update { it.copy(message = null) }
+                ShareEvent.OpenPrivacyChoices -> consent.openChoices()
             }
         }
 

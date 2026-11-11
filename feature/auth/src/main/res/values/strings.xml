@@ -17,6 +17,12 @@
     <string name="auth_error_login_failed">Login failed. Please try again.</string>
     <string name="auth_error_network">Can\'t reach the server. Check your connection, or the address under Server.</string>
 
+    <!-- Social sign-in (web SocialSignInButtons; brand names are not translated) -->
+    <string name="auth_continue_with">Continue with %1$s</string>
+    <string name="auth_coming_soon">%1$s sign-in is coming soon — use your username and password for now.</string>
+    <string name="auth_divider_or">or</string>
+    <string name="auth_privacy_choices">Privacy choices</string>
+
     <!-- Change password (web ChangePasswordPage) -->
     <string name="auth_change_password_title">Set your password</string>
     <string name="auth_change_password_welcome">Welcome, %1$s! Please set a new password to continue.</string>
