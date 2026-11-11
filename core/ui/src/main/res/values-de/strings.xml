@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_visa">Visum &amp; Einreise</string>
+    <string name="section_sim">SIM &amp; eSIM</string>
+    <string name="section_forex">Währung &amp; Geldwechsel</string>
+    <string name="section_status_loading">Lädt</string>
+    <string name="section_status_enhancing">Wird verbessert</string>
+    <string name="section_status_done">Fertig</string>
+    <string name="section_status_waiting">Wartet</string>
+    <string name="section_expand">%1$s ausklappen</string>
+    <string name="section_collapse">%1$s einklappen</string>
+    <string name="section_ready_announcement">%1$s fertig</string>
+    <string name="verification_pending">Links werden geprüft…</string>
+    <string name="price_unknown">Preis nicht verfügbar</string>
+    <string name="price_estimate_a11y">%1$s, Schätzung</string>
+    <string name="booking_open">%1$s öffnen</string>
+    <string name="booking_open_generic">Ansehen &amp; buchen</string>
+    <string name="plan_add">Zum Plan hinzufügen</string>
+    <string name="plan_added">In deinem Plan</string>
+    <string name="plan_add_a11y">%1$s zu Mein Plan hinzufügen</string>
+    <string name="plan_remove_a11y">%1$s aus Mein Plan entfernen</string>
+    <string name="watch_target_error">Gib einen Preis ein, z. B. %1$s.</string>
+    <string name="watch_email_missing">Füge zuerst in den Einstellungen eine E-Mail-Adresse hinzu.</string>
+    <string name="watch_expanded">Ausgeklappt</string>
+    <string name="watch_collapsed">Eingeklappt</string>
+    <string name="watch_fare_any_drop_hint">Nur deutliche Rückgänge – mindestens %1$s und 5 %%. Höchstens einmal pro Tag.</string>
+    <string name="watch_flexible_hint">Wir sagen dir auch Bescheid, wenn eine Abreise ein paar Tage früher oder später mindestens %1$s spart – bei gleicher Reisedauer.</string>
+    <string name="watch_fare_done_price">Der heutige Preis liegt bei %1$s (%2$s). Wir prüfen etwa zweimal täglich und melden uns nur, wenn es sich lohnt.</string>
+    <string name="watch_noun_hotel">Hotel</string>
+    <string name="watch_noun_activity">Aktivität</string>
+    <string name="watch_noun_trip">Reise</string>
+    <string name="watch_noun_price">Preis</string>
+    <string name="watch_price_title">%1$s beobachten</string>
+    <string name="watch_price_title_done">%1$s wird beobachtet</string>
+    <string name="watch_price_title_already">Du beobachtest bereits: %1$s</string>
+    <string name="watch_price_error">Die Beobachtung konnte nicht gestartet werden (%1$s). Versuch es gleich nochmal.</string>
+    <string name="watch_price_done_price">Der Live-Preis liegt bei %1$s. Wir prüfen etwa zweimal täglich und melden uns nur, wenn es sich lohnt.</string>
+    <string name="watch_tracking">%1$s wird beobachtet</string>
+    <string name="watch_hotel_find">Wir finden %1$s bei Google Hotels in %2$s und beobachten den Live-Preis für %3$s.</string>
+    <string name="watch_hotel_find_no_city">Wir finden %1$s bei Google Hotels und beobachten den Live-Preis für %2$s.</string>
+    <string name="watch_hotel_tracking">Beobachtet: %1$s bei Google Hotels</string>
+    <string name="watch_hotel_nightly">%1$s pro Nacht</string>
+    <string name="watch_activity_find">Wir suchen %1$s in %2$s bei GetYourGuide und Viator und beobachten den „ab“-Preis pro Person%3$s.</string>
+    <string name="watch_activity_listing">Wir beobachten das Angebot, das du für %1$s%2$s ausgewählt hast.</string>
+    <string name="watch_activity_rating">Bewertet mit %1$s</string>
+    <string name="watch_activity_from_pp">ab %1$s pro Person</string>
+    <string name="watch_trip_alert_rule">Alarme kommen nur, wenn Live-Preise die Summe um mindestens %1$s oder 4 %% verändern.</string>
+    <string name="watch_trip_watching_caption">Das beobachten wir · %1$s, %2$s</string>
+    <string name="watch_trip_diff_less">Das sind %1$s weniger als die Summe in Mein Plan (%2$s)</string>
+    <string name="watch_trip_diff_more">Das sind %1$s mehr als die Summe in Mein Plan (%2$s)</string>
+    <plurals name="watch_for_travellers">
+        <item quantity="one">für %d Reisenden</item>
+        <item quantity="other">für %d Reisende</item>
+    </plurals>
+    <plurals name="watch_for_nights">
+        <item quantity="one">für %d Nacht</item>
+        <item quantity="other">für %d Nächte</item>
+    </plurals>
+    <plurals name="watch_reviews">
+        <item quantity="one">%d Bewertung</item>
+        <item quantity="other">%d Bewertungen</item>
+    </plurals>
+    <plurals name="watch_estimates">
+        <item quantity="one">%d Schätzung</item>
+        <item quantity="other">%d Schätzungen</item>
+    </plurals>
+    <plurals name="watch_hotel_estimate_rooms">
+        <item quantity="one">KI-Schätzung: %1$d Zimmer × %2$s, gesamter Aufenthalt</item>
+        <item quantity="other">KI-Schätzung: %1$d Zimmer × %2$s, gesamter Aufenthalt</item>
+    </plurals>
+    <plurals name="watch_live_count">
+        <item quantity="one">%d live</item>
+        <item quantity="other">%d live</item>
+    </plurals>
+</resources>

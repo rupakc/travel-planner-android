@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_visa">ভিসা ও প্রবেশ</string>
+    <string name="section_sim">সিম ও eSIM</string>
+    <string name="section_forex">মুদ্রা ও বিনিময়</string>
+    <string name="section_status_loading">লোড হচ্ছে</string>
+    <string name="section_status_enhancing">উন্নত হচ্ছে</string>
+    <string name="section_status_done">প্রস্তুত</string>
+    <string name="section_status_waiting">অপেক্ষায়</string>
+    <string name="section_expand">%1$s প্রসারিত করুন</string>
+    <string name="section_collapse">%1$s সংকুচিত করুন</string>
+    <string name="section_ready_announcement">%1$s প্রস্তুত</string>
+    <string name="verification_pending">লিংক যাচাই হচ্ছে…</string>
+    <string name="price_unknown">দাম পাওয়া যায়নি</string>
+    <string name="price_estimate_a11y">%1$s, অনুমান</string>
+    <string name="booking_open">%1$s খুলুন</string>
+    <string name="booking_open_generic">দেখুন ও বুক করুন</string>
+    <string name="plan_add">প্ল্যানে যোগ করুন</string>
+    <string name="plan_added">আপনার প্ল্যানে আছে</string>
+    <string name="plan_add_a11y">%1$s আমার প্ল্যানে যোগ করুন</string>
+    <string name="plan_remove_a11y">%1$s আমার প্ল্যান থেকে সরান</string>
+    <string name="watch_target_error">একটি দাম লিখুন, যেমন %1$s।</string>
+    <string name="watch_email_missing">আগে পছন্দ-এ একটি ইমেইল ঠিকানা যোগ করুন।</string>
+    <string name="watch_expanded">প্রসারিত</string>
+    <string name="watch_collapsed">সংকুচিত</string>
+    <string name="watch_fare_any_drop_hint">শুধু উল্লেখযোগ্য কমলে — কমপক্ষে %1$s ও ৫%%। দিনে একবারের বেশি নয়।</string>
+    <string name="watch_flexible_hint">কয়েক দিন আগে বা পরে রওনা দিলে অন্তত %1$s সাশ্রয় হলে আমরা তা-ও জানাব, ভ্রমণের দৈর্ঘ্য একই রেখে।</string>
+    <string name="watch_fare_done_price">আজকের ভাড়া %1$s (%2$s)। আমরা দিনে প্রায় দুবার দেখব এবং কাজের কিছু হলেই জানাব।</string>
+    <string name="watch_noun_hotel">হোটেল</string>
+    <string name="watch_noun_activity">অ্যাক্টিভিটি</string>
+    <string name="watch_noun_trip">ভ্রমণ</string>
+    <string name="watch_noun_price">দাম</string>
+    <string name="watch_price_title">ট্র্যাক করুন: %1$s</string>
+    <string name="watch_price_title_done">ট্র্যাক হচ্ছে: %1$s</string>
+    <string name="watch_price_title_already">আপনি ইতিমধ্যে ট্র্যাক করছেন: %1$s</string>
+    <string name="watch_price_error">ট্র্যাকিং শুরু করা যায়নি (%1$s)। একটু পরে আবার চেষ্টা করুন।</string>
+    <string name="watch_price_done_price">লাইভ দাম %1$s। আমরা দিনে প্রায় দুবার দেখব এবং কাজের কিছু হলেই জানাব।</string>
+    <string name="watch_tracking">%1$s ট্র্যাক করা হচ্ছে</string>
+    <string name="watch_hotel_find">আমরা Google Hotels-এ %2$s-এ %1$s খুঁজব এবং %3$s-এর জন্য এর লাইভ দাম ট্র্যাক করব।</string>
+    <string name="watch_hotel_find_no_city">আমরা Google Hotels-এ %1$s খুঁজব এবং %2$s-এর জন্য এর লাইভ দাম ট্র্যাক করব।</string>
+    <string name="watch_hotel_tracking">ট্র্যাকিং: Google Hotels-এ %1$s</string>
+    <string name="watch_hotel_nightly">প্রতি রাতে %1$s</string>
+    <string name="watch_activity_find">আমরা GetYourGuide ও Viator-এ %2$s-এ %1$s খুঁজব এবং জনপ্রতি “শুরু” দাম ট্র্যাক করব%3$s।</string>
+    <string name="watch_activity_listing">%1$s%2$s-এর জন্য আপনার বেছে নেওয়া লিস্টিংটি আমরা ট্র্যাক করব।</string>
+    <string name="watch_activity_rating">রেটিং %1$s</string>
+    <string name="watch_activity_from_pp">জনপ্রতি %1$s থেকে</string>
+    <string name="watch_trip_alert_rule">অ্যালার্ট শুধু তখনই আসে যখন লাইভ দামে মোট অন্তত %1$s বা 4%% বদলায়।</string>
+    <string name="watch_trip_watching_caption">আমরা যা ট্র্যাক করছি · %1$s, %2$s</string>
+    <string name="watch_trip_diff_less">এটি আপনার “আমার প্ল্যান”-এর মোটের (%2$s) চেয়ে %1$s কম</string>
+    <string name="watch_trip_diff_more">এটি আপনার “আমার প্ল্যান”-এর মোটের (%2$s) চেয়ে %1$s বেশি</string>
+    <plurals name="watch_for_travellers">
+        <item quantity="one">%d জন যাত্রীর জন্য</item>
+        <item quantity="other">%d জন যাত্রীর জন্য</item>
+    </plurals>
+    <plurals name="watch_for_nights">
+        <item quantity="one">%d রাতের জন্য</item>
+        <item quantity="other">%d রাতের জন্য</item>
+    </plurals>
+    <plurals name="watch_reviews">
+        <item quantity="one">%dটি রিভিউ</item>
+        <item quantity="other">%dটি রিভিউ</item>
+    </plurals>
+    <plurals name="watch_estimates">
+        <item quantity="one">%d টি অনুমান</item>
+        <item quantity="other">%d টি অনুমান</item>
+    </plurals>
+    <plurals name="watch_hotel_estimate_rooms">
+        <item quantity="one">AI অনুমান: %1$dটি রুম × %2$s, পুরো থাকা</item>
+        <item quantity="other">AI অনুমান: %1$dটি রুম × %2$s, পুরো থাকা</item>
+    </plurals>
+    <plurals name="watch_live_count">
+        <item quantity="one">%dটি লাইভ</item>
+        <item quantity="other">%dটি লাইভ</item>
+    </plurals>
+</resources>

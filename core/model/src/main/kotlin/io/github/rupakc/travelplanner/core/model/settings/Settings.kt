@@ -17,7 +17,7 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
  */
 data class AppSettings(
     val baseUrlOverride: String? = null,
-    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val themeMode: ThemeMode = ThemeMode.LIGHT,
     val dynamicColor: Boolean = false,
     val localeTag: String? = null,
     val tripNotifications: Boolean = true,

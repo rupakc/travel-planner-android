@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_trip_reminders">यात्रा अनुस्मारक</string>
+    <string name="channel_trip_reminders_desc">आपकी सहेजी गई यात्राओं के लिए वीज़ा और पैकिंग जाँच, उड़ान के दिन और दैनिक यात्रा कार्यक्रम के अनुस्मारक।</string>
+    <string name="channel_price_alerts_desc">जब किसी निगरानी वाली उड़ान, होटल, गतिविधि या यात्रा की कीमत घटती है या आपके लक्ष्य तक पहुँचती है।</string>
+    <string name="channel_nearby">आस-पास के सुझाव</string>
+    <string name="channel_nearby_desc">यात्रा के दौरान ‘आस-पास’ देखने का अनुस्मारक, यदि आपने हाल ही में इसका उपयोग किया है। आपके खोलने तक कुछ भी खोजा नहीं जाता।</string>
+    <string name="channel_account">खाता</string>
+    <string name="channel_account_desc">साइन-इन और खाते से जुड़े संदेश।</string>
+    <string name="reminder_week_title">%1$s एक सप्ताह में</string>
+    <string name="reminder_week_body">अपना वीज़ा जाँचने और पैकिंग सूची शुरू करने का समय है।</string>
+    <string name="reminder_day_before_title">%1$s कल</string>
+    <string name="reminder_day_before_body">जाने से पहले अपनी उड़ान और मौसम जाँच लें।</string>
+    <string name="reminder_start_title">आपकी %1$s यात्रा आज शुरू हो रही है</string>
+    <string name="reminder_start_body">आज का यात्रा कार्यक्रम, आपका आपातकालीन कार्ड और आपके पास की गतिविधियाँ बस एक टैप दूर हैं।</string>
+    <string name="reminder_day_title">%2$s में दिन %1$d</string>
+    <string name="reminder_day_body">आज का यात्रा कार्यक्रम देखें।</string>
+    <string name="reminder_last_title">%1$s में आखिरी दिन</string>
+    <string name="reminder_last_body">अपना चेकआउट समय और वापसी का रास्ता जाँच लें।</string>
+    <string name="reminder_action_emergency">आपातकालीन कार्ड</string>
+    <string name="nearby_notification_title">देखें आपके आस-पास क्या है</string>
+    <string name="nearby_notification_body">आपके आस-पास देखने, खाने, खरीदारी और ठहरने की जगहें। देखने के लिए टैप करें।</string>
+</resources>

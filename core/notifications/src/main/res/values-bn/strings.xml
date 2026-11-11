@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_trip_reminders">ভ্রমণের রিমাইন্ডার</string>
+    <string name="channel_trip_reminders_desc">আপনার সংরক্ষিত ভ্রমণের জন্য ভিসা ও প্যাকিং যাচাই, ফ্লাইটের দিন এবং দৈনিক ভ্রমণসূচির রিমাইন্ডার।</string>
+    <string name="channel_price_alerts_desc">নজরে রাখা কোনো ফ্লাইট, হোটেল, কার্যকলাপ বা ভ্রমণের দাম কমলে বা আপনার লক্ষ্যমূল্যে পৌঁছালে।</string>
+    <string name="channel_nearby">আশেপাশের পরামর্শ</string>
+    <string name="channel_nearby_desc">আপনি সম্প্রতি ব্যবহার করে থাকলে ভ্রমণের সময় ‘আমার কাছে’ দেখার একটি রিমাইন্ডার। আপনি না খোলা পর্যন্ত কিছুই খোঁজা হয় না।</string>
+    <string name="channel_account">অ্যাকাউন্ট</string>
+    <string name="channel_account_desc">সাইন-ইন ও অ্যাকাউন্টের বার্তা।</string>
+    <string name="reminder_week_title">এক সপ্তাহ পরে %1$s</string>
+    <string name="reminder_week_body">আপনার ভিসা যাচাই করে প্যাকিং তালিকা শুরু করার সময় হয়েছে।</string>
+    <string name="reminder_day_before_title">আগামীকাল %1$s</string>
+    <string name="reminder_day_before_body">যাওয়ার আগে আপনার ফ্লাইট ও আবহাওয়া দেখে নিন।</string>
+    <string name="reminder_start_title">আপনার %1$s ভ্রমণ আজ শুরু</string>
+    <string name="reminder_start_body">আজকের ভ্রমণসূচি, আপনার জরুরি কার্ড এবং কাছাকাছি করণীয় মাত্র এক ট্যাপ দূরে।</string>
+    <string name="reminder_day_title">দিন %1$d · %2$s</string>
+    <string name="reminder_day_body">আজকের ভ্রমণসূচি দেখুন।</string>
+    <string name="reminder_last_title">শেষ দিন · %1$s</string>
+    <string name="reminder_last_body">আপনার চেকআউটের সময় ও ফেরার পথ দেখে নিন।</string>
+    <string name="reminder_action_emergency">জরুরি কার্ড</string>
+    <string name="nearby_notification_title">দেখুন আপনার আশেপাশে কী আছে</string>
+    <string name="nearby_notification_body">আপনার আশেপাশে দেখার, খাওয়ার, কেনাকাটার ও থাকার জায়গা। দেখতে ট্যাপ করুন।</string>
+</resources>

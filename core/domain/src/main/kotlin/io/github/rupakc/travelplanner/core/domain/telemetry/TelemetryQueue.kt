@@ -39,7 +39,7 @@ class TelemetryQueue(private val cap: Int = 500) {
     fun prepend(saved: List<QueuedEvent>, nowMs: Long) {
         val keep =
             saved.filter {
-                abs(nowMs - it.ts) < MAX_AGE_MS && TOKEN.matches(it.screen) && TOKEN.matches(it.event)
+                abs(nowMs - it.ts) < MAX_AGE_MS && TelemetryProps.isToken(it.screen) && TelemetryProps.isToken(it.event)
             }
         items.addAll(0, keep)
         while (items.size > cap) items.removeFirst()
@@ -49,8 +49,5 @@ class TelemetryQueue(private val cap: Int = 500) {
 
     private companion object {
         const val MAX_AGE_MS = 7L * 24 * 60 * 60 * 1000
-
-        // TODO(T4): use TelemetryProps.isToken
-        val TOKEN = Regex("^[A-Za-z0-9_.:/-]{1,64}$")
     }
 }

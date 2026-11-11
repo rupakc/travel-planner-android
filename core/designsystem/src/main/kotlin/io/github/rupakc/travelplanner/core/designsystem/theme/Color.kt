@@ -51,7 +51,7 @@ internal val LightColors: ColorScheme =
         surfaceContainerHighest = Palette.Slate200,
     )
 
-/** Dark scheme (no web reference; teal-400 primary per spec §5, slate surfaces, AA contrast). */
+/** Dark scheme: teal-400 primary; surfaces and neutrals from the web dark tokens (DarkPalette), AA contrast. */
 internal val DarkColors: ColorScheme =
     darkColorScheme(
         primary = Palette.Teal400,
@@ -71,24 +71,24 @@ internal val DarkColors: ColorScheme =
         onError = Palette.Red950,
         errorContainer = Palette.Red900,
         onErrorContainer = Palette.Red100,
-        background = Palette.Slate950,
-        onBackground = Palette.Slate100,
-        surface = Palette.Slate900,
-        onSurface = Palette.Slate100,
-        surfaceVariant = Palette.Slate800,
-        onSurfaceVariant = Palette.Slate300,
+        background = DarkPalette.Gray50,
+        onBackground = DarkPalette.Gray900,
+        surface = DarkPalette.White,
+        onSurface = DarkPalette.Gray900,
+        surfaceVariant = DarkPalette.Gray100,
+        onSurfaceVariant = DarkPalette.Gray700,
         surfaceTint = Palette.Teal400,
-        inverseSurface = Palette.Slate100,
-        inverseOnSurface = Palette.Slate800,
-        outline = Palette.Slate500,
-        outlineVariant = Palette.Slate700,
-        surfaceBright = Palette.Slate800,
-        surfaceDim = Palette.Slate950,
-        surfaceContainerLowest = Palette.Slate950,
-        surfaceContainerLow = Palette.Slate900,
-        surfaceContainer = Palette.Slate900,
-        surfaceContainerHigh = Palette.Slate800,
-        surfaceContainerHighest = Palette.Slate700,
+        inverseSurface = DarkPalette.Gray900,
+        inverseOnSurface = DarkPalette.Gray100,
+        outline = DarkPalette.Gray600,
+        outlineVariant = DarkPalette.Gray200,
+        surfaceBright = DarkPalette.Gray200,
+        surfaceDim = DarkPalette.Gray50,
+        surfaceContainerLowest = DarkPalette.Gray50,
+        surfaceContainerLow = DarkPalette.White,
+        surfaceContainer = DarkPalette.Gray100,
+        surfaceContainerHigh = DarkPalette.Gray200,
+        surfaceContainerHighest = DarkPalette.Gray300,
     )
 
 /** Semantic colours Material 3 lacks: success / warning ("Estimate", over budget) / info. */
@@ -133,8 +133,8 @@ internal val DarkExtendedColors =
         warningBorder = Palette.Amber700,
         info = Palette.Sky400,
         infoContainer = Palette.Sky950,
-        skeletonBase = Palette.Slate800,
-        skeletonHighlight = Palette.Slate700,
+        skeletonBase = DarkPalette.Gray100,
+        skeletonHighlight = DarkPalette.Gray200,
     )
 
 val LocalExtendedColors = staticCompositionLocalOf { LightExtendedColors }

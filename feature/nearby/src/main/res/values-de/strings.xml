@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nearby_message">Orte zum Sehen, Essen, Einkaufen und Übernachten rund um deinen Standort, von Google Maps. Der Standort wird nur hier und nur abgefragt, solange du diesen Bildschirm nutzt.</string>
+    <string name="nearby_rationale_title">Sieh, was in deiner Nähe ist</string>
+    <string name="nearby_rationale_precise">Ein ungefährer Standort genügt. Wenn du diesen Bildschirm öffnest, wird deine Position (auf etwa 100 m gerundet) über deinen Server an Google Maps gesendet, um Orte in der Nähe zu finden; sie wird nicht gespeichert. Wir verfolgen dich nie im Hintergrund.</string>
+    <string name="nearby_allow">Standort erlauben</string>
+    <string name="nearby_denied_title">Standort ist für %1$s ausgeschaltet</string>
+    <string name="nearby_denied_body">„In der Nähe“ braucht deinen ungefähren Standort, um Orte um dich herum zu finden. Du kannst ihn in den Einstellungen erlauben.</string>
+    <string name="nearby_open_settings">Einstellungen öffnen</string>
+    <string name="nearby_locating">Dein Standort wird ermittelt …</string>
+    <string name="nearby_loading">Orte in deiner Nähe werden gesucht … Das kann ein paar Sekunden dauern.</string>
+    <string name="nearby_off_title">Standortdienste sind ausgeschaltet</string>
+    <string name="nearby_off_body">Schalte die Standortdienste in den Telefoneinstellungen ein und versuche es dann erneut.</string>
+    <string name="nearby_open_location_settings">Standorteinstellungen öffnen</string>
+    <string name="nearby_no_fix_title">Standort konnte nicht ermittelt werden</string>
+    <string name="nearby_no_fix">Dein Telefon hat keine Position geliefert. Gehe nach draußen oder warte einen Moment und versuche es dann erneut.</string>
+    <string name="nearby_no_place_title">Noch nichts in der Nähe</string>
+    <string name="nearby_failed">Wir konnten keine Orte in deiner Nähe finden. Versuche es erneut.</string>
+    <string name="nearby_offline">Du bist offline. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="nearby_rate_limited">Zu viele Anfragen. Bitte warte einen Moment und versuche es erneut.</string>
+    <string name="nearby_ai_billing">KI-Funktionen sind auf diesem Server derzeit ausgeschaltet.</string>
+    <string name="nearby_grounding_unavailable">Live-Kartenergebnisse sind auf diesem Server nicht verfügbar.</string>
+    <string name="nearby_refresh">Orte aktualisieren</string>
+    <string name="nearby_distance">%1$s km von dir entfernt</string>
+    <string name="nearby_attribution">Orte von %1$s</string>
+    <string name="nearby_empty_title">Nichts in der Nähe gefunden</string>
+    <string name="nearby_empty">Wir haben deinen Standort gefunden, können aber gerade keine Orte anzeigen. Versuche es später erneut.</string>
+    <string name="nearby_section_empty">Dazu wurde in der Nähe nichts gefunden.</string>
+    <string name="nearby_open_maps_a11y">%1$s in Google Maps öffnen</string>
+    <string name="nearby_no_maps_app">Keine App auf diesem Telefon kann Karten öffnen.</string>
+    <string name="nearby_background_note">Wenn du Vorschläge in der Nähe in den Einstellungen aktivierst, erinnern wir dich unterwegs eventuell daran, „In der Nähe“ zu öffnen. Dafür speichern wir 24 Stunden lang nur ein grobes Gebiet (etwa 5 km) von deinem letzten Besuch hier; im Hintergrund wird nichts abgefragt.</string>
+</resources>
