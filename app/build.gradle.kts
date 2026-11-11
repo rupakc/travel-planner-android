@@ -121,6 +121,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.compose.material3.adaptive)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
@@ -131,6 +132,7 @@ dependencies {
 
     testImplementation(projects.core.testing)
     testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.androidx.navigation.testing)
 }
 
 // Review M8 / R2-M3: fail if R8 removed anything kotlinx.serialization needs from core:model in the prod release:

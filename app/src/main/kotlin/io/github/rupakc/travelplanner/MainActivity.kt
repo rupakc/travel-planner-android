@@ -2,6 +2,8 @@ package io.github.rupakc.travelplanner
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Process
+import android.os.SystemClock
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -9,12 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.OneShotPreDrawListener
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.notifications.withPushDeepLink
 import io.github.rupakc.travelplanner.navigation.DeepLinkIntents
 import io.github.rupakc.travelplanner.navigation.TravelApp
+import io.github.rupakc.travelplanner.telemetry.ColdStart
+import io.github.rupakc.travelplanner.telemetry.ColdStartGate
 
 /** AppCompatActivity (not ComponentActivity) so AppCompatDelegate per-app locales apply on API 26–32 too. */
 @AndroidEntryPoint
@@ -27,6 +32,8 @@ class MainActivity : AppCompatActivity() {
         // Then drop Navigation's internal deep-link extras and foreign data (exported activity, S-M1).
         DeepLinkIntents.sanitize(withPushDeepLink(intent))
         super.onCreate(savedInstanceState)
+        val firstActivity = ColdStart.claimFirstActivity()
+        val restored = savedInstanceState != null
         // Keep the splash until the session/profile are read from DataStore (no Login flash).
         splash.setKeepOnScreenCondition { viewModel.state.value.gate == AuthGate.LOADING }
         enableEdgeToEdge()
@@ -35,8 +42,21 @@ class MainActivity : AppCompatActivity() {
             // Status/navigation bar icons follow the app's theme setting, not only the system's.
             EdgeToEdgeSystemBars(dark = state.settings.themeMode.isDark(isSystemInDarkTheme()))
             TravelTheme(themeMode = state.settings.themeMode, dynamicColor = state.settings.dynamicColor) {
-                TravelApp(gate = state.gate)
+                val consentPrompt by viewModel.consentPrompt.collectAsStateWithLifecycle()
+                TravelApp(
+                    gate = state.gate,
+                    uiEventSink = viewModel.uiEventSink,
+                    screenTracker = viewModel.screenTracker,
+                    consentPrompt = consentPrompt,
+                    onConsentChoice = viewModel::chooseConsent,
+                    onCloseConsent = viewModel::closeConsentChoices,
+                )
             }
+        }
+        // Cold start = process start → first frame of the first activity (only foreground, unrestored launches).
+        OneShotPreDrawListener.add(window.decorView) {
+            val ms = SystemClock.uptimeMillis() - Process.getStartUptimeMillis()
+            if (ColdStartGate.shouldReport(ColdStart.startedInForeground, firstActivity, restored, ms)) viewModel.reportColdStart(ms)
         }
     }
 
