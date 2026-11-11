@@ -11,14 +11,15 @@ on:
 permissions:
   contents: read
 
-# PR runs cancel superseded ones; main runs queue instead, so two pushes never race the same release.
+# PR runs cancel superseded ones. Every push/dispatch on main gets its own group (per sha) and is never cancelled,
+# so each main commit is verified; only the publishing jobs below serialise, via the shared android-release-main group.
 env:
   # Expected signer of every published APK (the Voyager upload key). A mismatch fails the publishing jobs.
   EXPECTED_CERT_SHA256: "1C:B8:29:4D:D5:7B:8D:E7:7D:B2:77:99:F3:1A:86:3C:F8:97:56:D1:CC:E6:02:34:C8:E5:85:50:6E:1E:38:B0"
 
 concurrency:
-  group: android-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: android-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -112,6 +113,9 @@ jobs:
   # an older run can never move them backwards. Every job is safe to re-run.
   release-apk:
     name: Signed release APK
+    concurrency:
+      group: android-release-main
+      cancel-in-progress: false
     needs: build
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
@@ -242,6 +246,9 @@ jobs:
   # scripts/release-decision.sh says so (also comparing with the versionCode annotation on the current :latest).
   ghcr:
     name: Push APK to GHCR
+    concurrency:
+      group: android-release-main
+      cancel-in-progress: false
     needs: release-apk
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -343,6 +350,9 @@ jobs:
   # not mention GHCR). Idempotent: re-running for the same commit updates assets and notes; a tag on another commit fails.
   github-release:
     name: GitHub Release
+    concurrency:
+      group: android-release-main
+      cancel-in-progress: false
     needs: [release-apk, ghcr]
     if: always() && needs.release-apk.result == 'success'
     runs-on: ubuntu-latest
