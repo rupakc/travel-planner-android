@@ -161,6 +161,11 @@ Plan object (`plans_db._row_to_dict`): `{id:int, username, name, search_data:obj
 - `POST /api/feedback` (201) `{page<=64, rating 1..5, category:"bug|feature_request|general|praise", message?<=500, metadata?:object}` -> stored feedback row (keys `id,username,page,rating,category,message,metadata,created_at` - **UNVERIFIED** exact shape).
 - `POST /api/analytics/events` (204) `{events:[{feature<=64,page<=64,metadata?:object,ts?:int}]}` (<=50).
 
+### 2.7a Config and telemetry (no auth; see web `docs/Telemetry.md`)
+- `GET /api/config` -> `{public_base_url?:string, telemetry:{enabled:bool, flush_interval_s?:int, max_batch?:int}}`. `404` on older backends = telemetry off. The app clamps `flush_interval_s` to 1..300 (default 15) and `max_batch` to 1..100 (default 50).
+- `POST /api/telemetry` body `{"client":{anon_id,session_id,platform:"android",app_version,locale},"events":[{event,ts,screen,props}]}`, sent with `Content-Encoding: gzip`; event and prop names only from the registry. `4xx` other than 408/429 drops the batch; `404` disables telemetry; `Retry-After` honoured.
+- AI POST bodies carry an extra `locale` field (base language code, set by `AiLocaleInterceptor`); the backend ignores unknown fields on older versions. See [Telemetry-and-Privacy](../Telemetry-and-Privacy.md).
+
 ### 2.8 Admin (admin required)
 - `POST /api/admin/users` (201) `{username,password(>=8),email?,is_admin=false}` -> user row without password_hash: `{id,username,email,is_admin,is_first_login,is_active,created_at,updated_at}`; `409 "Username already exists"`, `400 "Temporary password must be at least 8 characters"`.
 - `GET /api/admin/users` -> user[]. `DELETE /api/admin/users/{username}` 204 (400 self, 404). `POST /api/admin/users/{username}/reactivate` -> `{"status":"reactivated"}`. `POST /api/admin/users/{username}/reset-password` `{new_password}` -> `{"status":"password_reset","username":...}`.

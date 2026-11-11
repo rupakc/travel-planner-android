@@ -16,6 +16,7 @@ Source of truth for scope: the [design spec](superpowers/specs/2026-11-05-androi
 - [Data-and-Offline](Data-and-Offline.md)
 - [Design-System-and-Theming](Design-System-and-Theming.md), [Localization](Localization.md), [Accessibility](Accessibility.md)
 - [Search-and-Filter](Search-and-Filter.md)
+- [Telemetry-and-Privacy](Telemetry-and-Privacy.md)
 - [Onboarding-and-Traveller-Types](Onboarding-and-Traveller-Types.md) (written by the onboarding team)
 - [Notifications-and-Push](Notifications-and-Push.md), [Firebase-Setup](Firebase-Setup.md) (written by the push team)
 

@@ -54,7 +54,7 @@ Parity with the traveller-facing web flows, plus what a phone is good at (design
 - "Search the web now" on every watched price: a user-initiated Google Search–grounded answer with its sources, never stored and never used for alerts.
 - Public share-link viewer (deep link), dark theme (light by default), dynamic colour.
 - Seven languages: English, Español, Deutsch, Français, हिन्दी, 中文（简体）, বাংলা ([Localization](docs/Localization.md)).
-- Privacy: anonymous, content-free usage telemetry with a consent prompt where the device zone is in Europe and an off switch in Settings; no tracker SDK ([privacy policy](https://github.com/rupakc/travel-planner/blob/main/docs/Privacy.md)).
+- Privacy: anonymous, content-free usage telemetry with a consent prompt where the device zone is in Europe and an off switch in Settings; no tracker SDK ([Telemetry-and-Privacy](docs/Telemetry-and-Privacy.md)).
 - Booking is always "open the provider's page in a Custom Tab"; there are no in-app payments.
 
 ## Architecture
