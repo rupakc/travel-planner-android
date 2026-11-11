@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mod_brand_name" translatable="false">Voyager</string>
+    <string name="mod_save">Save trip</string>
+    <string name="mod_brand">Help improve %1$s</string>
+    <string name="mod_order">%1$s of %2$s</string>
+    <string name="mod_hello">Hello, %s</string>
+    <string name="mod_esc">Itinerary &amp; plan</string>
+    <string name="mod_handle">Your handle</string>
+    <string name="mod_pct_plain">100% free</string>
+    <string name="mod_pct_args">%1$d%% off</string>
+    <string name="mod_apostrophe">Can\'t load</string>
+    <string name="mod_markup">Welcome <b>back</b></string>
+    <string name="mod_open">Open map</string>
+    <string name="mod_only">Only on Android, %1$s</string>
+    <plurals name="mod_items">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    <plurals name="mod_stops">
+        <item quantity="one">%1$d stop in %2$s</item>
+        <item quantity="other">%1$d stops in %2$s</item>
+    </plurals>
+</resources>

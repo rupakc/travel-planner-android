@@ -1,0 +1,14 @@
+{
+  "title": "Voyager",
+  "exact": "保存行程",
+  "brand": "帮助改进 Voyager",
+  "order": "{{b}} 中的 {{a}}",
+  "hello": "你好，{{name}}",
+  "esc": "行程与计划",
+  "handle": "你的昵称",
+  "pct": { "plain": "100% 免费", "args": "{{n}}% 折扣" },
+  "apostrophe": "无法加载",
+  "markup": "欢迎<b>回来</b>",
+  "items_other": "{{count}} 项",
+  "stops_other": "在 {{city}} 停靠 {{count}} 次"
+}
