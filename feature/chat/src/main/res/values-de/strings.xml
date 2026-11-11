@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_title">%1$s Chat</string>
+    <string name="chat_starter_1">Plane eine 5-tägige Reise nach Tokio mit %1$s Budget</string>
+    <string name="chat_input_placeholder">Frag nach deiner nächsten Reise…</string>
+    <string name="chat_user_message">Du: %1$s</string>
+    <string name="chat_thinking">Denke nach…</string>
+    <string name="chat_planning">Plane deine Reise…</string>
+    <string name="chat_error_request">Sorry, etwas ist schiefgelaufen. Bitte versuche es erneut.</string>
+    <string name="chat_stopped">Gestoppt</string>
+    <string name="chat_jump_latest">Zum Neuesten springen</string>
+    <string name="chat_suggestions">Vorgeschlagene Anschlussfragen</string>
+    <string name="chat_reply_announce">Assistent: %1$s</string>
+    <string name="chat_plan_ready_announce">Reiseplan für %1$s fertig</string>
+    <string name="chat_plan_ready_announce_generic">Reiseplan fertig</string>
+    <string name="chat_reply_failed_announce">Der Assistent konnte nicht antworten. Du kannst es erneut versuchen.</string>
+    <plurals name="chat_my_plan_a11y">
+        <item quantity="one">Mein Plan, %d Element</item>
+        <item quantity="other">Mein Plan, %d Elemente</item>
+    </plurals>
+    <string name="chat_threads">Chats</string>
+    <string name="chat_threads_show">Chats anzeigen</string>
+    <string name="chat_new">Neuer Chat</string>
+    <string name="chat_threads_search">Chats durchsuchen</string>
+    <string name="chat_threads_clear_search">Suche löschen</string>
+    <string name="chat_threads_empty">Noch keine Chats</string>
+    <string name="chat_threads_empty_message">Deine Unterhaltungen werden auf diesem Gerät gespeichert.</string>
+    <string name="chat_threads_no_match">Keine Chats passen zu „%1$s“</string>
+    <string name="chat_thread_menu">Weitere Optionen für %1$s</string>
+    <string name="chat_rename">Umbenennen</string>
+    <string name="chat_rename_title">Chat umbenennen</string>
+    <string name="chat_rename_label">Chat-Name</string>
+    <string name="chat_deleted">Chat gelöscht</string>
+    <plurals name="chat_show_more">
+        <item quantity="one">%d weitere anzeigen</item>
+        <item quantity="other">%d weitere anzeigen</item>
+    </plurals>
+    <string name="chat_progress">Fertig: %1$d/%2$d</string>
+    <string name="chat_route">%1$s → %2$s</string>
+    <plurals name="chat_visa_max_stay">
+        <item quantity="one">Max. Aufenthalt: %d Tag</item>
+        <item quantity="other">Max. Aufenthalt: %d Tage</item>
+    </plurals>
+    <string name="chat_sim_data">%1$s GB</string>
+    <string name="chat_hours">%1$s Std.</string>
+    <string name="chat_open_in_maps">%1$s in Karten öffnen</string>
+    <plurals name="chat_day_itinerary">
+        <item quantity="one">%d-Tage-Reiseroute</item>
+        <item quantity="other">%d-Tage-Reiseroute</item>
+    </plurals>
+    <string name="chat_travel_day">Reise</string>
+    <string name="chat_city_country">%1$s, %2$s</string>
+    <string name="chat_must_see">Unbedingt sehen</string>
+    <string name="chat_day_expanded">aufgeklappt</string>
+    <string name="chat_day_collapsed">eingeklappt</string>
+    <string name="chat_save_as_plan">Als Plan speichern</string>
+    <string name="chat_replace_title">Neuen Plan beginnen?</string>
+    <string name="chat_replace_message">Mein Plan hat ungespeicherte Änderungen. Wenn du diese Reiseroute speicherst, wird stattdessen ein neuer Plan angelegt.</string>
+    <string name="chat_replace_confirm">Neuen Plan beginnen</string>
+</resources>

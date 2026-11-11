@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_trip_reminders">Rappels de voyage</string>
+    <string name="channel_trip_reminders_desc">Vérifications du visa et des bagages, rappels du jour du vol et de l\'itinéraire quotidien pour vos voyages enregistrés.</string>
+    <string name="channel_price_alerts_desc">Lorsque le prix d\'un vol, d\'un hôtel, d\'une activité ou d\'un voyage suivi baisse ou atteint votre objectif.</string>
+    <string name="channel_nearby">Suggestions à proximité</string>
+    <string name="channel_nearby_desc">Un rappel pour consulter « Près de moi » pendant un voyage, si vous l\'avez utilisé récemment. Rien n\'est recherché avant que vous l\'ouvriez.</string>
+    <string name="channel_account">Compte</string>
+    <string name="channel_account_desc">Messages de connexion et de compte.</string>
+    <string name="reminder_week_title">%1$s dans une semaine</string>
+    <string name="reminder_week_body">C\'est le moment de vérifier votre visa et de commencer votre liste de bagages.</string>
+    <string name="reminder_day_before_title">%1$s demain</string>
+    <string name="reminder_day_before_body">Vérifiez votre vol et la météo avant de partir.</string>
+    <string name="reminder_start_title">Votre voyage à %1$s commence aujourd\'hui</string>
+    <string name="reminder_start_body">L\'itinéraire du jour, votre carte d\'urgence et les activités près de vous sont à portée d\'un geste.</string>
+    <string name="reminder_day_title">Jour %1$d à %2$s</string>
+    <string name="reminder_day_body">Consultez l\'itinéraire du jour.</string>
+    <string name="reminder_last_title">Dernier jour à %1$s</string>
+    <string name="reminder_last_body">Vérifiez l\'heure de départ de votre hébergement et votre trajet retour.</string>
+    <string name="reminder_action_emergency">Carte d\'urgence</string>
+    <string name="nearby_notification_title">Découvrez ce qui est près de vous</string>
+    <string name="nearby_notification_body">Des lieux à voir, où manger, faire du shopping et dormir autour de vous. Touchez pour découvrir.</string>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nearby_message">Des lieux à voir, où manger, faire du shopping et dormir autour de vous, grâce à Google Maps. La localisation n’est demandée qu’ici, et seulement pendant que vous utilisez cet écran.</string>
+    <string name="nearby_rationale_title">Découvrez ce qu’il y a près de vous</string>
+    <string name="nearby_rationale_precise">Une position approximative suffit. Lorsque vous ouvrez cet écran, votre position (arrondie à environ 100 m) transite par votre serveur vers Google Maps pour trouver des lieux à proximité ; elle n’est pas conservée. Nous ne vous suivons jamais en arrière-plan.</string>
+    <string name="nearby_allow">Autoriser la localisation</string>
+    <string name="nearby_denied_title">La localisation est désactivée pour %1$s</string>
+    <string name="nearby_denied_body">« Près de moi » a besoin de votre position approximative pour trouver des lieux autour de vous. Vous pouvez l’autoriser dans les réglages.</string>
+    <string name="nearby_open_settings">Ouvrir les réglages</string>
+    <string name="nearby_locating">Recherche de votre position…</string>
+    <string name="nearby_loading">Recherche de lieux près de chez vous… Cela peut prendre quelques secondes.</string>
+    <string name="nearby_off_title">Les services de localisation sont désactivés</string>
+    <string name="nearby_off_body">Activez la localisation dans les réglages de votre téléphone, puis réessayez.</string>
+    <string name="nearby_open_location_settings">Ouvrir les réglages de localisation</string>
+    <string name="nearby_no_fix_title">Impossible d’obtenir votre position</string>
+    <string name="nearby_no_fix">Votre téléphone n’a renvoyé aucune position. Sortez ou patientez un instant, puis réessayez.</string>
+    <string name="nearby_no_place_title">Rien à proximité pour l’instant</string>
+    <string name="nearby_failed">Nous n’avons pas pu trouver de lieux près de chez vous. Réessayez.</string>
+    <string name="nearby_offline">Vous êtes hors ligne. Vérifiez votre connexion et réessayez.</string>
+    <string name="nearby_rate_limited">Trop de requêtes. Patientez un instant, puis réessayez.</string>
+    <string name="nearby_ai_billing">Les fonctionnalités d’IA sont actuellement désactivées sur ce serveur.</string>
+    <string name="nearby_grounding_unavailable">Les résultats cartographiques en direct ne sont pas disponibles sur ce serveur.</string>
+    <string name="nearby_refresh">Actualiser les lieux</string>
+    <string name="nearby_distance">À %1$s km de vous</string>
+    <string name="nearby_attribution">Lieux fournis par %1$s</string>
+    <string name="nearby_empty_title">Rien trouvé à proximité</string>
+    <string name="nearby_empty">Nous avons trouvé où vous êtes, mais il n’y a aucun lieu à afficher pour le moment. Réessayez plus tard.</string>
+    <string name="nearby_section_empty">Rien trouvé à proximité pour cette catégorie.</string>
+    <string name="nearby_open_maps_a11y">Ouvrir %1$s dans Google Maps</string>
+    <string name="nearby_no_maps_app">Aucune application de ce téléphone ne peut ouvrir de cartes.</string>
+    <string name="nearby_background_note">Si vous activez les suggestions à proximité dans les réglages, nous pouvons vous rappeler d’ouvrir « Près de moi » pendant un voyage. Pour cela, nous ne conservons qu’une zone approximative (environ 5 km) de votre dernière visite ici, pendant 24 heures ; rien n’est recherché en arrière-plan.</string>
+</resources>

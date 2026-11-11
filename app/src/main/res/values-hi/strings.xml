@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">होम</string>
+    <string name="nav_plans">मेरी यात्राएँ</string>
+    <string name="nav_settings">सेटिंग</string>
+    <string name="nav_global_search">सब कुछ खोजें</string>
+    <string name="session_expired">आप साइन आउट हो गए हैं। कृपया फिर से साइन इन करें।</string>
+</resources>

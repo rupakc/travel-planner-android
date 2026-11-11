@@ -1,0 +1,15 @@
+{
+  "strings": {
+    "nearby_ai_limit": "misc:live.aiLimit",
+    "nearby_no_place": "misc:live.noPlace",
+    "nearby_open_maps": "misc:nearby.openMaps",
+    "nearby_section_eat": "misc:nearby.section.eat",
+    "nearby_section_see": "misc:nearby.section.see",
+    "nearby_section_shop": "misc:nearby.section.shop",
+    "nearby_section_stay": "misc:nearby.section.stay",
+    "nearby_sources": "misc:nearby.sources",
+    "nearby_title": "common:nav.nearby",
+    "nearby_try_again": "misc:nearby.tryAgain"
+  },
+  "plurals": {}
+}

@@ -1,0 +1,8 @@
+{
+  "strings": {
+    "nav_alerts": "common:nav.alerts",
+    "nav_chat": "common:nav.chat",
+    "nav_search": "common:nav.search"
+  },
+  "plurals": {}
+}
