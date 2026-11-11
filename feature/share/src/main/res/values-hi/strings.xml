@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_title">शेयर की गई यात्रा</string>
+    <string name="share_dates">%1$s → %2$s</string>
+    <string name="share_save_copy">कॉपी सेव करें</string>
+    <string name="share_hours">%1$s घंटे</string>
+    <string name="share_open_copy">मेरी कॉपी खोलें</string>
+    <string name="share_saved">मेरी यात्राएँ में सेव हो गया</string>
+    <string name="share_save_failed">कॉपी सेव नहीं हो सकी।</string>
+    <string name="share_offline">आप ऑफ़लाइन हैं। यह शेयर की गई यात्रा खोलने के लिए कनेक्ट करें।</string>
+    <string name="share_itinerary">दिन-दर-दिन यात्रा कार्यक्रम (%1$s)</string>
+    <string name="share_stars">%1$d-स्टार होटल</string>
+    <string name="share_review">%1$s/10</string>
+    <string name="share_open_link_a11y">%1$s खोलें</string>
+    <string name="share_unnamed">बिना नाम की प्रविष्टि</string>
+</resources>

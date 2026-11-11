@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_no_registration">账号由管理员创建。请向管理员索取用户名和临时密码。</string>
+    <string name="auth_password_shown">密码已显示</string>
+    <string name="auth_password_hidden">密码已隐藏</string>
+    <string name="auth_error_network">无法连接服务器。请检查网络连接，或“服务器”中的地址。</string>
+    <string name="auth_change_password_welcome">欢迎，%1$s！请设置新密码以继续。</string>
+    <string name="auth_change_password_voluntary_title">修改密码</string>
+    <string name="auth_change_password_voluntary_message">输入当前密码，然后设置新密码。</string>
+    <string name="auth_current_password">当前密码</string>
+    <string name="auth_update_password">更新密码</string>
+    <string name="auth_password_updated">密码已更新</string>
+    <string name="auth_error_not_configured">尚未设置服务器。点按“服务器”输入其地址。</string>
+    <string name="auth_server">服务器</string>
+    <string name="auth_server_button">服务器：%1$s</string>
+    <string name="auth_server_button_unset">设置服务器</string>
+    <string name="auth_server_title">服务器</string>
+    <string name="auth_server_message">你的 %1$s 服务器地址，例如 http://192.168.1.20:8001。</string>
+    <string name="auth_server_url">服务器地址</string>
+    <string name="auth_server_default">默认：%1$s</string>
+    <string name="auth_server_no_default">此版本没有默认服务器。</string>
+    <string name="auth_server_test">测试连接</string>
+    <string name="auth_server_testing">正在测试…</string>
+    <string name="auth_server_reset">恢复默认</string>
+    <string name="auth_server_reachable">已连接，服务器可访问。</string>
+    <string name="auth_server_serpapi_on">实时价格：可用</string>
+    <string name="auth_server_serpapi_off">实时价格：此服务器未设置</string>
+    <string name="auth_server_push_on">推送通知：可用</string>
+    <string name="auth_server_push_off">推送通知：此服务器未设置</string>
+    <string name="auth_server_unreachable">无法连接到此地址的服务器。请检查地址和网络连接。</string>
+    <string name="auth_server_error_blank">请输入服务器地址。</string>
+    <string name="auth_server_error_malformed">这看起来不像网址。请以 http:// 或 https:// 开头。</string>
+    <string name="auth_server_error_scheme">请使用 http:// 或 https:// 地址。</string>
+    <string name="auth_server_error_host">请添加服务器的主机名或 IP 地址。</string>
+    <string name="auth_server_error_https">此版本仅通过 HTTPS 连接。请使用 https:// 地址。</string>
+</resources>
