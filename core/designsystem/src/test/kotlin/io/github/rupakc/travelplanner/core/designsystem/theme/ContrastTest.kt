@@ -49,6 +49,7 @@ class ContrastTest {
             Pair("onWarningContainer on warningContainer", x.onWarningContainer, x.warningContainer, TEXT),
             Pair("info on infoContainer", x.info, x.infoContainer, TEXT),
             Pair("outline on surfaceVariant", s.outline, s.surfaceVariant, NON_TEXT),
+            Pair("outline on surfaceContainerHighest", s.outline, s.surfaceContainerHighest, NON_TEXT),
         ) +
             onSurfaces("onSurface", s.onSurface) +
             onSurfaces("onBackground", s.onBackground) +

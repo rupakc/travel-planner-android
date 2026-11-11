@@ -10,6 +10,7 @@ import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.data.telemetry.ConsentRepository
 import io.github.rupakc.travelplanner.core.database.RecentSearchDao
 import io.github.rupakc.travelplanner.core.database.RecentSearchEntity
 import io.github.rupakc.travelplanner.core.datastore.FeatureOverridesStore
@@ -197,11 +198,17 @@ class ProfileRepositoryImpl
 @Singleton
 class FeedbackRepositoryImpl
     @Inject
-    constructor(private val api: FeedbackApi) : FeedbackRepository {
+    constructor(
+        private val api: FeedbackApi,
+        private val consent: ConsentRepository,
+    ) : FeedbackRepository {
         override suspend fun sendFeedback(request: FeedbackRequest): AppResult<Unit> = apiCall { api.feedback(request) }.map { }
 
-        override suspend fun sendAnalytics(events: List<AnalyticsEvent>): AppResult<Unit> =
-            apiCall { api.analytics(AnalyticsBatch(events.take(MAX_EVENTS))) }.map { }
+        override suspend fun sendAnalytics(events: List<AnalyticsEvent>): AppResult<Unit> {
+            // No consent (or none yet in the EU): nothing leaves the device.
+            if (!consent.allowedNow()) return AppResult.Success(Unit)
+            return apiCall { api.analytics(AnalyticsBatch(events.take(MAX_EVENTS))) }.map { }
+        }
 
         private companion object {
             const val MAX_EVENTS = 50

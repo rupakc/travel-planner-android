@@ -44,7 +44,7 @@ class PreferencesSettingsStore(private val store: DataStore<Preferences>) : Sett
         store.safeData().map { p ->
             AppSettings(
                 baseUrlOverride = p[baseUrl]?.takeIf(String::isNotBlank),
-                themeMode = p[theme]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM,
+                themeMode = p[theme]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.LIGHT,
                 dynamicColor = p[dynamic] ?: false,
                 localeTag = p[locale]?.takeIf(String::isNotBlank),
                 tripNotifications = p[trip] ?: true,

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nearby_message">आप जहाँ हैं, उसके आसपास देखने, खाने, खरीदारी और ठहरने की जगहें, Google Maps से। लोकेशन सिर्फ़ यहीं माँगी जाती है, और केवल तब तक जब तक आप यह स्क्रीन इस्तेमाल करते हैं।</string>
+    <string name="nearby_rationale_title">देखें आपके आसपास क्या है</string>
+    <string name="nearby_rationale_precise">अनुमानित लोकेशन काफ़ी है। जब आप यह स्क्रीन खोलते हैं, तो आपकी स्थिति (लगभग 100 मीटर तक पूर्णांकित) आपके सर्वर के ज़रिए Google Maps तक जाती है ताकि आसपास की जगहें मिल सकें; इसे सहेजा नहीं जाता। हम बैकग्राउंड में आपको कभी ट्रैक नहीं करते।</string>
+    <string name="nearby_allow">लोकेशन की अनुमति दें</string>
+    <string name="nearby_denied_title">%1$s के लिए लोकेशन बंद है</string>
+    <string name="nearby_denied_body">\"आस-पास\" को आसपास की जगहें खोजने के लिए आपकी अनुमानित लोकेशन चाहिए। आप इसे सेटिंग में अनुमति दे सकते हैं।</string>
+    <string name="nearby_open_settings">सेटिंग खोलें</string>
+    <string name="nearby_locating">आपकी जगह का पता लगाया जा रहा है…</string>
+    <string name="nearby_loading">आपके आसपास के स्थान खोजे जा रहे हैं… इसमें कुछ सेकंड लग सकते हैं।</string>
+    <string name="nearby_off_title">लोकेशन सेवाएँ बंद हैं</string>
+    <string name="nearby_off_body">अपने फ़ोन की सेटिंग में लोकेशन चालू करें, फिर कोशिश करें।</string>
+    <string name="nearby_open_location_settings">लोकेशन सेटिंग खोलें</string>
+    <string name="nearby_no_fix_title">आपकी लोकेशन नहीं मिल सकी</string>
+    <string name="nearby_no_fix">आपके फ़ोन ने कोई लोकेशन नहीं दी। बाहर जाएँ या थोड़ा इंतज़ार करें, फिर कोशिश करें।</string>
+    <string name="nearby_no_place_title">अभी आसपास कुछ नहीं</string>
+    <string name="nearby_failed">हम आपके आसपास के स्थान नहीं खोज सके। फिर कोशिश करें।</string>
+    <string name="nearby_offline">आप ऑफ़लाइन हैं। अपना कनेक्शन जाँचें और फिर कोशिश करें।</string>
+    <string name="nearby_rate_limited">बहुत ज़्यादा अनुरोध। कृपया थोड़ी देर रुकें और फिर कोशिश करें।</string>
+    <string name="nearby_ai_billing">इस सर्वर पर अभी AI सुविधाएँ बंद हैं।</string>
+    <string name="nearby_grounding_unavailable">इस सर्वर पर लाइव मैप नतीजे उपलब्ध नहीं हैं।</string>
+    <string name="nearby_refresh">स्थान रीफ़्रेश करें</string>
+    <string name="nearby_distance">आपसे %1$s किमी दूर</string>
+    <string name="nearby_attribution">स्थान %1$s से</string>
+    <string name="nearby_empty_title">आसपास कुछ नहीं मिला</string>
+    <string name="nearby_empty">हमें आपकी जगह मिल गई, लेकिन अभी दिखाने के लिए कोई स्थान नहीं है। बाद में फिर कोशिश करें।</string>
+    <string name="nearby_section_empty">इसके लिए आसपास कुछ नहीं मिला।</string>
+    <string name="nearby_open_maps_a11y">%1$s को Google Maps में खोलें</string>
+    <string name="nearby_no_maps_app">इस फ़ोन पर कोई ऐप मैप नहीं खोल सकता।</string>
+    <string name="nearby_background_note">अगर आप सेटिंग में आसपास के सुझाव चालू करते हैं, तो हम यात्रा के दौरान आपको \"आस-पास\" खोलने की याद दिला सकते हैं। इसके लिए हम यहाँ आपकी पिछली विज़िट का केवल मोटा-सा क्षेत्र (लगभग 5 किमी) 24 घंटे तक रखते हैं; बैकग्राउंड में कुछ भी नहीं खोजा जाता।</string>
+</resources>

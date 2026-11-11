@@ -1,0 +1,8 @@
+{
+  "strings": {
+    "channel_price_alerts": "alerts:bell.title",
+    "reminder_action_itinerary": "chat:agent.itinerary",
+    "reminder_action_nearby": "common:nav.nearby"
+  },
+  "plurals": {}
+}

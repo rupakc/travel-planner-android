@@ -28,3 +28,6 @@ app/google-services.json
 
 # Logs
 *.log
+
+# Web checkout used by the web-sync CI check
+.web-source/
