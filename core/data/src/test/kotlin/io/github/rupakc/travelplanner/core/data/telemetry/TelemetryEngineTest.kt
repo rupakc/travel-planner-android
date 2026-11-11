@@ -31,7 +31,7 @@ private const val BASE_MS = 1_800_000_000_000L
 private const val MIN = 60_000L
 
 /** Records every batch; [outcomes] are consumed in order (then [SendOutcome.Sent]); [gate] holds a send open. */
-private class FakeSender(private val scope: TestScope) : TelemetrySender {
+private class EngineFakeSender(private val scope: TestScope) : TelemetrySender {
     val batches = mutableListOf<List<QueuedEvent>>()
     val sessions = mutableListOf<String>()
     val times = mutableListOf<Long>()
@@ -59,7 +59,7 @@ private class FakeSender(private val scope: TestScope) : TelemetrySender {
 }
 
 /** An append/claim store held in memory, recording calls. */
-private class FakeStore : TelemetryQueueStore {
+private class EngineFakeStore : TelemetryQueueStore {
     val items = mutableListOf<QueuedEvent>()
     val appends = mutableListOf<List<QueuedEvent>>()
     var claims = 0
@@ -81,7 +81,7 @@ private class FakeStore : TelemetryQueueStore {
     }
 }
 
-private class FakeScheduler : TelemetryFlushScheduler {
+private class EngineFakeScheduler : TelemetryFlushScheduler {
     var scheduled = 0
     var cancelled = 0
 
@@ -94,7 +94,7 @@ private class FakeScheduler : TelemetryFlushScheduler {
     }
 }
 
-private class FakePrefs : TelemetryPrefsStore {
+private class EngineFakePrefs : TelemetryPrefsStore {
     var stored: StoredSession? = null
     val writes = mutableListOf<StoredSession>()
 
@@ -113,13 +113,13 @@ private class FakePrefs : TelemetryPrefsStore {
 }
 
 /** A config call that stays pending until [answer] completes. */
-private class GatedConfig : ClientConfigRepository {
+private class EngineGatedConfig : ClientConfigRepository {
     val answer = CompletableDeferred<TelemetrySettings?>()
 
     override suspend fun telemetrySettings(): TelemetrySettings? = answer.await()
 }
 
-private class VirtualClock(private val scope: TestScope) : AppClock {
+private class EngineVirtualClock(private val scope: TestScope) : AppClock {
     override fun now(): Instant = Instant.ofEpochMilli(BASE_MS + scope.testScheduler.currentTime)
 
     override fun zone(): ZoneId = ZoneId.of("UTC")
@@ -127,12 +127,12 @@ private class VirtualClock(private val scope: TestScope) : AppClock {
 
 class TelemetryEngineTest {
     private class Rig(scope: TestScope, settings: TelemetrySettings?, allowed: Boolean, gated: Boolean = false) {
-        val sender = FakeSender(scope)
-        val store = FakeStore()
-        val scheduler = FakeScheduler()
-        val prefs = FakePrefs()
+        val sender = EngineFakeSender(scope)
+        val store = EngineFakeStore()
+        val scheduler = EngineFakeScheduler()
+        val prefs = EngineFakePrefs()
         val consent = FakeConsentRepository(initiallyAllowed = allowed)
-        val gatedConfig = GatedConfig()
+        val gatedConfig = EngineGatedConfig()
         val config: ClientConfigRepository = if (gated) gatedConfig else FakeClientConfigRepository(settings)
         val engine =
             TelemetryEngine(
@@ -142,7 +142,7 @@ class TelemetryEngineTest {
                 sender = sender,
                 store = store,
                 scheduler = scheduler,
-                clock = VirtualClock(scope),
+                clock = EngineVirtualClock(scope),
                 scope = scope.backgroundScope,
                 confinement = StandardTestDispatcher(scope.testScheduler),
             )
