@@ -5,8 +5,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -19,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,10 +37,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import androidx.core.util.Consumer
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -45,6 +54,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.github.rupakc.travelplanner.AuthGate
 import io.github.rupakc.travelplanner.R
+import io.github.rupakc.travelplanner.core.data.telemetry.ConsentPromptState
+import io.github.rupakc.travelplanner.core.designsystem.component.LocalUiEventSink
+import io.github.rupakc.travelplanner.core.designsystem.component.UiEventKind
+import io.github.rupakc.travelplanner.core.designsystem.component.UiEventSink
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.navigation.AccountChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
@@ -62,6 +75,8 @@ import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
+import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
+import io.github.rupakc.travelplanner.core.ui.privacy.ConsentPrompt
 import io.github.rupakc.travelplanner.feature.alerts.NotificationBellAction
 import io.github.rupakc.travelplanner.feature.alerts.navigation.alertsGraph
 import io.github.rupakc.travelplanner.feature.auth.navigation.authGraph
@@ -75,14 +90,67 @@ import io.github.rupakc.travelplanner.feature.search.navigation.searchGraph
 import io.github.rupakc.travelplanner.feature.settings.navigation.settingsGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareGraph
 
-/** Root of the UI: auth gate + NavHost + adaptive navigation suite. */
+/**
+ * Root of the UI: auth gate + NavHost + adaptive navigation suite, with the telemetry hooks: [uiEventSink] is
+ * provided to every screen, [screenTracker] follows the destination, and the consent prompt sits above everything.
+ */
 @Composable
-fun TravelApp(gate: AuthGate, navController: NavHostController = rememberNavController()) {
+fun TravelApp(
+    gate: AuthGate,
+    navController: NavHostController = rememberNavController(),
+    uiEventSink: UiEventSink = LocalUiEventSink.current,
+    screenTracker: NavController.OnDestinationChangedListener? = null,
+    consentPrompt: ConsentPromptState = ConsentPromptState.Hidden,
+    onConsentChoice: (ConsentChoice) -> Unit = {},
+    onCloseConsent: () -> Unit = {},
+) {
     // Nothing is composed until the gate has decided (the splash covers LOADING): a NavHost composed now would start
     // Home, whose screens fetch plans / recent searches / taste profile without a session (E2E O3).
     val start = startDestinationFor(gate) ?: return
-    TravelAppContent(gate, remember { start }, navController)
+    if (screenTracker != null) {
+        DisposableEffect(navController, screenTracker) {
+            navController.addOnDestinationChangedListener(screenTracker)
+            onDispose { navController.removeOnDestinationChangedListener(screenTracker) }
+        }
+    }
+    CompositionLocalProvider(LocalUiEventSink provides uiEventSink) {
+        Box(Modifier.fillMaxSize()) {
+            TravelAppContent(gate, remember { start }, navController)
+            // Over every destination (Login and Share included), above the system navigation bar.
+            ConsentHost(consentPrompt, onConsentChoice, onCloseConsent, Modifier.align(Alignment.BottomCenter))
+        }
+    }
 }
+
+/** The non-modal consent card: first run (no close button), reopened choices (current choice selected), or nothing. */
+@Composable
+internal fun ConsentHost(
+    prompt: ConsentPromptState,
+    onChoice: (ConsentChoice) -> Unit,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val currentAllowed =
+        when (prompt) {
+            ConsentPromptState.Hidden -> return
+            ConsentPromptState.FirstRun -> null
+            is ConsentPromptState.Reopened -> prompt.allowed
+        }
+    ConsentPrompt(
+        currentAllowed = currentAllowed,
+        onAllow = { onChoice(ConsentChoice.GRANTED) },
+        onDeny = { onChoice(ConsentChoice.DENIED) },
+        onClose = onClose,
+        modifier =
+            modifier
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(TravelTheme.spacing.md)
+                .widthIn(max = CONSENT_MAX_WIDTH)
+                .fillMaxWidth(),
+    )
+}
+
+private val CONSENT_MAX_WIDTH = 560.dp
 
 @Composable
 private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navController: NavHostController) {
@@ -223,6 +291,7 @@ fun TravelAppScaffold(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable () -> Unit,
 ) {
+    val sink = LocalUiEventSink.current
     val body: @Composable () -> Unit = {
         Box(Modifier.fillMaxSize()) {
             Column(Modifier.fillMaxSize()) {
@@ -253,7 +322,10 @@ fun TravelAppScaffold(
             TopLevelDestination.entries.forEach { dest ->
                 item(
                     selected = dest == currentTopLevel,
-                    onClick = { onNavigate(dest) },
+                    onClick = {
+                        runCatching { sink.onUiEvent(UiEventKind.TAP, dest.telemetryId, null) }
+                        onNavigate(dest)
+                    },
                     icon = { Icon(dest.icon, contentDescription = null) },
                     label = { Text(stringResource(dest.labelRes)) },
                 )
