@@ -34,7 +34,7 @@ class TelemetryUploaderTest {
     private fun uploader(): TelemetryUploader {
         val net = TestNetwork(server.url("/").toString(), dispatchers = TestAppDispatchers(Dispatchers.IO))
         val info = AppBuildInfo("http://x", "local", "1.2.3 beta", debug = false, cleartextAllowed = true)
-        return TelemetryUploader(net.api(), FakePrefs(), info, language, FixedClock())
+        return TelemetryUploader(net.api(), FixedIdPrefs(), info, language, FixedClock())
     }
 
     @Test

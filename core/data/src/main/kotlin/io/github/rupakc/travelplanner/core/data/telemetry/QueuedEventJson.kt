@@ -52,6 +52,7 @@ internal fun QueuedEvent.toStoredJson(): JsonObject =
     )
 
 /** Parses one stored event; null when a required field is missing or mistyped. */
+@Suppress("ReturnCount")
 internal fun JsonObject.toQueuedEvent(): QueuedEvent? {
     fun str(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content
     val event = str("event") ?: return null

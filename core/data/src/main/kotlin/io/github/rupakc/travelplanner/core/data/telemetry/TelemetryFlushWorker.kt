@@ -37,27 +37,12 @@ internal class TelemetryFlushWorker
             }
             val rest = ArrayDeque(store.claim(clock.now().toEpochMilli()))
             // The batch handed to the sender whose outcome is unknown if this run is interrupted.
-            var inFlight: List<QueuedEvent> = emptyList()
-            try {
-                while (rest.isNotEmpty()) {
-                    val sessionId = rest.first().sessionId
-                    val batch = rest.filter { it.sessionId == sessionId }.take(settings.maxBatch)
-                    inFlight = batch
-                    val outcome = sender.send(sessionId, batch)
-                    inFlight = emptyList()
-                    when (outcome) {
-                        SendOutcome.Sent, SendOutcome.Dropped -> removeBatch(rest, batch)
-                        SendOutcome.Disabled -> {
-                            store.clear()
-                            return Result.success()
-                        }
-                        is SendOutcome.Retry, is SendOutcome.RetryAfter -> {
-                            store.append(rest.toList())
-                            return if (runAttemptCount < MAX_ATTEMPTS) Result.retry() else Result.success()
-                        }
-                    }
-                }
-            } catch (t: Throwable) {
+            val inFlight = ArrayList<QueuedEvent>()
+            return try {
+                drain(rest, settings.maxBatch, inFlight)
+            } catch (
+                @Suppress("TooGenericExceptionCaught") t: Throwable,
+            ) {
                 // Cancelled (the app came to the foreground, the network went away) or failed: claim already
                 // removed everything from disk, so put back what was not sent. The in-flight batch may or may
                 // not have arrived; it is dropped (at most once) rather than risk sending it twice.
@@ -67,6 +52,35 @@ internal class TelemetryFlushWorker
                     runCatching { store.append(rest.filter { it !in gone }) }
                 }
                 throw t
+            }
+        }
+
+        private suspend fun drain(
+            rest: ArrayDeque<QueuedEvent>,
+            maxBatch: Int,
+            inFlight: MutableList<QueuedEvent>,
+        ): Result {
+            while (rest.isNotEmpty()) {
+                val sessionId = rest.first().sessionId
+                val batch = rest.filter { it.sessionId == sessionId }.take(maxBatch)
+                inFlight.addAll(batch)
+                val outcome = sender.send(sessionId, batch)
+                inFlight.clear()
+                when (outcome) {
+                    SendOutcome.Sent, SendOutcome.Dropped -> {
+                        removeBatch(rest, batch)
+                    }
+
+                    SendOutcome.Disabled -> {
+                        store.clear()
+                        return Result.success()
+                    }
+
+                    is SendOutcome.Retry, is SendOutcome.RetryAfter -> {
+                        store.append(rest.toList())
+                        return if (runAttemptCount < MAX_ATTEMPTS) Result.retry() else Result.success()
+                    }
+                }
             }
             return Result.success()
         }

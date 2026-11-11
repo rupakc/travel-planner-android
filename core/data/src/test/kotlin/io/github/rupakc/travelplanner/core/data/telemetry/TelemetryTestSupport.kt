@@ -19,7 +19,7 @@ internal class FixedClock(private val ms: Long = NOW_MS) : AppClock {
     override fun zone(): ZoneId = ZoneId.of("UTC")
 }
 
-internal class FakePrefs(private val id: String = "11111111-1111-4111-8111-111111111111") : TelemetryPrefsStore {
+internal class FixedIdPrefs(private val id: String = "11111111-1111-4111-8111-111111111111") : TelemetryPrefsStore {
     override suspend fun anonId(): String = id
 
     override val consent: Flow<ConsentChoice?> = flowOf(null)
