@@ -6,6 +6,7 @@ import io.github.rupakc.travelplanner.core.datastore.TelemetryPrefsStore
 import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -35,8 +36,9 @@ private class FakePrefs : TelemetryPrefsStore {
 class ConsentRepositoryImplTest {
     private val prefs = FakePrefs()
     private var zone = "America/New_York"
+    private val zoneChanges = MutableSharedFlow<Unit>(extraBufferCapacity = 4)
 
-    private fun TestScope.repo() = ConsentRepositoryImpl(prefs, { zone }, backgroundScope)
+    private fun TestScope.repo() = ConsentRepositoryImpl(prefs, { zone }, zoneChanges, backgroundScope)
 
     @Test fun `EU zone with no choice - allowed false and prompt FirstRun`() =
         runTest(UnconfinedTestDispatcher()) {
@@ -103,5 +105,36 @@ class ConsentRepositoryImplTest {
             r.openChoices()
             r.choose(ConsentChoice.GRANTED)
             assertEquals(ConsentPromptState.Hidden, r.prompt.value)
+        }
+
+    @Test fun `prompt appears after the zone switches into the EU`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val r = repo()
+            assertEquals(ConsentPromptState.Hidden, r.prompt.value)
+            zone = "Europe/Paris"
+            zoneChanges.emit(Unit)
+            assertEquals(ConsentPromptState.FirstRun, r.prompt.value)
+            zone = "Asia/Tokyo"
+            zoneChanges.emit(Unit)
+            assertEquals(ConsentPromptState.Hidden, r.prompt.value)
+        }
+
+    @Test fun `allowed flow re-evaluates on a zone change`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val r = repo()
+            r.allowed.test {
+                assertTrue(awaitItem())
+                zone = "Europe/Paris"
+                zoneChanges.emit(Unit)
+                assertFalse(awaitItem())
+            }
+        }
+
+    @Test fun `openChoices shows Reopened true when granted`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val r = repo()
+            r.choose(ConsentChoice.GRANTED)
+            r.openChoices()
+            assertEquals(ConsentPromptState.Reopened(true), r.prompt.value)
         }
 }
