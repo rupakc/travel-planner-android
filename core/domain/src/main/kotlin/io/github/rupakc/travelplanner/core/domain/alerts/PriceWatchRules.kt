@@ -191,6 +191,7 @@ private val ALERT_KINDS: Map<String, AlertKindStyle> =
         "trip_target" to AlertKindStyle(AlertIcon.LUGGAGE, Tone.GOOD, AlertAction.SEE_TRIP),
         "watch_expired" to AlertKindStyle(AlertIcon.ENDED, Tone.NEUTRAL, AlertAction.VIEW),
         "watch_error" to AlertKindStyle(AlertIcon.WARNING, Tone.WARN, AlertAction.RETRY),
+        "price_digest" to AlertKindStyle(AlertIcon.SPARKLE, Tone.INFO, AlertAction.VIEW),
     )
 
 fun alertKindFor(notification: AppNotification): AlertKindStyle {
