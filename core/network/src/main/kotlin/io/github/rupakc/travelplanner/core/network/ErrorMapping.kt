@@ -31,10 +31,10 @@ object HttpErrorMapper {
     fun map(status: Int, retryAfterHeader: String?, body: String?): AppError {
         val parsed = parseBody(body)
         return when {
-            status == UNAUTHORIZED -> AppError.Unauthorized(parsed.message)
-            status == FORBIDDEN -> AppError.Forbidden(parsed.message)
+            status == UNAUTHORIZED -> AppError.Unauthorized(parsed.message, parsed.code)
+            status == FORBIDDEN -> AppError.Forbidden(parsed.message, parsed.code, parsed.extras)
             status == NOT_FOUND -> AppError.NotFound(parsed.message, parsed.code)
-            status == TOO_MANY -> AppError.RateLimited(parsed.message, parseRetryAfter(retryAfterHeader))
+            status == TOO_MANY -> AppError.RateLimited(parsed.message, parseRetryAfter(retryAfterHeader), parsed.code)
             status >= SERVER_MIN -> AppError.Server(status, parsed.message, parsed.code)
             else -> AppError.Client(status, parsed.message, parsed.code, parsed.fieldErrors, parsed.extras)
         }
@@ -55,7 +55,8 @@ object HttpErrorMapper {
             body?.takeIf(String::isNotBlank)?.let { runCatching { TravelJson.parseToJsonElement(it) }.getOrNull() } as? JsonObject
                 ?: return ParsedBody(null, null, emptyList(), emptyMap())
         var message: String? = null
-        var code: String? = (obj["code"] as? JsonPrimitive)?.contentOrNull
+        // Accounts contract: the machine code of a failure is the top-level `error_code`.
+        var code: String? = (obj["code"] as? JsonPrimitive)?.contentOrNull ?: (obj["error_code"] as? JsonPrimitive)?.contentOrNull
         var fieldErrors = emptyList<AppError.FieldError>()
         when (val detail = obj["detail"]) {
             is JsonPrimitive -> {

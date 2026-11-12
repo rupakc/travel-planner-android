@@ -86,7 +86,8 @@ class SignedOutStartTest {
             Thread.sleep(SETTLE_STEP_MS)
         }
         val paths = generateSequence { server.takeRequest(1, TimeUnit.MILLISECONDS) }.map { it.url.encodedPath }.toList()
-        val authed = paths.filter { it.startsWith("/api/") && !it.startsWith("/api/auth/") }
+        // /api/auth/* and /api/config are public (Login reads the sign-up / reset switches from the config).
+        val authed = paths.filter { it.startsWith("/api/") && !it.startsWith("/api/auth/") && it != "/api/config" }
         assertTrue("authed requests while signed out: $authed", authed.isEmpty())
         controller.pause().stop().destroy()
     }
