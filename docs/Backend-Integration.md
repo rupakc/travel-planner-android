@@ -47,3 +47,9 @@ Use the `add-api-endpoint` Claude skill: add the wire model (tolerant, lenient n
 
 Every price, link and fact comes from the response. Estimates and AI content keep the web's labels; `verification` is rendered as the chip.
 Price watches without a live price return `422 no_live_price`; surface it, never fabricate a price.
+
+## Share links 2.0 (`features.sharing >= 1`)
+
+`SharesApi` (`POST/GET /shares`, `DELETE /shares/{token}`) is called only when `JourneyFlags.sharing` is on; the app shell then provides `LocalShareLauncher` (`core:ui`), which opens `ShareCreateRoute` (`feature:share`). Without the flag the launcher is null: the plan keeps the legacy `POST /plans/{id}/share` link, the recap keeps its text share and the savings tally shows no share button. Entry points: plan detail, trip recap (the trip id is the plan id), savings tally; each reads the launcher, so features never depend on each other.
+
+The dialog creates (idempotent: a second call replaces the options) and shows the server's absolute URL. "Share…" downloads the `size=story` card with the app's OkHttp client without interceptors (no bearer token; `http(s)` only, `image/png`, 8 MB cap, one file in `cache/share-cards/`, cleared on sign-out), hands it to the system share sheet through `ShareCardFileProvider` (authority `<applicationId>.share.cards`) with the link as text, and shares the link alone when the card cannot be fetched. Instagram Stories and TikTok Share Kit are out (they need developer apps). Errors: `sharing_disabled` and `plan_not_found` are translated, 429 and other server text is shown as is.

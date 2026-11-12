@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_create_title_plan">Share this plan</string>
+    <string name="share_create_title_recap">Share your trip recap</string>
+    <string name="share_create_title_savings">Share your catches</string>
+    <string name="share_create_intro">Choose what the link shows. Your email, nationality and visa details are never shared.</string>
+    <string name="share_create_reveals">Always shown: the title, destination, number of days and the items in your plan.</string>
+    <string name="share_create_options_legend">Also show</string>
+    <string name="share_create_dates">Dates</string>
+    <string name="share_create_dates_hidden">Hide dates</string>
+    <string name="share_create_dates_month">Month and year only</string>
+    <string name="share_create_dates_exact">Exact dates</string>
+    <string name="share_create_dates_note">Link previews never show more than the month and year.</string>
+    <string name="share_create_show_origin">Where I\'m travelling from</string>
+    <string name="share_create_show_name">My name</string>
+    <string name="share_create_create">Create link</string>
+    <string name="share_create_update">Update link</string>
+    <string name="share_create_working">Working…</string>
+    <string name="share_create_url_label">Share link</string>
+    <string name="share_create_action_native">Share…</string>
+    <string name="share_create_action_copy">Copy link</string>
+    <string name="share_create_status_created">Link ready</string>
+    <string name="share_create_status_updated">Link updated</string>
+    <string name="share_create_status_copy">Link copied</string>
+    <string name="share_create_status_revoked">Link removed. It no longer works.</string>
+    <string name="share_create_error_create">Could not create the link. Try again.</string>
+    <string name="share_create_error_share">Could not share.</string>
+    <string name="share_create_error_revoke">Could not remove the link.</string>
+    <string name="share_create_error_unavailable">Sharing links is not available right now.</string>
+    <string name="share_create_revoke">Stop sharing</string>
+    <string name="share_create_revoke_confirm">Stop sharing? Anyone with the link will lose access.</string>
+    <string name="share_create_revoke_yes">Yes, stop sharing</string>
+    <string name="share_create_revoke_no">Keep</string>
+    <string name="share_create_close">Close</string>
+    <string name="share_create_text_plan">My trip plan on Voyager</string>
+    <string name="share_create_text_recap">My trip recap on Voyager</string>
+    <string name="share_create_text_savings">Price drops I caught with Voyager</string>
+    <string name="share_create_offline">You\'re offline. Connect to create a link.</string>
+    <string name="share_create_card_unavailable">The card could not be loaded, so only the link is shared.</string>
+    <string name="share_create_link_pending">Options changed. Update the link to share it.</string>
+    <string name="share_create_chooser">Share via</string>
+</resources>

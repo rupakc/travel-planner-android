@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_create_title_plan">এই প্ল্যান শেয়ার করুন</string>
+    <string name="share_create_title_recap">আপনার ভ্রমণের রিক্যাপ শেয়ার করুন</string>
+    <string name="share_create_title_savings">আপনার ধরা দামের পতন শেয়ার করুন</string>
+    <string name="share_create_intro">লিঙ্কে কী দেখাবে তা বেছে নিন। আপনার ইমেল, জাতীয়তা ও ভিসার তথ্য কখনও শেয়ার হয় না।</string>
+    <string name="share_create_reveals">সবসময় দেখানো হয়: শিরোনাম, গন্তব্য, দিনের সংখ্যা এবং আপনার প্ল্যানের আইটেম।</string>
+    <string name="share_create_options_legend">এগুলোও দেখান</string>
+    <string name="share_create_dates">তারিখ</string>
+    <string name="share_create_dates_hidden">তারিখ লুকান</string>
+    <string name="share_create_dates_month">শুধু মাস ও বছর</string>
+    <string name="share_create_dates_exact">সঠিক তারিখ</string>
+    <string name="share_create_dates_note">লিঙ্কের প্রিভিউয়ে মাস ও বছরের বেশি কখনও দেখানো হয় না।</string>
+    <string name="share_create_show_origin">আমি যেখান থেকে যাচ্ছি</string>
+    <string name="share_create_show_name">আমার নাম</string>
+    <string name="share_create_create">লিঙ্ক তৈরি করুন</string>
+    <string name="share_create_update">লিঙ্ক আপডেট করুন</string>
+    <string name="share_create_working">একটু অপেক্ষা করুন…</string>
+    <string name="share_create_url_label">শেয়ার লিঙ্ক</string>
+    <string name="share_create_action_native">শেয়ার করুন…</string>
+    <string name="share_create_action_copy">লিঙ্ক কপি করুন</string>
+    <string name="share_create_status_created">লিঙ্ক তৈরি</string>
+    <string name="share_create_status_updated">লিঙ্ক আপডেট হয়েছে</string>
+    <string name="share_create_status_copy">লিঙ্ক কপি হয়েছে</string>
+    <string name="share_create_status_revoked">লিঙ্ক সরানো হয়েছে। এটি আর কাজ করবে না।</string>
+    <string name="share_create_error_create">লিঙ্ক তৈরি করা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="share_create_error_share">শেয়ার করা যায়নি।</string>
+    <string name="share_create_error_revoke">লিঙ্ক সরানো যায়নি।</string>
+    <string name="share_create_error_unavailable">লিঙ্ক শেয়ার করা এখন উপলব্ধ নয়।</string>
+    <string name="share_create_revoke">শেয়ার বন্ধ করুন</string>
+    <string name="share_create_revoke_confirm">শেয়ার বন্ধ করবেন? লিঙ্ক থাকা সবাই অ্যাক্সেস হারাবে।</string>
+    <string name="share_create_revoke_yes">হ্যাঁ, বন্ধ করুন</string>
+    <string name="share_create_revoke_no">রেখে দিন</string>
+    <string name="share_create_close">বন্ধ করুন</string>
+    <string name="share_create_text_plan">Voyager-এ আমার ভ্রমণ প্ল্যান</string>
+    <string name="share_create_text_recap">Voyager-এ আমার ভ্রমণের রিক্যাপ</string>
+    <string name="share_create_text_savings">Voyager দিয়ে ধরা দামের পতন</string>
+    <string name="share_create_offline">আপনি অফলাইনে আছেন। লিঙ্ক তৈরি করতে সংযোগ করুন।</string>
+    <string name="share_create_card_unavailable">কার্ড লোড করা যায়নি, তাই শুধু লিঙ্ক শেয়ার করা হচ্ছে।</string>
+    <string name="share_create_link_pending">বিকল্প বদলেছে। শেয়ার করতে লিঙ্ক আপডেট করুন।</string>
+    <string name="share_create_chooser">যার মাধ্যমে শেয়ার করবেন</string>
+</resources>

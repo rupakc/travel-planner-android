@@ -259,4 +259,31 @@ class PlanScreensTest {
         compose.onNodeWithText("Stop sharing").assertIsNotEnabled()
         compose.onNodeWithText("Open in results").assertIsEnabled()
     }
+
+    @Test
+    fun `share link opens the share dialog when sharing 2 is on and the legacy link otherwise`() {
+        val events = mutableListOf<PlanDetailEvent>()
+        val opened = mutableListOf<Pair<io.github.rupakc.travelplanner.core.model.share.ShareKind, Long?>>()
+        compose.setContent {
+            androidx.compose.runtime.CompositionLocalProvider(
+                io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher provides
+                    io.github.rupakc.travelplanner.core.ui.share.ShareLauncher { kind, id -> opened += kind to id },
+            ) {
+                TravelTheme(themeMode = ThemeMode.LIGHT) { PlanDetailScreen(detailState(), { events += it }, {}, onBack = {}) }
+            }
+        }
+        compose.onNodeWithText("Share link").performClick()
+        assertEquals(listOf(io.github.rupakc.travelplanner.core.model.share.ShareKind.PLAN to 7L), opened)
+        assertEquals(emptyList<PlanDetailEvent>(), events)
+    }
+
+    @Test
+    fun `without the flag share link is the legacy event`() {
+        val events = mutableListOf<PlanDetailEvent>()
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) { PlanDetailScreen(detailState(), { events += it }, {}, onBack = {}) }
+        }
+        compose.onNodeWithText("Share link").performClick()
+        assertEquals(PlanDetailEvent.ShareLink, events.last())
+    }
 }

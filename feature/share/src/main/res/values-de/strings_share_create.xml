@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_create_title_plan">Diesen Plan teilen</string>
+    <string name="share_create_title_recap">Deinen Reiserückblick teilen</string>
+    <string name="share_create_title_savings">Deine Preisfunde teilen</string>
+    <string name="share_create_intro">Wähle, was der Link zeigt. Deine E-Mail, Nationalität und Visadaten werden nie geteilt.</string>
+    <string name="share_create_reveals">Immer sichtbar: Titel, Ziel, Anzahl der Tage und die Inhalte deines Plans.</string>
+    <string name="share_create_options_legend">Zusätzlich anzeigen</string>
+    <string name="share_create_dates">Daten</string>
+    <string name="share_create_dates_hidden">Daten ausblenden</string>
+    <string name="share_create_dates_month">Nur Monat und Jahr</string>
+    <string name="share_create_dates_exact">Genaue Daten</string>
+    <string name="share_create_dates_note">Link-Vorschauen zeigen höchstens Monat und Jahr.</string>
+    <string name="share_create_show_origin">Von wo ich reise</string>
+    <string name="share_create_show_name">Mein Name</string>
+    <string name="share_create_create">Link erstellen</string>
+    <string name="share_create_update">Link aktualisieren</string>
+    <string name="share_create_working">Einen Moment…</string>
+    <string name="share_create_url_label">Link zum Teilen</string>
+    <string name="share_create_action_native">Teilen…</string>
+    <string name="share_create_action_copy">Link kopieren</string>
+    <string name="share_create_status_created">Link bereit</string>
+    <string name="share_create_status_updated">Link aktualisiert</string>
+    <string name="share_create_status_copy">Link kopiert</string>
+    <string name="share_create_status_revoked">Link entfernt. Er funktioniert nicht mehr.</string>
+    <string name="share_create_error_create">Der Link konnte nicht erstellt werden. Versuch es noch einmal.</string>
+    <string name="share_create_error_share">Teilen nicht möglich.</string>
+    <string name="share_create_error_revoke">Der Link konnte nicht entfernt werden.</string>
+    <string name="share_create_error_unavailable">Links teilen ist gerade nicht verfügbar.</string>
+    <string name="share_create_revoke">Nicht mehr teilen</string>
+    <string name="share_create_revoke_confirm">Nicht mehr teilen? Wer den Link hat, verliert den Zugriff.</string>
+    <string name="share_create_revoke_yes">Ja, nicht mehr teilen</string>
+    <string name="share_create_revoke_no">Behalten</string>
+    <string name="share_create_close">Schließen</string>
+    <string name="share_create_text_plan">Mein Reiseplan auf Voyager</string>
+    <string name="share_create_text_recap">Mein Reiserückblick auf Voyager</string>
+    <string name="share_create_text_savings">Preisrückgänge, die ich mit Voyager erwischt habe</string>
+    <string name="share_create_offline">Du bist offline. Verbinde dich, um einen Link zu erstellen.</string>
+    <string name="share_create_card_unavailable">Die Karte konnte nicht geladen werden, deshalb wird nur der Link geteilt.</string>
+    <string name="share_create_link_pending">Die Optionen wurden geändert. Aktualisiere den Link, um ihn zu teilen.</string>
+    <string name="share_create_chooser">Teilen über</string>
+</resources>

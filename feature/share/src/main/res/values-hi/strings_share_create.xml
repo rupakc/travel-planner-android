@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_create_title_plan">इस प्लान को शेयर करें</string>
+    <string name="share_create_title_recap">अपनी यात्रा का रीकैप शेयर करें</string>
+    <string name="share_create_title_savings">अपनी पकड़ी गई कीमतें शेयर करें</string>
+    <string name="share_create_intro">चुनें कि लिंक में क्या दिखे। आपका ईमेल, राष्ट्रीयता और वीज़ा की जानकारी कभी शेयर नहीं होती।</string>
+    <string name="share_create_reveals">हमेशा दिखता है: शीर्षक, गंतव्य, दिनों की संख्या और आपके प्लान की चीज़ें।</string>
+    <string name="share_create_options_legend">यह भी दिखाएँ</string>
+    <string name="share_create_dates">तारीखें</string>
+    <string name="share_create_dates_hidden">तारीखें छिपाएँ</string>
+    <string name="share_create_dates_month">सिर्फ़ महीना और साल</string>
+    <string name="share_create_dates_exact">सटीक तारीखें</string>
+    <string name="share_create_dates_note">लिंक प्रीव्यू में महीने और साल से ज़्यादा कभी नहीं दिखता।</string>
+    <string name="share_create_show_origin">मैं कहाँ से यात्रा कर रहा/रही हूँ</string>
+    <string name="share_create_show_name">मेरा नाम</string>
+    <string name="share_create_create">लिंक बनाएँ</string>
+    <string name="share_create_update">लिंक अपडेट करें</string>
+    <string name="share_create_working">कृपया रुकें…</string>
+    <string name="share_create_url_label">शेयर लिंक</string>
+    <string name="share_create_action_native">शेयर करें…</string>
+    <string name="share_create_action_copy">लिंक कॉपी करें</string>
+    <string name="share_create_status_created">लिंक तैयार है</string>
+    <string name="share_create_status_updated">लिंक अपडेट हो गया</string>
+    <string name="share_create_status_copy">लिंक कॉपी हो गया</string>
+    <string name="share_create_status_revoked">लिंक हटा दिया गया। अब यह काम नहीं करेगा।</string>
+    <string name="share_create_error_create">लिंक नहीं बन सका। फिर से कोशिश करें।</string>
+    <string name="share_create_error_share">शेयर नहीं हो सका।</string>
+    <string name="share_create_error_revoke">लिंक नहीं हट सका।</string>
+    <string name="share_create_error_unavailable">लिंक शेयर करना अभी उपलब्ध नहीं है।</string>
+    <string name="share_create_revoke">शेयर करना बंद करें</string>
+    <string name="share_create_revoke_confirm">शेयर करना बंद करें? लिंक वाले सभी की पहुँच खत्म हो जाएगी।</string>
+    <string name="share_create_revoke_yes">हाँ, बंद करें</string>
+    <string name="share_create_revoke_no">रहने दें</string>
+    <string name="share_create_close">बंद करें</string>
+    <string name="share_create_text_plan">Voyager पर मेरा यात्रा प्लान</string>
+    <string name="share_create_text_recap">Voyager पर मेरी यात्रा का रीकैप</string>
+    <string name="share_create_text_savings">Voyager से पकड़ी गई कीमतों की गिरावट</string>
+    <string name="share_create_offline">आप ऑफ़लाइन हैं। लिंक बनाने के लिए कनेक्ट करें।</string>
+    <string name="share_create_card_unavailable">कार्ड लोड नहीं हो सका, इसलिए सिर्फ़ लिंक शेयर किया जा रहा है।</string>
+    <string name="share_create_link_pending">विकल्प बदल गए हैं। शेयर करने के लिए लिंक अपडेट करें।</string>
+    <string name="share_create_chooser">इसके ज़रिए शेयर करें</string>
+</resources>
