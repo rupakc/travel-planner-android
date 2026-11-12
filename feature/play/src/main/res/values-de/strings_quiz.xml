@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="play_daily_title">Tägliches Quiz</string>
+    <string name="play_daily_hint">Fünf Fragen, heute für alle gleich. Ein Versuch pro Tag.</string>
+    <string name="play_daily_start">Heutiges Quiz spielen</string>
+    <plurals name="play_daily_streak">
+        <item quantity="one">%1$d Tag hintereinander</item>
+        <item quantity="other">%1$d Tage hintereinander</item>
+    </plurals>
+    <plurals name="play_daily_done">
+        <item quantity="one">Heute erledigt: %1$d Punkt</item>
+        <item quantity="other">Heute erledigt: %1$d Punkte</item>
+    </plurals>
+    <string name="play_challenge_title">Wissen vor der Reise</string>
+    <string name="play_challenge_destination">Fünf Fragen zu %1$s, deiner nächsten Reise.</string>
+    <string name="play_challenge_featured">Das Paket der Woche: fünf Fragen.</string>
+    <string name="play_challenge_start">Challenge starten</string>
+    <string name="play_challenge_done">Diese Woche erledigt. Super!</string>
+    <string name="play_packs_title">Übungspakete</string>
+    <string name="play_pack_flags">Flaggen</string>
+    <string name="play_pack_capitals">Hauptstädte</string>
+    <string name="play_pack_landmarks">Wahrzeichen</string>
+    <string name="play_pack_cuisine">Küche</string>
+    <string name="play_quiz_prompt_flag">Zu welchem Land gehört diese Flagge?</string>
+    <string name="play_quiz_prompt_capital_of">Was ist die Hauptstadt von %1$s?</string>
+    <string name="play_quiz_prompt_country_of_capital">%1$s ist die Hauptstadt welchen Landes?</string>
+    <string name="play_quiz_prompt_landmark_country">In welchem Land liegt %1$s?</string>
+    <string name="play_quiz_prompt_dish_country">Aus welchem Land stammt %1$s?</string>
+    <string name="play_quiz_flag_alt">Flagge</string>
+    <string name="play_quiz_progress">Frage %1$d von %2$d</string>
+    <plurals name="play_quiz_timer">
+        <item quantity="one">Noch %1$d Sekunde</item>
+        <item quantity="other">Noch %1$d Sekunden</item>
+    </plurals>
+    <string name="play_quiz_correct">Richtige Antwort</string>
+    <string name="play_quiz_wrong">Deine Antwort, falsch</string>
+    <plurals name="play_quiz_correct_points">
+        <item quantity="one">Richtig! +%1$d Punkt</item>
+        <item quantity="other">Richtig! +%1$d Punkte</item>
+    </plurals>
+    <string name="play_quiz_wrong_note">Diesmal nicht. Die richtige Antwort ist markiert.</string>
+    <string name="play_quiz_next">Nächste Frage</string>
+    <string name="play_quiz_finish">Ergebnis ansehen</string>
+    <string name="play_result_title">Dein Ergebnis</string>
+    <string name="play_result_correct" tools:ignore="PluralsCandidate">%1$d von %2$d richtig</string>
+    <plurals name="play_result_xp">
+        <item quantity="one">+%1$d XP</item>
+        <item quantity="other">+%1$d XP</item>
+    </plurals>
+    <plurals name="play_result_streak">
+        <item quantity="one">%1$d Tag hintereinander</item>
+        <item quantity="other">%1$d Tage hintereinander</item>
+    </plurals>
+    <string name="play_result_back">Zurück zu Play</string>
+    <string name="play_quiz_title">Quiz</string>
+    <string name="play_quiz_prompt_generic">Frage</string>
+    <string name="play_quiz_error">Das Quiz konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="play_quiz_already_done">Du hast dieses Quiz bereits gespielt. Schau später für das nächste vorbei.</string>
+    <string name="play_quiz_expired">Diese Quiz-Runde ist abgelaufen. Starte neu, um sie zu spielen.</string>
+    <string name="play_quiz_start_again">Neu starten</string>
+    <string name="play_quiz_answer_failed">Deine Antwort konnte nicht gesendet werden. Versuche es erneut.</string>
+    <string name="play_quiz_resumed">Weiter geht\'s da, wo du aufgehört hast.</string>
+    <string name="play_streak_freeze">Streak-Schutz verfügbar</string>
+    <string name="play_hub_error">Die Quizze konnten nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="play_retry">Erneut versuchen</string>
+    <string name="play_history_title">Letzte Quizze</string>
+    <string name="play_history_empty">Noch kein Quiz gespielt.</string>
+    <string name="play_history_correct">Richtig: %1$d</string>
+    <string name="play_mode_daily">Tagesquiz</string>
+    <string name="play_mode_pack">Übungspaket</string>
+    <string name="play_mode_challenge">Wochenchallenge</string>
+    <string name="play_mode_h2h">Duell</string>
+    <string name="play_daily_unavailable">Das heutige Quiz ist gerade nicht verfügbar.</string>
+    <plurals name="play_history_points">
+        <item quantity="one">%1$d Punkt</item>
+        <item quantity="other">%1$d Punkte</item>
+    </plurals>
+</resources>

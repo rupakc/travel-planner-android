@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="play_daily_title">每日测验</string>
+    <string name="play_daily_hint">五道题，今天对所有人都相同。每天只能答一次。</string>
+    <string name="play_daily_start">开始今天的测验</string>
+    <plurals name="play_daily_streak">
+        <item quantity="other">连续答题 %1$d 天</item>
+    </plurals>
+    <plurals name="play_daily_done">
+        <item quantity="other">今天已完成：%1$d 分</item>
+    </plurals>
+    <string name="play_challenge_title">出发前先了解</string>
+    <string name="play_challenge_destination">关于下一站 %1$s 的五道题。</string>
+    <string name="play_challenge_featured">本周精选题包：五道题。</string>
+    <string name="play_challenge_start">开始挑战</string>
+    <string name="play_challenge_done">本周已完成，真棒！</string>
+    <string name="play_packs_title">练习题包</string>
+    <string name="play_pack_flags">国旗</string>
+    <string name="play_pack_capitals">首都</string>
+    <string name="play_pack_landmarks">地标</string>
+    <string name="play_pack_cuisine">美食</string>
+    <string name="play_quiz_prompt_flag">这面国旗属于哪个国家？</string>
+    <string name="play_quiz_prompt_capital_of">%1$s 的首都是哪里？</string>
+    <string name="play_quiz_prompt_country_of_capital">%1$s 是哪个国家的首都？</string>
+    <string name="play_quiz_prompt_landmark_country">%1$s 位于哪个国家？</string>
+    <string name="play_quiz_prompt_dish_country">%1$s 来自哪个国家？</string>
+    <string name="play_quiz_flag_alt">国旗</string>
+    <string name="play_quiz_progress">第 %1$d / %2$d 题</string>
+    <plurals name="play_quiz_timer">
+        <item quantity="other">剩余 %1$d 秒</item>
+    </plurals>
+    <string name="play_quiz_correct">正确答案</string>
+    <string name="play_quiz_wrong">你的答案，错误</string>
+    <plurals name="play_quiz_correct_points">
+        <item quantity="other">答对了！+%1$d 分</item>
+    </plurals>
+    <string name="play_quiz_wrong_note">这次没答对，已标出正确答案。</string>
+    <string name="play_quiz_next">下一题</string>
+    <string name="play_quiz_finish">查看结果</string>
+    <string name="play_result_title">你的成绩</string>
+    <string name="play_result_correct" tools:ignore="PluralsCandidate">答对 %1$d / %2$d 题</string>
+    <plurals name="play_result_xp">
+        <item quantity="other">+%1$d XP</item>
+    </plurals>
+    <plurals name="play_result_streak">
+        <item quantity="other">连续 %1$d 天</item>
+    </plurals>
+    <string name="play_result_back">返回玩乐</string>
+    <string name="play_quiz_title">测验</string>
+    <string name="play_quiz_prompt_generic">问题</string>
+    <string name="play_quiz_error">无法加载测验。请检查网络连接后重试。</string>
+    <string name="play_quiz_already_done">你已经玩过这个测验了。请稍后再来玩下一个。</string>
+    <string name="play_quiz_expired">此测验已过期。重新开始即可再玩。</string>
+    <string name="play_quiz_start_again">重新开始</string>
+    <string name="play_quiz_answer_failed">无法发送你的答案。请重试。</string>
+    <string name="play_quiz_resumed">从上次中断的地方继续。</string>
+    <string name="play_streak_freeze">可使用连胜保护</string>
+    <string name="play_hub_error">无法加载测验。请检查网络连接后重试。</string>
+    <string name="play_retry">重试</string>
+    <string name="play_history_title">最近的测验</string>
+    <string name="play_history_empty">还没有玩过测验。</string>
+    <string name="play_history_correct">答对：%1$d</string>
+    <string name="play_mode_daily">每日测验</string>
+    <string name="play_mode_pack">练习包</string>
+    <string name="play_mode_challenge">每周挑战</string>
+    <string name="play_mode_h2h">一对一对战</string>
+    <string name="play_daily_unavailable">今天的测验暂时不可用。</string>
+    <plurals name="play_history_points">
+        <item quantity="other">%1$d 分</item>
+    </plurals>
+</resources>

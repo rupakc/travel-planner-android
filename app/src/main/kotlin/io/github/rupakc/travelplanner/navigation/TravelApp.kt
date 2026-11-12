@@ -374,7 +374,11 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
             )
             offlinePackDestination(onBack = { navController.popBackStack() })
             // The Play tab hides itself when the game is off (the flag or the user's hide_game setting): leave for Trips / Home.
-            playGraph(onHidden = { navController.navigateToTopLevel(if (shell.journey) TopLevelDestination.TRIPS else TopLevelDestination.HOME) })
+            playGraph(
+                onHidden = { navController.navigateToTopLevel(if (shell.journey) TopLevelDestination.TRIPS else TopLevelDestination.HOME) },
+                navController = navController,
+                quizEnabled = shell.play,
+            )
             accountGraph(
                 onBack = { navController.popBackStack() },
                 onChangePassword = { navController.navigate(AccountChangePasswordRoute) },

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="play_daily_title">Daily quiz</string>
+    <string name="play_daily_hint">Five questions, the same for everyone today. One try a day.</string>
+    <string name="play_daily_start">Play today\'s quiz</string>
+    <plurals name="play_daily_streak">
+        <item quantity="one">%1$d-day quiz streak</item>
+        <item quantity="other">%1$d-day quiz streak</item>
+    </plurals>
+    <plurals name="play_daily_done">
+        <item quantity="one">Done today: %1$d point</item>
+        <item quantity="other">Done today: %1$d points</item>
+    </plurals>
+    <string name="play_challenge_title">Know before you go</string>
+    <string name="play_challenge_destination">Five questions about %1$s, your next trip.</string>
+    <string name="play_challenge_featured">This week\'s featured pack: five questions.</string>
+    <string name="play_challenge_start">Start the challenge</string>
+    <string name="play_challenge_done">Done this week. Nice!</string>
+    <string name="play_packs_title">Practice packs</string>
+    <string name="play_pack_flags">Flags</string>
+    <string name="play_pack_capitals">Capitals</string>
+    <string name="play_pack_landmarks">Landmarks</string>
+    <string name="play_pack_cuisine">Cuisine</string>
+    <string name="play_quiz_prompt_flag">Which country has this flag?</string>
+    <string name="play_quiz_prompt_capital_of">What is the capital of %1$s?</string>
+    <string name="play_quiz_prompt_country_of_capital">%1$s is the capital of which country?</string>
+    <string name="play_quiz_prompt_landmark_country">In which country is %1$s?</string>
+    <string name="play_quiz_prompt_dish_country">%1$s comes from which country?</string>
+    <string name="play_quiz_flag_alt">Flag</string>
+    <string name="play_quiz_progress">Question %1$d of %2$d</string>
+    <plurals name="play_quiz_timer">
+        <item quantity="one">%1$d second left</item>
+        <item quantity="other">%1$d seconds left</item>
+    </plurals>
+    <string name="play_quiz_correct">Correct answer</string>
+    <string name="play_quiz_wrong">Your answer, incorrect</string>
+    <plurals name="play_quiz_correct_points">
+        <item quantity="one">Correct! +%1$d point</item>
+        <item quantity="other">Correct! +%1$d points</item>
+    </plurals>
+    <string name="play_quiz_wrong_note">Not this time. The right answer is marked.</string>
+    <string name="play_quiz_next">Next question</string>
+    <string name="play_quiz_finish">See result</string>
+    <string name="play_result_title">Your result</string>
+    <string name="play_result_correct" tools:ignore="PluralsCandidate">%1$d of %2$d correct</string>
+    <plurals name="play_result_xp">
+        <item quantity="one">+%1$d XP</item>
+        <item quantity="other">+%1$d XP</item>
+    </plurals>
+    <plurals name="play_result_streak">
+        <item quantity="one">%1$d-day streak</item>
+        <item quantity="other">%1$d-day streak</item>
+    </plurals>
+    <string name="play_result_back">Back to Play</string>
+    <string name="play_quiz_title">Quiz</string>
+    <string name="play_quiz_prompt_generic">Question</string>
+    <string name="play_quiz_error">Couldn\'t load the quiz. Check your connection and try again.</string>
+    <string name="play_quiz_already_done">You\'ve already finished this quiz. Check back later for the next one.</string>
+    <string name="play_quiz_expired">This quiz session expired. Start again to play it.</string>
+    <string name="play_quiz_start_again">Start again</string>
+    <string name="play_quiz_answer_failed">Couldn\'t send your answer. Try again.</string>
+    <string name="play_quiz_resumed">Picking up where you left off.</string>
+    <string name="play_streak_freeze">Streak freeze available</string>
+    <string name="play_hub_error">Couldn\'t load the quizzes. Check your connection and try again.</string>
+    <string name="play_retry">Try again</string>
+    <string name="play_history_title">Recent quizzes</string>
+    <string name="play_history_empty">No quizzes played yet.</string>
+    <string name="play_history_correct">Correct: %1$d</string>
+    <string name="play_mode_daily">Daily quiz</string>
+    <string name="play_mode_pack">Practice pack</string>
+    <string name="play_mode_challenge">Weekly challenge</string>
+    <string name="play_mode_h2h">Head-to-head</string>
+    <string name="play_daily_unavailable">Today\'s quiz isn\'t available right now.</string>
+    <plurals name="play_history_points">
+        <item quantity="one">%1$d point</item>
+        <item quantity="other">%1$d points</item>
+    </plurals>
+</resources>
