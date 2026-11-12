@@ -72,6 +72,8 @@ object TelemetryEvents {
     const val COMPLETENESS_VIEW = "completeness_view"
     const val ONBOARDING_STEP = "onboarding_step"
     const val ONBOARDING_RESULT = "onboarding_result"
+    const val ALERT_STORY_VIEW = "alert_story_view"
+    const val ALERT_ADVICE = "alert_advice"
 }
 
 /**
@@ -136,4 +138,7 @@ object TelemetryEnums {
     val ONBOARDING_STEP_ACTION = setOf("view", "next", "skip", "done")
     val ONBOARDING_TYPE =
         setOf("budget_backpacker", "family", "luxury", "adventure", "culture_foodie", "business", "relaxation", "accessible")
+    val ALERT_KIND = setOf("flight", "hotel", "activity", "trip")
+    val ALERT_VERDICT = setOf("great", "good", "typical", "high", "none")
+    val ALERT_ADVICE_OUTCOME = setOf("ok", "cached", "error")
 }
