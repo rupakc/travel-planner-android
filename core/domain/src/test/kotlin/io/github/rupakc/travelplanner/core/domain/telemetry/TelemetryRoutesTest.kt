@@ -35,6 +35,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.ServerRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SessionsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsEntryRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ShareCreateRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SignUpRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TasteProfileRoute
@@ -77,6 +78,7 @@ class TelemetryRoutesTest {
             is NotificationSettingsRoute -> NotificationSettingsRoute::class
             is NearbyRoute -> NearbyRoute::class
             is ShareRoute -> ShareRoute::class
+            is ShareCreateRoute -> ShareCreateRoute::class
             is CheckEmailRoute -> CheckEmailRoute::class
             is VerifyEmailRoute -> VerifyEmailRoute::class
             is ResetPasswordRoute -> ResetPasswordRoute::class
@@ -124,6 +126,7 @@ class TelemetryRoutesTest {
                 NotificationSettingsRoute,
                 NearbyRoute,
                 ShareRoute("t"),
+                ShareCreateRoute("plan", 1),
                 SignUpRoute,
                 CheckEmailRoute("a@b.c"),
                 VerifyEmailRoute(),
@@ -143,9 +146,9 @@ class TelemetryRoutesTest {
                 YouRoute,
             ).map(::classOf)
         val table = TelemetryRoutes.table
-        assertEquals(42, all.toSet().size)
-        assertEquals(42, table.size)
-        assertEquals(42, table.map { it.first }.toSet().size)
+        assertEquals(43, all.toSet().size)
+        assertEquals(43, table.size)
+        assertEquals(43, table.map { it.first }.toSet().size)
         assertEquals(all.toSet(), table.map { it.first }.toSet())
         table.forEach { assertTrue(it.second, TelemetryProps.isToken(it.second)) }
         assertTrue(TelemetryProps.isToken(TelemetryRoutes.OTHER))
