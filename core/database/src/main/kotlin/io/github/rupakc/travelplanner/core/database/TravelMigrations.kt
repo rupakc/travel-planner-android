@@ -27,7 +27,8 @@ object TravelMigrations {
         object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS `cached_trips` (`userId` TEXT NOT NULL, `json` TEXT NOT NULL, `savedAt` INTEGER NOT NULL, PRIMARY KEY(`userId`))",
+                    "CREATE TABLE IF NOT EXISTS `cached_trips` (`userId` TEXT NOT NULL, `json` TEXT NOT NULL, " +
+                        "`savedAt` INTEGER NOT NULL, PRIMARY KEY(`userId`))",
                 )
                 db.execSQL(
                     "CREATE TABLE IF NOT EXISTS `cached_expenses` (`key` TEXT NOT NULL, `userId` TEXT NOT NULL, " +
