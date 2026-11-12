@@ -47,6 +47,8 @@ data class TravellerProfile(
     val secondaryTypes: List<String> = emptyList(),
     val answers: Map<String, List<String>> = emptyMap(),
     val completedAtEpochMillis: Long? = null,
+    /** Home airport chosen in onboarding (IATA code or city), device-local like the web's; null = none. */
+    val homeAirport: String? = null,
 )
 
 /** User feature toggles on top of type defaults: visible = defaults ∪ enabled − disabled (`FeatureId.id` strings). */
