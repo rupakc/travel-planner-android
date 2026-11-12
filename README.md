@@ -55,6 +55,9 @@ Parity with the traveller-facing web flows, plus what a phone is good at (design
 - Public share-link viewer (deep link), dark theme (light by default), dynamic colour.
 - Seven languages: English, Español, Deutsch, Français, हिन्दी, 中文（简体）, বাংলা ([Localization](docs/Localization.md)).
 - Privacy: anonymous, content-free usage telemetry with a consent prompt where the device zone is in Europe and an off switch in Settings; no tracker SDK ([Telemetry-and-Privacy](docs/Telemetry-and-Privacy.md)).
+- Accounts: self sign-up, email verify, password reset, Google/GitHub/Facebook sign-in, refresh-token sessions, sign out everywhere, profile, data export/delete ([Accounts](docs/Accounts.md), [Deep-Links](docs/Deep-Links.md)).
+- Journey: Trips hub with trip phases, prep checklist, Today check-in, expenses, journal and recap; Play (XP, badges, streaks); 5-step onboarding ([Journey](docs/Journey.md)).
+- Offline: save a trip for airplane mode; expenses and journal queue in an outbox and sync on reconnect ([Offline-Pack-and-Outbox](docs/Offline-Pack-and-Outbox.md)).
 - Booking is always "open the provider's page in a Custom Tab"; there are no in-app payments.
 
 ## Architecture

@@ -180,3 +180,15 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - Use `public_base_url` from `/api/config` (Phase 1).
 - Play/game (T6): copy for badges, rules and levels is hand-maintained in core:ui strings_game.xml (web pin predates game.json); Trips stats via Optional TripsRepository until Task 8 binds it; celebrations gated by /game/me hidden or 404.
 - 2026-11-12 (P1/2 T8): feature:trips hub; TripsRepositoryImpl caches the list per user in memory (offline = network/5xx only, phase recomputed via TripsOffline); StartRoute has a third value Classic (journey off) besides Trips/Explore; trips strings come from the web trips namespace (incl. es) hand-copied into strings.xml, web.sha not bumped.
+
+## Phase 1/2 parity decisions (2026-11-12)
+
+- R1 Sessions list uses new backend `GET/DELETE /api/auth/sessions`; without it only "Sign out everywhere".
+- R2 OAuth via system browser + PKCE + `voyager://auth/callback` (Google, GitHub, Facebook); no Apple on Android; native Google ID-token deferred.
+- R3 Verify/reset links are https `/verify` and `/reset-password`, non-autoVerify filters, plus paste-link fallback (needs owner's `assetlinks.json`).
+- R4 Journey tabs Trips/Explore/Alerts/Play/You replace the classic five only when journey is on.
+- R5 Onboarding shown once when `onboarding.done == false`; Skip counts as seen; local TravellerProfile kept and synced.
+- R6 Offline = Room `offline_pack` + `outbox`, keyed `userId:tripId`, WorkManager single-flight flush.
+- R7 Dreaming create/rename/dates/phase override/delete are online only; expenses and journal work offline.
+- R8 Place-key and trip-phase shared fixtures copied to `core/domain/src/test/resources/journey/`.
+- Deviations: web.sha not bumped (strings hand-maintained, map when the pin moves); coach marks not purged on sign-out; standalone Today/Expenses/Journal/Recap routes and `onLinkProvider` not wired; `gameEnabled` ignores `hide_game`; "Save as trip" does not set dates from the request; OfflinePurger is a UserStateCleaner; storage full = `AppError.Unknown("storage_full")`; JDK 21 needed locally.
