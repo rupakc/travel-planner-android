@@ -18,3 +18,5 @@ Started with the plan; extend as tasks land.
 - `web.sha` pin not bumped (password min 10 vs 8); map strings when the pin moves.
 - CI build takes ~17 min per PR; local builds need JDK 21 (`~/Library/Java/temurin-21`).
 - MEMORY.md "Web repo" open-items line was not updated by T19.
+- Final review: linking a sign-in method from the account area is not wired (`onLinkProvider` missing; `OauthInbox` LINKED results are dropped outside Login).
+- Final review: `VerifyEmailViewModel` redeems a verify link automatically even when another user is signed in; add a confirmation step when a session exists.
