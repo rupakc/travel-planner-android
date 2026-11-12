@@ -20,3 +20,11 @@ Started with the plan; extend as tasks land.
 - MEMORY.md "Web repo" open-items line was not updated by T19.
 - Final review: linking a sign-in method from the account area is not wired (`onLinkProvider` missing; `OauthInbox` LINKED results are dropped outside Login).
 - Final review: `VerifyEmailViewModel` redeems a verify link automatically even when another user is signed in; add a confirmation step when a session exists.
+
+## Release smoke test (2026-11-12, localRelease on emulator; prod APK built clean, SHA-256 f5e4a953...0819, debug-signed)
+- Trips hub after a cold start offline shows an error: `TripsRepositoryImpl.cache` is in-memory only; persist the trip list in Room.
+- Money tab offline fails if never opened online, and "Add expense" on Today jumps to that failed tab; load from the outbox/cache so the add form works offline.
+- Reopening a trip shows "Check in for today" although the check-in exists, and the "Memories, set by you" stage override is lost (persist per trip).
+- Right after login the Home screen has no top/bottom bar until relaunch (check `TravelApp.kt` gate).
+- `localRelease` build needs a `.local` client in `google-services.json` (owner: add the package in Firebase) or the build fails at `processLocalReleaseGoogleServices`.
+- No release signing key configured: release APKs are debug-signed (owner action, see Release.md).
