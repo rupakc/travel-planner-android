@@ -32,6 +32,12 @@ import kotlinx.serialization.json.JsonObject
 interface TripsRepository {
     suspend fun list(today: String): AppResult<TripsResponse>
 
+    /**
+     * True when the last [list] could not reach the server and returned the signed-in user's cached list
+     * (phases recomputed for the device date). Implementations without a cache keep the default.
+     */
+    fun isShowingCachedList(): Boolean = false
+
     suspend fun create(request: CreateTripRequest): AppResult<Trip>
 
     suspend fun get(id: Long, today: String): AppResult<Trip>
