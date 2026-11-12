@@ -399,7 +399,7 @@ class WorkersTest {
             assertTrue(PushAlertHandler(signedIn, repo, FakeSettingsRepository(), notifier).handle(data))
             val post = notifier.posts.single()
             assertEquals(TravelChannel.PRICE_ALERTS, post.channel)
-            assertEquals("travelplanner://alerts?kind=hotel&watch=9", post.deepLink)
+            assertEquals("travelplanner://alerts?kind=hotel&watch=9&notif_cat=price_drops", post.deepLink)
             assertEquals("Lumen dropped to €90", post.title)
             assertEquals(setOf(57L), repo.seen)
             // The poller won't post it again.
@@ -418,9 +418,9 @@ class WorkersTest {
     @Test
     fun `a system-shown push opens the watch from its link extra`() {
         val intent = android.content.Intent(android.content.Intent.ACTION_MAIN).putExtra("link", "/alerts?kind=trip&watch=3").putExtra("watch_id", "3")
-        assertEquals("travelplanner://alerts?kind=trip&watch=3", withPushDeepLink(intent).data.toString())
+        assertEquals("travelplanner://alerts?kind=trip&watch=3&notif_cat=price_drops", withPushDeepLink(intent).data.toString())
         val fare = android.content.Intent().putExtra("watch_id", "7")
-        assertEquals("travelplanner://alerts?watch=7", withPushDeepLink(fare).data.toString())
+        assertEquals("travelplanner://alerts?watch=7&notif_cat=price_drops", withPushDeepLink(fare).data.toString())
         val plain = android.content.Intent(android.content.Intent.ACTION_MAIN)
         assertEquals(null, withPushDeepLink(plain).data)
     }
@@ -478,7 +478,7 @@ class WorkersTest {
         val data = mapOf("kind" to "fare_drop", "notification_id" to "70", "link" to "/alerts?watch=7", "title" to "Berlin → Lisbon dropped")
         // No coroutine scope involved: the notification exists when the call returns.
         assertTrue(handleBlocking(PushAlertHandler(signedIn, repo, FakeSettingsRepository(), notifier), data))
-        assertEquals("travelplanner://alerts?watch=7", notifier.posts.single().deepLink)
+        assertEquals("travelplanner://alerts?watch=7&notif_cat=price_drops", notifier.posts.single().deepLink)
     }
 
     private class RecordingScheduler : io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollScheduler {

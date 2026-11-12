@@ -261,4 +261,5 @@
     <string name="alerts_live_not_found">Esta vigilancia ya no existe.</string>
     <string name="alerts_live_expired">Las fechas de este viaje ya pasaron, así que no hay nada en directo que comprobar.</string>
     <string name="alerts_live_close">Cerrar</string>
+    <string name="alerts_action_open_trip">Abrir viaje</string>
 </resources>

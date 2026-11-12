@@ -37,4 +37,5 @@
     <string name="alerts_live_ai_billing">此服务器目前已关闭 AI 功能。</string>
     <string name="alerts_live_search_unavailable">此服务器不支持实时网络搜索。</string>
     <string name="alerts_live_not_found">该关注项已不存在。</string>
+    <string name="alerts_action_open_trip">打开行程</string>
 </resources>

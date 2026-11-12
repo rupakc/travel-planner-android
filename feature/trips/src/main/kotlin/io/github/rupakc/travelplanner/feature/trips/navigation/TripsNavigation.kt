@@ -2,6 +2,8 @@ package io.github.rupakc.travelplanner.feature.trips.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
+import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
 import io.github.rupakc.travelplanner.core.model.navigation.TripRoute as TripDestination
 import io.github.rupakc.travelplanner.core.model.navigation.TripsRoute
 import io.github.rupakc.travelplanner.feature.trips.hub.TripsHubRoute
@@ -28,7 +30,11 @@ fun NavGraphBuilder.tripsGraph(
     tabContent: Map<TripTab, TripTabContent> = emptyMap(),
 ) {
     composable<TripsRoute> { TripsHubRoute(onOpenTrip = onOpenTrip, onPlanTrip = onPlanTrip) }
-    composable<TripDestination> {
+    // `travelplanner://trip/{tripId}?tab=today`: trip-phase notification taps (Notifications API, ruling R8).
+    composable<TripDestination>(deepLinks = listOf(navDeepLink<TripDestination>(basePath = TRIP_DEEP_LINK_BASE))) {
         TripRoute(onBack = onBack, onDeleted = onTripDeleted, onOpenPlanner = onOpenPlanner, onPlanIt = onPlanIt, tabContent = tabContent)
     }
 }
+
+/** `travelplanner://trip` + `/{tripId}?tab={tab}` (matches [DeepLinks.TRIP_PATTERN]). */
+internal val TRIP_DEEP_LINK_BASE = DeepLinks.TRIP_PATTERN.substringBefore("/{")

@@ -25,4 +25,12 @@
     <!-- Nearby suggestions -->
     <string name="nearby_notification_title">See what’s near you</string>
     <string name="nearby_notification_body">Places to see, eat, shop and stay around you. Tap to look.</string>
+    <string name="channel_morning_brief">Morning brief</string>
+    <string name="channel_morning_brief_desc">Your day\'s plan on each morning of a trip.</string>
+    <string name="channel_weather">Weather</string>
+    <string name="channel_weather_desc">Weather changes for your trips.</string>
+    <string name="channel_social">Social</string>
+    <string name="channel_social_desc">Follows, comments and likes from other travellers.</string>
+    <string name="channel_quiz">Quiz and play</string>
+    <string name="channel_quiz_desc">Daily quiz and challenge nudges.</string>
 </resources>

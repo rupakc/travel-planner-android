@@ -20,4 +20,12 @@
     <string name="reminder_action_emergency">Notfallkarte</string>
     <string name="nearby_notification_title">Entdecke, was in deiner Nähe ist</string>
     <string name="nearby_notification_body">Sehenswertes, Restaurants, Shopping und Unterkünfte in deiner Umgebung. Tippe zum Ansehen.</string>
+    <string name="channel_morning_brief">Morgenüberblick</string>
+    <string name="channel_morning_brief_desc">Der Tagesplan an jedem Morgen einer Reise.</string>
+    <string name="channel_weather">Wetter</string>
+    <string name="channel_weather_desc">Wetteränderungen für deine Reisen.</string>
+    <string name="channel_social">Soziales</string>
+    <string name="channel_social_desc">Follower, Kommentare und Likes anderer Reisender.</string>
+    <string name="channel_quiz">Quiz und Spiel</string>
+    <string name="channel_quiz_desc">Hinweise zum täglichen Quiz und zu Herausforderungen.</string>
 </resources>

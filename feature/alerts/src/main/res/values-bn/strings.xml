@@ -39,4 +39,5 @@
     <string name="alerts_live_ai_billing">এই সার্ভারে এখন AI ফিচার বন্ধ আছে।</string>
     <string name="alerts_live_search_unavailable">এই সার্ভারে লাইভ ওয়েব সার্চ পাওয়া যায় না।</string>
     <string name="alerts_live_not_found">এই ট্র্যাকিং আর নেই।</string>
+    <string name="alerts_action_open_trip">ভ্রমণ খুলুন</string>
 </resources>

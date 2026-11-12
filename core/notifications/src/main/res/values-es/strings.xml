@@ -23,4 +23,12 @@
     <string name="reminder_action_nearby">Cerca de mí</string>
     <string name="nearby_notification_title">Mira qué hay cerca de ti</string>
     <string name="nearby_notification_body">Lugares para ver, comer, comprar y alojarte a tu alrededor. Toca para verlos.</string>
+    <string name="channel_morning_brief">Resumen matinal</string>
+    <string name="channel_morning_brief_desc">El plan del día cada mañana de un viaje.</string>
+    <string name="channel_weather">Clima</string>
+    <string name="channel_weather_desc">Cambios del tiempo en tus viajes.</string>
+    <string name="channel_social">Social</string>
+    <string name="channel_social_desc">Seguidores, comentarios y me gusta de otros viajeros.</string>
+    <string name="channel_quiz">Quiz y juegos</string>
+    <string name="channel_quiz_desc">Avisos del quiz diario y de los retos.</string>
 </resources>

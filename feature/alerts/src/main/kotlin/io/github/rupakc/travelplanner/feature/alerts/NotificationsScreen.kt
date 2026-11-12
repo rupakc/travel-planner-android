@@ -68,9 +68,12 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertAction
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertIcon
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertLink
+import io.github.rupakc.travelplanner.core.domain.alerts.NotificationTarget
 import io.github.rupakc.travelplanner.core.domain.alerts.alertKindFor
 import io.github.rupakc.travelplanner.core.domain.alerts.keepDeltaTogether
+import io.github.rupakc.travelplanner.core.domain.alerts.notificationCategory
 import io.github.rupakc.travelplanner.core.domain.alerts.notificationLink
+import io.github.rupakc.travelplanner.core.domain.alerts.target
 import io.github.rupakc.travelplanner.core.domain.alerts.timeAgo
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.isPriceDigest
@@ -128,6 +131,10 @@ class NotificationsViewModel
 
         /** Where a tapped notification leads (the Alerts screen focused on its watch). */
         val open: Flow<AlertLink> = opens.receiveAsFlow()
+        private val tripOpens = Channel<Long>(Channel.BUFFERED)
+
+        /** A trip-phase row (T-30, T-7, T-1, morning brief) was tapped: the trip whose Today tab to open (R8). */
+        val openTrip: Flow<Long> = tripOpens.receiveAsFlow()
 
         init {
             load()
@@ -187,7 +194,19 @@ class NotificationsViewModel
                 }
                 viewModelScope.launch { repository.markRead(listOf(n.id)) }
             }
-            viewModelScope.launch { opens.send(notificationLink(n)) }
+            notificationCategory(n.category, n.kind)?.let {
+                telemetry.emit(EVENT_NOTIF_OPEN, mapOf("category" to it.wire, "source" to "inapp"))
+            }
+            viewModelScope.launch {
+                when (val target = n.target()) {
+                    is NotificationTarget.Alert -> opens.send(notificationLink(n))
+
+                    is NotificationTarget.TripToday -> tripOpens.send(target.planId)
+
+                    // No trip id (or a category this screen does not route): the list is already open.
+                    NotificationTarget.Inbox -> Unit
+                }
+            }
         }
 
         private fun markAll() {
@@ -203,13 +222,20 @@ class NotificationsViewModel
             const val PAGE = 50
             const val EVENT_DROP_SEEN = "alert_drop_seen"
             const val EVENT_DIGEST_OPEN = "alert_digest_open"
+            const val EVENT_NOTIF_OPEN = "notif_open"
         }
     }
 
 @Composable
-fun NotificationsInboxRoute(onBack: () -> Unit, onOpenAlert: (AlertLink) -> Unit, viewModel: NotificationsViewModel = hiltViewModel()) {
+fun NotificationsInboxRoute(
+    onBack: () -> Unit,
+    onOpenAlert: (AlertLink) -> Unit,
+    onOpenTrip: (Long) -> Unit = {},
+    viewModel: NotificationsViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) { viewModel.open.collect(onOpenAlert) }
+    LaunchedEffect(viewModel) { viewModel.openTrip.collect(onOpenTrip) }
     NotificationsScreen(state, viewModel::onEvent, onBack)
 }
 
@@ -285,6 +311,7 @@ private fun actionText(action: AlertAction): String =
             AlertAction.SEE_ACTIVITY -> R.string.alerts_action_see_activity
             AlertAction.SEE_TRIP -> R.string.alerts_action_see_trip
             AlertAction.CHECK_TRIP -> R.string.alerts_action_check_trip
+            AlertAction.OPEN_TRIP -> R.string.alerts_action_open_trip
             AlertAction.VIEW -> R.string.alerts_action_view
             AlertAction.RETRY -> R.string.alerts_action_retry
         },

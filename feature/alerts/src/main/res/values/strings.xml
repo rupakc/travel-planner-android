@@ -244,4 +244,5 @@
     <string name="alerts_live_not_found">This watch no longer exists.</string>
     <string name="alerts_live_expired">This trip’s dates have passed, so there’s nothing live to check.</string>
     <string name="alerts_live_close">Close</string>
+    <string name="alerts_action_open_trip">Open trip</string>
 </resources>

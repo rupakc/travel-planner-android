@@ -173,7 +173,7 @@ fun parseAlertsPath(path: String?): AlertLink? {
 /** Icon and action wording for a notification kind (web `ALERT_KINDS` / `alertKindFor`). */
 enum class AlertIcon { TREND_DOWN, TARGET, SPARKLE, CALENDAR, HOTEL, TICKET, LUGGAGE, ENDED, WARNING }
 
-enum class AlertAction { SEE_FARE, SEE_DATES, SEE_HOTEL, SEE_ACTIVITY, SEE_TRIP, CHECK_TRIP, VIEW, RETRY }
+enum class AlertAction { SEE_FARE, SEE_DATES, SEE_HOTEL, SEE_ACTIVITY, SEE_TRIP, CHECK_TRIP, OPEN_TRIP, VIEW, RETRY }
 
 data class AlertKindStyle(val icon: AlertIcon, val tone: Tone, val action: AlertAction)
 
@@ -189,6 +189,11 @@ private val ALERT_KINDS: Map<String, AlertKindStyle> =
         "activity_target" to AlertKindStyle(AlertIcon.TICKET, Tone.GOOD, AlertAction.SEE_ACTIVITY),
         "trip_drop" to AlertKindStyle(AlertIcon.LUGGAGE, Tone.GOOD, AlertAction.SEE_TRIP),
         "trip_target" to AlertKindStyle(AlertIcon.LUGGAGE, Tone.GOOD, AlertAction.SEE_TRIP),
+        // Notifications 2.0 trip-phase rows (T-30, T-7, T-1, morning brief).
+        "trip_t30" to AlertKindStyle(AlertIcon.CALENDAR, Tone.INFO, AlertAction.OPEN_TRIP),
+        "trip_t7" to AlertKindStyle(AlertIcon.CALENDAR, Tone.INFO, AlertAction.OPEN_TRIP),
+        "trip_t1" to AlertKindStyle(AlertIcon.CALENDAR, Tone.INFO, AlertAction.OPEN_TRIP),
+        "trip_morning" to AlertKindStyle(AlertIcon.CALENDAR, Tone.INFO, AlertAction.OPEN_TRIP),
         "watch_expired" to AlertKindStyle(AlertIcon.ENDED, Tone.NEUTRAL, AlertAction.VIEW),
         "watch_error" to AlertKindStyle(AlertIcon.WARNING, Tone.WARN, AlertAction.RETRY),
         "price_digest" to AlertKindStyle(AlertIcon.SPARKLE, Tone.INFO, AlertAction.VIEW),

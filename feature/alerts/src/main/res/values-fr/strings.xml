@@ -41,4 +41,5 @@
     <string name="alerts_live_ai_billing">Les fonctions d\'IA sont actuellement désactivées sur ce serveur.</string>
     <string name="alerts_live_search_unavailable">La recherche web en direct n\'est pas disponible sur ce serveur.</string>
     <string name="alerts_live_not_found">Cette surveillance n\'existe plus.</string>
+    <string name="alerts_action_open_trip">Ouvrir le voyage</string>
 </resources>

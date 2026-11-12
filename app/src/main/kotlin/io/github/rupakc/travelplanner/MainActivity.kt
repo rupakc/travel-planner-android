@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.rupakc.travelplanner.core.data.repository.OauthInbox
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
+import io.github.rupakc.travelplanner.core.notifications.PushTaps
 import io.github.rupakc.travelplanner.core.notifications.withPushDeepLink
 import io.github.rupakc.travelplanner.navigation.DeepLinkIntents
 import io.github.rupakc.travelplanner.navigation.TravelApp
@@ -36,6 +37,8 @@ class MainActivity : AppCompatActivity() {
         // A push shown by the system (older servers) carries only a web `link` extra: give it the app deep link.
         // Then drop Navigation's internal deep-link extras and foreign data (exported activity, S-M1).
         DeepLinkIntents.sanitize(withPushDeepLink(intent))
+        // Only a fresh launch counts the tap (a recreation replays the same intent).
+        if (savedInstanceState == null) PushTaps.consume(intent)?.let(viewModel::reportPushOpen)
         super.onCreate(savedInstanceState)
         // Only a fresh launch: a recreation would replay the same (single-use) return.
         if (savedInstanceState == null) DeepLinkIntents.oauthCallback(intent)?.let(oauthInbox::post)
@@ -72,6 +75,7 @@ class MainActivity : AppCompatActivity() {
     /** singleTask: the NavHost's new-intent listener sees the intent after this maps its `link` extra. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(DeepLinkIntents.sanitize(withPushDeepLink(intent)))
+        PushTaps.consume(intent)?.let(viewModel::reportPushOpen)
         DeepLinkIntents.oauthCallback(intent)?.let(oauthInbox::post)
     }
 }

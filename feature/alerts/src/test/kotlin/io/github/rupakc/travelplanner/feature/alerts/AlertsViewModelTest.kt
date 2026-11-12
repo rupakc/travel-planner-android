@@ -312,6 +312,7 @@ class AlertsViewModelTest {
                 listOf(
                     "alert_drop_seen" to mapOf("kind" to "hotel", "target_hit" to true, "via" to "in_app"),
                     "alert_digest_open" to mapOf("via" to "in_app"),
+                    "notif_open" to mapOf("category" to "price_drops", "source" to "inapp"),
                 ),
                 telemetry.events,
             )

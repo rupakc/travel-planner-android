@@ -26,6 +26,15 @@ data class AppNotification(
     val isUnread: Boolean get() = readAt == null
     val watchId: Long? get() = (data["watch_id"] as? JsonPrimitive)?.longOrNull
     val watchKind: String? get() = (data["watch_kind"] as? JsonPrimitive)?.contentOrNull
+
+    /** Notifications 2.0 `data.category` (null on price rows of an older server). */
+    val category: String? get() = (data["category"] as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() }
+
+    /** Notifications 2.0 `data.plan_id` (number or string; null for price drops). */
+    val planId: Long? get() = (data["plan_id"] as? JsonPrimitive)?.let { it.longOrNull ?: it.contentOrNull?.toLongOrNull() }
+
+    /** Notifications 2.0 `data.link`, a web path. */
+    val link: String? get() = (data["link"] as? JsonPrimitive)?.contentOrNull
 }
 
 /** `GET /api/notifications` page (`{items, total, unread}`). */

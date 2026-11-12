@@ -118,6 +118,10 @@ object DeepLinks {
     const val PLAN_PATTERN = "$SCHEME://plan/{planId}"
     const val CHAT_PATTERN = "$SCHEME://chat"
     const val NEARBY_PATTERN = "$SCHEME://nearby"
+
+    /** A trip, optionally on a tab (`travelplanner://trip/12?tab=today`); built by notifications. */
+    const val TRIP_PATTERN = "$SCHEME://trip/{tripId}?tab={tab}"
+    const val NOTIFICATIONS_PATTERN = "$SCHEME://notifications"
 }
 
 // --- Phase 1: accounts ----------------------------------------------------

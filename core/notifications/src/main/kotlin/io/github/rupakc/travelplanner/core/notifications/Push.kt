@@ -25,8 +25,12 @@ import io.github.rupakc.travelplanner.core.data.repository.PushTokenSource
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.data.repository.UserStateCleaner
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertLink
+import io.github.rupakc.travelplanner.core.domain.alerts.NotificationTarget
+import io.github.rupakc.travelplanner.core.domain.alerts.notificationCategory
 import io.github.rupakc.travelplanner.core.domain.alerts.parseAlertsPath
+import io.github.rupakc.travelplanner.core.domain.alerts.resolveNotificationTarget
 import io.github.rupakc.travelplanner.core.model.devices.PushDataKeys
+import io.github.rupakc.travelplanner.core.model.notifications.NotificationCategory
 import java.security.MessageDigest
 import java.time.Duration
 import java.time.Instant
@@ -197,14 +201,29 @@ fun pushAlertLink(data: Map<String, String>): AlertLink =
     parseAlertsPath(data[PushDataKeys.LINK])
         ?: AlertLink(data[PushDataKeys.WATCH_KIND], data[PushDataKeys.WATCH_ID]?.toLongOrNull())
 
+/** Where a push `data` payload leads (R8): a `trip_*` phase push its trip's Today tab, an empty `plan_id` the list, else Alerts. */
+fun pushTarget(data: Map<String, String>): NotificationTarget =
+    resolveNotificationTarget(
+        kind = data[PushDataKeys.KIND],
+        link = data[PushDataKeys.LINK],
+        planId = data[PushDataKeys.PLAN_ID],
+        watchId = data[PushDataKeys.WATCH_ID]?.toLongOrNull(),
+        watchKind = data[PushDataKeys.WATCH_KIND],
+        category = data[PushDataKeys.CATEGORY],
+    )
+
 /** Price-alert notification kinds the server pushes high-priority; `watch_expired` / `watch_error` are notices. */
 private val NOTICE_KINDS = setOf("watch_expired", "watch_error")
 
 /**
- * Handles one data-only FCM message (backend `push.py`: keys `kind`, `notification_id`, `link`,
- * `watch_id`, `watch_kind`, `title`, `body`, all strings). Marks the id seen first (so the poller never
- * posts it again), then posts it on the Price alerts channel if that toggle is on, opening the app
- * route for the server's web `link`. Posts nothing without a session. Returns true when something was posted.
+ * Handles one data-only FCM message (backend `push.py` and `notify_center.py`: keys `kind`, `notification_id`, `link`,
+ * `watch_id`, `watch_kind`, `category`, `plan_id` (`""` when none), `group_count` (a grouped price push), `title`,
+ * `body`, all strings). Marks the id seen first (so the poller never posts it again), then posts it on the channel of
+ * its category (R8: an absent category is a price alert from an older server, an unknown one the default channel), if the
+ * price-alert toggle allows it for price drops (the server already applied every other category switch, quiet hours and
+ * the daily cap), opening the destination of [pushTarget]. A grouped push replaces the previous group of its category
+ * instead of stacking. Text is the server's, already in the user's language and without game wording under `hide_game`.
+ * Unknown kinds are tolerated. Posts nothing without a session. Returns true when something was posted.
  */
 @Singleton
 class PushAlertHandler
@@ -220,15 +239,17 @@ class PushAlertHandler
             notifications.markSeen(listOf(id))
             // Signed out (e.g. an unregister that never reached the server): never show a user's alerts (API review I1).
             if (auth.session.first() == null) return false
-            if (!settings.settings.first().priceAlertNotifications) return false
+            val category = notificationCategory(data[PushDataKeys.CATEGORY], data[PushDataKeys.KIND])
+            if (category == NotificationCategory.PRICE_DROPS && !settings.settings.first().priceAlertNotifications) return false
             val title = data[KEY_TITLE].orEmpty()
             if (title.isBlank()) return false
+            val grouped = (data[PushDataKeys.GROUP_COUNT]?.toIntOrNull() ?: 1) > 1
             notifier.post(
-                TravelChannel.PRICE_ALERTS,
-                NotificationIds.priceAlert(id),
+                TravelChannel.forCategory(category),
+                if (grouped) NotificationIds.group(category) else NotificationIds.priceAlert(id),
                 title,
                 data[KEY_BODY].orEmpty(),
-                pushAlertLink(data).toDeepLink(),
+                NotificationLinks.of(pushTarget(data), category),
                 quiet = data[PushDataKeys.KIND] in NOTICE_KINDS,
             )
             return true
@@ -242,16 +263,18 @@ class PushAlertHandler
 
 /**
  * A notification posted by FCM itself (not via [PushAlertHandler]) opens MainActivity with the data
- * keys as extras. If [intent] has no data URI but a web `link` extra, give it the app deep link
- * (`travelplanner://alerts?…`) in place, so the NavHost opens the watch. Safe to call on any intent.
+ * keys as extras. If [intent] has no data URI but a web `link` (or a `plan_id`, or a watch id) extra, give it the app
+ * deep link (`travelplanner://alerts?…`, `travelplanner://trip/{id}?tab=today`, `travelplanner://notifications`) in
+ * place, so the NavHost opens the right screen. Safe to call on any intent.
  */
 fun withPushDeepLink(intent: Intent): Intent {
     if (intent.data != null) return intent
     val extras = intent.extras ?: return intent
-    val link = extras.getString(PushDataKeys.LINK) ?: extras.getString(PushDataKeys.WATCH_ID)?.let { "/alerts?watch=$it" } ?: return intent
-    val data = buildMap { extras.keySet().forEach { k -> extras.getString(k)?.let { put(k, it) } } } + (PushDataKeys.LINK to link)
+    val data = buildMap { extras.keySet().forEach { k -> extras.getString(k)?.let { put(k, it) } } }
+    if (PushDataKeys.LINK !in data && PushDataKeys.WATCH_ID !in data && data[PushDataKeys.PLAN_ID].isNullOrBlank()) return intent
+    val category = notificationCategory(data[PushDataKeys.CATEGORY], data[PushDataKeys.KIND])
     intent.action = Intent.ACTION_VIEW
-    intent.data = pushAlertLink(data).toDeepLink().toUri()
+    intent.data = NotificationLinks.of(pushTarget(data), category).toUri()
     return intent
 }
 
@@ -281,15 +304,20 @@ class TravelMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        val data = message.data
-        // Older servers also sent a notification block; fall back to it for the text.
-        val withText =
-            data +
-                listOfNotNull(
-                    message.notification?.title?.let { PushAlertHandler.KEY_TITLE to it }.takeIf { data[PushAlertHandler.KEY_TITLE] == null },
-                    message.notification?.body?.let { PushAlertHandler.KEY_BODY to it }.takeIf { data[PushAlertHandler.KEY_BODY] == null },
-                )
         // Post before returning: FCM may stop the process right after this call (it allows ~10–20 s).
-        handleBlocking(handler, withText)
+        handleBlocking(handler, pushPayload(message))
     }
+}
+
+/**
+ * The data map of one FCM [message]: its data keys, with the text of a legacy `notification` block (older servers)
+ * filling in a missing `title` / `body`. Unknown keys pass through untouched.
+ */
+fun pushPayload(message: RemoteMessage): Map<String, String> {
+    val data = message.data
+    return data +
+        listOfNotNull(
+            message.notification?.title?.let { PushAlertHandler.KEY_TITLE to it }.takeIf { data[PushAlertHandler.KEY_TITLE] == null },
+            message.notification?.body?.let { PushAlertHandler.KEY_BODY to it }.takeIf { data[PushAlertHandler.KEY_BODY] == null },
+        )
 }
