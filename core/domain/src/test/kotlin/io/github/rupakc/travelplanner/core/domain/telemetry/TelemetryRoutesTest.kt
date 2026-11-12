@@ -1,30 +1,47 @@
 package io.github.rupakc.travelplanner.core.domain.telemetry
 
 import io.github.rupakc.travelplanner.core.model.navigation.AccountChangePasswordRoute
+import io.github.rupakc.travelplanner.core.model.navigation.AccountRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppearanceRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChatRoute
+import io.github.rupakc.travelplanner.core.model.navigation.CheckEmailRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ExpensesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.FeaturesRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ForgotPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
+import io.github.rupakc.travelplanner.core.model.navigation.JournalRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MyPlanRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationSettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationsRoute
+import io.github.rupakc.travelplanner.core.model.navigation.OauthUsernameRoute
+import io.github.rupakc.travelplanner.core.model.navigation.OfflinePackRoute
 import io.github.rupakc.travelplanner.core.model.navigation.OnboardingRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlanDetailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlansRoute
+import io.github.rupakc.travelplanner.core.model.navigation.PlayRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PreferencesRoute
+import io.github.rupakc.travelplanner.core.model.navigation.RecapRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ResetPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ServerRoute
+import io.github.rupakc.travelplanner.core.model.navigation.SessionsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsEntryRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
+import io.github.rupakc.travelplanner.core.model.navigation.SignUpRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TasteProfileRoute
+import io.github.rupakc.travelplanner.core.model.navigation.TodayRoute
+import io.github.rupakc.travelplanner.core.model.navigation.TripRoute
+import io.github.rupakc.travelplanner.core.model.navigation.TripsRoute
+import io.github.rupakc.travelplanner.core.model.navigation.VerifyEmailRoute
+import io.github.rupakc.travelplanner.core.model.navigation.YouRoute
 import kotlin.reflect.KClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -58,6 +75,23 @@ class TelemetryRoutesTest {
             is NotificationSettingsRoute -> NotificationSettingsRoute::class
             is NearbyRoute -> NearbyRoute::class
             is ShareRoute -> ShareRoute::class
+            is CheckEmailRoute -> CheckEmailRoute::class
+            is VerifyEmailRoute -> VerifyEmailRoute::class
+            is ResetPasswordRoute -> ResetPasswordRoute::class
+            is TripRoute -> TripRoute::class
+            is TodayRoute -> TodayRoute::class
+            is OfflinePackRoute -> OfflinePackRoute::class
+            is ExpensesRoute -> ExpensesRoute::class
+            is JournalRoute -> JournalRoute::class
+            is RecapRoute -> RecapRoute::class
+            is SignUpRoute -> SignUpRoute::class
+            is ForgotPasswordRoute -> ForgotPasswordRoute::class
+            is OauthUsernameRoute -> OauthUsernameRoute::class
+            is AccountRoute -> AccountRoute::class
+            is SessionsRoute -> SessionsRoute::class
+            is PlayRoute -> PlayRoute::class
+            is TripsRoute -> TripsRoute::class
+            is YouRoute -> YouRoute::class
         }
 
     @Test fun `every route class is mapped exactly once`() {
@@ -87,11 +121,28 @@ class TelemetryRoutesTest {
                 NotificationSettingsRoute,
                 NearbyRoute,
                 ShareRoute("t"),
+                SignUpRoute,
+                CheckEmailRoute("a@b.c"),
+                VerifyEmailRoute(),
+                ForgotPasswordRoute,
+                ResetPasswordRoute(),
+                OauthUsernameRoute,
+                AccountRoute,
+                SessionsRoute,
+                PlayRoute,
+                TripsRoute,
+                TripRoute(1),
+                TodayRoute(1),
+                OfflinePackRoute(1),
+                ExpensesRoute(1),
+                JournalRoute(1),
+                RecapRoute(1),
+                YouRoute,
             ).map(::classOf)
         val table = TelemetryRoutes.table
-        assertEquals(24, all.toSet().size)
-        assertEquals(24, table.size)
-        assertEquals(24, table.map { it.first }.toSet().size)
+        assertEquals(41, all.toSet().size)
+        assertEquals(41, table.size)
+        assertEquals(41, table.map { it.first }.toSet().size)
         assertEquals(all.toSet(), table.map { it.first }.toSet())
         table.forEach { assertTrue(it.second, TelemetryProps.isToken(it.second)) }
         assertTrue(TelemetryProps.isToken(TelemetryRoutes.OTHER))

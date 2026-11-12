@@ -137,4 +137,32 @@ class EncryptedSessionStoreTest {
             assertNull(store.current())
             assertEquals("alice", store.lastUsername())
         }
+
+    @Test
+    fun `new Phase 1 fields round-trip`() =
+        runTest {
+            val (store, _) = newStore()
+            val full = Session(jwt(10_000), user, "https://api.example.com", refreshToken = "rt_1", expiresAtEpochMs = 9_999_000L, userId = "u-1")
+            store.save(full)
+            assertEquals(full, store.current())
+        }
+
+    @Test
+    fun `a session sealed by an earlier build without the new fields still decodes`() =
+        runTest {
+            val file = tmp.newFile("old.preferences_pb").also { it.delete() }
+            val ds = PreferenceDataStoreFactory.create(scope = backgroundScope) { file }
+            val oldJson = """{"token":"${jwt(
+                10_000,
+            )}","user":{"username":"alice","is_admin":false,"requires_password_change":false,"email":null},"baseUrl":"https://api.example.com"}"""
+            val sealed = Base64.getEncoder().encodeToString(aead.encrypt(oldJson.encodeToByteArray(), "travelplanner.session.v2".encodeToByteArray()))
+            ds.edit { it[stringPreferencesKey("session_v2")] = sealed }
+            val store = EncryptedSessionStore(ds, { AeadSessionCipher(aead) }, SchedulerClock(this, 1_000), StandardTestDispatcher(testScheduler))
+            val s = store.current()
+            assertEquals("alice", s?.user?.username)
+            assertEquals("https://api.example.com", s?.baseUrl)
+            assertNull(s?.refreshToken)
+            assertNull(s?.expiresAtEpochMs)
+            assertNull(s?.userId)
+        }
 }

@@ -1,0 +1,6 @@
+{"trip_id": 12, "title": "Lisbon", "start_date": "2027-04-01", "end_date": "2027-04-08", "days": 8, "nights": 7, "planned_days": 7,
+ "places": [], "visited_count": 9, "rated_count": 7, "avg_stars": 4.3,
+ "route": [[38.70, -9.14], [38.71, -9.15]], "distance_km": 41.2,
+ "countries": [{"code": "PT", "name": "Portugal", "new": true}], "continents": ["EU"],
+ "spend": {"budget_usd": 3000, "plan_cost_usd": null, "spent_usd": "2140.50", "by_category_usd": {"food": "400.00"}, "unconverted": ["GBP"]},
+ "journal_count": 5, "checkin_days": 6, "completed_at": null, "can_complete": true}

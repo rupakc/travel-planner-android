@@ -1,0 +1,5 @@
+{"user": {"id": "u1", "username": "jane_doe", "email": null, "email_verified": false, "account_verified": false, "has_password": false, "signup_method": "oauth"},
+ "identities": [{"provider": "github", "email": "jane@example.com", "linked_at": "2026-11-11T10:00:00Z"}],
+ "settings": {"language": "es", "theme": "dark", "currency": "EUR", "units": "imperial", "timezone": "Europe/Madrid",
+  "hide_game": true, "hide_community": false, "profile_visibility": "private", "telemetry_opt_out": true, "bucket_list_goal": 30},
+ "onboarding": {"step": 3, "done": false, "skipped": false, "traveller_type": null, "completed_at": null}}

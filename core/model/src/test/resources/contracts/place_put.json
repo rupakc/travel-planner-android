@@ -1,0 +1,3 @@
+{"place": {"place_key": "activity:pasteis-de-belem", "name": "Pastéis de Belém", "kind": "activity", "visited": true, "stars": 5, "note": "yum", "day": "2027-04-02",
+  "lat": 38.69, "lng": -9.2, "visited_at": "2027-04-02T11:00:00Z", "updated_at": "2027-04-02T11:00:00Z"},
+ "game": {"xp": 65, "awards": [{"rule": "place_visited", "points": 5}], "badges": [], "level_up": null}}

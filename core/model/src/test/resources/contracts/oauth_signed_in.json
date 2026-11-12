@@ -1,0 +1,2 @@
+{"status": "signed_in", "session": {"access_token": "jwt", "expires_in": 3600, "refresh_token": "rt_1", "user": {"username": "jane"}},
+ "game": {"xp": 10, "awards": [], "badges": [], "level_up": null}, "return_to": "/"}

@@ -110,3 +110,43 @@ object DeepLinks {
     const val CHAT_PATTERN = "$SCHEME://chat"
     const val NEARBY_PATTERN = "$SCHEME://nearby"
 }
+
+// --- Phase 1: accounts ----------------------------------------------------
+@Serializable data object SignUpRoute : AppRoute
+
+@Serializable data class CheckEmailRoute(val email: String) : AppRoute
+
+/** Email verification; [token] comes from the deep link (null = paste a link or code). */
+@Serializable data class VerifyEmailRoute(val token: String? = null) : AppRoute
+
+@Serializable data object ForgotPasswordRoute : AppRoute
+
+/** Password reset; [token] comes from the deep link (null = paste a link or code). */
+@Serializable data class ResetPasswordRoute(val token: String? = null) : AppRoute
+
+/** Pick a username after a social sign-in that answered `needs_username`. */
+@Serializable data object OauthUsernameRoute : AppRoute
+
+@Serializable data object AccountRoute : AppRoute
+
+@Serializable data object SessionsRoute : AppRoute
+
+@Serializable data object PlayRoute : AppRoute
+
+// --- Phase 2: journey -------------------------------------------------------
+@Serializable data object TripsRoute : AppRoute
+
+/** A trip; [tab] is a tab id (`overview`, `prep`, `money`, `journal`, `recap`, `offline`) or null for the phase default. */
+@Serializable data class TripRoute(val tripId: Long, val tab: String? = null) : AppRoute
+
+@Serializable data class TodayRoute(val tripId: Long) : AppRoute
+
+@Serializable data class OfflinePackRoute(val tripId: Long) : AppRoute
+
+@Serializable data class ExpensesRoute(val tripId: Long) : AppRoute
+
+@Serializable data class JournalRoute(val tripId: Long) : AppRoute
+
+@Serializable data class RecapRoute(val tripId: Long) : AppRoute
+
+@Serializable data object YouRoute : AppRoute

@@ -1,0 +1,3 @@
+{"day": "2027-04-01", "day_index": 1, "city": "Lisbon", "country_code": "PT", "new_country": true,
+ "streak": {"current": 1, "longest": 1, "last_day": "2027-04-01", "freezes": 1},
+ "game": {"xp": 10, "awards": [{"rule": "trip_checkin", "points": 10}], "badges": [], "level_up": null}}

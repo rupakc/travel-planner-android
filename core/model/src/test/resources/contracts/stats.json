@@ -1,0 +1,2 @@
+{"countries": [{"code": "PT", "name": "Portugal", "first_trip_id": 12, "visited_at": "2026-11-01T00:00:00Z", "source": "checkin"}],
+ "continents": ["EU"], "bucket_goal": 30, "trips_by_phase": {"dreaming": 1, "planning": 2}}
