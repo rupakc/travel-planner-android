@@ -28,3 +28,10 @@ Started with the plan; extend as tasks land.
 - Right after login the Home screen has no top/bottom bar until relaunch (check `TravelApp.kt` gate).
 - `localRelease` build needs a `.local` client in `google-services.json` (owner: add the package in Firebase) or the build fails at `processLocalReleaseGoogleServices`.
 - No release signing key configured: release APKs are debug-signed (owner action, see Release.md).
+
+## Re-smoke after #91 (prod APK SHA-256 315d8500...5e9d; tab crash fixed)
+- Today "Add expense" does nothing when the trip is already on top (`TravelApp.kt` ~346, `launchSingleTop` no-op): switch the tab via state instead of navigating.
+- Trips list is stale after Back from a new trip ("No trips yet" until re-selecting the tab): refresh on resume.
+- After a stage change to Memories the Recap tab shows selected but the content is still Today (stale selected tab).
+- Cold-start offline (see above) remains the top gap: persist the trips list and expenses in Room.
+- Not verified: offline_pack row count just before sign-out, offline re-login.
