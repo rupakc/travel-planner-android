@@ -21,7 +21,6 @@ import io.github.rupakc.travelplanner.core.network.RefreshCall
 import io.github.rupakc.travelplanner.core.network.api.AccountApi
 import io.github.rupakc.travelplanner.core.network.api.AdminApi
 import io.github.rupakc.travelplanner.core.network.api.AlertsV2Api
-import io.github.rupakc.travelplanner.core.network.api.SharesApi
 import io.github.rupakc.travelplanner.core.network.api.AuthApi
 import io.github.rupakc.travelplanner.core.network.api.DevicesApi
 import io.github.rupakc.travelplanner.core.network.api.FareWatchApi
@@ -38,6 +37,7 @@ import io.github.rupakc.travelplanner.core.network.api.PreferencesApi
 import io.github.rupakc.travelplanner.core.network.api.PriceWatchApi
 import io.github.rupakc.travelplanner.core.network.api.ReferenceApi
 import io.github.rupakc.travelplanner.core.network.api.SearchApi
+import io.github.rupakc.travelplanner.core.network.api.SharesApi
 import java.time.Duration
 import javax.inject.Qualifier
 import javax.inject.Singleton

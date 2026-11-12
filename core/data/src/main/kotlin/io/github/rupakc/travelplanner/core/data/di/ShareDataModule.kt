@@ -27,7 +27,8 @@ abstract class ShareDataModule {
 
     @Binds abstract fun cardStore(impl: ShareCardStoreImpl): ShareCardStore
 
-    @Binds @IntoSet abstract fun cardCleaner(impl: ShareCardStoreImpl): UserStateCleaner
+    @Binds @IntoSet
+    abstract fun cardCleaner(impl: ShareCardStoreImpl): UserStateCleaner
 
     companion object {
         @Provides @Singleton

@@ -50,6 +50,7 @@ class ShareCardStoreImpl(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: IOException) {
+                AppLogger.w(TAG, "Card download failed: network", e)
                 AppResult.Failure(AppError.Network(null))
             } catch (e: Exception) {
                 AppLogger.w(TAG, "Card download failed", e)
