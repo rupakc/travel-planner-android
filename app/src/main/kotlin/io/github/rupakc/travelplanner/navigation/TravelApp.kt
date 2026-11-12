@@ -78,6 +78,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MyPlanRoute
+import io.github.rupakc.travelplanner.core.model.navigation.MyProfileRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MySharesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationsRoute
@@ -120,6 +121,7 @@ import io.github.rupakc.travelplanner.feature.share.navigation.shareCreateGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareOpenGraph
 import io.github.rupakc.travelplanner.feature.social.navigation.socialGraph
+import io.github.rupakc.travelplanner.feature.social.navigation.socialProfileGraph
 import io.github.rupakc.travelplanner.feature.trips.journal.journalTabContent
 import io.github.rupakc.travelplanner.feature.trips.money.moneyTabContent
 import io.github.rupakc.travelplanner.feature.trips.navigation.tripsGraph
@@ -387,6 +389,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                     onOpenSettings = { navController.navigate(SettingsRoute) },
                     onOpenShares = if (shell.sharing) ({ navController.navigate(MySharesRoute) }) else null,
                     onOpenShareLink = { navController.navigate(ShareOpenLinkRoute) },
+                    onOpenProfile = if (shell.social) ({ navController.navigate(MyProfileRoute) }) else null,
                 )
             }
             shareOpenGraph(onBack = { navController.popBackStack() }, onOpen = { navController.navigate(ShareRoute(it)) })
@@ -394,6 +397,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
             mySharesGraph(onBack = { navController.popBackStack() })
             // Social (profile, feed): the entry points are gated on `shell.social`; the screens land with the feature tasks.
             socialGraph()
+            socialProfileGraph(onBack = { navController.popBackStack() }, onNavigate = { route -> navController.navigateTo(route) })
             shareGraph(
                 onBack = {
                     if (!navController.popBackStack()) {
