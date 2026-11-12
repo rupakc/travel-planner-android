@@ -46,6 +46,7 @@ import io.github.rupakc.travelplanner.core.domain.plan.CostCategory
 import io.github.rupakc.travelplanner.core.domain.plan.CostPart
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.journey.CompletenessMeter
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
 import io.github.rupakc.travelplanner.feature.plan.model.PlanItineraryUi
@@ -122,6 +123,11 @@ private fun PlanBody(content: MyPlanContent, onEvent: (MyPlanEvent) -> Unit, onO
                 )
             }
             return@LazyColumn
+        }
+        content.completeness?.let { meter ->
+            item(key = "completeness", contentType = "completeness") {
+                CompletenessMeter(meter, Modifier.padding(top = TravelTheme.spacing.md))
+            }
         }
         item(key = "cost", contentType = "cost") {
             CostCard(content.costParts, content.budgetStatus, content.hasTransport, Modifier.padding(top = TravelTheme.spacing.md))

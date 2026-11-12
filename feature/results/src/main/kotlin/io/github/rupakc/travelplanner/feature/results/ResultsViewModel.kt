@@ -8,6 +8,7 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.offline.PlanJourney
 import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
@@ -26,6 +27,7 @@ import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogState
 import io.github.rupakc.travelplanner.core.domain.alerts.WatchTrip
 import io.github.rupakc.travelplanner.core.domain.alerts.WatchedOutcome
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
+import io.github.rupakc.travelplanner.core.domain.journey.PlanCompleteness
 import io.github.rupakc.travelplanner.core.domain.results.BestValuePackage
 import io.github.rupakc.travelplanner.core.domain.results.BudgetAllocation
 import io.github.rupakc.travelplanner.core.domain.results.BudgetPlanner
@@ -116,6 +118,7 @@ class ResultsViewModel
         private val dispatchers: AppDispatchers,
         private val savedState: SavedStateHandle,
         private val placeNames: PlaceNameLookup,
+        private val journey: PlanJourney,
     ) : ViewModel() {
         private val local = MutableStateFlow(LocalState())
         private val builder = ResultsStateBuilder()
@@ -150,10 +153,18 @@ class ResultsViewModel
                 ResultsSource.NONE -> SourcedResults(SearchResultsState(), chosen)
             }
 
+        /** The plan's completeness (My Plan's meter) while the selections change; null when `features.trips` is off. */
+        private val completeness: Flow<PlanCompleteness.Result?> =
+            plan.draft.map { journey.completeness(it) }.distinctUntilChanged().flowOn(dispatchers.default)
+
         val state: StateFlow<ResultsUiState> =
-            combine(source, plan.draft, local, health.capabilities, visibleFeatures) { sourced, draft, l, caps, visible ->
-                builder.build(sourced, draft, l, caps, visible, clock.today())
-            }.flowOn(dispatchers.default)
+            combine(
+                combine(source, plan.draft, local, health.capabilities, visibleFeatures) { sourced, draft, l, caps, visible ->
+                    builder.build(sourced, draft, l, caps, visible, clock.today())
+                },
+                completeness,
+            ) { built, meter -> if (meter == null) built else built.copy(completeness = meter) }
+                .flowOn(dispatchers.default)
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ResultsUiState())
 
         // ── Team E's SectionActions members (info sections, itinerary editor, health re-check) ──

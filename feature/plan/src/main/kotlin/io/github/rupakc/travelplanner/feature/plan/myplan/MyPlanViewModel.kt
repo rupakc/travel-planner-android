@@ -8,10 +8,12 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.offline.PlanJourney
 import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.domain.export.PlanExportInput
 import io.github.rupakc.travelplanner.core.domain.export.PlanIcs
+import io.github.rupakc.travelplanner.core.domain.journey.PlanCompleteness
 import io.github.rupakc.travelplanner.core.domain.place.placeName
 import io.github.rupakc.travelplanner.core.domain.place.placeRoute
 import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
@@ -65,6 +67,8 @@ internal data class MyPlanContent(
     val itemCount: Int,
     /** Web `selectedCount` also counts non-empty itinerary notes. */
     val hasNotes: Boolean = false,
+    /** Null unless `features.trips` is on (older backend: no meter). */
+    val completeness: PlanCompleteness.Result? = null,
 ) {
     val isEmpty: Boolean get() = itemCount == 0 && itinerary.isEmpty() && !hasNotes
 }
@@ -128,7 +132,9 @@ internal class MyPlanViewModel
         private val clock: AppClock,
         dispatchers: AppDispatchers,
         private val placeNames: PlaceNameLookup,
+        private val journey: PlanJourney,
     ) : ViewModel() {
+        private var meterReported = false
         private val status = MutableStateFlow(MyPlanUiState())
         private val exports = Channel<ExportRequest>(Channel.BUFFERED)
         private var undoSnapshot: PlanDraft? = null
@@ -143,7 +149,7 @@ internal class MyPlanViewModel
                 .flatMapLatest { draft ->
                     val request = draft.searchRequest
                     val places = listOfNotNull(request?.origin, request?.destination) + request?.destinations.orEmpty()
-                    placeNames.namesFor(places).map { names -> contentOf(draft, names) }
+                    placeNames.namesFor(places).map { names -> contentOf(draft, names).withMeter(draft) }
                 }.flowOn(dispatchers.default)
 
         val state: StateFlow<MyPlanUiState> =
@@ -200,6 +206,16 @@ internal class MyPlanViewModel
             )
         }
 
+        private suspend fun MyPlanContent.withMeter(draft: PlanDraft): MyPlanContent {
+            if (isEmpty) return this
+            val result = journey.completeness(draft) ?: return this
+            if (!meterReported) {
+                meterReported = true
+                journey.meterViewed("drawer", result.percent)
+            }
+            return copy(completeness = result)
+        }
+
         private fun liveItinerary(draft: PlanDraft): JsonObject? = draft.searchData?.get("itinerary") as? JsonObject
 
         private fun remove(removal: Removal, title: String?) {
@@ -224,6 +240,7 @@ internal class MyPlanViewModel
             status.update { it.copy(isSaving = true) }
             viewModelScope.launch {
                 val result = store.save(name)
+                if (result is AppResult.Success) journey.onPlanSaved(result.value.id, store.draft.value.searchData)
                 // Only the plan id goes back: edits made while the request was in flight stay.
                 if (result is AppResult.Failure && asNew) store.restore(store.snapshot().copy(planId = before.planId))
                 status.update {

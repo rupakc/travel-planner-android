@@ -17,9 +17,11 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
 import io.github.rupakc.travelplanner.feature.plan.FixedClock
 import io.github.rupakc.travelplanner.feature.plan.export.ExportRequest
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -44,8 +46,9 @@ class MyPlanViewModelTest {
         )
 
     private val search = FakeSearchRepository()
+    private val fakes = io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney()
 
-    private fun viewModel() = MyPlanViewModel(store, FixedClock(), TestAppDispatchers(main.testDispatcher), PlaceNameLookup(search))
+    private fun viewModel() = MyPlanViewModel(store, FixedClock(), TestAppDispatchers(main.testDispatcher), PlaceNameLookup(search), fakes.journey)
 
     @Test
     fun `the generated name uses the city of an airport code`() =
@@ -194,5 +197,53 @@ class MyPlanViewModelTest {
             viewModel().state.test {
                 assertFalse(expectMostRecentItem().content!!.isEmpty)
             }
+        }
+
+    @Test
+    fun `the completeness meter shows with trips on and reports once`() =
+        runTest(timeout = 30.seconds) {
+            seed()
+            val vm = viewModel()
+            vm.state.test {
+                val content = expectMostRecentItem().content!!
+                assertEquals(true, content.completeness != null)
+                cancelAndIgnoreRemainingEvents()
+            }
+            assertEquals(1, fakes.telemetry.events.count { it.first == "completeness_view" })
+        }
+
+    @Test
+    fun `no meter and no snapshot when trips are off`() =
+        runTest(timeout = 30.seconds) {
+            fakes.flags.flags = io.github.rupakc.travelplanner.core.domain.server.JourneyFlags(trips = false)
+            seed()
+            store.attachSearch(request, kotlinx.serialization.json.buildJsonObject { put("forex", kotlinx.serialization.json.buildJsonObject {}) })
+            val vm = viewModel()
+            vm.state.test {
+                assertEquals(null, expectMostRecentItem().content!!.completeness)
+                vm.onEvent(MyPlanEvent.Save)
+                expectMostRecentItem()
+            }
+            assertTrue(fakes.packs.snapshots.isEmpty())
+        }
+
+    @Test
+    fun `a save sends the snapshot of the streamed sections`() =
+        runTest(timeout = 30.seconds) {
+            seed()
+            store.attachSearch(
+                request,
+                kotlinx.serialization.json.buildJsonObject {
+                    put("forex", kotlinx.serialization.json.buildJsonObject {})
+                    put("hotels", kotlinx.serialization.json.buildJsonObject {})
+                },
+            )
+            val vm = viewModel()
+            vm.state.test {
+                expectMostRecentItem()
+                vm.onEvent(MyPlanEvent.Save)
+                expectMostRecentItem()
+            }
+            assertEquals(setOf("forex"), fakes.packs.snapshots.single().second.keys)
         }
 }

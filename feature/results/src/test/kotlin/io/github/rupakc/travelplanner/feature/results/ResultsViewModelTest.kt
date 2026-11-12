@@ -49,6 +49,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.Optional
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -89,6 +90,7 @@ class ResultsViewModelTest {
     private val fareWatches = FakeFareWatchesRepository()
     private val priceWatches = FakePriceWatchesRepository()
     private val visibility = FakeFeatureVisibility()
+    private val fakeJourney = io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney()
 
     private fun vm(store: io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore = plan) =
         ResultsViewModel(
@@ -105,9 +107,28 @@ class ResultsViewModelTest {
             dispatchers = TestAppDispatchers(main.testDispatcher),
             savedState = SavedStateHandle(),
             placeNames = PlaceNameLookup(search),
+            journey = fakeJourney.journey,
         )
 
     private fun ResultsUiState.section(id: SectionId) = sections.first { it.id == id }
+
+    @Test
+    fun `completeness reaches the state with trips on and is absent with trips off`() =
+        runTest(timeout = 30.seconds) {
+            val vm = vm()
+            vm.state.test {
+                search.start(request)
+                assertNotNull(expectMostRecentItem().completeness)
+                cancelAndIgnoreRemainingEvents()
+            }
+            fakeJourney.flags.flags = io.github.rupakc.travelplanner.core.domain.server.JourneyFlags(trips = false)
+            val off = vm()
+            off.state.test {
+                search.start(request.copy(destination = "Rome"))
+                assertEquals(null, expectMostRecentItem().completeness)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
 
     @Test
     fun `full stream ends done with static sections replaced by AI and the draft attached`() =
