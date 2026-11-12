@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Trip recap (Phase 1/2 T14). Hand-maintained. -->
+    <string name="recap_load_failed">आपका रीकैप लोड नहीं हो सका।</string>
+    <string name="recap_days">दिन: %1$d</string>
+    <string name="recap_places">घूमे गए स्थान: %1$d · रेटिंग वाले: %2$d</string>
+    <string name="recap_avg_stars">औसत रेटिंग: %1$s स्टार</string>
+    <string name="recap_distance">दूरी: %1$s किमी</string>
+    <string name="recap_distance_none">दूरी उपलब्ध नहीं</string>
+    <string name="recap_spend_title">खर्च</string>
+    <string name="recap_spent">खर्च: %1$s</string>
+    <string name="recap_budget">बजट: %1$s</string>
+    <string name="recap_over_budget">बजट से %1$s अधिक</string>
+    <string name="recap_under_budget">बजट में %1$s बचे</string>
+    <string name="recap_plan_cost">अनुमानित लागत: %1$s</string>
+    <string name="recap_unconverted">रूपांतरित नहीं: %1$s</string>
+    <string name="recap_route_title">आपका रूट</string>
+    <string name="recap_route_description">रूट मैप</string>
+    <string name="recap_countries_title">देश</string>
+    <string name="recap_country_new">नया: %1$s</string>
+    <string name="recap_complete">रीकैप पूरा करें</string>
+    <string name="recap_completed">रीकैप पूरा हुआ</string>
+    <string name="recap_err_not_ready">यह यात्रा अभी खत्म नहीं हुई है, इसलिए रीकैप पूरा नहीं किया जा सकता।</string>
+    <string name="recap_err_generic">रीकैप पूरा नहीं हो सका। फिर कोशिश करें।</string>
+    <string name="recap_share">रीकैप साझा करें</string>
+    <string name="recap_share_chooser">अपना रीकैप साझा करें</string>
+    <string name="recap_share_head">मेरी यात्रा: %1$s</string>
+    <string name="recap_share_stats">दिन: %1$d · स्थान: %2$d</string>
+    <string name="recap_where_next">अगला कहाँ?</string>
+</resources>

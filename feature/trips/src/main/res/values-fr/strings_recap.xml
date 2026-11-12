@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Trip recap (Phase 1/2 T14). Hand-maintained. -->
+    <string name="recap_load_failed">Impossible de charger votre récapitulatif.</string>
+    <string name="recap_days">Jours : %1$d</string>
+    <string name="recap_places">Lieux visités : %1$d · notés : %2$d</string>
+    <string name="recap_avg_stars">Note moyenne : %1$s étoiles</string>
+    <string name="recap_distance">Distance : %1$s km</string>
+    <string name="recap_distance_none">Distance indisponible</string>
+    <string name="recap_spend_title">Dépenses</string>
+    <string name="recap_spent">Dépensé : %1$s</string>
+    <string name="recap_budget">Budget : %1$s</string>
+    <string name="recap_over_budget">Dépassement du budget de %1$s</string>
+    <string name="recap_under_budget">Il vous reste %1$s de votre budget</string>
+    <string name="recap_plan_cost">Coût prévu : %1$s</string>
+    <string name="recap_unconverted">Non converti : %1$s</string>
+    <string name="recap_route_title">Votre itinéraire</string>
+    <string name="recap_route_description">Carte de l’itinéraire</string>
+    <string name="recap_countries_title">Pays</string>
+    <string name="recap_country_new">Nouveau : %1$s</string>
+    <string name="recap_complete">Marquer le récapitulatif comme terminé</string>
+    <string name="recap_completed">Récapitulatif terminé</string>
+    <string name="recap_err_not_ready">Ce voyage n’est pas encore terminé : le récapitulatif ne peut pas être finalisé.</string>
+    <string name="recap_err_generic">Impossible de terminer le récapitulatif. Réessayez.</string>
+    <string name="recap_share">Partager le récapitulatif</string>
+    <string name="recap_share_chooser">Partagez votre récapitulatif</string>
+    <string name="recap_share_head">Mon voyage : %1$s</string>
+    <string name="recap_share_stats">Jours : %1$d · Lieux : %2$d</string>
+    <string name="recap_where_next">Et ensuite ?</string>
+</resources>

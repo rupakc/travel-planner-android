@@ -1,0 +1,305 @@
+package io.github.rupakc.travelplanner.feature.trips.recap
+
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
+import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
+import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
+import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
+import io.github.rupakc.travelplanner.core.domain.journey.RecapRules
+import io.github.rupakc.travelplanner.core.model.trips.Recap
+import io.github.rupakc.travelplanner.core.model.trips.RecapCountry
+import io.github.rupakc.travelplanner.core.model.trips.Trip
+import io.github.rupakc.travelplanner.feature.trips.R
+import io.github.rupakc.travelplanner.feature.trips.trip.TripTabContent
+import java.text.NumberFormat
+import java.util.Currency
+
+/**
+ * The Recap tab for `TripTabContent` (`tripsGraph(tabContent = mapOf(TripTab.Recap to recapTabContent(...)))`).
+ * [onWhereNext] opens Explore; a button whose lambda is null is not shown.
+ */
+fun recapTabContent(onWhereNext: (() -> Unit)? = null): TripTabContent =
+    { _, modifier ->
+        RecapRoute(onWhereNext, modifier)
+    }
+
+@Composable
+fun RecapRoute(onWhereNext: (() -> Unit)?, modifier: Modifier = Modifier, viewModel: RecapViewModel = hiltViewModel()) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val chooser = stringResource(R.string.recap_share_chooser)
+    val shareText = state.recap?.let { shareText(it) }
+    RecapScreen(
+        state = state,
+        onEvent = viewModel::onEvent,
+        onShare = {
+            if (shareText != null && share(context, shareText, chooser)) viewModel.onEvent(RecapEvent.Shared)
+        },
+        onWhereNext =
+            onWhereNext?.let { f ->
+                {
+                    viewModel.onEvent(RecapEvent.WhereNext)
+                    f()
+                }
+            },
+        modifier = modifier,
+    )
+}
+
+/** The share text of a recap: counts and countries only, no amounts. */
+@Composable
+internal fun shareText(recap: Recap): String {
+    val days = recap.days ?: 0
+    val places = recap.visitedCount
+    val head = stringResource(R.string.recap_share_head, recap.title)
+    val line = stringResource(R.string.recap_share_stats, days, places)
+    val countries = recap.countries.mapNotNull { it.name ?: it.code.takeIf { c -> c.isNotBlank() } }
+    return listOfNotNull(head, line, countries.takeIf { it.isNotEmpty() }?.joinToString(", ")).joinToString("\n")
+}
+
+private fun share(context: Context, text: String, chooserTitle: String): Boolean =
+    try {
+        val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
+        context.startActivity(Intent.createChooser(send, chooserTitle).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        true
+    } catch (_: ActivityNotFoundException) {
+        false
+    }
+
+@Composable
+fun RecapScreen(
+    state: RecapUiState,
+    onEvent: (RecapEvent) -> Unit,
+    onShare: () -> Unit,
+    onWhereNext: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    val recap = state.recap
+    when {
+        state.loading -> {
+            SkeletonList(modifier, message = stringResource(R.string.trip_loading))
+        }
+
+        state.failed || recap == null -> {
+            ErrorState(null, modifier, title = stringResource(R.string.recap_load_failed), onRetry = { onEvent(RecapEvent.Retry) })
+        }
+
+        else -> {
+            LazyColumn(
+                modifier.fillMaxSize(),
+                contentPadding = PaddingValues(TravelTheme.spacing.gutter),
+                verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
+            ) {
+                item(key = "stats", contentType = "stats") { StatsCard(recap) }
+                item(key = "spend", contentType = "spend") { SpendCard(state, recap) }
+                val points = RecapRules.routePoints(recap)
+                if (points.size >= 2) item(key = "route", contentType = "route") { RouteCard(points) }
+                if (recap.countries.isNotEmpty()) item(key = "countries", contentType = "countries") { CountriesCard(recap.countries, state.newCountries) }
+                item(key = "actions", contentType = "actions") { Actions(state, recap, onEvent, onShare, onWhereNext) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatsCard(recap: Recap) {
+    TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item) {
+        Column(Modifier.padding(TravelTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
+            Text(recap.title, style = TravelTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
+            recap.days?.let { Text(stringResource(R.string.recap_days, it), style = TravelTheme.typography.titleMedium) }
+            Text(stringResource(R.string.recap_places, recap.visitedCount, recap.ratedCount), style = TravelTheme.typography.bodyMedium)
+            RecapRules.averageStars(recap)?.let {
+                Text(stringResource(R.string.recap_avg_stars, oneDecimal(it)), style = TravelTheme.typography.bodyMedium)
+            }
+            // A trip without coordinates has no distance: say so instead of showing 0.
+            val distance = RecapRules.distanceKm(recap)
+            Text(
+                if (distance == null) {
+                    stringResource(R.string.recap_distance_none)
+                } else {
+                    stringResource(R.string.recap_distance, NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }.format(distance))
+                },
+                style = TravelTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+private fun usd(amount: Number): String =
+    NumberFormat.getCurrencyInstance().apply {
+        currency = Currency.getInstance("USD")
+        maximumFractionDigits = 0
+    }.format(amount)
+
+@Composable
+private fun SpendCard(state: RecapUiState, recap: Recap) {
+    val spend = RecapRules.spend(recap)
+    val plan = state.planCostUsd
+    if (spend == null && plan == null) return
+    TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item) {
+        Column(Modifier.padding(TravelTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
+            Text(stringResource(R.string.recap_spend_title), style = TravelTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+            if (spend != null) {
+                Text(stringResource(R.string.recap_spent, usd(spend.spent)), style = TravelTheme.typography.titleMedium)
+                spend.budget?.let { budget ->
+                    Text(stringResource(R.string.recap_budget, usd(budget)), style = TravelTheme.typography.bodyMedium)
+                    Text(
+                        if (spend.over) {
+                            stringResource(
+                                R.string.recap_over_budget,
+                                usd(spend.amount),
+                            )
+                        } else {
+                            stringResource(R.string.recap_under_budget, usd(spend.amount))
+                        },
+                        style = TravelTheme.typography.bodyMedium,
+                        color = if (spend.over) TravelTheme.colors.error else TravelTheme.colors.onSurfaceVariant,
+                    )
+                }
+            }
+            plan?.let {
+                Text(stringResource(R.string.recap_plan_cost, usd(it)), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+            }
+            if (recap.spend.unconverted.isNotEmpty()) {
+                Text(
+                    stringResource(R.string.recap_unconverted, recap.spend.unconverted.joinToString(", ")),
+                    style = TravelTheme.typography.bodySmall,
+                    color = TravelTheme.colors.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RouteCard(points: List<Pair<Double, Double>>) {
+    val description = stringResource(R.string.recap_route_description)
+    val line = TravelTheme.colors.primary
+    val dot = TravelTheme.colors.onSurface
+    val projected = remember(points) { RecapRules.project(points) }
+    TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item) {
+        Column(Modifier.padding(TravelTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+            Text(stringResource(R.string.recap_route_title), style = TravelTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+            Canvas(Modifier.fillMaxWidth().aspectRatio(1.6f).semantics { contentDescription = description }) {
+                val pad = 16.dp.toPx()
+                val box = Size(size.width - 2 * pad, size.height - 2 * pad)
+                val side = minOf(box.width, box.height)
+                val origin = Offset(pad + (box.width - side) / 2, pad + (box.height - side) / 2)
+                val at = { p: RecapRules.MapPoint -> Offset(origin.x + p.x * side, origin.y + p.y * side) }
+                val path = Path()
+                projected.forEachIndexed { i, p -> at(p).let { if (i == 0) path.moveTo(it.x, it.y) else path.lineTo(it.x, it.y) } }
+                drawPath(path, line, style = Stroke(width = 3.dp.toPx()))
+                projected.forEach { drawCircle(dot, radius = 3.dp.toPx(), center = at(it)) }
+                // Start and end are larger so direction reads without colour.
+                drawCircle(line, radius = 6.dp.toPx(), center = at(projected.first()))
+                drawCircle(line, radius = 6.dp.toPx(), center = at(projected.last()))
+            }
+        }
+    }
+}
+
+@Composable
+private fun CountriesCard(countries: List<RecapCountry>, newCountries: Set<String>) {
+    TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item) {
+        Column(Modifier.padding(TravelTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+            Text(stringResource(R.string.recap_countries_title), style = TravelTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+                countries.forEach { Stamp(it, isNew = it.new || it.code in newCountries) }
+            }
+        }
+    }
+}
+
+/** A country stamp; a new one scales in once (static under reduced motion) and says "New" in words. */
+@Composable
+private fun Stamp(country: RecapCountry, isNew: Boolean) {
+    val reduceMotion = rememberReduceMotion()
+    var shown by remember { mutableStateOf(reduceMotion || !isNew) }
+    LaunchedEffect(Unit) { shown = true }
+    val scale by animateFloatAsState(if (shown) 1f else 0.6f, label = "stamp")
+    val name = country.name ?: country.code
+    val label = if (isNew) stringResource(R.string.recap_country_new, name) else name
+    Text(
+        label,
+        style = TravelTheme.typography.labelLarge,
+        modifier = Modifier.scale(if (reduceMotion) 1f else scale).semantics { contentDescription = label }.padding(TravelTheme.spacing.xs),
+        color = if (isNew) TravelTheme.colors.primary else TravelTheme.colors.onSurface,
+    )
+}
+
+@Composable
+private fun Actions(state: RecapUiState, recap: Recap, onEvent: (RecapEvent) -> Unit, onShare: () -> Unit, onWhereNext: (() -> Unit)?) {
+    Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+        Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }) {
+            if (recap.completedAt != null) {
+                Text(stringResource(R.string.recap_completed), style = TravelTheme.typography.titleSmall, color = TravelTheme.colors.primary)
+            }
+            state.completeFailure?.let {
+                Text(
+                    if (it.notReady) stringResource(R.string.recap_err_not_ready) else it.message ?: stringResource(R.string.recap_err_generic),
+                    style = TravelTheme.typography.bodySmall,
+                    color = TravelTheme.colors.error,
+                )
+            }
+        }
+        if (RecapRules.showComplete(recap)) {
+            TpButton(
+                stringResource(R.string.recap_complete),
+                { onEvent(RecapEvent.Complete) },
+                Modifier.fillMaxWidth(),
+                loading = state.completing,
+                tid = "recap.complete",
+            )
+        }
+        TpButton(stringResource(R.string.recap_share), onShare, Modifier.fillMaxWidth(), variant = TpButtonVariant.Secondary, tid = "recap.share")
+        onWhereNext?.let {
+            TpButton(stringResource(R.string.recap_where_next), it, Modifier.fillMaxWidth(), variant = TpButtonVariant.Secondary, tid = "recap.where_next")
+        }
+    }
+}
+
+private fun oneDecimal(value: Double): String =
+    NumberFormat.getNumberInstance().apply {
+        minimumFractionDigits = 1
+        maximumFractionDigits = 1
+    }.format(value)
