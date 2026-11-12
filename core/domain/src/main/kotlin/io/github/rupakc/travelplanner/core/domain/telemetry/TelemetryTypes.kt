@@ -85,6 +85,26 @@ object TelemetryEvents {
     const val SHARE_ACTION = "share_action"
     const val SHARE_REVOKE = "share_revoke"
     const val SHARE_VIEW = "share_view"
+    const val SOCIAL_PROFILE_VIEW = "social_profile_view"
+    const val SOCIAL_PROFILE_SAVE = "social_profile_save"
+    const val SOCIAL_FEED_VIEW = "social_feed_view"
+    const val SOCIAL_IDEA_PUBLISH = "social_idea_publish"
+    const val SOCIAL_IDEA_OPEN = "social_idea_open"
+    const val SOCIAL_IDEA_LIKE = "social_idea_like"
+    const val SOCIAL_IDEA_SAVE = "social_idea_save"
+    const val SOCIAL_COMMENT = "social_comment"
+    const val SOCIAL_FOLLOW = "social_follow"
+    const val SOCIAL_REPORT = "social_report"
+    const val SOCIAL_BLOCK = "social_block"
+    const val PLAY_STATE_VIEW = "play_state_view"
+    const val PLAY_QUIZ_START = "play_quiz_start"
+    const val PLAY_QUIZ_ANSWER = "play_quiz_answer"
+    const val PLAY_QUIZ_DONE = "play_quiz_done"
+    const val PLAY_H2H_CREATE = "play_h2h_create"
+    const val PLAY_H2H_OPEN = "play_h2h_open"
+    const val PLAY_H2H_RESULT = "play_h2h_result"
+    const val PLAY_BOARD_VIEW = "play_board_view"
+    const val PLAY_CHALLENGE_VIEW = "play_challenge_view"
 }
 
 /**
@@ -158,4 +178,14 @@ object TelemetryEnums {
     val ALERT_KIND = setOf("flight", "hotel", "activity", "trip")
     val ALERT_VERDICT = setOf("great", "good", "typical", "high", "none")
     val ALERT_ADVICE_OUTCOME = setOf("ok", "cached", "error")
+    val SOCIAL_VISIBILITY = setOf("private", "followers", "public")
+    val SOCIAL_FEED_SCOPE = setOf("for_you", "following", "new")
+    val SOCIAL_IDEA_KIND = setOf("plan", "recap")
+    val SOCIAL_FOLLOW_STATE = setOf("following", "pending", "none")
+    val SOCIAL_REPORT_TARGET = setOf("idea", "comment", "profile")
+    val SOCIAL_REPORT_REASON = setOf("spam", "abuse", "sexual", "violence", "misinformation", "other")
+    val PLAY_MODE = setOf("daily", "pack", "challenge", "h2h")
+    val PLAY_PACK = setOf("flags", "capitals", "landmarks", "cuisine", "none")
+    val PLAY_WINNER = setOf("you", "them", "draw")
+    val PLAY_BOARD_SCOPE = setOf("global", "friends")
 }

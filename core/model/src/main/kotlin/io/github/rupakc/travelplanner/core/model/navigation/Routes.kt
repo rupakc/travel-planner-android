@@ -152,6 +152,9 @@ object DeepLinks {
 
 @Serializable data object PlayRoute : AppRoute
 
+/** Social entry (profile, follows, ideas feed; `feature:social`). Reached only when `features.social >= 1`. */
+@Serializable data object SocialRoute : AppRoute
+
 // --- Phase 2: journey -------------------------------------------------------
 @Serializable data object TripsRoute : AppRoute
 

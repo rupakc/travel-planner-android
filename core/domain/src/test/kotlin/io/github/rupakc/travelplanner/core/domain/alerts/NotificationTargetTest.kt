@@ -68,4 +68,14 @@ class NotificationTargetTest {
         assertEquals(AlertIcon.CALENDAR, alertKindFor(AppNotification(id = 1, kind = "trip_morning")).icon)
         alertKindFor(AppNotification(id = 1, kind = "from_the_future"))
     }
+
+    @Test
+    fun `social kinds open the feed and quiz kinds their match`() {
+        assertEquals(NotificationTarget.Feed, resolveNotificationTarget("social_idea_saved", "/feed", null, null, null))
+        assertEquals(NotificationTarget.Feed, resolveNotificationTarget("social_new_follower", "/feed", null, null, null, "social"))
+        assertEquals(NotificationTarget.H2h("m-1"), resolveNotificationTarget("quiz_h2h_invite", "/play/h2h/m-1", null, null, null))
+        assertEquals(NotificationTarget.H2h("m1"), resolveNotificationTarget("quiz_h2h_result", "/play/h2h/m1", null, null, null, "quiz"))
+        assertEquals(NotificationTarget.Inbox, resolveNotificationTarget("quiz_h2h_result", null, null, null, null))
+        assertEquals(NotificationTarget.Inbox, resolveNotificationTarget("quiz_h2h_invite", "https://evil.test/x", null, null, null))
+    }
 }

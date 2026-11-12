@@ -84,6 +84,8 @@ class ShellTabsTest {
         assertEquals(JourneyFlags.OFF, decode(encode(JourneyFlags.OFF)))
         assertEquals(on, decode(encode(on)))
         assertEquals(JourneyFlags(sharing = true), decode(encode(JourneyFlags(sharing = true))))
+        assertEquals(JourneyFlags(social = true, play = true), decode(encode(JourneyFlags(social = true, play = true))))
+        assertEquals(JourneyFlags(play = true), decode(encode(JourneyFlags(play = true))))
     }
 
     @Test

@@ -119,6 +119,7 @@ import io.github.rupakc.travelplanner.feature.share.myshares.mySharesGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareCreateGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareOpenGraph
+import io.github.rupakc.travelplanner.feature.social.navigation.socialGraph
 import io.github.rupakc.travelplanner.feature.trips.journal.journalTabContent
 import io.github.rupakc.travelplanner.feature.trips.money.moneyTabContent
 import io.github.rupakc.travelplanner.feature.trips.navigation.tripsGraph
@@ -179,6 +180,10 @@ data class ShellMode(
     val offlinePack: Boolean = false,
     /** Share links 2.0 is on (`features.sharing >= 1`). */
     val sharing: Boolean = false,
+    /** Profiles and the ideas feed are on (`features.social >= 1`). */
+    val social: Boolean = false,
+    /** Quizzes, head-to-head and boards exist on the server (`features.play >= 1`; the game gate is separate). */
+    val play: Boolean = false,
 )
 
 /** The non-modal consent card: first run (no close button), reopened choices (current choice selected), or nothing. */
@@ -387,6 +392,8 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
             shareOpenGraph(onBack = { navController.popBackStack() }, onOpen = { navController.navigate(ShareRoute(it)) })
             shareCreateGraph(onClose = { navController.popBackStack() })
             mySharesGraph(onBack = { navController.popBackStack() })
+            // Social (profile, feed): the entry points are gated on `shell.social`; the screens land with the feature tasks.
+            socialGraph()
             shareGraph(
                 onBack = {
                     if (!navController.popBackStack()) {

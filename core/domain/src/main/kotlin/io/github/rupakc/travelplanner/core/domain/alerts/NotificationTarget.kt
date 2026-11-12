@@ -14,6 +14,12 @@ sealed interface NotificationTarget {
     /** The trip's Today tab. */
     data class TripToday(val planId: Long) : NotificationTarget
 
+    /** The ideas feed (`/feed`): a social kind (idea saved, new follower). */
+    data object Feed : NotificationTarget
+
+    /** A head-to-head match (`/play/h2h/{id}`): an invite or a result. */
+    data class H2h(val matchId: String) : NotificationTarget
+
     /** The notification list: the safe fallback when nothing more specific is known. */
     data object Inbox : NotificationTarget
 }
@@ -35,10 +41,24 @@ fun notificationCategory(category: String?, kind: String?): NotificationCategory
         !category.isNullOrBlank() -> NotificationCategory.from(category)
         kind == "trip_morning" -> NotificationCategory.MORNING_BRIEF
         isTripPushKind(kind) -> NotificationCategory.TRIP_REMINDERS
+        kind in SOCIAL_PUSH_KINDS -> NotificationCategory.SOCIAL
+        kind in QUIZ_PUSH_KINDS -> NotificationCategory.QUIZ
         else -> NotificationCategory.PRICE_DROPS
     }
 
 private const val MAX_ID_DIGITS = 15
+private const val MAX_MATCH_ID = 64
+private val H2H_PATH = Regex("^/play/h2h/([A-Za-z0-9_-]{1,$MAX_MATCH_ID})/?$")
+
+/** Social kinds (category `social`); both open the feed. */
+val SOCIAL_PUSH_KINDS: Set<String> = setOf("social_idea_saved", "social_new_follower")
+
+/** Head-to-head kinds (category `quiz`). */
+val QUIZ_PUSH_KINDS: Set<String> = setOf("quiz_h2h_invite", "quiz_h2h_result")
+
+/** The match id of a `/play/h2h/{id}` web path and nothing else. */
+fun parseH2hPath(path: String?): String? = path?.let { H2H_PATH.matchEntire(it.substringBefore('?')) }?.groupValues?.get(1)
+
 private val TRIP_PATH = Regex("^/trips/(\\d{1,$MAX_ID_DIGITS})(/today)?/?$")
 
 /** The trip id of a web trip path (`/trips/12`, `/trips/12/today`) and nothing else (allow-list, never a free-form URL). */
@@ -62,6 +82,8 @@ fun resolveNotificationTarget(
         val id = planId?.trim()?.takeIf { it.length <= MAX_ID_DIGITS }?.toLongOrNull()?.takeIf { it > 0 } ?: parseTripPath(link)
         return id?.let(NotificationTarget::TripToday) ?: NotificationTarget.Inbox
     }
+    if (kind in SOCIAL_PUSH_KINDS) return NotificationTarget.Feed
+    if (kind in QUIZ_PUSH_KINDS) return parseH2hPath(link)?.let(NotificationTarget::H2h) ?: NotificationTarget.Inbox
     val alert = parseAlertsPath(link) ?: AlertLink(watchKind, watchId)
     val priceLike = notificationCategory(category, kind) == NotificationCategory.PRICE_DROPS
     return if (priceLike || alert.watchId != null || link?.startsWith("/alerts") == true) NotificationTarget.Alert(alert) else NotificationTarget.Inbox

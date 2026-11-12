@@ -54,4 +54,5 @@ include(
     ":feature:account",
     ":feature:trips",
     ":feature:share",
+    ":feature:social",
 )

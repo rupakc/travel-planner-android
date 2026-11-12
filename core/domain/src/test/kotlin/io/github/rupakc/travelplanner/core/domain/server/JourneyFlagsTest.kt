@@ -60,4 +60,17 @@ class JourneyFlagsTest {
         val absent = TravelJson.decodeFromString(ClientConfigDto.serializer(), """{"features":{"accounts":true}}""")
         assertFalse(JourneyFlags(absent).sharing)
     }
+
+    @Test
+    fun `social and play need their own flag of at least 1`() {
+        val on = TravelJson.decodeFromString(ClientConfigDto.serializer(), """{"features":{"accounts":true,"social":1,"play":"1"}}""")
+        assertTrue(JourneyFlags(on).social)
+        assertTrue(JourneyFlags(on).play)
+        val mixed = TravelJson.decodeFromString(ClientConfigDto.serializer(), """{"features":{"accounts":true,"social":0,"play":1}}""")
+        assertFalse(JourneyFlags(mixed).social)
+        assertTrue(JourneyFlags(mixed).play)
+        val absent = TravelJson.decodeFromString(ClientConfigDto.serializer(), """{"features":{"accounts":true}}""")
+        assertFalse(JourneyFlags(absent).social)
+        assertFalse(JourneyFlags(absent).play)
+    }
 }

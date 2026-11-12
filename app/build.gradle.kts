@@ -116,6 +116,7 @@ dependencies {
     implementation(projects.feature.alerts)
     implementation(projects.feature.settings)
     implementation(projects.feature.nearby)
+    implementation(projects.feature.social)
     implementation(projects.feature.play)
     implementation(projects.feature.account)
     implementation(projects.feature.trips)
