@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Today tab and check-in (Phase 1/2 T10). Hand-maintained. -->
+    <string name="today_day">দিন %1$d</string>
+    <string name="today_checkin">আজকের চেক-ইন করুন</string>
+    <string name="today_checked_in">আজকের চেক-ইন হয়ে গেছে</string>
+    <string name="today_streak">চেক-ইন ধারা: %1$d</string>
+    <string name="today_new_country">নতুন দেশ আনলক হয়েছে! এটি এখন আপনার পাসপোর্টে আছে।</string>
+    <string name="today_err_out_of_trip">আজ এই ভ্রমণের তারিখের বাইরে, তাই চেক-ইন করার কিছু নেই।</string>
+    <string name="today_err_day_invalid">আপনার ডিভাইসের তারিখ ঠিক মনে হচ্ছে না। তারিখ ও সময়ের সেটিংস দেখে আবার চেষ্টা করুন।</string>
+    <string name="today_err_generic">এখন চেক-ইন করা গেল না। আবার চেষ্টা করুন।</string>
+    <string name="today_next_up">এরপর</string>
+    <string name="today_directions">দিকনির্দেশ</string>
+    <string name="today_emergency">জরুরি তথ্য</string>
+    <string name="today_add_expense">খরচ যোগ করুন</string>
+    <string name="today_nothing">আজকের জন্য কিছু নির্ধারিত নেই।</string>
+    <string name="today_load_failed">আজকের তথ্য লোড করা যায়নি।</string>
+</resources>

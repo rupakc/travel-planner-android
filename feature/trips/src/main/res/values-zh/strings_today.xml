@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Today tab and check-in (Phase 1/2 T10). Hand-maintained. -->
+    <string name="today_day">第 %1$d 天</string>
+    <string name="today_checkin">今日签到</string>
+    <string name="today_checked_in">今日已签到</string>
+    <string name="today_streak">连续签到：%1$d</string>
+    <string name="today_new_country">解锁新国家！它已记入你的护照。</string>
+    <string name="today_err_out_of_trip">今天不在本次行程的日期范围内，无需签到。</string>
+    <string name="today_err_day_invalid">你设备上的日期似乎不正确。请检查日期和时间设置后重试。</string>
+    <string name="today_err_generic">暂时无法签到，请重试。</string>
+    <string name="today_next_up">下一站</string>
+    <string name="today_directions">导航</string>
+    <string name="today_emergency">紧急信息</string>
+    <string name="today_add_expense">添加开销</string>
+    <string name="today_nothing">今天没有安排。</string>
+    <string name="today_load_failed">无法加载今日内容。</string>
+</resources>
