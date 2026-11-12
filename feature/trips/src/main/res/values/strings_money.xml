@@ -18,6 +18,7 @@
     <string name="money_waiting_sync">Waiting to sync</string>
     <string name="money_delete_failed">Couldn\'t delete that expense. It was put back.</string>
     <string name="money_queue_failed">Couldn\'t save this on the device. Try again.</string>
+    <string name="money_offline_notice">You are offline. Expenses you add are saved on this phone and sync later.</string>
     <string name="money_load_failed">Couldn\'t load expenses.</string>
     <string name="money_cat_flights">Flights</string>
     <string name="money_cat_lodging">Lodging</string>

@@ -59,6 +59,8 @@ sealed interface ExpenseNotice {
 data class ExpensesUiState(
     val loading: Boolean = true,
     val failed: Boolean = false,
+    /** The server could not be reached and nothing was saved for this trip: an empty list that still takes offline adds. */
+    val offline: Boolean = false,
     val expenses: List<Expense> = emptyList(),
     /** Adds made offline and not yet synced. */
     val pending: List<Expense> = emptyList(),
@@ -136,7 +138,7 @@ class ExpensesViewModel
         }
 
         private fun load() {
-            _state.update { it.copy(loading = it.expenses.isEmpty(), failed = false) }
+            _state.update { it.copy(loading = it.expenses.isEmpty(), failed = false, offline = false) }
             viewModelScope.launch {
                 when (val result = repo.list(tripId)) {
                     is AppResult.Success -> {
@@ -146,6 +148,7 @@ class ExpensesViewModel
                             it.copy(
                                 loading = false,
                                 failed = false,
+                                offline = false,
                                 expenses = r.expenses,
                                 totals = r.totals,
                                 rate = r.rate,
@@ -155,7 +158,12 @@ class ExpensesViewModel
                     }
 
                     is AppResult.Failure -> {
-                        _state.update { it.copy(loading = false, failed = it.expenses.isEmpty() && it.pending.isEmpty()) }
+                        // No network and nothing saved: still an (empty) list, so the add form works and queues in the outbox.
+                        val offline = result.error is AppError.Network
+                        _state.update {
+                            val empty = it.expenses.isEmpty() && it.pending.isEmpty()
+                            it.copy(loading = false, failed = empty && !offline, offline = offline && empty)
+                        }
                     }
                 }
             }

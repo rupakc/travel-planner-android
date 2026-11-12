@@ -18,6 +18,7 @@
     <string name="money_waiting_sync">Wartet auf Synchronisierung</string>
     <string name="money_delete_failed">Die Ausgabe konnte nicht gelöscht werden. Sie wurde wiederhergestellt.</string>
     <string name="money_queue_failed">Auf dem Gerät konnte nicht gespeichert werden. Versuch es noch einmal.</string>
+    <string name="money_offline_notice">Du bist offline. Hinzugefügte Ausgaben werden auf diesem Telefon gespeichert und später synchronisiert.</string>
     <string name="money_load_failed">Ausgaben konnten nicht geladen werden.</string>
     <string name="money_cat_flights">Flüge</string>
     <string name="money_cat_lodging">Unterkunft</string>

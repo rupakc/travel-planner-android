@@ -18,6 +18,7 @@
     <string name="money_waiting_sync">等待同步</string>
     <string name="money_delete_failed">无法删除这笔开销，已恢复显示。</string>
     <string name="money_queue_failed">无法保存到设备，请重试。</string>
+    <string name="money_offline_notice">你已离线。你添加的开销会保存在本手机上，稍后同步。</string>
     <string name="money_load_failed">无法加载开销。</string>
     <string name="money_cat_flights">机票</string>
     <string name="money_cat_lodging">住宿</string>

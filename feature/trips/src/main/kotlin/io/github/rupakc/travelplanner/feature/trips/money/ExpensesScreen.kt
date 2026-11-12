@@ -74,6 +74,16 @@ private fun ExpenseList(state: ExpensesUiState, onEvent: (ExpensesEvent) -> Unit
         item(key = "heading") {
             Text(stringResource(R.string.money_title), style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
         }
+        if (state.offline) {
+            item(key = "offline") {
+                Text(
+                    stringResource(R.string.money_offline_notice),
+                    style = TravelTheme.typography.bodySmall,
+                    color = TravelTheme.colors.onSurfaceVariant,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                )
+            }
+        }
         state.notice?.let { notice -> item(key = "notice") { Notice(notice) { onEvent(ExpensesEvent.DismissNotice) } } }
         item(key = "totals") { Totals(state) }
         val form = state.form

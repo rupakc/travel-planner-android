@@ -18,6 +18,7 @@
     <string name="money_waiting_sync">सिंक की प्रतीक्षा में</string>
     <string name="money_delete_failed">वह खर्च हटाया नहीं जा सका। उसे वापस रख दिया गया है।</string>
     <string name="money_queue_failed">डिवाइस पर सेव नहीं हो सका। फिर कोशिश करें।</string>
+    <string name="money_offline_notice">आप ऑफ़लाइन हैं। आपके जोड़े गए खर्च इस फ़ोन पर सहेजे जाते हैं और बाद में सिंक होंगे।</string>
     <string name="money_load_failed">खर्च लोड नहीं हो सके।</string>
     <string name="money_cat_flights">उड़ानें</string>
     <string name="money_cat_lodging">ठहरना</string>
