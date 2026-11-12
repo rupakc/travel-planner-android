@@ -211,7 +211,9 @@ internal class TelemetryEngine
                     settings = resolved
                 }
 
-                postDisabled -> Unit
+                postDisabled -> {
+                    Unit
+                }
 
                 else -> {
                     turnOn(resolved)
