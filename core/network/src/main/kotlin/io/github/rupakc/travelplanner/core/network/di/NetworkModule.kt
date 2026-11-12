@@ -12,10 +12,13 @@ import io.github.rupakc.travelplanner.core.common.DefaultAppDispatchers
 import io.github.rupakc.travelplanner.core.common.SystemAppClock
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.network.AiLocaleInterceptor
+import io.github.rupakc.travelplanner.core.network.ApiRefreshCall
 import io.github.rupakc.travelplanner.core.network.AuthInterceptor
 import io.github.rupakc.travelplanner.core.network.BaseUrlInterceptor
 import io.github.rupakc.travelplanner.core.network.PLACEHOLDER_BASE_URL
 import io.github.rupakc.travelplanner.core.network.RedactingHttpLogger
+import io.github.rupakc.travelplanner.core.network.RefreshCall
+import io.github.rupakc.travelplanner.core.network.api.AccountApi
 import io.github.rupakc.travelplanner.core.network.api.AdminApi
 import io.github.rupakc.travelplanner.core.network.api.AuthApi
 import io.github.rupakc.travelplanner.core.network.api.DevicesApi
@@ -55,6 +58,11 @@ annotation class AiHttp
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class StreamingHttp
+
+/** Token refresh only: base-URL rewriting, no bearer, no auth recovery (so a refresh can never recurse). */
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class RefreshHttp
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -106,6 +114,20 @@ object NetworkModule {
                 }
             }
             .build()
+
+    @Provides @Singleton @RefreshHttp
+    fun refreshOkHttp(baseUrl: BaseUrlInterceptor): OkHttpClient =
+        OkHttpClient.Builder()
+            .connectTimeout(Duration.ofSeconds(CONNECT_SECONDS))
+            .readTimeout(Duration.ofSeconds(READ_SECONDS))
+            .addInterceptor(baseUrl)
+            .build()
+
+    @Provides @Singleton
+    fun refreshCall(
+        @RefreshHttp client: Lazy<OkHttpClient>,
+        json: Json,
+    ): RefreshCall = ApiRefreshCall(retrofit(client, json).create(AccountApi::class.java))
 
     @Provides @Singleton @AiHttp
     fun aiOkHttp(

@@ -1,5 +1,7 @@
 package io.github.rupakc.travelplanner.core.data.impl
 
+import android.os.Build
+import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.common.AppResult
@@ -12,10 +14,12 @@ import io.github.rupakc.travelplanner.core.datastore.SessionStore
 import io.github.rupakc.travelplanner.core.model.auth.ChangePasswordRequest
 import io.github.rupakc.travelplanner.core.model.auth.EmailUpdateRequest
 import io.github.rupakc.travelplanner.core.model.auth.LoginRequest
+import io.github.rupakc.travelplanner.core.model.auth.LogoutRequest
 import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.devices.UnregisterDeviceRequest
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.network.BaseUrlProvider
+import io.github.rupakc.travelplanner.core.network.api.AccountApi
 import io.github.rupakc.travelplanner.core.network.api.AuthApi
 import io.github.rupakc.travelplanner.core.network.api.DevicesApi
 import io.github.rupakc.travelplanner.core.network.apiCall
@@ -36,6 +40,8 @@ class AuthRepositoryImpl
         private val pushTokenSource: Optional<PushTokenSource>,
         private val baseUrlProvider: BaseUrlProvider,
         private val sessionCleaner: SessionCleaner,
+        private val accountApi: AccountApi,
+        private val clock: AppClock,
     ) : AuthRepository {
         // A 401 or a locally expired JWT only signs out (the session reads null → Login); the user's draft,
         // cached plans, recent searches and chat survive so their work outlives a 24 h token. Local data is
@@ -45,7 +51,7 @@ class AuthRepositoryImpl
 
         override suspend fun login(username: String, password: String): AppResult<User> {
             val response =
-                when (val result = apiCall { authApi.login(LoginRequest(username.trim(), password)) }) {
+                when (val result = apiCall { authApi.login(LoginRequest(username.trim(), password, CLIENT, deviceName())) }) {
                     is AppResult.Failure -> return result
                     is AppResult.Success -> result.value
                 }
@@ -57,20 +63,38 @@ class AuthRepositoryImpl
                 val otherUser = previousUser != null && previousUser != response.user.username
                 val otherServer = previousServer != null && server != null && previousServer != server
                 if (otherUser || otherServer) sessionCleaner.clearUserData()
-                sessionStore.save(Session(response.accessToken, response.user, server))
+                sessionStore.save(
+                    Session(
+                        token = response.accessToken,
+                        user = response.user,
+                        baseUrl = server,
+                        refreshToken = response.refreshToken,
+                        expiresAtEpochMs = expiryOf(response.expiresIn),
+                        userId = response.user.id,
+                    ),
+                )
                 response.user
             }
         }
 
         override suspend fun changePassword(currentPassword: String, newPassword: String): AppResult<Unit> {
             val token =
-                when (val result = apiCall { authApi.changePassword(ChangePasswordRequest(currentPassword, newPassword)) }) {
+                when (val result = apiCall { authApi.changePassword(ChangePasswordRequest(currentPassword, newPassword, CLIENT)) }) {
                     is AppResult.Failure -> return result
                     is AppResult.Success -> result.value
                 }
             return persisting {
-                sessionStore.updateToken(token.accessToken)
-                sessionStore.current()?.user?.let { sessionStore.updateUser(it.copy(requiresPasswordChange = false)) }
+                // The server revokes every refresh token on a password change: keep the returned pair (mobile).
+                sessionStore.current()?.let {
+                    sessionStore.save(
+                        it.copy(
+                            token = token.accessToken,
+                            refreshToken = token.refreshToken ?: it.refreshToken,
+                            expiresAtEpochMs = expiryOf(token.expiresIn) ?: it.expiresAtEpochMs,
+                            user = it.user.copy(requiresPasswordChange = false),
+                        ),
+                    )
+                }
                 Unit
             }
         }
@@ -94,21 +118,44 @@ class AuthRepositoryImpl
                 .onSuccess { r -> sessionStore.current()?.user?.let { sessionStore.updateUser(it.copy(email = r.email)) } }
                 .map { it.email }
 
+        private fun expiryOf(expiresIn: Long?): Long? = expiresIn?.let { clock.now().toEpochMilli() + it * MILLIS }
+
+        // Build.MODEL is null under plain JVM unit tests; the server accepts at most 64 characters.
+        private fun deviceName(): String? = Build.MODEL?.trim()?.take(MAX_DEVICE_NAME)?.ifEmpty { null }
+
+        override suspend fun logoutAll(): AppResult<Unit> {
+            val result = apiCall { accountApi.logoutAll() }
+            // The token is dead after a successful call; on failure the user stays signed in so they can retry.
+            if (result is AppResult.Success) endSession()
+            return result
+        }
+
+        private suspend fun endSession() {
+            sessionStore.clear()
+            sessionCleaner.clearUserData()
+        }
+
         override suspend fun logout() {
+            val refreshToken = sessionStore.current()?.refreshToken
             // Best effort and bounded: a dead network must not keep the user signed in.
             val push = pushTokenSource.orElse(null)
             withTimeoutOrNull(UNREGISTER_TIMEOUT_MS) {
                 val token = push?.token()
                 if (token != null) apiCall { devicesApi.unregister(UnregisterDeviceRequest(token)) }
             }
+            // Revoke this device's refresh family (best effort, bounded) before the token is forgotten.
+            if (refreshToken != null) withTimeoutOrNull(LOGOUT_TIMEOUT_MS) { apiCall { accountApi.logout(LogoutRequest(refreshToken)) } }
             // Even if the unregister never arrived, a deleted token is pruned by the server on its next send,
             // so this phone stops receiving the user's alerts (API review I1).
             if (push != null) withTimeoutOrNull(DELETE_TOKEN_TIMEOUT_MS) { push.delete() }
-            sessionStore.clear()
-            sessionCleaner.clearUserData()
+            endSession()
         }
 
         companion object {
+            private const val CLIENT = "android"
+            private const val MAX_DEVICE_NAME = 64
+            private const val MILLIS = 1000L
+            const val LOGOUT_TIMEOUT_MS = 3_000L
             const val UNREGISTER_TIMEOUT_MS = 3_000L
             const val DELETE_TOKEN_TIMEOUT_MS = 2_000L
         }

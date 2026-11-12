@@ -85,6 +85,9 @@ interface AuthRepository {
      * local data via [SessionCleaner]. Chat history is kept (per username).
      */
     suspend fun logout()
+
+    /** `POST /auth/logout-all`; on success clears the session and the user's local data. On failure the user stays signed in. */
+    suspend fun logoutAll(): AppResult<Unit>
 }
 
 /**

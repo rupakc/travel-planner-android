@@ -134,7 +134,8 @@ class EncryptedSessionStore(
 
     private fun untilExpiry(session: Session): Flow<Session?> =
         flow {
-            val exp = JwtExpiry.expiresAtEpochSeconds(session.token)
+            // A session with a refresh token outlives its access token: the interceptor refreshes it.
+            val exp = if (session.refreshToken != null) null else JwtExpiry.expiresAtEpochSeconds(session.token)
             if (exp == null) {
                 emit(session)
                 return@flow
@@ -156,6 +157,7 @@ class EncryptedSessionStore(
         }
 
     private fun isExpired(session: Session): Boolean {
+        if (session.refreshToken != null) return false
         val exp = JwtExpiry.expiresAtEpochSeconds(session.token) ?: return false
         return exp * MILLIS <= clock.now().toEpochMilli()
     }

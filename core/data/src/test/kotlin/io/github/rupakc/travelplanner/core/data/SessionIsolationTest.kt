@@ -75,6 +75,8 @@ class SessionIsolationTest {
         Optional.ofNullable(push),
         BaseUrlProvider(FakeSettingsStore(), buildInfo),
         cleaner,
+        mockk(relaxed = true),
+        SystemAppClock(),
     )
 
     @Test
@@ -331,7 +333,8 @@ class SessionIsolationTest {
             val provider = BaseUrlProvider(settings, buildInfo)
             val store = FakeSessionStore(Session("expired", User("alice"), baseUrl = "http://10.0.2.2:8001"))
             val cleaner = cleanerFor(plan)
-            val repo = AuthRepositoryImpl(loginApi(), mockk(relaxed = true), store, Optional.empty(), provider, cleaner)
+            val repo =
+                AuthRepositoryImpl(loginApi(), mockk(relaxed = true), store, Optional.empty(), provider, cleaner, mockk(relaxed = true), SystemAppClock())
             store.state.value = null // token expired: signed out, data kept
             SettingsRepositoryImpl(settings, provider, store, cleaner).setBaseUrl("http://192.168.1.10:8001")
             repo.login("alice", "pw")
@@ -364,6 +367,8 @@ class SessionIsolationTest {
                     Optional.empty(),
                     BaseUrlProvider(FakeSettingsStore(), buildInfo),
                     CountingCleaner(),
+                    mockk(relaxed = true),
+                    SystemAppClock(),
                 )
             assertTrue(repo.login("alice", "pw") is AppResult.Failure)
         }
