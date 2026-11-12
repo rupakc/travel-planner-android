@@ -111,4 +111,19 @@
     <string name="auth_reset_use_link">Utiliser ce lien</string>
     <string name="auth_rule_met">condition remplie</string>
     <string name="auth_rule_unmet">condition non remplie</string>
+    <!-- Social sign-in (Phase 1 T4) -->
+    <string name="auth_oauth_err_cancelled">La connexion a été annulée.</string>
+    <string name="auth_oauth_err_state_invalid">La connexion a expiré ou n\'a pas pu être vérifiée. Réessayez.</string>
+    <string name="auth_oauth_err_provider_error">Le fournisseur a signalé un problème. Réessayez.</string>
+    <string name="auth_oauth_err_provider_unavailable">Ce fournisseur est indisponible pour le moment. Essayez une autre méthode de connexion.</string>
+    <string name="auth_oauth_err_email_in_use_unverified">Un compte avec cet e-mail existe déjà mais n\'est pas encore confirmé. Confirmez-le d\'abord par e-mail, ou connectez-vous avec votre mot de passe.</string>
+    <string name="auth_oauth_err_identity_in_use">Ce compte social est déjà lié à un autre compte.</string>
+    <string name="auth_oauth_err_account_inactive">Ce compte n\'est pas actif. Contactez votre administrateur.</string>
+    <string name="auth_oauth_err_bad_request">La demande de connexion n\'était pas valide. Réessayez.</string>
+    <string name="auth_oauth_err_code_invalid">Ce lien de connexion a expiré ou a déjà été utilisé. Recommencez.</string>
+    <string name="auth_oauth_username_title">Choisissez un nom d\'utilisateur</string>
+    <string name="auth_oauth_username_intro">Presque terminé. Choisissez un nom d\'utilisateur pour finir de créer votre compte.</string>
+    <string name="auth_oauth_username_submit">Terminer l\'inscription</string>
+    <string name="auth_oauth_username_submitting">Finalisation…</string>
+    <string name="auth_oauth_username_cancel">Annuler</string>
 </resources>

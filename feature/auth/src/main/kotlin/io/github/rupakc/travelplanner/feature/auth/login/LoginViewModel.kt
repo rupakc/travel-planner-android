@@ -12,14 +12,22 @@ import io.github.rupakc.travelplanner.core.data.repository.AuthConfigRepository
 import io.github.rupakc.travelplanner.core.data.repository.AuthProviderInfo
 import io.github.rupakc.travelplanner.core.data.repository.AuthProvidersRepository
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
+import io.github.rupakc.travelplanner.core.data.repository.OauthInbox
+import io.github.rupakc.travelplanner.core.data.repository.OauthRepository
 import io.github.rupakc.travelplanner.core.data.repository.SignupRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.ConsentRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.designsystem.component.SocialProvider
+import io.github.rupakc.travelplanner.core.domain.auth.OauthCallback
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
 import io.github.rupakc.travelplanner.core.model.auth.AuthErrorCodes
+import io.github.rupakc.travelplanner.core.model.auth.OauthResult
+import io.github.rupakc.travelplanner.core.model.auth.OauthResultKind
 import io.github.rupakc.travelplanner.feature.auth.AuthMessage
+import io.github.rupakc.travelplanner.feature.auth.R
+import io.github.rupakc.travelplanner.feature.auth.oauth.oauthErrorCopy
 import io.github.rupakc.travelplanner.feature.auth.signup.Cooldown
+import io.github.rupakc.travelplanner.feature.auth.signup.errorCode
 import io.github.rupakc.travelplanner.feature.auth.signup.toAccountMessage
 import io.github.rupakc.travelplanner.feature.auth.toLoginMessage
 import javax.inject.Inject
@@ -93,6 +101,9 @@ sealed interface LoginEvent {
 sealed interface LoginEffect {
     /** Open the provider's same-origin sign-in start URL (already checked) in a Custom Tab. */
     data class OpenUrl(val url: String) : LoginEffect
+
+    /** The server wants a username for this new social account: open the username screen. */
+    data object NeedsUsername : LoginEffect
 }
 
 /**
@@ -113,12 +124,17 @@ class LoginViewModel
         private val authConfig: AuthConfigRepository,
         private val telemetry: Telemetry,
         private val language: AppLanguage,
+        private val oauth: OauthRepository,
+        private val inbox: OauthInbox,
     ) : ViewModel() {
         private val mutableState = MutableStateFlow(LoginUiState(username = savedState[KEY_USERNAME] ?: ""))
         val state: StateFlow<LoginUiState> = mutableState.asStateFlow()
         private val effectChannel = Channel<LoginEffect>(Channel.BUFFERED)
         val effects: Flow<LoginEffect> = effectChannel.receiveAsFlow()
         private var providers: Map<String, AuthProviderInfo> = emptyMap()
+
+        /** The provider of the attempt this screen started (null after a recreation: its result is then not reported). */
+        private var activeProvider: String? = null
 
         private val cooldown = Cooldown(viewModelScope) { left -> updatePending { it.copy(cooldownSeconds = left) } }
 
@@ -129,6 +145,8 @@ class LoginViewModel
             }
             // The repository never throws: a 404 or any failure is an empty map (every provider "coming soon").
             viewModelScope.launch { providers = authProviders.providers() }
+            // The browser's return link (`voyager://auth/callback`), already parsed; ignored without a pending attempt.
+            viewModelScope.launch { inbox.callbacks.collect(::onCallback) }
         }
 
         fun onEvent(event: LoginEvent) {
@@ -169,13 +187,88 @@ class LoginViewModel
         }
 
         private fun chooseProvider(provider: SocialProvider) {
-            val start = providers[provider.id]?.takeIf { it.configured }?.startUrl
-            if (start != null) {
-                mutableState.update { it.copy(comingSoonProvider = null) }
-                effectChannel.trySend(LoginEffect.OpenUrl(start))
-            } else {
+            val configured = providers[provider.id]?.takeIf { it.configured && it.startUrl != null }
+            if (configured == null) {
+                telemetry.emit(TelemetryEvents.AUTH_RESULT, oauthProps(provider.id, "coming_soon"))
                 mutableState.update { it.copy(comingSoonProvider = provider.displayName) }
+                return
             }
+            mutableState.update { it.copy(comingSoonProvider = null, error = null) }
+            activeProvider = provider.id
+            viewModelScope.launch {
+                telemetry.emit(TelemetryEvents.AUTH_START, mapOf("method" to provider.id, "mode" to "signin"))
+                when (val result = oauth.begin(provider.id)) {
+                    is AppResult.Success -> {
+                        effectChannel.trySend(LoginEffect.OpenUrl(result.value))
+                    }
+
+                    is AppResult.Failure -> {
+                        telemetry.emit(TelemetryEvents.AUTH_RESULT, oauthProps(provider.id, "error"))
+                        mutableState.update { it.copy(error = result.error.toLoginMessage()) }
+                    }
+                }
+            }
+        }
+
+        private suspend fun onCallback(callback: OauthCallback) {
+            if (!oauth.hasPendingAttempt()) return
+            when (callback) {
+                is OauthCallback.Error -> {
+                    oauth.cancelPendingAttempt()
+                    val result = if (callback.error == "cancelled") "cancelled" else "error"
+                    reportResult(result)
+                    mutableState.update { it.copy(loading = false, error = AuthMessage.Local(oauthErrorCopy(callback.error))) }
+                }
+
+                is OauthCallback.Code -> {
+                    exchange(callback.code)
+                }
+            }
+        }
+
+        private suspend fun exchange(code: String) {
+            mutableState.update { it.copy(loading = true, error = null) }
+            when (val result = oauth.exchange(code)) {
+                is AppResult.Success -> {
+                    onExchanged(result.value)
+                }
+
+                is AppResult.Failure -> {
+                    reportResult("error")
+                    // `400 code_invalid` (unknown, expired or used): the attempt is gone, the user starts again.
+                    val message =
+                        if (result.error.errorCode() == CODE_INVALID) AuthMessage.Local(R.string.auth_oauth_err_code_invalid) else result.error.toLoginMessage()
+                    mutableState.update { it.copy(loading = false, error = message) }
+                }
+            }
+        }
+
+        private fun onExchanged(result: OauthResult) {
+            when (result.kind) {
+                OauthResultKind.SIGNED_IN -> {
+                    reportResult("ok")
+                    mutableState.update { it.copy(loading = false, signedIn = true) }
+                }
+
+                OauthResultKind.NEEDS_USERNAME -> {
+                    reportResult("needs_username")
+                    inbox.setDraft(result)
+                    mutableState.update { it.copy(loading = false) }
+                    effectChannel.trySend(LoginEffect.NeedsUsername)
+                }
+
+                // `linked` belongs to the account area's link flow; nothing to do on Login.
+                OauthResultKind.LINKED, OauthResultKind.UNKNOWN -> {
+                    mutableState.update { it.copy(loading = false, error = AuthMessage.Local(R.string.auth_error_generic)) }
+                }
+            }
+        }
+
+        private fun oauthProps(provider: String, result: String): Map<String, Any?> =
+            mapOf("method" to provider, "mode" to "signin", "result" to result)
+
+        private fun reportResult(result: String) {
+            activeProvider?.let { telemetry.emit(TelemetryEvents.AUTH_RESULT, oauthProps(it, result)) }
         }
 
         private fun submit() {
@@ -223,5 +316,6 @@ class LoginViewModel
 
         private companion object {
             const val KEY_USERNAME = "username"
+            const val CODE_INVALID = "code_invalid"
         }
     }

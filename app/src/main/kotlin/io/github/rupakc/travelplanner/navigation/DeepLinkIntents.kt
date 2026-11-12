@@ -1,6 +1,8 @@
 package io.github.rupakc.travelplanner.navigation
 
 import android.content.Intent
+import io.github.rupakc.travelplanner.core.domain.auth.OauthCallback
+import io.github.rupakc.travelplanner.core.domain.auth.OauthCallbackLink
 import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
 
 /**
@@ -28,11 +30,21 @@ internal object DeepLinkIntents {
      */
     fun sanitize(intent: Intent): Intent {
         NAV_EXTRAS.forEach(intent::removeExtra)
-        if (intent.data != null && (intent.action != Intent.ACTION_VIEW || intent.data?.scheme != DeepLinks.SCHEME)) intent.data = null
+        val data = intent.data
+        val isAppLink = intent.action == Intent.ACTION_VIEW && data?.scheme == DeepLinks.SCHEME
+        val isOauthReturn = intent.action == Intent.ACTION_VIEW && OauthCallbackLink.parse(data?.toString()) != null
+        if (data != null && !isAppLink && !isOauthReturn) intent.data = null
         return intent
     }
 
     /** The app deep link [intent] carries (`travelplanner://…` VIEW), or null. */
     fun appLink(intent: Intent?): String? =
         intent?.takeIf { it.action == Intent.ACTION_VIEW }?.data?.takeIf { it.scheme == DeepLinks.SCHEME }?.toString()
+
+    /**
+     * The OAuth return (`voyager://auth/callback?code=|error=`, bounded params) [intent] carries, or null. The data
+     * is only the browser's answer: it is acted on solely while an attempt this process started is pending.
+     */
+    fun oauthCallback(intent: Intent?): OauthCallback? =
+        intent?.takeIf { it.action == Intent.ACTION_VIEW }?.data?.let { OauthCallbackLink.parse(it.toString()) }
 }

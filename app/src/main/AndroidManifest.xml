@@ -45,6 +45,13 @@
                 <data android:host="chat" />
                 <data android:host="nearby" />
             </intent-filter>
+            <!-- Social sign-in return from the system browser: voyager://auth/callback?code=|error= -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="voyager" android:host="auth" android:path="/callback" />
+            </intent-filter>
         </activity>
 
         <!-- Per-app language below API 33: AppCompat stores the choice itself (Settings → Language). -->

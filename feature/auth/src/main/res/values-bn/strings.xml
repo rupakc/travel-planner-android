@@ -111,4 +111,19 @@
     <string name="auth_reset_use_link">এই লিঙ্ক ব্যবহার করুন</string>
     <string name="auth_rule_met">শর্ত পূরণ হয়েছে</string>
     <string name="auth_rule_unmet">শর্ত পূরণ হয়নি</string>
+    <!-- Social sign-in (Phase 1 T4) -->
+    <string name="auth_oauth_err_cancelled">সাইন-ইন বাতিল করা হয়েছে।</string>
+    <string name="auth_oauth_err_state_invalid">সাইন-ইনের মেয়াদ শেষ হয়েছে বা যাচাই করা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="auth_oauth_err_provider_error">প্রদানকারী একটি সমস্যা জানিয়েছে। আবার চেষ্টা করুন।</string>
+    <string name="auth_oauth_err_provider_unavailable">এই প্রদানকারী এখন পাওয়া যাচ্ছে না। অন্য উপায়ে সাইন ইন করুন।</string>
+    <string name="auth_oauth_err_email_in_use_unverified">এই ইমেলে একটি অ্যাকাউন্ট আগে থেকেই আছে, কিন্তু এখনও নিশ্চিত করা হয়নি। আগে ইমেলে নিশ্চিত করুন, অথবা পাসওয়ার্ড দিয়ে সাইন ইন করুন।</string>
+    <string name="auth_oauth_err_identity_in_use">এই সোশ্যাল অ্যাকাউন্ট ইতিমধ্যে অন্য অ্যাকাউন্টের সাথে যুক্ত।</string>
+    <string name="auth_oauth_err_account_inactive">এই অ্যাকাউন্ট সক্রিয় নয়। আপনার অ্যাডমিনের সাথে যোগাযোগ করুন।</string>
+    <string name="auth_oauth_err_bad_request">সাইন-ইন অনুরোধ বৈধ ছিল না। আবার চেষ্টা করুন।</string>
+    <string name="auth_oauth_err_code_invalid">সেই সাইন-ইন লিঙ্কের মেয়াদ শেষ হয়েছে বা আগেই ব্যবহার করা হয়েছে। আবার শুরু করুন।</string>
+    <string name="auth_oauth_username_title">ইউজারনেম বেছে নিন</string>
+    <string name="auth_oauth_username_intro">প্রায় শেষ। অ্যাকাউন্ট তৈরি শেষ করতে একটি ইউজারনেম বেছে নিন।</string>
+    <string name="auth_oauth_username_submit">সাইন-আপ সম্পূর্ণ করুন</string>
+    <string name="auth_oauth_username_submitting">সম্পূর্ণ হচ্ছে…</string>
+    <string name="auth_oauth_username_cancel">বাতিল করুন</string>
 </resources>
