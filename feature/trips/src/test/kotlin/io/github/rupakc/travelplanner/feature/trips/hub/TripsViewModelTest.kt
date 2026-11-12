@@ -133,4 +133,30 @@ class TripsViewModelTest {
             }
             assertTrue(telemetry.events.all { (_, props) -> props.values.all { it is String } })
         }
+
+    @Test
+    fun `coming back to the hub refetches silently, and the first resume does not`() {
+        repo.listResult = AppResult.Success(TripsResponse(listOf(trip(1, Phase.PLANNING, "Old")), pinnedId = 1))
+        val vm = vm()
+        val after = repo.calls.size
+        vm.onEvent(TripsEvent.Resumed)
+        assertEquals(after, repo.calls.size)
+
+        repo.listResult = AppResult.Success(TripsResponse(listOf(trip(1, Phase.PLANNING, "Renamed")), pinnedId = 1))
+        vm.onEvent(TripsEvent.Resumed)
+        assertEquals(after + 1, repo.calls.size)
+        assertEquals("Renamed", vm.state.value.pinned?.title)
+        assertFalse(vm.state.value.loading)
+    }
+
+    @Test
+    fun `a failed silent refetch keeps the list that is shown`() {
+        repo.listResult = AppResult.Success(TripsResponse(listOf(trip(1, Phase.PLANNING)), pinnedId = 1))
+        val vm = vm()
+        vm.onEvent(TripsEvent.Resumed)
+        repo.listResult = AppResult.Failure(AppError.Network())
+        vm.onEvent(TripsEvent.Resumed)
+        assertNull(vm.state.value.error)
+        assertEquals(1L, vm.state.value.pinned?.id)
+    }
 }
