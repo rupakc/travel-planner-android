@@ -196,12 +196,29 @@ class ExpensesViewModelTest {
     @Test
     fun `a failed first load offers retry`() =
         runTest(timeout = 30.seconds) {
-            repo.listResult = AppResult.Failure(AppError.Network())
+            repo.listResult = AppResult.Failure(AppError.Server(500, null))
             val vm = ExpensesViewModel(SavedStateHandle(mapOf("tripId" to 9L)), repo, outbox, telemetry, clock)
             assertTrue(vm.state.value.failed)
             repo.listResult = AppResult.Success(ExpensesResponse(listOf(exp(1))))
             vm.onEvent(ExpensesEvent.Retry)
             assertFalse(vm.state.value.failed)
             assertNotNull(vm.state.value.expenses.firstOrNull())
+        }
+
+    @Test
+    fun `with no network and nothing saved the list is empty, flagged offline, and an add is queued`() =
+        runTest(timeout = 30.seconds) {
+            repo.listResult = AppResult.Failure(AppError.Network())
+            repo.createResult = AppResult.Failure(AppError.Network())
+            val vm = ExpensesViewModel(SavedStateHandle(mapOf("tripId" to 9L)), repo, outbox, telemetry, clock)
+            val s = vm.state.value
+            assertFalse(s.failed)
+            assertFalse(s.loading)
+            assertTrue(s.offline)
+            fill(vm, "8.00", "EUR")
+            vm.onEvent(ExpensesEvent.Submit)
+            assertNull(vm.state.value.form)
+            assertEquals(1, vm.state.value.pending.size)
+            assertEquals(1, outbox.queued.value.size)
         }
 }

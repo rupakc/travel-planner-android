@@ -34,6 +34,8 @@ import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledSlot
 import io.github.rupakc.travelplanner.core.model.trips.Trip
 import io.github.rupakc.travelplanner.core.ui.itinerary.ItineraryDayCard
 import io.github.rupakc.travelplanner.feature.trips.R
+import io.github.rupakc.travelplanner.feature.trips.trip.LocalTripTabSelector
+import io.github.rupakc.travelplanner.feature.trips.trip.TripTab
 import io.github.rupakc.travelplanner.feature.trips.trip.TripTabContent
 
 /**
@@ -56,6 +58,14 @@ fun TodayRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    // Inside a trip the Money tab is one tap away: switch to it (a navigate to the route already on top does nothing).
+    val selectTab = LocalTripTabSelector.current
+    val addExpense: (() -> Unit)? =
+        when {
+            selectTab != null -> ({ selectTab(TripTab.Money) })
+            onAddExpense != null -> ({ onAddExpense(trip.id) })
+            else -> null
+        }
     TodayScreen(
         state = state,
         onEvent = viewModel::onEvent,
@@ -65,7 +75,7 @@ fun TodayRoute(
             }
         },
         onOpenEmergency = onOpenEmergency?.let { f -> { f(trip.id) } },
-        onAddExpense = onAddExpense?.let { f -> { f(trip.id) } },
+        onAddExpense = addExpense,
         modifier = modifier,
     )
 }

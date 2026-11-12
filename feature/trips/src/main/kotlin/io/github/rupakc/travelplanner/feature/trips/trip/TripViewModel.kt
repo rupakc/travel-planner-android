@@ -71,6 +71,13 @@ data class TripUiState(
 ) {
     /** A dreaming trip with nothing searched yet: the overview offers "Plan it" instead of the planner. */
     val canPlanIt: Boolean get() = trip?.phase == Phase.DREAMING && !hasSearch(plan?.searchData)
+
+    /** [next] replaces the trip. A phase change drops the requested tab so the tabs follow the new phase (its default opens). */
+    internal fun withTrip(next: Trip): TripUiState {
+        val before = trip?.phase
+        val changed = before != null && before != next.phase
+        return copy(trip = next, requestedTab = if (changed) null else requestedTab)
+    }
 }
 
 sealed interface TripEvent {
@@ -232,7 +239,7 @@ class TripViewModel
             viewModelScope.launch {
                 when (val result = trips.get(tripId, clock.today().toString())) {
                     is AppResult.Success -> {
-                        _state.update { it.copy(loading = false, trip = result.value, error = null) }
+                        _state.update { it.withTrip(result.value).copy(loading = false, error = null) }
                         loadPlan()
                     }
 
@@ -329,7 +336,7 @@ class TripViewModel
                 when (val result = trips.update(tripId, body)) {
                     is AppResult.Success -> {
                         telemetry.emit(TelemetryEvents.TRIP_ACTION, mapOf("action" to action))
-                        _state.update { it.copy(trip = result.value, dialog = null, busy = false) }
+                        _state.update { it.withTrip(result.value).copy(dialog = null, busy = false) }
                         if (action == "dates" || action.startsWith("phase")) loadPlan()
                     }
 

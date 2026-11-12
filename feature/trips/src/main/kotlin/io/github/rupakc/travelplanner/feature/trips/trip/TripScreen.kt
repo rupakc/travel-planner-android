@@ -21,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -163,11 +164,14 @@ private fun Loaded(
                 }
             }
         }
+        val selectTab = remember(onEvent) { { tab: TripTab -> onEvent(TripEvent.SelectTab(tab)) } }
         Box(Modifier.weight(1f).fillMaxWidth()) {
-            when (tabs.selected) {
-                TripTab.Overview -> Overview(state, trip, onEvent)
-                TripTab.Prep -> prepContent(Modifier.fillMaxSize())
-                else -> tabContent[tabs.selected]?.invoke(trip, Modifier.fillMaxSize())
+            CompositionLocalProvider(LocalTripTabSelector provides selectTab) {
+                when (tabs.selected) {
+                    TripTab.Overview -> Overview(state, trip, onEvent)
+                    TripTab.Prep -> prepContent(Modifier.fillMaxSize())
+                    else -> tabContent[tabs.selected]?.invoke(trip, Modifier.fillMaxSize())
+                }
             }
         }
     }

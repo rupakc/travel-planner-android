@@ -1,9 +1,13 @@
 package io.github.rupakc.travelplanner.core.data
 
+import android.app.Application
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.impl.TripsRepositoryImpl
+import io.github.rupakc.travelplanner.core.data.offline.memoryDb
+import io.github.rupakc.travelplanner.core.database.TravelDatabase
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.trips.CreateTripRequest
 import io.github.rupakc.travelplanner.core.model.trips.Phase
@@ -25,15 +29,26 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 
-/** Trips list: per-user in-memory cache, offline fallback with the phase recomputed for the device date. */
+/** Trips list: per-user Room cache (survives a new repository, i.e. a cold start), offline fallback with the phase recomputed for the device date. */
+@RunWith(AndroidJUnit4::class)
+@Config(application = Application::class)
 class TripsRepositoryImplTest {
     private val server = MockWebServer()
+    private lateinit var db: TravelDatabase
     private val sessions = FakeSessionStore(Session("token", TestUser))
 
-    @Before fun setUp() = server.start()
+    @Before fun setUp() {
+        server.start()
+        db = memoryDb()
+    }
 
-    @After fun tearDown() = server.close()
+    @After fun tearDown() {
+        server.close()
+        db.close()
+    }
 
     private val gameEvents = FakeGameEvents()
 
@@ -45,7 +60,7 @@ class TripsRepositoryImplTest {
 
                 override fun zone() = ZoneOffset.UTC
             }
-        return TripsRepositoryImpl(net.api(), sessions, clock, gameEvents)
+        return TripsRepositoryImpl(net.api(), sessions, clock, gameEvents, db.tripCacheDao())
     }
 
     private fun ok(body: String) = server.enqueue(MockResponse.Builder().code(200).body(body).build())
@@ -136,5 +151,21 @@ class TripsRepositoryImplTest {
             assertEquals("""{"day":"2027-01-06"}""", req.body?.utf8())
             assertTrue(r.newCountry)
             assertEquals(1, gameEvents.published.size)
+        }
+
+    @Test
+    fun `a cold start with no network serves the list saved by the previous process`() =
+        runTest(timeout = 30.seconds) {
+            ok(planning)
+            repository().list("2026-11-01")
+
+            server.enqueue(MockResponse.Builder().code(503).body("""{"detail":"down"}""").build())
+            val fresh = repository()
+            val offline = (fresh.list("2026-12-25") as AppResult.Success).value
+            assertTrue(fresh.isShowingCachedList())
+            assertEquals(Phase.READY, offline.trips.single().phase)
+
+            server.enqueue(MockResponse.Builder().code(503).body("""{"detail":"down"}""").build())
+            assertEquals(1L, (repository().get(1, "2026-12-25") as AppResult.Success).value.id)
         }
 }

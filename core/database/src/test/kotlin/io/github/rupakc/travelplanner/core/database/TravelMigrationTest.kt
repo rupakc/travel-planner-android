@@ -40,4 +40,21 @@ class TravelMigrationTest {
         db.execSQL("INSERT INTO outbox (userId, method, path, body, key, createdAt) VALUES ('u', 'POST', 'p', NULL, 'k', 1)")
         db.close()
     }
+
+    @Test
+    fun `2 to 3 keeps the offline rows and adds the trip and expense caches`() {
+        val name = "migration-test-3"
+        helper.createDatabase(name, 2).apply {
+            execSQL("INSERT INTO outbox (userId, method, path, body, key, createdAt) VALUES ('u', 'POST', 'p', NULL, 'k', 1)")
+            close()
+        }
+        val db = helper.runMigrationsAndValidate(name, 3, true, TravelMigrations.MIGRATION_2_3)
+        db.query("SELECT COUNT(*) FROM outbox").use {
+            it.moveToFirst()
+            assertEquals(1, it.getInt(0))
+        }
+        db.execSQL("INSERT INTO cached_trips (userId, json, savedAt) VALUES ('u', '{}', 1)")
+        db.execSQL("INSERT INTO cached_expenses (`key`, userId, tripId, json, savedAt) VALUES ('u:7', 'u', 7, '{}', 1)")
+        db.close()
+    }
 }

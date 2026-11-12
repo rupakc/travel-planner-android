@@ -215,3 +215,24 @@ interface OutboxDao {
     @Query("DELETE FROM outbox")
     suspend fun clear()
 }
+
+@Dao
+interface TripCacheDao {
+    @Query("SELECT * FROM cached_trips WHERE userId = :userId")
+    suspend fun trips(userId: String): CachedTripsEntity?
+
+    @Upsert
+    suspend fun upsertTrips(entity: CachedTripsEntity)
+
+    @Query("SELECT * FROM cached_expenses WHERE `key` = :key")
+    suspend fun expenses(key: String): CachedExpensesEntity?
+
+    @Upsert
+    suspend fun upsertExpenses(entity: CachedExpensesEntity)
+
+    @Query("DELETE FROM cached_trips")
+    suspend fun clearTrips()
+
+    @Query("DELETE FROM cached_expenses")
+    suspend fun clearExpenses()
+}

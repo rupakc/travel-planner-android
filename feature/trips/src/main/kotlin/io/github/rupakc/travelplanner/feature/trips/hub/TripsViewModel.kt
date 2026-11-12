@@ -54,6 +54,9 @@ data class TripsUiState(
 sealed interface TripsEvent {
     data object Refresh : TripsEvent
 
+    /** The hub came back to the foreground (Back from a trip, app resume): the list is refetched silently. */
+    data object Resumed : TripsEvent
+
     data object OpenCreate : TripsEvent
 
     data object DismissCreate : TripsEvent
@@ -96,6 +99,7 @@ class TripsViewModel
         val effects = _effects.receiveAsFlow()
 
         private var viewed = false
+        private var firstResume = true
 
         init {
             load()
@@ -105,6 +109,11 @@ class TripsViewModel
             when (event) {
                 TripsEvent.Refresh -> {
                     load()
+                }
+
+                TripsEvent.Resumed -> {
+                    // The first resume is the screen appearing, whose load is already running.
+                    if (firstResume) firstResume = false else load(silent = true)
                 }
 
                 TripsEvent.OpenCreate -> {
@@ -148,8 +157,9 @@ class TripsViewModel
 
         private fun editSheet(change: NewTripSheet.() -> NewTripSheet) = _state.update { s -> s.sheet?.let { s.copy(sheet = it.change()) } ?: s }
 
-        private fun load() {
-            _state.update { it.copy(loading = it.groups.isEmpty() && it.pinned == null, error = null) }
+        /** [silent]: keep what is shown while refetching, and keep it when the refetch fails. */
+        private fun load(silent: Boolean = false) {
+            _state.update { it.copy(loading = it.groups.isEmpty() && it.pinned == null, error = if (silent) it.error else null) }
             viewModelScope.launch {
                 when (val result = repository.list(clock.today().toString())) {
                     is AppResult.Success -> {
@@ -168,7 +178,8 @@ class TripsViewModel
                     }
 
                     is AppResult.Failure -> {
-                        _state.update { it.copy(loading = false, error = HubError(result.error.userFacingDetail())) }
+                        val keep = silent && (_state.value.groups.isNotEmpty() || _state.value.pinned != null)
+                        _state.update { if (keep) it.copy(loading = false) else it.copy(loading = false, error = HubError(result.error.userFacingDetail())) }
                         view("none")
                     }
                 }

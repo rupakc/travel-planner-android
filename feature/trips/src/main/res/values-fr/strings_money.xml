@@ -18,6 +18,7 @@
     <string name="money_waiting_sync">En attente de synchronisation</string>
     <string name="money_delete_failed">Impossible de supprimer cette dépense. Elle a été remise.</string>
     <string name="money_queue_failed">Enregistrement impossible sur l\'appareil. Réessayez.</string>
+    <string name="money_offline_notice">Vous êtes hors ligne. Les dépenses ajoutées sont enregistrées sur ce téléphone et synchronisées plus tard.</string>
     <string name="money_load_failed">Impossible de charger les dépenses.</string>
     <string name="money_cat_flights">Vols</string>
     <string name="money_cat_lodging">Hébergement</string>

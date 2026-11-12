@@ -46,6 +46,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.journey.RecapRules
+import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.Recap
 import io.github.rupakc.travelplanner.core.model.trips.RecapCountry
 import io.github.rupakc.travelplanner.core.model.trips.Trip
@@ -59,13 +60,15 @@ import java.util.Currency
  * [onWhereNext] opens Explore; a button whose lambda is null is not shown.
  */
 fun recapTabContent(onWhereNext: (() -> Unit)? = null): TripTabContent =
-    { _, modifier ->
-        RecapRoute(onWhereNext, modifier)
+    { trip, modifier ->
+        RecapRoute(onWhereNext, modifier, trip.phase)
     }
 
 @Composable
-fun RecapRoute(onWhereNext: (() -> Unit)?, modifier: Modifier = Modifier, viewModel: RecapViewModel = hiltViewModel()) {
+fun RecapRoute(onWhereNext: (() -> Unit)?, modifier: Modifier = Modifier, phase: Phase? = null, viewModel: RecapViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // A phase change (the user sets a stage, or the dates move it) refetches the recap instead of keeping the old one.
+    LaunchedEffect(phase) { viewModel.onEvent(RecapEvent.PhaseShown(phase)) }
     val context = LocalContext.current
     val chooser = stringResource(R.string.recap_share_chooser)
     val shareText = state.recap?.let { shareText(it) }

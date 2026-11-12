@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
@@ -59,6 +60,10 @@ fun TripsHubRoute(onOpenTrip: (Long) -> Unit, onPlanTrip: () -> Unit, modifier: 
                 TripsEffect.PlanTrip -> onPlanTrip()
             }
         }
+    }
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onEvent(TripsEvent.Resumed)
+        onPauseOrDispose { }
     }
     TripsScreen(state, viewModel::onEvent, modifier)
 }

@@ -110,3 +110,22 @@ data class OutboxEntity(
     val key: String,
     val createdAt: Long,
 )
+
+/** The last trips list of one user (`TripsResponse` JSON), so the hub opens after a cold start with no network. */
+@Entity(tableName = "cached_trips")
+data class CachedTripsEntity(
+    @PrimaryKey val userId: String,
+    val json: String,
+    /** Epoch millis of the last successful fetch. */
+    val savedAt: Long,
+)
+
+/** The last expenses answer of one trip (`ExpensesResponse` JSON), keyed `userId:tripId`. */
+@Entity(tableName = "cached_expenses", indices = [Index("userId")])
+data class CachedExpensesEntity(
+    @PrimaryKey val key: String,
+    val userId: String,
+    val tripId: Long,
+    val json: String,
+    val savedAt: Long,
+)

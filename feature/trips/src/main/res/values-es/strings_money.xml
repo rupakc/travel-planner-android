@@ -18,6 +18,7 @@
     <string name="money_waiting_sync">Pendiente de sincronizar</string>
     <string name="money_delete_failed">No se pudo eliminar el gasto. Lo hemos vuelto a poner.</string>
     <string name="money_queue_failed">No se pudo guardar en el dispositivo. Inténtalo de nuevo.</string>
+    <string name="money_offline_notice">Sin conexión. Los gastos que añadas se guardan en este teléfono y se sincronizan después.</string>
     <string name="money_load_failed">No se pudieron cargar los gastos.</string>
     <string name="money_cat_flights">Vuelos</string>
     <string name="money_cat_lodging">Alojamiento</string>
