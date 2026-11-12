@@ -84,3 +84,10 @@ interface LastLocationStore {
 
     suspend fun clear()
 }
+
+/** Which first-run coach marks each user has already seen (device-local, keyed by user id; never sent anywhere). */
+interface CoachMarkStore {
+    fun seen(userKey: String): Flow<Set<String>>
+
+    suspend fun markSeen(userKey: String, ids: Set<String>)
+}

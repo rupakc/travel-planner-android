@@ -5,4 +5,20 @@
     <string name="nav_settings">设置</string>
     <string name="nav_global_search">搜索全部</string>
     <string name="session_expired">你已退出登录，请重新登录。</string>
+    <string name="nav_trips">行程</string>
+    <string name="nav_explore">探索</string>
+    <string name="nav_play">游戏</string>
+    <string name="nav_you">我的</string>
+    <string name="you_account">账户</string>
+    <string name="you_saved_plans">已保存的计划</string>
+    <string name="explore_chat">聊天</string>
+    <string name="explore_near_me">附近</string>
+    <string name="coach_trips_title">你的行程都在这里</string>
+    <string name="coach_trips_body">规划、准备、出行:每个行程都集中了清单、花销和日记。</string>
+    <string name="coach_explore_title">发现你的下一次旅行</string>
+    <string name="coach_explore_body">搜索航班、酒店和活动,或向聊天提问。“附近”会显示你周围的地点。</string>
+    <string name="coach_play_title">边旅行边赚经验值</string>
+    <string name="coach_play_body">签到、记录地点并完成行程,即可获得经验值、徽章和连续记录。</string>
+    <string name="coach_got_it">知道了</string>
+    <string name="coach_skip">跳过提示</string>
 </resources>

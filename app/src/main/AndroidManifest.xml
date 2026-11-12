@@ -52,6 +52,17 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="voyager" android:host="auth" android:path="/callback" />
             </intent-filter>
+            <!--
+              Emailed links (R3): https://<web host>/verify?token= and /reset-password?token=. Not autoVerify (no assetlinks.json until
+              the release cert is known), so Android may show a chooser; the screens also take a pasted link or code.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="${webHost}" android:path="/verify" />
+                <data android:scheme="https" android:host="${webHost}" android:path="/reset-password" />
+            </intent-filter>
         </activity>
 
         <!-- Per-app language below API 33: AppCompat stores the choice itself (Settings → Language). -->

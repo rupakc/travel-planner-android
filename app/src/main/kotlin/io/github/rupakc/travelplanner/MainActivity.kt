@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         val firstActivity = ColdStart.claimFirstActivity()
         val restored = savedInstanceState != null
         // Keep the splash until the session/profile are read from DataStore (no Login flash).
-        splash.setKeepOnScreenCondition { viewModel.state.value.gate == AuthGate.LOADING }
+        splash.setKeepOnScreenCondition { viewModel.state.value.let { it.gate == AuthGate.LOADING || it.hold } }
         enableEdgeToEdge()
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
@@ -51,7 +51,9 @@ class MainActivity : AppCompatActivity() {
             TravelTheme(themeMode = state.settings.themeMode, dynamicColor = state.settings.dynamicColor) {
                 val consentPrompt by viewModel.consentPrompt.collectAsStateWithLifecycle()
                 TravelApp(
-                    gate = state.gate,
+                    // `hold` keeps the shell undecided until the config / trip count that pick the start screen are known (<= 2 s).
+                    gate = if (state.hold) AuthGate.LOADING else state.gate,
+                    shell = state.shellMode(),
                     uiEventSink = viewModel.uiEventSink,
                     screenTracker = viewModel.screenTracker,
                     consentPrompt = consentPrompt,

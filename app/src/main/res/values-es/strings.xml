@@ -8,4 +8,20 @@
     <string name="nav_settings">Ajustes</string>
     <string name="nav_global_search">Buscar en todo</string>
     <string name="session_expired">Se cerró tu sesión. Vuelve a iniciar sesión.</string>
+    <string name="nav_trips">Viajes</string>
+    <string name="nav_explore">Explorar</string>
+    <string name="nav_play">Jugar</string>
+    <string name="nav_you">Tú</string>
+    <string name="you_account">Cuenta</string>
+    <string name="you_saved_plans">Planes guardados</string>
+    <string name="explore_chat">Chat</string>
+    <string name="explore_near_me">Cerca de mí</string>
+    <string name="coach_trips_title">Tus viajes viven aquí</string>
+    <string name="coach_trips_body">Planifica, prepara y viaja: cada viaje reúne su lista, su dinero y su diario.</string>
+    <string name="coach_explore_title">Encuentra tu próximo viaje</string>
+    <string name="coach_explore_body">Busca vuelos, hoteles y actividades, o pregunta en el chat. Cerca de mí muestra lo que tienes alrededor.</string>
+    <string name="coach_play_title">Gana XP mientras viajas</string>
+    <string name="coach_play_body">Haz check-in, registra lugares y termina viajes para ganar XP, insignias y rachas.</string>
+    <string name="coach_got_it">Entendido</string>
+    <string name="coach_skip">Omitir consejos</string>
 </resources>
