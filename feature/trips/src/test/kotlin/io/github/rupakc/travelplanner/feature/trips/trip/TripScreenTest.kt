@@ -2,6 +2,11 @@ package io.github.rupakc.travelplanner.feature.trips.trip
 
 import android.app.Application
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -76,6 +81,29 @@ class TripScreenTest {
         compose.onNodeWithText("Day 2 of 9").assertIsDisplayed()
         compose.onNodeWithText("Overview").performClick()
         assertEquals(TripEvent.SelectTab(TripTab.Overview), events.last())
+    }
+
+    @Test(timeout = 60_000)
+    fun `requesting prep on the road appends a sixth tab without crashing`() {
+        val road = state(planning.copy(phase = Phase.ON_THE_ROAD, dayIndex = 2, startDate = "2027-03-31"))
+        val body: TripTabContent = { _, _ -> Text("tab body") }
+        val content = TripTab.entries.filter { it != TripTab.Prep && it != TripTab.Recap }.associateWith { body }
+        compose.setContent {
+            var s by remember { mutableStateOf(road) }
+            TravelTheme(ThemeMode.LIGHT) {
+                TripScreen(s, { e -> if (e is TripEvent.SelectTab) s = s.copy(requestedTab = e.tab) }, content, { Text("prep tab") })
+            }
+        }
+        compose.onNodeWithText("Day 2 of 9").assertIsDisplayed()
+        compose.onNodeWithText("Overview").performClick()
+        compose.onNodeWithText("Before you go").performClick()
+        compose.onNodeWithText("prep tab").assertIsDisplayed()
+    }
+
+    @Test(timeout = 60_000)
+    fun `the day line is hidden under a memories override`() {
+        show(state(planning.copy(phase = Phase.MEMORIES, dayIndex = 3, startDate = "2027-03-31")))
+        compose.onNodeWithText("Day 3 of 9").assertDoesNotExist()
     }
 
     @Test
