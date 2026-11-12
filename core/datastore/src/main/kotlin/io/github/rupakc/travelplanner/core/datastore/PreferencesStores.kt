@@ -176,3 +176,13 @@ class PreferencesLastLocationStore(private val store: DataStore<Preferences>) : 
         store.edit { it.clear() }
     }
 }
+
+class PreferencesCoachMarkStore(private val store: DataStore<Preferences>) : CoachMarkStore {
+    private fun key(userKey: String) = stringSetPreferencesKey("coach_seen_$userKey")
+
+    override fun seen(userKey: String): Flow<Set<String>> = store.safeData().map { it[key(userKey)] ?: emptySet() }.distinctUntilChanged()
+
+    override suspend fun markSeen(userKey: String, ids: Set<String>) {
+        store.edit { it[key(userKey)] = (it[key(userKey)] ?: emptySet()) + ids }
+    }
+}
