@@ -46,6 +46,26 @@ class TelemetryRegistryMirrorTest {
             TelemetryEvents.SHARE_ACTION,
             TelemetryEvents.SHARE_REVOKE,
             TelemetryEvents.SHARE_VIEW,
+            TelemetryEvents.SOCIAL_PROFILE_VIEW,
+            TelemetryEvents.SOCIAL_PROFILE_SAVE,
+            TelemetryEvents.SOCIAL_FEED_VIEW,
+            TelemetryEvents.SOCIAL_IDEA_PUBLISH,
+            TelemetryEvents.SOCIAL_IDEA_OPEN,
+            TelemetryEvents.SOCIAL_IDEA_LIKE,
+            TelemetryEvents.SOCIAL_IDEA_SAVE,
+            TelemetryEvents.SOCIAL_COMMENT,
+            TelemetryEvents.SOCIAL_FOLLOW,
+            TelemetryEvents.SOCIAL_REPORT,
+            TelemetryEvents.SOCIAL_BLOCK,
+            TelemetryEvents.PLAY_STATE_VIEW,
+            TelemetryEvents.PLAY_QUIZ_START,
+            TelemetryEvents.PLAY_QUIZ_ANSWER,
+            TelemetryEvents.PLAY_QUIZ_DONE,
+            TelemetryEvents.PLAY_H2H_CREATE,
+            TelemetryEvents.PLAY_H2H_OPEN,
+            TelemetryEvents.PLAY_H2H_RESULT,
+            TelemetryEvents.PLAY_BOARD_VIEW,
+            TelemetryEvents.PLAY_CHALLENGE_VIEW,
         )
 
     @Test
@@ -97,6 +117,16 @@ class TelemetryRegistryMirrorTest {
                 TelemetryEnums.SHARE_KIND to 3,
                 TelemetryEnums.SHARE_DATES to 3,
                 TelemetryEnums.SHARE_TARGET to 7,
+                TelemetryEnums.SOCIAL_VISIBILITY to 3,
+                TelemetryEnums.SOCIAL_FEED_SCOPE to 3,
+                TelemetryEnums.SOCIAL_IDEA_KIND to 2,
+                TelemetryEnums.SOCIAL_FOLLOW_STATE to 3,
+                TelemetryEnums.SOCIAL_REPORT_TARGET to 3,
+                TelemetryEnums.SOCIAL_REPORT_REASON to 6,
+                TelemetryEnums.PLAY_MODE to 4,
+                TelemetryEnums.PLAY_PACK to 5,
+                TelemetryEnums.PLAY_WINNER to 3,
+                TelemetryEnums.PLAY_BOARD_SCOPE to 2,
             )
         for ((set, size) in sets) {
             assertEquals(size, set.size)

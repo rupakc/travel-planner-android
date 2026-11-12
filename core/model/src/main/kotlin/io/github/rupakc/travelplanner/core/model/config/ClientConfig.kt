@@ -36,6 +36,10 @@ data class FeaturesDto(
     val apns: Boolean = false,
     /** Share links 2.0 version (1 = `/shares` routes exist); null or 0 on older backends. */
     val sharing: LenientInt = null,
+    /** Social (profiles, ideas feed) version: 1 = the `/social` routes exist; null or 0 on older backends. */
+    val social: LenientInt = null,
+    /** Play (quizzes, head-to-head, boards) version: 1 = the `/play` routes exist; null or 0 on older backends. */
+    val play: LenientInt = null,
 )
 
 /** `auth` of `GET /api/config`. [signupMode] is `open` | `invite`. */

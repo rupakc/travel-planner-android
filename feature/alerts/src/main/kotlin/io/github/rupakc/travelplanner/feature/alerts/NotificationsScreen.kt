@@ -204,7 +204,7 @@ class NotificationsViewModel
                     is NotificationTarget.TripToday -> tripOpens.send(target.planId)
 
                     // No trip id (or a category this screen does not route): the list is already open.
-                    NotificationTarget.Inbox -> Unit
+                    NotificationTarget.Inbox, NotificationTarget.Feed, is NotificationTarget.H2h -> Unit
                 }
             }
         }

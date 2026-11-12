@@ -92,8 +92,11 @@ object NotificationLinks {
         val base =
             when (target) {
                 is NotificationTarget.Alert -> target.link.toDeepLink()
+
                 is NotificationTarget.TripToday -> tripToday(target.planId)
-                NotificationTarget.Inbox -> INBOX
+
+                // The feed and match screens land with T5.2-T5.5; until then the list is the safe destination (no dead end).
+                NotificationTarget.Feed, is NotificationTarget.H2h, NotificationTarget.Inbox -> INBOX
             }
         if (category == null) return base
         return base + (if ('?' in base) "&" else "?") + "$OPEN_CATEGORY_PARAM=${category.wire}"

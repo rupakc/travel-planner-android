@@ -28,6 +28,10 @@ data class JourneyFlags(
     val notifications: NotificationsFlags = NotificationsFlags.OFF,
     /** Share links 2.0 (`features.sharing >= 1`); off keeps the legacy plan share. */
     val sharing: Boolean = false,
+    /** Profiles and the ideas feed (`features.social >= 1`). */
+    val social: Boolean = false,
+    /** Quizzes, head-to-head, boards (`features.play >= 1`); the game must also be visible (`game`, `hide_game`). */
+    val play: Boolean = false,
 ) {
     companion object {
         /** Everything off (config not loaded, or an older backend). */
@@ -48,6 +52,8 @@ data class JourneyFlags(
                 alerts = AlertsFlags(config),
                 notifications = NotificationsFlags(config),
                 sharing = (f.sharing ?: 0) >= 1,
+                social = (f.social ?: 0) >= 1,
+                play = (f.play ?: 0) >= 1,
             )
         }
     }
