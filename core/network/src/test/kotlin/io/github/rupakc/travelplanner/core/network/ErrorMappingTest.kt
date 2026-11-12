@@ -31,6 +31,13 @@ class ErrorMappingTest {
     }
 
     @Test
+    fun `phase 1 envelope error_code maps to the code`() {
+        val error = HttpErrorMapper.map(409, null, """{"detail":"Done automatically","error_code":"prep_item_auto"}""") as AppError.Client
+        assertEquals("prep_item_auto", error.code)
+        assertEquals("Done automatically", error.message)
+    }
+
+    @Test
     fun `top level code with extras is kept for price watch 422s`() {
         val body = """{"detail":"Priced in EUR","code":"target_currency_mismatch","message":"Priced in EUR","currency":"EUR","price":120.0}"""
         val error = HttpErrorMapper.map(422, null, body) as AppError.Client
