@@ -42,9 +42,15 @@ internal class DeepLinkHold(
 
     /**
      * One run of the gate check. [target] is where the gate sends the user (null = stay), [onGateScreen] whether the
-     * current destination is Login / change password / onboarding. Returns the link to replay after navigating to [target].
+     * current destination is Login / change password / onboarding. Returns the link to replay after navigating to
+     * [target] (replayed when that is [home], the start screen).
      */
-    fun onGateCheck(gate: AuthGate, target: AppRoute?, onGateScreen: Boolean): String? {
+    fun onGateCheck(
+        gate: AuthGate,
+        target: AppRoute?,
+        onGateScreen: Boolean,
+        home: AppRoute = HomeRoute,
+    ): String? {
         if (gate == AuthGate.LOADING) return null
         if (target == null) {
             if (!onGateScreen) {
@@ -56,6 +62,6 @@ internal class DeepLinkHold(
         }
         if (gate != AuthGate.READY) latest?.let(pending::keep)
         latest = null
-        return if (gate == AuthGate.READY && target == HomeRoute) pending.take() else null
+        return if (gate == AuthGate.READY && target == home) pending.take() else null
     }
 }

@@ -5,4 +5,20 @@
     <string name="nav_settings">Einstellungen</string>
     <string name="nav_global_search">Alles durchsuchen</string>
     <string name="session_expired">Du wurdest abgemeldet. Bitte melde dich erneut an.</string>
+    <string name="nav_trips">Reisen</string>
+    <string name="nav_explore">Entdecken</string>
+    <string name="nav_play">Spielen</string>
+    <string name="nav_you">Du</string>
+    <string name="you_account">Konto</string>
+    <string name="you_saved_plans">Gespeicherte Pläne</string>
+    <string name="explore_chat">Chat</string>
+    <string name="explore_near_me">In meiner Nähe</string>
+    <string name="coach_trips_title">Hier leben deine Reisen</string>
+    <string name="coach_trips_body">Plane, bereite dich vor und reise: Jede Reise bündelt Checkliste, Geld und Tagebuch.</string>
+    <string name="coach_explore_title">Finde deine nächste Reise</string>
+    <string name="coach_explore_body">Suche Flüge, Hotels und Aktivitäten oder frag den Chat. „In meiner Nähe“ zeigt, was um dich herum ist.</string>
+    <string name="coach_play_title">Sammle XP unterwegs</string>
+    <string name="coach_play_body">Checke ein, halte Orte fest und schließe Reisen ab, um XP, Abzeichen und Serien zu verdienen.</string>
+    <string name="coach_got_it">Verstanden</string>
+    <string name="coach_skip">Tipps überspringen</string>
 </resources>

@@ -43,6 +43,9 @@ val appVersionCode: Int = providers.gradleProperty("VOYAGER_VERSION_CODE").orNul
 val appVersionName: String = providers.gradleProperty("VOYAGER_VERSION_NAME").orNull ?: "0.1.0"
 val webBaseUrl: String = providers.gradleProperty("WEB_BASE_URL").orElse("").get()
 
+// Host of the emailed verify / reset links (R3); a build without WEB_BASE_URL gets a host that never matches.
+val webHost: String = runCatching { uri(webBaseUrl).host }.getOrNull() ?: "web-host-unset.invalid"
+
 android {
     namespace = "io.github.rupakc.travelplanner"
 
@@ -52,6 +55,7 @@ android {
         versionName = appVersionName
         resValue("bool", "fcm_enabled", hasGoogleServices.toString())
         buildConfigField("String", "WEB_BASE_URL", "\"$webBaseUrl\"")
+        manifestPlaceholders["webHost"] = webHost
         // Resource configs shipped (spec §5: en default + es).
         androidResources.localeFilters += listOf("en", "es", "de", "fr", "hi", "zh", "bn")
     }

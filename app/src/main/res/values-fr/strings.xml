@@ -5,4 +5,20 @@
     <string name="nav_settings">Paramètres</string>
     <string name="nav_global_search">Tout rechercher</string>
     <string name="session_expired">Votre session a expiré. Veuillez vous reconnecter.</string>
+    <string name="nav_trips">Voyages</string>
+    <string name="nav_explore">Explorer</string>
+    <string name="nav_play">Jouer</string>
+    <string name="nav_you">Vous</string>
+    <string name="you_account">Compte</string>
+    <string name="you_saved_plans">Plans enregistrés</string>
+    <string name="explore_chat">Chat</string>
+    <string name="explore_near_me">Près de moi</string>
+    <string name="coach_trips_title">Vos voyages sont ici</string>
+    <string name="coach_trips_body">Planifiez, préparez et voyagez : chaque voyage réunit sa liste, son budget et son journal.</string>
+    <string name="coach_explore_title">Trouvez votre prochain voyage</string>
+    <string name="coach_explore_body">Cherchez des vols, des hôtels et des activités, ou posez une question au chat. Près de moi montre ce qui vous entoure.</string>
+    <string name="coach_play_title">Gagnez de l\'XP en voyageant</string>
+    <string name="coach_play_body">Enregistrez votre présence, notez des lieux et terminez des voyages pour gagner de l\'XP, des badges et des séries.</string>
+    <string name="coach_got_it">Compris</string>
+    <string name="coach_skip">Passer les conseils</string>
 </resources>

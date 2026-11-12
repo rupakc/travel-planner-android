@@ -5,4 +5,20 @@
     <string name="nav_settings">सेटिंग</string>
     <string name="nav_global_search">सब कुछ खोजें</string>
     <string name="session_expired">आप साइन आउट हो गए हैं। कृपया फिर से साइन इन करें।</string>
+    <string name="nav_trips">यात्राएँ</string>
+    <string name="nav_explore">खोजें</string>
+    <string name="nav_play">खेलें</string>
+    <string name="nav_you">आप</string>
+    <string name="you_account">खाता</string>
+    <string name="you_saved_plans">सहेजी गई योजनाएँ</string>
+    <string name="explore_chat">चैट</string>
+    <string name="explore_near_me">आस-पास</string>
+    <string name="coach_trips_title">आपकी यात्राएँ यहाँ हैं</string>
+    <string name="coach_trips_body">योजना बनाएँ, तैयारी करें और यात्रा करें: हर यात्रा में उसकी चेकलिस्ट, खर्च और डायरी साथ रहती है।</string>
+    <string name="coach_explore_title">अपनी अगली यात्रा खोजें</string>
+    <string name="coach_explore_body">उड़ानें, होटल और गतिविधियाँ खोजें या चैट से पूछें। आस-पास आपके नज़दीक की जगहें दिखाता है।</string>
+    <string name="coach_play_title">यात्रा करते हुए XP कमाएँ</string>
+    <string name="coach_play_body">चेक-इन करें, जगहें दर्ज करें और यात्राएँ पूरी करके XP, बैज और स्ट्रीक पाएँ।</string>
+    <string name="coach_got_it">समझ गया</string>
+    <string name="coach_skip">सुझाव छोड़ें</string>
 </resources>
