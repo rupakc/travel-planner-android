@@ -338,6 +338,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 },
                 onSearch = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
                 onOpenPrefs = { navController.navigate(AlertPrefsRoute) },
+                onOpenTrip = { navController.navigate(TripRoute(it, tab = TripTab.Today.id)) { launchSingleTop = true } },
             )
             settingsGraph(
                 onBack = { navController.popBackStack() },

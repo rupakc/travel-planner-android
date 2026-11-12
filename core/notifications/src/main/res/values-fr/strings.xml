@@ -20,4 +20,12 @@
     <string name="reminder_action_emergency">Carte d\'urgence</string>
     <string name="nearby_notification_title">Découvrez ce qui est près de vous</string>
     <string name="nearby_notification_body">Des lieux à voir, où manger, faire du shopping et dormir autour de vous. Touchez pour découvrir.</string>
+    <string name="channel_morning_brief">Point du matin</string>
+    <string name="channel_morning_brief_desc">Le programme du jour chaque matin d\'un voyage.</string>
+    <string name="channel_weather">Météo</string>
+    <string name="channel_weather_desc">Changements de météo pour vos voyages.</string>
+    <string name="channel_social">Social</string>
+    <string name="channel_social_desc">Abonnés, commentaires et mentions j\'aime d\'autres voyageurs.</string>
+    <string name="channel_quiz">Quiz et jeux</string>
+    <string name="channel_quiz_desc">Rappels du quiz quotidien et des défis.</string>
 </resources>

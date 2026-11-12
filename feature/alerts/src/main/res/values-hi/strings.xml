@@ -39,4 +39,5 @@
     <string name="alerts_live_ai_billing">इस सर्वर पर अभी AI सुविधाएँ बंद हैं।</string>
     <string name="alerts_live_search_unavailable">इस सर्वर पर लाइव वेब खोज उपलब्ध नहीं है।</string>
     <string name="alerts_live_not_found">यह ट्रैकिंग अब मौजूद नहीं है।</string>
+    <string name="alerts_action_open_trip">यात्रा खोलें</string>
 </resources>

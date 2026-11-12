@@ -39,4 +39,13 @@ object PushDataKeys {
     const val LINK = "link"
     const val WATCH_ID = "watch_id"
     const val WATCH_KIND = "watch_kind"
+
+    /** Notification 2.0 category (`price_drops`, `trip_reminders`, …); absent from older servers' pushes. */
+    const val CATEGORY = "category"
+
+    /** The trip a `trip_*` push is about; the empty string (or absent) when there is none. */
+    const val PLAN_ID = "plan_id"
+
+    /** Present on a grouped price push: how many drops it covers. */
+    const val GROUP_COUNT = "group_count"
 }

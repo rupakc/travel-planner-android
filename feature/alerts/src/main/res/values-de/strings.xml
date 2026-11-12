@@ -39,4 +39,5 @@
     <string name="alerts_live_ai_billing">KI-Funktionen sind auf diesem Server derzeit ausgeschaltet.</string>
     <string name="alerts_live_search_unavailable">Die Live-Websuche ist auf diesem Server nicht verfügbar.</string>
     <string name="alerts_live_not_found">Diese Beobachtung existiert nicht mehr.</string>
+    <string name="alerts_action_open_trip">Reise öffnen</string>
 </resources>

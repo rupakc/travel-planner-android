@@ -20,4 +20,12 @@
     <string name="reminder_action_emergency">জরুরি কার্ড</string>
     <string name="nearby_notification_title">দেখুন আপনার আশেপাশে কী আছে</string>
     <string name="nearby_notification_body">আপনার আশেপাশে দেখার, খাওয়ার, কেনাকাটার ও থাকার জায়গা। দেখতে ট্যাপ করুন।</string>
+    <string name="channel_morning_brief">সকালের সারাংশ</string>
+    <string name="channel_morning_brief_desc">ভ্রমণের প্রতিটি সকালে সেদিনের পরিকল্পনা।</string>
+    <string name="channel_weather">আবহাওয়া</string>
+    <string name="channel_weather_desc">আপনার ভ্রমণের আবহাওয়ার পরিবর্তন।</string>
+    <string name="channel_social">সামাজিক</string>
+    <string name="channel_social_desc">অন্য ভ্রমণকারীদের ফলো, মন্তব্য ও লাইক।</string>
+    <string name="channel_quiz">কুইজ ও খেলা</string>
+    <string name="channel_quiz_desc">দৈনিক কুইজ ও চ্যালেঞ্জের মনে করিয়ে দেওয়া।</string>
 </resources>

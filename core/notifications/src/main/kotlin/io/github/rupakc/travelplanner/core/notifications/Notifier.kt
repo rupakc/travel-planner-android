@@ -16,9 +16,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertLink
+import io.github.rupakc.travelplanner.core.domain.alerts.NotificationTarget
 import io.github.rupakc.travelplanner.core.domain.alerts.notificationLink
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
+import io.github.rupakc.travelplanner.core.model.notifications.NotificationCategory
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -54,6 +56,10 @@ object NotificationIds {
     private const val TRIP_REMINDER_BASE = 2_000_000
     private const val TRIP_REMINDER_RANGE = 1_000_000
     const val NEARBY = 3_000_001
+    private const val GROUP_BASE = 4_000_000
+
+    /** One slot per category for a grouped push, so the next group replaces the last instead of stacking. */
+    fun group(category: NotificationCategory?): Int = GROUP_BASE + (category?.ordinal ?: NotificationCategory.entries.size)
 
     fun priceAlert(notificationId: Long): Int = (PRICE_ALERT_BASE + Math.floorMod(notificationId, PRICE_ALERT_RANGE)).toInt()
 
@@ -71,6 +77,27 @@ fun AlertLink.toDeepLink(): String =
 /** Deep links built by notifications (patterns in [DeepLinks]). */
 object NotificationLinks {
     fun plan(planId: Long): String = "${DeepLinks.SCHEME}://plan/$planId"
+
+    /** The trip's Today tab (`travelplanner://trip/{id}?tab=today`). */
+    fun tripToday(planId: Long): String = "${DeepLinks.SCHEME}://trip/$planId?tab=today"
+
+    /** The notification list. */
+    val INBOX: String = "${DeepLinks.SCHEME}://notifications"
+
+    /** Query parameter a push deep link carries so the tap can be counted (`notif_open`); see [PushTaps]. */
+    const val OPEN_CATEGORY_PARAM = "notif_cat"
+
+    /** The link for a resolved [target], tagged with the [category] the tap reports (null = untagged). */
+    fun of(target: NotificationTarget, category: NotificationCategory? = null): String {
+        val base =
+            when (target) {
+                is NotificationTarget.Alert -> target.link.toDeepLink()
+                is NotificationTarget.TripToday -> tripToday(target.planId)
+                NotificationTarget.Inbox -> INBOX
+            }
+        if (category == null) return base
+        return base + (if ('?' in base) "&" else "?") + "$OPEN_CATEGORY_PARAM=${category.wire}"
+    }
 
     val NEARBY: String = "${DeepLinks.SCHEME}://nearby"
 }

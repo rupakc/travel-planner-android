@@ -24,6 +24,7 @@ import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
 import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TripsRoute
+import io.github.rupakc.travelplanner.core.model.notifications.NotificationCategory
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
 import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
 import io.github.rupakc.travelplanner.core.model.settings.Session
@@ -216,6 +217,11 @@ class MainViewModel
         }
 
         fun closeConsentChoices() = consentRepository.closeChoices()
+
+        /** `notif_open` (source push) for a tapped, category-tagged notification; the category is one of the closed names. */
+        fun reportPushOpen(category: NotificationCategory) {
+            telemetry.emit(TelemetryEvents.NOTIF_OPEN, mapOf("category" to category.wire, "source" to "push"))
+        }
 
         /** `perf cold_start` for a launch [io.github.rupakc.travelplanner.telemetry.ColdStartGate] accepted. */
         fun reportColdStart(ms: Long) {

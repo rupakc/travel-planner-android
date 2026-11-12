@@ -20,4 +20,12 @@
     <string name="reminder_action_emergency">आपातकालीन कार्ड</string>
     <string name="nearby_notification_title">देखें आपके आस-पास क्या है</string>
     <string name="nearby_notification_body">आपके आस-पास देखने, खाने, खरीदारी और ठहरने की जगहें। देखने के लिए टैप करें।</string>
+    <string name="channel_morning_brief">सुबह की जानकारी</string>
+    <string name="channel_morning_brief_desc">यात्रा की हर सुबह उस दिन की योजना।</string>
+    <string name="channel_weather">मौसम</string>
+    <string name="channel_weather_desc">आपकी यात्राओं के मौसम में बदलाव।</string>
+    <string name="channel_social">सामाजिक</string>
+    <string name="channel_social_desc">अन्य यात्रियों के फ़ॉलो, टिप्पणियाँ और पसंद।</string>
+    <string name="channel_quiz">क्विज़ और खेल</string>
+    <string name="channel_quiz_desc">रोज़ के क्विज़ और चुनौतियों की याद दिलाने वाले संदेश।</string>
 </resources>

@@ -20,4 +20,12 @@
     <string name="reminder_action_emergency">紧急卡片</string>
     <string name="nearby_notification_title">看看你附近有什么</string>
     <string name="nearby_notification_body">你周边值得看、吃、买和住的地方。点按查看。</string>
+    <string name="channel_morning_brief">早晨简报</string>
+    <string name="channel_morning_brief_desc">旅行期间每天早晨的当日计划。</string>
+    <string name="channel_weather">天气</string>
+    <string name="channel_weather_desc">你的行程的天气变化。</string>
+    <string name="channel_social">社交</string>
+    <string name="channel_social_desc">其他旅行者的关注、评论和点赞。</string>
+    <string name="channel_quiz">测验与游戏</string>
+    <string name="channel_quiz_desc">每日测验和挑战的提醒。</string>
 </resources>
