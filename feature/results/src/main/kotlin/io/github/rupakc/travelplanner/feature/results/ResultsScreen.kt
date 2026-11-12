@@ -54,6 +54,7 @@ import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.WeatherData
 import io.github.rupakc.travelplanner.core.ui.StreamingStatusAnnouncer
+import io.github.rupakc.travelplanner.core.ui.journey.CompletenessMeter
 import io.github.rupakc.travelplanner.feature.results.sections.CommerceRow
 import io.github.rupakc.travelplanner.feature.results.sections.CommerceRowContent
 import io.github.rupakc.travelplanner.feature.results.sections.LocalSelections
@@ -90,7 +91,7 @@ private val EXPANDED_WIDTH = 840.dp
 private val LIST_PANE_WIDTH = 380.dp
 
 /** Number of lazy items above the first section (summary, banner, remix ×2, best value, budget, ease, search). */
-private const val HEADER_ITEMS = 8
+private const val HEADER_ITEMS = 9
 
 /**
  * Stateless results screen. Compact: one scrolling column (summary → banners → tools →
@@ -299,6 +300,10 @@ private fun LazyListScope.headerItems(state: ResultsUiState, onEvent: (ResultsEv
     item(key = "remix_diff", contentType = "remix_diff") { state.remix?.let { RemixComparisonBanner(it, onDismiss = { onEvent(ResultsEvent.DismissRemix) }) } }
     item(key = "remix", contentType = "remix") { if (state.isDone) state.request?.let { RemixBar(it, onEvent) } }
     item(key = "best_value", contentType = "best_value") { state.bestValue?.let { BestValueCard(it, onEvent, onOpenLink = actions::onOpenLink) } }
+    item(key = "completeness", contentType = "completeness") {
+        val meter = state.completeness
+        if (meter != null && state.hasResults) CompletenessMeter(meter)
+    }
     item(key = "budget", contentType = "budget") { state.budget?.let { BudgetPlannerCard(it, onEvent) } }
     item(key = "ease", contentType = "ease") { state.confidence?.let { TravelEaseBanner(it) } }
     item(key = "search", contentType = "search") {

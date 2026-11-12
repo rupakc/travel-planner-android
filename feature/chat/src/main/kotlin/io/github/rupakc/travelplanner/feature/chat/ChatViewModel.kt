@@ -7,6 +7,7 @@ import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppException
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
+import io.github.rupakc.travelplanner.core.data.offline.PlanJourney
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.repository.ChatRepository
 import io.github.rupakc.travelplanner.core.domain.chat.applyPlanAction
@@ -70,6 +71,7 @@ class ChatViewModel
     constructor(
         private val chat: ChatRepository,
         private val planStore: CurrentPlanStore,
+        private val journey: PlanJourney,
         private val dispatchers: AppDispatchers,
         @param:ApplicationScope private val appScope: CoroutineScope,
     ) : ViewModel() {
@@ -365,8 +367,15 @@ class ChatViewModel
                     ),
                 )
                 when (val result = planStore.save(name)) {
-                    is AppResult.Success -> effects.trySend(ChatEffect.OpenPlan(result.value.id))
-                    is AppResult.Failure -> effects.trySend(ChatEffect.SaveFailed(result.error))
+                    is AppResult.Success -> {
+                        // Same snapshot as the results screen (emergency card, forex, visa, packing, weather), behind features.trips.
+                        journey.onPlanSaved(result.value.id, turn.sections.mapValues { it.value.raw }.let(::JsonObject))
+                        effects.trySend(ChatEffect.OpenPlan(result.value.id))
+                    }
+
+                    is AppResult.Failure -> {
+                        effects.trySend(ChatEffect.SaveFailed(result.error))
+                    }
                 }
                 local.update { it.copy(savingPlanTurnId = null) }
             }

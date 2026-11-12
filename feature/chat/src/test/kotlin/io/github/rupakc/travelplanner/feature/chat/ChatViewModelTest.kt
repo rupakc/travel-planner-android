@@ -41,7 +41,9 @@ class ChatViewModelTest {
 
     private val appScope = CoroutineScope(main.testDispatcher)
 
-    private fun viewModel() = ChatViewModel(repo, store, TestAppDispatchers(main.testDispatcher), appScope)
+    private val journey = io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney()
+
+    private fun viewModel() = ChatViewModel(repo, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope)
 
     @Test
     fun `send streams a reply, persists both turns and creates a titled thread`() =
@@ -160,7 +162,7 @@ class ChatViewModelTest {
                             emit(ChatEvent.Done)
                         }
                 }
-            val vm = ChatViewModel(slow, store, TestAppDispatchers(main.testDispatcher), appScope)
+            val vm = ChatViewModel(slow, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope)
             vm.uiState.test {
                 vm.onEvent(ChatUiEvent.Send("tell me about Rome"))
                 val streaming = expectMostRecentItemMatching { it.isStreaming && it.streaming?.content == "Half an answer" }
@@ -182,7 +184,7 @@ class ChatViewModelTest {
                     override fun send(request: io.github.rupakc.travelplanner.core.model.chat.ChatRequest): Flow<ChatEvent> =
                         flow { gate.await() }
                 }
-            val vm = ChatViewModel(silent, store, TestAppDispatchers(main.testDispatcher), appScope)
+            val vm = ChatViewModel(silent, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope)
             vm.uiState.test {
                 vm.onEvent(ChatUiEvent.Send("hello"))
                 expectMostRecentItemMatching { it.isStreaming }

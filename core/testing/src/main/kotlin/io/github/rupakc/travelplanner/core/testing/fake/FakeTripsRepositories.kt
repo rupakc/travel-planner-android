@@ -211,3 +211,29 @@ class FakeOutbox : Outbox {
         return FlushResult()
     }
 }
+
+class FakeJourneyFlagsRepository(
+    var flags: io.github.rupakc.travelplanner.core.domain.server.JourneyFlags =
+        io.github.rupakc.travelplanner.core.domain.server.JourneyFlags(trips = true),
+) : io.github.rupakc.travelplanner.core.data.repository.JourneyFlagsRepository {
+    override suspend fun flags() = flags
+}
+
+/** A [io.github.rupakc.travelplanner.core.data.offline.PlanJourney] over fakes; [flags], [packs] and [telemetry] are exposed for assertions. */
+class FakePlanJourney(
+    val flags: FakeJourneyFlagsRepository = FakeJourneyFlagsRepository(),
+    val packs: FakeOfflinePackRepository = FakeOfflinePackRepository(),
+    val outbox: FakeOutbox = FakeOutbox(),
+    val prep: FakePrepRepository = FakePrepRepository(),
+    val telemetry: FakeTelemetry = FakeTelemetry(),
+    clock: io.github.rupakc.travelplanner.core.common.AppClock = io.github.rupakc.travelplanner.core.common.SystemAppClock(),
+) {
+    val journey =
+        io.github.rupakc.travelplanner.core.data.offline.PlanJourney(
+            flags,
+            io.github.rupakc.travelplanner.core.data.offline.TripSnapshotUploader(packs, outbox),
+            prep,
+            clock,
+            telemetry,
+        )
+}

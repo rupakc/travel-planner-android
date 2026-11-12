@@ -67,6 +67,8 @@ data class ResultsUiState(
     val hotelFilters: HotelFilters? = null,
     val activityFilters: ActivityFilters? = null,
     val source: ResultsSource = ResultsSource.NONE,
+    /** Plan completeness for the meter; null unless `features.trips` is on. */
+    val completeness: io.github.rupakc.travelplanner.core.domain.journey.PlanCompleteness.Result? = null,
 ) {
     val isDone: Boolean get() = phase == StreamPhase.DONE
     val isStreaming: Boolean get() = phase == StreamPhase.STREAMING

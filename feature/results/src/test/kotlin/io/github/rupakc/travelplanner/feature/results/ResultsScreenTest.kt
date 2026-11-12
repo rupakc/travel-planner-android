@@ -108,6 +108,7 @@ class ResultsScreenTest {
                 TestAppDispatchers(Dispatchers.Unconfined),
                 androidx.lifecycle.SavedStateHandle(),
                 io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup(search),
+                io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney().journey,
             )
         search.start(request)
         compose.setContent {
