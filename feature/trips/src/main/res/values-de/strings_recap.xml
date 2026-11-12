@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Trip recap (Phase 1/2 T14). Hand-maintained. -->
+    <string name="recap_load_failed">Deine Reiserückschau konnte nicht geladen werden.</string>
+    <string name="recap_days">Tage: %1$d</string>
+    <string name="recap_places">Besuchte Orte: %1$d · bewertet: %2$d</string>
+    <string name="recap_avg_stars">Durchschnittsbewertung: %1$s Sterne</string>
+    <string name="recap_distance">Strecke: %1$s km</string>
+    <string name="recap_distance_none">Strecke nicht verfügbar</string>
+    <string name="recap_spend_title">Ausgaben</string>
+    <string name="recap_spent">Ausgegeben: %1$s</string>
+    <string name="recap_budget">Budget: %1$s</string>
+    <string name="recap_over_budget">%1$s über dem Budget</string>
+    <string name="recap_under_budget">Noch %1$s vom Budget übrig</string>
+    <string name="recap_plan_cost">Geplante Kosten: %1$s</string>
+    <string name="recap_unconverted">Nicht umgerechnet: %1$s</string>
+    <string name="recap_route_title">Deine Route</string>
+    <string name="recap_route_description">Routenkarte</string>
+    <string name="recap_countries_title">Länder</string>
+    <string name="recap_country_new">Neu: %1$s</string>
+    <string name="recap_complete">Rückschau abschließen</string>
+    <string name="recap_completed">Rückschau abgeschlossen</string>
+    <string name="recap_err_not_ready">Diese Reise ist noch nicht vorbei, die Rückschau kann daher nicht abgeschlossen werden.</string>
+    <string name="recap_err_generic">Die Rückschau konnte nicht abgeschlossen werden. Versuche es erneut.</string>
+    <string name="recap_share">Rückschau teilen</string>
+    <string name="recap_share_chooser">Teile deine Rückschau</string>
+    <string name="recap_share_head">Meine Reise: %1$s</string>
+    <string name="recap_share_stats">Tage: %1$d · Orte: %2$d</string>
+    <string name="recap_where_next">Wohin als Nächstes?</string>
+</resources>

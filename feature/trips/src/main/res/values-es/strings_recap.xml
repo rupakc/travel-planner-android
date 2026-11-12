@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Trip recap (Phase 1/2 T14). Hand-maintained. -->
+    <string name="recap_load_failed">No se pudo cargar tu resumen.</string>
+    <string name="recap_days">Días: %1$d</string>
+    <string name="recap_places">Lugares visitados: %1$d · valorados: %2$d</string>
+    <string name="recap_avg_stars">Valoración media: %1$s estrellas</string>
+    <string name="recap_distance">Distancia: %1$s km</string>
+    <string name="recap_distance_none">Distancia no disponible</string>
+    <string name="recap_spend_title">Gastos</string>
+    <string name="recap_spent">Gastado: %1$s</string>
+    <string name="recap_budget">Presupuesto: %1$s</string>
+    <string name="recap_over_budget">Te pasaste del presupuesto por %1$s</string>
+    <string name="recap_under_budget">Te quedan %1$s del presupuesto</string>
+    <string name="recap_plan_cost">Coste planificado: %1$s</string>
+    <string name="recap_unconverted">Sin convertir: %1$s</string>
+    <string name="recap_route_title">Tu ruta</string>
+    <string name="recap_route_description">Mapa de la ruta</string>
+    <string name="recap_countries_title">Países</string>
+    <string name="recap_country_new">Nuevo: %1$s</string>
+    <string name="recap_complete">Marcar resumen como completo</string>
+    <string name="recap_completed">Resumen completo</string>
+    <string name="recap_err_not_ready">Este viaje aún no ha terminado, así que no se puede completar el resumen.</string>
+    <string name="recap_err_generic">No se pudo completar el resumen. Inténtalo de nuevo.</string>
+    <string name="recap_share">Compartir resumen</string>
+    <string name="recap_share_chooser">Comparte tu resumen</string>
+    <string name="recap_share_head">Mi viaje: %1$s</string>
+    <string name="recap_share_stats">Días: %1$d · Lugares: %2$d</string>
+    <string name="recap_where_next">¿Y ahora adónde?</string>
+</resources>

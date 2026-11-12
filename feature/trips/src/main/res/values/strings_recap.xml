@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Trip recap (Phase 1/2 T14). Hand-maintained. -->
+    <string name="recap_load_failed">Could not load your recap.</string>
+    <string name="recap_days">Days: %1$d</string>
+    <string name="recap_places">Places visited: %1$d · rated: %2$d</string>
+    <string name="recap_avg_stars">Average rating: %1$s stars</string>
+    <string name="recap_distance">Distance: %1$s km</string>
+    <string name="recap_distance_none">Distance not available</string>
+    <string name="recap_spend_title">Spending</string>
+    <string name="recap_spent">Spent: %1$s</string>
+    <string name="recap_budget">Budget: %1$s</string>
+    <string name="recap_over_budget">Over budget by %1$s</string>
+    <string name="recap_under_budget">%1$s left of your budget</string>
+    <string name="recap_plan_cost">Planned cost: %1$s</string>
+    <string name="recap_unconverted">Not converted: %1$s</string>
+    <string name="recap_route_title">Your route</string>
+    <string name="recap_route_description">Route map</string>
+    <string name="recap_countries_title">Countries</string>
+    <string name="recap_country_new">New: %1$s</string>
+    <string name="recap_complete">Mark recap complete</string>
+    <string name="recap_completed">Recap complete</string>
+    <string name="recap_err_not_ready">This trip has not ended yet, so the recap cannot be completed.</string>
+    <string name="recap_err_generic">Could not complete the recap. Try again.</string>
+    <string name="recap_share">Share recap</string>
+    <string name="recap_share_chooser">Share your recap</string>
+    <string name="recap_share_head">My trip: %1$s</string>
+    <string name="recap_share_stats">Days: %1$d · Places: %2$d</string>
+    <string name="recap_where_next">Where next?</string>
+</resources>

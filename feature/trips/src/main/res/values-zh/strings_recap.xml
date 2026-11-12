@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Trip recap (Phase 1/2 T14). Hand-maintained. -->
+    <string name="recap_load_failed">无法加载你的回顾。</string>
+    <string name="recap_days">天数：%1$d</string>
+    <string name="recap_places">到访地点：%1$d · 已评分：%2$d</string>
+    <string name="recap_avg_stars">平均评分：%1$s 星</string>
+    <string name="recap_distance">距离：%1$s 公里</string>
+    <string name="recap_distance_none">暂无距离数据</string>
+    <string name="recap_spend_title">花费</string>
+    <string name="recap_spent">已花费：%1$s</string>
+    <string name="recap_budget">预算：%1$s</string>
+    <string name="recap_over_budget">超出预算 %1$s</string>
+    <string name="recap_under_budget">预算还剩 %1$s</string>
+    <string name="recap_plan_cost">计划费用：%1$s</string>
+    <string name="recap_unconverted">未换算：%1$s</string>
+    <string name="recap_route_title">你的路线</string>
+    <string name="recap_route_description">路线图</string>
+    <string name="recap_countries_title">国家</string>
+    <string name="recap_country_new">新：%1$s</string>
+    <string name="recap_complete">标记回顾为已完成</string>
+    <string name="recap_completed">回顾已完成</string>
+    <string name="recap_err_not_ready">这次旅行尚未结束，暂时无法完成回顾。</string>
+    <string name="recap_err_generic">无法完成回顾，请重试。</string>
+    <string name="recap_share">分享回顾</string>
+    <string name="recap_share_chooser">分享你的回顾</string>
+    <string name="recap_share_head">我的旅行：%1$s</string>
+    <string name="recap_share_stats">天数：%1$d · 地点：%2$d</string>
+    <string name="recap_where_next">下一站去哪？</string>
+</resources>
