@@ -148,4 +148,16 @@ class TripScreenTest {
         compose.onNodeWithText("Try again").performClick()
         assertEquals(TripEvent.RetryPlan, events.last())
     }
+
+    @Test
+    fun `a tab can switch to a sibling tab through the provided selector`() {
+        val onRoad = planning.copy(phase = Phase.ON_THE_ROAD, dayIndex = 2)
+        val today: TripTabContent = { _, _ ->
+            val select = LocalTripTabSelector.current
+            androidx.compose.material3.Button(onClick = { select?.invoke(TripTab.Money) }) { Text("quick add") }
+        }
+        show(state(onRoad), mapOf(TripTab.Today to today, TripTab.Money to { _, _ -> Text("money tab") }))
+        compose.onNodeWithText("quick add").performClick()
+        assertEquals(TripEvent.SelectTab(TripTab.Money), events.last())
+    }
 }

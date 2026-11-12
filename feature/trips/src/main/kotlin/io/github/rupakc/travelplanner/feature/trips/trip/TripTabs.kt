@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.trips.trip
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.Trip
@@ -27,6 +28,13 @@ enum class TripTab(val id: String) {
  * `Map<TripTab, TripTabContent>`. Overview and Prep are built in. A tab without content is not shown.
  */
 typealias TripTabContent = @Composable (trip: Trip, modifier: Modifier) -> Unit
+
+/**
+ * Switches the open trip to another tab. [TripScreen] provides it to the tab content, so a tab (Today's "Add expense")
+ * can move to a sibling tab without navigating: navigating to the route already on top of the stack does nothing.
+ * Null outside a trip screen.
+ */
+val LocalTripTabSelector = compositionLocalOf<((TripTab) -> Unit)?> { null }
 
 /** The tabs of a phase, in order, and the one opened by default (web `tabsFor`). */
 data class TabLayout(val tabs: List<TripTab>, val default: TripTab)
