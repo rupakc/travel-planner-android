@@ -152,3 +152,62 @@ interface PlanDraftDao {
     @Query("DELETE FROM plan_draft WHERE id = :id")
     suspend fun deleteRow(id: Int)
 }
+
+@Dao
+interface OfflinePackDao {
+    @Query("SELECT * FROM offline_pack WHERE `key` = :key")
+    fun observe(key: String): Flow<OfflinePackEntity?>
+
+    @Query("SELECT * FROM offline_pack WHERE `key` = :key")
+    suspend fun get(key: String): OfflinePackEntity?
+
+    @Upsert
+    suspend fun upsert(pack: OfflinePackEntity)
+
+    @Query("DELETE FROM offline_pack WHERE `key` = :key")
+    suspend fun delete(key: String)
+
+    @Query("DELETE FROM offline_pack WHERE userId = :userId")
+    suspend fun deleteAllFor(userId: String)
+
+    @Query("DELETE FROM offline_pack")
+    suspend fun clear()
+}
+
+@Dao
+interface OutboxDao {
+    /** Queues [item]; an earlier row with the same user and key is replaced (and moves to the end). */
+    @Transaction
+    suspend fun enqueue(item: OutboxEntity) {
+        deleteKey(item.userId, item.key)
+        insert(item.copy(id = 0))
+    }
+
+    @Insert
+    suspend fun insert(item: OutboxEntity): Long
+
+    @Query("DELETE FROM outbox WHERE userId = :userId AND `key` = :key")
+    suspend fun deleteKey(userId: String, key: String)
+
+    /** The oldest waiting row of [userId], or null. */
+    @Query("SELECT * FROM outbox WHERE userId = :userId AND id > :afterId ORDER BY id LIMIT 1")
+    suspend fun next(userId: String, afterId: Long): OutboxEntity?
+
+    @Query("DELETE FROM outbox WHERE id = :id")
+    suspend fun delete(id: Long)
+
+    @Query("SELECT `key` FROM outbox WHERE userId = :userId ORDER BY id")
+    fun observeKeys(userId: String): Flow<List<String>>
+
+    @Query("SELECT COUNT(*) FROM outbox WHERE userId = :userId")
+    suspend fun count(userId: String): Int
+
+    @Query("SELECT COUNT(*) FROM outbox")
+    suspend fun countAll(): Int
+
+    @Query("DELETE FROM outbox WHERE userId = :userId")
+    suspend fun deleteAllFor(userId: String)
+
+    @Query("DELETE FROM outbox")
+    suspend fun clear()
+}

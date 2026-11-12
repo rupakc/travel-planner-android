@@ -11,3 +11,8 @@ android {
 dependencies {
     api(projects.core.model)
 }
+
+android {
+    // Exported schemas feed MigrationTestHelper.
+    sourceSets.getByName("test").assets.directories.add("$projectDir/schemas")
+}

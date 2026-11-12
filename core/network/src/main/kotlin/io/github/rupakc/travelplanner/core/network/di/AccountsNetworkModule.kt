@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.network.api.AccountApi
 import io.github.rupakc.travelplanner.core.network.api.GameApi
 import io.github.rupakc.travelplanner.core.network.api.OauthApi
+import io.github.rupakc.travelplanner.core.network.api.OutboxApi
 import io.github.rupakc.travelplanner.core.network.api.SignupApi
 import io.github.rupakc.travelplanner.core.network.api.TripsApi
 import javax.inject.Singleton
@@ -40,4 +41,9 @@ object AccountsNetworkModule {
     fun tripsApi(
         @DefaultHttp r: Retrofit,
     ): TripsApi = r.create(TripsApi::class.java)
+
+    @Provides @Singleton
+    fun outboxApi(
+        @DefaultHttp r: Retrofit,
+    ): OutboxApi = r.create(OutboxApi::class.java)
 }
