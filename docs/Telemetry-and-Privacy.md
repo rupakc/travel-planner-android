@@ -63,6 +63,10 @@ Crashes do not fit the registry's `js|promise|api` error kinds, so they are not 
 
 Alerts 2.0 events sent from the inbox (`NotificationsViewModel`, constants local to `feature:alerts` until the shared enum lands): `alert_drop_seen` (`kind`, `target_hit`, `via: in_app`, once per row per session) and `alert_digest_open` (`via: in_app`). No amounts, titles or ids.
 
+## Price alerts 2.0 events
+
+`alert_quick_watch` (`kind`, `action` add/undo/exists/blocked, `surface` results/chat/trip/suggest), `alert_suggest` (`action` shown/accepted/dismissed, `count`) and `alert_prefs_change` (`field` digest/quiet_hours/instant/cap/group) are emitted by `QuickWatcher` and the alert preference and suggestion view models (`core:domain` `AlertTelemetry`). Values are closed enums; no titles, prices, ids or times leave the device. The screen `/alerts/preferences` is the template for `AlertPrefsRoute`.
+
 ## Follow-ups
 
 - Web repo: the Android column of `docs/Feature-Parity.md` and the Android path in `docs/Privacy.md`.

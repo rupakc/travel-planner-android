@@ -163,6 +163,9 @@ data class WatchState(val busy: Boolean = false, val watchId: Long? = null, val 
 
 data class VerificationDetail(val section: SectionId, val verification: Verification)
 
+/** Why a one-tap watch did not happen. */
+enum class QuickBlock { LIVE_PRICES_OFF, LIMIT, INVALID, FAILED }
+
 /** One-shot messages (snackbar). */
 sealed interface ResultsMessage {
     data class FareWatched(val price: Double?, val travellers: Int, val alreadyLow: Boolean, val alreadyWatching: Boolean) : ResultsMessage
@@ -173,6 +176,12 @@ sealed interface ResultsMessage {
     data class WatchFailed(val kind: String, val message: String?) : ResultsMessage
 
     data object WatchUnavailable : ResultsMessage
+
+    /** One-tap watch done: [existing] = an active watch already matched (nothing new, no Undo). */
+    data class QuickWatched(val existing: Boolean) : ResultsMessage
+
+    /** One-tap watch refused or failed; [detail] is the backend text (limit / failure) or null. */
+    data class QuickWatchBlocked(val reason: QuickBlock, val detail: String?) : ResultsMessage
 
     data object NewPlanStarted : ResultsMessage
 

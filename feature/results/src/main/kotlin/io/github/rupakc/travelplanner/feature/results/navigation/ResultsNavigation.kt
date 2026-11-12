@@ -31,6 +31,7 @@ import io.github.rupakc.travelplanner.core.model.section.StressTestData
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.core.ui.watch.FareWatchSheet
 import io.github.rupakc.travelplanner.core.ui.watch.PriceWatchSheet
+import io.github.rupakc.travelplanner.feature.results.QuickBlock
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.ResultsEvent
 import io.github.rupakc.travelplanner.feature.results.ResultsMessage
@@ -76,12 +77,17 @@ internal fun ResultsRoute(onBack: () -> Unit, onOpenMyPlan: () -> Unit, onOpenAl
                 val action =
                     when (message) {
                         is ResultsMessage.FareWatched, is ResultsMessage.PriceWatched -> seeAlerts
+                        is ResultsMessage.QuickWatched -> if (message.existing) seeAlerts else undo
                         ResultsMessage.NewPlanStarted -> undo
                         else -> null
                     }
                 val result = snackbar.showSnackbar(text, actionLabel = action, withDismissAction = action == null, duration = SnackbarDuration.Long)
                 if (result == SnackbarResult.ActionPerformed) {
-                    if (message == ResultsMessage.NewPlanStarted) viewModel.onEvent(ResultsEvent.UndoNewPlan) else onOpenAlerts()
+                    when {
+                        message == ResultsMessage.NewPlanStarted -> viewModel.onEvent(ResultsEvent.UndoNewPlan)
+                        message is ResultsMessage.QuickWatched && !message.existing -> viewModel.undoQuickWatch()
+                        else -> onOpenAlerts()
+                    }
                 }
             }
         }
@@ -210,6 +216,10 @@ internal fun messageText(context: android.content.Context, message: ResultsMessa
             context.getString(R.string.results_watch_unavailable)
         }
 
+        is ResultsMessage.QuickWatched, is ResultsMessage.QuickWatchBlocked -> {
+            quickWatchText(context, message)
+        }
+
         ResultsMessage.NewPlanStarted -> {
             context.getString(R.string.results_new_plan_started)
         }
@@ -219,3 +229,18 @@ internal fun messageText(context: android.content.Context, message: ResultsMessa
         }
     }
 }
+
+private fun quickWatchText(context: android.content.Context, message: ResultsMessage): String =
+    when (message) {
+        is ResultsMessage.QuickWatched -> context.getString(if (message.existing) R.string.results_quick_existing else R.string.results_quick_watched)
+        is ResultsMessage.QuickWatchBlocked -> quickBlockedText(context, message)
+        else -> ""
+    }
+
+private fun quickBlockedText(context: android.content.Context, message: ResultsMessage.QuickWatchBlocked): String =
+    when (message.reason) {
+        QuickBlock.LIVE_PRICES_OFF -> context.getString(R.string.results_quick_live_off)
+        QuickBlock.LIMIT -> message.detail ?: context.getString(R.string.results_quick_limit)
+        QuickBlock.INVALID -> context.getString(R.string.results_watch_unavailable)
+        QuickBlock.FAILED -> message.detail ?: context.getString(R.string.results_watch_price_failed)
+    }

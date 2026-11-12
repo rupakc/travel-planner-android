@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.core.domain.telemetry
 
 import io.github.rupakc.travelplanner.core.model.navigation.AccountChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AccountRoute
+import io.github.rupakc.travelplanner.core.model.navigation.AlertPrefsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppearanceRoute
@@ -64,6 +65,7 @@ class TelemetryRoutesTest {
             is ChatRoute -> ChatRoute::class
             is AlertsRoute -> AlertsRoute::class
             is NotificationsRoute -> NotificationsRoute::class
+            is AlertPrefsRoute -> AlertPrefsRoute::class
             is GlobalSearchRoute -> GlobalSearchRoute::class
             is SettingsRoute -> SettingsRoute::class
             is SettingsEntryRoute -> SettingsEntryRoute::class
@@ -110,6 +112,7 @@ class TelemetryRoutesTest {
                 ChatRoute(),
                 AlertsRoute(),
                 NotificationsRoute,
+                AlertPrefsRoute,
                 GlobalSearchRoute,
                 SettingsRoute,
                 SettingsEntryRoute("x"),
@@ -140,9 +143,9 @@ class TelemetryRoutesTest {
                 YouRoute,
             ).map(::classOf)
         val table = TelemetryRoutes.table
-        assertEquals(41, all.toSet().size)
-        assertEquals(41, table.size)
-        assertEquals(41, table.map { it.first }.toSet().size)
+        assertEquals(42, all.toSet().size)
+        assertEquals(42, table.size)
+        assertEquals(42, table.map { it.first }.toSet().size)
         assertEquals(all.toSet(), table.map { it.first }.toSet())
         table.forEach { assertTrue(it.second, TelemetryProps.isToken(it.second)) }
         assertTrue(TelemetryProps.isToken(TelemetryRoutes.OTHER))

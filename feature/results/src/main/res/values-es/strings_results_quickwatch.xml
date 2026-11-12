@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="results_quick_watched">Vigilando. Comprobaremos el precio y te avisaremos de las bajadas.</string>
+    <string name="results_quick_existing">Ya estás vigilando esto.</string>
+    <string name="results_quick_live_off">Las comprobaciones de precios en vivo están desactivadas ahora, así que no podemos vigilar esto todavía.</string>
+    <string name="results_quick_limit">Has alcanzado tu límite de vigilancias. Quita una para añadir otra.</string>
+</resources>

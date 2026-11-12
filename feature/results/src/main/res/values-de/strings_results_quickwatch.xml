@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="results_quick_watched">Wird beobachtet. Wir prüfen den Preis und melden uns bei Preisrückgängen.</string>
+    <string name="results_quick_existing">Das beobachtest du bereits.</string>
+    <string name="results_quick_live_off">Live-Preisprüfungen sind gerade aus, deshalb können wir das noch nicht beobachten.</string>
+    <string name="results_quick_limit">Du hast dein Limit für Beobachtungen erreicht. Entferne eine, um eine neue hinzuzufügen.</string>
+</resources>

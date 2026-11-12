@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="results_quick_watched">Surveillance en cours. Nous vérifierons le prix et vous préviendrons en cas de baisse.</string>
+    <string name="results_quick_existing">Vous surveillez déjà ceci.</string>
+    <string name="results_quick_live_off">Les vérifications de prix en direct sont désactivées pour le moment, nous ne pouvons donc pas encore le surveiller.</string>
+    <string name="results_quick_limit">Vous avez atteint votre limite de surveillances. Retirez-en une pour en ajouter une autre.</string>
+</resources>

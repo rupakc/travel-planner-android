@@ -67,6 +67,7 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.game.GameDelta
 import io.github.rupakc.travelplanner.core.model.navigation.AccountChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AccountRoute
+import io.github.rupakc.travelplanner.core.model.navigation.AlertPrefsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
@@ -325,6 +326,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                     }
                 },
                 onSearch = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
+                onOpenPrefs = { navController.navigate(AlertPrefsRoute) },
             )
             settingsGraph(
                 onBack = { navController.popBackStack() },
