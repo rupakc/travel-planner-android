@@ -22,16 +22,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -112,8 +119,22 @@ fun NearbyScreen(
     onOpenSource: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val snackbar = remember { SnackbarHostState() }
+    val hereFailedText = stringResource(R.string.nearby_here_failed)
+    LaunchedEffect(state.hereFailed) {
+        if (state.hereFailed) {
+            snackbar.showSnackbar(hereFailedText)
+            onEvent(NearbyEvent.HereMessageShown)
+        }
+    }
+    if (state.pickingFor !=
+        null
+    ) {
+        TripPicker(state.hereTrips, onPick = { onEvent(NearbyEvent.PickTrip(it)) }, onDismiss = { onEvent(NearbyEvent.DismissPicker) })
+    }
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TpTopBar(
                 title = stringResource(R.string.nearby_title),
@@ -182,7 +203,7 @@ fun NearbyScreen(
                 }
 
                 NearbyPhase.Loaded -> {
-                    Results(state, onOpenMaps, onOpenSource)
+                    Results(state, onEvent, onOpenMaps, onOpenSource)
                 }
             }
         }
@@ -247,7 +268,7 @@ private fun failureText(phase: NearbyPhase.Failed): String {
 }
 
 @Composable
-private fun Results(state: NearbyUiState, onOpenMaps: (NearbyCard) -> Unit, onOpenSource: (String) -> Unit) {
+private fun Results(state: NearbyUiState, onEvent: (NearbyEvent) -> Unit, onOpenMaps: (NearbyCard) -> Unit, onOpenSource: (String) -> Unit) {
     LazyColumn(
         contentPadding = PaddingValues(TravelTheme.spacing.gutter),
         verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
@@ -277,7 +298,15 @@ private fun Results(state: NearbyUiState, onOpenMaps: (NearbyCard) -> Unit, onOp
                     )
                 }
             }
-            items(section.cards, key = { it.key }, contentType = { "card" }) { card -> PlaceCard(card, onOpenMaps) }
+            items(section.cards, key = { it.key }, contentType = { "card" }) { card ->
+                PlaceCard(
+                    card,
+                    onOpenMaps,
+                    canMark = ImHere.available(card, state.hereTrips),
+                    marked = card.key in state.markedKeys,
+                    onHere = { onEvent(NearbyEvent.ImHere(card.key)) },
+                )
+            }
         }
         if (state.sources.isNotEmpty()) {
             item(key = "sources", contentType = "sources") { Sources(state.sources, onOpenSource) }
@@ -307,7 +336,7 @@ private fun PlaceHeader(state: NearbyUiState) {
 }
 
 @Composable
-private fun PlaceCard(card: NearbyCard, onOpenMaps: (NearbyCard) -> Unit) {
+private fun PlaceCard(card: NearbyCard, onOpenMaps: (NearbyCard) -> Unit, canMark: Boolean, marked: Boolean, onHere: () -> Unit) {
     TpCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             Text(card.name, style = TravelTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
@@ -320,8 +349,36 @@ private fun PlaceCard(card: NearbyCard, onOpenMaps: (NearbyCard) -> Unit) {
                 leadingIcon = Icons.Filled.Place,
                 modifier = Modifier.semantics { contentDescription = a11y },
             )
+            if (canMark) {
+                val hereA11y = stringResource(R.string.nearby_here_a11y, card.name)
+                TpButton(
+                    stringResource(if (marked) R.string.nearby_here_done else R.string.nearby_here),
+                    onHere,
+                    variant = TpButtonVariant.Text,
+                    enabled = !marked,
+                    leadingIcon = Icons.Filled.Check,
+                    modifier = Modifier.semantics { contentDescription = hereA11y },
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun TripPicker(trips: List<HereTrip>, onPick: (Long) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.nearby_here_pick_title)) },
+        text = {
+            Column {
+                trips.forEach { trip ->
+                    TextButton(onClick = { onPick(trip.id) }, modifier = Modifier.fillMaxWidth()) { Text(trip.title) }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.nearby_here_cancel)) } },
+    )
 }
 
 @Composable

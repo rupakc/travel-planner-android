@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nearby_here">我在这里</string>
+    <string name="nearby_here_a11y">我在这里：%1$s</string>
+    <string name="nearby_here_done">已保存为到访过</string>
+    <string name="nearby_here_pick_title">将此地点添加到行程</string>
+    <string name="nearby_here_failed">无法保存此地点。请重试。</string>
+    <string name="nearby_here_cancel">取消</string>
+</resources>

@@ -29,6 +29,7 @@ import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNearbyRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -118,10 +119,10 @@ class NearbyTest {
 
     @Test
     fun `without permission it asks, and a grant loads v2 sections into memory`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             val location = FakeLocation(permitted = false)
             val repo = FakeNearbyRepository(AppResult.Success(v2))
-            val vm = NearbyViewModel(location, repo, nearbyOn)
+            val vm = nearbyVm(location, repo, nearbyOn)
             assertEquals(NearbyPhase.NeedsPermission, vm.state.value.phase)
             vm.onEvent(NearbyEvent.PermissionResult(granted = false))
             assertEquals(NearbyPhase.Denied, vm.state.value.phase)
@@ -143,9 +144,9 @@ class NearbyTest {
 
     @Test
     fun `refresh always asks the server again (no cache)`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             val repo = FakeNearbyRepository(AppResult.Success(v2))
-            val vm = NearbyViewModel(FakeLocation(true), repo, FakeSettingsRepository())
+            val vm = nearbyVm(FakeLocation(true), repo, FakeSettingsRepository())
             advanceUntilIdle()
             vm.onEvent(NearbyEvent.Refresh)
             advanceUntilIdle()
@@ -156,10 +157,10 @@ class NearbyTest {
 
     @Test
     fun `phases follow with Turbine`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             val gate = CompletableDeferred<Unit>()
             val location = FakeLocation(false).apply { this.gate = gate }
-            val vm = NearbyViewModel(location, FakeNearbyRepository(AppResult.Success(v2)), FakeSettingsRepository())
+            val vm = nearbyVm(location, FakeNearbyRepository(AppResult.Success(v2)), FakeSettingsRepository())
             vm.state.test {
                 assertEquals(NearbyPhase.NeedsPermission, awaitItem().phase)
                 location.permitted = true
@@ -176,10 +177,10 @@ class NearbyTest {
 
     @Test
     fun `no place, rate limit, AI limit, offline and location off map to their states`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             val repo = FakeNearbyRepository(AppResult.Failure(AppError.NotFound("We don't know a town or city near you yet.", "no_place")))
             val location = FakeLocation(true)
-            val vm = NearbyViewModel(location, repo, FakeSettingsRepository())
+            val vm = nearbyVm(location, repo, FakeSettingsRepository())
             advanceUntilIdle()
             assertEquals(NearbyPhase.NoPlace("We don't know a town or city near you yet."), vm.state.value.phase)
             repo.result = AppResult.Failure(AppError.RateLimited("Too many requests — please wait 30 seconds and try again.", 30))

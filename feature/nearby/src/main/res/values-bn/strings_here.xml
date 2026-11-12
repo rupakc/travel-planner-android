@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nearby_here">আমি এখানে</string>
+    <string name="nearby_here_a11y">আমি এখানে: %1$s</string>
+    <string name="nearby_here_done">ঘুরে দেখা হিসেবে সংরক্ষিত</string>
+    <string name="nearby_here_pick_title">এই জায়গাটি একটি ভ্রমণে যোগ করুন</string>
+    <string name="nearby_here_failed">জায়গাটি সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="nearby_here_cancel">বাতিল</string>
+</resources>
