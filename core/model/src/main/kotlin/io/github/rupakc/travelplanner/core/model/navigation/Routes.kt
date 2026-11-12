@@ -93,6 +93,9 @@ sealed interface AppRoute
 // --- nearby / share -----------------------------------------------------
 @Serializable data object NearbyRoute : AppRoute
 
+/** The paste-a-share-link screen (R6: opening a share link the system did not route to the app). */
+@Serializable data object ShareOpenLinkRoute : AppRoute
+
 /** Public share-link viewer (`/share/{token}`). */
 @Serializable data class ShareRoute(val token: String) : AppRoute
 

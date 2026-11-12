@@ -37,6 +37,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.SessionsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsEntryRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareCreateRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ShareOpenLinkRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SignUpRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TasteProfileRoute
@@ -84,6 +85,7 @@ object TelemetryRoutes {
             ShareRoute::class to "/share/:token",
             ShareCreateRoute::class to "/share",
             MySharesRoute::class to "/you/shares",
+            ShareOpenLinkRoute::class to "/share/open",
             SignUpRoute::class to "/signup",
             CheckEmailRoute::class to "/check-email",
             VerifyEmailRoute::class to "/verify",
