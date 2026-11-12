@@ -55,6 +55,8 @@ data class ServerNotificationsUiState(
     val loadError: NotificationsFailure? = null,
     val saveError: NotificationsFailure? = null,
     val local: AppSettings = AppSettings(),
+    /** Alerts v2 exists on this backend, so the alert preferences screen can be linked. */
+    val alertPrefsAvailable: Boolean = false,
 ) {
     /**
      * Whether [category] shows as on. The three categories that also gate an on-device notifier (trip, price, nearby)
@@ -172,7 +174,9 @@ class ServerNotificationsViewModel
             loadJob?.cancel()
             loadJob =
                 viewModelScope.launch {
-                    if (!flags.flags().notifications.apiAvailable) {
+                    val gates = flags.flags()
+                    mutable.update { it.copy(alertPrefsAvailable = gates.alerts.v2Available) }
+                    if (!gates.notifications.apiAvailable) {
                         mutable.update { it.copy(available = false, loading = false) }
                         return@launch
                     }

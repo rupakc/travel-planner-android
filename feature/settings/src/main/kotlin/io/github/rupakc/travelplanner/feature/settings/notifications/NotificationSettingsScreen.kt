@@ -45,7 +45,12 @@ import io.github.rupakc.travelplanner.feature.settings.common.SettingsScaffold
 import io.github.rupakc.travelplanner.feature.settings.common.SettingsSwitchRow
 
 @Composable
-internal fun NotificationSettingsRoute(onBack: () -> Unit, viewModel: NotificationSettingsViewModel, serverViewModel: ServerNotificationsViewModel) {
+internal fun NotificationSettingsRoute(
+    onBack: () -> Unit,
+    onOpenAlertPrefs: () -> Unit,
+    viewModel: NotificationSettingsViewModel,
+    serverViewModel: ServerNotificationsViewModel,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val server by serverViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -63,6 +68,7 @@ internal fun NotificationSettingsRoute(onBack: () -> Unit, viewModel: Notificati
         onBack = onBack,
         server = server,
         onServerEvent = serverViewModel::onEvent,
+        onOpenAlertPrefs = onOpenAlertPrefs,
     )
 }
 
@@ -88,6 +94,7 @@ fun NotificationSettingsScreen(
     modifier: Modifier = Modifier,
     server: ServerNotificationsUiState = ServerNotificationsUiState(),
     onServerEvent: (ServerNotificationsEvent) -> Unit = {},
+    onOpenAlertPrefs: (() -> Unit)? = null,
 ) {
     SettingsScaffold(stringResource(R.string.settings_notifications), onBack = onBack, modifier = modifier) {
         if (settings == null) {
@@ -108,7 +115,7 @@ fun NotificationSettingsScreen(
                 }
             }
             if (server.available) {
-                ServerNotificationsSection(server, onServerEvent)
+                ServerNotificationsSection(server, onServerEvent, onOpenAlertPrefs = onOpenAlertPrefs)
                 // Trip, price and nearby are switched by the category rows above (they also drive the on-device setting).
                 SettingsHeading(stringResource(R.string.settings_notif_nearby))
             } else {

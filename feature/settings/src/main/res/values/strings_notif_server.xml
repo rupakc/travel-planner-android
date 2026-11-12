@@ -41,4 +41,6 @@
         <item quantity="one">%1$d per day</item>
         <item quantity="other">%1$d per day</item>
     </plurals>
+    <string name="settings_notifsrv_alert_prefs">Alert settings</string>
+    <string name="settings_notifsrv_alert_prefs_sub">Price alert digest, instant alerts and limits</string>
 </resources>

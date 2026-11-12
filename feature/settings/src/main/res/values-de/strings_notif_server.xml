@@ -41,4 +41,6 @@
         <item quantity="one">%1$d pro Tag</item>
         <item quantity="other">%1$d pro Tag</item>
     </plurals>
+    <string name="settings_notifsrv_alert_prefs">Alarm-Einstellungen</string>
+    <string name="settings_notifsrv_alert_prefs_sub">Preisalarm-Zusammenfassung, Sofortalarme und Limits</string>
 </resources>

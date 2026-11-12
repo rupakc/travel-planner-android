@@ -117,4 +117,22 @@ class ServerNotificationsSectionTest {
         compose.onNodeWithText("Could not save that change. It was undone.").assertExists()
         switchNamed("Price drops").assertIsOn()
     }
+
+    @Test
+    fun `alert settings link shows only when alerts v2 is available`() {
+        var opened = 0
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                ServerNotificationsSection(ready.copy(alertPrefsAvailable = true), {}, onOpenAlertPrefs = { opened++ })
+            }
+        }
+        compose.onNodeWithText("Alert settings").performClick()
+        assertEquals(1, opened)
+    }
+
+    @Test
+    fun `alert settings link is hidden without alerts v2`() {
+        show(ready)
+        compose.onNodeWithText("Alert settings").assertDoesNotExist()
+    }
 }

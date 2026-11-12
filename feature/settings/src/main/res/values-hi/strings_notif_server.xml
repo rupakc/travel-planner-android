@@ -41,4 +41,6 @@
         <item quantity="one">प्रतिदिन %1$d</item>
         <item quantity="other">प्रतिदिन %1$d</item>
     </plurals>
+    <string name="settings_notifsrv_alert_prefs">अलर्ट सेटिंग</string>
+    <string name="settings_notifsrv_alert_prefs_sub">मूल्य अलर्ट डाइजेस्ट, तुरंत अलर्ट और सीमाएँ</string>
 </resources>

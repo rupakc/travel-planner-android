@@ -39,4 +39,6 @@
     <plurals name="settings_notifsrv_cap_value">
         <item quantity="other">每天 %1$d 条</item>
     </plurals>
+    <string name="settings_notifsrv_alert_prefs">提醒设置</string>
+    <string name="settings_notifsrv_alert_prefs_sub">降价提醒摘要、即时提醒和上限</string>
 </resources>

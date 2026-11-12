@@ -56,6 +56,7 @@ internal fun ServerNotificationsSection(
     state: ServerNotificationsUiState,
     onEvent: (ServerNotificationsEvent) -> Unit,
     modifier: Modifier = Modifier,
+    onOpenAlertPrefs: (() -> Unit)? = null,
 ) {
     if (!state.available) return
     val settings = state.settings
@@ -84,6 +85,13 @@ internal fun ServerNotificationsSection(
                 Categories(state, onEvent)
                 QuietAndLimits(state, settings, onEvent)
                 PushStatusRows(settings)
+                if (state.alertPrefsAvailable && onOpenAlertPrefs != null) {
+                    SettingsRow(
+                        stringResource(R.string.settings_notifsrv_alert_prefs),
+                        subtitle = stringResource(R.string.settings_notifsrv_alert_prefs_sub),
+                        onClick = onOpenAlertPrefs,
+                    )
+                }
             }
         }
     }
