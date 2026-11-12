@@ -82,4 +82,15 @@ class ErrorMappingTest {
             AppLogger.sink = previous
         }
     }
+
+    @Test
+    fun `error_code is kept on 403, 429, 503 and 409, with the 403 extras`() {
+        val pending = HttpErrorMapper.map(403, null, """{"detail":"Confirm your email","error_code":"account_pending","email_hint":"j•••@x.com"}""")
+        assertEquals("account_pending", (pending as AppError.Forbidden).code)
+        assertEquals("j•••@x.com", pending.extras["email_hint"])
+        assertEquals("rate_limited", (HttpErrorMapper.map(429, "5", """{"detail":"Slow","error_code":"rate_limited"}""") as AppError.RateLimited).code)
+        assertEquals("email_unavailable", (HttpErrorMapper.map(503, null, """{"error_code":"email_unavailable"}""") as AppError.Server).code)
+        assertEquals("username_taken", (HttpErrorMapper.map(409, null, """{"error_code":"username_taken"}""") as AppError.Client).code)
+        assertEquals("session_revoked", (HttpErrorMapper.map(401, null, """{"error_code":"session_revoked"}""") as AppError.Unauthorized).code)
+    }
 }

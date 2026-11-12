@@ -12,16 +12,20 @@ sealed interface AppError {
     data class Network(override val message: String? = null) : AppError
 
     /** 401: the session was cleared; the app routes to Login. */
-    data class Unauthorized(override val message: String? = null) : AppError
+    data class Unauthorized(override val message: String? = null, val code: String? = null) : AppError
 
     /** 403 (e.g. admin-only). */
-    data class Forbidden(override val message: String? = null) : AppError
+    data class Forbidden(
+        override val message: String? = null,
+        val code: String? = null,
+        val extras: Map<String, String> = emptyMap(),
+    ) : AppError
 
     /** 404 with the backend's detail ("Plan not found"). */
     data class NotFound(override val message: String? = null, val code: String? = null) : AppError
 
     /** 429. [retryAfterSeconds] from the `Retry-After` header when present. */
-    data class RateLimited(override val message: String?, val retryAfterSeconds: Long?) : AppError
+    data class RateLimited(override val message: String?, val retryAfterSeconds: Long?, val code: String? = null) : AppError
 
     /**
      * 400/409/413/422 and other 4xx with a readable detail.
