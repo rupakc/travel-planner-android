@@ -109,6 +109,7 @@ class ResultsScreenTest {
                 androidx.lifecycle.SavedStateHandle(),
                 io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup(search),
                 io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney().journey,
+                io.github.rupakc.travelplanner.core.testing.fake.FakeQuickWatch().watcher,
             )
         search.start(request)
         compose.setContent {

@@ -63,6 +63,9 @@ sealed interface AppRoute
 
 @Serializable data object NotificationsRoute : AppRoute
 
+/** Price alert preferences (digest, instant mode, quiet hours, caps, grouping); needs `alerts_api >= 2`. */
+@Serializable data object AlertPrefsRoute : AppRoute
+
 /** Unified offline-first search over trips, chats, recent searches, features and settings (opened from Home / top bars). */
 @Serializable data object GlobalSearchRoute : AppRoute
 

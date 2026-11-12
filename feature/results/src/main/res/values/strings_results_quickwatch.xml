@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="results_quick_watched">Watching. We\'ll check the price and tell you about drops.</string>
+    <string name="results_quick_existing">You\'re already watching this.</string>
+    <string name="results_quick_live_off">Live price checks are off right now, so we can\'t watch this yet.</string>
+    <string name="results_quick_limit">You\'ve reached your watch limit. Remove one to add another.</string>
+</resources>

@@ -72,6 +72,7 @@ import io.github.rupakc.travelplanner.core.ui.watch.ToneBox
 import io.github.rupakc.travelplanner.feature.alerts.savings.SavingsHeaderRoute
 import io.github.rupakc.travelplanner.feature.alerts.story.PriceStorySheet
 import io.github.rupakc.travelplanner.feature.alerts.story.StoryGateViewModel
+import io.github.rupakc.travelplanner.feature.alerts.v2.AlertTools
 import java.time.Instant
 
 /** Watched prices (top-level: the shell draws the app bar). */
@@ -80,6 +81,7 @@ fun WatchedPricesRoute(
     onReplanned: () -> Unit,
     onSearch: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenPrefs: () -> Unit = {},
     viewModel: AlertsViewModel = hiltViewModel(),
     gate: StoryGateViewModel = hiltViewModel(),
 ) {
@@ -88,7 +90,11 @@ fun WatchedPricesRoute(
         viewModel.effect.collect { if (it == AlertsEffect.Replanned) onReplanned() }
     }
     val storyAvailable by gate.available.collectAsStateWithLifecycle()
-    AlertsScreen(state, viewModel::onEvent, onSearch, modifier, header = { SavingsHeaderRoute() }, storyAvailable = storyAvailable)
+    Column(modifier) {
+        // Alerts 2.0: suggestions (one-tap) and alert settings; renders nothing against a backend without the v2 API.
+        AlertTools(onOpenPrefs = onOpenPrefs)
+        AlertsScreen(state, viewModel::onEvent, onSearch, Modifier.weight(1f), header = { SavingsHeaderRoute() }, storyAvailable = storyAvailable)
+    }
 }
 
 /** Stateless Alerts screen (web AlertsPage). */

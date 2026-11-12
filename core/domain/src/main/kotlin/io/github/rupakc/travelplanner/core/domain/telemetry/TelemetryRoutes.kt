@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.core.domain.telemetry
 
 import io.github.rupakc.travelplanner.core.model.navigation.AccountChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AccountRoute
+import io.github.rupakc.travelplanner.core.model.navigation.AlertPrefsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AlertsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppearanceRoute
@@ -67,6 +68,7 @@ object TelemetryRoutes {
             ChatRoute::class to "/chat",
             AlertsRoute::class to "/alerts",
             NotificationsRoute::class to "/notifications",
+            AlertPrefsRoute::class to "/alerts/preferences",
             GlobalSearchRoute::class to "/global-search",
             SettingsRoute::class to "/settings",
             SettingsEntryRoute::class to "/settings/:entry",

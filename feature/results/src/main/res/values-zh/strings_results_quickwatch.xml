@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="results_quick_watched">已开始关注。我们会查看价格，并在降价时通知你。</string>
+    <string name="results_quick_existing">你已在关注此项。</string>
+    <string name="results_quick_live_off">实时价格检查目前已关闭，暂时无法关注。</string>
+    <string name="results_quick_limit">已达到关注上限。请先移除一项再添加。</string>
+</resources>

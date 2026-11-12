@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="results_quick_watched">ট্র্যাক হচ্ছে। আমরা দাম দেখব এবং কমলে জানাব।</string>
+    <string name="results_quick_existing">আপনি এটি আগেই ট্র্যাক করছেন।</string>
+    <string name="results_quick_live_off">লাইভ দাম পরীক্ষা এখন বন্ধ, তাই এখনই এটি ট্র্যাক করা যাচ্ছে না।</string>
+    <string name="results_quick_limit">আপনি ট্র্যাকিংয়ের সীমায় পৌঁছেছেন। নতুন যোগ করতে একটি সরান।</string>
+</resources>

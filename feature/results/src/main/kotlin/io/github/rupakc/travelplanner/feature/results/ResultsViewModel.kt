@@ -8,6 +8,7 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.alerts.QuickWatcher
 import io.github.rupakc.travelplanner.core.data.offline.PlanJourney
 import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
@@ -24,6 +25,7 @@ import io.github.rupakc.travelplanner.core.domain.alerts.FareWatchDialogState
 import io.github.rupakc.travelplanner.core.domain.alerts.PricePreview
 import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogController
 import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogState
+import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchOutcome
 import io.github.rupakc.travelplanner.core.domain.alerts.WatchTrip
 import io.github.rupakc.travelplanner.core.domain.alerts.WatchedOutcome
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
@@ -39,6 +41,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.ALERT_ANY_DROP
 import io.github.rupakc.travelplanner.core.model.alerts.ActivityWatchSpec
 import io.github.rupakc.travelplanner.core.model.alerts.CreatePriceWatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
+import io.github.rupakc.travelplanner.core.model.alerts.FareWatchMatchRequest
 import io.github.rupakc.travelplanner.core.model.alerts.HotelWatchSpec
 import io.github.rupakc.travelplanner.core.model.alerts.NoLivePriceError
 import io.github.rupakc.travelplanner.core.model.alerts.PriceSuggestion
@@ -119,6 +122,7 @@ class ResultsViewModel
         private val savedState: SavedStateHandle,
         private val placeNames: PlaceNameLookup,
         private val journey: PlanJourney,
+        private val quickWatcher: QuickWatcher,
     ) : ViewModel() {
         private val local = MutableStateFlow(LocalState())
         private val builder = ResultsStateBuilder()
@@ -672,7 +676,15 @@ class ResultsViewModel
                     emailAvailable = health.capabilities.value?.emailAlertsAvailable == true,
                     placeNames = local.value.placeNames,
                 )
-            sheet.value = WatchSheet.Fare(FareWatchDialogController(initial) { fareWatches.create(it) })
+            viewModelScope.launch {
+                if (quickWatcher.available()) {
+                    val spec = TravelJson.encodeToJsonElement(FareWatchMatchRequest.serializer(), trip.toMatchRequest()) as JsonObject
+                    val title = listOf(trip.origin, trip.destination).mapNotNull { it?.let { c -> cityName(c) } }.joinToString(" → ")
+                    quickWatch(QuickTarget.Fare, "flight", title.ifEmpty { trip.destination.orEmpty() }, null, spec)
+                } else {
+                    sheet.value = WatchSheet.Fare(FareWatchDialogController(initial) { fareWatches.create(it) })
+                }
+            }
         }
 
         /** Airport codes → city names (shared [PlaceNameLookup], web `useAirportCities`); other text unchanged. */
@@ -695,6 +707,10 @@ class ResultsViewModel
                 val body = TravelJson.encodeToJsonElement(HotelWatchSpec.serializer(), spec) as JsonObject
                 // The estimate the sheet labels "AI estimate for 1 room, whole stay" is the spec's whole-stay total (web
                 // `hotelPreview`), not the card's nightly price.
+                if (quickWatcher.available()) {
+                    quickWatch(QuickTarget.Hotel(name), PriceWatchKinds.HOTEL, name, hotel.city, body)
+                    return@launch
+                }
                 openPriceSheet(PriceWatchKinds.HOTEL, name, body, PricePreview(title = name, estimate = spec.estimateTotal))
             }
         }
@@ -712,6 +728,10 @@ class ResultsViewModel
                     return@launch
                 }
                 val body = TravelJson.encodeToJsonElement(ActivityWatchSpec.serializer(), spec) as JsonObject
+                if (quickWatcher.available()) {
+                    quickWatch(QuickTarget.Activity(name), PriceWatchKinds.ACTIVITY, name, activity.city, body)
+                    return@launch
+                }
                 openPriceSheet(PriceWatchKinds.ACTIVITY, name, body, PricePreview(title = name, subtitle = activity.city, estimate = activity.priceUsd))
             }
         }
@@ -721,6 +741,64 @@ class ResultsViewModel
             val controller = PriceWatchDialogController(initial, { priceWatches.create(it) }, { priceWatches.delete(it) })
             sheet.value = WatchSheet.Price(controller, kind, itemName)
         }
+
+        // ── one-tap watch (Alerts 2.0, only when live prices and the v2 API are on; the sheets above otherwise) ──
+        private var lastQuick: QuickUndo? = null
+
+        private fun setQuickState(target: QuickTarget, value: WatchState?) =
+            when (target) {
+                QuickTarget.Fare -> local.update { l -> l.copy(watches = l.watches.copy(fare = value)) }
+                is QuickTarget.Hotel -> setHotelWatch(target.name, value)
+                is QuickTarget.Activity -> setActivityWatch(target.name, value)
+            }
+
+        private suspend fun quickWatch(target: QuickTarget, kind: String, title: String, subtitle: String?, spec: JsonObject) {
+            setQuickState(target, WatchState(busy = true))
+            val outcome = quickWatcher.watch(kind, title, subtitle, spec, planId = null, surface = QUICK_SURFACE)
+            val id = (outcome as? QuickWatchOutcome.Added)?.watchId ?: (outcome as? QuickWatchOutcome.Existing)?.watchId
+            if (outcome.watching && id != null) {
+                // A new watch is pending: no price yet, so the chip reads "Watching" (the first check is queued server side).
+                setQuickState(target, WatchState(watchId = id))
+                val added = outcome is QuickWatchOutcome.Added
+                lastQuick = if (added) QuickUndo(target, kind, id) else null
+                messageChannel.trySend(ResultsMessage.QuickWatched(existing = !added))
+            } else {
+                setQuickState(target, null)
+                messageChannel.trySend(
+                    ResultsMessage.QuickWatchBlocked(
+                        outcome.toBlock(),
+                        (outcome as? QuickWatchOutcome.Limit)?.detail ?: (outcome as? QuickWatchOutcome.Failed)?.detail,
+                    ),
+                )
+            }
+        }
+
+        /** Snackbar Undo of the last one-tap watch this screen created: deletes it and clears the chip. */
+        fun undoQuickWatch() {
+            val undo = lastQuick ?: return
+            lastQuick = null
+            viewModelScope.launch {
+                if (quickWatcher.undo(undo.kind, undo.watchId, QUICK_SURFACE)) setQuickState(undo.target, null)
+            }
+        }
+
+        private fun QuickWatchOutcome.toBlock(): QuickBlock =
+            when (this) {
+                QuickWatchOutcome.LivePricesOff -> QuickBlock.LIVE_PRICES_OFF
+                is QuickWatchOutcome.Limit -> QuickBlock.LIMIT
+                is QuickWatchOutcome.Invalid -> QuickBlock.INVALID
+                else -> QuickBlock.FAILED
+            }
+
+        private sealed interface QuickTarget {
+            data object Fare : QuickTarget
+
+            data class Hotel(val name: String) : QuickTarget
+
+            data class Activity(val name: String) : QuickTarget
+        }
+
+        private data class QuickUndo(val target: QuickTarget, val kind: String, val watchId: Long)
 
         private fun setHotelWatch(name: String, value: WatchState?) =
             local.update { l -> l.copy(watches = l.watches.copy(hotels = if (value == null) l.watches.hotels - name else l.watches.hotels + (name to value))) }
@@ -732,6 +810,7 @@ class ResultsViewModel
 
         private companion object {
             const val STOP_TIMEOUT_MS = 5_000L
+            const val QUICK_SURFACE = "results"
             const val KEY_EXTRAS_SEARCH = "results_extras_search"
             const val KEY_CONFIDENCE = "results_confidence"
             const val KEY_ADVISOR = "results_pricing_advisor"

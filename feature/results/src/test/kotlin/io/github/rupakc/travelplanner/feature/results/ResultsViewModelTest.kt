@@ -91,6 +91,7 @@ class ResultsViewModelTest {
     private val priceWatches = FakePriceWatchesRepository()
     private val visibility = FakeFeatureVisibility()
     private val fakeJourney = io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney()
+    private var quick = io.github.rupakc.travelplanner.core.testing.fake.FakeQuickWatch(fare = fareWatches, price = priceWatches)
 
     private fun vm(store: io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore = plan) =
         ResultsViewModel(
@@ -108,6 +109,7 @@ class ResultsViewModelTest {
             savedState = SavedStateHandle(),
             placeNames = PlaceNameLookup(search),
             journey = fakeJourney.journey,
+            quickWatcher = quick.watcher,
         )
 
     private fun ResultsUiState.section(id: SectionId) = sections.first { it.id == id }
@@ -361,6 +363,7 @@ class ResultsViewModelTest {
                     SavedStateHandle(),
                     PlaceNameLookup(slow),
                     fakeJourney.journey,
+                    quick.watcher,
                 )
             vm.state.test {
                 search.start(request)
@@ -395,6 +398,7 @@ class ResultsViewModelTest {
                     saved,
                     PlaceNameLookup(search),
                     fakeJourney.journey,
+                    quick.watcher,
                 )
             first.state.test {
                 search.start(request)
@@ -419,6 +423,7 @@ class ResultsViewModelTest {
                     saved,
                     PlaceNameLookup(FakeSearchRepository()),
                     fakeJourney.journey,
+                    quick.watcher,
                 )
             restored.state.test {
                 val s = expectMostRecentItem()
@@ -674,6 +679,95 @@ class ResultsViewModelTest {
                 assertNull(vm.watchSheet.value)
                 cancelAndIgnoreRemainingEvents()
             }
+        }
+
+    private fun quickOn() {
+        quick =
+            io.github.rupakc.travelplanner.core.testing.fake.FakeQuickWatch.on().let {
+                io.github.rupakc.travelplanner.core.testing.fake.FakeQuickWatch(it.flags, it.alerts, fareWatches, priceWatches, it.telemetry)
+            }
+    }
+
+    private fun quickResponse(kind: String, existing: Boolean, id: Long = 5) =
+        io.github.rupakc.travelplanner.core.common.AppResult.Success(
+            io.github.rupakc.travelplanner.core.model.alerts.QuickWatchResponse(
+                kind = kind,
+                watch = kotlinx.serialization.json.buildJsonObject { put("id", kotlinx.serialization.json.JsonPrimitive(id)) },
+                existing = existing,
+            ),
+        )
+
+    @Test
+    fun `one-tap hotel watch posts quick-watch, marks the card pending and Undo deletes it`() =
+        runTest(timeout = 30.seconds) {
+            quickOn()
+            quick.alerts.quickWatchResult = quickResponse("hotel", existing = false)
+            val vm = vm()
+            vm.state.test {
+                search.start(request)
+                val hotel = (expectMostRecentItem().section(SectionId.HOTELS).data as HotelsData).results.first()
+                vm.onEvent(ResultsEvent.WatchHotel(hotel))
+                assertNull(vm.watchSheet.value) // no sheet: one tap
+                val sent = quick.alerts.quickWatchCalls.single()
+                assertEquals("hotel", sent.kind)
+                assertEquals("results", sent.surface)
+                assertEquals(hotel.name, sent.title)
+                val watch = expectMostRecentItem().watches.hotels[hotel.name]
+                assertEquals(5L, watch?.watchId)
+                assertNull(watch?.price) // pending: no price yet
+                assertEquals(listOf("alert_quick_watch" to mapOf("kind" to "hotel", "action" to "add", "surface" to "results")), quick.telemetry.events)
+                priceWatches.watches.value = listOf(io.github.rupakc.travelplanner.core.model.alerts.PriceWatch(id = 5, kind = "hotel"))
+                vm.undoQuickWatch()
+                assertTrue(priceWatches.watches.value.isEmpty())
+                assertNull(expectMostRecentItem().watches.hotels[hotel.name])
+                assertEquals("undo", quick.telemetry.events.last().second["action"])
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `one-tap fare watch sends the trip fields and an existing watch has no Undo`() =
+        runTest(timeout = 30.seconds) {
+            quickOn()
+            quick.alerts.quickWatchResult = quickResponse("flight", existing = true, id = 9)
+            val vm = vm()
+            vm.messages.test {
+                vm.state.test {
+                    search.start(request)
+                    cancelAndIgnoreRemainingEvents()
+                }
+                vm.onEvent(ResultsEvent.WatchFare)
+                val sent = quick.alerts.quickWatchCalls.single()
+                assertEquals("flight", sent.kind)
+                assertEquals("NYC", sent.spec["origin"]?.toString()?.trim('"'))
+                assertEquals(ResultsMessage.QuickWatched(existing = true), awaitItem())
+                vm.undoQuickWatch() // nothing to undo
+                assertTrue(quick.telemetry.events.none { it.second["action"] == "undo" })
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `one-tap blocked states clear the busy marker and say why`() =
+        runTest(timeout = 30.seconds) {
+            quickOn()
+            quick.alerts.quickWatchResult =
+                io.github.rupakc.travelplanner.core.common.AppResult.Failure(
+                    io.github.rupakc.travelplanner.core.common.AppError.Client(409, "Too many watches", "watch_limit"),
+                )
+            val vm = vm()
+            vm.messages.test {
+                vm.state.test {
+                    search.start(request)
+                    val hotel = (expectMostRecentItem().section(SectionId.HOTELS).data as HotelsData).results.first()
+                    vm.onEvent(ResultsEvent.WatchHotel(hotel))
+                    assertNull(expectMostRecentItem().watches.hotels[hotel.name])
+                    cancelAndIgnoreRemainingEvents()
+                }
+                assertEquals(ResultsMessage.QuickWatchBlocked(QuickBlock.LIMIT, "Too many watches"), awaitItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+            assertEquals("blocked", quick.telemetry.events.single().second["action"])
         }
 
     @Test
