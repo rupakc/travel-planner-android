@@ -42,6 +42,8 @@ data class PriceWatch(
     val problem: String? = null,
     @SerialName("already_below_target") val alreadyBelowTarget: LenientBoolean = null,
     val link: String? = null,
+    /** Alerts 2.0: true until the first check ran (then `last_price` is null). Absent on older backends. */
+    @SerialName("pending_first_check") val pendingFirstCheck: LenientBoolean = null,
     val history: List<PriceWatchHistory> = emptyList(),
     @SerialName("already_watching") val alreadyWatching: LenientBoolean = null,
     /** checked | unavailable | failed | errored | expired | postponed | deleted | … */
