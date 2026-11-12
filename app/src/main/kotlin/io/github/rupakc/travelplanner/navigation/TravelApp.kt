@@ -344,7 +344,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 onPlanIt = { navController.navigateToTopLevel(TopLevelDestination.EXPLORE) },
                 tabContent =
                     tripTabContent(shell.offlinePack, onAddExpense = { id ->
-                        navController.navigate(TripRoute(id, tab = TripTab.Money.id))
+                        navController.navigate(TripRoute(id, tab = TripTab.Money.id)) { launchSingleTop = true }
                     }, onWhereNext = { navController.navigateToTopLevel(TopLevelDestination.EXPLORE) }),
             )
             offlinePackDestination(onBack = { navController.popBackStack() })

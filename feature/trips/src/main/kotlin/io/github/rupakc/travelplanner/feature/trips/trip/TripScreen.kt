@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -149,13 +150,17 @@ private fun Loaded(
             }
         }
         val label = stringResource(R.string.trip_tabs_label)
-        ScrollableTabRow(
-            selectedTabIndex = tabs.visible.indexOf(tabs.selected).coerceAtLeast(0),
-            edgePadding = TravelTheme.spacing.gutter,
-            modifier = Modifier.semantics { contentDescription = label },
-        ) {
-            tabs.visible.forEach { tab ->
-                Tab(selected = tab == tabs.selected, onClick = { onEvent(TripEvent.SelectTab(tab)) }, text = { Text(stringResource(tabLabel(tab))) })
+        // Keyed by the rendered list: when a requested tab is appended the row is rebuilt, so its indicator and scroll
+        // state never index the previous (shorter) tab positions. The index is derived from the same list, and clamped.
+        key(tabs.visible) {
+            ScrollableTabRow(
+                selectedTabIndex = tabs.visible.indexOf(tabs.selected).coerceIn(0, (tabs.visible.size - 1).coerceAtLeast(0)),
+                edgePadding = TravelTheme.spacing.gutter,
+                modifier = Modifier.semantics { contentDescription = label },
+            ) {
+                tabs.visible.forEach { tab ->
+                    Tab(selected = tab == tabs.selected, onClick = { onEvent(TripEvent.SelectTab(tab)) }, text = { Text(stringResource(tabLabel(tab))) })
+                }
             }
         }
         Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -225,7 +230,8 @@ private fun Header(trip: Trip, busy: Boolean, onEvent: (TripEvent) -> Unit) {
 /** "in 12 days" before the trip, "Day 2 of 8" on the road. */
 @Composable
 private fun timeLine(trip: Trip): String? {
-    trip.dayIndex?.let { day -> return stringResource(R.string.trip_day_of, day, tripLengthDays(trip) ?: day) }
+    // Only on the road: under a stage override (Memories, Ready, ...) the dates' day number would be stale.
+    if (trip.phase == Phase.ON_THE_ROAD) trip.dayIndex?.let { day -> return stringResource(R.string.trip_day_of, day, tripLengthDays(trip) ?: day) }
     return trip.daysToStart?.takeIf { it >= 0 }?.let { pluralStringResource(R.plurals.trip_countdown, it, it) }
 }
 
