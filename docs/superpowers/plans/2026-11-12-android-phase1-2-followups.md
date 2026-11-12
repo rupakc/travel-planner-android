@@ -11,3 +11,10 @@ Started with the plan; extend as tasks land.
 ## Engineering
 - Plan PR #66 was merged before CI finished; confirm it passed.
 - Sessions list depends on backend PR B1 (R1); the app degrades to "Sign out everywhere" until it deploys.
+- T15: "Save as trip" from a search result does not set trip dates from the request explicitly (no separate code path; verify the dates arrive on the trip) and has no test.
+- T17: coach-mark state is not purged on sign-out (per-user key, survives); standalone Today/Expenses/Journal/Recap routes and `onLinkProvider` are not wired (trip tabs cover them); `gameEnabled` ignores the user's `hide_game` setting; Home's `homeGraph` stays registered in journey mode.
+- T11: `offlinePackDestination` registration relies on T9/T17 wiring; confirm in the smoke test.
+- Backend docs: note that a revoked session's access token stays valid until expiry.
+- `web.sha` pin not bumped (password min 10 vs 8); map strings when the pin moves.
+- CI build takes ~17 min per PR; local builds need JDK 21 (`~/Library/Java/temurin-21`).
+- MEMORY.md "Web repo" open-items line was not updated by T19.
