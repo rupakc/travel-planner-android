@@ -19,10 +19,13 @@ import io.github.rupakc.travelplanner.core.data.repository.NotificationsReposito
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.MarkReadResponse
 import io.github.rupakc.travelplanner.core.model.alerts.NotificationsPage
+import io.github.rupakc.travelplanner.core.model.alerts.QuietHours
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
+import io.github.rupakc.travelplanner.core.model.notifications.CategorySetting
+import io.github.rupakc.travelplanner.core.model.notifications.NotificationSettings
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
@@ -31,6 +34,9 @@ import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollInterva
 import io.github.rupakc.travelplanner.core.notifications.alerts.AlertPollWorker
 import io.github.rupakc.travelplanner.core.notifications.alerts.PollBaseline
 import io.github.rupakc.travelplanner.core.notifications.alerts.PollBaselineCleaner
+import io.github.rupakc.travelplanner.core.notifications.nearby.NearbyArrival
+import io.github.rupakc.travelplanner.core.notifications.nearby.NearbyArrivalSource
+import io.github.rupakc.travelplanner.core.notifications.nearby.NearbyArrivalText
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbyNotificationPolicy
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbyPostLog
 import io.github.rupakc.travelplanner.core.notifications.nearby.NearbySuggestionWorker
@@ -40,6 +46,8 @@ import io.github.rupakc.travelplanner.core.notifications.reminders.WorkManagerTr
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNearbyRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationCatalogRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationSettingsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
@@ -48,6 +56,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
@@ -265,6 +274,10 @@ class WorkersTest {
     /** Every nearby repository the worker got; none may ever see a `/api/nearby` call. */
     private val nearbyRepos = mutableListOf<FakeNearbyRepository>()
 
+    private val nearbyCatalog = FakeNotificationCatalogRepository()
+    private val nearbyServer = FakeNotificationSettingsRepository()
+    private var nearbyArrival: NearbyArrival? = null
+
     private fun nearbyWorker(settings: AppSettings, plans: List<Plan>, log: NearbyPostLog, cellAgeHours: Long? = 1) =
         build({ c, p ->
             NearbySuggestionWorker(
@@ -280,8 +293,51 @@ class WorkersTest {
                 log,
                 notifier,
                 clock,
+                nearbyCatalog,
+                nearbyServer,
+                object : NearbyArrivalSource {
+                    override suspend fun arrival(cell: LocationCell) = nearbyArrival
+                },
             )
         })
+
+    @Test
+    fun `nearby text comes from the catalog template when an arrival is known`() =
+        runBlocking {
+            nearbyArrival = NearbyArrival("Lisbon", "Time Out Market", 7)
+            nearbyCatalog.templates = mapOf("nearby_arrival" to "Cerca de {place}: {item}, {minutes} min")
+            nearbyWorker(AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true, localeTag = "es"), emptyList(), MemoryLog()).doWork()
+            assertEquals("Cerca de Lisbon: Time Out Market, 7 min", notifier.posts.single().body)
+            assertEquals(listOf<String?>("es"), nearbyCatalog.requests)
+            assertTrue(nearbyRepos.all { it.requests.isEmpty() })
+        }
+
+    @Test
+    fun `a missing catalog key falls back to the bundled English template`() {
+        val text = NearbyArrivalText.body(emptyMap(), NearbyArrival("Lisbon", "Time Out Market", 7))
+        assertEquals("You're near Lisbon: Time Out Market is 7 min away", text)
+    }
+
+    @Test
+    fun `the server nearby switch and the user's quiet hours are honoured on the device`() =
+        runBlocking {
+            val on = AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true)
+            nearbyServer.current = NotificationSettings(categories = mapOf("nearby" to CategorySetting(false)))
+            nearbyWorker(on, emptyList(), MemoryLog()).doWork()
+            assertTrue(notifier.posts.isEmpty())
+            val zone = clock.zone()
+            val local = clock.instant.atZone(zone).toLocalTime()
+            val around = QuietHours(true, local.minusHours(1).toString().take(5), local.plusHours(1).toString().take(5))
+            nearbyServer.current = NotificationSettings(quietHours = around)
+            nearbyWorker(on, emptyList(), MemoryLog()).doWork()
+            assertTrue(notifier.posts.isEmpty())
+            assertTrue(NearbyArrivalText.inUserQuietHours(QuietHours(true, "20:00", "07:00"), LocalTime.of(23, 0)))
+            assertTrue(NearbyArrivalText.inUserQuietHours(QuietHours(true, "20:00", "07:00"), LocalTime.of(6, 0)))
+            assertFalse(NearbyArrivalText.inUserQuietHours(QuietHours(true, "20:00", "07:00"), LocalTime.of(12, 0)))
+            assertFalse(NearbyArrivalText.inUserQuietHours(QuietHours(false, "20:00", "07:00"), LocalTime.of(23, 0)))
+            assertFalse(NearbyArrivalText.inUserQuietHours(QuietHours(true, "09:00", "09:00"), LocalTime.of(9, 0)))
+            assertFalse(NearbyArrivalText.inUserQuietHours(QuietHours(true, "9am", "07:00"), LocalTime.of(9, 0)))
+        }
 
     @Test
     fun `nearby invitation only when enabled, during a trip and at most once a day`() =
