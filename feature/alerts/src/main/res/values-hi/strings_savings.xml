@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_savings_title">पकड़ी गई कीमत गिरावट</string>
+    <string name="alerts_savings_amount">पकड़ी गई कीमत गिरावट: %1$s</string>
+    <string name="alerts_savings_other_currencies">अन्य मुद्राएँ, बिना बदले</string>
+    <string name="alerts_savings_best">सबसे बड़ी पकड़: %1$s, %2$s</string>
+    <string name="alerts_savings_best_untitled">सबसे बड़ी पकड़: %1$s</string>
+    <string name="alerts_savings_progress">%2$s तक %1$d%% का सफ़र पूरा</string>
+    <string name="alerts_savings_all_done">सभी पड़ाव पूरे</string>
+    <string name="alerts_savings_empty">आपकी पहली कीमत गिरावट यहाँ दिखेगी</string>
+    <string name="alerts_savings_empty_hint">आपकी वॉच की हर असली कीमत गिरावट यहाँ जुड़ती है।</string>
+    <string name="alerts_savings_caveat">पहली देखी गई कीमत और उस सबसे कम कीमत का अंतर, जिसकी हमने आपको सूचना दी, केवल USD निगरानी पर। यह तभी असली पैसों में बदलता है जब आप उसी कीमत पर बुक करें।</string>
+    <string name="alerts_savings_paused">लाइव जाँच रुकी हुई है, इसलिए ये आँकड़े सहेजे गए डेटा से आए हैं।</string>
+    <string name="alerts_savings_error">आपकी पकड़ी गई गिरावटें लोड नहीं हो सकीं।</string>
+    <string name="alerts_drop_title">कीमत में गिरावट पकड़ी गई</string>
+    <string name="alerts_drop_target">आपकी लक्ष्य कीमत आ गई है</string>
+    <string name="alerts_drop_caught">%1$s की गिरावट पकड़ी गई</string>
+    <string name="alerts_drop_caught_pct">%1$s (%2$d%%) की गिरावट पकड़ी गई</string>
+    <string name="alerts_drop_now_at">अब: %1$s</string>
+    <string name="alerts_drop_xp">+%1$d XP</string>
+    <string name="alerts_drop_note">यह हमारे देखे गए दो दामों के बीच की गिरावट है। बुक करने से पहले दाम बदल सकते हैं।</string>
+    <string name="alerts_digest_week">साप्ताहिक सारांश · %1$s</string>
+    <string name="alerts_digest_down">इस हफ़्ते %1$s कम</string>
+    <string name="alerts_digest_up">इस हफ़्ते %1$s ज़्यादा</string>
+    <plurals name="alerts_savings_drops">
+        <item quantity="one">%1$d गिरावट पकड़ी गई</item>
+        <item quantity="other">%1$d गिरावटें पकड़ी गईं</item>
+    </plurals>
+    <plurals name="alerts_savings_targets">
+        <item quantity="one">%1$d लक्ष्य पूरा</item>
+        <item quantity="other">%1$d लक्ष्य पूरे</item>
+    </plurals>
+    <plurals name="alerts_digest_more">
+        <item quantity="one">+%1$d और वॉच</item>
+        <item quantity="other">+%1$d और वॉच</item>
+    </plurals>
+</resources>

@@ -22,6 +22,7 @@ import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeFareWatchesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeGameEvents
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeLiveCheckRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationsRepository
@@ -29,6 +30,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakePreferencesRepositor
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchLauncher
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import java.time.Instant
 import java.time.ZoneId
@@ -277,9 +279,42 @@ class AlertsViewModelTest {
     fun `the inbox marks what it shows as seen`() =
         runTest {
             val repo = FakeNotificationsRepository(listOf(AppNotification(id = 5, title = "x"), AppNotification(id = 6, title = "y")))
-            NotificationsViewModel(repo, clock)
+            NotificationsViewModel(repo, clock, FakeGameEvents(), FakeTelemetry())
             advanceUntilIdle()
             assertEquals(setOf(5L, 6L), repo.seen)
+        }
+
+    @Test
+    fun `the inbox emits drop-seen once per drop row and digest-open when a digest is tapped`() =
+        runTest {
+            val drop =
+                AppNotification(
+                    id = 7,
+                    kind = "hotel_drop",
+                    data =
+                        kotlinx.serialization.json.buildJsonObject {
+                            put(
+                                "drop",
+                                kotlinx.serialization.json.buildJsonObject {
+                                    put("to", kotlinx.serialization.json.JsonPrimitive(300))
+                                    put("target_hit", kotlinx.serialization.json.JsonPrimitive(true))
+                                },
+                            )
+                        },
+                )
+            val digest = AppNotification(id = 8, kind = "price_digest")
+            val telemetry = FakeTelemetry()
+            val vm = NotificationsViewModel(FakeNotificationsRepository(listOf(drop, digest)), clock, FakeGameEvents(), telemetry)
+            vm.onEvent(NotificationsEvent.Retry)
+            vm.onEvent(NotificationsEvent.Open(digest))
+            advanceUntilIdle()
+            assertEquals(
+                listOf(
+                    "alert_drop_seen" to mapOf("kind" to "hotel", "target_hit" to true, "via" to "in_app"),
+                    "alert_digest_open" to mapOf("via" to "in_app"),
+                ),
+                telemetry.events,
+            )
         }
 
     @Test

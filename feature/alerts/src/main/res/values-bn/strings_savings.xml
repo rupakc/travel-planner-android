@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_savings_title">ধরা পড়া দামের পতন</string>
+    <string name="alerts_savings_amount">ধরা পড়া দামের পতন: %1$s</string>
+    <string name="alerts_savings_other_currencies">অন্যান্য মুদ্রা, রূপান্তর ছাড়া</string>
+    <string name="alerts_savings_best">সেরা ধরা: %1$s, %2$s</string>
+    <string name="alerts_savings_best_untitled">সেরা ধরা: %1$s</string>
+    <string name="alerts_savings_progress">%2$s-এর পথে %1$d%%</string>
+    <string name="alerts_savings_all_done">সব মাইলফলক পূরণ</string>
+    <string name="alerts_savings_empty">আপনার প্রথম দামের পতন এখানে দেখা যাবে</string>
+    <string name="alerts_savings_empty_hint">আপনার নজরদারির প্রতিটি আসল দামের পতন এখানে যোগ হয়।</string>
+    <string name="alerts_savings_caveat">প্রথম দেখা দাম আর আমরা আপনাকে যে সর্বনিম্ন দামের কথা জানিয়েছি তার পার্থক্য, শুধু USD নজরদারিতে। আপনি ওই দামে বুক করলেই এটি আসল টাকা হবে।</string>
+    <string name="alerts_savings_paused">লাইভ চেক বন্ধ আছে, তাই এই সংখ্যাগুলো সংরক্ষিত তথ্য থেকে এসেছে।</string>
+    <string name="alerts_savings_error">আপনার ধরা পতনগুলো লোড করা যায়নি।</string>
+    <string name="alerts_drop_title">দাম কমা ধরা পড়েছে</string>
+    <string name="alerts_drop_target">আপনার লক্ষ্যমূল্যে পৌঁছেছে</string>
+    <string name="alerts_drop_caught">%1$s দাম কমা ধরা পড়েছে</string>
+    <string name="alerts_drop_caught_pct">%1$s (%2$d%%) দাম কমা ধরা পড়েছে</string>
+    <string name="alerts_drop_now_at">এখন: %1$s</string>
+    <string name="alerts_drop_xp">+%1$d XP</string>
+    <string name="alerts_drop_note">এটি আমাদের দেখা দুটি দামের মধ্যে পার্থক্য। বুক করার আগে দাম বদলাতে পারে।</string>
+    <string name="alerts_digest_week">সাপ্তাহিক সারসংক্ষেপ · %1$s</string>
+    <string name="alerts_digest_down">এই সপ্তাহে %1$s কমেছে</string>
+    <string name="alerts_digest_up">এই সপ্তাহে %1$s বেড়েছে</string>
+    <plurals name="alerts_savings_drops">
+        <item quantity="one">%1$dটি পতন ধরা পড়েছে</item>
+        <item quantity="other">%1$dটি পতন ধরা পড়েছে</item>
+    </plurals>
+    <plurals name="alerts_savings_targets">
+        <item quantity="one">%1$dটি লক্ষ্য পূরণ</item>
+        <item quantity="other">%1$dটি লক্ষ্য পূরণ</item>
+    </plurals>
+    <plurals name="alerts_digest_more">
+        <item quantity="one">আরও %1$dটি নজরদারি</item>
+        <item quantity="other">আরও %1$dটি নজরদারি</item>
+    </plurals>
+</resources>

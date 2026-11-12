@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_savings_title">Bajadas detectadas</string>
+    <string name="alerts_savings_amount">Bajadas detectadas: %1$s</string>
+    <string name="alerts_savings_other_currencies">Otras monedas, sin convertir</string>
+    <string name="alerts_savings_best">Mejor detección: %1$s, %2$s</string>
+    <string name="alerts_savings_best_untitled">Mejor detección: %1$s</string>
+    <string name="alerts_savings_progress">%1$d %% del camino hacia %2$s</string>
+    <string name="alerts_savings_all_done">Todos los hitos alcanzados</string>
+    <string name="alerts_savings_empty">Tu primera bajada aparecerá aquí</string>
+    <string name="alerts_savings_empty_hint">Aquí se suma cada bajada de precio real de tus seguimientos.</string>
+    <string name="alerts_savings_caveat">La diferencia entre el primer precio que vimos y el más bajo del que te avisamos, solo en seguimientos en USD. Solo se convierte en dinero si reservas a ese precio.</string>
+    <string name="alerts_savings_paused">Las comprobaciones en directo están en pausa, así que estas cifras salen de datos guardados.</string>
+    <string name="alerts_savings_error">No pudimos cargar tus bajadas detectadas.</string>
+    <string name="alerts_drop_title">Bajada de precio detectada</string>
+    <string name="alerts_drop_target">Tu precio objetivo ya está aquí</string>
+    <string name="alerts_drop_caught">Hemos detectado una bajada de %1$s</string>
+    <string name="alerts_drop_caught_pct">Hemos detectado una bajada de %1$s (%2$d %%)</string>
+    <string name="alerts_drop_now_at">Ahora: %1$s</string>
+    <string name="alerts_drop_xp">+%1$d XP</string>
+    <string name="alerts_drop_note">Es la bajada entre dos precios que hemos observado. Los precios pueden cambiar antes de que reserves.</string>
+    <string name="alerts_digest_week">Resumen semanal · %1$s</string>
+    <string name="alerts_digest_down">%1$s menos esta semana</string>
+    <string name="alerts_digest_up">%1$s más esta semana</string>
+    <plurals name="alerts_savings_drops">
+        <item quantity="one">%1$d bajada detectada</item>
+        <item quantity="many">%1$d de bajadas detectadas</item>
+        <item quantity="other">%1$d bajadas detectadas</item>
+    </plurals>
+    <plurals name="alerts_savings_targets">
+        <item quantity="one">%1$d objetivo alcanzado</item>
+        <item quantity="many">%1$d de objetivos alcanzados</item>
+        <item quantity="other">%1$d objetivos alcanzados</item>
+    </plurals>
+    <plurals name="alerts_digest_more">
+        <item quantity="one">+%1$d seguimiento más</item>
+        <item quantity="many">+%1$d de seguimientos más</item>
+        <item quantity="other">+%1$d seguimientos más</item>
+    </plurals>
+</resources>
