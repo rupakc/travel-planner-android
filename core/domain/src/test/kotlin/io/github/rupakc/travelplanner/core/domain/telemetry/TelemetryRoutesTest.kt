@@ -17,6 +17,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.JournalRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MyPlanRoute
+import io.github.rupakc.travelplanner.core.model.navigation.MySharesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationSettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationsRoute
@@ -79,6 +80,7 @@ class TelemetryRoutesTest {
             is NearbyRoute -> NearbyRoute::class
             is ShareRoute -> ShareRoute::class
             is ShareCreateRoute -> ShareCreateRoute::class
+            is MySharesRoute -> MySharesRoute::class
             is CheckEmailRoute -> CheckEmailRoute::class
             is VerifyEmailRoute -> VerifyEmailRoute::class
             is ResetPasswordRoute -> ResetPasswordRoute::class
@@ -127,6 +129,7 @@ class TelemetryRoutesTest {
                 NearbyRoute,
                 ShareRoute("t"),
                 ShareCreateRoute("plan", 1),
+                MySharesRoute,
                 SignUpRoute,
                 CheckEmailRoute("a@b.c"),
                 VerifyEmailRoute(),
