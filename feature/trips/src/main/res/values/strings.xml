@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trips_title">Trips</string>
+    <string name="trips_new">New trip</string>
+    <string name="trips_create_heading">Save an idea</string>
+    <string name="trips_create_title">Title</string>
+    <string name="trips_create_destination">Destination (optional)</string>
+    <string name="trips_create_cancel">Cancel</string>
+    <string name="trips_create_save">Save</string>
+    <string name="trips_title_invalid">Please give your trip a title.</string>
+    <string name="trips_create_failed">Couldn\'t save this trip. Try again.</string>
+    <string name="trips_load_failed">Couldn\'t load this right now.</string>
+    <string name="trips_loading">Loading your trips…</string>
+    <string name="trips_empty">No trips yet. Plan one or save an idea for later.</string>
+    <string name="trips_empty_plan">Plan a trip</string>
+    <string name="trips_empty_idea">Save an idea</string>
+    <string name="trips_no_dates">No dates yet</string>
+    <string name="trips_phase_dreaming">Dreaming</string>
+    <string name="trips_phase_planning">Planning</string>
+    <string name="trips_phase_ready">Ready</string>
+    <string name="trips_phase_on_the_road">On the road</string>
+    <string name="trips_phase_memories">Memories</string>
+    <string name="trips_next_heading">Next trip</string>
+    <string name="trips_next_dreaming">An idea waiting for dates.</string>
+    <string name="trips_next_planning">%1$d %% planned</string>
+    <string name="trips_next_ready">Finish your prep</string>
+    <string name="trips_next_on_the_road">Day %1$d in %2$s</string>
+    <string name="trips_next_memories">Relive your trip</string>
+    <string name="trips_next_open">Open trip</string>
+    <string name="trips_start_date">Start date (optional)</string>
+    <string name="trips_end_date">End date (optional)</string>
+    <string name="trips_date_hint">YYYY-MM-DD</string>
+    <string name="trips_dates_invalid">Check the dates: use YYYY-MM-DD, the end can\'t be before the start, and a trip can last at most a year.</string>
+    <string name="trips_offline_notice">You are offline. Showing your saved trips.</string>
+    <string name="trips_pinned">Next up</string>
+    <string name="trips_card_a11y">%1$s, %2$s</string>
+</resources>

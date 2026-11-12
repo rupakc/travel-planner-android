@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trips_title">ভ্রমণ</string>
+    <string name="trips_new">নতুন ভ্রমণ</string>
+    <string name="trips_create_heading">একটি ধারণা সংরক্ষণ করুন</string>
+    <string name="trips_create_title">শিরোনাম</string>
+    <string name="trips_create_destination">গন্তব্য (ঐচ্ছিক)</string>
+    <string name="trips_create_cancel">বাতিল</string>
+    <string name="trips_create_save">সংরক্ষণ</string>
+    <string name="trips_title_invalid">অনুগ্রহ করে আপনার ভ্রমণের একটি শিরোনাম দিন।</string>
+    <string name="trips_create_failed">এই ভ্রমণ সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="trips_load_failed">এখন এটি লোড করা যায়নি।</string>
+    <string name="trips_loading">আপনার ভ্রমণ লোড হচ্ছে…</string>
+    <string name="trips_empty">এখনও কোনো ভ্রমণ নেই। একটি পরিকল্পনা করুন বা পরের জন্য একটি ধারণা সংরক্ষণ করুন।</string>
+    <string name="trips_empty_plan">ভ্রমণের পরিকল্পনা করুন</string>
+    <string name="trips_empty_idea">ধারণা সংরক্ষণ করুন</string>
+    <string name="trips_no_dates">এখনও তারিখ নেই</string>
+    <string name="trips_phase_dreaming">স্বপ্নে</string>
+    <string name="trips_phase_planning">পরিকল্পনায়</string>
+    <string name="trips_phase_ready">প্রস্তুত</string>
+    <string name="trips_phase_on_the_road">পথে</string>
+    <string name="trips_phase_memories">স্মৃতি</string>
+    <string name="trips_next_heading">পরবর্তী ভ্রমণ</string>
+    <string name="trips_next_dreaming">তারিখের অপেক্ষায় থাকা একটি ধারণা।</string>
+    <string name="trips_next_planning">%1$d %% পরিকল্পিত</string>
+    <string name="trips_next_ready">আপনার প্রস্তুতি শেষ করুন</string>
+    <string name="trips_next_on_the_road">%2$s-এ দিন %1$d</string>
+    <string name="trips_next_memories">আপনার ভ্রমণ আবার অনুভব করুন</string>
+    <string name="trips_next_open">ভ্রমণ খুলুন</string>
+    <string name="trips_start_date">শুরুর তারিখ (ঐচ্ছিক)</string>
+    <string name="trips_end_date">শেষের তারিখ (ঐচ্ছিক)</string>
+    <string name="trips_date_hint">YYYY-MM-DD</string>
+    <string name="trips_dates_invalid">তারিখ দেখে নিন: YYYY-MM-DD ফরম্যাট, শেষের তারিখ শুরুর আগে হতে পারে না, আর ভ্রমণ সর্বোচ্চ এক বছরের হতে পারে।</string>
+    <string name="trips_offline_notice">আপনি অফলাইনে আছেন। সংরক্ষিত ভ্রমণগুলো দেখানো হচ্ছে।</string>
+    <string name="trips_pinned">এরপর</string>
+    <string name="trips_card_a11y">%1$s, %2$s</string>
+</resources>

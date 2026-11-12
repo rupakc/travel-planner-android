@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trips_title">Reisen</string>
+    <string name="trips_new">Neue Reise</string>
+    <string name="trips_create_heading">Idee speichern</string>
+    <string name="trips_create_title">Titel</string>
+    <string name="trips_create_destination">Reiseziel (optional)</string>
+    <string name="trips_create_cancel">Abbrechen</string>
+    <string name="trips_create_save">Speichern</string>
+    <string name="trips_title_invalid">Gib deiner Reise bitte einen Titel.</string>
+    <string name="trips_create_failed">Die Reise konnte nicht gespeichert werden. Versuch es nochmal.</string>
+    <string name="trips_load_failed">Das konnte gerade nicht geladen werden.</string>
+    <string name="trips_loading">Deine Reisen werden geladen…</string>
+    <string name="trips_empty">Noch keine Reisen. Plane eine oder speichere eine Idee für später.</string>
+    <string name="trips_empty_plan">Reise planen</string>
+    <string name="trips_empty_idea">Idee speichern</string>
+    <string name="trips_no_dates">Noch kein Datum</string>
+    <string name="trips_phase_dreaming">Träumen</string>
+    <string name="trips_phase_planning">Planen</string>
+    <string name="trips_phase_ready">Bereit</string>
+    <string name="trips_phase_on_the_road">Unterwegs</string>
+    <string name="trips_phase_memories">Erinnerungen</string>
+    <string name="trips_next_heading">Nächste Reise</string>
+    <string name="trips_next_dreaming">Eine Idee wartet auf Reisedaten.</string>
+    <string name="trips_next_planning">%1$d %% geplant</string>
+    <string name="trips_next_ready">Vorbereitung abschließen</string>
+    <string name="trips_next_on_the_road">Tag %1$d in %2$s</string>
+    <string name="trips_next_memories">Reise noch einmal erleben</string>
+    <string name="trips_next_open">Reise öffnen</string>
+    <string name="trips_start_date">Startdatum (optional)</string>
+    <string name="trips_end_date">Enddatum (optional)</string>
+    <string name="trips_date_hint">JJJJ-MM-TT</string>
+    <string name="trips_dates_invalid">Prüfe die Daten: Format JJJJ-MM-TT, das Ende darf nicht vor dem Start liegen, und eine Reise darf höchstens ein Jahr dauern.</string>
+    <string name="trips_offline_notice">Du bist offline. Deine gespeicherten Reisen werden angezeigt.</string>
+    <string name="trips_pinned">Als Nächstes</string>
+    <string name="trips_card_a11y">%1$s, %2$s</string>
+</resources>

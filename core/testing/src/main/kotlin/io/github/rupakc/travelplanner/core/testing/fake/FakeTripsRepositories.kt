@@ -45,9 +45,14 @@ class FakeTripsRepository : TripsRepository {
     var checkinResult: AppResult<CheckinResponse> = NotStubbed
     var checkinsResult: AppResult<CheckinsResponse> = AppResult.Success(CheckinsResponse())
     val createRequests = mutableListOf<CreateTripRequest>()
+
+    /** What [isShowingCachedList] answers (the offline fallback of the real repository). */
+    var showingCached = false
     val patches = mutableListOf<JsonObject>()
 
     override suspend fun list(today: String) = listResult.also { calls += "list:$today" }
+
+    override fun isShowingCachedList() = showingCached
 
     override suspend fun create(request: CreateTripRequest) =
         createResult.also {
