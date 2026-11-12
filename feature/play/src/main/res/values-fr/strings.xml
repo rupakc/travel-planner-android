@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play_streaks">Séries</string>
+    <string name="play_streak_daily">Série quotidienne</string>
+    <string name="play_streak_trip_checkin">Série de pointages en voyage</string>
+    <string name="play_streak_values">Actuelle %1$d · Meilleure %2$d</string>
+    <string name="play_tier_bronze">Bronze</string>
+    <string name="play_tier_silver">Argent</string>
+    <string name="play_tier_gold">Or</string>
+    <string name="play_badge_earned_on">Obtenu le %1$s</string>
+    <string name="play_badge_locked">Pas encore obtenu</string>
+    <string name="play_countries">Pays visités</string>
+    <string name="play_countries_empty">Aucun pays pour l’instant. Pointez pendant un voyage pour en ajouter un.</string>
+    <string name="play_goal">Objectif de la liste de rêves</string>
+    <plurals name="play_goal_progress">
+        <item quantity="one">%1$d pays sur %2$d</item>
+        <item quantity="many">%1$d pays sur %2$d</item>
+        <item quantity="other">%1$d pays sur %2$d</item>
+    </plurals>
+    <string name="play_error">Impossible de charger votre progression. Vérifiez votre connexion et réessayez.</string>
+</resources>

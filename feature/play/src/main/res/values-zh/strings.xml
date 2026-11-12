@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play_streaks">连续记录</string>
+    <string name="play_streak_daily">每日连续</string>
+    <string name="play_streak_trip_checkin">旅途签到连续</string>
+    <string name="play_streak_values">当前 %1$d · 最佳 %2$d</string>
+    <string name="play_tier_bronze">铜</string>
+    <string name="play_tier_silver">银</string>
+    <string name="play_tier_gold">金</string>
+    <string name="play_badge_earned_on">获得于 %1$s</string>
+    <string name="play_badge_locked">尚未获得</string>
+    <string name="play_countries">已到访国家</string>
+    <string name="play_countries_empty">还没有国家。在旅途中签到即可添加。</string>
+    <string name="play_goal">心愿清单目标</string>
+    <plurals name="play_goal_progress">
+        <item quantity="other">%1$d / %2$d 个国家</item>
+    </plurals>
+    <string name="play_error">无法加载你的进度。请检查网络后重试。</string>
+</resources>

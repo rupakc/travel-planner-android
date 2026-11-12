@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play_streaks">Streaks</string>
+    <string name="play_streak_daily">Daily streak</string>
+    <string name="play_streak_trip_checkin">Trip check-in streak</string>
+    <string name="play_streak_values">Current %1$d · Best %2$d</string>
+    <string name="play_tier_bronze">Bronze</string>
+    <string name="play_tier_silver">Silver</string>
+    <string name="play_tier_gold">Gold</string>
+    <string name="play_badge_earned_on">Earned %1$s</string>
+    <string name="play_badge_locked">Not earned yet</string>
+    <string name="play_countries">Countries visited</string>
+    <string name="play_countries_empty">No countries yet. Check in on a trip to add one.</string>
+    <string name="play_goal">Bucket list goal</string>
+    <plurals name="play_goal_progress">
+        <item quantity="one">%1$d of %2$d country</item>
+        <item quantity="other">%1$d of %2$d countries</item>
+    </plurals>
+    <string name="play_error">Couldn’t load your progress. Check your connection and try again.</string>
+</resources>
