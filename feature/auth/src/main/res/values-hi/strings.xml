@@ -111,4 +111,19 @@
     <string name="auth_reset_use_link">इस लिंक का उपयोग करें</string>
     <string name="auth_rule_met">आवश्यकता पूरी</string>
     <string name="auth_rule_unmet">आवश्यकता पूरी नहीं</string>
+    <!-- Social sign-in (Phase 1 T4) -->
+    <string name="auth_oauth_err_cancelled">साइन-इन रद्द कर दिया गया।</string>
+    <string name="auth_oauth_err_state_invalid">साइन-इन की अवधि समाप्त हो गई या उसकी पुष्टि नहीं हो सकी। कृपया फिर से कोशिश करें।</string>
+    <string name="auth_oauth_err_provider_error">प्रदाता ने समस्या बताई। कृपया फिर से कोशिश करें।</string>
+    <string name="auth_oauth_err_provider_unavailable">यह प्रदाता अभी उपलब्ध नहीं है। साइन-इन का कोई और तरीका आज़माएँ।</string>
+    <string name="auth_oauth_err_email_in_use_unverified">इस ईमेल से एक खाता पहले से है, लेकिन अभी पुष्टि नहीं हुई है। पहले ईमेल से उसकी पुष्टि करें, या अपने पासवर्ड से साइन इन करें।</string>
+    <string name="auth_oauth_err_identity_in_use">यह सोशल खाता पहले से किसी दूसरे खाते से जुड़ा है।</string>
+    <string name="auth_oauth_err_account_inactive">यह खाता सक्रिय नहीं है। अपने एडमिन से संपर्क करें।</string>
+    <string name="auth_oauth_err_bad_request">साइन-इन अनुरोध मान्य नहीं था। कृपया फिर से कोशिश करें।</string>
+    <string name="auth_oauth_err_code_invalid">वह साइन-इन लिंक समाप्त हो गया है या पहले ही इस्तेमाल हो चुका है। कृपया फिर से शुरू करें।</string>
+    <string name="auth_oauth_username_title">यूज़रनेम चुनें</string>
+    <string name="auth_oauth_username_intro">बस थोड़ा और। खाता बनाना पूरा करने के लिए एक यूज़रनेम चुनें।</string>
+    <string name="auth_oauth_username_submit">साइन-अप पूरा करें</string>
+    <string name="auth_oauth_username_submitting">पूरा हो रहा है…</string>
+    <string name="auth_oauth_username_cancel">रद्द करें</string>
 </resources>

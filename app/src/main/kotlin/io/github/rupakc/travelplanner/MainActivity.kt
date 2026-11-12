@@ -14,17 +14,22 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.OneShotPreDrawListener
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.rupakc.travelplanner.core.data.repository.OauthInbox
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.notifications.withPushDeepLink
 import io.github.rupakc.travelplanner.navigation.DeepLinkIntents
 import io.github.rupakc.travelplanner.navigation.TravelApp
 import io.github.rupakc.travelplanner.telemetry.ColdStart
 import io.github.rupakc.travelplanner.telemetry.ColdStartGate
+import javax.inject.Inject
 
 /** AppCompatActivity (not ComponentActivity) so AppCompatDelegate per-app locales apply on API 26–32 too. */
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
+
+    /** Receives the browser's OAuth return (`voyager://auth/callback`); the login screen consumes it. */
+    @Inject lateinit var oauthInbox: OauthInbox
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
@@ -32,6 +37,8 @@ class MainActivity : AppCompatActivity() {
         // Then drop Navigation's internal deep-link extras and foreign data (exported activity, S-M1).
         DeepLinkIntents.sanitize(withPushDeepLink(intent))
         super.onCreate(savedInstanceState)
+        // Only a fresh launch: a recreation would replay the same (single-use) return.
+        if (savedInstanceState == null) DeepLinkIntents.oauthCallback(intent)?.let(oauthInbox::post)
         val firstActivity = ColdStart.claimFirstActivity()
         val restored = savedInstanceState != null
         // Keep the splash until the session/profile are read from DataStore (no Login flash).
@@ -63,5 +70,6 @@ class MainActivity : AppCompatActivity() {
     /** singleTask: the NavHost's new-intent listener sees the intent after this maps its `link` extra. */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(DeepLinkIntents.sanitize(withPushDeepLink(intent)))
+        DeepLinkIntents.oauthCallback(intent)?.let(oauthInbox::post)
     }
 }

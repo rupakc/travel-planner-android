@@ -71,6 +71,7 @@ internal fun LoginRoute(
     serverViewModel: ServerViewModel = hiltViewModel(),
     onSignUp: () -> Unit = {},
     onForgotPassword: () -> Unit = {},
+    onNeedsUsername: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val server by serverViewModel.state.collectAsStateWithLifecycle()
@@ -81,6 +82,7 @@ internal fun LoginRoute(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is LoginEffect.OpenUrl -> openLink(effect.url)
+                LoginEffect.NeedsUsername -> onNeedsUsername()
             }
         }
     }
@@ -282,7 +284,7 @@ private fun PendingAccountCard(pending: PendingAccount, onEvent: (LoginEvent) ->
 @Composable
 private fun SocialSignIn(comingSoonProvider: String?, onEvent: (LoginEvent) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-        SocialProvider.entries.forEach { provider ->
+        SocialProvider.entries.filter { it != SocialProvider.APPLE }.forEach { provider ->
             SocialSignInButton(
                 provider = provider,
                 label = stringResource(R.string.auth_continue_with, provider.displayName),

@@ -146,4 +146,19 @@
     <string name="auth_reset_use_link">Use this link</string>
     <string name="auth_rule_met">requirement met</string>
     <string name="auth_rule_unmet">requirement not met</string>
+    <!-- Social sign-in (Phase 1 T4) -->
+    <string name="auth_oauth_err_cancelled">Sign-in was cancelled.</string>
+    <string name="auth_oauth_err_state_invalid">The sign-in expired or could not be verified. Please try again.</string>
+    <string name="auth_oauth_err_provider_error">The provider reported a problem. Please try again.</string>
+    <string name="auth_oauth_err_provider_unavailable">That provider is unavailable right now. Try another way to sign in.</string>
+    <string name="auth_oauth_err_email_in_use_unverified">An account with this email already exists but is not confirmed yet. Confirm it by email first, or sign in with your password.</string>
+    <string name="auth_oauth_err_identity_in_use">This social account is already linked to another account.</string>
+    <string name="auth_oauth_err_account_inactive">This account is not active. Contact your administrator.</string>
+    <string name="auth_oauth_err_bad_request">The sign-in request was not valid. Please try again.</string>
+    <string name="auth_oauth_err_code_invalid">That sign-in link has expired or was already used. Please start again.</string>
+    <string name="auth_oauth_username_title">Choose a username</string>
+    <string name="auth_oauth_username_intro">Almost done. Pick a username to finish creating your account.</string>
+    <string name="auth_oauth_username_submit">Finish sign-up</string>
+    <string name="auth_oauth_username_submitting">Finishing…</string>
+    <string name="auth_oauth_username_cancel">Cancel</string>
 </resources>

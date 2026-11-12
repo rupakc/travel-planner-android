@@ -111,4 +111,19 @@
     <string name="auth_reset_use_link">使用此链接</string>
     <string name="auth_rule_met">已满足</string>
     <string name="auth_rule_unmet">未满足</string>
+    <!-- Social sign-in (Phase 1 T4) -->
+    <string name="auth_oauth_err_cancelled">登录已取消。</string>
+    <string name="auth_oauth_err_state_invalid">登录已过期或无法验证,请重试。</string>
+    <string name="auth_oauth_err_provider_error">服务商报告了问题,请重试。</string>
+    <string name="auth_oauth_err_provider_unavailable">该服务商暂时不可用,请尝试其他登录方式。</string>
+    <string name="auth_oauth_err_email_in_use_unverified">使用此邮箱的账户已存在但尚未确认。请先通过邮件确认,或使用密码登录。</string>
+    <string name="auth_oauth_err_identity_in_use">此社交账号已关联到另一个账户。</string>
+    <string name="auth_oauth_err_account_inactive">此账户未启用,请联系管理员。</string>
+    <string name="auth_oauth_err_bad_request">登录请求无效,请重试。</string>
+    <string name="auth_oauth_err_code_invalid">该登录链接已过期或已被使用,请重新开始。</string>
+    <string name="auth_oauth_username_title">选择用户名</string>
+    <string name="auth_oauth_username_intro">即将完成。请选择一个用户名以完成账户创建。</string>
+    <string name="auth_oauth_username_submit">完成注册</string>
+    <string name="auth_oauth_username_submitting">正在完成…</string>
+    <string name="auth_oauth_username_cancel">取消</string>
 </resources>

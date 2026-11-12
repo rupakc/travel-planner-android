@@ -111,4 +111,19 @@
     <string name="auth_reset_use_link">Link verwenden</string>
     <string name="auth_rule_met">Anforderung erfüllt</string>
     <string name="auth_rule_unmet">Anforderung nicht erfüllt</string>
+    <!-- Social sign-in (Phase 1 T4) -->
+    <string name="auth_oauth_err_cancelled">Die Anmeldung wurde abgebrochen.</string>
+    <string name="auth_oauth_err_state_invalid">Die Anmeldung ist abgelaufen oder konnte nicht geprüft werden. Bitte versuche es erneut.</string>
+    <string name="auth_oauth_err_provider_error">Der Anbieter hat ein Problem gemeldet. Bitte versuche es erneut.</string>
+    <string name="auth_oauth_err_provider_unavailable">Dieser Anbieter ist gerade nicht verfügbar. Melde dich auf anderem Weg an.</string>
+    <string name="auth_oauth_err_email_in_use_unverified">Ein Konto mit dieser E-Mail existiert bereits, ist aber noch nicht bestätigt. Bestätige es zuerst per E-Mail oder melde dich mit deinem Passwort an.</string>
+    <string name="auth_oauth_err_identity_in_use">Dieses Social-Konto ist bereits mit einem anderen Konto verknüpft.</string>
+    <string name="auth_oauth_err_account_inactive">Dieses Konto ist nicht aktiv. Wende dich an deinen Admin.</string>
+    <string name="auth_oauth_err_bad_request">Die Anmeldeanfrage war ungültig. Bitte versuche es erneut.</string>
+    <string name="auth_oauth_err_code_invalid">Dieser Anmeldelink ist abgelaufen oder wurde schon verwendet. Bitte starte neu.</string>
+    <string name="auth_oauth_username_title">Benutzernamen wählen</string>
+    <string name="auth_oauth_username_intro">Fast geschafft. Wähle einen Benutzernamen, um dein Konto fertig anzulegen.</string>
+    <string name="auth_oauth_username_submit">Registrierung abschließen</string>
+    <string name="auth_oauth_username_submitting">Wird abgeschlossen…</string>
+    <string name="auth_oauth_username_cancel">Abbrechen</string>
 </resources>

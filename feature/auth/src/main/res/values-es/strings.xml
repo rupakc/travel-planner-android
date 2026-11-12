@@ -141,4 +141,19 @@
     <string name="auth_reset_use_link">Usar este enlace</string>
     <string name="auth_rule_met">requisito cumplido</string>
     <string name="auth_rule_unmet">requisito sin cumplir</string>
+    <!-- Social sign-in (Phase 1 T4) -->
+    <string name="auth_oauth_err_cancelled">Se canceló el inicio de sesión.</string>
+    <string name="auth_oauth_err_state_invalid">El inicio de sesión caducó o no se pudo verificar. Inténtalo de nuevo.</string>
+    <string name="auth_oauth_err_provider_error">El proveedor informó de un problema. Inténtalo de nuevo.</string>
+    <string name="auth_oauth_err_provider_unavailable">Ese proveedor no está disponible ahora. Prueba otra forma de iniciar sesión.</string>
+    <string name="auth_oauth_err_email_in_use_unverified">Ya existe una cuenta con este correo, pero aún no está confirmada. Confírmala primero por correo o inicia sesión con tu contraseña.</string>
+    <string name="auth_oauth_err_identity_in_use">Esta cuenta social ya está vinculada a otra cuenta.</string>
+    <string name="auth_oauth_err_account_inactive">Esta cuenta no está activa. Contacta con tu administrador.</string>
+    <string name="auth_oauth_err_bad_request">La solicitud de inicio de sesión no era válida. Inténtalo de nuevo.</string>
+    <string name="auth_oauth_err_code_invalid">Ese enlace de inicio de sesión caducó o ya se usó. Empieza de nuevo.</string>
+    <string name="auth_oauth_username_title">Elige un nombre de usuario</string>
+    <string name="auth_oauth_username_intro">Ya casi. Elige un nombre de usuario para terminar de crear tu cuenta.</string>
+    <string name="auth_oauth_username_submit">Terminar registro</string>
+    <string name="auth_oauth_username_submitting">Terminando…</string>
+    <string name="auth_oauth_username_cancel">Cancelar</string>
 </resources>

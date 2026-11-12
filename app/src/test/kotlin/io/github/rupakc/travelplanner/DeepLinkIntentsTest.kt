@@ -31,6 +31,22 @@ class DeepLinkIntentsTest {
     }
 
     @Test
+    fun `the oauth return survives only as voyager auth callback with code or error`() {
+        val ok = DeepLinkIntents.sanitize(Intent(Intent.ACTION_VIEW, Uri.parse("voyager://auth/callback?code=abc")))
+        assertEquals("voyager://auth/callback?code=abc", ok.dataString)
+        assertEquals(
+            io.github.rupakc.travelplanner.core.domain.auth.OauthCallback.Code("abc"),
+            DeepLinkIntents.oauthCallback(ok),
+        )
+        listOf("voyager://auth/callback", "voyager://auth/x?code=a", "voyager://evil/callback?code=a").forEach {
+            val i = DeepLinkIntents.sanitize(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
+            assertNull(it, i.data)
+            assertNull(it, DeepLinkIntents.oauthCallback(i))
+        }
+        assertNull(DeepLinkIntents.oauthCallback(Intent(Intent.ACTION_SEND, Uri.parse("voyager://auth/callback?code=a"))))
+    }
+
+    @Test
     fun `only app-scheme VIEW links survive`() {
         val app = DeepLinkIntents.sanitize(Intent(Intent.ACTION_VIEW, Uri.parse("travelplanner://plan/7")))
         assertEquals("travelplanner://plan/7", app.dataString)

@@ -7,10 +7,12 @@ import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.CheckEmailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ForgotPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
+import io.github.rupakc.travelplanner.core.model.navigation.OauthUsernameRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResetPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SignUpRoute
 import io.github.rupakc.travelplanner.core.model.navigation.VerifyEmailRoute
 import io.github.rupakc.travelplanner.feature.auth.login.LoginRoute as LoginScreenRoute
+import io.github.rupakc.travelplanner.feature.auth.oauth.OauthUsernameRoute as OauthUsernameScreenRoute
 import io.github.rupakc.travelplanner.feature.auth.password.ChangePasswordRoute as ChangePasswordScreenRoute
 import io.github.rupakc.travelplanner.feature.auth.reset.ForgotPasswordRoute as ForgotPasswordScreenRoute
 import io.github.rupakc.travelplanner.feature.auth.reset.ResetPasswordRoute as ResetPasswordScreenRoute
@@ -31,6 +33,8 @@ class AuthNavActions(
     val toLogin: () -> Unit = {},
     /** Request a new reset link from the Reset screen. */
     val toRequestNewReset: () -> Unit = toForgotPassword,
+    /** A first social sign-in needs a username ([OauthUsernameRoute]). */
+    val toOauthUsername: () -> Unit = {},
 )
 
 /**
@@ -47,10 +51,16 @@ fun NavGraphBuilder.authGraph(
     actions: AuthNavActions = AuthNavActions(),
 ) {
     composable<LoginRoute> {
-        LoginScreenRoute(onLoggedIn = onLoggedIn, onSignUp = actions.toSignUp, onForgotPassword = actions.toForgotPassword)
+        LoginScreenRoute(
+            onLoggedIn = onLoggedIn,
+            onSignUp = actions.toSignUp,
+            onForgotPassword = actions.toForgotPassword,
+            onNeedsUsername = actions.toOauthUsername,
+        )
     }
     // Account screens. Verify and Reset take their token from the route (a deep link or null = paste a link).
     composable<SignUpRoute> { SignUpScreenRoute(onCheckEmail = actions.toCheckEmail, onSignIn = actions.toLogin) }
+    composable<OauthUsernameRoute> { OauthUsernameScreenRoute(onCancel = actions.toLogin) }
     composable<CheckEmailRoute> { CheckEmailScreenRoute(onBackToLogin = actions.toLogin) }
     composable<VerifyEmailRoute> { VerifyEmailScreenRoute(onDone = actions.toLogin) }
     composable<ForgotPasswordRoute> { ForgotPasswordScreenRoute(onBackToLogin = actions.toLogin) }
