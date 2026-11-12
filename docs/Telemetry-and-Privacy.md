@@ -61,6 +61,8 @@ Crashes do not fit the registry's `js|promise|api` error kinds, so they are not 
 `core:data/telemetry` `Telemetry`, `TelemetryLifecycle`, `ConsentRepository`, `ClientConfigRepository`, the queue file, uploader and worker;
 `core:network` `ClientConfigApi`, `TelemetryApi`, `AiLocaleInterceptor`; `core:designsystem` `UiEventSink`; `core:ui` `ConsentPrompt`.
 
+Alerts 2.0 events sent from the inbox (`NotificationsViewModel`, constants local to `feature:alerts` until the shared enum lands): `alert_drop_seen` (`kind`, `target_hit`, `via: in_app`, once per row per session) and `alert_digest_open` (`via: in_app`). No amounts, titles or ids.
+
 ## Follow-ups
 
 - Web repo: the Android column of `docs/Feature-Parity.md` and the Android path in `docs/Privacy.md`.

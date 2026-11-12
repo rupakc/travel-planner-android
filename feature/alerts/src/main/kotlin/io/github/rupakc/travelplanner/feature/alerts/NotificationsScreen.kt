@@ -57,7 +57,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.GameEvents
 import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
+import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
@@ -71,8 +73,14 @@ import io.github.rupakc.travelplanner.core.domain.alerts.keepDeltaTogether
 import io.github.rupakc.travelplanner.core.domain.alerts.notificationLink
 import io.github.rupakc.travelplanner.core.domain.alerts.timeAgo
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
+import io.github.rupakc.travelplanner.core.model.alerts.isPriceDigest
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.watch.toneColors
+import io.github.rupakc.travelplanner.feature.alerts.savings.DigestBlock
+import io.github.rupakc.travelplanner.feature.alerts.savings.DropBlock
+import io.github.rupakc.travelplanner.feature.alerts.savings.digestView
+import io.github.rupakc.travelplanner.feature.alerts.savings.dropView
+import io.github.rupakc.travelplanner.feature.alerts.savings.telemetryKind
 import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
@@ -91,6 +99,8 @@ data class NotificationsUiState(
     val failed: Boolean = false,
     val unread: Int = 0,
     val now: Instant = Instant.EPOCH,
+    /** XP lines show only while the game is visible (`hide_game`, feature flag; ruling R4). */
+    val gameVisible: Boolean = false,
 )
 
 sealed interface NotificationsEvent {
@@ -108,8 +118,11 @@ class NotificationsViewModel
     constructor(
         private val repository: NotificationsRepository,
         private val clock: AppClock,
+        private val gameEvents: GameEvents,
+        private val telemetry: Telemetry,
     ) : ViewModel() {
         private val mutable = MutableStateFlow(NotificationsUiState(now = clock.now()))
+        private val dropsSeen = mutableSetOf<Long>()
         val state: StateFlow<NotificationsUiState> = mutable.asStateFlow()
         private val opens = Channel<AlertLink>(Channel.BUFFERED)
 
@@ -118,6 +131,7 @@ class NotificationsViewModel
 
         init {
             load()
+            viewModelScope.launch { gameEvents.visible.collect { v -> mutable.update { it.copy(gameVisible = v) } } }
         }
 
         fun onEvent(event: NotificationsEvent) {
@@ -134,6 +148,7 @@ class NotificationsViewModel
                 when (val page = repository.list(limit = PAGE)) {
                     is AppResult.Success -> {
                         mutable.update { it.copy(items = page.value.items, unread = page.value.unread) }
+                        page.value.items.forEach(::emitDropSeen)
                         // Seen here: the poller won't post these as system notifications later.
                         page.value.items.map { it.id }.takeIf { it.isNotEmpty() }?.let { repository.markSeen(it) }
                     }
@@ -145,7 +160,14 @@ class NotificationsViewModel
             }
         }
 
+        private fun emitDropSeen(n: AppNotification) {
+            val drop = n.dropView(gameVisible = false) ?: return
+            if (!dropsSeen.add(n.id)) return
+            telemetry.emit(EVENT_DROP_SEEN, mapOf("kind" to n.telemetryKind(), "target_hit" to drop.targetHit, "via" to "in_app"))
+        }
+
         private fun open(n: AppNotification) {
+            if (n.isPriceDigest) telemetry.emit(EVENT_DIGEST_OPEN, mapOf("via" to "in_app"))
             if (n.isUnread) {
                 val read = clock.now().toString()
                 mutable.update { s ->
@@ -179,6 +201,8 @@ class NotificationsViewModel
 
         private companion object {
             const val PAGE = 50
+            const val EVENT_DROP_SEEN = "alert_drop_seen"
+            const val EVENT_DIGEST_OPEN = "alert_digest_open"
         }
     }
 
@@ -229,7 +253,7 @@ fun NotificationsScreen(state: NotificationsUiState, onEvent: (NotificationsEven
                 else -> {
                     LazyColumn(Modifier.fillMaxSize()) {
                         items(items, key = { it.id }, contentType = { "notification" }) { n ->
-                            NotificationRow(n, state.now) { onEvent(NotificationsEvent.Open(n)) }
+                            NotificationRow(n, state.now, state.gameVisible) { onEvent(NotificationsEvent.Open(n)) }
                             HorizontalDivider(color = TravelTheme.colors.outlineVariant)
                         }
                     }
@@ -267,7 +291,7 @@ private fun actionText(action: AlertAction): String =
     )
 
 @Composable
-internal fun NotificationRow(n: AppNotification, now: Instant, onOpen: () -> Unit) {
+internal fun NotificationRow(n: AppNotification, now: Instant, gameVisible: Boolean = false, onOpen: () -> Unit) {
     val style = alertKindFor(n)
     val (bg, fg) = toneColors(style.tone)
     val unread = n.isUnread
@@ -293,6 +317,8 @@ internal fun NotificationRow(n: AppNotification, now: Instant, onOpen: () -> Uni
             n.body?.let {
                 Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
+            n.dropView(gameVisible)?.let { DropBlock(it, Modifier.padding(vertical = TravelTheme.spacing.xs)) }
+            n.takeIf { it.isPriceDigest }?.digestView()?.let { DigestBlock(it, Modifier.padding(vertical = TravelTheme.spacing.xs)) }
             Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                 timeAgo(n.createdAt, now)?.let { Text(timeAgoText(it), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant) }
                 Text(actionText(style.action), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.primary)

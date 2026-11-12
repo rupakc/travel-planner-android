@@ -65,6 +65,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.core.ui.watch.ToneBox
+import io.github.rupakc.travelplanner.feature.alerts.savings.SavingsHeaderRoute
 import java.time.Instant
 
 /** Watched prices (top-level: the shell draws the app bar). */
@@ -74,12 +75,19 @@ fun WatchedPricesRoute(onReplanned: () -> Unit, onSearch: () -> Unit, modifier: 
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { if (it == AlertsEffect.Replanned) onReplanned() }
     }
-    AlertsScreen(state, viewModel::onEvent, onSearch, modifier)
+    AlertsScreen(state, viewModel::onEvent, onSearch, modifier, header = { SavingsHeaderRoute() })
 }
 
 /** Stateless Alerts screen (web AlertsPage). */
 @Composable
-fun AlertsScreen(state: AlertsUiState, onEvent: (AlertsEvent) -> Unit, onSearch: () -> Unit, modifier: Modifier = Modifier) {
+fun AlertsScreen(
+    state: AlertsUiState,
+    onEvent: (AlertsEvent) -> Unit,
+    onSearch: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** Slot under the title: the savings tally (stateful, so the stateless screen stays previewable). */
+    header: @Composable () -> Unit = {},
+) {
     val grid = rememberLazyGridState()
     val reduceMotion = rememberReduceMotion()
     val snackbar = remember { SnackbarHostState() }
@@ -110,6 +118,7 @@ fun AlertsScreen(state: AlertsUiState, onEvent: (AlertsEvent) -> Unit, onSearch:
             modifier = Modifier.fillMaxSize(),
         ) {
             full("header") { Header() }
+            full("savings") { header() }
             if (state.livePrices == false) full("unavailable") { ToneBox(Tone.WARN) { Text(stringResource(R.string.alerts_live_unavailable)) } }
             when {
                 state.loading -> loading()

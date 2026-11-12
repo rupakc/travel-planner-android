@@ -36,6 +36,7 @@ Alert notifications link to `alerts?kind=&watch=`, mirroring the web's `/alerts?
   during a trip unless "always" is chosen, and only if Near me was used in the last 24 h (its coarse `last_location` cell). It makes **no network
   call**: Google Maps grounding may only answer the user's own request, so the notification just deep-links to `travelplanner://nearby`, where
   the user's request runs. No background location permission.
+- **Drop moment and digest rows** (Alerts 2.0, `feature:alerts` `savings/`): a row with `data.drop` shows "caught a drop of $X" (target-hit variant "Your target price is here"; estimates, `observed: false`, never show); the XP line is the notification's own `game.xp` and only while the game is visible (R4). A `price_digest` row lists up to five watches with their 7-day change and the savings total; tapping it opens Alerts. Unknown kinds and malformed `data` render as plain rows.
 - **In-app inbox**: the bell in the top bar shows the unread count (`GET /api/notifications/unread-count`); `NotificationsRoute` lists, marks read and opens alerts.
 - **Trip reminder text** names the city: a plan's search stores an airport code ("LIS"), so `TripReminderWorker` looks it up with the shared
   `PlaceNameLookup` when it posts ("Your Lisbon trip starts today"); if the lookup finds nothing the code stays (never an invented name).

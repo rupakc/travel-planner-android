@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_savings_title">Erkannte Preissenkungen</string>
+    <string name="alerts_savings_amount">Erkannte Preissenkungen: %1$s</string>
+    <string name="alerts_savings_other_currencies">Andere Währungen, nicht umgerechnet</string>
+    <string name="alerts_savings_best">Bester Fang: %1$s, %2$s</string>
+    <string name="alerts_savings_best_untitled">Bester Fang: %1$s</string>
+    <string name="alerts_savings_progress">%1$d %% des Wegs zu %2$s</string>
+    <string name="alerts_savings_all_done">Alle Meilensteine erreicht</string>
+    <string name="alerts_savings_empty">Deine erste Preissenkung erscheint hier</string>
+    <string name="alerts_savings_empty_hint">Jede echte Preissenkung deiner Beobachtungen wird hier ergänzt.</string>
+    <string name="alerts_savings_caveat">Der Unterschied zwischen dem ersten gesehenen Preis und dem niedrigsten Preis, über den wir dich informiert haben, nur bei USD-Beobachtungen. Er wird nur dann zu Geld, wenn du zu diesem Preis buchst.</string>
+    <string name="alerts_savings_paused">Live-Prüfungen sind pausiert, diese Zahlen stammen daher aus gespeicherten Daten.</string>
+    <string name="alerts_savings_error">Deine erkannten Preissenkungen konnten nicht geladen werden.</string>
+    <string name="alerts_drop_title">Preissenkung erkannt</string>
+    <string name="alerts_drop_target">Dein Zielpreis ist erreicht</string>
+    <string name="alerts_drop_caught">Preissenkung von %1$s erkannt</string>
+    <string name="alerts_drop_caught_pct">Preissenkung von %1$s (%2$d %%) erkannt</string>
+    <string name="alerts_drop_now_at">Jetzt: %1$s</string>
+    <string name="alerts_drop_xp">+%1$d XP</string>
+    <string name="alerts_drop_note">Das ist der Unterschied zwischen zwei beobachteten Preisen. Preise können sich ändern, bevor du buchst.</string>
+    <string name="alerts_digest_week">Wochenübersicht · %1$s</string>
+    <string name="alerts_digest_down">Diese Woche %1$s günstiger</string>
+    <string name="alerts_digest_up">Diese Woche %1$s teurer</string>
+    <plurals name="alerts_savings_drops">
+        <item quantity="one">%1$d Preissenkung erkannt</item>
+        <item quantity="other">%1$d Preissenkungen erkannt</item>
+    </plurals>
+    <plurals name="alerts_savings_targets">
+        <item quantity="one">%1$d Zielpreis erreicht</item>
+        <item quantity="other">%1$d Zielpreise erreicht</item>
+    </plurals>
+    <plurals name="alerts_digest_more">
+        <item quantity="one">+%1$d weitere Beobachtung</item>
+        <item quantity="other">+%1$d weitere Beobachtungen</item>
+    </plurals>
+</resources>

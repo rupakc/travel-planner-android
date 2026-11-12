@@ -89,6 +89,7 @@ class PriceWatchRulesTest {
         assertEquals(AlertAction.SEE_FARE, alertKindFor(AppNotification(id = 1, kind = "fare_drop")).action)
         assertEquals(AlertAction.SEE_DATES, alertKindFor(AppNotification(id = 1, kind = "fare_cheaper_date")).action)
         assertEquals(AlertIcon.ENDED, alertKindFor(AppNotification(id = 1, kind = "mystery")).icon)
+        assertEquals(AlertIcon.SPARKLE, alertKindFor(AppNotification(id = 1, kind = "price_digest")).icon)
         val hotelEnded = AppNotification(id = 1, kind = "watch_expired", data = json("""{"watch_kind":"hotel"}"""))
         assertEquals(AlertAction.SEE_HOTEL, alertKindFor(hotelEnded).action)
         val activityEnded = AppNotification(id = 1, kind = "watch_expired", data = json("""{"watch_kind":"activity"}"""))

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_savings_title">Drops caught</string>
+    <string name="alerts_savings_amount">Drops caught: %1$s</string>
+    <string name="alerts_savings_other_currencies">Other currencies, not converted</string>
+    <string name="alerts_savings_best">Best catch: %1$s, %2$s</string>
+    <string name="alerts_savings_best_untitled">Best catch: %1$s</string>
+    <string name="alerts_savings_progress">%1$d%% of the way to %2$s</string>
+    <string name="alerts_savings_all_done">Every milestone reached</string>
+    <string name="alerts_savings_empty">Your first drop will show here</string>
+    <string name="alerts_savings_empty_hint">Every real price drop on your watches is added here.</string>
+    <string name="alerts_savings_caveat">The drop between the first price we saw and the lowest price we alerted you about, on USD watches only. It only turns into money if you book at that price.</string>
+    <string name="alerts_savings_paused">Live checks are paused, so these figures come from saved data.</string>
+    <string name="alerts_savings_error">We couldn’t load your drops caught.</string>
+    <string name="alerts_drop_title">Price drop caught</string>
+    <string name="alerts_drop_target">Your target price is here</string>
+    <string name="alerts_drop_caught">Caught a drop of %1$s</string>
+    <string name="alerts_drop_caught_pct">Caught a drop of %1$s (%2$d%%)</string>
+    <string name="alerts_drop_now_at">Now at %1$s</string>
+    <string name="alerts_drop_xp">+%1$d XP</string>
+    <string name="alerts_drop_note">This is the drop between two prices we observed. Prices can change before you book.</string>
+    <string name="alerts_digest_week">Weekly digest · %1$s</string>
+    <string name="alerts_digest_down">Down %1$s this week</string>
+    <string name="alerts_digest_up">Up %1$s this week</string>
+    <plurals name="alerts_savings_drops">
+        <item quantity="one">%1$d drop caught</item>
+        <item quantity="other">%1$d drops caught</item>
+    </plurals>
+    <plurals name="alerts_savings_targets">
+        <item quantity="one">%1$d target hit</item>
+        <item quantity="other">%1$d targets hit</item>
+    </plurals>
+    <plurals name="alerts_digest_more">
+        <item quantity="one">+%1$d more watch</item>
+        <item quantity="other">+%1$d more watches</item>
+    </plurals>
+</resources>

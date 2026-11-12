@@ -323,6 +323,8 @@ data class DigestWatch(
     val kind: String? = null,
     @SerialName("watch_id") val watchId: Long? = null,
     val title: String? = null,
+    /** The watch's currency (sent by the backend, absent from the contract table); null means unknown. */
+    val currency: String? = null,
     val latest: LenientDouble = null,
     @SerialName("change_7d") val change7d: LenientDouble = null,
     val lowest: LenientDouble = null,
