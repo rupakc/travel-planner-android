@@ -5,6 +5,7 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.map
 import io.github.rupakc.travelplanner.core.common.onSuccess
+import io.github.rupakc.travelplanner.core.data.repository.GameEvents
 import io.github.rupakc.travelplanner.core.data.repository.TripsRepository
 import io.github.rupakc.travelplanner.core.data.repository.UserStateCleaner
 import io.github.rupakc.travelplanner.core.datastore.SessionStore
@@ -38,6 +39,7 @@ class TripsRepositoryImpl
         private val api: TripsApi,
         private val sessionStore: SessionStore,
         private val clock: AppClock,
+        private val gameEvents: GameEvents,
     ) : TripsRepository,
         UserStateCleaner {
         private val cache = ConcurrentHashMap<String, TripsResponse>()
@@ -105,7 +107,10 @@ class TripsRepositoryImpl
 
         override suspend fun stats(): AppResult<Stats> = apiCall { api.stats() }
 
-        override suspend fun checkin(id: Long, day: String): AppResult<CheckinResponse> = apiCall { api.checkin(id, CheckinRequest(day)) }
+        override suspend fun checkin(id: Long, day: String): AppResult<CheckinResponse> =
+            apiCall {
+                api.checkin(id, CheckinRequest(day))
+            }.onSuccess { gameEvents.publish(it.game) }
 
         override suspend fun checkins(id: Long): AppResult<CheckinsResponse> = apiCall { api.checkins(id) }
 

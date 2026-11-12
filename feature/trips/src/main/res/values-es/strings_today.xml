@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Today tab and check-in (Phase 1/2 T10). Hand-maintained. -->
+    <string name="today_day">Día %1$d</string>
+    <string name="today_checkin">Haz el check-in de hoy</string>
+    <string name="today_checked_in">Check-in de hoy hecho</string>
+    <string name="today_streak">Racha de check-ins: %1$d</string>
+    <string name="today_new_country">¡País nuevo desbloqueado! Ya está en tu pasaporte.</string>
+    <string name="today_err_out_of_trip">Hoy queda fuera de las fechas del viaje, así que no hay nada que registrar.</string>
+    <string name="today_err_day_invalid">La fecha de tu dispositivo parece incorrecta. Revisa la fecha y la hora e inténtalo de nuevo.</string>
+    <string name="today_err_generic">No se pudo hacer el check-in ahora. Inténtalo de nuevo.</string>
+    <string name="today_next_up">A continuación</string>
+    <string name="today_directions">Cómo llegar</string>
+    <string name="today_emergency">Información de emergencia</string>
+    <string name="today_add_expense">Añadir gasto</string>
+    <string name="today_nothing">No hay nada planeado para hoy.</string>
+    <string name="today_load_failed">No se pudo cargar hoy.</string>
+</resources>
