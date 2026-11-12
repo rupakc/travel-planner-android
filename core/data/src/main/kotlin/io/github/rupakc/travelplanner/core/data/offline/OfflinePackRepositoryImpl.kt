@@ -27,7 +27,8 @@ import kotlinx.serialization.json.JsonObject
 
 /**
  * Offline packs in Room under `userId:tripId`. The viewer reads [saved] only, so it works with the network off.
- * `404 offline_pack_disabled` means the feature is off on this server: everything is purged.
+ * `404 offline_pack_disabled` means the feature is off on this server: the packs and queued snapshot uploads
+ * are purged (queued expenses and journal writes stay).
  */
 @Singleton
 internal class OfflinePackRepositoryImpl
@@ -89,7 +90,8 @@ internal class OfflinePackRepositoryImpl
             val user = sessionStore.currentUserKey()
             if (user != null) {
                 dao.deleteAllFor(user)
-                outboxDao.deleteAllFor(user)
+                // Only pack-related writes: queued expenses and journal entries are the user's own data.
+                outboxDao.deleteSnapshotsFor(user)
             }
         }
 

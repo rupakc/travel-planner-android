@@ -56,9 +56,10 @@ class AccountRepositoryImpl
                 .map { it.user }
                 .onSuccess { sessionStore.updateUser(it) }
 
-        override suspend fun settings(): AppResult<AccountSettings> = apiCall { api.settings() }
+        override suspend fun settings(): AppResult<AccountSettings> = apiCall { api.settings() }.onSuccess { gameEvents.setVisible(!it.hideGame) }
 
-        override suspend fun patchSettings(patch: JsonObject): AppResult<AccountSettings> = apiCall { api.patchSettings(patch) }
+        override suspend fun patchSettings(patch: JsonObject): AppResult<AccountSettings> =
+            apiCall { api.patchSettings(patch) }.onSuccess { gameEvents.setVisible(!it.hideGame) }
 
         override suspend fun putOnboarding(request: OnboardingRequest): AppResult<OnboardingResponse> =
             apiCall { api.putOnboarding(request) }.onSuccess { gameEvents.publish(it.game) }
@@ -128,9 +129,7 @@ class AccountRepositoryImpl
 
         override suspend fun revokeSession(id: String): AppResult<Unit> = apiCall { api.revokeSession(id) }
 
-        override suspend fun logoutAll(): AppResult<Unit> =
-            apiCall { api.logoutAll() }.onSuccess {
-                // Every token (this one too) is now revoked: finish like a normal sign-out.
-                authRepository.logout()
-            }
+        // Unregisters the device first, then revokes everything and ends the session locally. A plain logout()
+        // after logout-all would 401 on devices/unregister, emit a false SessionExpired and never unregister.
+        override suspend fun logoutAll(): AppResult<Unit> = authRepository.logoutAll()
     }

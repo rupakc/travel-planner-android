@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.rupakc.travelplanner.core.network.AuthEvents
+import io.github.rupakc.travelplanner.core.testing.fake.FakeOutbox
 import io.github.rupakc.travelplanner.navigation.DeepLinkIntents
 import io.github.rupakc.travelplanner.navigation.ShellViewModel
 import org.junit.Assert.assertEquals
@@ -65,11 +66,11 @@ class DeepLinkIntentsTest {
     @Test
     fun `a deep link that hit the login gate is kept across recreation and replayed once`() {
         val handle = SavedStateHandle()
-        val shell = ShellViewModel(AuthEvents(), handle)
+        val shell = ShellViewModel(AuthEvents(), FakeOutbox(), handle)
         assertNull(shell.take())
         shell.keep("travelplanner://plan/7")
         // Process death / recreation: a new ViewModel on the same saved state still has it.
-        val restored = ShellViewModel(AuthEvents(), handle)
+        val restored = ShellViewModel(AuthEvents(), FakeOutbox(), handle)
         assertEquals("travelplanner://plan/7", restored.take())
         assertNull(restored.take())
         restored.keep("travelplanner://chat")

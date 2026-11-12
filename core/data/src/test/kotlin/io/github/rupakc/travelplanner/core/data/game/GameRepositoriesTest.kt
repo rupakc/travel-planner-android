@@ -87,6 +87,17 @@ class GameRepositoriesTest {
             assertEquals(mapOf("level" to 2), tel.events[2].second)
         }
 
+    @Test fun `the bus is hidden until the setting is known`() {
+        val tel = FakeTelemetry()
+        val events = GameEventsImpl(tel)
+        assertTrue(!events.visible.value)
+        events.publish(delta)
+        assertTrue(tel.events.isEmpty())
+        events.setVisible(true)
+        events.publish(delta)
+        assertTrue(tel.events.isNotEmpty())
+    }
+
     @Test fun `null and empty deltas are ignored`() {
         val tel = FakeTelemetry()
         val events = GameEventsImpl(tel)

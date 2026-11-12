@@ -115,6 +115,39 @@ class AuthSessionFlowTest {
         }
 
     @Test
+    fun `logoutAll unregisters the device before revoking, then clears locally`() =
+        runTest(timeout = 30.seconds) {
+            withContext(Dispatchers.Default) {
+                server.enqueue(json(204))
+                val store = FakeSessionStore(Session("at", User("jane"), refreshToken = "rt_9"))
+                val devices = io.mockk.mockk<DevicesApi>()
+                var requestsAtUnregister = -1
+                io.mockk.coEvery { devices.unregister(any()) } coAnswers {
+                    requestsAtUnregister = server.requestCount
+                    retrofit2.Response.success(Unit)
+                }
+                val net = TestNetwork(server.url("/").toString(), store, TestAppDispatchers(Dispatchers.IO))
+                val push = io.github.rupakc.travelplanner.core.data.repository.PushTokenSource { "fcm-1" }
+                val repo =
+                    AuthRepositoryImpl(
+                        net.api<AuthApi>(),
+                        devices,
+                        store,
+                        Optional.of(push),
+                        net.baseUrlProvider,
+                        cleaner,
+                        net.api<AccountApi>(),
+                        SystemAppClock(),
+                    )
+                assertTrue(repo.logoutAll() is AppResult.Success)
+                assertEquals("unregistered while the token was still valid", 0, requestsAtUnregister)
+                assertTrue(server.takeRequest().url.encodedPath.endsWith("/auth/logout-all"))
+                assertNull(store.current())
+                assertEquals(1, cleared)
+            }
+        }
+
+    @Test
     fun `logoutAll clears on success and keeps the session on failure`() =
         runTest(timeout = 30.seconds) {
             server.enqueue(json(500, "{}"))

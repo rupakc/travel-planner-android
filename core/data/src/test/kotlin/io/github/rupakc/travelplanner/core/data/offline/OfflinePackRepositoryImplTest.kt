@@ -85,19 +85,23 @@ class OfflinePackRepositoryImplTest {
         }
 
     @Test
-    fun `404 offline_pack_disabled purges packs and the outbox`() =
+    fun `404 offline_pack_disabled purges packs and snapshot uploads but keeps queued expenses`() =
         runBlocking {
             val repo = repo()
             server.enqueue(MockResponse.Builder().code(200).body(body).build())
             repo.save(12, "2027-04-01")
-            db.outboxDao().enqueue(OutboxEntity(userId = "u1", method = "POST", path = "p", body = null, key = "k", createdAt = 1))
+            db.outboxDao().enqueue(OutboxEntity(userId = "u1", method = "PUT", path = "p", body = null, key = "snapshot:12", createdAt = 1))
+            db.outboxDao().enqueue(
+                OutboxEntity(userId = "u1", method = "POST", path = "api/trips/12/expenses", body = null, key = "expense:abc", createdAt = 2),
+            )
             server.enqueue(
                 MockResponse.Builder().code(404).body("""{"detail":{"code":"offline_pack_disabled","message":"off"}}""").build(),
             )
             val result = repo.save(12, "2027-04-01")
             assertTrue((result as AppResult.Failure).error is AppError.NotFound)
             assertNull(repo.saved(12).first())
-            assertEquals(0, db.outboxDao().countAll())
+            assertEquals(1, db.outboxDao().countAll())
+            assertEquals(setOf("expense:abc"), db.outboxDao().observeKeys("u1").first().toSet())
             assertEquals("unsupported", telemetry.events.last().second["result"])
         }
 

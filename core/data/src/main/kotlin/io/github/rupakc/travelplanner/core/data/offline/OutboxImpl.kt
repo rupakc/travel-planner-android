@@ -19,6 +19,8 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -38,6 +40,9 @@ internal class OutboxImpl
         private val telemetry: Telemetry,
         private val clock: AppClock,
     ) : Outbox {
+        private val _dropNotices = MutableSharedFlow<Int>(extraBufferCapacity = 8)
+        override val dropNotices: Flow<Int> = _dropNotices.asSharedFlow()
+
         private val locks = ConcurrentHashMap<String, Mutex>()
 
         override suspend fun enqueue(request: OutboxRequest): AppResult<Unit> {
@@ -77,6 +82,11 @@ internal class OutboxImpl
             // The token on the wire is the signed-in user's: another user's writes wait for that user.
             if (user != current) return FlushResult()
             val result = locks.getOrPut(user) { Mutex() }.withLock { drain(user) }
+            if (result.dropped > 0) {
+                // A 4xx (409 expense_limit / journal_limit included) is permanent: the write is gone, so say so.
+                AppLogger.w(TAG, "${result.dropped} queued write(s) were rejected by the server and dropped")
+                _dropNotices.tryEmit(result.dropped)
+            }
             if (result.sent + result.failed + result.dropped > 0) {
                 telemetry.emit(
                     TelemetryEvents.OUTBOX_FLUSH,
@@ -139,7 +149,6 @@ internal class OutboxImpl
 
         private companion object {
             const val TAG = "Outbox"
-            const val CONFLICT = 409
             const val UNAUTHORIZED = 401
             const val TIMEOUT = 408
             const val TOO_MANY = 429
@@ -150,7 +159,7 @@ internal class OutboxImpl
 
             fun classify(status: Int): Outcome =
                 when (status) {
-                    in OK_FROM..OK_TO, CONFLICT -> Outcome.SENT
+                    in OK_FROM..OK_TO -> Outcome.SENT
                     UNAUTHORIZED, TIMEOUT, TOO_MANY -> Outcome.KEEP_AND_STOP
                     in CLIENT_FROM..CLIENT_TO -> Outcome.DROP
                     else -> Outcome.KEEP

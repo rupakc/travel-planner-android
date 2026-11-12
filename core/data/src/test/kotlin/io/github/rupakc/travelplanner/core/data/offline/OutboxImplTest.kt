@@ -11,10 +11,13 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeSessionStore
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import java.io.IOException
 import java.util.Collections
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -85,19 +88,19 @@ class OutboxImplTest {
         }
 
     @Test
-    fun `2xx and 409 are sent, 4xx are dropped, 408 429 and 5xx are kept`() =
+    fun `2xx are sent, 4xx (409 included) are dropped, 408 429 and 5xx are kept`() =
         runBlocking {
             val outbox = outbox()
             val codes = mapOf("a" to 200, "b" to 409, "c" to 422, "d" to 500, "e" to 404)
             status = { path -> codes.getValue(path.substringAfterLast('/')) }
             codes.keys.forEach { outbox.enqueue(req(it)) }
             val r = outbox.flush()
-            assertEquals(2, r.sent)
-            assertEquals(2, r.dropped)
+            assertEquals(1, r.sent)
+            assertEquals(3, r.dropped)
             assertEquals(1, r.failed)
             assertEquals(1, db.outboxDao().count("u1"))
             assertEquals(
-                listOf("outbox_flush" to mapOf<String, Any?>("sent" to 2, "failed" to 1, "dropped" to 2)),
+                listOf("outbox_flush" to mapOf<String, Any?>("sent" to 1, "failed" to 1, "dropped" to 3)),
                 telemetry.events,
             )
             for (code in listOf(408, 429)) {
@@ -109,6 +112,19 @@ class OutboxImplTest {
             status = { 201 }
             assertEquals(1, outbox.flush().sent)
             assertTrue(scheduler.cancelled > 0)
+        }
+
+    @Test
+    fun `a dropped write (409 limit) is announced to the shell`() =
+        runBlocking {
+            val outbox = outbox()
+            status = { 409 }
+            outbox.enqueue(req("a"))
+            val notices = mutableListOf<Int>()
+            val job = launch(Dispatchers.Unconfined) { outbox.dropNotices.toList(notices) }
+            assertEquals(1, outbox.flush().dropped)
+            job.cancel()
+            assertEquals(listOf(1), notices)
         }
 
     @Test

@@ -8,8 +8,9 @@ import javax.inject.Singleton
 
 /**
  * Deletes every offline pack and queued write on this device. Contributed to the session wipe as a
- * [UserStateCleaner], so sign-out, `session_revoked`, account deletion, a different user signing in and a
- * server change all purge them. Packs are per user, and the next account must never see or send them.
+ * [UserStateCleaner], so sign-out, account deletion, a different user signing in and a server change
+ * purge them, and so does a server-ended session (`session_revoked`, dead refresh token) via
+ * `SessionEndWatcher`. Packs are per user, and the next account must never see or send them.
  */
 @Singleton
 internal class OfflinePurger
