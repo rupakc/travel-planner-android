@@ -68,6 +68,7 @@ internal fun ResultStep(state: OnboardingUiState, onEvent: (OnboardingEvent) -> 
         modifier = modifier,
         onBack = { onEvent(OnboardingEvent.Back) },
         onClose = onClose.takeIf { state.fromSettings },
+        onSkipAll = skipAllAction(state, onEvent),
         actions = {
             TpButton(stringResource(R.string.onboarding_continue), { onEvent(OnboardingEvent.ConfirmResult) }, Modifier.fillMaxWidth())
         },
@@ -165,6 +166,7 @@ internal fun FeaturesStep(
         modifier = modifier,
         onBack = { onEvent(OnboardingEvent.Back) }.takeUnless { state.saving },
         onClose = onClose.takeIf { state.fromSettings },
+        onSkipAll = skipAllAction(state, onEvent),
         actions = {
             Text(
                 pluralStringResource(R.plurals.onboarding_features_count, state.selectedFeatures.size, state.selectedFeatures.size),
@@ -177,7 +179,7 @@ internal fun FeaturesStep(
                     when {
                         state.saving -> R.string.onboarding_saving
                         state.fromSettings -> R.string.onboarding_save_changes
-                        else -> R.string.onboarding_finish
+                        else -> R.string.onboarding_continue
                     },
                 ),
                 onFinish,
@@ -267,7 +269,7 @@ private fun FeatureRow(id: FeatureId, checked: Boolean, enabled: Boolean, onTogg
 }
 
 @Composable
-private fun SyncErrorCard(message: String?, onEvent: (OnboardingEvent) -> Unit) {
+internal fun SyncErrorCard(message: String?, onEvent: (OnboardingEvent) -> Unit) {
     TpCard(Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite }, accent = TravelTheme.colors.error, selected = true) {
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             Text(
@@ -287,9 +289,10 @@ private fun SyncErrorCard(message: String?, onEvent: (OnboardingEvent) -> Unit) 
 
 /** In-context POST_NOTIFICATIONS rationale (Android 13+, first run only). */
 @Composable
-internal fun NotificationsStep(onAllow: () -> Unit, onLater: () -> Unit, modifier: Modifier = Modifier) {
+internal fun NotificationsStep(onAllow: () -> Unit, onLater: () -> Unit, onSkipAll: (() -> Unit)? = null, modifier: Modifier = Modifier) {
     OnboardingFrame(
         modifier = modifier,
+        onSkipAll = onSkipAll,
         actions = {
             TpButton(stringResource(R.string.onboarding_notifications_later), onLater, variant = TpButtonVariant.Text)
             Spacer(Modifier.weight(1f))

@@ -97,4 +97,19 @@
     <string name="onboarding_notifications_message">Recibe recordatorios antes de salir, alertas de bajadas de precio de lo que vigilas y sugerencias cercanas durante el viaje. Puedes desactivar cada una en Ajustes.</string>
     <string name="onboarding_notifications_allow">Permitir notificaciones</string>
     <string name="onboarding_notifications_later">Ahora no</string>
+    <!-- Flujo compartido de 5 pasos -->
+    <string name="onboarding_skip_all">Omitir configuración</string>
+    <string name="onboarding_resume">¡Te damos la bienvenida de nuevo! Guardamos tu progreso para que continúes donde lo dejaste.</string>
+    <string name="onboarding_home_title">Origen y pasaporte</string>
+    <string name="onboarding_home_message">Dinos desde dónde vuelas y qué pasaporte tienes, para revisar los visados y encontrar los vuelos adecuados.</string>
+    <string name="onboarding_home_airport">Aeropuerto de origen</string>
+    <string name="onboarding_home_airport_placeholder">Ciudad o código de aeropuerto</string>
+    <string name="onboarding_home_airport_hint">Se guarda en este dispositivo para iniciar tus búsquedas desde casa.</string>
+    <string name="onboarding_passport">Pasaporte</string>
+    <string name="onboarding_passport_placeholder">Tu nacionalidad, p. ej. india</string>
+    <string name="onboarding_passport_hint">Se usa para comprobar los requisitos de visado. Se guarda en tus preferencias.</string>
+    <string name="onboarding_first_trip_title">Planifica tu primer viaje</string>
+    <string name="onboarding_first_trip_message">Busca un destino o pídele a %1$s que te sorprenda.</string>
+    <string name="onboarding_plan_first_trip">Planificar mi primer viaje</string>
+    <string name="onboarding_just_explore">Solo explorar</string>
 </resources>

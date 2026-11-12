@@ -82,6 +82,7 @@ class PreferencesTravellerProfileStore(private val store: DataStore<Preferences>
     private val secondary = stringPreferencesKey("secondary_types")
     private val answers = stringPreferencesKey("answers_json")
     private val completedAt = longPreferencesKey("completed_at")
+    private val homeAirport = stringPreferencesKey("home_airport")
     private val answersSerializer = MapSerializer(String.serializer(), ListSerializer(String.serializer()))
 
     override val profile: Flow<TravellerProfile> =
@@ -92,6 +93,7 @@ class PreferencesTravellerProfileStore(private val store: DataStore<Preferences>
                 secondaryTypes = p[secondary]?.split(',')?.filter(String::isNotBlank).orEmpty(),
                 answers = p[answers]?.let { runCatching { TravelJson.decodeFromString(answersSerializer, it) }.getOrNull() }.orEmpty(),
                 completedAtEpochMillis = p[completedAt],
+                homeAirport = p[homeAirport],
             )
         }.distinctUntilChanged()
 
@@ -103,6 +105,7 @@ class PreferencesTravellerProfileStore(private val store: DataStore<Preferences>
             p[answers] = TravelJson.encodeToString(answersSerializer, profile.answers)
             val at = profile.completedAtEpochMillis
             if (at != null) p[completedAt] = at else p.remove(completedAt)
+            p.setOrRemove(homeAirport, profile.homeAirport)
         }
     }
 

@@ -72,4 +72,19 @@
     <string name="onboarding_notifications_title">Gardez vos voyages à l’œil</string>
     <string name="onboarding_notifications_message">Recevez des rappels avant votre départ, des alertes de baisse de prix pour ce que vous suivez et des suggestions à proximité pendant le voyage. Vous pouvez désactiver chacune dans les réglages.</string>
     <string name="onboarding_notifications_allow">Autoriser les notifications</string>
+    <!-- Shared 5-step flow: copy from the web onboarding namespace (web.* and steps.*) -->
+    <string name="onboarding_skip_all">Passer la configuration</string>
+    <string name="onboarding_resume">Bon retour ! Nous avons gardé votre progression : reprenez là où vous vous étiez arrêté.</string>
+    <string name="onboarding_home_title">Domicile et passeport</string>
+    <string name="onboarding_home_message">Indiquez d\'où vous partez et quel passeport vous détenez, afin que nous vérifiions les visas et trouvions les bons vols.</string>
+    <string name="onboarding_home_airport">Aéroport de départ habituel</string>
+    <string name="onboarding_home_airport_placeholder">Ville ou code d’aéroport</string>
+    <string name="onboarding_home_airport_hint">Enregistré sur cet appareil pour lancer vos recherches depuis chez vous.</string>
+    <string name="onboarding_passport">Passeport</string>
+    <string name="onboarding_passport_placeholder">Votre nationalité, p. ex. indienne</string>
+    <string name="onboarding_passport_hint">Sert à vérifier les règles de visa. Enregistré dans vos préférences.</string>
+    <string name="onboarding_first_trip_title">Planifiez votre premier voyage</string>
+    <string name="onboarding_first_trip_message">Recherchez une destination ou demandez à %1$s de vous surprendre.</string>
+    <string name="onboarding_plan_first_trip">Planifier mon premier voyage</string>
+    <string name="onboarding_just_explore">Simplement explorer</string>
 </resources>

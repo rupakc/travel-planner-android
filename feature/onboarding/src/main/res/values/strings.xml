@@ -102,4 +102,19 @@
     <string name="onboarding_notifications_message">Get trip reminders before you leave, price-drop alerts for what you watch, and suggestions nearby while you travel. You can turn each one off in Settings.</string>
     <string name="onboarding_notifications_allow">Allow notifications</string>
     <string name="onboarding_notifications_later">Not now</string>
+    <!-- Shared 5-step flow (web steps 3 and 5, Skip setup, resume) -->
+    <string name="onboarding_skip_all">Skip setup</string>
+    <string name="onboarding_resume">Welcome back! We kept your place, so you can pick up where you left off.</string>
+    <string name="onboarding_home_title">Home and passport</string>
+    <string name="onboarding_home_message">Tell us where you fly from and which passport you hold, so we can check visas and find the right flights.</string>
+    <string name="onboarding_home_airport">Home airport</string>
+    <string name="onboarding_home_airport_placeholder">City or airport code</string>
+    <string name="onboarding_home_airport_hint">Kept on this device to start your searches from home.</string>
+    <string name="onboarding_passport">Passport</string>
+    <string name="onboarding_passport_placeholder">Your nationality, e.g. Indian</string>
+    <string name="onboarding_passport_hint">Used to check visa rules. Saved to your preferences.</string>
+    <string name="onboarding_first_trip_title">Plan your first trip</string>
+    <string name="onboarding_first_trip_message">Search for a destination, or ask %1$s to surprise you.</string>
+    <string name="onboarding_plan_first_trip">Plan my first trip</string>
+    <string name="onboarding_just_explore">Just explore</string>
 </resources>

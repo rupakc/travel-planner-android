@@ -9,10 +9,14 @@ import io.github.rupakc.travelplanner.core.domain.profile.DefaultFeatureCatalogu
 import io.github.rupakc.travelplanner.core.domain.profile.DefaultTravellerClassifier
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.preferences.TasteProfile
+import io.github.rupakc.travelplanner.core.testing.fake.FakeAccountRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeProfileRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeSearchRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
+import java.util.Optional
 import kotlinx.coroutines.flow.emitAll
 
 /** Preferences fake that can fail the PUT ([saveFailure]) and records what was sent. */
@@ -42,6 +46,9 @@ fun onboardingViewModel(
     profile: io.github.rupakc.travelplanner.core.data.repository.ProfileRepository = FakeProfileRepository(),
     preferences: ScriptedPreferencesRepository = ScriptedPreferencesRepository(),
     saved: SavedStateHandle = SavedStateHandle(),
+    account: FakeAccountRepository? = FakeAccountRepository(),
+    telemetry: FakeTelemetry = FakeTelemetry(),
+    search: FakeSearchRepository = FakeSearchRepository(),
 ) = OnboardingViewModel(
     savedState = saved,
     profileRepository = profile,
@@ -49,6 +56,9 @@ fun onboardingViewModel(
     catalogue = DefaultFeatureCatalogue,
     classifier = DefaultTravellerClassifier,
     clock = SystemAppClock(Clock.fixed(FIXED_NOW, ZoneOffset.UTC)),
+    telemetry = telemetry,
+    searchRepository = search,
+    accountRepository = Optional.ofNullable(account),
 )
 
 /** Profile repository whose reads wait for [gate] (keeps the ViewModel in LOADING). */
