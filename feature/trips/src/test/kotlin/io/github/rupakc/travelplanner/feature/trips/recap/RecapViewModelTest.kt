@@ -6,6 +6,7 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
+import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.Recap
 import io.github.rupakc.travelplanner.core.model.trips.RecapCompleteResponse
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
@@ -112,5 +113,19 @@ class RecapViewModelTest {
             vm.onEvent(RecapEvent.WhereNext)
             assertEquals(listOf("view", "share", "where_next"), telemetry.events.map { it.second["action"] })
             assertTrue(telemetry.events.all { it.second.keys == setOf("action") })
+        }
+
+    @Test
+    fun `a phase change reloads the recap, the first phase report does not`() =
+        runTest(timeout = 30.seconds) {
+            val vm = vm()
+            vm.onEvent(RecapEvent.PhaseShown(Phase.MEMORIES))
+            assertEquals(1, recaps.calls.size)
+            vm.onEvent(RecapEvent.PhaseShown(Phase.MEMORIES))
+            assertEquals(1, recaps.calls.size)
+            recaps.recapResult = AppResult.Success(recap.copy(title = "Lisbon again"))
+            vm.onEvent(RecapEvent.PhaseShown(Phase.PLANNING))
+            assertEquals(2, recaps.calls.size)
+            assertEquals("Lisbon again", vm.state.value.recap?.title)
         }
 }

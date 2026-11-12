@@ -292,4 +292,30 @@ class TripViewModelTest {
         assertEquals(before + 1, trips.calls.count { it.startsWith("get") })
         assertFalse(vm.state.value.loading)
     }
+
+    @Test
+    fun `a phase change drops the requested tab so the tabs follow the new phase`() {
+        trips.getResult = AppResult.Success(trip(Phase.READY))
+        givenPlan()
+        val vm = vm()
+        vm.onEvent(TripEvent.SelectTab(TripTab.Money))
+        assertEquals(TripTab.Money, vm.state.value.requestedTab)
+
+        trips.updateResult = AppResult.Success(trip(Phase.MEMORIES).copy(phaseSource = "manual"))
+        vm.onEvent(TripEvent.SetPhase(Phase.MEMORIES))
+        assertNull(vm.state.value.requestedTab)
+        val tabs = TripTabs.resolve(Phase.MEMORIES, vm.state.value.requestedTab, TripTab.entries.toSet())
+        assertEquals(TripTab.Recap, tabs.selected)
+    }
+
+    @Test
+    fun `an edit that keeps the phase keeps the requested tab`() {
+        trips.getResult = AppResult.Success(trip(Phase.READY))
+        givenPlan()
+        val vm = vm()
+        vm.onEvent(TripEvent.SelectTab(TripTab.Money))
+        trips.updateResult = AppResult.Success(trip(Phase.READY).copy(title = "Renamed"))
+        vm.onEvent(TripEvent.SetPhase(Phase.READY))
+        assertEquals(TripTab.Money, vm.state.value.requestedTab)
+    }
 }

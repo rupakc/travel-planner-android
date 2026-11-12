@@ -14,6 +14,7 @@ import io.github.rupakc.travelplanner.core.data.repository.RecapRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.plan.computePlanCost
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
+import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.Recap
 import io.github.rupakc.travelplanner.feature.trips.trip.TripViewModel
 import javax.inject.Inject
@@ -45,6 +46,9 @@ data class RecapUiState(
 sealed interface RecapEvent {
     data object Retry : RecapEvent
 
+    /** The trip is in [phase] now: the first call records it, a later change reloads the recap. */
+    data class PhaseShown(val phase: Phase?) : RecapEvent
+
     data object Complete : RecapEvent
 
     data object DismissFailure : RecapEvent
@@ -71,6 +75,8 @@ class RecapViewModel
         private val _state = MutableStateFlow(RecapUiState())
         val state: StateFlow<RecapUiState> = _state.asStateFlow()
         private var viewReported = false
+        private var phase: Phase? = null
+        private var phaseKnown = false
 
         init {
             load()
@@ -79,11 +85,19 @@ class RecapViewModel
         fun onEvent(event: RecapEvent) {
             when (event) {
                 RecapEvent.Retry -> load()
+                is RecapEvent.PhaseShown -> phaseShown(event.phase)
                 RecapEvent.Complete -> complete()
                 RecapEvent.DismissFailure -> _state.update { it.copy(completeFailure = null) }
                 RecapEvent.Shared -> action("share")
                 RecapEvent.WhereNext -> action("where_next")
             }
+        }
+
+        private fun phaseShown(next: Phase?) {
+            val changed = phaseKnown && next != phase
+            phase = next
+            phaseKnown = true
+            if (changed) load()
         }
 
         private fun action(name: String) = telemetry.emit(TelemetryEvents.RECAP_ACTION, mapOf("action" to name))
