@@ -198,6 +198,7 @@ class FakeOutbox : Outbox {
     val queued = MutableStateFlow<List<OutboxRequest>>(emptyList())
     var enqueueResult: AppResult<Unit> = AppResult.Success(Unit)
     var flushes = 0
+    override val dropNotices: Flow<Int> = kotlinx.coroutines.flow.emptyFlow()
 
     override suspend fun enqueue(request: OutboxRequest): AppResult<Unit> {
         if (enqueueResult is AppResult.Success) queued.value = queued.value.filterNot { it.key == request.key } + request

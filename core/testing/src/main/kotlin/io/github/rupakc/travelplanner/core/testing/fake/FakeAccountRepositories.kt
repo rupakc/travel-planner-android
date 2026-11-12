@@ -166,9 +166,15 @@ class FakeGameEvents : GameEvents {
     private val flow = MutableSharedFlow<GameDelta>(replay = 16, extraBufferCapacity = 16)
     override val deltas: Flow<GameDelta> = flow
     val published = mutableListOf<GameDelta>()
+    private val shown = kotlinx.coroutines.flow.MutableStateFlow(true)
+    override val visible: kotlinx.coroutines.flow.StateFlow<Boolean> = shown
+
+    override fun setVisible(value: Boolean) {
+        shown.value = value
+    }
 
     override fun publish(delta: GameDelta?) {
-        if (delta == null || delta.isEmpty) return
+        if (delta == null || delta.isEmpty || !shown.value) return
         published += delta
         flow.tryEmit(delta)
     }

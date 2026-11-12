@@ -15,7 +15,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -30,17 +33,20 @@ class GameEventsImpl
     constructor(private val telemetry: Telemetry) : GameEvents {
         private val flow = MutableSharedFlow<GameDelta>(extraBufferCapacity = BUFFER)
 
-        @Volatile private var visible = true
+        private val shown = MutableStateFlow(false)
 
         override val deltas: Flow<GameDelta> = flow.asSharedFlow()
 
-        /** Called by [GameRepositoryImpl] from what `GET /game/me` says. */
-        fun setVisible(value: Boolean) {
-            visible = value
+        /** Hidden until the user's `hide_game` setting (or `GET /game/me`) says otherwise. */
+        override val visible: StateFlow<Boolean> = shown.asStateFlow()
+
+        /** Called with what `GET /game/me` or `/account/settings` says. */
+        override fun setVisible(value: Boolean) {
+            shown.value = value
         }
 
         override fun publish(delta: GameDelta?) {
-            if (delta == null || delta.isEmpty || !visible) return
+            if (delta == null || delta.isEmpty || !shown.value) return
             delta.awards.forEach { telemetry.emit(TelemetryEvents.GAME_AWARD, mapOf("rule" to it.rule, "points" to it.points)) }
             delta.badges.forEach { telemetry.emit(TelemetryEvents.BADGE_EARNED, mapOf("badge" to it.id)) }
             delta.levelUp?.let { telemetry.emit(TelemetryEvents.LEVEL_UP, mapOf("level" to it.to)) }

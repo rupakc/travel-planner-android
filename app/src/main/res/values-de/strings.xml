@@ -5,6 +5,7 @@
     <string name="nav_settings">Einstellungen</string>
     <string name="nav_global_search">Alles durchsuchen</string>
     <string name="session_expired">Du wurdest abgemeldet. Bitte melde dich erneut an.</string>
+    <string name="outbox_dropped">Einige offline gespeicherte Änderungen konnten nicht synchronisiert werden und wurden verworfen.</string>
     <string name="nav_trips">Reisen</string>
     <string name="nav_explore">Entdecken</string>
     <string name="nav_play">Spielen</string>

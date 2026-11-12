@@ -5,6 +5,7 @@
     <string name="nav_settings">সেটিংস</string>
     <string name="nav_global_search">সব কিছু খুঁজুন</string>
     <string name="session_expired">আপনি সাইন আউট হয়ে গেছেন। অনুগ্রহ করে আবার সাইন ইন করুন।</string>
+    <string name="outbox_dropped">অফলাইনে সংরক্ষিত কিছু পরিবর্তন সিঙ্ক করা যায়নি এবং বাদ দেওয়া হয়েছে।</string>
     <string name="nav_trips">ভ্রমণ</string>
     <string name="nav_explore">খুঁজুন</string>
     <string name="nav_play">খেলুন</string>

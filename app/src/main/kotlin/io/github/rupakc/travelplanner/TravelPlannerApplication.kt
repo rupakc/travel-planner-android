@@ -9,6 +9,7 @@ import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
+import io.github.rupakc.travelplanner.core.data.impl.SessionEndWatcher
 import io.github.rupakc.travelplanner.core.data.telemetry.TelemetryLifecycle
 import io.github.rupakc.travelplanner.core.notifications.NotificationChannels
 import io.github.rupakc.travelplanner.core.notifications.NotificationsInitializer
@@ -34,6 +35,9 @@ class TravelPlannerApplication :
 
     /** Lazy for the same reason: resolved on [appScope] by [TelemetryProcessObserver], never on the main thread. */
     @Inject lateinit var telemetryLifecycle: dagger.Lazy<TelemetryLifecycle>
+
+    /** Lazy: wipes local user data whenever the server ends the session (revoked / dead refresh token). */
+    @Inject lateinit var sessionEndWatcher: dagger.Lazy<SessionEndWatcher>
 
     @Inject @ApplicationScope
     lateinit var appScope: CoroutineScope
@@ -63,6 +67,7 @@ class TravelPlannerApplication :
         NotificationChannels.createAll(this)
         // Alert poll, trip reminders, nearby worker and FCM registration (all off the main thread).
         appScope.launch { notifications.get().start() }
+        appScope.launch { sessionEndWatcher.get().start() }
         // Telemetry: app_open / app_background follow the process lifecycle. A process started for a worker or a
         // push starts telemetry only when it first comes to the foreground (no config call in the background).
         val telemetryObserver = TelemetryProcessObserver(appScope) { telemetryLifecycle.get() }

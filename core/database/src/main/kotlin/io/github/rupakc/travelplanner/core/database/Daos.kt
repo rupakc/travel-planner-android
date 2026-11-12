@@ -205,6 +205,10 @@ interface OutboxDao {
     @Query("SELECT COUNT(*) FROM outbox")
     suspend fun countAll(): Int
 
+    /** Only the queued offline-pack snapshot uploads (`snapshot:<tripId>`); expenses and journal writes stay. */
+    @Query("DELETE FROM outbox WHERE userId = :userId AND `key` LIKE 'snapshot:%'")
+    suspend fun deleteSnapshotsFor(userId: String)
+
     @Query("DELETE FROM outbox WHERE userId = :userId")
     suspend fun deleteAllFor(userId: String)
 

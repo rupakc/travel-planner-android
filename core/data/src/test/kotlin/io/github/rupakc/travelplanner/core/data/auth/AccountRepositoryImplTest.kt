@@ -4,6 +4,7 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.impl.AccountRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
+import io.github.rupakc.travelplanner.core.model.auth.AccountSettings
 import io.github.rupakc.travelplanner.core.model.auth.DeleteAccountRequest
 import io.github.rupakc.travelplanner.core.model.auth.SessionInfo
 import io.github.rupakc.travelplanner.core.model.auth.SessionsList
@@ -88,11 +89,24 @@ class AccountRepositoryImplTest {
             assertEquals(null, store.current())
         }
 
+    @Test fun `settings and patched settings drive the game visibility`() =
+        runTest(timeout = 30.seconds) {
+            val events = FakeGameEvents()
+            val r = AccountRepositoryImpl(api, store, cleaner, auth, events)
+            coEvery { api.settings() } returns AccountSettings(hideGame = true)
+            r.settings()
+            assertTrue(!events.visible.value)
+            coEvery { api.patchSettings(any()) } returns AccountSettings(hideGame = false)
+            r.patchSettings(kotlinx.serialization.json.JsonObject(emptyMap()))
+            assertTrue(events.visible.value)
+        }
+
     @Test fun `logout everywhere signs out locally after the call`() =
         runTest(timeout = 30.seconds) {
             coEvery { api.logoutAll() } returns Unit
             repo.logoutAll()
-            coVerify { api.logoutAll() }
-            assertEquals(1, auth.logoutCalls)
+            // Delegates to the auth repository, which unregisters the device first; a plain logout() would 401 on it.
+            assertEquals(1, auth.logoutAllCalls)
+            assertEquals(0, auth.logoutCalls)
         }
 }

@@ -5,6 +5,7 @@
     <string name="nav_settings">设置</string>
     <string name="nav_global_search">搜索全部</string>
     <string name="session_expired">你已退出登录，请重新登录。</string>
+    <string name="outbox_dropped">部分离线保存的更改无法同步，已被丢弃。</string>
     <string name="nav_trips">行程</string>
     <string name="nav_explore">探索</string>
     <string name="nav_play">游戏</string>

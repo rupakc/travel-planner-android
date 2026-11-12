@@ -8,6 +8,7 @@
     <string name="nav_settings">Ajustes</string>
     <string name="nav_global_search">Buscar en todo</string>
     <string name="session_expired">Se cerró tu sesión. Vuelve a iniciar sesión.</string>
+    <string name="outbox_dropped">Algunos cambios guardados sin conexión no se pudieron sincronizar y se descartaron.</string>
     <string name="nav_trips">Viajes</string>
     <string name="nav_explore">Explorar</string>
     <string name="nav_play">Jugar</string>

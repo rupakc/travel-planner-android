@@ -21,6 +21,7 @@ import io.github.rupakc.travelplanner.core.model.game.GameDelta
 import io.github.rupakc.travelplanner.core.model.game.GameMe
 import java.io.File
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.JsonObject
 
 /** The signed-in account (Accounts-API "Account"). Every call needs `features.accounts`. */
@@ -109,6 +110,12 @@ interface GameRepository {
 /** Where every repository forwards a response's `game` delta; the UI host in `core:ui` collects it. */
 interface GameEvents {
     val deltas: Flow<GameDelta>
+
+    /** True once the game is known to be on for the signed-in user; false (the default) hides every celebration. */
+    val visible: StateFlow<Boolean>
+
+    /** Records what `hide_game` / `GET /game/me` say; nothing is published or counted in telemetry while false. */
+    fun setVisible(value: Boolean)
 
     /** Ignores null and empty deltas. */
     fun publish(delta: GameDelta?)

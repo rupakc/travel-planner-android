@@ -5,7 +5,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.AccountRepository
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
+import io.github.rupakc.travelplanner.core.data.repository.GameEvents
+import io.github.rupakc.travelplanner.core.data.repository.OfflinePackRepository
 import io.github.rupakc.travelplanner.core.data.repository.ProfileRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.data.repository.TripsRepository
@@ -36,8 +39,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -54,6 +61,8 @@ data class MainUiState(
     val flags: JourneyFlags = JourneyFlags.OFF,
     val startRoute: StartRoute = StartRoute.Classic,
     val hold: Boolean = false,
+    /** The signed-in user's game is on (not hidden by `hide_game`); false until known. */
+    val gameVisible: Boolean = false,
 )
 
 /** The shell's view of [MainUiState]: tabs, start screen, celebrations and the Offline tab. */
@@ -66,7 +75,7 @@ fun MainUiState.shellMode(): ShellMode =
                 StartRoute.Trips -> TripsRoute
                 StartRoute.Explore -> SearchRoute()
             },
-        gameEnabled = flags.game,
+        gameEnabled = flags.game && gameVisible,
         offlinePack = flags.offlinePack,
     )
 
@@ -93,6 +102,9 @@ class MainViewModel
         private val configApi: ClientConfigApi,
         private val tripsRepository: TripsRepository,
         private val flagsCache: JourneyFlagsCache,
+        private val accountRepository: AccountRepository,
+        private val offlinePackRepository: OfflinePackRepository,
+        private val gameEvents: GameEvents,
     ) : ViewModel() {
         /** Null until `GET /api/config` answered (or a cached answer exists). */
         private val flags = MutableStateFlow(flagsCache.read())
@@ -102,6 +114,16 @@ class MainViewModel
         private val tripCountKnown = MutableStateFlow(false)
         private val waitOver = MutableStateFlow(false)
 
+        /** Set only from a fresh `GET /api/config` answer (200 or 404), never from the cache. */
+        private val freshFlags = MutableStateFlow<JourneyFlags?>(null)
+
+        private data class Extras(val count: Int?, val countKnown: Boolean, val over: Boolean, val gameVisible: Boolean)
+
+        private val extras = combine(tripCount, tripCountKnown, waitOver, gameEvents.visible, ::Extras)
+
+        /** The signed-in user's key; null when signed out. Per-user work restarts when it changes. */
+        private val userKeys = authRepository.session.map { s -> s?.let { it.userId ?: it.user.username } }.distinctUntilChanged()
+
         private val base =
             combine(
                 authRepository.session,
@@ -110,13 +132,13 @@ class MainViewModel
             ) { session, profile, settings -> Triple(session, gateFor(session, profile), settings) }
 
         val state: StateFlow<MainUiState> =
-            combine(base, flags, tripCount, tripCountKnown, waitOver) { (session, gate, settings), f, count, countKnown, over ->
+            combine(base, flags, extras) { (session, gate, settings), f, (count, countKnown, over, gameVisible) ->
                 val resolved = f ?: JourneyFlags.OFF
                 val signedIn = session != null
                 val hold =
                     gate != AuthGate.LOADING &&
                         StartGate.hold(f != null, resolved, signedIn && gate == AuthGate.READY, countKnown, if (over) StartGate.MAX_WAIT_MS else 0L)
-                MainUiState(gate, settings, resolved, resolveStartRoute(resolved, signedIn, count), hold)
+                MainUiState(gate, settings, resolved, resolveStartRoute(resolved, signedIn, count), hold, gameVisible)
             }.stateIn(viewModelScope, SharingStarted.Eagerly, MainUiState())
 
         init {
@@ -127,13 +149,37 @@ class MainViewModel
                 delay(StartGate.MAX_WAIT_MS)
                 waitOver.value = true
             }
+            // The home rule needs the trip count once per signed-in user, when the journey UI is on.
             viewModelScope.launch {
-                // The home rule needs the trip count once: when signed in and the journey UI is on.
-                state.first { it.gate == AuthGate.READY && it.flags.journey && it.flags.trips }
-                val result = tripsRepository.list(LocalDate.now().toString())
-                tripCount.value = (result as? AppResult.Success)?.value?.trips?.size
-                tripCountKnown.value = true
+                userKeys.collectLatest { key ->
+                    tripCountKnown.value = false
+                    tripCount.value = null
+                    if (key == null) return@collectLatest
+                    state.first { it.gate == AuthGate.READY && it.flags.journey && it.flags.trips }
+                    val result = tripsRepository.list(LocalDate.now().toString())
+                    tripCount.value = (result as? AppResult.Success)?.value?.trips?.size
+                    tripCountKnown.value = true
+                }
             }
+            // `hide_game` decides whether celebrations show: hidden until known, reset whenever the user changes.
+            viewModelScope.launch {
+                combine(userKeys, flags) { key, f -> Triple(key, f?.game == true, f?.accounts == true) }
+                    .distinctUntilChanged()
+                    .collectLatest { (key, game, accounts) -> applyGameVisibility(key, game, accounts) }
+            }
+            // The server says offline packs are off: drop the packs and queued snapshot uploads (not expenses or journal).
+            viewModelScope.launch {
+                combine(userKeys, freshFlags.filterNotNull()) { key, f -> key to f.offlinePack }
+                    .distinctUntilChanged()
+                    .collect { (key, on) -> if (key != null && !on) offlinePackRepository.purgeAll() }
+            }
+        }
+
+        private suspend fun applyGameVisibility(key: String?, game: Boolean, accounts: Boolean) {
+            gameEvents.setVisible(false)
+            if (key == null || !game) return
+            // Without accounts there is no `hide_game` setting to read; with them, settings() updates the visibility.
+            if (accounts) accountRepository.settings() else gameEvents.setVisible(true)
         }
 
         /** `GET /api/config`; null when it could not be read (offline, older backend without it keeps every flag off). */
@@ -142,9 +188,9 @@ class MainViewModel
             try {
                 val response = configApi.config()
                 if (response.isSuccessful) {
-                    JourneyFlags(response.body()).also(flagsCache::write)
+                    JourneyFlags(response.body()).also { flagsCache.write(it) }.also { freshFlags.value = it }
                 } else if (response.code() == HTTP_NOT_FOUND) {
-                    JourneyFlags.OFF.also(flagsCache::write)
+                    JourneyFlags.OFF.also { flagsCache.write(it) }.also { freshFlags.value = it }
                 } else {
                     null
                 }

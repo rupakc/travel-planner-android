@@ -124,10 +124,23 @@ class AuthRepositoryImpl
         private fun deviceName(): String? = Build.MODEL?.trim()?.take(MAX_DEVICE_NAME)?.ifEmpty { null }
 
         override suspend fun logoutAll(): AppResult<Unit> {
+            // Unregister this device first: once logout-all succeeds the token is dead and devices/unregister would 401.
+            val push = pushTokenSource.orElse(null)
+            unregisterDevice(push)
             val result = apiCall { accountApi.logoutAll() }
             // The token is dead after a successful call; on failure the user stays signed in so they can retry.
-            if (result is AppResult.Success) endSession()
+            if (result is AppResult.Success) {
+                if (push != null) withTimeoutOrNull(DELETE_TOKEN_TIMEOUT_MS) { push.delete() }
+                endSession()
+            }
             return result
+        }
+
+        private suspend fun unregisterDevice(push: PushTokenSource?) {
+            withTimeoutOrNull(UNREGISTER_TIMEOUT_MS) {
+                val token = push?.token()
+                if (token != null) apiCall { devicesApi.unregister(UnregisterDeviceRequest(token)) }
+            }
         }
 
         private suspend fun endSession() {
@@ -139,10 +152,7 @@ class AuthRepositoryImpl
             val refreshToken = sessionStore.current()?.refreshToken
             // Best effort and bounded: a dead network must not keep the user signed in.
             val push = pushTokenSource.orElse(null)
-            withTimeoutOrNull(UNREGISTER_TIMEOUT_MS) {
-                val token = push?.token()
-                if (token != null) apiCall { devicesApi.unregister(UnregisterDeviceRequest(token)) }
-            }
+            unregisterDevice(push)
             // Revoke this device's refresh family (best effort, bounded) before the token is forgotten.
             if (refreshToken != null) withTimeoutOrNull(LOGOUT_TIMEOUT_MS) { apiCall { accountApi.logout(LogoutRequest(refreshToken)) } }
             // Even if the unregister never arrived, a deleted token is pruned by the server on its next send,

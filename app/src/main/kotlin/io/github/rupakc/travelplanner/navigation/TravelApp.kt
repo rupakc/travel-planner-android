@@ -223,6 +223,10 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
     LaunchedEffect(shellViewModel) {
         shellViewModel.sessionExpired.collect { snackbarHostState.showSnackbar(expiredMessage) }
     }
+    val droppedMessage = stringResource(R.string.outbox_dropped)
+    LaunchedEffect(shellViewModel) {
+        shellViewModel.droppedWrites.collect { snackbarHostState.showSnackbar(droppedMessage) }
+    }
 
     // Auth gate: re-checked whenever the gate or the destination changes (also after Back from a deep link).
     LaunchedEffect(gate, destination?.id) {

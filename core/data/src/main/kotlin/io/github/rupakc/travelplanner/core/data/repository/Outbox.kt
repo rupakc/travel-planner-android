@@ -14,7 +14,7 @@ data class OutboxRequest(
     val key: String,
 )
 
-/** What one flush did: [sent] (2xx or 409), [failed] (kept for a later try), [dropped] (permanent 4xx). */
+/** What one flush did: [sent] (2xx only), [failed] (kept for a later try), [dropped] (permanent 4xx, 409 included). */
 data class FlushResult(val sent: Int = 0, val failed: Int = 0, val dropped: Int = 0)
 
 /**
@@ -27,6 +27,9 @@ interface Outbox {
 
     /** Keys still waiting for the signed-in user (drives "waiting to sync" markers); empty when signed out. */
     fun pendingKeys(): Flow<Set<String>>
+
+    /** Emits the number of queued writes a flush dropped because the server rejected them for good (the shell shows a notice). */
+    val dropNotices: Flow<Int>
 
     /**
      * Sends the waiting requests of [userId] (default: the signed-in user) in order. Single-flight per user: a

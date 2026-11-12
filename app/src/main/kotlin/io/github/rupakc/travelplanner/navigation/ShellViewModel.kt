@@ -3,6 +3,7 @@ package io.github.rupakc.travelplanner.navigation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.rupakc.travelplanner.core.data.repository.Outbox
 import io.github.rupakc.travelplanner.core.network.AuthEvent
 import io.github.rupakc.travelplanner.core.network.AuthEvents
 import javax.inject.Inject
@@ -17,11 +18,15 @@ class ShellViewModel
     @Inject
     constructor(
         authEvents: AuthEvents,
+        outbox: Outbox,
         private val savedState: SavedStateHandle,
     ) : ViewModel(),
         PendingDeepLinks {
         /** Emits when a 401 cleared the session (shown as a snackbar). */
         val sessionExpired: Flow<AuthEvent> = authEvents.flow
+
+        /** Emits when queued offline writes were rejected for good and dropped (shown as a snackbar). */
+        val droppedWrites: Flow<Int> = outbox.dropNotices
 
         /**
          * Keeps the deep link (`travelplanner://…`) the gate redirected away from (e.g. a trip-reminder tap
