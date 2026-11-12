@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nearby_here">I’m here</string>
+    <string name="nearby_here_a11y">I’m here: %1$s</string>
+    <string name="nearby_here_done">Saved as visited</string>
+    <string name="nearby_here_pick_title">Add this place to a trip</string>
+    <string name="nearby_here_failed">Couldn’t save this place. Try again.</string>
+    <string name="nearby_here_cancel">Cancel</string>
+</resources>

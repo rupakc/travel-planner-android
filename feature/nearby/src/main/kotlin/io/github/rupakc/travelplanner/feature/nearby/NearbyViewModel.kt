@@ -4,13 +4,19 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.JournalRepository
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.data.repository.TripsRepository
+import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
+import io.github.rupakc.travelplanner.core.domain.journey.PlaceKey
 import io.github.rupakc.travelplanner.core.domain.live.LiveErrorCodes
 import io.github.rupakc.travelplanner.core.domain.live.LiveFailure
 import io.github.rupakc.travelplanner.core.domain.live.safeWebUri
 import io.github.rupakc.travelplanner.core.domain.live.toLiveError
+import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
 import io.github.rupakc.travelplanner.core.model.grounding.GroundingSource
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyPlace
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyRequest
@@ -61,6 +67,14 @@ data class NearbyUiState(
     /** "Google Maps", shown as sent. */
     val attribution: String? = null,
     val sources: List<GroundingSource> = emptyList(),
+    /** Trips an "I'm here" can go on (empty = the action is hidden). */
+    val hereTrips: List<HereTrip> = emptyList(),
+    /** Card key waiting for the user to pick a trip. */
+    val pickingFor: String? = null,
+    /** Card keys already recorded as visited. */
+    val markedKeys: Set<String> = emptySet(),
+    /** Last "I'm here" attempt failed (shown once as a message). */
+    val hereFailed: Boolean = false,
 ) {
     val isEmpty: Boolean get() = sections.all { it.cards.isEmpty() }
 }
@@ -70,6 +84,15 @@ sealed interface NearbyEvent {
     data class PermissionResult(val granted: Boolean) : NearbyEvent
 
     data object Refresh : NearbyEvent
+
+    /** "I'm here" on the card with this key. */
+    data class ImHere(val cardKey: String) : NearbyEvent
+
+    data class PickTrip(val tripId: Long) : NearbyEvent
+
+    data object DismissPicker : NearbyEvent
+
+    data object HereMessageShown : NearbyEvent
 }
 
 /**
@@ -83,7 +106,13 @@ class NearbyViewModel
         private val location: LocationClient,
         private val nearby: NearbyRepository,
         private val settings: SettingsRepository,
+        private val trips: TripsRepository,
+        private val journal: JournalRepository,
+        private val telemetry: Telemetry,
+        private val clock: AppClock,
     ) : ViewModel() {
+        private var tripList: List<io.github.rupakc.travelplanner.core.model.trips.Trip> = emptyList()
+        private var lastFix: LocationFix.Found? = null
         private val mutable = MutableStateFlow(NearbyUiState(phase = if (location.hasPermission()) NearbyPhase.Locating else NearbyPhase.NeedsPermission))
         val state: StateFlow<NearbyUiState> = mutable.asStateFlow()
         private var job: Job? = null
@@ -96,7 +125,46 @@ class NearbyViewModel
             when (event) {
                 is NearbyEvent.PermissionResult -> if (event.granted) load() else mutable.update { it.copy(phase = NearbyPhase.Denied) }
                 NearbyEvent.Refresh -> if (location.hasPermission()) load() else mutable.update { it.copy(phase = NearbyPhase.NeedsPermission) }
+                is NearbyEvent.ImHere -> imHere(event.cardKey)
+                is NearbyEvent.PickTrip -> mutable.value.pickingFor?.let { key -> record(key, event.tripId) }
+                NearbyEvent.DismissPicker -> mutable.update { it.copy(pickingFor = null) }
+                NearbyEvent.HereMessageShown -> mutable.update { it.copy(hereFailed = false) }
             }
+        }
+
+        private fun cardOf(key: String): NearbyCard? = mutable.value.sections.flatMap { it.cards }.firstOrNull { it.key == key }
+
+        private fun imHere(key: String) {
+            val card = cardOf(key) ?: return
+            if (!ImHere.available(card, mutable.value.hereTrips) || key in mutable.value.markedKeys) return
+            val auto = ImHere.autoTrip(tripList)
+            if (auto != null) record(key, auto.id) else mutable.update { it.copy(pickingFor = key) }
+        }
+
+        private fun record(key: String, tripId: Long) {
+            val card = cardOf(key) ?: return
+            mutable.update { it.copy(pickingFor = null) }
+            viewModelScope.launch {
+                val request = ImHere.request(card, clock.today().toString(), lastFix?.lat, lastFix?.lng)
+                when (journal.putPlace(tripId, PlaceKey.of(ImHere.KIND, request.name), request)) {
+                    is AppResult.Success -> {
+                        telemetry.emit(TelemetryEvents.PLACE_ACTION, mapOf("action" to "visited", "kind" to ImHere.KIND))
+                        mutable.update { it.copy(markedKeys = it.markedKeys + key) }
+                    }
+
+                    is AppResult.Failure -> {
+                        mutable.update { it.copy(hereFailed = true) }
+                    }
+                }
+            }
+        }
+
+        /** Best effort: a failure (old backend, offline, signed out) just leaves the action hidden. */
+        private suspend fun loadTrips() {
+            val list = (trips.list(clock.today().toString()) as? AppResult.Success)?.value?.trips.orEmpty()
+            tripList = list
+            val choices = ImHere.pickable(list)
+            mutable.update { it.copy(hereTrips = choices) }
         }
 
         private fun load() {
@@ -111,6 +179,7 @@ class NearbyViewModel
                             LocationFix.Off -> return@launch mutable.update { it.copy(phase = NearbyPhase.LocationOff) }
                             LocationFix.Unavailable -> return@launch mutable.update { it.copy(phase = NearbyPhase.NoFix) }
                         }
+                    lastFix = fix
                     // Remembered as a ~5 km cell to gate the background invitation, only while it is turned on.
                     if (settings.settings.first().nearbyNotifications) nearby.rememberLocation(fix.lat, fix.lng)
                     mutable.update { it.copy(phase = NearbyPhase.Loading) }
@@ -126,6 +195,7 @@ class NearbyViewModel
                                     sources = r.sources.filter { s -> safeWebUri(s.uri) != null },
                                 )
                             }
+                            loadTrips()
                         }
 
                         is AppResult.Failure -> {

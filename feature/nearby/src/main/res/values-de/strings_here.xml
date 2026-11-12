@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nearby_here">Ich bin hier</string>
+    <string name="nearby_here_a11y">Ich bin hier: %1$s</string>
+    <string name="nearby_here_done">Als besucht gespeichert</string>
+    <string name="nearby_here_pick_title">Diesen Ort zu einer Reise hinzufügen</string>
+    <string name="nearby_here_failed">Der Ort konnte nicht gespeichert werden. Versuch es erneut.</string>
+    <string name="nearby_here_cancel">Abbrechen</string>
+</resources>
