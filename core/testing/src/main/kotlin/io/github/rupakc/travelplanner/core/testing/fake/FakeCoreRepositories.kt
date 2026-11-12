@@ -59,6 +59,7 @@ class FakeAuthRepository(initial: Session? = null) : AuthRepository {
     var refreshResult: AppResult<User> = AppResult.Success(TestUser)
     var emailResult: AppResult<String?> = AppResult.Success(null)
     var logoutCalls = 0
+    var logoutAllResult: AppResult<Unit> = AppResult.Success(Unit)
 
     override suspend fun login(username: String, password: String): AppResult<User> =
         loginResult.also { if (it is AppResult.Success) sessionFlow.value = Session("token", it.value) }
@@ -79,6 +80,9 @@ class FakeAuthRepository(initial: Session? = null) : AuthRepository {
         logoutCalls++
         sessionFlow.value = null
     }
+
+    override suspend fun logoutAll(): AppResult<Unit> =
+        logoutAllResult.also { if (it is AppResult.Success) sessionFlow.value = null }
 }
 
 /**
