@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
@@ -30,12 +31,23 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 
 /** The You tab (journey on): account, saved plans and settings, which the classic shell reaches from the top bar / My trips. */
 @Composable
-fun YouScreen(onOpenAccount: () -> Unit, onOpenSavedPlans: () -> Unit, onOpenSettings: () -> Unit, modifier: Modifier = Modifier) {
+fun YouScreen(
+    onOpenAccount: () -> Unit,
+    onOpenSavedPlans: () -> Unit,
+    onOpenSettings: () -> Unit,
+    modifier: Modifier = Modifier,
+    onOpenShares: (() -> Unit)? = null,
+) {
     Column(modifier.fillMaxWidth()) {
         YouRow(Icons.Filled.AccountCircle, R.string.you_account, onOpenAccount)
         HorizontalDivider()
         YouRow(Icons.AutoMirrored.Filled.List, R.string.you_saved_plans, onOpenSavedPlans)
         HorizontalDivider()
+        // Share links 2.0 (`features.sharing`): without the flag there is nothing to manage.
+        if (onOpenShares != null) {
+            YouRow(Icons.Filled.Share, R.string.you_my_shares, onOpenShares)
+            HorizontalDivider()
+        }
         YouRow(Icons.Filled.Settings, R.string.nav_settings, onOpenSettings)
     }
 }
