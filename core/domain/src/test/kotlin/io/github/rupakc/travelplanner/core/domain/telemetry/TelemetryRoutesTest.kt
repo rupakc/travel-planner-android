@@ -17,6 +17,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.JournalRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MyPlanRoute
+import io.github.rupakc.travelplanner.core.model.navigation.MySharesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationSettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationsRoute
@@ -79,6 +80,7 @@ class TelemetryRoutesTest {
             is NearbyRoute -> NearbyRoute::class
             is ShareRoute -> ShareRoute::class
             is ShareCreateRoute -> ShareCreateRoute::class
+            is MySharesRoute -> MySharesRoute::class
             is CheckEmailRoute -> CheckEmailRoute::class
             is VerifyEmailRoute -> VerifyEmailRoute::class
             is ResetPasswordRoute -> ResetPasswordRoute::class
@@ -127,6 +129,7 @@ class TelemetryRoutesTest {
                 NearbyRoute,
                 ShareRoute("t"),
                 ShareCreateRoute("plan", 1),
+                MySharesRoute,
                 SignUpRoute,
                 CheckEmailRoute("a@b.c"),
                 VerifyEmailRoute(),
@@ -146,9 +149,10 @@ class TelemetryRoutesTest {
                 YouRoute,
             ).map(::classOf)
         val table = TelemetryRoutes.table
-        assertEquals(43, all.toSet().size)
-        assertEquals(43, table.size)
-        assertEquals(43, table.map { it.first }.toSet().size)
+        // Counted from the mapping itself, so parallel branches adding routes do not collide on a number.
+        assertEquals(all.size, all.toSet().size)
+        assertEquals(all.size, table.size)
+        assertEquals(all.size, table.map { it.first }.toSet().size)
         assertEquals(all.toSet(), table.map { it.first }.toSet())
         table.forEach { assertTrue(it.second, TelemetryProps.isToken(it.second)) }
         assertTrue(TelemetryProps.isToken(TelemetryRoutes.OTHER))

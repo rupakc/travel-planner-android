@@ -66,7 +66,7 @@ Alerts 2.0 events sent from the inbox (`NotificationsViewModel`, constants local
 ## Price alerts 2.0 events
 
 `alert_quick_watch` (`kind`, `action` add/undo/exists/blocked, `surface` results/chat/trip/suggest), `alert_suggest` (`action` shown/accepted/dismissed, `count`) and `alert_prefs_change` (`field` digest/quiet_hours/instant/cap/group) are emitted by `QuickWatcher` and the alert preference and suggestion view models (`core:domain` `AlertTelemetry`). Values are closed enums; no titles, prices, ids or times leave the device. The screen `/alerts/preferences` is the template for `AlertPrefsRoute`.
-Share links 2.0 events from the share dialog (`ShareCreateViewModel`, web names and enums): `share_open` (`kind`), `share_create` (`kind`, `dates`), `share_action` (`kind`, `target`: `native` or `copy` on Android) and `share_revoke` (`kind`). No tokens, urls, ids or names. `share_view` is reserved for the share viewer.
+Share links 2.0 events from the share dialog (`ShareCreateViewModel`, web names and enums): `share_open` (`kind`), `share_create` (`kind`, `dates`), `share_action` (`kind`, `target`: `native` or `copy` on Android) and `share_revoke` (`kind`). No tokens, urls, ids or names. `share_view` is reserved for the share viewer. "My shares" (`MySharesViewModel`, screen `/you/shares`) sends `share_action` (`native` or `copy`) and `share_revoke` with the same enums; rows of an unknown kind send nothing.
 
 ## Follow-ups
 

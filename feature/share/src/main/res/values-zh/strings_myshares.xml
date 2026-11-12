@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="myshares_title">我的分享</string>
+    <string name="myshares_empty_title">还没有分享链接</string>
+    <string name="myshares_empty_body">你用“分享”创建的链接会显示在这里，可以复制、再次分享或停止分享。</string>
+    <string name="myshares_revoke_note">删除的链接几分钟内失效。聊天应用已保存的链接预览可能保留更久。</string>
+    <string name="myshares_legacy_title">旧版计划链接</string>
+    <string name="myshares_legacy_body">这些链接创建于链接选项出现之前，显示计划保存时的样子。</string>
+    <string name="myshares_share">分享…</string>
+    <string name="myshares_copy">复制链接</string>
+    <string name="myshares_revoke">停止分享</string>
+    <string name="myshares_confirm_title">停止分享？</string>
+    <string name="myshares_confirm_body">任何持有该链接的人都将无法访问。</string>
+    <string name="myshares_confirm_yes">是，停止分享</string>
+    <string name="myshares_confirm_no">保留</string>
+    <string name="myshares_kind_plan">计划</string>
+    <string name="myshares_kind_recap">旅行回顾</string>
+    <string name="myshares_kind_savings">降价记录</string>
+    <string name="myshares_kind_other">分享链接</string>
+    <string name="myshares_opt_origin">显示出发地</string>
+    <string name="myshares_opt_name">显示我的名字</string>
+    <string name="myshares_created">创建于 %1$s</string>
+    <string name="myshares_offline">你已离线。请联网后加载你的分享。</string>
+    <string name="myshares_error_load">无法加载你的分享。</string>
+</resources>

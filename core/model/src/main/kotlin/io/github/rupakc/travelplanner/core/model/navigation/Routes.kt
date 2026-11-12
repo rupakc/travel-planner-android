@@ -102,6 +102,9 @@ sealed interface AppRoute
  */
 @Serializable data class ShareCreateRoute(val kind: String, val planId: Long? = null) : AppRoute
 
+/** The caller's own share links (Share links 2.0 "My shares"): list, copy, share again, revoke. Reached from the You tab. */
+@Serializable data object MySharesRoute : AppRoute
+
 /** Search form modes (web segmented toggle + "Surprise me"). */
 object SearchModes {
     const val KNOWN = "known"

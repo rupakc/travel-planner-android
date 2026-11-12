@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="myshares_title">My shares</string>
+    <string name="myshares_empty_title">No shared links yet</string>
+    <string name="myshares_empty_body">Links you create with Share appear here, so you can copy, share again or stop sharing them.</string>
+    <string name="myshares_revoke_note">A removed link stops working within minutes. Link previews that chat apps already saved can last longer.</string>
+    <string name="myshares_legacy_title">Older plan links</string>
+    <string name="myshares_legacy_body">These links were made before link options existed. They show the plan as it was saved.</string>
+    <string name="myshares_share">Share…</string>
+    <string name="myshares_copy">Copy link</string>
+    <string name="myshares_revoke">Stop sharing</string>
+    <string name="myshares_confirm_title">Stop sharing?</string>
+    <string name="myshares_confirm_body">Anyone with the link will lose access.</string>
+    <string name="myshares_confirm_yes">Yes, stop sharing</string>
+    <string name="myshares_confirm_no">Keep</string>
+    <string name="myshares_kind_plan">Plan</string>
+    <string name="myshares_kind_recap">Trip recap</string>
+    <string name="myshares_kind_savings">Price catches</string>
+    <string name="myshares_kind_other">Shared link</string>
+    <string name="myshares_opt_origin">Shows origin</string>
+    <string name="myshares_opt_name">Shows my name</string>
+    <string name="myshares_created">Created %1$s</string>
+    <string name="myshares_offline">You\'re offline. Connect to load your shares.</string>
+    <string name="myshares_error_load">Could not load your shares.</string>
+</resources>

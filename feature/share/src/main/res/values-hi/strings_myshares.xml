@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="myshares_title">मेरे शेयर</string>
+    <string name="myshares_empty_title">अभी कोई साझा लिंक नहीं</string>
+    <string name="myshares_empty_body">साझा करें से बनाए गए लिंक यहाँ दिखते हैं, ताकि आप उन्हें कॉपी कर सकें, फिर से साझा कर सकें या साझा करना बंद कर सकें।</string>
+    <string name="myshares_revoke_note">हटाया गया लिंक कुछ ही मिनटों में काम करना बंद कर देता है। चैट ऐप्स में पहले से सहेजे गए प्रीव्यू ज़्यादा समय तक रह सकते हैं।</string>
+    <string name="myshares_legacy_title">पुराने प्लान लिंक</string>
+    <string name="myshares_legacy_body">ये लिंक लिंक विकल्पों से पहले बने थे। ये प्लान को वैसा ही दिखाते हैं जैसा वह सहेजा गया था।</string>
+    <string name="myshares_share">साझा करें…</string>
+    <string name="myshares_copy">लिंक कॉपी करें</string>
+    <string name="myshares_revoke">साझा करना बंद करें</string>
+    <string name="myshares_confirm_title">साझा करना बंद करें?</string>
+    <string name="myshares_confirm_body">लिंक वाले किसी भी व्यक्ति की पहुँच खत्म हो जाएगी।</string>
+    <string name="myshares_confirm_yes">हाँ, बंद करें</string>
+    <string name="myshares_confirm_no">रखें</string>
+    <string name="myshares_kind_plan">प्लान</string>
+    <string name="myshares_kind_recap">यात्रा सारांश</string>
+    <string name="myshares_kind_savings">कीमत में गिरावट</string>
+    <string name="myshares_kind_other">साझा लिंक</string>
+    <string name="myshares_opt_origin">शुरुआत की जगह दिखाता है</string>
+    <string name="myshares_opt_name">मेरा नाम दिखाता है</string>
+    <string name="myshares_created">बनाया गया: %1$s</string>
+    <string name="myshares_offline">आप ऑफ़लाइन हैं। अपने लिंक लोड करने के लिए कनेक्ट करें।</string>
+    <string name="myshares_error_load">आपके लिंक लोड नहीं हो सके।</string>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="myshares_title">Mis enlaces</string>
+    <string name="myshares_empty_title">Aún no hay enlaces compartidos</string>
+    <string name="myshares_empty_body">Los enlaces que crees con Compartir aparecen aquí para copiarlos, compartirlos de nuevo o dejar de compartirlos.</string>
+    <string name="myshares_revoke_note">Un enlace eliminado deja de funcionar en pocos minutos. Las vistas previas que las apps de chat ya guardaron pueden durar más.</string>
+    <string name="myshares_legacy_title">Enlaces de planes antiguos</string>
+    <string name="myshares_legacy_body">Estos enlaces se crearon antes de las opciones de enlace. Muestran el plan tal como se guardó.</string>
+    <string name="myshares_share">Compartir…</string>
+    <string name="myshares_copy">Copiar enlace</string>
+    <string name="myshares_revoke">Dejar de compartir</string>
+    <string name="myshares_confirm_title">¿Dejar de compartir?</string>
+    <string name="myshares_confirm_body">Cualquiera con el enlace perderá el acceso.</string>
+    <string name="myshares_confirm_yes">Sí, dejar de compartir</string>
+    <string name="myshares_confirm_no">Mantener</string>
+    <string name="myshares_kind_plan">Plan</string>
+    <string name="myshares_kind_recap">Resumen del viaje</string>
+    <string name="myshares_kind_savings">Bajadas de precio</string>
+    <string name="myshares_kind_other">Enlace compartido</string>
+    <string name="myshares_opt_origin">Muestra el origen</string>
+    <string name="myshares_opt_name">Muestra mi nombre</string>
+    <string name="myshares_created">Creado el %1$s</string>
+    <string name="myshares_offline">Sin conexión. Conéctate para cargar tus enlaces.</string>
+    <string name="myshares_error_load">No se pudieron cargar tus enlaces.</string>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="myshares_title">Mes liens</string>
+    <string name="myshares_empty_title">Aucun lien partagé pour l\'instant</string>
+    <string name="myshares_empty_body">Les liens que vous créez avec Partager apparaissent ici : copiez-les, partagez-les à nouveau ou arrêtez de les partager.</string>
+    <string name="myshares_revoke_note">Un lien supprimé cesse de fonctionner en quelques minutes. Les aperçus déjà enregistrés par les applis de messagerie peuvent durer plus longtemps.</string>
+    <string name="myshares_legacy_title">Anciens liens de plans</string>
+    <string name="myshares_legacy_body">Ces liens ont été créés avant les options de lien. Ils montrent le plan tel qu\'il a été enregistré.</string>
+    <string name="myshares_share">Partager…</string>
+    <string name="myshares_copy">Copier le lien</string>
+    <string name="myshares_revoke">Arrêter le partage</string>
+    <string name="myshares_confirm_title">Arrêter le partage ?</string>
+    <string name="myshares_confirm_body">Toute personne disposant du lien perdra l\'accès.</string>
+    <string name="myshares_confirm_yes">Oui, arrêter</string>
+    <string name="myshares_confirm_no">Garder</string>
+    <string name="myshares_kind_plan">Plan</string>
+    <string name="myshares_kind_recap">Récap du voyage</string>
+    <string name="myshares_kind_savings">Baisses de prix</string>
+    <string name="myshares_kind_other">Lien partagé</string>
+    <string name="myshares_opt_origin">Affiche l\'origine</string>
+    <string name="myshares_opt_name">Affiche mon nom</string>
+    <string name="myshares_created">Créé le %1$s</string>
+    <string name="myshares_offline">Vous êtes hors ligne. Connectez-vous pour charger vos liens.</string>
+    <string name="myshares_error_load">Impossible de charger vos liens.</string>
+</resources>
