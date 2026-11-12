@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Expenses / Money tab (Phase 1/2 T12). Hand-maintained. -->
+    <string name="money_title">Expenses</string>
+    <string name="money_add">Add expense</string>
+    <string name="money_edit_title">Edit expense</string>
+    <string name="money_edit">Edit</string>
+    <string name="money_delete">Delete</string>
+    <string name="money_empty">No expenses yet. Add the first one.</string>
+    <string name="money_no_date">No date</string>
+    <string name="money_totals">Totals</string>
+    <string name="money_no_totals">Nothing spent yet.</string>
+    <string name="money_usd_estimate">Estimate: about USD %1$s</string>
+    <string name="money_unconverted">Not converted: %1$s</string>
+    <string name="money_rate_dated">1 USD = %1$s %2$s (rate from %3$s)</string>
+    <string name="money_rate">1 USD = %1$s %2$s</string>
+    <string name="money_pending_not_counted">Waiting-to-sync expenses are not in the totals yet.</string>
+    <string name="money_waiting_sync">Waiting to sync</string>
+    <string name="money_delete_failed">Couldn\'t delete that expense. It was put back.</string>
+    <string name="money_queue_failed">Couldn\'t save this on the device. Try again.</string>
+    <string name="money_load_failed">Couldn\'t load expenses.</string>
+    <string name="money_cat_flights">Flights</string>
+    <string name="money_cat_lodging">Lodging</string>
+    <string name="money_cat_food">Food</string>
+    <string name="money_cat_transport">Transport</string>
+    <string name="money_cat_activities">Activities</string>
+    <string name="money_cat_shopping">Shopping</string>
+    <string name="money_cat_fees">Fees</string>
+    <string name="money_cat_other">Other</string>
+    <string name="money_err_amount">Enter an amount above 0 that %1$s allows.</string>
+    <string name="money_err_currency">Pick a valid currency.</string>
+    <string name="money_err_category">Pick a category.</string>
+    <string name="money_err_note">Keep the note to 140 characters.</string>
+    <string name="money_err_date">Enter the date as YYYY-MM-DD.</string>
+    <string name="money_err_generic">Couldn\'t save this expense. Try again.</string>
+    <string name="money_err_limit">This trip has reached the limit of 2000 expenses.</string>
+    <string name="money_amount">Amount</string>
+    <string name="money_note">Note (optional)</string>
+    <string name="money_date">Date</string>
+</resources>

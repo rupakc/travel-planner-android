@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Expenses / Money tab (Phase 1/2 T12). Hand-maintained. -->
+    <string name="money_title">开销</string>
+    <string name="money_add">添加开销</string>
+    <string name="money_edit_title">编辑开销</string>
+    <string name="money_edit">编辑</string>
+    <string name="money_delete">删除</string>
+    <string name="money_empty">还没有开销。添加第一笔吧。</string>
+    <string name="money_no_date">无日期</string>
+    <string name="money_totals">合计</string>
+    <string name="money_no_totals">还没有花费。</string>
+    <string name="money_usd_estimate">估算：约 %1$s 美元</string>
+    <string name="money_unconverted">未换算：%1$s</string>
+    <string name="money_rate_dated">1 美元 = %1$s %2$s（%3$s 的汇率）</string>
+    <string name="money_rate">1 美元 = %1$s %2$s</string>
+    <string name="money_pending_not_counted">等待同步的开销暂未计入合计。</string>
+    <string name="money_waiting_sync">等待同步</string>
+    <string name="money_delete_failed">无法删除这笔开销，已恢复显示。</string>
+    <string name="money_queue_failed">无法保存到设备，请重试。</string>
+    <string name="money_load_failed">无法加载开销。</string>
+    <string name="money_cat_flights">机票</string>
+    <string name="money_cat_lodging">住宿</string>
+    <string name="money_cat_food">餐饮</string>
+    <string name="money_cat_transport">交通</string>
+    <string name="money_cat_activities">活动</string>
+    <string name="money_cat_shopping">购物</string>
+    <string name="money_cat_fees">费用</string>
+    <string name="money_cat_other">其他</string>
+    <string name="money_err_amount">请输入大于 0 且符合 %1$s 小数位要求的金额。</string>
+    <string name="money_err_currency">请选择有效的币种。</string>
+    <string name="money_err_category">请选择类别。</string>
+    <string name="money_err_note">备注最多 140 个字符。</string>
+    <string name="money_err_date">请按 YYYY-MM-DD 输入日期。</string>
+    <string name="money_err_generic">无法保存这笔开销，请重试。</string>
+    <string name="money_err_limit">这次旅行已达到 2000 笔开销的上限。</string>
+    <string name="money_amount">金额</string>
+    <string name="money_note">备注（可选）</string>
+    <string name="money_date">日期</string>
+</resources>
