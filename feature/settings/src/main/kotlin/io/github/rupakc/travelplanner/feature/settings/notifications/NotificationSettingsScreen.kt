@@ -45,12 +45,14 @@ import io.github.rupakc.travelplanner.feature.settings.common.SettingsScaffold
 import io.github.rupakc.travelplanner.feature.settings.common.SettingsSwitchRow
 
 @Composable
-internal fun NotificationSettingsRoute(onBack: () -> Unit, viewModel: NotificationSettingsViewModel) {
+internal fun NotificationSettingsRoute(onBack: () -> Unit, viewModel: NotificationSettingsViewModel, serverViewModel: ServerNotificationsViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val server by serverViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var systemEnabled by remember { mutableStateOf(true) }
     LifecycleResumeEffect(context) {
         systemEnabled = context.getSystemService(NotificationManager::class.java)?.areNotificationsEnabled() != false
+        serverViewModel.onEvent(ServerNotificationsEvent.Refresh)
         onPauseOrDispose { }
     }
     NotificationSettingsScreen(
@@ -59,6 +61,8 @@ internal fun NotificationSettingsRoute(onBack: () -> Unit, viewModel: Notificati
         onToggle = viewModel::onEvent,
         onOpenSystem = { channel -> openSystemSettings(context, channel) },
         onBack = onBack,
+        server = server,
+        onServerEvent = serverViewModel::onEvent,
     )
 }
 
@@ -82,6 +86,8 @@ fun NotificationSettingsScreen(
     onOpenSystem: (ChannelShortcut?) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    server: ServerNotificationsUiState = ServerNotificationsUiState(),
+    onServerEvent: (ServerNotificationsEvent) -> Unit = {},
 ) {
     SettingsScaffold(stringResource(R.string.settings_notifications), onBack = onBack, modifier = modifier) {
         if (settings == null) {
@@ -101,28 +107,34 @@ fun NotificationSettingsScreen(
                     }
                 }
             }
-            SettingsHeading(stringResource(R.string.settings_notif_in_app))
-            SettingsSwitchRow(
-                title = stringResource(R.string.settings_notif_trip),
-                subtitle = stringResource(R.string.settings_notif_trip_sub),
-                icon = Icons.Filled.DateRange,
-                checked = settings.tripNotifications,
-                onCheckedChange = { onToggle(SetToggle(NotificationToggle.TRIP, it)) },
-            )
-            SettingsSwitchRow(
-                title = stringResource(R.string.settings_notif_price),
-                subtitle = stringResource(R.string.settings_notif_price_sub),
-                icon = Icons.Filled.Notifications,
-                checked = settings.priceAlertNotifications,
-                onCheckedChange = { onToggle(SetToggle(NotificationToggle.PRICE_ALERTS, it)) },
-            )
-            SettingsSwitchRow(
-                title = stringResource(R.string.settings_notif_nearby),
-                subtitle = stringResource(R.string.settings_notif_nearby_sub),
-                icon = Icons.Filled.LocationOn,
-                checked = settings.nearbyNotifications,
-                onCheckedChange = { onToggle(SetToggle(NotificationToggle.NEARBY, it)) },
-            )
+            if (server.available) {
+                ServerNotificationsSection(server, onServerEvent)
+                // Trip, price and nearby are switched by the category rows above (they also drive the on-device setting).
+                SettingsHeading(stringResource(R.string.settings_notif_nearby))
+            } else {
+                SettingsHeading(stringResource(R.string.settings_notif_in_app))
+                SettingsSwitchRow(
+                    title = stringResource(R.string.settings_notif_trip),
+                    subtitle = stringResource(R.string.settings_notif_trip_sub),
+                    icon = Icons.Filled.DateRange,
+                    checked = settings.tripNotifications,
+                    onCheckedChange = { onToggle(SetToggle(NotificationToggle.TRIP, it)) },
+                )
+                SettingsSwitchRow(
+                    title = stringResource(R.string.settings_notif_price),
+                    subtitle = stringResource(R.string.settings_notif_price_sub),
+                    icon = Icons.Filled.Notifications,
+                    checked = settings.priceAlertNotifications,
+                    onCheckedChange = { onToggle(SetToggle(NotificationToggle.PRICE_ALERTS, it)) },
+                )
+                SettingsSwitchRow(
+                    title = stringResource(R.string.settings_notif_nearby),
+                    subtitle = stringResource(R.string.settings_notif_nearby_sub),
+                    icon = Icons.Filled.LocationOn,
+                    checked = settings.nearbyNotifications,
+                    onCheckedChange = { onToggle(SetToggle(NotificationToggle.NEARBY, it)) },
+                )
+            }
             // The background check never asks for a fresh fix: it reuses the coarse cell stored by Near me.
             SettingsNote(stringResource(R.string.settings_notif_nearby_location_note))
             SettingsSwitchRow(

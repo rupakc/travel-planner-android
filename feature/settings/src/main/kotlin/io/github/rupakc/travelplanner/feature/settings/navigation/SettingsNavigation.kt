@@ -84,7 +84,7 @@ private class SettingsScreens(
             SettingsPage.FEATURES -> FeaturesScreenRoute(onBack, hiltViewModel())
             SettingsPage.APPEARANCE -> AppearanceScreenRoute(highlight, onBack, hiltViewModel())
             SettingsPage.SERVER -> ServerScreenRoute(onBack, hiltViewModel())
-            SettingsPage.NOTIFICATIONS -> NotificationsScreenRoute(onBack, hiltViewModel())
+            SettingsPage.NOTIFICATIONS -> NotificationsScreenRoute(onBack, hiltViewModel(), hiltViewModel())
         }
     }
 }
