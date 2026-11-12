@@ -20,6 +20,7 @@ import io.github.rupakc.travelplanner.core.network.RedactingHttpLogger
 import io.github.rupakc.travelplanner.core.network.RefreshCall
 import io.github.rupakc.travelplanner.core.network.api.AccountApi
 import io.github.rupakc.travelplanner.core.network.api.AdminApi
+import io.github.rupakc.travelplanner.core.network.api.AlertsV2Api
 import io.github.rupakc.travelplanner.core.network.api.AuthApi
 import io.github.rupakc.travelplanner.core.network.api.DevicesApi
 import io.github.rupakc.travelplanner.core.network.api.FareWatchApi
@@ -193,6 +194,11 @@ object NetworkModule {
     fun fareWatchApi(
         @AiHttp r: Retrofit,
     ): FareWatchApi = r.create(FareWatchApi::class.java)
+
+    @Provides @Singleton
+    fun alertsV2Api(
+        @AiHttp r: Retrofit,
+    ): AlertsV2Api = r.create(AlertsV2Api::class.java)
 
     @Provides @Singleton
     fun priceWatchApi(

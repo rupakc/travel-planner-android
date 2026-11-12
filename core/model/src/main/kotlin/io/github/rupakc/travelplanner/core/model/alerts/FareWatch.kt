@@ -52,6 +52,8 @@ data class FareWatch(
     val problem: String? = null,
     @SerialName("already_below_target") val alreadyBelowTarget: LenientBoolean = null,
     @SerialName("already_low") val alreadyLow: LenientBoolean = null,
+    /** Alerts 2.0: true until the first check ran (then `last_price` is null). Absent on older backends. */
+    @SerialName("pending_first_check") val pendingFirstCheck: LenientBoolean = null,
     val history: List<FareWatchHistory> = emptyList(),
     /** Google Flights link. */
     @SerialName("booking_url") val bookingUrl: String? = null,

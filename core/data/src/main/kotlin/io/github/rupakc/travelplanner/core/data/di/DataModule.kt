@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import dagger.multibindings.Multibinds
+import io.github.rupakc.travelplanner.core.data.impl.AlertsV2RepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.AuthRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.ChatRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.CompareRepositoryImpl
@@ -33,6 +34,7 @@ import io.github.rupakc.travelplanner.core.data.impl.SharedPrefsHealthCacheStore
 import io.github.rupakc.travelplanner.core.data.impl.TripsRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStoreImpl
+import io.github.rupakc.travelplanner.core.data.repository.AlertsV2Repository
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.ChatRepository
 import io.github.rupakc.travelplanner.core.data.repository.CompareRepository
@@ -78,6 +80,8 @@ abstract class DataModule {
     @Binds abstract fun recentSearches(impl: RecentSearchesRepositoryImpl): RecentSearchesRepository
 
     @Binds abstract fun fareWatches(impl: FareWatchesRepositoryImpl): FareWatchesRepository
+
+    @Binds abstract fun alertsV2(impl: AlertsV2RepositoryImpl): AlertsV2Repository
 
     @Binds abstract fun priceWatches(impl: PriceWatchesRepositoryImpl): PriceWatchesRepository
 

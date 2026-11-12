@@ -23,6 +23,11 @@ data class FeaturesDto(
     val trips: Boolean = false,
     val journey: Boolean = false,
     @SerialName("offline_pack") val offlinePack: Boolean = false,
+    /** Alerts API version (2 = the v2 routes exist); null or 0 on older backends. */
+    @SerialName("alerts_api") val alertsApi: LenientInt = null,
+    @SerialName("price_alerts_v2") val priceAlertsV2: Boolean = false,
+    /** A SerpAPI key is configured server-side: one-tap watches and suggestions can work. */
+    @SerialName("live_prices") val livePrices: Boolean = false,
 )
 
 /** `auth` of `GET /api/config`. [signupMode] is `open` | `invite`. */
