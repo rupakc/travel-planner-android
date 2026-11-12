@@ -1,0 +1,4 @@
+{"access_token": "jwt-value", "token_type": "bearer", "expires_in": 3600,
+ "refresh_token": "rt_abc", "user": {"id": "u1", "username": "jane_doe", "display_name": "Jane", "email": "jane@example.com",
+ "email_verified": true, "is_admin": false, "requires_password_change": false, "account_verified": true, "has_password": true,
+ "signup_method": "password", "avatar_url": null}, "future_key": 1}

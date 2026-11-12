@@ -1,0 +1,3 @@
+{"items": [{"id": "passport", "status": "done", "auto": false, "due": "2027-03-02", "overdue": false, "facts": {}}], "done": 1, "total": 1, "percent": 100, "complete": true,
+ "item": {"id": "passport", "status": "done", "auto": false, "due": "2027-03-02", "overdue": false, "facts": {}},
+ "game": {"xp": 60, "awards": [{"rule": "trip_ready", "points": 50}], "badges": [{"id": "trip_ready", "earned_at": "2026-11-12T10:00:00Z"}], "level_up": null}}

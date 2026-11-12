@@ -1,0 +1,9 @@
+{"version": 1, "trip_id": 12, "generated_at": "2026-11-12T10:00:00Z", "title": "Lisbon", "start_date": "2027-04-01", "end_date": "2027-04-08",
+ "destinations": [{"city": "Lisbon", "country_code": "PT", "country_name": "Portugal"}],
+ "emergency": {"source": "ai", "as_of": "2026-11-12T10:00:00Z",
+   "cities": [{"city": "Lisbon", "emergency_numbers": {"police": "112"}, "embassy": null, "hospitals": [], "local_phrases": []}]},
+ "phrases": {"language": "pt", "language_name": "Português", "items": [{"id": "help", "text": "Socorro!", "romanized": null}]},
+ "address_card": {"hotel_name": "Hotel X", "area": null, "city": "Lisbon", "take_me_to": {"text": "Leve-me ao Hotel X", "romanized": null}},
+ "currency": {"local": "EUR", "home": "USD", "rate": 0.92, "as_of": "2026-11-12T10:00:00Z", "source": "snapshot"},
+ "selections": {"itinerary": {"days": []}, "hotel": {"name": "Hotel X"}},
+ "checkins": ["2027-04-01"]}

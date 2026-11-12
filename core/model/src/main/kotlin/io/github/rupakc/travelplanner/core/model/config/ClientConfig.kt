@@ -9,6 +9,30 @@ import kotlinx.serialization.Serializable
 data class ClientConfigDto(
     @SerialName("public_base_url") val publicBaseUrl: String? = null,
     val telemetry: TelemetryConfigDto? = null,
+    /** Feature flags (Phase 1/2); absent on older backends, which decode to all-false. */
+    val features: FeaturesDto? = null,
+    /** Accounts block (Phase 1); absent on older backends. */
+    val auth: AuthConfigDto? = null,
+)
+
+/** `features` of `GET /api/config`; unknown flags are ignored, absent ones are false. */
+@Serializable
+data class FeaturesDto(
+    val accounts: Boolean = false,
+    val game: Boolean = false,
+    val trips: Boolean = false,
+    val journey: Boolean = false,
+    @SerialName("offline_pack") val offlinePack: Boolean = false,
+)
+
+/** `auth` of `GET /api/config`. [signupMode] is `open` | `invite`. */
+@Serializable
+data class AuthConfigDto(
+    @SerialName("signup_mode") val signupMode: String? = null,
+    @SerialName("signup_available") val signupAvailable: Boolean = false,
+    @SerialName("password_reset_available") val passwordResetAvailable: Boolean = false,
+    @SerialName("min_password_length") val minPasswordLength: LenientInt = null,
+    @SerialName("verify_ttl_s") val verifyTtlS: LenientInt = null,
 )
 
 /** The telemetry block of [ClientConfigDto]; values are clamped by the client, not here. */

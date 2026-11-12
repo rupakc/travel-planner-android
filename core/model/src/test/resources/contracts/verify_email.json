@@ -1,0 +1,2 @@
+{"status": "verified", "session": {"access_token": "jwt", "token_type": "bearer", "expires_in": 3600, "refresh_token": "rt_1", "user": {"username": "jane_doe"}},
+ "game": {"xp": 50, "awards": [{"rule": "email_verified", "points": 50}], "badges": [], "level_up": null}}

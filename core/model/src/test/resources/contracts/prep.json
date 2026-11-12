@@ -1,0 +1,3 @@
+{"items": [{"id": "visa", "status": "na", "auto": false, "due": null, "overdue": false, "facts": {"visa_type": "visa-free", "max_stay_days": 90, "official_url": null, "source": "static"}},
+ {"id": "offline_pack", "status": "todo", "auto": true, "due": "2027-03-31", "overdue": true, "facts": {"saved_at": null}}],
+ "done": 0, "total": 1, "percent": 0, "complete": false}

@@ -1,0 +1,6 @@
+{"id": 12, "title": "Lisbon in spring", "destination": "Lisbon", "destinations": ["Lisbon", "Porto"],
+ "origin": "NYC", "start_date": "2027-04-01", "end_date": "2027-04-08", "nights": 7,
+ "phase": "planning", "phase_source": "auto", "days_to_start": 140, "day_index": null,
+ "num_travelers": 2, "budget_usd": 3000, "countries": ["PT"],
+ "prep": {"done": 3, "total": 9, "percent": 33, "complete": false},
+ "has_itinerary": true, "recap_completed_at": null, "created_at": "2026-11-01T00:00:00Z", "updated_at": "2026-11-02T00:00:00Z"}

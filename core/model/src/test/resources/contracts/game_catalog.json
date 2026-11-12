@@ -1,0 +1,3 @@
+{"version": 1, "rules": [{"id": "plan_saved", "points": 10, "daily_cap": 3, "once": false}, {"id": "traveller_type", "points": 25, "daily_cap": 1, "once": true}],
+ "badges": [{"id": "first_trip", "rule": "plan_saved", "target": 1, "tier": "bronze", "icon": "map"}],
+ "levels": [{"level": 1, "min_xp": 0}, {"level": 2, "min_xp": 100}]}

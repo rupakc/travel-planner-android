@@ -1,0 +1,4 @@
+{"xp": 150, "level": 2, "level_min_xp": 100, "next_level_xp": 250,
+ "badges": [{"id": "traveller", "progress": 1, "target": 1, "earned_at": "2026-11-11T10:00:00Z"}, {"id": "countries_3", "progress": 1, "target": 3, "earned_at": null}],
+ "streaks": {"daily": {"current": 2, "longest": 5, "last_day": "2026-11-11", "freezes": 1}, "trip_checkin": {"current": 0, "longest": 0, "last_day": null, "freezes": 1}},
+ "recent": [{"rule": "plan_saved", "points": 10, "created_at": "2026-11-11T10:00:00Z"}], "hidden": false}

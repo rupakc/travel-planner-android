@@ -74,7 +74,15 @@ class EncryptedSessionStore(
     private val memory = MutableStateFlow<Session?>(null)
 
     @Serializable
-    private data class Record(val token: String, val user: User, val baseUrl: String? = null)
+    private data class Record(
+        val token: String,
+        val user: User,
+        val baseUrl: String? = null,
+        // Phase 1 fields: absent in sessions sealed by earlier builds (decode to null).
+        val refreshToken: String? = null,
+        val expiresAtEpochMs: Long? = null,
+        val userId: String? = null,
+    )
 
     private val stored: Flow<Session?> =
         store.safeData()
@@ -169,7 +177,7 @@ class EncryptedSessionStore(
         return try {
             val plain = c.decrypt(Base64.getDecoder().decode(value), AAD)
             val record = TravelJson.decodeFromString(Record.serializer(), plain.decodeToString())
-            Session(record.token, record.user, record.baseUrl)
+            Session(record.token, record.user, record.baseUrl, record.refreshToken, record.expiresAtEpochMs, record.userId)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -184,7 +192,11 @@ class EncryptedSessionStore(
     private fun seal(session: Session): String? {
         val c = cipher ?: return null
         return try {
-            val json = TravelJson.encodeToString(Record.serializer(), Record(session.token, session.user, session.baseUrl))
+            val json =
+                TravelJson.encodeToString(
+                    Record.serializer(),
+                    Record(session.token, session.user, session.baseUrl, session.refreshToken, session.expiresAtEpochMs, session.userId),
+                )
             Base64.getEncoder().encodeToString(c.encrypt(json.encodeToByteArray(), AAD))
         } catch (e: Exception) {
             AppLogger.e(TAG, "Could not seal the session", e)
