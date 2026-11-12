@@ -35,6 +35,11 @@ class TelemetryRegistryMirrorTest {
             TelemetryEvents.ONBOARDING_RESULT,
             TelemetryEvents.ALERT_STORY_VIEW,
             TelemetryEvents.ALERT_ADVICE,
+            TelemetryEvents.NOTIF_SETTINGS_VIEW,
+            TelemetryEvents.NOTIF_CATEGORY_TOGGLE,
+            TelemetryEvents.NOTIF_QUIET_HOURS_CHANGE,
+            TelemetryEvents.NOTIF_CAP_CHANGE,
+            TelemetryEvents.NOTIF_OPEN,
         )
 
     @Test
@@ -51,6 +56,8 @@ class TelemetryRegistryMirrorTest {
         val sets =
             listOf(
                 TelemetryEnums.AUTH_METHOD to 5,
+                TelemetryEnums.NOTIF_CATEGORY to 7,
+                TelemetryEnums.NOTIF_SOURCE to 2,
                 TelemetryEnums.AUTH_MODE to 3,
                 TelemetryEnums.AUTH_RESULT to 6,
                 TelemetryEnums.SIGNUP_STEP to 4,

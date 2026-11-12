@@ -74,6 +74,11 @@ object TelemetryEvents {
     const val ONBOARDING_RESULT = "onboarding_result"
     const val ALERT_STORY_VIEW = "alert_story_view"
     const val ALERT_ADVICE = "alert_advice"
+    const val NOTIF_SETTINGS_VIEW = "notif_settings_view"
+    const val NOTIF_CATEGORY_TOGGLE = "notif_category_toggle"
+    const val NOTIF_QUIET_HOURS_CHANGE = "notif_quiet_hours_change"
+    const val NOTIF_CAP_CHANGE = "notif_cap_change"
+    const val NOTIF_OPEN = "notif_open"
 }
 
 /**
@@ -135,6 +140,8 @@ object TelemetryEnums {
     val PLACE_KIND = setOf("activity", "place", "food", "hotel", "event", "tour", "nearby", "other")
     val RECAP_ACTION = setOf("view", "complete", "share", "where_next")
     val COMPLETENESS_SURFACE = setOf("drawer", "trip")
+    val NOTIF_CATEGORY = setOf("price_drops", "trip_reminders", "morning_brief", "weather", "nearby", "social", "quiz")
+    val NOTIF_SOURCE = setOf("push", "inapp")
     val ONBOARDING_STEP_ACTION = setOf("view", "next", "skip", "done")
     val ONBOARDING_TYPE =
         setOf("budget_backpacker", "family", "luxury", "adventure", "culture_foodie", "business", "relaxation", "accessible")

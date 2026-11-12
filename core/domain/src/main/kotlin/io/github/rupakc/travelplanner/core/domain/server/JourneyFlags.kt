@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.core.domain.server
 
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertsFlags
+import io.github.rupakc.travelplanner.core.domain.notifications.NotificationsFlags
 import io.github.rupakc.travelplanner.core.model.config.ClientConfigDto
 
 /**
@@ -23,6 +24,8 @@ data class JourneyFlags(
     val resetAvailable: Boolean = false,
     /** Alerts 2.0 gates (off against an older backend). */
     val alerts: AlertsFlags = AlertsFlags.OFF,
+    /** Notifications 2.0 gates (off against an older backend). */
+    val notifications: NotificationsFlags = NotificationsFlags.OFF,
 ) {
     companion object {
         /** Everything off (config not loaded, or an older backend). */
@@ -41,6 +44,7 @@ data class JourneyFlags(
                 signupAvailable = f.accounts && config.auth?.signupAvailable == true,
                 resetAvailable = f.accounts && config.auth?.passwordResetAvailable == true,
                 alerts = AlertsFlags(config),
+                notifications = NotificationsFlags(config),
             )
         }
     }

@@ -29,6 +29,8 @@ import io.github.rupakc.travelplanner.core.network.api.HealthApi
 import io.github.rupakc.travelplanner.core.network.api.ImportApi
 import io.github.rupakc.travelplanner.core.network.api.LiveCheckApi
 import io.github.rupakc.travelplanner.core.network.api.NearbyApi
+import io.github.rupakc.travelplanner.core.network.api.NotificationCatalogApi
+import io.github.rupakc.travelplanner.core.network.api.NotificationSettingsApi
 import io.github.rupakc.travelplanner.core.network.api.NotificationsApi
 import io.github.rupakc.travelplanner.core.network.api.PlansApi
 import io.github.rupakc.travelplanner.core.network.api.PreferencesApi
@@ -199,6 +201,16 @@ object NetworkModule {
     fun alertsV2Api(
         @AiHttp r: Retrofit,
     ): AlertsV2Api = r.create(AlertsV2Api::class.java)
+
+    @Provides @Singleton
+    fun notificationSettingsApi(
+        @DefaultHttp r: Retrofit,
+    ): NotificationSettingsApi = r.create(NotificationSettingsApi::class.java)
+
+    @Provides @Singleton
+    fun notificationCatalogApi(
+        @DefaultHttp r: Retrofit,
+    ): NotificationCatalogApi = r.create(NotificationCatalogApi::class.java)
 
     @Provides @Singleton
     fun priceWatchApi(
