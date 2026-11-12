@@ -22,6 +22,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HTTP
+import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -51,7 +52,9 @@ interface AccountApi {
 
     /** Task B1 endpoint: 404 on backends without it (the app then shows only "Sign out everywhere"). */
     @GET("api/auth/sessions")
-    suspend fun sessions(): SessionsList
+    suspend fun sessions(
+        @Header("X-Refresh-Token") refreshToken: String?,
+    ): SessionsList
 
     @DELETE("api/auth/sessions/{id}")
     suspend fun revokeSession(

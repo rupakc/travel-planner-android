@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Shares the account data export (a cache file) through the share sheet; never external storage. -->
+        <provider
+            android:name=".AccountExportFileProvider"
+            android:authorities="${applicationId}.account.exports"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/account_export_paths" />
+        </provider>
+    </application>
+</manifest>

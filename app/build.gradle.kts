@@ -113,6 +113,7 @@ dependencies {
     implementation(projects.feature.settings)
     implementation(projects.feature.nearby)
     implementation(projects.feature.play)
+    implementation(projects.feature.account)
     implementation(projects.feature.trips)
     implementation(projects.feature.share)
 
