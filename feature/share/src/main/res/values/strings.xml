@@ -55,4 +55,33 @@
         <item quantity="one">%1$d day</item>
         <item quantity="other">%1$d days</item>
     </plurals>
+    <string name="share_shared_by">Shared by %1$s</string>
+    <string name="share_unknown_title">This link opens on the web</string>
+    <string name="share_unknown_message">This kind of share needs a newer version of the app. You can still view it in your browser.</string>
+    <string name="share_unknown_open">Open in browser</string>
+    <string name="share_paste_title">Open a share link</string>
+    <string name="share_paste_message">Paste a Voyager share link or its code to open the shared trip.</string>
+    <string name="share_paste_label">Share link or code</string>
+    <string name="share_paste_invalid">That doesn\'t look like a share link.</string>
+    <string name="share_paste_open">Open</string>
+    <plurals name="share_stat_activities">
+        <item quantity="one">%d activity</item>
+        <item quantity="other">%d activities</item>
+    </plurals>
+    <plurals name="share_stat_hotels">
+        <item quantity="one">%d hotel</item>
+        <item quantity="other">%d hotels</item>
+    </plurals>
+    <plurals name="share_stat_places">
+        <item quantity="one">%d place</item>
+        <item quantity="other">%d places</item>
+    </plurals>
+    <plurals name="share_stat_drops_caught">
+        <item quantity="one">%d drop caught</item>
+        <item quantity="other">%d drops caught</item>
+    </plurals>
+    <plurals name="share_stat_targets_hit">
+        <item quantity="one">%d target hit</item>
+        <item quantity="other">%d targets hit</item>
+    </plurals>
 </resources>

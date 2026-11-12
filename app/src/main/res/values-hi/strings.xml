@@ -23,4 +23,5 @@
     <string name="coach_play_body">चेक-इन करें, जगहें दर्ज करें और यात्राएँ पूरी करके XP, बैज और स्ट्रीक पाएँ।</string>
     <string name="coach_got_it">समझ गया</string>
     <string name="coach_skip">सुझाव छोड़ें</string>
+    <string name="you_open_share_link">साझा लिंक खोलें</string>
 </resources>

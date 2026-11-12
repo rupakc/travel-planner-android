@@ -6,6 +6,8 @@ import io.github.rupakc.travelplanner.core.model.json.LenientInt
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.search.ImportSource
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
+import io.github.rupakc.travelplanner.core.model.share.ShareCardSnapshot
+import io.github.rupakc.travelplanner.core.model.share.ShareOptions
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
@@ -59,6 +61,13 @@ data class SharedPlan(
     @SerialName("updated_at") val updatedAt: String? = null,
     @SerialName("search_data") val searchData: SharedSearchData = SharedSearchData(),
     val selections: PlanSelections = PlanSelections(),
+    /** Phase 4 tokens only (absent on a legacy plan token): `plan`, `recap`, `savings` or a kind this app does not know. */
+    val kind: String? = null,
+    val options: ShareOptions? = null,
+    /** Only with the sharer's `show_name`. */
+    @SerialName("owner_name") val ownerName: String? = null,
+    /** Recap and savings shares. */
+    val card: ShareCardSnapshot? = null,
 )
 
 @Serializable

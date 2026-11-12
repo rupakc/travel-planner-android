@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.rupakc.travelplanner.core.common.AppBuildInfo
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
@@ -12,9 +13,13 @@ import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.ConsentRepository
+import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
+import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.plan.SharedPlan
 import io.github.rupakc.travelplanner.core.model.plan.SharedSearchData
+import io.github.rupakc.travelplanner.core.model.share.ShareCardSnapshot
+import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,6 +50,15 @@ internal data class ShareUiState(
     /** Set after "Save a copy" succeeded; the button then opens the copy (no duplicates). */
     val savedPlanId: Long? = null,
     val message: ShareMessage? = null,
+    /** Which Phase 4 kind the link is; a legacy plan token is [ShareKind.PLAN]. */
+    val kind: ShareKind = ShareKind.PLAN,
+    /** Recap and savings shares: the server's card snapshot (headline, count chips); never holds exact dates. */
+    val card: ShareCardSnapshot? = null,
+    /** Only when the sharer chose to show their name. */
+    val ownerName: String? = null,
+    /** A kind this app does not know: the plain https link (opened in a Custom Tab), or null when no web host is configured. */
+    val unknownKind: Boolean = false,
+    val plainLink: String? = null,
 )
 
 internal sealed interface ShareEvent {
@@ -73,6 +87,8 @@ internal class ShareViewModel
         private val dispatchers: AppDispatchers,
         private val placeNames: PlaceNameLookup,
         private val consent: ConsentRepository,
+        private val telemetry: Telemetry,
+        private val build: AppBuildInfo,
     ) : ViewModel() {
         private val token: String? = savedStateHandle.get<String>(TOKEN_ARG)
         private val status = MutableStateFlow(ShareUiState())
@@ -107,8 +123,30 @@ internal class ShareViewModel
                     is AppResult.Success -> {
                         shared = result.value
                         val plan = result.value
+                        val kind = if (plan.kind == null) ShareKind.PLAN else ShareKind.from(plan.kind)
+                        // Only the three known kinds are in the closed telemetry enum; a legacy token is a plan.
+                        kind.wire?.let { telemetry.emit(TelemetryEvents.SHARE_VIEW, mapOf("kind" to it)) }
+                        if (kind != ShareKind.PLAN) {
+                            status.update {
+                                it.copy(
+                                    isLoading = false,
+                                    kind = kind,
+                                    ownerName = plan.ownerName?.takeIf(String::isNotBlank),
+                                    card = plan.card.takeIf { kind != ShareKind.UNKNOWN },
+                                    unknownKind = kind == ShareKind.UNKNOWN || plan.card == null,
+                                    plainLink = ShareLinks.plainLink(build.webBaseUrl, t),
+                                )
+                            }
+                            return@launch
+                        }
                         val known = placeNames.names.value
-                        status.update { it.copy(isLoading = false, trip = withContext(dispatchers.default) { SharedTrip.from(plan, known) }) }
+                        status.update {
+                            it.copy(
+                                isLoading = false,
+                                ownerName = plan.ownerName?.takeIf(String::isNotBlank),
+                                trip = withContext(dispatchers.default) { SharedTrip.from(plan, known) },
+                            )
+                        }
                         // Airport codes → cities (shared lookup); a code it cannot name stays a code.
                         val names = placeNames.resolve(SharedTrip.places(plan))
                         if (!known.entries.containsAll(names.entries)) {

@@ -13,4 +13,33 @@
     <string name="share_review">%1$s/10</string>
     <string name="share_open_link_a11y">%1$s খুলুন</string>
     <string name="share_unnamed">নামহীন আইটেম</string>
+    <string name="share_shared_by">%1$s শেয়ার করেছেন</string>
+    <string name="share_unknown_title">এই লিঙ্কটি ওয়েবে খোলে</string>
+    <string name="share_unknown_message">এই ধরনের শেয়ারের জন্য অ্যাপের নতুন সংস্করণ লাগবে। আপনি এখনও ব্রাউজারে দেখতে পারেন।</string>
+    <string name="share_unknown_open">ব্রাউজারে খুলুন</string>
+    <string name="share_paste_title">শেয়ার লিঙ্ক খুলুন</string>
+    <string name="share_paste_message">ভ্রমণটি খুলতে Voyager-এর শেয়ার লিঙ্ক বা তার কোড পেস্ট করুন।</string>
+    <string name="share_paste_label">লিঙ্ক বা কোড</string>
+    <string name="share_paste_invalid">এটি শেয়ার লিঙ্কের মতো মনে হচ্ছে না।</string>
+    <string name="share_paste_open">খুলুন</string>
+    <plurals name="share_stat_activities">
+        <item quantity="one">%d টি কার্যকলাপ</item>
+        <item quantity="other">%d টি কার্যকলাপ</item>
+    </plurals>
+    <plurals name="share_stat_hotels">
+        <item quantity="one">%d টি হোটেল</item>
+        <item quantity="other">%d টি হোটেল</item>
+    </plurals>
+    <plurals name="share_stat_places">
+        <item quantity="one">%d টি স্থান</item>
+        <item quantity="other">%d টি স্থান</item>
+    </plurals>
+    <plurals name="share_stat_drops_caught">
+        <item quantity="one">%d টি দাম কমা ধরা পড়েছে</item>
+        <item quantity="other">%d টি দাম কমা ধরা পড়েছে</item>
+    </plurals>
+    <plurals name="share_stat_targets_hit">
+        <item quantity="one">%d টি লক্ষ্য পূরণ</item>
+        <item quantity="other">%d টি লক্ষ্য পূরণ</item>
+    </plurals>
 </resources>

@@ -26,4 +26,5 @@
     <string name="coach_play_body">Haz check-in, registra lugares y termina viajes para ganar XP, insignias y rachas.</string>
     <string name="coach_got_it">Entendido</string>
     <string name="coach_skip">Omitir consejos</string>
+    <string name="you_open_share_link">Abrir un enlace compartido</string>
 </resources>

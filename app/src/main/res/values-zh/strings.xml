@@ -23,4 +23,5 @@
     <string name="coach_play_body">签到、记录地点并完成行程,即可获得经验值、徽章和连续记录。</string>
     <string name="coach_got_it">知道了</string>
     <string name="coach_skip">跳过提示</string>
+    <string name="you_open_share_link">打开分享链接</string>
 </resources>

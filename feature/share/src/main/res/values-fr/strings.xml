@@ -13,4 +13,38 @@
     <string name="share_review">%1$s/10</string>
     <string name="share_open_link_a11y">Ouvrir %1$s</string>
     <string name="share_unnamed">Élément sans nom</string>
+    <string name="share_shared_by">Partagé par %1$s</string>
+    <string name="share_unknown_title">Ce lien s\'ouvre sur le web</string>
+    <string name="share_unknown_message">Ce type de lien nécessite une version plus récente de l\'app. Vous pouvez toujours le voir dans votre navigateur.</string>
+    <string name="share_unknown_open">Ouvrir dans le navigateur</string>
+    <string name="share_paste_title">Ouvrir un lien partagé</string>
+    <string name="share_paste_message">Collez un lien de partage Voyager ou son code pour ouvrir le voyage.</string>
+    <string name="share_paste_label">Lien ou code</string>
+    <string name="share_paste_invalid">Cela ne ressemble pas à un lien partagé.</string>
+    <string name="share_paste_open">Ouvrir</string>
+    <plurals name="share_stat_activities">
+        <item quantity="one">%d activité</item>
+        <item quantity="other">%d activités</item>
+        <item quantity="many">%d activités</item>
+    </plurals>
+    <plurals name="share_stat_hotels">
+        <item quantity="one">%d hôtel</item>
+        <item quantity="other">%d hôtels</item>
+        <item quantity="many">%d hôtels</item>
+    </plurals>
+    <plurals name="share_stat_places">
+        <item quantity="one">%d lieu</item>
+        <item quantity="other">%d lieux</item>
+        <item quantity="many">%d lieux</item>
+    </plurals>
+    <plurals name="share_stat_drops_caught">
+        <item quantity="one">%d baisse repérée</item>
+        <item quantity="other">%d baisses repérées</item>
+        <item quantity="many">%d baisses repérées</item>
+    </plurals>
+    <plurals name="share_stat_targets_hit">
+        <item quantity="one">%d objectif atteint</item>
+        <item quantity="other">%d objectifs atteints</item>
+        <item quantity="many">%d objectifs atteints</item>
+    </plurals>
 </resources>

@@ -13,4 +13,33 @@
     <string name="share_review">%1$s/10</string>
     <string name="share_open_link_a11y">%1$s öffnen</string>
     <string name="share_unnamed">Unbenannter Eintrag</string>
+    <string name="share_shared_by">Geteilt von %1$s</string>
+    <string name="share_unknown_title">Dieser Link öffnet sich im Web</string>
+    <string name="share_unknown_message">Diese Art von Link benötigt eine neuere Version der App. Du kannst ihn weiterhin im Browser ansehen.</string>
+    <string name="share_unknown_open">Im Browser öffnen</string>
+    <string name="share_paste_title">Geteilten Link öffnen</string>
+    <string name="share_paste_message">Füge einen geteilten Voyager-Link oder dessen Code ein, um die Reise zu öffnen.</string>
+    <string name="share_paste_label">Link oder Code</string>
+    <string name="share_paste_invalid">Das sieht nicht nach einem geteilten Link aus.</string>
+    <string name="share_paste_open">Öffnen</string>
+    <plurals name="share_stat_activities">
+        <item quantity="one">%d Aktivität</item>
+        <item quantity="other">%d Aktivitäten</item>
+    </plurals>
+    <plurals name="share_stat_hotels">
+        <item quantity="one">%d Hotel</item>
+        <item quantity="other">%d Hotels</item>
+    </plurals>
+    <plurals name="share_stat_places">
+        <item quantity="one">%d Ort</item>
+        <item quantity="other">%d Orte</item>
+    </plurals>
+    <plurals name="share_stat_drops_caught">
+        <item quantity="one">%d Preissenkung erwischt</item>
+        <item quantity="other">%d Preissenkungen erwischt</item>
+    </plurals>
+    <plurals name="share_stat_targets_hit">
+        <item quantity="one">%d Ziel erreicht</item>
+        <item quantity="other">%d Ziele erreicht</item>
+    </plurals>
 </resources>
