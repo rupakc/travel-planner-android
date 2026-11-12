@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_notifsrv_intro">Choose what Voyager may send you. These settings follow your account on every device.</string>
+    <string name="settings_notifsrv_price_drops">Price drops</string>
+    <string name="settings_notifsrv_price_drops_hint">When a price you are watching falls.</string>
+    <string name="settings_notifsrv_trip_reminders">Trip reminders</string>
+    <string name="settings_notifsrv_trip_reminders_hint">A heads-up 30, 7 and 1 days before you go.</string>
+    <string name="settings_notifsrv_morning_brief">Morning brief</string>
+    <string name="settings_notifsrv_morning_brief_hint">Your plan for the day while you travel.</string>
+    <string name="settings_notifsrv_weather">Weather</string>
+    <string name="settings_notifsrv_weather_hint">Weather notes for your trip.</string>
+    <string name="settings_notifsrv_nearby">Near you</string>
+    <string name="settings_notifsrv_nearby_hint">Suggestions on this device when you are close to something interesting.</string>
+    <string name="settings_notifsrv_limits_heading">Quiet hours and limits</string>
+    <string name="settings_notifsrv_quiet">Quiet hours</string>
+    <string name="settings_notifsrv_quiet_hint">No notifications during this window; they wait until it ends.</string>
+    <string name="settings_notifsrv_quiet_from">From</string>
+    <string name="settings_notifsrv_quiet_until">Until</string>
+    <string name="settings_notifsrv_quiet_timezone">Quiet hours follow your account time zone: %1$s.</string>
+    <string name="settings_notifsrv_quiet_no_timezone">Quiet hours and the morning brief need a time zone on your account. Until one is set, quiet hours are not applied.</string>
+    <string name="settings_notifsrv_quiet_active">Quiet hours are on right now.</string>
+    <string name="settings_notifsrv_cap">Daily limit</string>
+    <string name="settings_notifsrv_cap_hint">The most reminders and briefs we send you in one day. Price drops are not counted.</string>
+    <string name="settings_notifsrv_cap_less">Fewer notifications per day</string>
+    <string name="settings_notifsrv_cap_more">More notifications per day</string>
+    <string name="settings_notifsrv_push_heading">Push delivery</string>
+    <string name="settings_notifsrv_push_on">Push notifications are available</string>
+    <string name="settings_notifsrv_push_on_sub">This server can send push notifications to your phone.</string>
+    <string name="settings_notifsrv_push_off">Push notifications are not set up</string>
+    <string name="settings_notifsrv_push_off_sub">This server cannot send push yet. Notifications still appear inside the app.</string>
+    <string name="settings_notifsrv_devices_none">No devices registered yet</string>
+    <string name="settings_notifsrv_timezone">Time zone</string>
+    <string name="settings_notifsrv_timezone_unset">Not set</string>
+    <string name="settings_notifsrv_error_load">Could not load your notification settings.</string>
+    <string name="settings_notifsrv_error_save">Could not save that change. It was undone.</string>
+    <plurals name="settings_notifsrv_devices">
+        <item quantity="one">%1$d device registered</item>
+        <item quantity="other">%1$d devices registered</item>
+    </plurals>
+    <plurals name="settings_notifsrv_cap_value">
+        <item quantity="one">%1$d per day</item>
+        <item quantity="other">%1$d per day</item>
+    </plurals>
+    <string name="settings_notifsrv_alert_prefs">Alert settings</string>
+    <string name="settings_notifsrv_alert_prefs_sub">Price alert digest, instant alerts and limits</string>
+</resources>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_notifsrv_intro">Choisissez ce que Voyager peut vous envoyer. Ces réglages suivent votre compte sur tous vos appareils.</string>
+    <string name="settings_notifsrv_price_drops">Baisses de prix</string>
+    <string name="settings_notifsrv_price_drops_hint">Lorsque le prix d\'un élément suivi baisse.</string>
+    <string name="settings_notifsrv_trip_reminders">Rappels de voyage</string>
+    <string name="settings_notifsrv_trip_reminders_hint">Un message 30, 7 et 1 jours avant le départ.</string>
+    <string name="settings_notifsrv_morning_brief">Récap du matin</string>
+    <string name="settings_notifsrv_morning_brief_hint">Votre programme du jour pendant le voyage.</string>
+    <string name="settings_notifsrv_weather">Météo</string>
+    <string name="settings_notifsrv_weather_hint">Informations météo pour votre voyage.</string>
+    <string name="settings_notifsrv_nearby">Près de vous</string>
+    <string name="settings_notifsrv_nearby_hint">Suggestions sur cet appareil lorsque vous êtes près d\'un lieu intéressant.</string>
+    <string name="settings_notifsrv_limits_heading">Heures calmes et limites</string>
+    <string name="settings_notifsrv_quiet">Heures calmes</string>
+    <string name="settings_notifsrv_quiet_hint">Aucune notification pendant cette plage ; elles attendent la fin.</string>
+    <string name="settings_notifsrv_quiet_from">De</string>
+    <string name="settings_notifsrv_quiet_until">Jusqu\'à</string>
+    <string name="settings_notifsrv_quiet_timezone">Les heures calmes suivent le fuseau horaire de votre compte : %1$s.</string>
+    <string name="settings_notifsrv_quiet_no_timezone">Les heures calmes et le récap du matin ont besoin d\'un fuseau horaire sur votre compte. Tant qu\'aucun n\'est défini, les heures calmes ne sont pas appliquées.</string>
+    <string name="settings_notifsrv_quiet_active">Les heures calmes sont actives en ce moment.</string>
+    <string name="settings_notifsrv_cap">Limite quotidienne</string>
+    <string name="settings_notifsrv_cap_hint">Le nombre maximal de rappels et de récaps envoyés par jour. Les baisses de prix ne comptent pas.</string>
+    <string name="settings_notifsrv_cap_less">Moins de notifications par jour</string>
+    <string name="settings_notifsrv_cap_more">Plus de notifications par jour</string>
+    <string name="settings_notifsrv_push_heading">Envoi des notifications push</string>
+    <string name="settings_notifsrv_push_on">Les notifications push sont disponibles</string>
+    <string name="settings_notifsrv_push_on_sub">Ce serveur peut envoyer des notifications push à votre téléphone.</string>
+    <string name="settings_notifsrv_push_off">Les notifications push ne sont pas configurées</string>
+    <string name="settings_notifsrv_push_off_sub">Ce serveur ne peut pas encore envoyer de push. Les notifications apparaissent toujours dans l\'application.</string>
+    <string name="settings_notifsrv_devices_none">Aucun appareil enregistré pour l\'instant</string>
+    <string name="settings_notifsrv_timezone">Fuseau horaire</string>
+    <string name="settings_notifsrv_timezone_unset">Non défini</string>
+    <string name="settings_notifsrv_error_load">Impossible de charger vos réglages de notifications.</string>
+    <string name="settings_notifsrv_error_save">Impossible d\'enregistrer ce changement. Il a été annulé.</string>
+    <plurals name="settings_notifsrv_devices">
+        <item quantity="one">%1$d appareil enregistré</item>
+        <item quantity="many">%1$d d’appareils enregistrés</item>
+        <item quantity="other">%1$d appareils enregistrés</item>
+    </plurals>
+    <plurals name="settings_notifsrv_cap_value">
+        <item quantity="one">%1$d par jour</item>
+        <item quantity="many">%1$d par jour</item>
+        <item quantity="other">%1$d par jour</item>
+    </plurals>
+    <string name="settings_notifsrv_alert_prefs">Réglages des alertes</string>
+    <string name="settings_notifsrv_alert_prefs_sub">Récap des alertes de prix, alertes instantanées et limites</string>
+</resources>

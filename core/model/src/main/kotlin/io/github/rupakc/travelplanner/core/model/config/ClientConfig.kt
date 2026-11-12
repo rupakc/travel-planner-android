@@ -28,6 +28,12 @@ data class FeaturesDto(
     @SerialName("price_alerts_v2") val priceAlertsV2: Boolean = false,
     /** A SerpAPI key is configured server-side: one-tap watches and suggestions can work. */
     @SerialName("live_prices") val livePrices: Boolean = false,
+    /** Notifications API version (1 = `/notification-settings` and the catalog exist); null or 0 on older backends. */
+    @SerialName("notifications_api") val notificationsApi: LenientInt = null,
+    /** Category checks, trip pushes and platform routing are active server side. */
+    @SerialName("notifications_v2") val notificationsV2: Boolean = false,
+    /** An Apple push key is configured (iOS only; informational on Android). */
+    val apns: Boolean = false,
 )
 
 /** `auth` of `GET /api/config`. [signupMode] is `open` | `invite`. */

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_notifsrv_intro">Lege fest, was Voyager dir schicken darf. Diese Einstellungen gelten für dein Konto auf allen Geräten.</string>
+    <string name="settings_notifsrv_price_drops">Preissenkungen</string>
+    <string name="settings_notifsrv_price_drops_hint">Wenn ein beobachteter Preis fällt.</string>
+    <string name="settings_notifsrv_trip_reminders">Reiseerinnerungen</string>
+    <string name="settings_notifsrv_trip_reminders_hint">Ein Hinweis 30, 7 und 1 Tag vor der Abreise.</string>
+    <string name="settings_notifsrv_morning_brief">Morgenübersicht</string>
+    <string name="settings_notifsrv_morning_brief_hint">Dein Tagesplan während der Reise.</string>
+    <string name="settings_notifsrv_weather">Wetter</string>
+    <string name="settings_notifsrv_weather_hint">Wetterhinweise für deine Reise.</string>
+    <string name="settings_notifsrv_nearby">In deiner Nähe</string>
+    <string name="settings_notifsrv_nearby_hint">Vorschläge auf diesem Gerät, wenn du in der Nähe von etwas Interessantem bist.</string>
+    <string name="settings_notifsrv_limits_heading">Ruhezeiten und Limits</string>
+    <string name="settings_notifsrv_quiet">Ruhezeiten</string>
+    <string name="settings_notifsrv_quiet_hint">In diesem Zeitraum gibt es keine Benachrichtigungen; sie warten, bis er endet.</string>
+    <string name="settings_notifsrv_quiet_from">Von</string>
+    <string name="settings_notifsrv_quiet_until">Bis</string>
+    <string name="settings_notifsrv_quiet_timezone">Die Ruhezeiten richten sich nach der Zeitzone deines Kontos: %1$s.</string>
+    <string name="settings_notifsrv_quiet_no_timezone">Ruhezeiten und die Morgenübersicht brauchen eine Zeitzone in deinem Konto. Solange keine gesetzt ist, gelten die Ruhezeiten nicht.</string>
+    <string name="settings_notifsrv_quiet_active">Die Ruhezeiten sind gerade aktiv.</string>
+    <string name="settings_notifsrv_cap">Tageslimit</string>
+    <string name="settings_notifsrv_cap_hint">Die maximale Zahl an Erinnerungen und Übersichten pro Tag. Preissenkungen zählen nicht mit.</string>
+    <string name="settings_notifsrv_cap_less">Weniger Benachrichtigungen pro Tag</string>
+    <string name="settings_notifsrv_cap_more">Mehr Benachrichtigungen pro Tag</string>
+    <string name="settings_notifsrv_push_heading">Push-Zustellung</string>
+    <string name="settings_notifsrv_push_on">Push-Benachrichtigungen sind verfügbar</string>
+    <string name="settings_notifsrv_push_on_sub">Dieser Server kann Push-Benachrichtigungen an dein Telefon senden.</string>
+    <string name="settings_notifsrv_push_off">Push-Benachrichtigungen sind nicht eingerichtet</string>
+    <string name="settings_notifsrv_push_off_sub">Dieser Server kann noch keine Push-Nachrichten senden. Benachrichtigungen erscheinen weiterhin in der App.</string>
+    <string name="settings_notifsrv_devices_none">Noch keine Geräte registriert</string>
+    <string name="settings_notifsrv_timezone">Zeitzone</string>
+    <string name="settings_notifsrv_timezone_unset">Nicht festgelegt</string>
+    <string name="settings_notifsrv_error_load">Deine Benachrichtigungseinstellungen konnten nicht geladen werden.</string>
+    <string name="settings_notifsrv_error_save">Die Änderung konnte nicht gespeichert werden. Sie wurde rückgängig gemacht.</string>
+    <plurals name="settings_notifsrv_devices">
+        <item quantity="one">%1$d Gerät registriert</item>
+        <item quantity="other">%1$d Geräte registriert</item>
+    </plurals>
+    <plurals name="settings_notifsrv_cap_value">
+        <item quantity="one">%1$d pro Tag</item>
+        <item quantity="other">%1$d pro Tag</item>
+    </plurals>
+    <string name="settings_notifsrv_alert_prefs">Alarm-Einstellungen</string>
+    <string name="settings_notifsrv_alert_prefs_sub">Preisalarm-Zusammenfassung, Sofortalarme und Limits</string>
+</resources>

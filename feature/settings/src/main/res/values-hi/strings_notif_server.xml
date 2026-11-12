@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_notifsrv_intro">चुनें कि Voyager आपको क्या भेज सकता है। ये सेटिंग आपके खाते के साथ सभी डिवाइस पर लागू रहती हैं।</string>
+    <string name="settings_notifsrv_price_drops">कीमत में गिरावट</string>
+    <string name="settings_notifsrv_price_drops_hint">जब आपके देखे जा रहे किसी दाम में कमी आए।</string>
+    <string name="settings_notifsrv_trip_reminders">यात्रा के रिमाइंडर</string>
+    <string name="settings_notifsrv_trip_reminders_hint">रवाना होने से 30, 7 और 1 दिन पहले याद दिलाना।</string>
+    <string name="settings_notifsrv_morning_brief">सुबह की झलक</string>
+    <string name="settings_notifsrv_morning_brief_hint">यात्रा के दौरान आपके दिन की योजना।</string>
+    <string name="settings_notifsrv_weather">मौसम</string>
+    <string name="settings_notifsrv_weather_hint">आपकी यात्रा के लिए मौसम की जानकारी।</string>
+    <string name="settings_notifsrv_nearby">आपके आस-पास</string>
+    <string name="settings_notifsrv_nearby_hint">जब आप किसी दिलचस्प जगह के पास हों तो इस डिवाइस पर सुझाव।</string>
+    <string name="settings_notifsrv_limits_heading">शांत घंटे और सीमाएँ</string>
+    <string name="settings_notifsrv_quiet">शांत घंटे</string>
+    <string name="settings_notifsrv_quiet_hint">इस समय में कोई सूचना नहीं आएगी; वे खत्म होने तक रुकी रहेंगी।</string>
+    <string name="settings_notifsrv_quiet_from">से</string>
+    <string name="settings_notifsrv_quiet_until">तक</string>
+    <string name="settings_notifsrv_quiet_timezone">शांत घंटे आपके खाते के समय क्षेत्र के अनुसार चलते हैं: %1$s।</string>
+    <string name="settings_notifsrv_quiet_no_timezone">शांत घंटों और सुबह की झलक के लिए आपके खाते में समय क्षेत्र चाहिए। जब तक वह तय नहीं होता, शांत घंटे लागू नहीं होते।</string>
+    <string name="settings_notifsrv_quiet_active">शांत घंटे अभी चालू हैं।</string>
+    <string name="settings_notifsrv_cap">दैनिक सीमा</string>
+    <string name="settings_notifsrv_cap_hint">एक दिन में हम अधिकतम कितने रिमाइंडर और झलकें भेजें। कीमत में गिरावट की सूचनाएँ इसमें नहीं गिनी जातीं।</string>
+    <string name="settings_notifsrv_cap_less">प्रतिदिन कम सूचनाएँ</string>
+    <string name="settings_notifsrv_cap_more">प्रतिदिन ज़्यादा सूचनाएँ</string>
+    <string name="settings_notifsrv_push_heading">पुश सूचनाओं की डिलीवरी</string>
+    <string name="settings_notifsrv_push_on">पुश सूचनाएँ उपलब्ध हैं</string>
+    <string name="settings_notifsrv_push_on_sub">यह सर्वर आपके फ़ोन पर पुश सूचनाएँ भेज सकता है।</string>
+    <string name="settings_notifsrv_push_off">पुश सूचनाएँ सेट नहीं हैं</string>
+    <string name="settings_notifsrv_push_off_sub">यह सर्वर अभी पुश नहीं भेज सकता। सूचनाएँ फिर भी ऐप के अंदर दिखती हैं।</string>
+    <string name="settings_notifsrv_devices_none">अभी कोई डिवाइस पंजीकृत नहीं है</string>
+    <string name="settings_notifsrv_timezone">समय क्षेत्र</string>
+    <string name="settings_notifsrv_timezone_unset">तय नहीं है</string>
+    <string name="settings_notifsrv_error_load">आपकी सूचना सेटिंग लोड नहीं हो सकीं।</string>
+    <string name="settings_notifsrv_error_save">यह बदलाव सहेजा नहीं जा सका। उसे वापस कर दिया गया।</string>
+    <plurals name="settings_notifsrv_devices">
+        <item quantity="one">%1$d डिवाइस पंजीकृत</item>
+        <item quantity="other">%1$d डिवाइस पंजीकृत</item>
+    </plurals>
+    <plurals name="settings_notifsrv_cap_value">
+        <item quantity="one">प्रतिदिन %1$d</item>
+        <item quantity="other">प्रतिदिन %1$d</item>
+    </plurals>
+    <string name="settings_notifsrv_alert_prefs">अलर्ट सेटिंग</string>
+    <string name="settings_notifsrv_alert_prefs_sub">मूल्य अलर्ट डाइजेस्ट, तुरंत अलर्ट और सीमाएँ</string>
+</resources>

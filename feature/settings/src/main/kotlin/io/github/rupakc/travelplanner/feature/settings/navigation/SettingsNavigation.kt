@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsPage
+import io.github.rupakc.travelplanner.core.model.navigation.AlertPrefsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.AppearanceRoute
 import io.github.rupakc.travelplanner.core.model.navigation.FeaturesRoute
@@ -84,7 +85,7 @@ private class SettingsScreens(
             SettingsPage.FEATURES -> FeaturesScreenRoute(onBack, hiltViewModel())
             SettingsPage.APPEARANCE -> AppearanceScreenRoute(highlight, onBack, hiltViewModel())
             SettingsPage.SERVER -> ServerScreenRoute(onBack, hiltViewModel())
-            SettingsPage.NOTIFICATIONS -> NotificationsScreenRoute(onBack, hiltViewModel())
+            SettingsPage.NOTIFICATIONS -> NotificationsScreenRoute(onBack, onOpenAlertPrefs = { onNavigate(AlertPrefsRoute) }, hiltViewModel(), hiltViewModel())
         }
     }
 }

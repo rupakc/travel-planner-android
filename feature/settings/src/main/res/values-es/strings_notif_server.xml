@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_notifsrv_intro">Elige qué puede enviarte Voyager. Estos ajustes acompañan a tu cuenta en todos tus dispositivos.</string>
+    <string name="settings_notifsrv_price_drops">Bajadas de precio</string>
+    <string name="settings_notifsrv_price_drops_hint">Cuando baja el precio de algo que sigues.</string>
+    <string name="settings_notifsrv_trip_reminders">Recordatorios de viaje</string>
+    <string name="settings_notifsrv_trip_reminders_hint">Un aviso 30, 7 y 1 días antes de salir.</string>
+    <string name="settings_notifsrv_morning_brief">Resumen matinal</string>
+    <string name="settings_notifsrv_morning_brief_hint">Tu plan del día mientras viajas.</string>
+    <string name="settings_notifsrv_weather">Clima</string>
+    <string name="settings_notifsrv_weather_hint">Avisos del tiempo para tu viaje.</string>
+    <string name="settings_notifsrv_nearby">Cerca de ti</string>
+    <string name="settings_notifsrv_nearby_hint">Sugerencias en este dispositivo cuando estás cerca de algo interesante.</string>
+    <string name="settings_notifsrv_limits_heading">Horas de silencio y límites</string>
+    <string name="settings_notifsrv_quiet">Horas de silencio</string>
+    <string name="settings_notifsrv_quiet_hint">Sin notificaciones en este horario; esperan hasta que termine.</string>
+    <string name="settings_notifsrv_quiet_from">Desde</string>
+    <string name="settings_notifsrv_quiet_until">Hasta</string>
+    <string name="settings_notifsrv_quiet_timezone">Las horas de silencio siguen la zona horaria de tu cuenta: %1$s.</string>
+    <string name="settings_notifsrv_quiet_no_timezone">Las horas de silencio y el resumen matinal necesitan una zona horaria en tu cuenta. Mientras no haya una, las horas de silencio no se aplican.</string>
+    <string name="settings_notifsrv_quiet_active">Las horas de silencio están activas ahora.</string>
+    <string name="settings_notifsrv_cap">Límite diario</string>
+    <string name="settings_notifsrv_cap_hint">El máximo de recordatorios y resúmenes que te enviamos en un día. Las bajadas de precio no cuentan.</string>
+    <string name="settings_notifsrv_cap_less">Menos notificaciones al día</string>
+    <string name="settings_notifsrv_cap_more">Más notificaciones al día</string>
+    <string name="settings_notifsrv_push_heading">Envío de notificaciones push</string>
+    <string name="settings_notifsrv_push_on">Las notificaciones push están disponibles</string>
+    <string name="settings_notifsrv_push_on_sub">Este servidor puede enviar notificaciones push a tu teléfono.</string>
+    <string name="settings_notifsrv_push_off">Las notificaciones push no están configuradas</string>
+    <string name="settings_notifsrv_push_off_sub">Este servidor aún no puede enviar push. Las notificaciones siguen apareciendo dentro de la app.</string>
+    <string name="settings_notifsrv_devices_none">Aún no hay dispositivos registrados</string>
+    <string name="settings_notifsrv_timezone">Zona horaria</string>
+    <string name="settings_notifsrv_timezone_unset">Sin configurar</string>
+    <string name="settings_notifsrv_error_load">No se pudieron cargar tus ajustes de notificaciones.</string>
+    <string name="settings_notifsrv_error_save">No se pudo guardar el cambio. Se deshizo.</string>
+    <plurals name="settings_notifsrv_devices">
+        <item quantity="one">%1$d dispositivo registrado</item>
+        <item quantity="many">%1$d de dispositivos registrados</item>
+        <item quantity="other">%1$d dispositivos registrados</item>
+    </plurals>
+    <plurals name="settings_notifsrv_cap_value">
+        <item quantity="one">%1$d al día</item>
+        <item quantity="many">%1$d al día</item>
+        <item quantity="other">%1$d al día</item>
+    </plurals>
+    <string name="settings_notifsrv_alert_prefs">Ajustes de alertas</string>
+    <string name="settings_notifsrv_alert_prefs_sub">Resumen de alertas de precio, alertas inmediatas y límites</string>
+</resources>
