@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_story_title">Historia del precio</string>
+    <string name="alerts_story_loading">Cargando la historia del precio…</string>
+    <string name="alerts_story_error_load">No se pudo cargar la historia del precio.</string>
+    <string name="alerts_story_verdict_great">Precio excelente</string>
+    <string name="alerts_story_verdict_good">Buen precio</string>
+    <string name="alerts_story_verdict_typical">Precio habitual</string>
+    <string name="alerts_story_verdict_high">Precio alto</string>
+    <string name="alerts_story_verdict_label">Nivel de precio: %1$s</string>
+    <string name="alerts_story_advice_pending">Esperando la primera comprobación de precio.</string>
+    <string name="alerts_story_advice_below_target">En tu precio objetivo o por debajo, por %1$s.</string>
+    <string name="alerts_story_advice_near_target">Solo %1$s por encima de tu objetivo.</string>
+    <string name="alerts_story_advice_at_lowest">El precio más bajo visto hasta ahora.</string>
+    <string name="alerts_story_advice_below_typical">Por debajo del rango habitual para este viaje.</string>
+    <string name="alerts_story_advice_within_typical">Dentro del rango habitual.</string>
+    <string name="alerts_story_advice_above_typical">Por encima del rango habitual.</string>
+    <string name="alerts_story_advice_generic">Consulta el historial de precios abajo.</string>
+    <string name="alerts_story_checked_today">Comprobado hoy</string>
+    <string name="alerts_story_latest">Último precio observado</string>
+    <string name="alerts_story_estimate">Estimación: %1$s. No es un precio observado.</string>
+    <string name="alerts_story_chart_point">%1$s el %2$s</string>
+    <string name="alerts_story_chart_typical">Rango habitual</string>
+    <string name="alerts_story_chart_lowest">Más bajo: %1$s</string>
+    <string name="alerts_story_chart_target">Objetivo: %1$s</string>
+    <string name="alerts_story_chart_baseline">Primer precio: %1$s</string>
+    <string name="alerts_story_chart_none">Aún no hay comprobaciones de precio.</string>
+    <string name="alerts_story_tip_title">Consejo de momento</string>
+    <string name="alerts_story_tip_button">Obtener un consejo de momento</string>
+    <string name="alerts_story_tip_ai">Generado por IA</string>
+    <string name="alerts_story_tip_loading">Pensando…</string>
+    <string name="alerts_story_tip_error">No se pudo obtener un consejo ahora.</string>
+    <string name="alerts_story_tip_limit">Se alcanzó el límite de IA de este mes.</string>
+    <string name="alerts_story_chart_first">Primera comprobación</string>
+    <string name="alerts_story_chart_latest">Última comprobación</string>
+    <string name="alerts_story_chart_previous">Comprobación anterior</string>
+    <string name="alerts_story_chart_next">Comprobación siguiente</string>
+    <string name="alerts_story_chart_help">Toca el gráfico o desliza para recorrer las comprobaciones.</string>
+    <string name="alerts_story_caught">Detectaste una bajada de %1$s desde que empezaste a vigilar.</string>
+    <string name="alerts_story_open">Historial de precio</string>
+    <string name="alerts_story_open_a11y">Historial de precio de %1$s</string>
+    <string name="alerts_story_close">Cerrar</string>
+    <string name="alerts_story_tip_billing">La IA no está disponible ahora porque la facturación está desactivada.</string>
+    <string name="alerts_story_tip_no_data">Todavía no se ha observado ningún precio, así que no hay consejo.</string>
+    <string name="alerts_story_tip_unsupported">Los consejos de momento solo están disponibles para vuelos.</string>
+    <string name="alerts_story_not_found">Esta vigilancia ya no existe.</string>
+    <plurals name="alerts_story_chart_label">
+        <item quantity="one">Historial de precios: %1$d comprobaciones del %2$s al %3$s</item>
+        <item quantity="many">Historial de precios: %1$d comprobaciones del %2$s al %3$s</item>
+        <item quantity="other">Historial de precios: %1$d comprobaciones del %2$s al %3$s</item>
+    </plurals>
+    <plurals name="alerts_story_advice_checks_paused">
+        <item quantity="one">Las comprobaciones de precio en vivo están en pausa. La última fue hace %1$d día.</item>
+        <item quantity="many">Las comprobaciones de precio en vivo están en pausa. La última fue hace %1$d días.</item>
+        <item quantity="other">Las comprobaciones de precio en vivo están en pausa. La última fue hace %1$d días.</item>
+    </plurals>
+    <plurals name="alerts_story_advice_steady">
+        <item quantity="one">Estable durante el último %1$d día.</item>
+        <item quantity="many">Estable durante los últimos %1$d días.</item>
+        <item quantity="other">Estable durante los últimos %1$d días.</item>
+    </plurals>
+    <plurals name="alerts_story_advice_few_checks">
+        <item quantity="one">Solo %1$d comprobación por ahora, así que aún hay poco que comparar.</item>
+        <item quantity="many">Solo %1$d comprobaciones por ahora, así que aún hay poco que comparar.</item>
+        <item quantity="other">Solo %1$d comprobaciones por ahora, así que aún hay poco que comparar.</item>
+    </plurals>
+    <plurals name="alerts_story_checked_ago">
+        <item quantity="one">Comprobado hace %1$d día</item>
+        <item quantity="many">Comprobado hace %1$d días</item>
+        <item quantity="other">Comprobado hace %1$d días</item>
+    </plurals>
+    <plurals name="alerts_story_chart_few">
+        <item quantity="one">%1$d comprobación por ahora. El gráfico aparece tras dos comprobaciones.</item>
+        <item quantity="many">%1$d comprobaciones por ahora. El gráfico aparece tras dos comprobaciones.</item>
+        <item quantity="other">%1$d comprobaciones por ahora. El gráfico aparece tras dos comprobaciones.</item>
+    </plurals>
+</resources>

@@ -5,6 +5,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -55,9 +57,11 @@ class AlertsScreenTest {
     private val hotel =
         PriceWatch(id = 3, kind = "hotel", status = "active", title = "Lumen Hotel", currency = "EUR", lastPrice = 398.0, expiresOn = "2026-12-14")
 
-    private fun show(state: AlertsUiState, dark: Boolean = false) =
+    private fun show(state: AlertsUiState, dark: Boolean = false, storyAvailable: Boolean = false) =
         compose.setContent {
-            TravelTheme(themeMode = if (dark) ThemeMode.DARK else ThemeMode.LIGHT) { AlertsScreen(state, { events += it }, {}) }
+            TravelTheme(themeMode = if (dark) ThemeMode.DARK else ThemeMode.LIGHT) {
+                AlertsScreen(state, { events += it }, {}, storyAvailable = storyAvailable)
+            }
         }
 
     @Test
@@ -244,5 +248,17 @@ class AlertsScreenTest {
         compose.onNodeWithText("Live web search isn’t available on this server.").assertIsDisplayed()
         compose.onNodeWithText("Retry").performScrollTo().performClick()
         assertTrue(retried)
+    }
+
+    @Test
+    fun `the price story button shows only when the backend has the v2 routes`() {
+        show(AlertsUiState(fares = listOf(fare), prices = listOf(hotel), livePrices = true, now = now))
+        compose.onNodeWithText("Price story").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the price story button is on every card of a v2 backend`() {
+        show(AlertsUiState(fares = listOf(fare), prices = listOf(hotel), livePrices = true, now = now), storyAvailable = true)
+        compose.onAllNodesWithText("Price story").onFirst().assertExists()
     }
 }

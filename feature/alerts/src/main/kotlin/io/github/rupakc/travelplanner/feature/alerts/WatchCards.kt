@@ -97,6 +97,7 @@ import io.github.rupakc.travelplanner.core.ui.watch.TripBadge
 import io.github.rupakc.travelplanner.core.ui.watch.TripRowLine
 import io.github.rupakc.travelplanner.core.ui.watch.currentLocale
 import io.github.rupakc.travelplanner.core.ui.watch.toneColors
+import io.github.rupakc.travelplanner.feature.alerts.story.StoryButton
 import java.time.Instant
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -115,6 +116,8 @@ internal data class CardCallbacks(
     val onOpenLink: (String) -> Unit,
     /** "Search the web now" (a user-initiated live web search; never feeds alerts). */
     val onLiveCheck: () -> Unit = {},
+    /** "Price story" sheet; null hides the button (older backend without the v2 routes). */
+    val onStory: (() -> Unit)? = null,
 )
 
 private fun JsonObject?.str(k: String) = (this?.get(k) as? JsonPrimitive)?.contentOrNull
@@ -607,6 +610,7 @@ private fun CardActions(
                 leadingIcon = Icons.Filled.Refresh,
             )
         }
+        StoryButton(title, callbacks.onStory)
         if (!past) {
             val a11y = stringResource(R.string.alerts_live_check_a11y, title)
             TpButton(

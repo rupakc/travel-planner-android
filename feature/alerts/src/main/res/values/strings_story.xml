@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_story_title">Price story</string>
+    <string name="alerts_story_loading">Loading the price story…</string>
+    <string name="alerts_story_error_load">Could not load the price story.</string>
+    <string name="alerts_story_verdict_great">Great price</string>
+    <string name="alerts_story_verdict_good">Good price</string>
+    <string name="alerts_story_verdict_typical">Typical price</string>
+    <string name="alerts_story_verdict_high">High price</string>
+    <string name="alerts_story_verdict_label">Price level: %1$s</string>
+    <string name="alerts_story_advice_pending">Waiting for the first price check.</string>
+    <string name="alerts_story_advice_below_target">At or below your target, by %1$s.</string>
+    <string name="alerts_story_advice_near_target">Just %1$s above your target.</string>
+    <string name="alerts_story_advice_at_lowest">The lowest price seen so far.</string>
+    <string name="alerts_story_advice_below_typical">Below the usual range for this trip.</string>
+    <string name="alerts_story_advice_within_typical">Within the usual range.</string>
+    <string name="alerts_story_advice_above_typical">Above the usual range.</string>
+    <string name="alerts_story_advice_generic">See the price history below.</string>
+    <string name="alerts_story_checked_today">Checked today</string>
+    <string name="alerts_story_latest">Latest observed price</string>
+    <string name="alerts_story_estimate">Estimate: %1$s. This is not an observed price.</string>
+    <string name="alerts_story_chart_point">%1$s on %2$s</string>
+    <string name="alerts_story_chart_typical">Typical range</string>
+    <string name="alerts_story_chart_lowest">Lowest: %1$s</string>
+    <string name="alerts_story_chart_target">Target: %1$s</string>
+    <string name="alerts_story_chart_baseline">First seen: %1$s</string>
+    <string name="alerts_story_chart_none">No price checks yet.</string>
+    <string name="alerts_story_tip_title">Timing tip</string>
+    <string name="alerts_story_tip_button">Get a timing tip</string>
+    <string name="alerts_story_tip_ai">AI-generated</string>
+    <string name="alerts_story_tip_loading">Thinking…</string>
+    <string name="alerts_story_tip_error">Could not get a tip right now.</string>
+    <string name="alerts_story_tip_limit">The AI limit is reached for this month.</string>
+    <string name="alerts_story_chart_first">First check</string>
+    <string name="alerts_story_chart_latest">Latest check</string>
+    <string name="alerts_story_chart_previous">Previous check</string>
+    <string name="alerts_story_chart_next">Next check</string>
+    <string name="alerts_story_chart_help">Touch the chart or swipe to step through the checks.</string>
+    <string name="alerts_story_caught">Caught a drop of %1$s since you started watching.</string>
+    <string name="alerts_story_open">Price story</string>
+    <string name="alerts_story_open_a11y">Price story for %1$s</string>
+    <string name="alerts_story_close">Close</string>
+    <string name="alerts_story_tip_billing">AI is unavailable right now because billing is off.</string>
+    <string name="alerts_story_tip_no_data">No price has been observed yet, so there is no tip to give.</string>
+    <string name="alerts_story_tip_unsupported">Timing tips are only available for flights.</string>
+    <string name="alerts_story_not_found">This watch no longer exists.</string>
+    <plurals name="alerts_story_chart_label">
+        <item quantity="one">Price history: %1$d checks from %2$s to %3$s</item>
+        <item quantity="other">Price history: %1$d checks from %2$s to %3$s</item>
+    </plurals>
+    <plurals name="alerts_story_advice_checks_paused">
+        <item quantity="one">Live price checks are paused. The last check was %1$d day ago.</item>
+        <item quantity="other">Live price checks are paused. The last check was %1$d days ago.</item>
+    </plurals>
+    <plurals name="alerts_story_advice_steady">
+        <item quantity="one">Steady for the last %1$d day.</item>
+        <item quantity="other">Steady for the last %1$d days.</item>
+    </plurals>
+    <plurals name="alerts_story_advice_few_checks">
+        <item quantity="one">Only %1$d check so far, so there is not much to compare yet.</item>
+        <item quantity="other">Only %1$d checks so far, so there is not much to compare yet.</item>
+    </plurals>
+    <plurals name="alerts_story_checked_ago">
+        <item quantity="one">Checked %1$d day ago</item>
+        <item quantity="other">Checked %1$d days ago</item>
+    </plurals>
+    <plurals name="alerts_story_chart_few">
+        <item quantity="one">%1$d check so far. A chart appears after two checks.</item>
+        <item quantity="other">%1$d checks so far. A chart appears after two checks.</item>
+    </plurals>
+</resources>

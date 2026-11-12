@@ -34,7 +34,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -60,22 +63,32 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertTab
 import io.github.rupakc.travelplanner.core.domain.alerts.AnyWatch
 import io.github.rupakc.travelplanner.core.domain.alerts.Tone
+import io.github.rupakc.travelplanner.core.model.alerts.AlertKind
 import io.github.rupakc.travelplanner.core.model.alerts.FareWatch
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.core.ui.watch.ToneBox
 import io.github.rupakc.travelplanner.feature.alerts.savings.SavingsHeaderRoute
+import io.github.rupakc.travelplanner.feature.alerts.story.PriceStorySheet
+import io.github.rupakc.travelplanner.feature.alerts.story.StoryGateViewModel
 import java.time.Instant
 
 /** Watched prices (top-level: the shell draws the app bar). */
 @Composable
-fun WatchedPricesRoute(onReplanned: () -> Unit, onSearch: () -> Unit, modifier: Modifier = Modifier, viewModel: AlertsViewModel = hiltViewModel()) {
+fun WatchedPricesRoute(
+    onReplanned: () -> Unit,
+    onSearch: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: AlertsViewModel = hiltViewModel(),
+    gate: StoryGateViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { if (it == AlertsEffect.Replanned) onReplanned() }
     }
-    AlertsScreen(state, viewModel::onEvent, onSearch, modifier, header = { SavingsHeaderRoute() })
+    val storyAvailable by gate.available.collectAsStateWithLifecycle()
+    AlertsScreen(state, viewModel::onEvent, onSearch, modifier, header = { SavingsHeaderRoute() }, storyAvailable = storyAvailable)
 }
 
 /** Stateless Alerts screen (web AlertsPage). */
@@ -87,7 +100,9 @@ fun AlertsScreen(
     modifier: Modifier = Modifier,
     /** Slot under the title: the savings tally (stateful, so the stateless screen stays previewable). */
     header: @Composable () -> Unit = {},
+    storyAvailable: Boolean = false,
 ) {
+    var storyKey by rememberSaveable { mutableStateOf<String?>(null) }
     val grid = rememberLazyGridState()
     val reduceMotion = rememberReduceMotion()
     val snackbar = remember { SnackbarHostState() }
@@ -122,10 +137,20 @@ fun AlertsScreen(
             if (state.livePrices == false) full("unavailable") { ToneBox(Tone.WARN) { Text(stringResource(R.string.alerts_live_unavailable)) } }
             when {
                 state.loading -> loading()
-                else -> content(state, onEvent, onSearch, open)
+                else -> content(state, onEvent, onSearch, open, onStory = if (storyAvailable) ({ key: String -> storyKey = key }) else null)
             }
         }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+    }
+
+    storyKey?.let { key ->
+        val watch = state.watches.firstOrNull { it.key == key }
+        val kind = watch?.let { AlertKind.from(it.kind) }
+        if (watch == null || kind == null) {
+            storyKey = null
+        } else {
+            PriceStorySheet(kind, watch.id, watchTitle(watch, state.placeNames), onDismiss = { storyKey = null })
+        }
     }
 
     state.liveCheck?.let { live ->
@@ -191,7 +216,13 @@ private fun LazyGridScope.loading() {
     }
 }
 
-private fun LazyGridScope.content(state: AlertsUiState, onEvent: (AlertsEvent) -> Unit, onSearch: () -> Unit, open: (String) -> Unit) {
+private fun LazyGridScope.content(
+    state: AlertsUiState,
+    onEvent: (AlertsEvent) -> Unit,
+    onSearch: () -> Unit,
+    open: (String) -> Unit,
+    onStory: ((String) -> Unit)?,
+) {
     if (state.faresFailed) {
         full("fares-error") {
             ToneBox(Tone.WARN, live = true) {
@@ -242,8 +273,8 @@ private fun LazyGridScope.content(state: AlertsUiState, onEvent: (AlertsEvent) -
         }
         return
     }
-    section("active", R.string.alerts_active, state.active, state, onEvent, open)
-    section("past", R.string.alerts_past, state.past, state, onEvent, open)
+    section("active", R.string.alerts_active, state.active, state, onEvent, open, onStory)
+    section("past", R.string.alerts_past, state.past, state, onEvent, open, onStory)
 }
 
 private fun LazyGridScope.section(
@@ -253,6 +284,7 @@ private fun LazyGridScope.section(
     state: AlertsUiState,
     onEvent: (AlertsEvent) -> Unit,
     open: (String) -> Unit,
+    onStory: ((String) -> Unit)?,
 ) {
     if (list.isEmpty()) return
     full("$key-header") {
@@ -281,6 +313,7 @@ private fun LazyGridScope.section(
                     onReplan = { onEvent(AlertsEvent.Replan(item.key, it)) },
                     onOpenLink = open,
                     onLiveCheck = { onEvent(AlertsEvent.LiveCheck(item.key)) },
+                    onStory = onStory?.let { show -> { show(item.key) } },
                 ),
         )
     }

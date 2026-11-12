@@ -33,6 +33,8 @@ class TelemetryRegistryMirrorTest {
             TelemetryEvents.COMPLETENESS_VIEW,
             TelemetryEvents.ONBOARDING_STEP,
             TelemetryEvents.ONBOARDING_RESULT,
+            TelemetryEvents.ALERT_STORY_VIEW,
+            TelemetryEvents.ALERT_ADVICE,
         )
 
     @Test
@@ -75,6 +77,9 @@ class TelemetryRegistryMirrorTest {
                 TelemetryEnums.COMPLETENESS_SURFACE to 2,
                 TelemetryEnums.ONBOARDING_STEP_ACTION to 4,
                 TelemetryEnums.ONBOARDING_TYPE to 8,
+                TelemetryEnums.ALERT_KIND to 4,
+                TelemetryEnums.ALERT_VERDICT to 5,
+                TelemetryEnums.ALERT_ADVICE_OUTCOME to 3,
             )
         for ((set, size) in sets) {
             assertEquals(size, set.size)

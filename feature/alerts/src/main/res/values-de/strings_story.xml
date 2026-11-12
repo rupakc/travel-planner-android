@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_story_title">Preisverlauf</string>
+    <string name="alerts_story_loading">Preisverlauf wird geladen …</string>
+    <string name="alerts_story_error_load">Der Preisverlauf konnte nicht geladen werden.</string>
+    <string name="alerts_story_verdict_great">Sehr guter Preis</string>
+    <string name="alerts_story_verdict_good">Guter Preis</string>
+    <string name="alerts_story_verdict_typical">Üblicher Preis</string>
+    <string name="alerts_story_verdict_high">Hoher Preis</string>
+    <string name="alerts_story_verdict_label">Preisniveau: %1$s</string>
+    <string name="alerts_story_advice_pending">Die erste Preisprüfung steht noch aus.</string>
+    <string name="alerts_story_advice_below_target">Auf oder unter deinem Zielpreis, um %1$s.</string>
+    <string name="alerts_story_advice_near_target">Nur %1$s über deinem Zielpreis.</string>
+    <string name="alerts_story_advice_at_lowest">Der bisher niedrigste Preis.</string>
+    <string name="alerts_story_advice_below_typical">Unter dem üblichen Bereich für diese Reise.</string>
+    <string name="alerts_story_advice_within_typical">Im üblichen Bereich.</string>
+    <string name="alerts_story_advice_above_typical">Über dem üblichen Bereich.</string>
+    <string name="alerts_story_advice_generic">Siehe den Preisverlauf unten.</string>
+    <string name="alerts_story_checked_today">Heute geprüft</string>
+    <string name="alerts_story_latest">Zuletzt beobachteter Preis</string>
+    <string name="alerts_story_estimate">Schätzung: %1$s. Das ist kein beobachteter Preis.</string>
+    <string name="alerts_story_chart_point">%1$s am %2$s</string>
+    <string name="alerts_story_chart_typical">Üblicher Bereich</string>
+    <string name="alerts_story_chart_lowest">Niedrigster: %1$s</string>
+    <string name="alerts_story_chart_target">Ziel: %1$s</string>
+    <string name="alerts_story_chart_baseline">Erster Preis: %1$s</string>
+    <string name="alerts_story_chart_none">Noch keine Preisprüfungen.</string>
+    <string name="alerts_story_tip_title">Timing-Tipp</string>
+    <string name="alerts_story_tip_button">Timing-Tipp holen</string>
+    <string name="alerts_story_tip_ai">KI-generiert</string>
+    <string name="alerts_story_tip_loading">Einen Moment …</string>
+    <string name="alerts_story_tip_error">Derzeit ist kein Tipp verfügbar.</string>
+    <string name="alerts_story_tip_limit">Das KI-Limit für diesen Monat ist erreicht.</string>
+    <string name="alerts_story_chart_first">Erste Prüfung</string>
+    <string name="alerts_story_chart_latest">Letzte Prüfung</string>
+    <string name="alerts_story_chart_previous">Vorherige Prüfung</string>
+    <string name="alerts_story_chart_next">Nächste Prüfung</string>
+    <string name="alerts_story_chart_help">Tippe auf das Diagramm oder wische, um die Prüfungen durchzugehen.</string>
+    <string name="alerts_story_caught">Ein Preisrückgang von %1$s erfasst, seit du beobachtest.</string>
+    <string name="alerts_story_open">Preisverlauf</string>
+    <string name="alerts_story_open_a11y">Preisverlauf für %1$s</string>
+    <string name="alerts_story_close">Schließen</string>
+    <string name="alerts_story_tip_billing">KI ist gerade nicht verfügbar, weil die Abrechnung deaktiviert ist.</string>
+    <string name="alerts_story_tip_no_data">Es wurde noch kein Preis beobachtet, daher gibt es keinen Tipp.</string>
+    <string name="alerts_story_tip_unsupported">Timing-Tipps gibt es nur für Flüge.</string>
+    <string name="alerts_story_not_found">Diese Beobachtung gibt es nicht mehr.</string>
+    <plurals name="alerts_story_chart_label">
+        <item quantity="one">Preisverlauf: %1$d Prüfungen von %2$s bis %3$s</item>
+        <item quantity="other">Preisverlauf: %1$d Prüfungen von %2$s bis %3$s</item>
+    </plurals>
+    <plurals name="alerts_story_advice_checks_paused">
+        <item quantity="one">Live-Preisprüfungen sind pausiert. Die letzte Prüfung war vor %1$d Tag.</item>
+        <item quantity="other">Live-Preisprüfungen sind pausiert. Die letzte Prüfung war vor %1$d Tagen.</item>
+    </plurals>
+    <plurals name="alerts_story_advice_steady">
+        <item quantity="one">Stabil seit %1$d Tag.</item>
+        <item quantity="other">Stabil seit %1$d Tagen.</item>
+    </plurals>
+    <plurals name="alerts_story_advice_few_checks">
+        <item quantity="one">Erst %1$d Prüfung, daher gibt es noch wenig zu vergleichen.</item>
+        <item quantity="other">Erst %1$d Prüfungen, daher gibt es noch wenig zu vergleichen.</item>
+    </plurals>
+    <plurals name="alerts_story_checked_ago">
+        <item quantity="one">Vor %1$d Tag geprüft</item>
+        <item quantity="other">Vor %1$d Tagen geprüft</item>
+    </plurals>
+    <plurals name="alerts_story_chart_few">
+        <item quantity="one">Erst %1$d Prüfung. Nach zwei Prüfungen erscheint ein Diagramm.</item>
+        <item quantity="other">Erst %1$d Prüfungen. Nach zwei Prüfungen erscheint ein Diagramm.</item>
+    </plurals>
+</resources>
