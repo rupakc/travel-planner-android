@@ -20,7 +20,7 @@ class LoginViewModelTest {
     private val consent = FakeConsentRepository()
 
     private fun vm(providers: Map<String, AuthProviderInfo> = emptyMap(), repo: FakeAuthProvidersRepository = FakeAuthProvidersRepository(providers)) =
-        LoginViewModel(FakeAuthRepository(), SavedStateHandle(), repo, consent)
+        loginViewModel(FakeAuthRepository(), providers = repo, consent = consent)
 
     @Test
     fun `tapping Google shows coming soon for Google`() =

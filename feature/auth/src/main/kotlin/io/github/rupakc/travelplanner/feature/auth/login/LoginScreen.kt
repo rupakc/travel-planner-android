@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,6 +69,8 @@ internal fun LoginRoute(
     onLoggedIn: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel(),
     serverViewModel: ServerViewModel = hiltViewModel(),
+    onSignUp: () -> Unit = {},
+    onForgotPassword: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val server by serverViewModel.state.collectAsStateWithLifecycle()
@@ -90,6 +93,8 @@ internal fun LoginRoute(
             serverViewModel.onEvent(ServerEvent.Open)
             showServer = true
         },
+        onSignUp = onSignUp,
+        onForgotPassword = onForgotPassword,
     )
     if (showServer) {
         ServerSheet(
@@ -117,6 +122,8 @@ internal fun LoginScreen(
     modifier: Modifier = Modifier,
     serverUrl: String = "",
     onOpenServer: () -> Unit = {},
+    onSignUp: () -> Unit = {},
+    onForgotPassword: () -> Unit = {},
 ) {
     val focus = LocalFocusManager.current
     AuthBackdrop(modifier) {
@@ -138,6 +145,7 @@ internal fun LoginScreen(
                         TpButton(stringResource(R.string.auth_server), onOpenServer, variant = TpButtonVariant.Tonal)
                     }
                 }
+                state.pending?.let { PendingAccountCard(it, onEvent) }
                 SocialSignIn(state.comingSoonProvider, onEvent)
                 OrDivider()
                 AuthTextField(
@@ -166,6 +174,14 @@ internal fun LoginScreen(
                         onEvent(LoginEvent.Submit)
                     },
                 )
+                if (state.resetAvailable) {
+                    TpButton(
+                        stringResource(R.string.auth_su_login_forgot),
+                        onForgotPassword,
+                        variant = TpButtonVariant.Text,
+                        tid = "login.forgot",
+                    )
+                }
                 TpButton(
                     text = stringResource(if (state.loading) R.string.auth_signing_in else R.string.auth_sign_in),
                     onClick = { onEvent(LoginEvent.Submit) },
@@ -175,12 +191,22 @@ internal fun LoginScreen(
                 )
             }
         }
-        Text(
-            stringResource(R.string.auth_no_registration),
-            style = TravelTheme.typography.bodySmall,
-            color = TravelTheme.colors.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+        if (state.signupAvailable) {
+            TpButton(
+                stringResource(R.string.auth_su_login_create),
+                onSignUp,
+                variant = TpButtonVariant.Tonal,
+                modifier = Modifier.fillMaxWidth(),
+                tid = "login.create_account",
+            )
+        } else {
+            Text(
+                stringResource(R.string.auth_no_registration),
+                style = TravelTheme.typography.bodySmall,
+                color = TravelTheme.colors.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
         TpButton(
             text =
                 if (serverUrl.isBlank()) {
@@ -196,6 +222,58 @@ internal fun LoginScreen(
             onClick = { onEvent(LoginEvent.OpenPrivacyChoices) },
             variant = TpButtonVariant.Text,
             tid = "privacy.choices",
+        )
+    }
+}
+
+/** `403 account_pending`: the account still waits for its confirmation email; resend needs the full address. */
+@Composable
+private fun PendingAccountCard(pending: PendingAccount, onEvent: (LoginEvent) -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(TravelTheme.colors.secondaryContainer, TravelShape.Input)
+            .padding(TravelTheme.spacing.md)
+            .semantics { liveRegion = LiveRegionMode.Polite },
+        verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
+    ) {
+        Text(
+            stringResource(R.string.auth_su_pending_title),
+            style = TravelTheme.typography.titleSmall,
+            color = TravelTheme.colors.onSecondaryContainer,
+            modifier = Modifier.semantics { heading() },
+        )
+        Text(
+            pending.hint?.let { stringResource(R.string.auth_su_pending_body, it) } ?: stringResource(R.string.auth_su_pending_no_hint),
+            style = TravelTheme.typography.bodyMedium,
+            color = TravelTheme.colors.onSecondaryContainer,
+        )
+        pending.error?.let { AuthErrorBanner(it) }
+        if (pending.sent) {
+            Text(stringResource(R.string.auth_su_pending_sent), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSecondaryContainer)
+        }
+        AuthTextField(
+            value = pending.email,
+            onValueChange = { onEvent(LoginEvent.PendingEmailChanged(it)) },
+            label = stringResource(R.string.auth_su_pending_email),
+            placeholder = stringResource(R.string.auth_su_email_placeholder),
+            contentType = ContentType.EmailAddress,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done, autoCorrectEnabled = false),
+            keyboardActions = KeyboardActions(onDone = { onEvent(LoginEvent.ResendPending) }),
+        )
+        TpButton(
+            text =
+                when {
+                    pending.sending -> stringResource(R.string.auth_su_pending_sending)
+                    pending.cooldownSeconds > 0 -> stringResource(R.string.auth_check_resend_in, pending.cooldownSeconds)
+                    else -> stringResource(R.string.auth_su_pending_resend)
+                },
+            onClick = { onEvent(LoginEvent.ResendPending) },
+            enabled = pending.canResend,
+            loading = pending.sending,
+            variant = TpButtonVariant.Tonal,
+            modifier = Modifier.fillMaxWidth(),
+            tid = "login.pending_resend",
         )
     }
 }

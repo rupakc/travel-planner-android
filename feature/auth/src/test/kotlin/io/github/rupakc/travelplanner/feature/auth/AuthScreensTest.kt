@@ -30,6 +30,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import io.github.rupakc.travelplanner.feature.auth.login.FakeAuthProvidersRepository
 import io.github.rupakc.travelplanner.feature.auth.login.LoginRoute
 import io.github.rupakc.travelplanner.feature.auth.login.LoginViewModel
+import io.github.rupakc.travelplanner.feature.auth.login.loginViewModel
 import io.github.rupakc.travelplanner.feature.auth.password.ChangePasswordRoute
 import io.github.rupakc.travelplanner.feature.auth.password.ChangePasswordViewModel
 import io.github.rupakc.travelplanner.feature.auth.server.ServerViewModel
@@ -53,7 +54,7 @@ class AuthScreensTest {
 
     @Test
     fun `server sheet opens from login and saves a new address`() {
-        val vm = LoginViewModel(FakeAuthRepository(), SavedStateHandle(), FakeAuthProvidersRepository(), FakeConsentRepository())
+        val vm = loginViewModel(FakeAuthRepository())
         val server = serverVm()
         compose.setContent { TravelTheme { LoginRoute({}, vm, server) } }
         compose.onNodeWithText("Server: http://10.0.2.2:8001").performScrollTo().performClick()
@@ -69,7 +70,7 @@ class AuthScreensTest {
     @Test
     fun `unreachable server gets its own copy and a server action`() {
         val auth = FakeAuthRepository().apply { loginResult = AppResult.Failure(AppError.Network("java.net.ConnectException: failed")) }
-        val vm = LoginViewModel(auth, SavedStateHandle(), FakeAuthProvidersRepository(), FakeConsentRepository())
+        val vm = loginViewModel(auth)
         val server = serverVm()
         compose.setContent { TravelTheme { LoginRoute({}, vm, server) } }
         compose.onNodeWithText("Username").performTextInput("alice")
@@ -85,7 +86,7 @@ class AuthScreensTest {
     fun `login error from the server is shown and sign in stays available`() {
         val auth = FakeAuthRepository().apply { loginResult = AppResult.Failure(AppError.Unauthorized("Invalid username or password")) }
         var loggedIn = 0
-        val vm = LoginViewModel(auth, SavedStateHandle(), FakeAuthProvidersRepository(), FakeConsentRepository())
+        val vm = loginViewModel(auth)
         compose.setContent { TravelTheme(themeMode = ThemeMode.LIGHT) { LoginRoute({ loggedIn++ }, vm, serverVm()) } }
 
         compose.onNodeWithText("Sign In").assertIsNotEnabled()
@@ -102,7 +103,7 @@ class AuthScreensTest {
     fun `successful login reports once`() {
         val auth = FakeAuthRepository()
         var loggedIn = 0
-        val vm = LoginViewModel(auth, SavedStateHandle(), FakeAuthProvidersRepository(), FakeConsentRepository())
+        val vm = loginViewModel(auth)
         compose.setContent { TravelTheme(themeMode = ThemeMode.DARK) { LoginRoute({ loggedIn++ }, vm, serverVm()) } }
         compose.onNodeWithText("Username").performTextInput("alice")
         compose.onNodeWithText("Password").performTextInput("secret")
@@ -113,7 +114,7 @@ class AuthScreensTest {
 
     @Test
     fun `password toggle is labelled and describes its state`() {
-        val vm = LoginViewModel(FakeAuthRepository(), SavedStateHandle(), FakeAuthProvidersRepository(), FakeConsentRepository())
+        val vm = loginViewModel(FakeAuthRepository())
         compose.setContent { TravelTheme { LoginRoute({}, vm, serverVm()) } }
         // Below the social sign-in buttons: scroll it into view before tapping.
         compose.onNodeWithContentDescription("Show password")

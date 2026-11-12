@@ -12,6 +12,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import io.github.rupakc.travelplanner.feature.auth.login.FakeAuthProvidersRepository
 import io.github.rupakc.travelplanner.feature.auth.login.LoginEvent
 import io.github.rupakc.travelplanner.feature.auth.login.LoginViewModel
+import io.github.rupakc.travelplanner.feature.auth.login.loginViewModel
 import io.github.rupakc.travelplanner.feature.auth.password.ChangePasswordEvent
 import io.github.rupakc.travelplanner.feature.auth.password.ChangePasswordViewModel
 import io.github.rupakc.travelplanner.feature.auth.password.PasswordField
@@ -28,7 +29,7 @@ class LoginViewModelTest {
 
     private val auth = FakeAuthRepository()
 
-    private fun vm(saved: SavedStateHandle = SavedStateHandle()) = LoginViewModel(auth, saved, FakeAuthProvidersRepository(), FakeConsentRepository())
+    private fun vm(saved: SavedStateHandle = SavedStateHandle()) = loginViewModel(auth, saved)
 
     private fun LoginViewModel.fill(user: String = "alice", pass: String = "secret") {
         onEvent(LoginEvent.UsernameChanged(user))

@@ -17,7 +17,7 @@ sealed interface AuthMessage {
 }
 
 /** Errors that mean "no usable server": they get their own copy and a "Server" action on Login. */
-private fun AppError.serverProblem(): AuthMessage? =
+internal fun AppError.serverProblem(): AuthMessage? =
     when (this) {
         is AppError.NotConfigured -> AuthMessage.Local(R.string.auth_error_not_configured, suggestServer = true)
         is AppError.Network -> AuthMessage.Local(R.string.auth_error_network, suggestServer = true)

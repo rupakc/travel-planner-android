@@ -173,3 +173,11 @@ class FakeGameEvents : GameEvents {
         flow.tryEmit(delta)
     }
 }
+
+/** Settable [AuthFlags]. */
+class FakeAuthConfigRepository(
+    var flags: io.github.rupakc.travelplanner.core.data.repository.AuthFlags = io.github.rupakc.travelplanner.core.data.repository.AuthFlags(),
+) :
+    io.github.rupakc.travelplanner.core.data.repository.AuthConfigRepository {
+    override suspend fun flags() = flags
+}
