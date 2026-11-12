@@ -91,7 +91,7 @@ private val EXPANDED_WIDTH = 840.dp
 private val LIST_PANE_WIDTH = 380.dp
 
 /** Number of lazy items above the first section (summary, banner, remix ×2, best value, budget, ease, search). */
-private const val HEADER_ITEMS = 8
+private const val HEADER_ITEMS = 9
 
 /**
  * Stateless results screen. Compact: one scrolling column (summary → banners → tools →

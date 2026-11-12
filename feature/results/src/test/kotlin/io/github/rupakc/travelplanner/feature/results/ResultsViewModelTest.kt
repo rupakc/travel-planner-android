@@ -360,6 +360,7 @@ class ResultsViewModelTest {
                     TestAppDispatchers(main.testDispatcher),
                     SavedStateHandle(),
                     PlaceNameLookup(slow),
+                    fakeJourney.journey,
                 )
             vm.state.test {
                 search.start(request)
@@ -393,6 +394,7 @@ class ResultsViewModelTest {
                     TestAppDispatchers(main.testDispatcher),
                     saved,
                     PlaceNameLookup(search),
+                    fakeJourney.journey,
                 )
             first.state.test {
                 search.start(request)
@@ -416,6 +418,7 @@ class ResultsViewModelTest {
                     TestAppDispatchers(main.testDispatcher),
                     saved,
                     PlaceNameLookup(FakeSearchRepository()),
+                    fakeJourney.journey,
                 )
             restored.state.test {
                 val s = expectMostRecentItem()
