@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Expenses / Money tab (Phase 1/2 T12). Hand-maintained. -->
+    <string name="money_title">खर्च</string>
+    <string name="money_add">खर्च जोड़ें</string>
+    <string name="money_edit_title">खर्च बदलें</string>
+    <string name="money_edit">बदलें</string>
+    <string name="money_delete">हटाएँ</string>
+    <string name="money_empty">अभी कोई खर्च नहीं। पहला जोड़ें।</string>
+    <string name="money_no_date">तारीख नहीं</string>
+    <string name="money_totals">कुल</string>
+    <string name="money_no_totals">अभी तक कुछ खर्च नहीं हुआ।</string>
+    <string name="money_usd_estimate">अनुमान: लगभग %1$s USD</string>
+    <string name="money_unconverted">बदला नहीं गया: %1$s</string>
+    <string name="money_rate_dated">1 USD = %1$s %2$s (%3$s की दर)</string>
+    <string name="money_rate">1 USD = %1$s %2$s</string>
+    <string name="money_pending_not_counted">सिंक की प्रतीक्षा वाले खर्च अभी कुल में नहीं हैं।</string>
+    <string name="money_waiting_sync">सिंक की प्रतीक्षा में</string>
+    <string name="money_delete_failed">वह खर्च हटाया नहीं जा सका। उसे वापस रख दिया गया है।</string>
+    <string name="money_queue_failed">डिवाइस पर सेव नहीं हो सका। फिर कोशिश करें।</string>
+    <string name="money_load_failed">खर्च लोड नहीं हो सके।</string>
+    <string name="money_cat_flights">उड़ानें</string>
+    <string name="money_cat_lodging">ठहरना</string>
+    <string name="money_cat_food">खाना</string>
+    <string name="money_cat_transport">परिवहन</string>
+    <string name="money_cat_activities">गतिविधियाँ</string>
+    <string name="money_cat_shopping">खरीदारी</string>
+    <string name="money_cat_fees">शुल्क</string>
+    <string name="money_cat_other">अन्य</string>
+    <string name="money_err_amount">0 से अधिक ऐसी राशि डालें जो %1$s के लिए सही हो (दशमलव उसी मुद्रा के अनुसार)।</string>
+    <string name="money_err_currency">सही मुद्रा चुनें।</string>
+    <string name="money_err_category">एक श्रेणी चुनें।</string>
+    <string name="money_err_note">नोट 140 अक्षरों तक रखें।</string>
+    <string name="money_err_date">तारीख YYYY-MM-DD रूप में डालें।</string>
+    <string name="money_err_generic">यह खर्च सेव नहीं हो सका। फिर कोशिश करें।</string>
+    <string name="money_err_limit">इस यात्रा में 2000 खर्च की सीमा पूरी हो गई है।</string>
+    <string name="money_amount">राशि</string>
+    <string name="money_note">नोट (वैकल्पिक)</string>
+    <string name="money_date">तारीख</string>
+</resources>

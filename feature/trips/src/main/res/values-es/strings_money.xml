@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Expenses / Money tab (Phase 1/2 T12). Hand-maintained. -->
+    <string name="money_title">Gastos</string>
+    <string name="money_add">Añadir gasto</string>
+    <string name="money_edit_title">Editar gasto</string>
+    <string name="money_edit">Editar</string>
+    <string name="money_delete">Eliminar</string>
+    <string name="money_empty">Aún no hay gastos. Añade el primero.</string>
+    <string name="money_no_date">Sin fecha</string>
+    <string name="money_totals">Totales</string>
+    <string name="money_no_totals">Aún no has gastado nada.</string>
+    <string name="money_usd_estimate">Estimación: unos %1$s USD</string>
+    <string name="money_unconverted">Sin convertir: %1$s</string>
+    <string name="money_rate_dated">1 USD = %1$s %2$s (tipo de cambio del %3$s)</string>
+    <string name="money_rate">1 USD = %1$s %2$s</string>
+    <string name="money_pending_not_counted">Los gastos pendientes de sincronizar aún no están en los totales.</string>
+    <string name="money_waiting_sync">Pendiente de sincronizar</string>
+    <string name="money_delete_failed">No se pudo eliminar el gasto. Lo hemos vuelto a poner.</string>
+    <string name="money_queue_failed">No se pudo guardar en el dispositivo. Inténtalo de nuevo.</string>
+    <string name="money_load_failed">No se pudieron cargar los gastos.</string>
+    <string name="money_cat_flights">Vuelos</string>
+    <string name="money_cat_lodging">Alojamiento</string>
+    <string name="money_cat_food">Comida</string>
+    <string name="money_cat_transport">Transporte</string>
+    <string name="money_cat_activities">Actividades</string>
+    <string name="money_cat_shopping">Compras</string>
+    <string name="money_cat_fees">Comisiones</string>
+    <string name="money_cat_other">Otros</string>
+    <string name="money_err_amount">Introduce un importe mayor que 0 válido para %1$s (con los decimales que admite esa moneda).</string>
+    <string name="money_err_currency">Elige una moneda válida.</string>
+    <string name="money_err_category">Elige una categoría.</string>
+    <string name="money_err_note">La nota admite 140 caracteres como máximo.</string>
+    <string name="money_err_date">Escribe la fecha como AAAA-MM-DD.</string>
+    <string name="money_err_generic">No se pudo guardar el gasto. Inténtalo de nuevo.</string>
+    <string name="money_err_limit">Este viaje ha alcanzado el límite de 2000 gastos.</string>
+    <string name="money_amount">Importe</string>
+    <string name="money_note">Nota (opcional)</string>
+    <string name="money_date">Fecha</string>
+</resources>

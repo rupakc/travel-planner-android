@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Expenses / Money tab (Phase 1/2 T12). Hand-maintained. -->
+    <string name="money_title">Ausgaben</string>
+    <string name="money_add">Ausgabe hinzufügen</string>
+    <string name="money_edit_title">Ausgabe bearbeiten</string>
+    <string name="money_edit">Bearbeiten</string>
+    <string name="money_delete">Löschen</string>
+    <string name="money_empty">Noch keine Ausgaben. Füge die erste hinzu.</string>
+    <string name="money_no_date">Kein Datum</string>
+    <string name="money_totals">Summen</string>
+    <string name="money_no_totals">Noch nichts ausgegeben.</string>
+    <string name="money_usd_estimate">Schätzung: etwa %1$s USD</string>
+    <string name="money_unconverted">Nicht umgerechnet: %1$s</string>
+    <string name="money_rate_dated">1 USD = %1$s %2$s (Kurs vom %3$s)</string>
+    <string name="money_rate">1 USD = %1$s %2$s</string>
+    <string name="money_pending_not_counted">Ausgaben, die noch synchronisiert werden, sind noch nicht in den Summen.</string>
+    <string name="money_waiting_sync">Wartet auf Synchronisierung</string>
+    <string name="money_delete_failed">Die Ausgabe konnte nicht gelöscht werden. Sie wurde wiederhergestellt.</string>
+    <string name="money_queue_failed">Auf dem Gerät konnte nicht gespeichert werden. Versuch es noch einmal.</string>
+    <string name="money_load_failed">Ausgaben konnten nicht geladen werden.</string>
+    <string name="money_cat_flights">Flüge</string>
+    <string name="money_cat_lodging">Unterkunft</string>
+    <string name="money_cat_food">Essen</string>
+    <string name="money_cat_transport">Transport</string>
+    <string name="money_cat_activities">Aktivitäten</string>
+    <string name="money_cat_shopping">Einkäufe</string>
+    <string name="money_cat_fees">Gebühren</string>
+    <string name="money_cat_other">Sonstiges</string>
+    <string name="money_err_amount">Gib einen Betrag über 0 ein, der zu %1$s passt (mit den Dezimalstellen dieser Währung).</string>
+    <string name="money_err_currency">Wähle eine gültige Währung.</string>
+    <string name="money_err_category">Wähle eine Kategorie.</string>
+    <string name="money_err_note">Die Notiz darf höchstens 140 Zeichen haben.</string>
+    <string name="money_err_date">Gib das Datum als JJJJ-MM-TT ein.</string>
+    <string name="money_err_generic">Die Ausgabe konnte nicht gespeichert werden. Versuch es noch einmal.</string>
+    <string name="money_err_limit">Diese Reise hat das Limit von 2000 Ausgaben erreicht.</string>
+    <string name="money_amount">Betrag</string>
+    <string name="money_note">Notiz (optional)</string>
+    <string name="money_date">Datum</string>
+</resources>

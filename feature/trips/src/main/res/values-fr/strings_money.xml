@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Expenses / Money tab (Phase 1/2 T12). Hand-maintained. -->
+    <string name="money_title">Dépenses</string>
+    <string name="money_add">Ajouter une dépense</string>
+    <string name="money_edit_title">Modifier la dépense</string>
+    <string name="money_edit">Modifier</string>
+    <string name="money_delete">Supprimer</string>
+    <string name="money_empty">Aucune dépense pour l\'instant. Ajoutez la première.</string>
+    <string name="money_no_date">Sans date</string>
+    <string name="money_totals">Totaux</string>
+    <string name="money_no_totals">Rien de dépensé pour l\'instant.</string>
+    <string name="money_usd_estimate">Estimation : environ %1$s USD</string>
+    <string name="money_unconverted">Non converti : %1$s</string>
+    <string name="money_rate_dated">1 USD = %1$s %2$s (taux du %3$s)</string>
+    <string name="money_rate">1 USD = %1$s %2$s</string>
+    <string name="money_pending_not_counted">Les dépenses en attente de synchronisation ne sont pas encore dans les totaux.</string>
+    <string name="money_waiting_sync">En attente de synchronisation</string>
+    <string name="money_delete_failed">Impossible de supprimer cette dépense. Elle a été remise.</string>
+    <string name="money_queue_failed">Enregistrement impossible sur l\'appareil. Réessayez.</string>
+    <string name="money_load_failed">Impossible de charger les dépenses.</string>
+    <string name="money_cat_flights">Vols</string>
+    <string name="money_cat_lodging">Hébergement</string>
+    <string name="money_cat_food">Repas</string>
+    <string name="money_cat_transport">Transport</string>
+    <string name="money_cat_activities">Activités</string>
+    <string name="money_cat_shopping">Achats</string>
+    <string name="money_cat_fees">Frais</string>
+    <string name="money_cat_other">Autre</string>
+    <string name="money_err_amount">Saisissez un montant supérieur à 0, valide pour %1$s (avec les décimales de cette devise).</string>
+    <string name="money_err_currency">Choisissez une devise valide.</string>
+    <string name="money_err_category">Choisissez une catégorie.</string>
+    <string name="money_err_note">La note ne peut pas dépasser 140 caractères.</string>
+    <string name="money_err_date">Saisissez la date au format AAAA-MM-JJ.</string>
+    <string name="money_err_generic">Impossible d\'enregistrer cette dépense. Réessayez.</string>
+    <string name="money_err_limit">Ce voyage a atteint la limite de 2000 dépenses.</string>
+    <string name="money_amount">Montant</string>
+    <string name="money_note">Note (facultatif)</string>
+    <string name="money_date">Date</string>
+</resources>
