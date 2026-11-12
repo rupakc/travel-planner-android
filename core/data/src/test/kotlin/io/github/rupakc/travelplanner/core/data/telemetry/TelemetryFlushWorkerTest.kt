@@ -94,13 +94,13 @@ class TelemetryFlushWorkerTest {
         }
 
     @Test
-    fun `config off clears and succeeds`() =
+    fun `config off or failed lookup succeeds and keeps the queue`() =
         runBlocking {
             store.append(listOf(event()))
             config.settings = null
             assertEquals(ListenableWorker.Result.success(), worker().doWork())
             assertTrue(sender.sent.isEmpty())
-            assertTrue(store.claim(NOW_MS).isEmpty())
+            assertEquals(1, store.claim(NOW_MS).size)
         }
 
     @Test

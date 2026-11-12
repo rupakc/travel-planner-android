@@ -31,10 +31,13 @@ internal class TelemetryFlushWorker
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
             val settings = config.telemetrySettings()
-            if (!consent.allowedNow() || settings == null) {
+            if (!consent.allowedNow()) {
                 store.clear()
                 return Result.success()
             }
+            // Null is "off" or a failed config lookup; the engine clears the queue when the server really has
+            // telemetry off, so never delete events here.
+            if (settings == null) return Result.success()
             val rest = ArrayDeque(store.claim(clock.now().toEpochMilli()))
             // The batch handed to the sender whose outcome is unknown if this run is interrupted.
             val inFlight = ArrayList<QueuedEvent>()
@@ -49,7 +52,7 @@ internal class TelemetryFlushWorker
                 withContext(NonCancellable) {
                     val gone = java.util.Collections.newSetFromMap(java.util.IdentityHashMap<QueuedEvent, Boolean>())
                     gone.addAll(inFlight)
-                    runCatching { store.append(rest.filter { it !in gone }) }
+                    if (consent.allowedNow()) runCatching { store.append(rest.filter { it !in gone }) }
                 }
                 throw t
             }
