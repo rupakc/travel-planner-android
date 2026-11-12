@@ -20,8 +20,10 @@ import javax.inject.Singleton
         RecentSearchEntity::class,
         SeenNotificationEntity::class,
         PlanDraftEntity::class,
+        OfflinePackEntity::class,
+        OutboxEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class TravelDatabase : RoomDatabase() {
@@ -35,6 +37,10 @@ abstract class TravelDatabase : RoomDatabase() {
 
     abstract fun planDraftDao(): PlanDraftDao
 
+    abstract fun offlinePackDao(): OfflinePackDao
+
+    abstract fun outboxDao(): OutboxDao
+
     companion object {
         const val NAME = "travel-planner.db"
     }
@@ -47,7 +53,9 @@ object DatabaseModule {
     fun database(
         @ApplicationContext context: Context,
     ): TravelDatabase =
-        Room.databaseBuilder(context, TravelDatabase::class.java, TravelDatabase.NAME).build()
+        Room.databaseBuilder(context, TravelDatabase::class.java, TravelDatabase.NAME)
+            .addMigrations(TravelMigrations.MIGRATION_1_2)
+            .build()
 
     @Provides fun planDao(db: TravelDatabase): PlanDao = db.planDao()
 
@@ -58,4 +66,8 @@ object DatabaseModule {
     @Provides fun seenNotificationDao(db: TravelDatabase): SeenNotificationDao = db.seenNotificationDao()
 
     @Provides fun planDraftDao(db: TravelDatabase): PlanDraftDao = db.planDraftDao()
+
+    @Provides fun offlinePackDao(db: TravelDatabase): OfflinePackDao = db.offlinePackDao()
+
+    @Provides fun outboxDao(db: TravelDatabase): OutboxDao = db.outboxDao()
 }

@@ -21,4 +21,6 @@ dependencies {
     testImplementation(libs.okhttp.mockwebserver)
     testImplementation(projects.core.testing)
     testImplementation(libs.androidx.work.testing)
+    testImplementation(libs.androidx.room.runtime)
+    testImplementation(libs.androidx.room.ktx)
 }

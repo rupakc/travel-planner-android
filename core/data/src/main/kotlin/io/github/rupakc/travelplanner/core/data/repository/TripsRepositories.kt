@@ -118,4 +118,9 @@ interface OfflinePackRepository {
 
     /** Deletes every pack and the outbox of the current user. */
     suspend fun purgeAll()
+
+    companion object {
+        /** `AppError.Unknown.message` of a [save] that failed because the device storage is full. */
+        const val STORAGE_FULL = "storage_full"
+    }
 }

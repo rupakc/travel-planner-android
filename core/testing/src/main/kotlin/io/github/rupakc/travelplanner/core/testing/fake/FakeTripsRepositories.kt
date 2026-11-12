@@ -2,8 +2,11 @@ package io.github.rupakc.travelplanner.core.testing.fake
 
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.repository.ExpensesRepository
+import io.github.rupakc.travelplanner.core.data.repository.FlushResult
 import io.github.rupakc.travelplanner.core.data.repository.JournalRepository
 import io.github.rupakc.travelplanner.core.data.repository.OfflinePackRepository
+import io.github.rupakc.travelplanner.core.data.repository.Outbox
+import io.github.rupakc.travelplanner.core.data.repository.OutboxRequest
 import io.github.rupakc.travelplanner.core.data.repository.PrepRepository
 import io.github.rupakc.travelplanner.core.data.repository.RecapRepository
 import io.github.rupakc.travelplanner.core.data.repository.TripsRepository
@@ -187,5 +190,24 @@ class FakeOfflinePackRepository : OfflinePackRepository {
     override suspend fun purgeAll() {
         calls += "purgeAll"
         packs.value = emptyMap()
+    }
+}
+
+/** In-memory [Outbox]: records queued requests (a repeated key replaces) and counts flushes. */
+class FakeOutbox : Outbox {
+    val queued = MutableStateFlow<List<OutboxRequest>>(emptyList())
+    var enqueueResult: AppResult<Unit> = AppResult.Success(Unit)
+    var flushes = 0
+
+    override suspend fun enqueue(request: OutboxRequest): AppResult<Unit> {
+        if (enqueueResult is AppResult.Success) queued.value = queued.value.filterNot { it.key == request.key } + request
+        return enqueueResult
+    }
+
+    override fun pendingKeys(): Flow<Set<String>> = queued.map { list -> list.map { it.key }.toSet() }
+
+    override suspend fun flush(userId: String?): FlushResult {
+        flushes++
+        return FlushResult()
     }
 }
