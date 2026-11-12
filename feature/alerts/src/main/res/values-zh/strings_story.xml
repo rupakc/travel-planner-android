@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_story_title">价格走势</string>
+    <string name="alerts_story_loading">正在加载价格走势…</string>
+    <string name="alerts_story_error_load">无法加载价格走势。</string>
+    <string name="alerts_story_verdict_great">价格极佳</string>
+    <string name="alerts_story_verdict_good">价格不错</string>
+    <string name="alerts_story_verdict_typical">价格正常</string>
+    <string name="alerts_story_verdict_high">价格偏高</string>
+    <string name="alerts_story_verdict_label">价格水平：%1$s</string>
+    <string name="alerts_story_advice_pending">正在等待首次价格检查。</string>
+    <string name="alerts_story_advice_below_target">已达到或低于目标价，低 %1$s。</string>
+    <string name="alerts_story_advice_near_target">仅比目标价高 %1$s。</string>
+    <string name="alerts_story_advice_at_lowest">迄今见到的最低价。</string>
+    <string name="alerts_story_advice_below_typical">低于此行程的常见价格区间。</string>
+    <string name="alerts_story_advice_within_typical">在常见价格区间内。</string>
+    <string name="alerts_story_advice_above_typical">高于常见价格区间。</string>
+    <string name="alerts_story_advice_generic">请查看下方的价格历史。</string>
+    <string name="alerts_story_checked_today">今天已检查</string>
+    <string name="alerts_story_latest">最近观测到的价格</string>
+    <string name="alerts_story_estimate">估算：%1$s。这不是实际观测到的价格。</string>
+    <string name="alerts_story_chart_point">%2$s：%1$s</string>
+    <string name="alerts_story_chart_typical">常见区间</string>
+    <string name="alerts_story_chart_lowest">最低：%1$s</string>
+    <string name="alerts_story_chart_target">目标：%1$s</string>
+    <string name="alerts_story_chart_baseline">首次价格：%1$s</string>
+    <string name="alerts_story_chart_none">尚无价格检查。</string>
+    <string name="alerts_story_tip_title">时机建议</string>
+    <string name="alerts_story_tip_button">获取时机建议</string>
+    <string name="alerts_story_tip_ai">AI 生成</string>
+    <string name="alerts_story_tip_loading">思考中…</string>
+    <string name="alerts_story_tip_error">暂时无法获取建议。</string>
+    <string name="alerts_story_tip_limit">本月 AI 额度已用完。</string>
+    <string name="alerts_story_chart_first">第一次检查</string>
+    <string name="alerts_story_chart_latest">最近一次检查</string>
+    <string name="alerts_story_chart_previous">上一次检查</string>
+    <string name="alerts_story_chart_next">下一次检查</string>
+    <string name="alerts_story_chart_help">触摸图表或滑动即可逐次查看检查记录。</string>
+    <string name="alerts_story_caught">自开始关注以来，已捕捉到 %1$s 的降价。</string>
+    <string name="alerts_story_open">价格走势</string>
+    <string name="alerts_story_open_a11y">%1$s 的价格走势</string>
+    <string name="alerts_story_close">关闭</string>
+    <string name="alerts_story_tip_billing">由于计费已关闭，AI 暂时不可用。</string>
+    <string name="alerts_story_tip_no_data">尚未观察到任何价格，因此暂无建议。</string>
+    <string name="alerts_story_tip_unsupported">时机建议仅适用于航班。</string>
+    <string name="alerts_story_not_found">该关注已不存在。</string>
+    <plurals name="alerts_story_chart_label">
+        <item quantity="other">价格历史：%2$s 至 %3$s，共 %1$d 次检查</item>
+    </plurals>
+    <plurals name="alerts_story_advice_checks_paused">
+        <item quantity="other">实时价格检查已暂停。上次检查是在 %1$d 天前。</item>
+    </plurals>
+    <plurals name="alerts_story_advice_steady">
+        <item quantity="other">过去 %1$d 天价格稳定。</item>
+    </plurals>
+    <plurals name="alerts_story_advice_few_checks">
+        <item quantity="other">目前只检查了 %1$d 次，可比较的内容还不多。</item>
+    </plurals>
+    <plurals name="alerts_story_checked_ago">
+        <item quantity="other">%1$d 天前已检查</item>
+    </plurals>
+    <plurals name="alerts_story_chart_few">
+        <item quantity="other">目前有 %1$d 次检查。检查两次后会显示图表。</item>
+    </plurals>
+</resources>

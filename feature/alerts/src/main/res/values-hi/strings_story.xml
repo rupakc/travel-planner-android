@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alerts_story_title">कीमत की कहानी</string>
+    <string name="alerts_story_loading">कीमत की कहानी लोड हो रही है…</string>
+    <string name="alerts_story_error_load">कीमत की कहानी लोड नहीं हो सकी।</string>
+    <string name="alerts_story_verdict_great">बहुत बढ़िया कीमत</string>
+    <string name="alerts_story_verdict_good">अच्छी कीमत</string>
+    <string name="alerts_story_verdict_typical">सामान्य कीमत</string>
+    <string name="alerts_story_verdict_high">ऊँची कीमत</string>
+    <string name="alerts_story_verdict_label">कीमत का स्तर: %1$s</string>
+    <string name="alerts_story_advice_pending">पहली कीमत जाँच की प्रतीक्षा है।</string>
+    <string name="alerts_story_advice_below_target">आपके लक्ष्य पर या उससे %1$s कम।</string>
+    <string name="alerts_story_advice_near_target">आपके लक्ष्य से बस %1$s ऊपर।</string>
+    <string name="alerts_story_advice_at_lowest">अब तक देखी गई सबसे कम कीमत।</string>
+    <string name="alerts_story_advice_below_typical">इस यात्रा की सामान्य सीमा से कम।</string>
+    <string name="alerts_story_advice_within_typical">सामान्य सीमा के भीतर।</string>
+    <string name="alerts_story_advice_above_typical">सामान्य सीमा से ऊपर।</string>
+    <string name="alerts_story_advice_generic">नीचे कीमत इतिहास देखें।</string>
+    <string name="alerts_story_checked_today">आज जाँचा गया</string>
+    <string name="alerts_story_latest">आखिरी देखी गई कीमत</string>
+    <string name="alerts_story_estimate">अनुमान: %1$s। यह देखी गई कीमत नहीं है।</string>
+    <string name="alerts_story_chart_point">%2$s को %1$s</string>
+    <string name="alerts_story_chart_typical">सामान्य सीमा</string>
+    <string name="alerts_story_chart_lowest">सबसे कम: %1$s</string>
+    <string name="alerts_story_chart_target">लक्ष्य: %1$s</string>
+    <string name="alerts_story_chart_baseline">पहली देखी कीमत: %1$s</string>
+    <string name="alerts_story_chart_none">अभी तक कोई कीमत जाँच नहीं हुई।</string>
+    <string name="alerts_story_tip_title">समय की सलाह</string>
+    <string name="alerts_story_tip_button">समय की सलाह पाएँ</string>
+    <string name="alerts_story_tip_ai">AI द्वारा बनाया गया</string>
+    <string name="alerts_story_tip_loading">सोच रहा है…</string>
+    <string name="alerts_story_tip_error">अभी सलाह नहीं मिल सकी।</string>
+    <string name="alerts_story_tip_limit">इस महीने की AI सीमा पूरी हो गई है।</string>
+    <string name="alerts_story_chart_first">पहली जाँच</string>
+    <string name="alerts_story_chart_latest">नवीनतम जाँच</string>
+    <string name="alerts_story_chart_previous">पिछली जाँच</string>
+    <string name="alerts_story_chart_next">अगली जाँच</string>
+    <string name="alerts_story_chart_help">जाँचों को देखने के लिए चार्ट को छुएँ या स्वाइप करें।</string>
+    <string name="alerts_story_caught">निगरानी शुरू करने के बाद से %1$s की गिरावट पकड़ी गई।</string>
+    <string name="alerts_story_open">कीमत की कहानी</string>
+    <string name="alerts_story_open_a11y">%1$s की कीमत की कहानी</string>
+    <string name="alerts_story_close">बंद करें</string>
+    <string name="alerts_story_tip_billing">बिलिंग बंद होने के कारण AI अभी उपलब्ध नहीं है।</string>
+    <string name="alerts_story_tip_no_data">अभी तक कोई कीमत नहीं देखी गई है, इसलिए कोई सुझाव नहीं है।</string>
+    <string name="alerts_story_tip_unsupported">समय के सुझाव केवल उड़ानों के लिए उपलब्ध हैं।</string>
+    <string name="alerts_story_not_found">यह वॉच अब मौजूद नहीं है।</string>
+    <plurals name="alerts_story_chart_label">
+        <item quantity="one">कीमत इतिहास: %2$s से %3$s तक %1$d जाँचें</item>
+        <item quantity="other">कीमत इतिहास: %2$s से %3$s तक %1$d जाँचें</item>
+    </plurals>
+    <plurals name="alerts_story_advice_checks_paused">
+        <item quantity="one">लाइव कीमत जाँच रुकी हुई है। आखिरी जाँच %1$d दिन पहले हुई थी।</item>
+        <item quantity="other">लाइव कीमत जाँच रुकी हुई है। आखिरी जाँच %1$d दिन पहले हुई थी।</item>
+    </plurals>
+    <plurals name="alerts_story_advice_steady">
+        <item quantity="one">पिछले %1$d दिन से स्थिर।</item>
+        <item quantity="other">पिछले %1$d दिनों से स्थिर।</item>
+    </plurals>
+    <plurals name="alerts_story_advice_few_checks">
+        <item quantity="one">अभी तक केवल %1$d जाँच हुई है, इसलिए तुलना के लिए ज़्यादा कुछ नहीं है।</item>
+        <item quantity="other">अभी तक केवल %1$d जाँचें हुई हैं, इसलिए तुलना के लिए ज़्यादा कुछ नहीं है।</item>
+    </plurals>
+    <plurals name="alerts_story_checked_ago">
+        <item quantity="one">%1$d दिन पहले जाँचा गया</item>
+        <item quantity="other">%1$d दिन पहले जाँचा गया</item>
+    </plurals>
+    <plurals name="alerts_story_chart_few">
+        <item quantity="one">अभी तक %1$d जाँच हुई है। दो जाँचों के बाद चार्ट दिखेगा।</item>
+        <item quantity="other">अभी तक %1$d जाँचें हुई हैं। दो जाँचों के बाद चार्ट दिखेगा।</item>
+    </plurals>
+</resources>
