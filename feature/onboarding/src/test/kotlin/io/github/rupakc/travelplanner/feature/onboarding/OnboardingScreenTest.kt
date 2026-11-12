@@ -39,11 +39,17 @@ class OnboardingScreenTest {
     private val profile = FakeProfileRepository()
     private val preferences = ScriptedPreferencesRepository()
     private var finished = 0
+    private var plannedTrip = false
 
     private fun launch(dark: Boolean = false): OnboardingViewModel {
         val vm = onboardingViewModel(profile, preferences)
         compose.setContent {
-            TravelTheme(themeMode = if (dark) ThemeMode.DARK else ThemeMode.LIGHT) { OnboardingRoute(onFinished = { finished++ }, viewModel = vm) }
+            TravelTheme(themeMode = if (dark) ThemeMode.DARK else ThemeMode.LIGHT) {
+                OnboardingRoute(onFinished = { plan ->
+                    finished++
+                    plannedTrip = plan
+                }, viewModel = vm)
+            }
         }
         return vm
     }
@@ -116,7 +122,7 @@ class OnboardingScreenTest {
     }
 
     @Test
-    fun `feature switches toggle and finishing goes through the notification rationale`() {
+    fun `feature switches toggle and the five steps end with the first-trip choice`() {
         val vm = launch()
         vm.onEvent(OnboardingEvent.Start)
         vm.onEvent(OnboardingEvent.Select("work"))
@@ -130,25 +136,39 @@ class OnboardingScreenTest {
         compose.onNode(sim).assertIsOn().performClick()
         compose.onNode(sim).assertIsOff()
 
-        compose.onNodeWithText("Finish").performClick()
+        compose.onNodeWithText("Continue").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Home and passport").assertExists()
+        compose.onNodeWithText("Skip setup").assertExists()
+        compose.onNodeWithText("Continue").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Stay on top of your trips").assertExists()
         click("Not now")
         compose.waitForIdle()
+        compose.onNodeWithText("Plan your first trip").assertExists()
+        click("Plan my first trip")
+        compose.waitForIdle()
         assertEquals(1, finished)
+        assertTrue(plannedTrip)
         assertTrue(profile.profileState.value.onboardingCompleted)
         assertTrue("sim" in profile.overridesState.value.disabled)
     }
 
     @Test
-    fun `sync failure scrolls its card into view`() {
+    fun `sync failure on the last step shows its card with retry`() {
         preferences.saveFailure = io.github.rupakc.travelplanner.core.common.AppError.Server(503, "Service unavailable")
         val vm = launch()
         vm.onEvent(OnboardingEvent.Start)
         repeat(6) { vm.onEvent(OnboardingEvent.Skip) }
         click("Continue")
         reveal(hasText("Search, results, My Plan and Settings are always on."))
-        compose.onNodeWithText("Finish").performClick()
+        compose.onNodeWithText("Continue").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Continue").performClick()
+        compose.waitForIdle()
+        click("Not now")
+        compose.waitForIdle()
+        click("Plan my first trip")
         compose.waitForIdle()
         compose.onNodeWithText("Couldn't save your preferences to your account").assertIsDisplayed()
         compose.onNodeWithText("Service unavailable").assertIsDisplayed()

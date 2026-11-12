@@ -71,4 +71,19 @@
     <string name="onboarding_notifications_title">अपनी यात्राओं पर नज़र रखें</string>
     <string name="onboarding_notifications_message">यात्रा से पहले रिमाइंडर, आपके देखे जा रहे दामों में गिरावट के अलर्ट और सफ़र के दौरान आसपास के सुझाव पाएँ। हर एक को आप सेटिंग में बंद कर सकते हैं।</string>
     <string name="onboarding_notifications_allow">सूचनाओं की अनुमति दें</string>
+    <!-- Shared 5-step flow: copy from the web onboarding namespace (web.* and steps.*) -->
+    <string name="onboarding_skip_all">सेटअप छोड़ें</string>
+    <string name="onboarding_resume">फिर से स्वागत है! हमने आपकी जगह सँभालकर रखी है, जहाँ छोड़ा था वहीं से आगे बढ़ें।</string>
+    <string name="onboarding_home_title">घर और पासपोर्ट</string>
+    <string name="onboarding_home_message">बताइए कि आप कहाँ से उड़ान भरते हैं और आपके पास कौन-सा पासपोर्ट है, ताकि हम वीज़ा जाँच सकें और सही उड़ानें ढूँढ सकें।</string>
+    <string name="onboarding_home_airport">घरेलू हवाई अड्डा</string>
+    <string name="onboarding_home_airport_placeholder">शहर या हवाई अड्डे का कोड</string>
+    <string name="onboarding_home_airport_hint">इस डिवाइस पर सहेजा जाता है, ताकि आपकी खोजें घर से शुरू हों।</string>
+    <string name="onboarding_passport">पासपोर्ट</string>
+    <string name="onboarding_passport_placeholder">आपकी नागरिकता, जैसे भारतीय</string>
+    <string name="onboarding_passport_hint">वीज़ा नियम जाँचने के लिए। आपकी प्राथमिकताओं में सहेजा जाता है।</string>
+    <string name="onboarding_first_trip_title">अपनी पहली यात्रा प्लान करें</string>
+    <string name="onboarding_first_trip_message">कोई गंतव्य खोजें, या %1$s से कहें कि वह आपको चौंका दे।</string>
+    <string name="onboarding_plan_first_trip">मेरी पहली यात्रा की योजना बनाएँ</string>
+    <string name="onboarding_just_explore">बस घूमकर देखें</string>
 </resources>

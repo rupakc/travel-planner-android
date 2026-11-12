@@ -70,4 +70,19 @@
     <string name="onboarding_notifications_title">随时掌握你的行程</string>
     <string name="onboarding_notifications_message">出发前收到行程提醒，关注项目降价时收到提醒，旅途中收到附近推荐。每一项都可以在设置中关闭。</string>
     <string name="onboarding_notifications_allow">允许通知</string>
+    <!-- Shared 5-step flow: copy from the web onboarding namespace (web.* and steps.*) -->
+    <string name="onboarding_skip_all">跳过设置</string>
+    <string name="onboarding_resume">欢迎回来！我们保存了你的进度，可以从上次离开的地方继续。</string>
+    <string name="onboarding_home_title">所在地与护照</string>
+    <string name="onboarding_home_message">告诉我们你从哪里出发、持有哪国护照，以便我们核查签证并找到合适的航班。</string>
+    <string name="onboarding_home_airport">常用出发机场</string>
+    <string name="onboarding_home_airport_placeholder">城市或机场代码</string>
+    <string name="onboarding_home_airport_hint">保存在此设备上，让你的搜索从家出发。</string>
+    <string name="onboarding_passport">护照</string>
+    <string name="onboarding_passport_placeholder">你的国籍，例如印度</string>
+    <string name="onboarding_passport_hint">用于查询签证规定，并保存到你的偏好设置。</string>
+    <string name="onboarding_first_trip_title">规划你的第一次旅行</string>
+    <string name="onboarding_first_trip_message">搜索目的地，或让 %1$s 给你一个惊喜。</string>
+    <string name="onboarding_plan_first_trip">规划我的第一次旅行</string>
+    <string name="onboarding_just_explore">随便看看</string>
 </resources>

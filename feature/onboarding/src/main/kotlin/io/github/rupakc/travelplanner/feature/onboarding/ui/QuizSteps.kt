@@ -51,6 +51,7 @@ internal fun WelcomeStep(state: OnboardingUiState, onEvent: (OnboardingEvent) ->
     OnboardingFrame(
         modifier = modifier,
         onClose = onClose.takeIf { state.fromSettings },
+        onSkipAll = skipAllAction(state, onEvent),
         actions = {
             TpButton(stringResource(R.string.onboarding_get_started), { onEvent(OnboardingEvent.Start) }, Modifier.fillMaxWidth())
         },
@@ -113,6 +114,7 @@ internal fun QuestionStep(state: OnboardingUiState, onEvent: (OnboardingEvent) -
         modifier = modifier,
         onBack = { onEvent(OnboardingEvent.Back) },
         onClose = onClose.takeIf { state.fromSettings },
+        onSkipAll = skipAllAction(state, onEvent),
         top = { StepProgress(step = state.questionIndex + 1, total = state.questionCount) },
         actions = {
             TpButton(stringResource(R.string.onboarding_skip), { onEvent(OnboardingEvent.Skip) }, variant = TpButtonVariant.Text)

@@ -157,6 +157,7 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - 2026-11-11 The anon id and the consent choice survive sign-out and are excluded from backup and device transfer.
 - 2026-11-11 `cold_start` is reported only for a process started in the foreground, for its first activity, not restored, and 60 s or less.
 - 2026-11-11 `POST /api/analytics/events` is skipped while telemetry is not allowed.
+- 2026-11-12 Shared onboarding (Phase 1/2 T7): `AccountRepository` is read through `@BindsOptionalOf` (local-only until bound); the new 14 strings are hand-copied from the web (`web.*`, `steps.*`) into values-<lang>/strings.xml instead of mapped, because bumping `web.sha` past e8c78cb breaks `feature:auth` (web min password 10 vs 8) and rewrites every `strings_web.xml`; map them when the pin moves. Home airport is `TravellerProfile.homeAirport` (device-local, like the web). `onboardingGraph` gained optional `onPlanFirstTrip`.
 
 ## Documentation and tooling
 

@@ -71,4 +71,19 @@
     <string name="onboarding_notifications_title">Behalte deine Reisen im Blick</string>
     <string name="onboarding_notifications_message">Erhalte Reiseerinnerungen vor der Abreise, Preisalarme für Beobachtetes und Vorschläge in der Nähe unterwegs. Jede Option kannst du in den Einstellungen ausschalten.</string>
     <string name="onboarding_notifications_allow">Benachrichtigungen erlauben</string>
+    <!-- Shared 5-step flow: copy from the web onboarding namespace (web.* and steps.*) -->
+    <string name="onboarding_skip_all">Einrichtung überspringen</string>
+    <string name="onboarding_resume">Willkommen zurück! Wir haben uns gemerkt, wo du warst, also kannst du direkt weitermachen.</string>
+    <string name="onboarding_home_title">Heimatort und Reisepass</string>
+    <string name="onboarding_home_message">Sag uns, von wo du fliegst und welchen Reisepass du hast, damit wir Visa prüfen und passende Flüge finden können.</string>
+    <string name="onboarding_home_airport">Heimatflughafen</string>
+    <string name="onboarding_home_airport_placeholder">Stadt oder Flughafencode</string>
+    <string name="onboarding_home_airport_hint">Wird auf diesem Gerät gespeichert, damit deine Suchen von zu Hause starten.</string>
+    <string name="onboarding_passport">Reisepass</string>
+    <string name="onboarding_passport_placeholder">Deine Staatsangehörigkeit, z. B. indisch</string>
+    <string name="onboarding_passport_hint">Damit prüfen wir die Visaregeln. Wird in deinen Einstellungen gespeichert.</string>
+    <string name="onboarding_first_trip_title">Plane deine erste Reise</string>
+    <string name="onboarding_first_trip_message">Suche nach einem Reiseziel oder lass dich von %1$s überraschen.</string>
+    <string name="onboarding_plan_first_trip">Meine erste Reise planen</string>
+    <string name="onboarding_just_explore">Einfach stöbern</string>
 </resources>

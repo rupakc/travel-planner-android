@@ -32,8 +32,12 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.unit.dp
+import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
+import io.github.rupakc.travelplanner.feature.onboarding.OnboardingEvent
+import io.github.rupakc.travelplanner.feature.onboarding.OnboardingUiState
 import io.github.rupakc.travelplanner.feature.onboarding.R
 
 /** Layout constants of the onboarding flow (defined once). */
@@ -57,6 +61,7 @@ internal fun OnboardingFrame(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     onClose: (() -> Unit)? = null,
+    onSkipAll: (() -> Unit)? = null,
     top: @Composable ColumnScope.() -> Unit = {},
     actions: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -73,6 +78,9 @@ internal fun OnboardingFrame(
                     }
                 }
                 Spacer(Modifier.weight(1f))
+                if (onSkipAll != null) {
+                    TpButton(stringResource(R.string.onboarding_skip_all), onSkipAll, variant = TpButtonVariant.Text)
+                }
                 if (onClose != null) {
                     IconButton(onClick = onClose) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.onboarding_close))
@@ -119,3 +127,7 @@ internal fun StepProgress(step: Int, total: Int, modifier: Modifier = Modifier) 
         Text(label, style = TravelTheme.typography.labelLarge, color = TravelTheme.colors.onSurfaceVariant)
     }
 }
+
+/** "Skip setup" in the top bar of every first-run step; none while saving or when retaking the quiz from Settings. */
+internal fun skipAllAction(state: OnboardingUiState, onEvent: (OnboardingEvent) -> Unit): (() -> Unit)? =
+    { onEvent(OnboardingEvent.SkipAll) }.takeUnless { state.fromSettings || state.saving }

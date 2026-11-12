@@ -32,10 +32,13 @@ import io.github.rupakc.travelplanner.core.domain.profile.DefaultTravellerClassi
 import io.github.rupakc.travelplanner.core.domain.profile.TravellerQuiz
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.feature.onboarding.ui.FeaturesStep
+import io.github.rupakc.travelplanner.feature.onboarding.ui.FirstTripStep
+import io.github.rupakc.travelplanner.feature.onboarding.ui.HomePassportStep
 import io.github.rupakc.travelplanner.feature.onboarding.ui.NotificationsStep
 import io.github.rupakc.travelplanner.feature.onboarding.ui.QuestionStep
 import io.github.rupakc.travelplanner.feature.onboarding.ui.ResultStep
 import io.github.rupakc.travelplanner.feature.onboarding.ui.WelcomeStep
+import io.github.rupakc.travelplanner.feature.onboarding.ui.skipAllAction
 
 /**
  * Wires [OnboardingViewModel]: system Back walks the steps, the notification permission is
@@ -43,7 +46,7 @@ import io.github.rupakc.travelplanner.feature.onboarding.ui.WelcomeStep
  * (or when a Settings re-run is closed with ✕ — nothing is saved then).
  */
 @Composable
-internal fun OnboardingRoute(onFinished: () -> Unit, viewModel: OnboardingViewModel = hiltViewModel()) {
+internal fun OnboardingRoute(onFinished: (planFirstTrip: Boolean) -> Unit, viewModel: OnboardingViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val permission =
@@ -52,11 +55,16 @@ internal fun OnboardingRoute(onFinished: () -> Unit, viewModel: OnboardingViewMo
         }
     BackHandler(enabled = state.stage in BACKABLE && !state.saving) { viewModel.onEvent(OnboardingEvent.Back) }
     BackHandler(enabled = state.stage == OnboardingStage.NOTIFICATIONS) { viewModel.onEvent(OnboardingEvent.NotificationsDone) }
-    LaunchedEffect(state.finished) { if (state.finished) onFinished() }
+    // Resumed on step 4 although the permission is already settled (or unsupported): nothing to ask.
+    LaunchedEffect(state.stage) {
+        if (state.stage == OnboardingStage.NOTIFICATIONS && !context.needsNotificationPermission()) viewModel.onEvent(OnboardingEvent.NotificationsDone)
+    }
+    LaunchedEffect(state.finished) { if (state.finished) onFinished(state.planFirstTrip) }
     OnboardingScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        onFinish = { viewModel.onEvent(OnboardingEvent.Finish(askNotifications = context.needsNotificationPermission())) },
+        onFinish = { viewModel.onEvent(OnboardingEvent.Finish) },
+        askNotifications = context.needsNotificationPermission(),
         onAllowNotifications = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 permission.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -64,11 +72,11 @@ internal fun OnboardingRoute(onFinished: () -> Unit, viewModel: OnboardingViewMo
                 viewModel.onEvent(OnboardingEvent.NotificationsDone)
             }
         },
-        onClose = onFinished,
+        onClose = { onFinished(false) },
     )
 }
 
-private val BACKABLE = setOf(OnboardingStage.QUESTION, OnboardingStage.RESULT, OnboardingStage.FEATURES)
+private val BACKABLE = setOf(OnboardingStage.QUESTION, OnboardingStage.RESULT, OnboardingStage.FEATURES, OnboardingStage.HOME_PASSPORT)
 
 private fun Context.needsNotificationPermission(): Boolean =
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -83,6 +91,7 @@ internal fun OnboardingScreen(
     onAllowNotifications: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
+    askNotifications: Boolean = false,
 ) {
     val reduceMotion = rememberReduceMotion()
     AnimatedContent(
@@ -112,8 +121,20 @@ internal fun OnboardingScreen(
                 FeaturesStep(state, onEvent, onFinish, onClose)
             }
 
+            OnboardingStage.HOME_PASSPORT -> {
+                HomePassportStep(state, onEvent, askNotifications)
+            }
+
             OnboardingStage.NOTIFICATIONS -> {
-                NotificationsStep(onAllow = onAllowNotifications, onLater = { onEvent(OnboardingEvent.NotificationsDone) })
+                NotificationsStep(
+                    onAllow = onAllowNotifications,
+                    onLater = { onEvent(OnboardingEvent.NotificationsDone) },
+                    onSkipAll = skipAllAction(state, onEvent),
+                )
+            }
+
+            OnboardingStage.FIRST_TRIP -> {
+                FirstTripStep(state, onEvent)
             }
         }
     }
@@ -185,3 +206,11 @@ private fun NotificationsLight() = Preview(OnboardingStage.NOTIFICATIONS, dark =
 @Preview(name = "Notifications – dark")
 @Composable
 private fun NotificationsDark() = Preview(OnboardingStage.NOTIFICATIONS, dark = true)
+
+@Preview(name = "Home and passport – light")
+@Composable
+private fun HomeLight() = Preview(OnboardingStage.HOME_PASSPORT, dark = false)
+
+@Preview(name = "First trip – dark")
+@Composable
+private fun FirstTripDark() = Preview(OnboardingStage.FIRST_TRIP, dark = true)

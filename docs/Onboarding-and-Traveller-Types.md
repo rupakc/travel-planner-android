@@ -38,6 +38,21 @@ Welcome → Q1 … Q6 → Result → Feature picker → (Notification rationale)
 - **State:** stage, question, answers, toggles and the seeding basis live in `SavedStateHandle`, so
   rotation and process death resume where the user was.
 
+### Shared five-step first run (Phase 1/2 parity, plan R5)
+
+The first run follows the web's five steps and the server's `onboarding.step`: 1 welcome, 2 how you travel (6 questions, result,
+feature picker), 3 home airport + passport, 4 notifications (shown only when `POST_NOTIFICATIONS` is still needed; the system dialog
+opens only after "Allow notifications"), 5 first trip ("Plan my first trip") or "Just explore".
+
+- Entering a step sends `PUT /account/onboarding {step, done:false}` (fire-and-forget) and resumes from `onboarding.step` ("Welcome back").
+- Finish (step 5): `PUT /preferences` (read-modify-write: quiz answers merged, a non-blank passport sets `nationality`; failure shows
+  Retry / "Continue without syncing"), then `{step:5, done:true, traveller_type}`. "Skip setup" sends `{step, done:true, skipped:true}`.
+- The home airport is device-local (`TravellerProfile.homeAirport`); the local quiz, classifier and profile are unchanged.
+- Gate for the app shell: `OnboardingGate.shouldShow(signedIn)` (pure rule `shouldShowOnboarding`): signed in, `GET /account` says
+  `onboarding.done == false`, once per process; a 404 or any error never shows it. `onboardingGraph(onFinished, onPlanFirstTrip)`
+  reports the first-trip choice. Telemetry: `onboarding_step {step, action}` and `onboarding_result {type, secondary}`.
+- Settings "Retake quiz" (edit mode) never calls the account endpoints.
+
 ### Edit mode (Settings → "Retake quiz")
 
 Navigate to `OnboardingRoute(fromSettings = true)`. Differences from the first run:
