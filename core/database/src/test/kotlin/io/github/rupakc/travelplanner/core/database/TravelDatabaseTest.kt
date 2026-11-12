@@ -83,4 +83,20 @@ class TravelDatabaseTest {
             db.planDraftDao().clear()
             assertNull(db.planDraftDao().get())
         }
+
+    @Test
+    fun `trip and expense caches replace per key and clear`() =
+        runTest {
+            val dao = db.tripCacheDao()
+            dao.upsertTrips(CachedTripsEntity("alice", "a", 1))
+            dao.upsertTrips(CachedTripsEntity("alice", "b", 2))
+            assertEquals("b", dao.trips("alice")?.json)
+            assertNull(dao.trips("bob"))
+            dao.upsertExpenses(CachedExpensesEntity("alice:7", "alice", 7, "x", 1))
+            assertEquals("x", dao.expenses("alice:7")?.json)
+            dao.clearTrips()
+            dao.clearExpenses()
+            assertNull(dao.trips("alice"))
+            assertNull(dao.expenses("alice:7"))
+        }
 }

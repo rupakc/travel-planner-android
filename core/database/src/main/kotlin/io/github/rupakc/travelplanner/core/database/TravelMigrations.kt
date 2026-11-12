@@ -21,4 +21,19 @@ object TravelMigrations {
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_outbox_userId_key` ON `outbox` (`userId`, `key`)")
             }
         }
+
+    /** Adds the cached trips list and cached expenses (cold-start offline). */
+    val MIGRATION_2_3: Migration =
+        object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `cached_trips` (`userId` TEXT NOT NULL, `json` TEXT NOT NULL, `savedAt` INTEGER NOT NULL, PRIMARY KEY(`userId`))",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `cached_expenses` (`key` TEXT NOT NULL, `userId` TEXT NOT NULL, " +
+                        "`tripId` INTEGER NOT NULL, `json` TEXT NOT NULL, `savedAt` INTEGER NOT NULL, PRIMARY KEY(`key`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_cached_expenses_userId` ON `cached_expenses` (`userId`)")
+            }
+        }
 }

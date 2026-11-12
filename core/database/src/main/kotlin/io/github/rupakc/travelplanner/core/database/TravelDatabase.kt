@@ -22,8 +22,10 @@ import javax.inject.Singleton
         PlanDraftEntity::class,
         OfflinePackEntity::class,
         OutboxEntity::class,
+        CachedTripsEntity::class,
+        CachedExpensesEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class TravelDatabase : RoomDatabase() {
@@ -41,6 +43,8 @@ abstract class TravelDatabase : RoomDatabase() {
 
     abstract fun outboxDao(): OutboxDao
 
+    abstract fun tripCacheDao(): TripCacheDao
+
     companion object {
         const val NAME = "travel-planner.db"
     }
@@ -54,7 +58,7 @@ object DatabaseModule {
         @ApplicationContext context: Context,
     ): TravelDatabase =
         Room.databaseBuilder(context, TravelDatabase::class.java, TravelDatabase.NAME)
-            .addMigrations(TravelMigrations.MIGRATION_1_2)
+            .addMigrations(TravelMigrations.MIGRATION_1_2, TravelMigrations.MIGRATION_2_3)
             .build()
 
     @Provides fun planDao(db: TravelDatabase): PlanDao = db.planDao()
@@ -70,4 +74,6 @@ object DatabaseModule {
     @Provides fun offlinePackDao(db: TravelDatabase): OfflinePackDao = db.offlinePackDao()
 
     @Provides fun outboxDao(db: TravelDatabase): OutboxDao = db.outboxDao()
+
+    @Provides fun tripCacheDao(db: TravelDatabase): TripCacheDao = db.tripCacheDao()
 }
