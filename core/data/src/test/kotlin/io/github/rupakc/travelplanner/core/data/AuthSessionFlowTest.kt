@@ -13,8 +13,10 @@ import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.TestNetwork
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSessionStore
 import java.util.Optional
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import org.junit.After
@@ -58,7 +60,7 @@ class AuthSessionFlowTest {
 
     @Test
     fun `login sends client android and stores the refresh token and expiry`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.enqueue(
                 json(200, """{"access_token":"at","token_type":"bearer","expires_in":3600,"refresh_token":"rt_1","user":{"username":"jane","id":"u1"}}"""),
             )
@@ -74,7 +76,7 @@ class AuthSessionFlowTest {
 
     @Test
     fun `an old-backend login response without refresh_token still signs in`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.enqueue(json(200, """{"access_token":"at","token_type":"bearer","user":{"username":"jane"}}"""))
             val store = FakeSessionStore()
             assertTrue(repo(store).login("jane", "pw") is AppResult.Success)
@@ -85,30 +87,36 @@ class AuthSessionFlowTest {
 
     @Test
     fun `logout revokes the refresh family best effort then clears everything`() =
-        runTest {
-            server.enqueue(json(204))
-            val store = FakeSessionStore(Session("at", User("jane"), refreshToken = "rt_9"))
-            repo(store).logout()
-            val req = server.takeRequest()
-            assertTrue(req.url.encodedPath.endsWith("/auth/logout"))
-            assertTrue(req.body?.utf8().orEmpty().contains("rt_9"))
-            assertNull(store.current())
-            assertEquals(1, cleared)
+        runTest(timeout = 30.seconds) {
+            // Real time: logout() bounds its network calls with withTimeoutOrNull, which virtual time would expire at once.
+            withContext(Dispatchers.Default) {
+                server.enqueue(json(204))
+                val store = FakeSessionStore(Session("at", User("jane"), refreshToken = "rt_9"))
+                repo(store).logout()
+                val req = server.takeRequest()
+                assertTrue(req.url.encodedPath.endsWith("/auth/logout"))
+                assertTrue(req.body?.utf8().orEmpty().contains("rt_9"))
+                assertNull(store.current())
+                assertEquals(1, cleared)
+            }
         }
 
     @Test
     fun `logout clears even when the server is unreachable`() =
-        runTest {
-            server.close()
-            val store = FakeSessionStore(Session("at", User("jane"), refreshToken = "rt_9"))
-            repo(store).logout()
-            assertNull(store.current())
-            assertEquals(1, cleared)
+        runTest(timeout = 30.seconds) {
+            // Real time: logout() bounds its network calls with withTimeoutOrNull, which virtual time would expire at once.
+            withContext(Dispatchers.Default) {
+                server.close()
+                val store = FakeSessionStore(Session("at", User("jane"), refreshToken = "rt_9"))
+                repo(store).logout()
+                assertNull(store.current())
+                assertEquals(1, cleared)
+            }
         }
 
     @Test
     fun `logoutAll clears on success and keeps the session on failure`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.enqueue(json(500, "{}"))
             server.enqueue(json(204))
             val store = FakeSessionStore(Session("at", User("jane"), refreshToken = "rt_9"))
@@ -122,7 +130,7 @@ class AuthSessionFlowTest {
 
     @Test
     fun `changePassword stores the returned tokens`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.enqueue(json(200, """{"access_token":"at2","token_type":"bearer","expires_in":3600,"refresh_token":"rt_2"}"""))
             val store = FakeSessionStore(Session("at", User("jane", requiresPasswordChange = true), refreshToken = "rt_1"))
             assertTrue(repo(store).changePassword("old", "new-password") is AppResult.Success)

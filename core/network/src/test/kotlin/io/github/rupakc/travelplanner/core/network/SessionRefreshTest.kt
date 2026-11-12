@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeSessionStore
 import java.time.Instant
 import java.time.ZoneOffset
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -69,7 +70,7 @@ class SessionRefreshTest {
 
     @Test
     fun `20 parallel 401s cause exactly one refresh call`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             val refreshes = AtomicInteger()
             server.dispatcher = dispatcher { refreshes.incrementAndGet().let { json(200, refreshOk) } }
             val net = network(session())
@@ -79,7 +80,7 @@ class SessionRefreshTest {
 
     @Test
     fun `rotated tokens are persisted before the retry`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             var storedAtRetry: Session? = null
             val net = network(session())
             server.dispatcher =
@@ -108,7 +109,7 @@ class SessionRefreshTest {
 
     @Test
     fun `refresh_stale re-reads the newest stored token and retries once`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             val store = FakeSessionStore(session())
             val used = mutableListOf<String>()
             server.dispatcher =
@@ -131,7 +132,7 @@ class SessionRefreshTest {
 
     @Test
     fun `refresh_stale twice is treated as invalid`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.dispatcher = dispatcher { json(401, """{"error_code":"refresh_stale"}""") }
             val net = network(session())
             net.authEvents.flow.test {
@@ -143,7 +144,7 @@ class SessionRefreshTest {
 
     @Test
     fun `refresh_invalid signs out and emits SessionExpired`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.dispatcher = dispatcher { json(401, """{"error_code":"refresh_invalid"}""") }
             val net = network(session())
             net.authEvents.flow.test {
@@ -156,7 +157,7 @@ class SessionRefreshTest {
 
     @Test
     fun `429 on refresh keeps the session`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.dispatcher = dispatcher { json(429, """{"detail":"slow down"}""", "Retry-After" to "60") }
             val net = network(session())
             runCatching { net.api<AuthApi>().me() }
@@ -165,7 +166,7 @@ class SessionRefreshTest {
 
     @Test
     fun `short Retry-After is waited out then the refresh succeeds`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             val calls = AtomicInteger()
             server.dispatcher =
                 dispatcher { if (calls.incrementAndGet() == 1) json(429, "{}", "Retry-After" to "0") else json(200, refreshOk) }
@@ -177,7 +178,7 @@ class SessionRefreshTest {
 
     @Test
     fun `an offline refresh keeps the session`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.dispatcher =
                 dispatcher { MockResponse.Builder().onRequestStart(mockwebserver3.SocketEffect.CloseSocket()).build() }
             val net = network(session())
@@ -188,7 +189,7 @@ class SessionRefreshTest {
 
     @Test
     fun `session_revoked refreshes once then signs out when still rejected`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             val refreshes = AtomicInteger()
             server.dispatcher =
                 object : Dispatcher() {
@@ -211,7 +212,7 @@ class SessionRefreshTest {
 
     @Test
     fun `an access token near expiry is refreshed before the call`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.dispatcher = dispatcher { json(200, refreshOk) }
             val net = network(session(expires = now + 30_000))
             net.api<AuthApi>().me()
@@ -221,7 +222,7 @@ class SessionRefreshTest {
 
     @Test
     fun `a token-only session keeps the old behaviour and never calls refresh`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             server.enqueue(json(401, """{"detail":"Invalid or expired token"}"""))
             val net = network(Session("tok", user))
             net.authEvents.flow.test {
@@ -234,7 +235,7 @@ class SessionRefreshTest {
 
     @Test
     fun `the token is never sent to a foreign host, and a foreign 401 never refreshes`() =
-        runTest {
+        runTest(timeout = 30.seconds) {
             val other = MockWebServer().apply { start() }
             other.enqueue(json(401, "{}"))
             val net = network(session())
