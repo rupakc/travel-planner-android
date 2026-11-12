@@ -46,10 +46,13 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.journey.RecapRules
+import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.Recap
 import io.github.rupakc.travelplanner.core.model.trips.RecapCountry
 import io.github.rupakc.travelplanner.core.model.trips.Trip
+import io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher
+import io.github.rupakc.travelplanner.core.ui.share.ShareLauncher
 import io.github.rupakc.travelplanner.feature.trips.R
 import io.github.rupakc.travelplanner.feature.trips.trip.TripTabContent
 import java.text.NumberFormat
@@ -72,11 +75,15 @@ fun RecapRoute(onWhereNext: (() -> Unit)?, modifier: Modifier = Modifier, phase:
     val context = LocalContext.current
     val chooser = stringResource(R.string.recap_share_chooser)
     val shareText = state.recap?.let { shareText(it) }
+    // Share links 2.0 (card + link with privacy options) when the backend has it; otherwise the plain-text share.
+    val shareLauncher = LocalShareLauncher.current
     RecapScreen(
         state = state,
         onEvent = viewModel::onEvent,
         onShare = {
-            if (shareText != null && share(context, shareText, chooser)) viewModel.onEvent(RecapEvent.Shared)
+            if (shareRecap(shareLauncher, state.recap) { shareText != null && share(context, shareText, chooser) }) {
+                viewModel.onEvent(RecapEvent.Shared)
+            }
         },
         onWhereNext =
             onWhereNext?.let { f ->
@@ -88,6 +95,18 @@ fun RecapRoute(onWhereNext: (() -> Unit)?, modifier: Modifier = Modifier, phase:
         modifier = modifier,
     )
 }
+
+/**
+ * Share the recap: the Share links 2.0 dialog when [launcher] exists (the trip's id is its plan id), else [legacy] (the plain-text
+ * sheet). True when a share was started.
+ */
+internal fun shareRecap(launcher: ShareLauncher?, recap: Recap?, legacy: () -> Boolean): Boolean =
+    if (launcher != null && recap != null) {
+        launcher.open(ShareKind.RECAP, recap.tripId)
+        true
+    } else {
+        legacy()
+    }
 
 /** The share text of a recap: counts and countries only, no amounts. */
 @Composable

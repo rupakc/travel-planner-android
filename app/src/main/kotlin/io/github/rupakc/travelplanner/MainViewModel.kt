@@ -77,6 +77,7 @@ fun MainUiState.shellMode(): ShellMode =
             },
         gameEnabled = flags.game && gameVisible,
         offlinePack = flags.offlinePack,
+        sharing = flags.sharing,
     )
 
 private const val HTTP_NOT_FOUND = 404

@@ -34,6 +34,8 @@ data class FeaturesDto(
     @SerialName("notifications_v2") val notificationsV2: Boolean = false,
     /** An Apple push key is configured (iOS only; informational on Android). */
     val apns: Boolean = false,
+    /** Share links 2.0 version (1 = `/shares` routes exist); null or 0 on older backends. */
+    val sharing: LenientInt = null,
 )
 
 /** `auth` of `GET /api/config`. [signupMode] is `open` | `invite`. */

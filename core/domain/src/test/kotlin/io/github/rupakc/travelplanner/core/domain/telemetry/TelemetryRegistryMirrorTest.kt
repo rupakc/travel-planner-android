@@ -40,6 +40,12 @@ class TelemetryRegistryMirrorTest {
             TelemetryEvents.NOTIF_QUIET_HOURS_CHANGE,
             TelemetryEvents.NOTIF_CAP_CHANGE,
             TelemetryEvents.NOTIF_OPEN,
+            TelemetryEvents.ALERT_SAVINGS_SHARE,
+            TelemetryEvents.SHARE_OPEN,
+            TelemetryEvents.SHARE_CREATE,
+            TelemetryEvents.SHARE_ACTION,
+            TelemetryEvents.SHARE_REVOKE,
+            TelemetryEvents.SHARE_VIEW,
         )
 
     @Test
@@ -87,6 +93,10 @@ class TelemetryRegistryMirrorTest {
                 TelemetryEnums.ALERT_KIND to 4,
                 TelemetryEnums.ALERT_VERDICT to 5,
                 TelemetryEnums.ALERT_ADVICE_OUTCOME to 3,
+                TelemetryEnums.ALERT_SAVINGS_SHARE_TARGET to 3,
+                TelemetryEnums.SHARE_KIND to 3,
+                TelemetryEnums.SHARE_DATES to 3,
+                TelemetryEnums.SHARE_TARGET to 7,
             )
         for ((set, size) in sets) {
             assertEquals(size, set.size)

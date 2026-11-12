@@ -83,5 +83,12 @@ class ShellTabsTest {
         assertEquals(all, decode(encode(all)))
         assertEquals(JourneyFlags.OFF, decode(encode(JourneyFlags.OFF)))
         assertEquals(on, decode(encode(on)))
+        assertEquals(JourneyFlags(sharing = true), decode(encode(JourneyFlags(sharing = true))))
+    }
+
+    @Test
+    fun `the shell follows the sharing flag`() {
+        assertEquals(false, MainUiState().shellMode().sharing)
+        assertEquals(true, MainUiState(flags = JourneyFlags(sharing = true)).shellMode().sharing)
     }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Hands the share-card PNG to the system share sheet (authority = ShareSheet.authority). -->
+        <provider
+            android:name=".create.ShareCardFileProvider"
+            android:authorities="${applicationId}.share.cards"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_card_paths" />
+        </provider>
+    </application>
+</manifest>

@@ -50,4 +50,14 @@ class JourneyFlagsTest {
         assertFalse(JourneyFlags(ClientConfigDto(features = all)).signupAvailable)
         assertFalse(JourneyFlags(ClientConfigDto(features = all, auth = AuthConfigDto(signupAvailable = true))).resetAvailable)
     }
+
+    @Test
+    fun `sharing needs features sharing of at least 1`() {
+        val on = TravelJson.decodeFromString(ClientConfigDto.serializer(), """{"features":{"accounts":true,"sharing":1}}""")
+        assertTrue(JourneyFlags(on).sharing)
+        val off = TravelJson.decodeFromString(ClientConfigDto.serializer(), """{"features":{"accounts":true,"sharing":0}}""")
+        assertFalse(JourneyFlags(off).sharing)
+        val absent = TravelJson.decodeFromString(ClientConfigDto.serializer(), """{"features":{"accounts":true}}""")
+        assertFalse(JourneyFlags(absent).sharing)
+    }
 }

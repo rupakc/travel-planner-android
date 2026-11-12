@@ -88,6 +88,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.ResetPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ShareCreateRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SignUpRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TripRoute
@@ -96,6 +97,8 @@ import io.github.rupakc.travelplanner.core.model.navigation.YouRoute
 import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
 import io.github.rupakc.travelplanner.core.ui.game.GameDeltaHost
 import io.github.rupakc.travelplanner.core.ui.privacy.ConsentPrompt
+import io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher
+import io.github.rupakc.travelplanner.core.ui.share.ShareLauncher
 import io.github.rupakc.travelplanner.feature.account.navigation.accountGraph
 import io.github.rupakc.travelplanner.feature.alerts.NotificationBellAction
 import io.github.rupakc.travelplanner.feature.alerts.navigation.alertsGraph
@@ -110,6 +113,7 @@ import io.github.rupakc.travelplanner.feature.play.navigation.playGraph
 import io.github.rupakc.travelplanner.feature.results.navigation.resultsGraph
 import io.github.rupakc.travelplanner.feature.search.navigation.searchGraph
 import io.github.rupakc.travelplanner.feature.settings.navigation.settingsGraph
+import io.github.rupakc.travelplanner.feature.share.navigation.shareCreateGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareGraph
 import io.github.rupakc.travelplanner.feature.trips.journal.journalTabContent
 import io.github.rupakc.travelplanner.feature.trips.money.moneyTabContent
@@ -146,7 +150,12 @@ fun TravelApp(
             onDispose { navController.removeOnDestinationChangedListener(screenTracker) }
         }
     }
-    CompositionLocalProvider(LocalUiEventSink provides uiEventSink) {
+    // Share links 2.0 entry points read this; null (no `features.sharing`) keeps the legacy plan share and hides the rest.
+    val shareLauncher =
+        remember(navController, shell.sharing) {
+            if (shell.sharing) ShareLauncher { kind, planId -> navController.navigate(ShareCreateRoute(kind.wire.orEmpty(), planId)) } else null
+        }
+    CompositionLocalProvider(LocalUiEventSink provides uiEventSink, LocalShareLauncher provides shareLauncher) {
         Box(Modifier.fillMaxSize()) {
             TravelAppContent(gate, remember { start }, navController, shell)
             // Over every destination (Login and Share included), above the system navigation bar.
@@ -164,6 +173,8 @@ data class ShellMode(
     val home: AppRoute = HomeRoute,
     val gameEnabled: Boolean = false,
     val offlinePack: Boolean = false,
+    /** Share links 2.0 is on (`features.sharing >= 1`). */
+    val sharing: Boolean = false,
 )
 
 /** The non-modal consent card: first run (no close button), reopened choices (current choice selected), or nothing. */
@@ -366,6 +377,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                     onOpenSettings = { navController.navigate(SettingsRoute) },
                 )
             }
+            shareCreateGraph(onClose = { navController.popBackStack() })
             shareGraph(
                 onBack = {
                     if (!navController.popBackStack()) {

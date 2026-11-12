@@ -92,4 +92,18 @@ class RecapScreenTest {
         show(RecapUiState(loading = false, recap = recap), whereNext = null)
         compose.onNodeWithText("Where next?").assertDoesNotExist()
     }
+
+    @Test
+    fun `share opens the share dialog for the trip when sharing 2 is on, else the legacy share`() {
+        val opened = mutableListOf<Pair<io.github.rupakc.travelplanner.core.model.share.ShareKind, Long?>>()
+        val launcher = io.github.rupakc.travelplanner.core.ui.share.ShareLauncher { kind, id -> opened += kind to id }
+        val recap = Recap(tripId = 12, title = "Lisbon")
+        var legacy = 0
+        assertEquals(true, shareRecap(launcher, recap) { legacy++ >= 0 })
+        assertEquals(listOf(io.github.rupakc.travelplanner.core.model.share.ShareKind.RECAP to 12L), opened)
+        assertEquals(0, legacy)
+        assertEquals(false, shareRecap(null, recap) { legacy++ < 0 })
+        assertEquals(1, legacy)
+        assertEquals(1, opened.size)
+    }
 }

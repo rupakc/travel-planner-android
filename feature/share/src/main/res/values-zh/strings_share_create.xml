@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_create_title_plan">分享这份计划</string>
+    <string name="share_create_title_recap">分享你的旅行回顾</string>
+    <string name="share_create_title_savings">分享你抓到的降价</string>
+    <string name="share_create_intro">选择链接显示的内容。你的邮箱、国籍和签证信息绝不会被分享。</string>
+    <string name="share_create_reveals">始终显示：标题、目的地、天数以及计划中的项目。</string>
+    <string name="share_create_options_legend">同时显示</string>
+    <string name="share_create_dates">日期</string>
+    <string name="share_create_dates_hidden">隐藏日期</string>
+    <string name="share_create_dates_month">仅显示年月</string>
+    <string name="share_create_dates_exact">精确日期</string>
+    <string name="share_create_dates_note">链接预览最多只显示年月。</string>
+    <string name="share_create_show_origin">我的出发地</string>
+    <string name="share_create_show_name">我的名字</string>
+    <string name="share_create_create">创建链接</string>
+    <string name="share_create_update">更新链接</string>
+    <string name="share_create_working">请稍候…</string>
+    <string name="share_create_url_label">分享链接</string>
+    <string name="share_create_action_native">分享…</string>
+    <string name="share_create_action_copy">复制链接</string>
+    <string name="share_create_status_created">链接已就绪</string>
+    <string name="share_create_status_updated">链接已更新</string>
+    <string name="share_create_status_copy">链接已复制</string>
+    <string name="share_create_status_revoked">链接已移除，不再有效。</string>
+    <string name="share_create_error_create">无法创建链接，请重试。</string>
+    <string name="share_create_error_share">无法分享。</string>
+    <string name="share_create_error_revoke">无法移除链接。</string>
+    <string name="share_create_error_unavailable">暂时无法分享链接。</string>
+    <string name="share_create_revoke">停止分享</string>
+    <string name="share_create_revoke_confirm">停止分享？拿到链接的人将无法再访问。</string>
+    <string name="share_create_revoke_yes">是，停止分享</string>
+    <string name="share_create_revoke_no">保留</string>
+    <string name="share_create_close">关闭</string>
+    <string name="share_create_text_plan">我在 Voyager 上的旅行计划</string>
+    <string name="share_create_text_recap">我在 Voyager 上的旅行回顾</string>
+    <string name="share_create_text_savings">我用 Voyager 抓到的降价</string>
+    <string name="share_create_offline">你已离线。请联网后再创建链接。</string>
+    <string name="share_create_card_unavailable">无法加载卡片，因此只分享链接。</string>
+    <string name="share_create_link_pending">选项已更改。请先更新链接再分享。</string>
+    <string name="share_create_chooser">分享方式</string>
+</resources>

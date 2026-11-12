@@ -42,7 +42,7 @@ other project dependencies). Each exports one graph function that `app` calls in
 | `feature:settings` | Preferences, taste graph, features, appearance, server, notifications | `SettingsRoute`, `PreferencesRoute`, `TasteProfileRoute`, `FeaturesRoute`, `AppearanceRoute`, `ServerRoute`, `NotificationSettingsRoute`, `SettingsEntryRoute` |
 | `feature:nearby` | Near me | `NearbyRoute` |
 | `feature:play` | Play: level, badges, streaks, recent awards, countries and bucket-list goal (`GameDeltaHost` celebrations live in `core:ui`) | `PlayRoute` |
-| `feature:share` | Public share viewer | `ShareRoute` |
+| `feature:share` | Public share viewer; Share links 2.0 dialog (options, card, share sheet) | `ShareRoute`, `ShareCreateRoute` |
 
 Every feature screen is implemented; `core:ui` still has the foundation's `FeaturePlaceholder`, which no route uses.
 The graph signatures are listed in [Foundation-Interfaces](Foundation-Interfaces.md) section 5.

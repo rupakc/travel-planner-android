@@ -55,7 +55,9 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.export.PlanCalendarEvent
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
+import io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
 import io.github.rupakc.travelplanner.feature.plan.model.PlanItineraryUi
@@ -227,6 +229,8 @@ internal fun TripHeader(summary: TripSummary, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (PlanDetailEvent) -> Unit, onWatchTrip: (() -> Unit)?) {
+    // Share links 2.0 (options, card, share sheet) when the backend has it; otherwise the legacy plan link.
+    val shareLauncher = LocalShareLauncher.current
     Column(Modifier.padding(top = TravelTheme.spacing.lg), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
         TpButton(
             stringResource(R.string.plan_action_open_results),
@@ -236,7 +240,7 @@ private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (
         FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             TpButton(
                 stringResource(R.string.plan_action_share_link),
-                onClick = { onEvent(PlanDetailEvent.ShareLink) },
+                onClick = { shareLauncher?.open(ShareKind.PLAN, summary.id) ?: onEvent(PlanDetailEvent.ShareLink) },
                 variant = TpButtonVariant.Tonal,
                 loading = state.shareBusy,
                 enabled = !state.offline,

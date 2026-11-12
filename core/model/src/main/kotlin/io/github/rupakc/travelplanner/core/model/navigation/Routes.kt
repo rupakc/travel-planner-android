@@ -96,6 +96,12 @@ sealed interface AppRoute
 /** Public share-link viewer (`/share/{token}`). */
 @Serializable data class ShareRoute(val token: String) : AppRoute
 
+/**
+ * The share dialog (Share links 2.0): [kind] is a `ShareKind.wire` (`plan`, `recap`, `savings`), [planId] the plan or trip's
+ * plan (null for savings). Features open it through `LocalShareLauncher`; only `feature:share` implements it.
+ */
+@Serializable data class ShareCreateRoute(val kind: String, val planId: Long? = null) : AppRoute
+
 /** Search form modes (web segmented toggle + "Surprise me"). */
 object SearchModes {
     const val KNOWN = "known"

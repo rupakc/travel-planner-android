@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_create_title_plan">Partagez ce plan</string>
+    <string name="share_create_title_recap">Partagez le récap de votre voyage</string>
+    <string name="share_create_title_savings">Partagez vos bonnes affaires</string>
+    <string name="share_create_intro">Choisissez ce que le lien montre. Votre e-mail, votre nationalité et vos données de visa ne sont jamais partagés.</string>
+    <string name="share_create_reveals">Toujours affiché : le titre, la destination, le nombre de jours et le contenu de votre plan.</string>
+    <string name="share_create_options_legend">Afficher aussi</string>
+    <string name="share_create_dates">Dates</string>
+    <string name="share_create_dates_hidden">Masquer les dates</string>
+    <string name="share_create_dates_month">Mois et année seulement</string>
+    <string name="share_create_dates_exact">Dates exactes</string>
+    <string name="share_create_dates_note">Les aperçus du lien n\'affichent jamais plus que le mois et l\'année.</string>
+    <string name="share_create_show_origin">Mon lieu de départ</string>
+    <string name="share_create_show_name">Mon nom</string>
+    <string name="share_create_create">Créer le lien</string>
+    <string name="share_create_update">Mettre à jour le lien</string>
+    <string name="share_create_working">Un instant…</string>
+    <string name="share_create_url_label">Lien de partage</string>
+    <string name="share_create_action_native">Partager…</string>
+    <string name="share_create_action_copy">Copier le lien</string>
+    <string name="share_create_status_created">Lien prêt</string>
+    <string name="share_create_status_updated">Lien mis à jour</string>
+    <string name="share_create_status_copy">Lien copié</string>
+    <string name="share_create_status_revoked">Lien supprimé. Il ne fonctionne plus.</string>
+    <string name="share_create_error_create">Impossible de créer le lien. Réessayez.</string>
+    <string name="share_create_error_share">Impossible de partager.</string>
+    <string name="share_create_error_revoke">Impossible de supprimer le lien.</string>
+    <string name="share_create_error_unavailable">Le partage de liens n\'est pas disponible pour le moment.</string>
+    <string name="share_create_revoke">Arrêter le partage</string>
+    <string name="share_create_revoke_confirm">Arrêter le partage ? Toute personne ayant le lien perdra l\'accès.</string>
+    <string name="share_create_revoke_yes">Oui, arrêter</string>
+    <string name="share_create_revoke_no">Garder</string>
+    <string name="share_create_close">Fermer</string>
+    <string name="share_create_text_plan">Mon plan de voyage sur Voyager</string>
+    <string name="share_create_text_recap">Le récap de mon voyage sur Voyager</string>
+    <string name="share_create_text_savings">Les baisses de prix repérées avec Voyager</string>
+    <string name="share_create_offline">Vous êtes hors ligne. Connectez-vous pour créer un lien.</string>
+    <string name="share_create_card_unavailable">La carte n\'a pas pu être chargée, seul le lien est partagé.</string>
+    <string name="share_create_link_pending">Les options ont changé. Mettez à jour le lien pour le partager.</string>
+    <string name="share_create_chooser">Partager via</string>
+</resources>

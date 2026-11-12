@@ -37,6 +37,7 @@ import io.github.rupakc.travelplanner.core.network.api.PreferencesApi
 import io.github.rupakc.travelplanner.core.network.api.PriceWatchApi
 import io.github.rupakc.travelplanner.core.network.api.ReferenceApi
 import io.github.rupakc.travelplanner.core.network.api.SearchApi
+import io.github.rupakc.travelplanner.core.network.api.SharesApi
 import java.time.Duration
 import javax.inject.Qualifier
 import javax.inject.Singleton
@@ -196,6 +197,11 @@ object NetworkModule {
     fun fareWatchApi(
         @AiHttp r: Retrofit,
     ): FareWatchApi = r.create(FareWatchApi::class.java)
+
+    @Provides @Singleton
+    fun sharesApi(
+        @DefaultHttp r: Retrofit,
+    ): SharesApi = r.create(SharesApi::class.java)
 
     @Provides @Singleton
     fun alertsV2Api(

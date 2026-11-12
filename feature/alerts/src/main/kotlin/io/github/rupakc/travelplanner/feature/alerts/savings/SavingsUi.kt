@@ -33,8 +33,10 @@ import io.github.rupakc.travelplanner.core.model.alerts.DigestWatch
 import io.github.rupakc.travelplanner.core.model.alerts.Savings
 import io.github.rupakc.travelplanner.core.model.alerts.SavingsBest
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.core.ui.format.localUsd
+import io.github.rupakc.travelplanner.core.ui.share.ShareEntryButton
 import io.github.rupakc.travelplanner.core.ui.watch.ToneBox
 import io.github.rupakc.travelplanner.feature.alerts.R
 import kotlin.math.abs
@@ -86,6 +88,8 @@ internal fun SavingsCard(view: SavingsView, livePricesPaused: Boolean, modifier:
                 Text(stringResource(R.string.alerts_savings_empty_hint), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
             } else {
                 SavingsBody(view)
+                // Share links 2.0: draws nothing without `features.sharing` (core:ui reads the shell's launcher).
+                ShareEntryButton(ShareKind.SAVINGS, null, tid = "alerts.savings.share")
             }
         }
     }
