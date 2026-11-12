@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Plan completeness meter (Phase 1/2 T9). Copy from the web completeness catalogue; hand-maintained, not generated. -->
+    <string name="completeness_title">Planfortschritt</string>
+    <string name="completeness_percent">%1$d%%</string>
+    <string name="completeness_part_flights">Flüge</string>
+    <string name="completeness_part_stay">Unterkunft</string>
+    <string name="completeness_part_days">Geplante Tage</string>
+    <string name="completeness_part_visa">Visum geprüft</string>
+    <string name="completeness_part_packing">Packliste</string>
+</resources>
