@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Journal and place ratings (Phase 1/2 T13). Hand-maintained. -->
+    <string name="journal_load_failed">No pudimos cargar el diario</string>
+    <string name="journal_title">Diario</string>
+    <string name="journal_hint">¿Qué pasó hoy?</string>
+    <string name="journal_mood">Ánimo</string>
+    <string name="journal_mood_great">Genial</string>
+    <string name="journal_mood_good">Bien</string>
+    <string name="journal_mood_ok">Normal</string>
+    <string name="journal_mood_tough">Duro</string>
+    <string name="journal_save">Guardar entrada</string>
+    <string name="journal_update">Actualizar entrada</string>
+    <string name="journal_cancel">Cancelar</string>
+    <string name="journal_edit">Editar</string>
+    <string name="journal_delete">Borrar</string>
+    <string name="journal_waiting">Esperando para sincronizar</string>
+    <string name="journal_empty">Aún no hay entradas. Escribe la primera.</string>
+    <string name="journal_too_long">Las entradas pueden tener hasta 4000 caracteres.</string>
+    <string name="journal_limit">Este viaje ha llegado al límite de 500 entradas.</string>
+    <string name="places_limit">Este viaje ha llegado al límite de 1000 lugares.</string>
+    <string name="journal_save_failed">No se pudo guardar. Inténtalo de nuevo.</string>
+    <string name="journal_places">Lugares</string>
+    <string name="journal_places_empty">Aquí aparecen los lugares de tu itinerario y los que marques con Estoy aquí.</string>
+    <string name="journal_visited">Visitado: %1$s</string>
+    <string name="journal_stars">Valorar %1$s, %2$d de 5 estrellas</string>
+    <string name="journal_stars_value">%1$d de 5 estrellas</string>
+    <string name="journal_note">Nota</string>
+    <string name="journal_note_save">Guardar nota</string>
+    <string name="journal_note_label">Tu nota</string>
+    <string name="journal_place_failed">No se pudo guardar el lugar. Inténtalo de nuevo.</string>
+    <string name="journal_dismiss">Cerrar</string>
+</resources>

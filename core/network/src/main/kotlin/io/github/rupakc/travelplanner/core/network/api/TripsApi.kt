@@ -15,7 +15,6 @@ import io.github.rupakc.travelplanner.core.model.trips.PlacesResponse
 import io.github.rupakc.travelplanner.core.model.trips.PrepResponse
 import io.github.rupakc.travelplanner.core.model.trips.PrepToggleRequest
 import io.github.rupakc.travelplanner.core.model.trips.PrepToggleResponse
-import io.github.rupakc.travelplanner.core.model.trips.PutPlaceRequest
 import io.github.rupakc.travelplanner.core.model.trips.PutPlaceResponse
 import io.github.rupakc.travelplanner.core.model.trips.Recap
 import io.github.rupakc.travelplanner.core.model.trips.RecapCompleteResponse
@@ -154,7 +153,8 @@ interface TripsApi {
     suspend fun putPlace(
         @Path("id") id: Long,
         @Path("placeKey") placeKey: String,
-        @Body body: PutPlaceRequest,
+        /** [body] is `PutPlaceRequest.toJsonObject()` (it can carry an explicit `"stars": null`). */
+        @Body body: JsonObject,
     ): PutPlaceResponse
 
     @DELETE("api/trips/{id}/places/{placeKey}")

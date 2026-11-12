@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Journal and place ratings (Phase 1/2 T13). Hand-maintained. -->
+    <string name="journal_load_failed">无法加载日记</string>
+    <string name="journal_title">日记</string>
+    <string name="journal_hint">今天发生了什么？</string>
+    <string name="journal_mood">心情</string>
+    <string name="journal_mood_great">很棒</string>
+    <string name="journal_mood_good">不错</string>
+    <string name="journal_mood_ok">一般</string>
+    <string name="journal_mood_tough">艰难</string>
+    <string name="journal_save">保存日记</string>
+    <string name="journal_update">更新日记</string>
+    <string name="journal_cancel">取消</string>
+    <string name="journal_edit">编辑</string>
+    <string name="journal_delete">删除</string>
+    <string name="journal_waiting">等待同步</string>
+    <string name="journal_empty">还没有日记，写下第一篇吧。</string>
+    <string name="journal_too_long">每篇日记最多 4000 个字符。</string>
+    <string name="journal_limit">这次旅行已达到 500 篇日记的上限。</string>
+    <string name="places_limit">这次旅行已达到 1000 个地点的上限。</string>
+    <string name="journal_save_failed">无法保存，请重试。</string>
+    <string name="journal_places">地点</string>
+    <string name="journal_places_empty">行程中的地点和你用“我在这里”标记的地点会显示在这里。</string>
+    <string name="journal_visited">已到访：%1$s</string>
+    <string name="journal_stars">为%1$s评分，5 星中的 %2$d 星</string>
+    <string name="journal_stars_value">5 星中的 %1$d 星</string>
+    <string name="journal_note">备注</string>
+    <string name="journal_note_save">保存备注</string>
+    <string name="journal_note_label">你的备注</string>
+    <string name="journal_place_failed">无法保存该地点，请重试。</string>
+    <string name="journal_dismiss">关闭</string>
+</resources>

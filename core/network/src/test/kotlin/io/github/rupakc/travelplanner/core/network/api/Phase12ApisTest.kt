@@ -118,7 +118,7 @@ class Phase12ApisTest {
             assertEquals("""{"client_id":"cid","amount":"12.50","currency":"EUR","category":"food","spent_on":"2027-04-02"}""", e.body!!.utf8())
 
             ok("""{"place":{"place_key":"activity:x"}}""")
-            api.putPlace(4, "activity:x", PutPlaceRequest("X", "activity", visited = true))
+            api.putPlace(4, "activity:x", PutPlaceRequest("X", "activity", visited = true).toJsonObject())
             val p = server.takeRequest()
             assertEquals("PUT", p.method)
             assertEquals("/api/trips/4/places/activity:x", p.target)
