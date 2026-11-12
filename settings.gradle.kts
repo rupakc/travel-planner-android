@@ -51,5 +51,6 @@ include(
     ":feature:settings",
     ":feature:nearby",
     ":feature:play",
+    ":feature:trips",
     ":feature:share",
 )

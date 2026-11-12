@@ -5,6 +5,7 @@ import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.multibindings.IntoSet
 import dagger.multibindings.Multibinds
 import io.github.rupakc.travelplanner.core.data.impl.AuthRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.ChatRepositoryImpl
@@ -29,6 +30,7 @@ import io.github.rupakc.travelplanner.core.data.impl.SearchRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.SessionCleanerImpl
 import io.github.rupakc.travelplanner.core.data.impl.SettingsRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.impl.SharedPrefsHealthCacheStore
+import io.github.rupakc.travelplanner.core.data.impl.TripsRepositoryImpl
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStoreImpl
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
@@ -53,6 +55,7 @@ import io.github.rupakc.travelplanner.core.data.repository.RecentSearchesReposit
 import io.github.rupakc.travelplanner.core.data.repository.SearchRepository
 import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.data.repository.TripsRepository
 import io.github.rupakc.travelplanner.core.data.repository.UserStateCleaner
 import io.github.rupakc.travelplanner.core.data.search.SearchLauncher
 import io.github.rupakc.travelplanner.core.data.search.SearchLauncherImpl
@@ -112,5 +115,10 @@ abstract class DataModule {
     @Multibinds abstract fun userStateCleaners(): Set<UserStateCleaner>
 
     /** Bound by core:notifications when Firebase is configured. */
+    @Binds abstract fun trips(impl: TripsRepositoryImpl): TripsRepository
+
+    @Binds @IntoSet
+    abstract fun tripsCleaner(impl: TripsRepositoryImpl): UserStateCleaner
+
     @BindsOptionalOf abstract fun pushTokenSource(): PushTokenSource
 }

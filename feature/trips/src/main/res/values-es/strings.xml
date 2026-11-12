@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trips_title">Viajes</string>
+    <string name="trips_new">Nuevo viaje</string>
+    <string name="trips_create_heading">Guarda una idea</string>
+    <string name="trips_create_title">Título</string>
+    <string name="trips_create_destination">Destino (opcional)</string>
+    <string name="trips_create_cancel">Cancelar</string>
+    <string name="trips_create_save">Guardar</string>
+    <string name="trips_title_invalid">Ponle un título a tu viaje.</string>
+    <string name="trips_create_failed">No pudimos guardar este viaje. Inténtalo de nuevo.</string>
+    <string name="trips_load_failed">No se pudo cargar ahora mismo.</string>
+    <string name="trips_loading">Cargando tus viajes…</string>
+    <string name="trips_empty">Aún no tienes viajes. Planea uno o guarda una idea para más tarde.</string>
+    <string name="trips_empty_plan">Planear un viaje</string>
+    <string name="trips_empty_idea">Guardar una idea</string>
+    <string name="trips_no_dates">Aún sin fechas</string>
+    <string name="trips_phase_dreaming">Soñando</string>
+    <string name="trips_phase_planning">Planificando</string>
+    <string name="trips_phase_ready">Listo</string>
+    <string name="trips_phase_on_the_road">De viaje</string>
+    <string name="trips_phase_memories">Recuerdos</string>
+    <string name="trips_next_heading">Próximo viaje</string>
+    <string name="trips_next_dreaming">Una idea a la espera de fechas.</string>
+    <string name="trips_next_planning">%1$d %% planificado</string>
+    <string name="trips_next_ready">Termina tu preparación</string>
+    <string name="trips_next_on_the_road">Día %1$d en %2$s</string>
+    <string name="trips_next_memories">Revive tu viaje</string>
+    <string name="trips_next_open">Abrir viaje</string>
+    <string name="trips_start_date">Fecha de inicio (opcional)</string>
+    <string name="trips_end_date">Fecha de fin (opcional)</string>
+    <string name="trips_date_hint">AAAA-MM-DD</string>
+    <string name="trips_dates_invalid">Revisa las fechas: usa AAAA-MM-DD, el fin no puede ser anterior al inicio y un viaje puede durar como máximo un año.</string>
+    <string name="trips_offline_notice">Sin conexión. Mostrando tus viajes guardados.</string>
+    <string name="trips_pinned">Lo siguiente</string>
+    <string name="trips_card_a11y">%1$s, %2$s</string>
+</resources>

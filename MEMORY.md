@@ -179,3 +179,4 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - Native-speaker review of hi, bn and zh.
 - Use `public_base_url` from `/api/config` (Phase 1).
 - Play/game (T6): copy for badges, rules and levels is hand-maintained in core:ui strings_game.xml (web pin predates game.json); Trips stats via Optional TripsRepository until Task 8 binds it; celebrations gated by /game/me hidden or 404.
+- 2026-11-12 (P1/2 T8): feature:trips hub; TripsRepositoryImpl caches the list per user in memory (offline = network/5xx only, phase recomputed via TripsOffline); StartRoute has a third value Classic (journey off) besides Trips/Explore; trips strings come from the web trips namespace (incl. es) hand-copied into strings.xml, web.sha not bumped.

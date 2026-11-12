@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="trips_title">旅行</string>
+    <string name="trips_new">新建旅行</string>
+    <string name="trips_create_heading">保存一个想法</string>
+    <string name="trips_create_title">标题</string>
+    <string name="trips_create_destination">目的地（可选）</string>
+    <string name="trips_create_cancel">取消</string>
+    <string name="trips_create_save">保存</string>
+    <string name="trips_title_invalid">请给你的旅行起个标题。</string>
+    <string name="trips_create_failed">无法保存这次旅行，请重试。</string>
+    <string name="trips_load_failed">暂时无法加载。</string>
+    <string name="trips_loading">正在加载你的旅行…</string>
+    <string name="trips_empty">还没有旅行。规划一次，或先保存一个想法。</string>
+    <string name="trips_empty_plan">规划旅行</string>
+    <string name="trips_empty_idea">保存一个想法</string>
+    <string name="trips_no_dates">尚未设定日期</string>
+    <string name="trips_phase_dreaming">憧憬中</string>
+    <string name="trips_phase_planning">规划中</string>
+    <string name="trips_phase_ready">已就绪</string>
+    <string name="trips_phase_on_the_road">旅途中</string>
+    <string name="trips_phase_memories">回忆</string>
+    <string name="trips_next_heading">下一次旅行</string>
+    <string name="trips_next_dreaming">一个等待确定日期的想法。</string>
+    <string name="trips_next_planning">已规划 %1$d %%</string>
+    <string name="trips_next_ready">完成你的准备</string>
+    <string name="trips_next_on_the_road">第 %1$d 天 · %2$s</string>
+    <string name="trips_next_memories">重温你的旅行</string>
+    <string name="trips_next_open">打开旅行</string>
+    <string name="trips_start_date">开始日期（可选）</string>
+    <string name="trips_end_date">结束日期（可选）</string>
+    <string name="trips_date_hint">YYYY-MM-DD</string>
+    <string name="trips_dates_invalid">请检查日期：格式为 YYYY-MM-DD，结束日期不能早于开始日期，行程最长一年。</string>
+    <string name="trips_offline_notice">你已离线，正在显示已保存的行程。</string>
+    <string name="trips_pinned">下一个</string>
+    <string name="trips_card_a11y">%1$s，%2$s</string>
+</resources>
