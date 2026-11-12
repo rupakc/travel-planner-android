@@ -108,7 +108,6 @@
     <string name="auth_link_paste_label">লিঙ্ক বা কোড</string>
     <string name="auth_verify_paste_title">আপনার নিশ্চিতকরণ লিঙ্ক বা কোড পেস্ট করুন</string>
     <string name="auth_verify_confirm">ইমেল নিশ্চিত করুন</string>
-    <string name="auth_verify_xp">+%1$d XP</string>
     <string name="auth_reset_use_link">এই লিঙ্ক ব্যবহার করুন</string>
     <string name="auth_rule_met">শর্ত পূরণ হয়েছে</string>
     <string name="auth_rule_unmet">শর্ত পূরণ হয়নি</string>

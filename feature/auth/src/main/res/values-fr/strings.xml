@@ -108,7 +108,6 @@
     <string name="auth_link_paste_label">Lien ou code</string>
     <string name="auth_verify_paste_title">Collez votre lien ou code de confirmation</string>
     <string name="auth_verify_confirm">Confirmer l’e-mail</string>
-    <string name="auth_verify_xp">+%1$d XP</string>
     <string name="auth_reset_use_link">Utiliser ce lien</string>
     <string name="auth_rule_met">condition remplie</string>
     <string name="auth_rule_unmet">condition non remplie</string>

@@ -55,7 +55,6 @@ internal fun VerifyEmailScreen(
             }
 
             VerifyPhase.SignedIn, VerifyPhase.Confirmed -> {
-                state.game?.let { Text(stringResource(R.string.auth_verify_xp, it.xp), style = TravelTheme.typography.titleMedium) }
                 TpButton(stringResource(R.string.auth_verify_to_account), onDone, modifier = Modifier.fillMaxWidth(), tid = "verify.done")
             }
 

@@ -11,6 +11,8 @@ import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.auth.VerificationSentDto
 import io.github.rupakc.travelplanner.core.model.auth.VerifyEmailRequest
 import io.github.rupakc.travelplanner.core.model.auth.VerifyEmailResponse
+import io.github.rupakc.travelplanner.core.model.game.GameAward
+import io.github.rupakc.travelplanner.core.model.game.GameDelta
 import io.github.rupakc.travelplanner.core.network.BaseUrlProvider
 import io.github.rupakc.travelplanner.core.network.api.SignupApi
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSessionStore
@@ -38,8 +40,9 @@ class SignupRepositoryImplTest {
     private val api = mockk<SignupApi>()
     private val store = FakeSessionStore()
     private val cleaner = Cleaner()
+    private val games = io.github.rupakc.travelplanner.core.testing.fake.FakeGameEvents()
     private val repo =
-        SignupRepositoryImpl(api, store, BaseUrlProvider(FakeSettingsStore(), AppBuildInfo("http://10.0.2.2:8001", "local", "t", false, true)), cleaner)
+        SignupRepositoryImpl(api, store, BaseUrlProvider(FakeSettingsStore(), AppBuildInfo("http://10.0.2.2:8001", "local", "t", false, true)), cleaner, games)
     private val session = SessionDto("jwt", "bearer", 3600, "rt_1", User(username = "jane", id = "u1"))
 
     @Test
@@ -56,7 +59,8 @@ class SignupRepositoryImplTest {
     fun `verify with a session stores token, refresh token, expiry and user id`() =
         runTest {
             val sent = slot<VerifyEmailRequest>()
-            coEvery { api.verifyEmail(capture(sent)) } returns VerifyEmailResponse(status = "verified", session = session)
+            coEvery { api.verifyEmail(capture(sent)) } returns
+                VerifyEmailResponse(status = "verified", session = session, game = GameDelta(xp = 50, awards = listOf(GameAward("signup", 50))))
             repo.verifyEmail(" tok ")
             assertEquals("tok", sent.captured.token)
             assertEquals("android", sent.captured.client)
@@ -66,6 +70,7 @@ class SignupRepositoryImplTest {
             assertEquals("u1", saved.userId)
             assertNotNull(saved.expiresAtEpochMs)
             assertEquals("http://10.0.2.2:8001", saved.baseUrl)
+            assertEquals(50, games.published.single().xp)
         }
 
     @Test

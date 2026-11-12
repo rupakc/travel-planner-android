@@ -172,7 +172,6 @@ class SignupViewModelsTest {
         repo.verifyResult = AppResult.Success(VerifyEmailResponse("verified", session, GameDelta(xp = 50)))
         val vm = verify("https://h/verify?token=abc&x=1")
         assertEquals(VerifyPhase.SignedIn, vm.state.value.phase)
-        assertEquals(50, vm.state.value.game?.xp)
         assertTrue(repo.calls.contains("verifyEmail:abc"))
         assertTrue(telemetry.events.contains("email_verify" to mapOf("result" to "ok")))
     }
@@ -182,7 +181,6 @@ class SignupViewModelsTest {
         repo.verifyResult = AppResult.Success(VerifyEmailResponse("verified", null, GameDelta()))
         val vm = verify("abc")
         assertEquals(VerifyPhase.Confirmed, vm.state.value.phase)
-        assertNull(vm.state.value.game)
     }
 
     @Test

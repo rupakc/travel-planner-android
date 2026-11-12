@@ -47,8 +47,9 @@ class LoginAccountsTest {
         val vm = vm(AuthFlags())
         assertFalse(vm.state.value.signupAvailable)
         assertFalse(vm.state.value.resetAvailable)
+        val state = vm.state.value
         compose.setContent {
-            TravelTheme { LoginScreen(vm.state.value, vm::onEvent) }
+            TravelTheme { LoginScreen(state, vm::onEvent) }
         }
         compose.onNodeWithText("Create account").assertDoesNotExist()
         compose.onNodeWithText("Forgot password?").assertDoesNotExist()
@@ -59,8 +60,9 @@ class LoginAccountsTest {
         val vm = vm(AuthFlags(signupAvailable = true, resetAvailable = true))
         var signUp = 0
         var forgot = 0
+        val state = vm.state.value
         compose.setContent {
-            TravelTheme { LoginScreen(vm.state.value, vm::onEvent, onSignUp = { signUp++ }, onForgotPassword = { forgot++ }) }
+            TravelTheme { LoginScreen(state, vm::onEvent, onSignUp = { signUp++ }, onForgotPassword = { forgot++ }) }
         }
         compose.onNodeWithText("Create account").performScrollTo().performClick()
         compose.onNodeWithText("Forgot password?").performScrollTo().performClick()

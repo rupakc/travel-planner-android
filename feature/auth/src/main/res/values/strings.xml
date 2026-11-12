@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Login (web LoginPage) -->
     <string name="auth_tagline">Plan your perfect trip</string>
     <string name="auth_login_title">Sign in to your account</string>
@@ -76,7 +76,7 @@
     <string name="auth_su_username_placeholder">e.g. wanderer_42</string>
     <string name="auth_su_email">Email</string>
     <string name="auth_su_email_placeholder">you\@example.com</string>
-    <string name="auth_su_password_placeholder">At least %1$d characters</string>
+    <string name="auth_su_password_placeholder" tools:ignore="PluralsCandidate">At least %1$d characters</string>
     <string name="auth_su_display_name">Display name (optional)</string>
     <string name="auth_su_display_name_placeholder">How should we call you?</string>
     <string name="auth_su_invite">Invite code</string>
@@ -85,7 +85,7 @@
     <string name="auth_su_submitting">Creating account…</string>
     <string name="auth_su_have_account">Already have an account?</string>
     <string name="auth_su_sign_in">Sign in</string>
-    <string name="auth_su_rule_length">use at least %1$d characters</string>
+    <string name="auth_su_rule_length" tools:ignore="PluralsCandidate">use at least %1$d characters</string>
     <string name="auth_su_rule_identity">don\'t include your username or email</string>
     <string name="auth_su_login_create">Create account</string>
     <string name="auth_su_login_forgot">Forgot password?</string>
@@ -143,7 +143,6 @@
     <string name="auth_link_paste_label">Link or code</string>
     <string name="auth_verify_paste_title">Paste your confirmation link or code</string>
     <string name="auth_verify_confirm">Confirm email</string>
-    <string name="auth_verify_xp">+%1$d XP</string>
     <string name="auth_reset_use_link">Use this link</string>
     <string name="auth_rule_met">requirement met</string>
     <string name="auth_rule_unmet">requirement not met</string>

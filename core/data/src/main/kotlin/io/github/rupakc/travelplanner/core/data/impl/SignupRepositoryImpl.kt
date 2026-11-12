@@ -5,6 +5,7 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.map
+import io.github.rupakc.travelplanner.core.data.repository.GameEvents
 import io.github.rupakc.travelplanner.core.data.repository.SessionCleaner
 import io.github.rupakc.travelplanner.core.data.repository.SignupRepository
 import io.github.rupakc.travelplanner.core.datastore.SessionStore
@@ -37,6 +38,7 @@ class SignupRepositoryImpl
         private val sessionStore: SessionStore,
         private val baseUrlProvider: BaseUrlProvider,
         private val sessionCleaner: SessionCleaner,
+        private val gameEvents: GameEvents,
     ) : SignupRepository {
         override suspend fun signup(request: SignupRequest): AppResult<VerificationSentDto> =
             apiCall { api.signup(request.copy(client = request.client ?: CLIENT)) }
@@ -51,7 +53,10 @@ class SignupRepositoryImpl
                     is AppResult.Success -> result.value
                 }
             val session = response.session ?: return AppResult.Success(response)
-            return persisting(session).map { response }
+            return persisting(session).map {
+                gameEvents.publish(response.game)
+                response
+            }
         }
 
         override suspend fun requestPasswordReset(email: String, locale: String?): AppResult<Unit> =

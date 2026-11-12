@@ -10,7 +10,6 @@ import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.repository.SignupRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
-import io.github.rupakc.travelplanner.core.model.game.GameDelta
 import io.github.rupakc.travelplanner.feature.auth.AuthMessage
 import io.github.rupakc.travelplanner.feature.auth.R
 import io.github.rupakc.travelplanner.feature.auth.signup.Cooldown
@@ -30,7 +29,7 @@ enum class VerifyPhase {
     NeedsToken,
     Working,
 
-    /** Account activated, session stored (the app moves on by itself; [VerifyEmailUiState.game] may hold XP). */
+    /** Account activated, session stored (the app moves on by itself; the repository forwards the game delta to GameEvents). */
     SignedIn,
 
     /** `session == null`: an email on an already active account was confirmed. */
@@ -43,7 +42,6 @@ data class VerifyEmailUiState(
     val phase: VerifyPhase = VerifyPhase.NeedsToken,
     val pasted: String = "",
     val error: AuthMessage? = null,
-    val game: GameDelta? = null,
     /** An expired or changed-email link offers a new one for this address. */
     val canResend: Boolean = false,
     val email: String = "",
@@ -114,7 +112,7 @@ class VerifyEmailViewModel
                         val response = result.value
                         val phase = if (response.session != null) VerifyPhase.SignedIn else VerifyPhase.Confirmed
                         telemetry.emit(TelemetryEvents.SIGNUP_STEP, mapOf("step" to "done"))
-                        mutableState.update { it.copy(phase = phase, game = response.game?.takeIf { g -> g.xp > 0 }) }
+                        mutableState.update { it.copy(phase = phase) }
                     }
 
                     is AppResult.Failure -> {

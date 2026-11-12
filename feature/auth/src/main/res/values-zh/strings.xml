@@ -108,7 +108,6 @@
     <string name="auth_link_paste_label">链接或代码</string>
     <string name="auth_verify_paste_title">粘贴你的确认链接或代码</string>
     <string name="auth_verify_confirm">确认邮箱</string>
-    <string name="auth_verify_xp">+%1$d XP</string>
     <string name="auth_reset_use_link">使用此链接</string>
     <string name="auth_rule_met">已满足</string>
     <string name="auth_rule_unmet">未满足</string>

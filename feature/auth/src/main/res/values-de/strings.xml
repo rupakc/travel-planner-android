@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="auth_no_registration">Konten werden von einem Admin angelegt. Frag deinen Admin nach einem Benutzernamen und einem temporären Passwort.</string>
     <string name="auth_password_shown">Passwort wird angezeigt</string>
     <string name="auth_password_hidden">Passwort verborgen</string>
@@ -101,14 +101,13 @@
     <string name="auth_err_token_invalid">Dieser Link ist ungültig.</string>
     <string name="auth_err_token_expired">Dieser Link ist abgelaufen. Fordere einen neuen an.</string>
     <string name="auth_err_token_used">Dieser Link wurde bereits verwendet.</string>
-    <string name="auth_err_email_changed">Deine E-Mail-Adresse hat sich seit dem Versand dieses Links geändert. Fordere einen neuen an.</string>
+    <string name="auth_err_email_changed" tools:ignore="Typos">Deine E-Mail-Adresse hat sich seit dem Versand dieses Links geändert. Fordere einen neuen an.</string>
     <string name="auth_err_rate_limited">Zu viele Versuche. Bitte warte einen Moment und versuche es erneut.</string>
     <string name="auth_err_email_unverified">Bestätige deine E-Mail, um den KI-Planer zu nutzen.</string>
     <string name="auth_err_account_pending">Bestätige deine E-Mail, um dein Konto fertig einzurichten.</string>
     <string name="auth_link_paste_label">Link oder Code</string>
     <string name="auth_verify_paste_title">Füge deinen Bestätigungslink oder -code ein</string>
     <string name="auth_verify_confirm">E-Mail bestätigen</string>
-    <string name="auth_verify_xp">+%1$d XP</string>
     <string name="auth_reset_use_link">Link verwenden</string>
     <string name="auth_rule_met">Anforderung erfüllt</string>
     <string name="auth_rule_unmet">Anforderung nicht erfüllt</string>
