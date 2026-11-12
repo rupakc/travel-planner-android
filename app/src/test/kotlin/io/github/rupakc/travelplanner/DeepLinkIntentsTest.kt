@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
 import io.github.rupakc.travelplanner.core.network.AuthEvents
 import io.github.rupakc.travelplanner.core.testing.fake.FakeOutbox
 import io.github.rupakc.travelplanner.navigation.DeepLinkIntents
@@ -61,6 +62,28 @@ class DeepLinkIntentsTest {
             DeepLinkIntents.appLink(Intent(Intent.ACTION_VIEW, Uri.parse("travelplanner://alerts?kind=fare&watch=3"))),
         )
         assertNull(DeepLinkIntents.appLink(Intent(Intent.ACTION_MAIN)))
+    }
+
+    @Test
+    fun `an https share link on the web host survives sanitize, any other share-like data does not`() {
+        val host = "app.example.org"
+        val ok = DeepLinkIntents.sanitize(Intent(Intent.ACTION_VIEW, Uri.parse("https://$host/share/abc123")), host)
+        assertEquals("https://$host/share/abc123", ok.dataString)
+        assertEquals("https://$host/share/abc123", DeepLinkIntents.accountLink(ok, host))
+        assertEquals(ShareRoute("abc123"), DeepLinkIntents.accountRoute("https://$host/share/abc123", host))
+        listOf(
+            "https://evil.example/share/abc123",
+            "https://$host/share/abc123?next=/admin",
+            "https://$host/share/abc/extra",
+            "http://$host/share/abc123",
+        ).forEach {
+            val i = DeepLinkIntents.sanitize(Intent(Intent.ACTION_VIEW, Uri.parse(it)), host)
+            assertNull(it, i.data)
+        }
+        // Not a VIEW intent: the data goes, extras are never trusted.
+        val send = DeepLinkIntents.sanitize(Intent(Intent.ACTION_SEND, Uri.parse("https://$host/share/abc123")), host)
+        assertNull(send.data)
+        assertNull(DeepLinkIntents.accountLink(Intent(Intent.ACTION_SEND, Uri.parse("https://$host/share/abc123")), host))
     }
 
     @Test

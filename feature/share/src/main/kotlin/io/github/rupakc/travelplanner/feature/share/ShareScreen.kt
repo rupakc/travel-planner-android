@@ -63,6 +63,8 @@ import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.core.ui.itinerary.ItineraryDayCard
+import io.github.rupakc.travelplanner.feature.share.open.ShareCardBody
+import io.github.rupakc.travelplanner.feature.share.open.UnknownShareBody
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -97,6 +99,14 @@ internal fun ShareScreen(
                     TripBody(trip, state, onEvent, onPlanOwn, onOpenLink, onOpenSaved)
                 }
 
+                state.card != null -> {
+                    ShareCardBody(state.card, state.ownerName, onPlanOwn) { PrivacyChoicesButton(onEvent) }
+                }
+
+                state.unknownKind -> {
+                    UnknownShareBody(state.plainLink, onOpenLink, onPlanOwn) { PrivacyChoicesButton(onEvent) }
+                }
+
                 state.error is AppError.Network -> {
                     WithPrivacyFooter(onEvent) {
                         ErrorState(stringResource(R.string.share_offline), onRetry = { onEvent(ShareEvent.Retry) })
@@ -127,7 +137,7 @@ private const val SKELETON_LINES = 6
 
 /** The web share page's footer "Privacy choices" button (tid `privacy.choices`). */
 @Composable
-private fun PrivacyChoicesButton(onEvent: (ShareEvent) -> Unit, modifier: Modifier = Modifier) {
+internal fun PrivacyChoicesButton(onEvent: (ShareEvent) -> Unit, modifier: Modifier = Modifier) {
     TpButton(
         stringResource(R.string.share_privacy_choices),
         onClick = { onEvent(ShareEvent.OpenPrivacyChoices) },
@@ -189,6 +199,9 @@ private fun TripBody(
         verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
     ) {
         item(key = "poster", contentType = "poster") { Poster(trip, onOpenLink) }
+        state.ownerName?.let { name ->
+            item(key = "owner", contentType = "owner") { Text(stringResource(R.string.share_shared_by, name), style = TravelTheme.typography.bodyMedium) }
+        }
         if (trip.flights.isNotEmpty()) item(key = "flights", contentType = "card") { FlightsCard(trip) }
         sel.hotel?.let { hotel -> item(key = "hotel", contentType = "card") { HotelCard(hotel) } }
         if (trip.itinerary.isNotEmpty()) itinerary(trip)

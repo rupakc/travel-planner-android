@@ -63,6 +63,16 @@
                 <data android:scheme="https" android:host="${webHost}" android:path="/verify" />
                 <data android:scheme="https" android:host="${webHost}" android:path="/reset-password" />
             </intent-filter>
+            <!--
+              Share links (R6): https://<web host>/share/<token>. Not autoVerify either; DeepLinkIntents.sanitize accepts only the
+              exact host and a single URL-safe token, and the Shared trip screen takes a pasted link as the fallback.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="${webHost}" android:pathPrefix="/share/" />
+            </intent-filter>
         </activity>
 
         <!-- Per-app language below API 33: AppCompat stores the choice itself (Settings → Language). -->

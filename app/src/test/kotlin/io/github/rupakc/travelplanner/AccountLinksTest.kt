@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.rupakc.travelplanner.core.model.navigation.ResetPasswordRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
 import io.github.rupakc.travelplanner.core.model.navigation.VerifyEmailRoute
 import io.github.rupakc.travelplanner.navigation.AccountLinks
 import io.github.rupakc.travelplanner.navigation.DeepLinkIntents
@@ -24,6 +25,38 @@ class AccountLinksTest {
         assertEquals(VerifyEmailRoute("abc-DEF_123.~"), AccountLinks.route("https://$host/verify?token=abc-DEF_123.~", host))
         assertEquals(ResetPasswordRoute("t0k"), AccountLinks.route("https://$host/reset-password?token=t0k", host))
         assertEquals(VerifyEmailRoute("x"), AccountLinks.route("https://APP.example.org/verify?token=x", host))
+    }
+
+    @Test
+    fun `a share link on the prod host opens the public share viewer`() {
+        assertEquals(ShareRoute("Ab-_09xyz"), AccountLinks.route("https://$host/share/Ab-_09xyz", host))
+        assertEquals(ShareRoute("tok"), AccountLinks.route("https://APP.example.org/share/tok", host))
+    }
+
+    @Test
+    fun `share links from other hosts or with extra parts are rejected`() {
+        val bad =
+            listOf(
+                "https://evil.example.org/share/tok",
+                "https://$host.evil.org/share/tok",
+                "https://evil.org@$host/share/tok",
+                "https://$host:8443/share/tok",
+                "http://$host/share/tok",
+                "https://$host/share/",
+                "https://$host/share",
+                "https://$host/share/tok/page",
+                "https://$host/share/tok/card.png",
+                "https://$host/share/tok?next=/admin",
+                "https://$host/share/tok?token=abc",
+                "https://$host/share/tok#frag",
+                "https://$host/share/to%20k",
+                "https://$host/share/to.k",
+                "https://$host//share/tok",
+                "https://$host/api/share/tok",
+                "https://$host/share/" + "a".repeat(129),
+            )
+        bad.forEach { assertNull(it, AccountLinks.route(it, host)) }
+        assertNull(AccountLinks.route("https://$host/share/tok", ""))
     }
 
     @Test

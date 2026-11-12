@@ -129,6 +129,15 @@ internal object ShareLinks {
         return token?.takeIf(::isValidToken)
     }
 
+    /** The public page of [token] on [webBase] when that is an http(s) base, else null (never a link built from guesswork). */
+    fun plainLink(webBase: String, token: String): String? {
+        val base = webBase.trim().trimEnd('/')
+        val web = base.startsWith("https://") || base.startsWith("http://")
+        val hasHost = runCatching { java.net.URI(base).host }.getOrNull().isNullOrBlank().not()
+        if (!isValidToken(token) || !web || !hasHost) return null
+        return "$base/share/$token"
+    }
+
     /** Share tokens are URL-safe base64 (22 chars today); anything else never reaches the network. */
     fun isValidToken(token: String): Boolean = TOKEN.matches(token)
 }

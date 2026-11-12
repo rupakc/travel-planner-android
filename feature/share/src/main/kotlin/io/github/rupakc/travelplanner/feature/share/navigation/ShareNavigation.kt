@@ -29,8 +29,8 @@ fun NavGraphBuilder.shareGraph(
     onPlanTrip: () -> Unit = onBack,
 ) {
     composable<ShareRoute>(
-        // App scheme only: the manifest declares no https filter and MainActivity drops non-app data (S-M1).
-        // Opening web share links would need verified App Links plus an explicit allowance in DeepLinkIntents.
+        // Navigation's own deep link is the app scheme only. The https `/share/<token>` link (R6) never reaches Navigation:
+        // the app's DeepLinkIntents.sanitize admits only the exact host and a bare token and opens `ShareRoute(token)` itself.
         deepLinks = listOf(navDeepLink<ShareRoute>(basePath = SHARE_APP_LINK_BASE)),
     ) {
         ShareRoute(onBack = onBack, onOpenPlan = onOpenPlan, onPlanTrip = onPlanTrip)

@@ -58,4 +58,38 @@
         <item quantity="many">%1$d días</item>
         <item quantity="other">%1$d días</item>
     </plurals>
+    <string name="share_shared_by">Compartido por %1$s</string>
+    <string name="share_unknown_title">Este enlace se abre en la web</string>
+    <string name="share_unknown_message">Este tipo de enlace necesita una versión más reciente de la app. Aún puedes verlo en el navegador.</string>
+    <string name="share_unknown_open">Abrir en el navegador</string>
+    <string name="share_paste_title">Abrir un enlace compartido</string>
+    <string name="share_paste_message">Pega un enlace compartido de Voyager o su código para abrir el viaje.</string>
+    <string name="share_paste_label">Enlace o código</string>
+    <string name="share_paste_invalid">Eso no parece un enlace compartido.</string>
+    <string name="share_paste_open">Abrir</string>
+    <plurals name="share_stat_activities">
+        <item quantity="one">%d actividad</item>
+        <item quantity="other">%d actividades</item>
+        <item quantity="many">%d actividades</item>
+    </plurals>
+    <plurals name="share_stat_hotels">
+        <item quantity="one">%d hotel</item>
+        <item quantity="other">%d hoteles</item>
+        <item quantity="many">%d hoteles</item>
+    </plurals>
+    <plurals name="share_stat_places">
+        <item quantity="one">%d lugar</item>
+        <item quantity="other">%d lugares</item>
+        <item quantity="many">%d lugares</item>
+    </plurals>
+    <plurals name="share_stat_drops_caught">
+        <item quantity="one">%d bajada captada</item>
+        <item quantity="other">%d bajadas captadas</item>
+        <item quantity="many">%d bajadas captadas</item>
+    </plurals>
+    <plurals name="share_stat_targets_hit">
+        <item quantity="one">%d objetivo alcanzado</item>
+        <item quantity="other">%d objetivos alcanzados</item>
+        <item quantity="many">%d objetivos alcanzados</item>
+    </plurals>
 </resources>

@@ -37,6 +37,7 @@ fun YouScreen(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenShares: (() -> Unit)? = null,
+    onOpenShareLink: () -> Unit = {},
 ) {
     Column(modifier.fillMaxWidth()) {
         YouRow(Icons.Filled.AccountCircle, R.string.you_account, onOpenAccount)
@@ -49,6 +50,8 @@ fun YouScreen(
             HorizontalDivider()
         }
         YouRow(Icons.Filled.Settings, R.string.nav_settings, onOpenSettings)
+        HorizontalDivider()
+        YouRow(Icons.Filled.Share, R.string.you_open_share_link, onOpenShareLink)
     }
 }
 

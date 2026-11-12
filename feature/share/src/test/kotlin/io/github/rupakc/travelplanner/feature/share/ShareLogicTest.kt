@@ -78,6 +78,8 @@ class ShareLogicTest {
             TestAppDispatchers(main.testDispatcher),
             PlaceNameLookup(search),
             consent,
+            io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry(),
+            io.github.rupakc.travelplanner.core.common.AppBuildInfo("http://x", "local", "1", true, true),
         )
 
     private val search = FakeSearchRepository()

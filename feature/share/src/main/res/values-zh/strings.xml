@@ -13,4 +13,28 @@
     <string name="share_review">%1$s/10</string>
     <string name="share_open_link_a11y">打开 %1$s</string>
     <string name="share_unnamed">未命名项目</string>
+    <string name="share_shared_by">由 %1$s 分享</string>
+    <string name="share_unknown_title">此链接在网页中打开</string>
+    <string name="share_unknown_message">这类分享需要更新版本的应用。你仍可在浏览器中查看。</string>
+    <string name="share_unknown_open">在浏览器中打开</string>
+    <string name="share_paste_title">打开分享链接</string>
+    <string name="share_paste_message">粘贴 Voyager 分享链接或其代码来打开该行程。</string>
+    <string name="share_paste_label">分享链接或代码</string>
+    <string name="share_paste_invalid">这看起来不像分享链接。</string>
+    <string name="share_paste_open">打开</string>
+    <plurals name="share_stat_activities">
+        <item quantity="other">%d 项活动</item>
+    </plurals>
+    <plurals name="share_stat_hotels">
+        <item quantity="other">%d 家酒店</item>
+    </plurals>
+    <plurals name="share_stat_places">
+        <item quantity="other">%d 个地点</item>
+    </plurals>
+    <plurals name="share_stat_drops_caught">
+        <item quantity="other">抓到 %d 次降价</item>
+    </plurals>
+    <plurals name="share_stat_targets_hit">
+        <item quantity="other">达成 %d 个目标</item>
+    </plurals>
 </resources>

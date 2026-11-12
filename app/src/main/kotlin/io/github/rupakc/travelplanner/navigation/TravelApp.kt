@@ -90,6 +90,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SettingsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareCreateRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ShareOpenLinkRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SignUpRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TripRoute
@@ -117,6 +118,7 @@ import io.github.rupakc.travelplanner.feature.settings.navigation.settingsGraph
 import io.github.rupakc.travelplanner.feature.share.myshares.mySharesGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareCreateGraph
 import io.github.rupakc.travelplanner.feature.share.navigation.shareGraph
+import io.github.rupakc.travelplanner.feature.share.navigation.shareOpenGraph
 import io.github.rupakc.travelplanner.feature.trips.journal.journalTabContent
 import io.github.rupakc.travelplanner.feature.trips.money.moneyTabContent
 import io.github.rupakc.travelplanner.feature.trips.navigation.tripsGraph
@@ -379,8 +381,10 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                     onOpenSavedPlans = { navController.navigate(PlansRoute) },
                     onOpenSettings = { navController.navigate(SettingsRoute) },
                     onOpenShares = if (shell.sharing) ({ navController.navigate(MySharesRoute) }) else null,
+                    onOpenShareLink = { navController.navigate(ShareOpenLinkRoute) },
                 )
             }
+            shareOpenGraph(onBack = { navController.popBackStack() }, onOpen = { navController.navigate(ShareRoute(it)) })
             shareCreateGraph(onClose = { navController.popBackStack() })
             mySharesGraph(onBack = { navController.popBackStack() })
             shareGraph(

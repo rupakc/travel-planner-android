@@ -13,4 +13,33 @@
     <string name="share_review">%1$s/10</string>
     <string name="share_open_link_a11y">%1$s खोलें</string>
     <string name="share_unnamed">बिना नाम की प्रविष्टि</string>
+    <string name="share_shared_by">%1$s द्वारा साझा किया गया</string>
+    <string name="share_unknown_title">यह लिंक वेब पर खुलता है</string>
+    <string name="share_unknown_message">इस तरह के लिंक के लिए ऐप का नया संस्करण चाहिए। आप इसे ब्राउज़र में अब भी देख सकते हैं।</string>
+    <string name="share_unknown_open">ब्राउज़र में खोलें</string>
+    <string name="share_paste_title">साझा लिंक खोलें</string>
+    <string name="share_paste_message">यात्रा खोलने के लिए Voyager का साझा लिंक या उसका कोड पेस्ट करें।</string>
+    <string name="share_paste_label">लिंक या कोड</string>
+    <string name="share_paste_invalid">यह साझा लिंक जैसा नहीं लगता।</string>
+    <string name="share_paste_open">खोलें</string>
+    <plurals name="share_stat_activities">
+        <item quantity="one">%d गतिविधि</item>
+        <item quantity="other">%d गतिविधियाँ</item>
+    </plurals>
+    <plurals name="share_stat_hotels">
+        <item quantity="one">%d होटल</item>
+        <item quantity="other">%d होटल</item>
+    </plurals>
+    <plurals name="share_stat_places">
+        <item quantity="one">%d जगह</item>
+        <item quantity="other">%d जगहें</item>
+    </plurals>
+    <plurals name="share_stat_drops_caught">
+        <item quantity="one">%d कीमत गिरावट पकड़ी गई</item>
+        <item quantity="other">%d कीमत गिरावटें पकड़ी गईं</item>
+    </plurals>
+    <plurals name="share_stat_targets_hit">
+        <item quantity="one">%d लक्ष्य पूरा</item>
+        <item quantity="other">%d लक्ष्य पूरे</item>
+    </plurals>
 </resources>

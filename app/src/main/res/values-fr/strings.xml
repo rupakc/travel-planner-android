@@ -23,4 +23,5 @@
     <string name="coach_play_body">Enregistrez votre présence, notez des lieux et terminez des voyages pour gagner de l\'XP, des badges et des séries.</string>
     <string name="coach_got_it">Compris</string>
     <string name="coach_skip">Passer les conseils</string>
+    <string name="you_open_share_link">Ouvrir un lien partagé</string>
 </resources>
