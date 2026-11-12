@@ -28,7 +28,7 @@ class JourneyFlagsCache
     }
 
 internal fun encode(f: JourneyFlags): Int =
-    listOf(f.accounts, f.game, f.trips, f.journey, f.offlinePack, f.signupAvailable, f.resetAvailable)
+    listOf(f.accounts, f.game, f.trips, f.journey, f.offlinePack, f.signupAvailable, f.resetAvailable, f.sharing)
         .foldIndexed(0) { i, acc, on -> if (on) acc or (1 shl i) else acc }
 
 internal fun decode(bits: Int): JourneyFlags =
@@ -40,4 +40,5 @@ internal fun decode(bits: Int): JourneyFlags =
         offlinePack = bits and 16 != 0,
         signupAvailable = bits and 32 != 0,
         resetAvailable = bits and 64 != 0,
+        sharing = bits and 128 != 0,
     )

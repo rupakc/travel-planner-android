@@ -26,6 +26,8 @@ data class JourneyFlags(
     val alerts: AlertsFlags = AlertsFlags.OFF,
     /** Notifications 2.0 gates (off against an older backend). */
     val notifications: NotificationsFlags = NotificationsFlags.OFF,
+    /** Share links 2.0 (`features.sharing >= 1`); off keeps the legacy plan share. */
+    val sharing: Boolean = false,
 ) {
     companion object {
         /** Everything off (config not loaded, or an older backend). */
@@ -45,6 +47,7 @@ data class JourneyFlags(
                 resetAvailable = f.accounts && config.auth?.passwordResetAvailable == true,
                 alerts = AlertsFlags(config),
                 notifications = NotificationsFlags(config),
+                sharing = (f.sharing ?: 0) >= 1,
             )
         }
     }
