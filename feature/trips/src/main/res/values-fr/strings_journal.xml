@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Journal and place ratings (Phase 1/2 T13). Hand-maintained. -->
+    <string name="journal_load_failed">Impossible de charger le journal</string>
+    <string name="journal_title">Journal</string>
+    <string name="journal_hint">Que s\'est-il passé aujourd\'hui ?</string>
+    <string name="journal_mood">Humeur</string>
+    <string name="journal_mood_great">Super</string>
+    <string name="journal_mood_good">Bien</string>
+    <string name="journal_mood_ok">Correct</string>
+    <string name="journal_mood_tough">Difficile</string>
+    <string name="journal_save">Enregistrer</string>
+    <string name="journal_update">Mettre à jour</string>
+    <string name="journal_cancel">Annuler</string>
+    <string name="journal_edit">Modifier</string>
+    <string name="journal_delete">Supprimer</string>
+    <string name="journal_waiting">En attente de synchronisation</string>
+    <string name="journal_empty">Aucune entrée pour l\'instant. Écrivez la première.</string>
+    <string name="journal_too_long">Une entrée peut contenir jusqu\'à 4000 caractères.</string>
+    <string name="journal_limit">Ce voyage a atteint la limite de 500 entrées.</string>
+    <string name="places_limit">Ce voyage a atteint la limite de 1000 lieux.</string>
+    <string name="journal_save_failed">Enregistrement impossible. Réessayez.</string>
+    <string name="journal_places">Lieux</string>
+    <string name="journal_places_empty">Les lieux de votre itinéraire et ceux que vous marquez avec Je suis ici apparaissent ici.</string>
+    <string name="journal_visited">Visité : %1$s</string>
+    <string name="journal_stars">Noter %1$s, %2$d étoiles sur 5</string>
+    <string name="journal_stars_value">%1$d étoiles sur 5</string>
+    <string name="journal_note">Note</string>
+    <string name="journal_note_save">Enregistrer la note</string>
+    <string name="journal_note_label">Votre note</string>
+    <string name="journal_place_failed">Impossible d\'enregistrer ce lieu. Réessayez.</string>
+    <string name="journal_dismiss">Fermer</string>
+</resources>

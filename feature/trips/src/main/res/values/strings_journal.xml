@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Journal and place ratings (Phase 1/2 T13). Hand-maintained. -->
+    <string name="journal_load_failed">Couldn\'t load the journal</string>
+    <string name="journal_title">Journal</string>
+    <string name="journal_hint">What happened today?</string>
+    <string name="journal_mood">Mood</string>
+    <string name="journal_mood_great">Great</string>
+    <string name="journal_mood_good">Good</string>
+    <string name="journal_mood_ok">Okay</string>
+    <string name="journal_mood_tough">Tough</string>
+    <string name="journal_save">Save entry</string>
+    <string name="journal_update">Update entry</string>
+    <string name="journal_cancel">Cancel</string>
+    <string name="journal_edit">Edit</string>
+    <string name="journal_delete">Delete</string>
+    <string name="journal_waiting">Waiting to sync</string>
+    <string name="journal_empty">No entries yet. Write the first one.</string>
+    <string name="journal_too_long">Entries can be up to 4000 characters.</string>
+    <string name="journal_limit">This trip has reached the 500 entry limit.</string>
+    <string name="places_limit">This trip has reached the 1000 place limit.</string>
+    <string name="journal_save_failed">Couldn\'t save that. Try again.</string>
+    <string name="journal_places">Places</string>
+    <string name="journal_places_empty">Places from your itinerary and the ones you mark with I\'m here show up here.</string>
+    <string name="journal_visited">Visited %1$s</string>
+    <string name="journal_stars">Rate %1$s, %2$d of 5 stars</string>
+    <string name="journal_stars_value">%1$d of 5 stars</string>
+    <string name="journal_note">Note</string>
+    <string name="journal_note_save">Save note</string>
+    <string name="journal_note_label">Your note</string>
+    <string name="journal_place_failed">Couldn\'t save that place. Try again.</string>
+    <string name="journal_dismiss">Dismiss</string>
+</resources>

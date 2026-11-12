@@ -5,6 +5,11 @@ import io.github.rupakc.travelplanner.core.model.json.LenientDouble
 import io.github.rupakc.travelplanner.core.model.json.LenientInt
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /** Moods of a journal entry. */
 object JournalMoods {
@@ -78,7 +83,22 @@ data class PutPlaceRequest(
     val day: String? = null,
     val lat: Double? = null,
     val lng: Double? = null,
-)
+    /** Send an explicit `"stars": null` (the server clears the rating); wins over [stars]. Not a wire field itself. */
+    @Transient val clearStars: Boolean = false,
+) {
+    /** The wire body: set fields only, plus `"stars": null` when [clearStars]. */
+    fun toJsonObject(): JsonObject =
+        buildJsonObject {
+            put("name", name)
+            put("kind", kind)
+            visited?.let { put("visited", it) }
+            if (clearStars) put("stars", JsonNull) else stars?.let { put("stars", it) }
+            note?.let { put("note", it) }
+            day?.let { put("day", it) }
+            lat?.let { put("lat", it) }
+            lng?.let { put("lng", it) }
+        }
+}
 
 /** `PUT /trips/{id}/places/{place_key}` 200: [game] is set when `visited` first becomes true. */
 @Serializable

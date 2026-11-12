@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Journal and place ratings (Phase 1/2 T13). Hand-maintained. -->
+    <string name="journal_load_failed">Das Tagebuch konnte nicht geladen werden</string>
+    <string name="journal_title">Tagebuch</string>
+    <string name="journal_hint">Was ist heute passiert?</string>
+    <string name="journal_mood">Stimmung</string>
+    <string name="journal_mood_great">Super</string>
+    <string name="journal_mood_good">Gut</string>
+    <string name="journal_mood_ok">Okay</string>
+    <string name="journal_mood_tough">Hart</string>
+    <string name="journal_save">Eintrag speichern</string>
+    <string name="journal_update">Eintrag aktualisieren</string>
+    <string name="journal_cancel">Abbrechen</string>
+    <string name="journal_edit">Bearbeiten</string>
+    <string name="journal_delete">Löschen</string>
+    <string name="journal_waiting">Wartet auf Synchronisierung</string>
+    <string name="journal_empty">Noch keine Einträge. Schreib den ersten.</string>
+    <string name="journal_too_long">Einträge dürfen bis zu 4000 Zeichen lang sein.</string>
+    <string name="journal_limit">Diese Reise hat das Limit von 500 Einträgen erreicht.</string>
+    <string name="places_limit">Diese Reise hat das Limit von 1000 Orten erreicht.</string>
+    <string name="journal_save_failed">Das konnte nicht gespeichert werden. Versuch es erneut.</string>
+    <string name="journal_places">Orte</string>
+    <string name="journal_places_empty">Orte aus deinem Reiseplan und die, die du mit Ich bin hier markierst, erscheinen hier.</string>
+    <string name="journal_visited">Besucht: %1$s</string>
+    <string name="journal_stars">%1$s bewerten, %2$d von 5 Sternen</string>
+    <string name="journal_stars_value">%1$d von 5 Sternen</string>
+    <string name="journal_note">Notiz</string>
+    <string name="journal_note_save">Notiz speichern</string>
+    <string name="journal_note_label">Deine Notiz</string>
+    <string name="journal_place_failed">Der Ort konnte nicht gespeichert werden. Versuch es erneut.</string>
+    <string name="journal_dismiss">Schließen</string>
+</resources>
