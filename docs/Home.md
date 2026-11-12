@@ -8,6 +8,7 @@ Source of truth for scope: the [design spec](superpowers/specs/2026-11-05-androi
 
 - [README](../README.md) - what it is and quick start
 - [Architecture](Architecture.md), [Modules](Modules.md)
+- [Play (game)](Play.md)
 - [Adding-a-Feature](Adding-a-Feature.md), [Foundation-Interfaces](Foundation-Interfaces.md)
 
 ## Building blocks

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play_streaks">Rachas</string>
+    <string name="play_streak_daily">Racha diaria</string>
+    <string name="play_streak_trip_checkin">Racha de registros de viaje</string>
+    <string name="play_streak_values">Actual %1$d · Mejor %2$d</string>
+    <string name="play_tier_bronze">Bronce</string>
+    <string name="play_tier_silver">Plata</string>
+    <string name="play_tier_gold">Oro</string>
+    <string name="play_badge_earned_on">Conseguida el %1$s</string>
+    <string name="play_badge_locked">Aún sin conseguir</string>
+    <string name="play_countries">Países visitados</string>
+    <string name="play_countries_empty">Aún no hay países. Regístrate en un viaje para añadir uno.</string>
+    <string name="play_goal">Objetivo de la lista de deseos</string>
+    <plurals name="play_goal_progress">
+        <item quantity="one">%1$d de %2$d país</item>
+        <item quantity="many">%1$d de %2$d países</item>
+        <item quantity="other">%1$d de %2$d países</item>
+    </plurals>
+    <string name="play_error">No pudimos cargar tu progreso. Comprueba tu conexión e inténtalo de nuevo.</string>
+</resources>

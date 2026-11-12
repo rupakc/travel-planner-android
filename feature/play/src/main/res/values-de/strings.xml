@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play_streaks">Serien</string>
+    <string name="play_streak_daily">Tagesserie</string>
+    <string name="play_streak_trip_checkin">Check-in-Serie auf Reisen</string>
+    <string name="play_streak_values">Aktuell %1$d · Beste %2$d</string>
+    <string name="play_tier_bronze">Bronze</string>
+    <string name="play_tier_silver">Silber</string>
+    <string name="play_tier_gold">Gold</string>
+    <string name="play_badge_earned_on">Erhalten am %1$s</string>
+    <string name="play_badge_locked">Noch nicht erhalten</string>
+    <string name="play_countries">Besuchte Länder</string>
+    <string name="play_countries_empty">Noch keine Länder. Checke auf einer Reise ein, um eines hinzuzufügen.</string>
+    <string name="play_goal">Wunschlisten-Ziel</string>
+    <plurals name="play_goal_progress">
+        <item quantity="one">%1$d von %2$d Land</item>
+        <item quantity="other">%1$d von %2$d Ländern</item>
+    </plurals>
+    <string name="play_error">Dein Fortschritt konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.</string>
+</resources>

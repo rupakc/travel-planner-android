@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play_streaks">स्ट्रीक</string>
+    <string name="play_streak_daily">दैनिक स्ट्रीक</string>
+    <string name="play_streak_trip_checkin">यात्रा चेक-इन स्ट्रीक</string>
+    <string name="play_streak_values">अभी %1$d · सर्वश्रेष्ठ %2$d</string>
+    <string name="play_tier_bronze">कांस्य</string>
+    <string name="play_tier_silver">रजत</string>
+    <string name="play_tier_gold">स्वर्ण</string>
+    <string name="play_badge_earned_on">%1$s को मिला</string>
+    <string name="play_badge_locked">अभी नहीं मिला</string>
+    <string name="play_countries">घूमे गए देश</string>
+    <string name="play_countries_empty">अभी कोई देश नहीं। देश जोड़ने के लिए किसी यात्रा में चेक-इन करें।</string>
+    <string name="play_goal">बकेट लिस्ट लक्ष्य</string>
+    <plurals name="play_goal_progress">
+        <item quantity="one">%2$d में से %1$d देश</item>
+        <item quantity="other">%2$d में से %1$d देश</item>
+    </plurals>
+    <string name="play_error">आपकी प्रगति लोड नहीं हो सकी। अपना कनेक्शन जांचें और फिर कोशिश करें।</string>
+</resources>

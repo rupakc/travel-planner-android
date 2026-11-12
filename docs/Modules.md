@@ -41,6 +41,7 @@ other project dependencies). Each exports one graph function that `app` calls in
 | `feature:alerts` | Watches, notification inbox | `AlertsRoute`, `NotificationsRoute` |
 | `feature:settings` | Preferences, taste graph, features, appearance, server, notifications | `SettingsRoute`, `PreferencesRoute`, `TasteProfileRoute`, `FeaturesRoute`, `AppearanceRoute`, `ServerRoute`, `NotificationSettingsRoute`, `SettingsEntryRoute` |
 | `feature:nearby` | Near me | `NearbyRoute` |
+| `feature:play` | Play: level, badges, streaks, recent awards, countries and bucket-list goal (`GameDeltaHost` celebrations live in `core:ui`) | `PlayRoute` |
 | `feature:share` | Public share viewer | `ShareRoute` |
 
 Every feature screen is implemented; `core:ui` still has the foundation's `FeaturePlaceholder`, which no route uses.

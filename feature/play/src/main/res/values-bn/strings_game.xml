@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play_title">আপনার অগ্রগতি</string>
+    <string name="play_level">লেভেল %1$d</string>
+    <string name="play_xp">%1$d XP</string>
+    <string name="play_progress_label">পরের লেভেল পর্যন্ত অগ্রগতি</string>
+    <string name="play_to_next">লেভেল %2$d পর্যন্ত আরও %1$d XP</string>
+    <string name="play_max_level">সর্বোচ্চ লেভেলে পৌঁছেছেন</string>
+    <string name="play_badges">ব্যাজ</string>
+    <string name="play_earned">অর্জিত</string>
+    <string name="play_badge_progress">%1$d/%2$d</string>
+    <string name="play_recent">সাম্প্রতিক পুরস্কার</string>
+    <string name="play_recent_empty">এখনও কিছু নেই। প্রথম XP পেতে একটি ধাপ শেষ করুন।</string>
+    <string name="play_points">+%1$d XP</string>
+</resources>

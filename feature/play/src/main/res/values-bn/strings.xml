@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play_streaks">স্ট্রিক</string>
+    <string name="play_streak_daily">দৈনিক স্ট্রিক</string>
+    <string name="play_streak_trip_checkin">ভ্রমণ চেক-ইন স্ট্রিক</string>
+    <string name="play_streak_values">বর্তমান %1$d · সেরা %2$d</string>
+    <string name="play_tier_bronze">ব্রোঞ্জ</string>
+    <string name="play_tier_silver">রুপা</string>
+    <string name="play_tier_gold">সোনা</string>
+    <string name="play_badge_earned_on">%1$s তারিখে অর্জিত</string>
+    <string name="play_badge_locked">এখনও অর্জিত হয়নি</string>
+    <string name="play_countries">ঘুরে আসা দেশ</string>
+    <string name="play_countries_empty">এখনও কোনো দেশ নেই। একটি যোগ করতে ভ্রমণে চেক-ইন করুন।</string>
+    <string name="play_goal">বাকেট লিস্ট লক্ষ্য</string>
+    <plurals name="play_goal_progress">
+        <item quantity="one">%2$d টির মধ্যে %1$d টি দেশ</item>
+        <item quantity="other">%2$d টির মধ্যে %1$d টি দেশ</item>
+    </plurals>
+    <string name="play_error">আপনার অগ্রগতি লোড করা যায়নি। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।</string>
+</resources>

@@ -178,3 +178,4 @@ never delete an entry, supersede it with a new line that says "supersedes". The 
 - Backend registry `error` kind for native crashes.
 - Native-speaker review of hi, bn and zh.
 - Use `public_base_url` from `/api/config` (Phase 1).
+- Play/game (T6): copy for badges, rules and levels is hand-maintained in core:ui strings_game.xml (web pin predates game.json); Trips stats via Optional TripsRepository until Task 8 binds it; celebrations gated by /game/me hidden or 404.

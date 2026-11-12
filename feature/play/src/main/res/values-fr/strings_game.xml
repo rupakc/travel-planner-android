@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="play_title">Votre progression</string>
+    <string name="play_level">Niveau %1$d</string>
+    <string name="play_xp">%1$d XP</string>
+    <string name="play_progress_label">Progression vers le niveau suivant</string>
+    <string name="play_to_next">%1$d XP avant le niveau %2$d</string>
+    <string name="play_max_level">Niveau maximum atteint</string>
+    <string name="play_badges">Badges</string>
+    <string name="play_earned">Obtenu</string>
+    <string name="play_badge_progress">%1$d/%2$d</string>
+    <string name="play_recent">Récompenses récentes</string>
+    <string name="play_recent_empty">Rien pour l\'instant. Terminez une étape pour gagner vos premiers XP.</string>
+    <string name="play_points">+%1$d XP</string>
+</resources>
