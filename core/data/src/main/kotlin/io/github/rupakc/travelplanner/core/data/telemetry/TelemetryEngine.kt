@@ -101,6 +101,7 @@ internal class TelemetryEngine
         private var foreground = true
         private var wasBackgrounded = false
         private var handedOver = false
+        private var postDisabled = false // a POST 404 turned it off: do not re-enable from the cached config
         private var grantedWhilePending = false
         private var grantTs = Long.MIN_VALUE
         private var sending = false
@@ -210,6 +211,8 @@ internal class TelemetryEngine
                     settings = resolved
                 }
 
+                postDisabled -> Unit
+
                 else -> {
                     turnOn(resolved)
                     if (consent.allowedNow()) activate()
@@ -309,6 +312,8 @@ internal class TelemetryEngine
             scheduler.cancel()
             if (!wasActive) return
             reclaim()
+            // A cancelled flush worker may still put its unsent events back on disk; make the next drain reclaim them.
+            handedOver = true
             // Cold start already sent app_open on activation; this is a return from the background.
             if (wasBackgrounded) enqueue(TelemetryEvents.APP_OPEN, emptyMap(), nowMs())
             scheduleFlush()
@@ -445,6 +450,7 @@ internal class TelemetryEngine
                 }
 
                 SendOutcome.Disabled -> {
+                    postDisabled = true
                     turnOff()
                     false
                 }

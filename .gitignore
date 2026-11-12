@@ -31,3 +31,4 @@ app/google-services.json
 
 # Web checkout used by the web-sync CI check
 .web-source/
+.claude/worktrees/
