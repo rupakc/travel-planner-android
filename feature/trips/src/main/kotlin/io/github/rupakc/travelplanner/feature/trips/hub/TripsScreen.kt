@@ -229,7 +229,7 @@ private fun PhaseTag(phase: Phase, label: String) {
     }
 }
 
-private fun dateRange(start: String?, end: String?): String? {
+internal fun dateRange(start: String?, end: String?): String? {
     val format = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
 
     fun fmt(value: String?): String? =
