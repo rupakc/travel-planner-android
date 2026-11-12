@@ -149,9 +149,10 @@ class TelemetryRoutesTest {
                 YouRoute,
             ).map(::classOf)
         val table = TelemetryRoutes.table
-        assertEquals(43, all.toSet().size)
-        assertEquals(43, table.size)
-        assertEquals(43, table.map { it.first }.toSet().size)
+        // Counted from the mapping itself, so parallel branches adding routes do not collide on a number.
+        assertEquals(all.size, all.toSet().size)
+        assertEquals(all.size, table.size)
+        assertEquals(all.size, table.map { it.first }.toSet().size)
         assertEquals(all.toSet(), table.map { it.first }.toSet())
         table.forEach { assertTrue(it.second, TelemetryProps.isToken(it.second)) }
         assertTrue(TelemetryProps.isToken(TelemetryRoutes.OTHER))
