@@ -46,17 +46,18 @@ class SignupRepositoryImpl
         override suspend fun resendVerification(email: String, locale: String?): AppResult<VerificationSentDto> =
             apiCall { api.resendVerification(EmailRequest(email.trim(), locale)) }
 
-        override suspend fun verifyEmail(token: String): AppResult<VerifyEmailResponse> {
-            val response =
-                when (val result = apiCall { api.verifyEmail(VerifyEmailRequest(token.trim(), CLIENT, deviceName())) }) {
-                    is AppResult.Failure -> return result
-                    is AppResult.Success -> result.value
-                }
-            val session = response.session ?: return AppResult.Success(response)
-            return persisting(session).map {
-                gameEvents.publish(response.game)
-                response
+        override suspend fun verifyEmail(token: String): AppResult<VerifyEmailResponse> =
+            when (val redeemed = redeemEmailToken(token)) {
+                is AppResult.Failure -> redeemed
+                is AppResult.Success -> storeSession(redeemed.value).map { redeemed.value }
             }
+
+        override suspend fun redeemEmailToken(token: String): AppResult<VerifyEmailResponse> =
+            apiCall { api.verifyEmail(VerifyEmailRequest(token.trim(), CLIENT, deviceName())) }
+
+        override suspend fun storeSession(response: VerifyEmailResponse): AppResult<Unit> {
+            val session = response.session ?: return AppResult.Success(Unit)
+            return persisting(session).map { gameEvents.publish(response.game) }
         }
 
         override suspend fun requestPasswordReset(email: String, locale: String?): AppResult<Unit> =

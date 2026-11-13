@@ -98,4 +98,7 @@
     <string name="account_err_sessions">Impossible de charger vos appareils.</string>
     <string name="account_err_revoke">Impossible de déconnecter cet appareil.</string>
     <string name="account_err_signout_all">Impossible de se déconnecter partout. Réessayez.</string>
+    <string name="account_link_coming_soon">La connexion avec %1$s arrive bientôt.</string>
+    <string name="account_err_link_failed">Impossible de lancer l\'association. Réessayez.</string>
+    <string name="account_link_done">Méthode de connexion associée.</string>
 </resources>

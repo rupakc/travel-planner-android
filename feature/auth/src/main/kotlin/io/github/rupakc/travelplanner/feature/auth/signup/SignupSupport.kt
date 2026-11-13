@@ -139,3 +139,85 @@ internal class Cooldown(private val scope: CoroutineScope, private val onTick: (
         const val MILLIS = 1000L
     }
 }
+
+/** One improvement hint of the strength meter (web `signup:strength.hint.*`). */
+enum class StrengthHint { TooShort, Longer, Variety, Repeats, Sequence, Identity }
+
+/** [score] 0..4 (web `strength.level.<score>`); [hints] in the web's order. */
+data class PasswordStrengthResult(val score: Int, val hints: List<StrengthHint>)
+
+/**
+ * Port of the web's `utils/passwordStrength.js`: a small dependency-free heuristic. Advice only; the server's
+ * rules (length, common list, identity match) stay the authority.
+ */
+object PasswordStrength {
+    /** The server's minimum for sign-up, reset and change-password (web `MIN_PASSWORD_LENGTH`). */
+    const val MIN_LENGTH = 10
+
+    private const val MIN_IDENTITY_PART = 3
+    private const val LEN_FAIR = 12
+    private const val LEN_GOOD = 16
+    private const val LEN_LONG = 20
+    private const val CLASSES_OK = 3
+    private const val MAX_SCORE = 4
+    private const val SCORE_LONG = 3
+    private const val SEQUENCE = 4
+    private const val IDENTITY_PENALTY = 2
+    private const val DISTINCT_RATIO = 3
+    private val repeatedRun = Regex("(.)\\1{2,}")
+
+    private fun hasSequence(password: String): Boolean {
+        val lower = password.lowercase()
+        for (i in 0..lower.length - SEQUENCE) {
+            val steps = (1 until SEQUENCE).map { lower[i + it] - lower[i + it - 1] }
+            if (steps.all { it == 1 } || steps.all { it == -1 }) return true
+        }
+        return false
+    }
+
+    private fun identityParts(username: String, email: String): List<String> =
+        listOf(username, email.substringBefore('@', ""))
+            .map { it.lowercase() }
+            .filter { it.length >= MIN_IDENTITY_PART }
+
+    fun of(password: String, username: String = "", email: String = ""): PasswordStrengthResult {
+        if (password.isEmpty()) return PasswordStrengthResult(0, emptyList())
+        val hints = mutableListOf<StrengthHint>()
+        val len = password.codePointCount(0, password.length)
+        var score =
+            when {
+                len < MIN_LENGTH -> 0
+                len < LEN_FAIR -> 1
+                len < LEN_GOOD -> 2
+                else -> SCORE_LONG
+            }
+        if (len < MIN_LENGTH) {
+            hints += StrengthHint.TooShort
+        } else if (len < LEN_GOOD) {
+            hints += StrengthHint.Longer
+        }
+
+        val classes =
+            listOf(Regex("[a-z]"), Regex("[A-Z]"), Regex("\\d"), Regex("[^a-zA-Z0-9]")).count { it.containsMatchIn(password) }
+        if (len >= MIN_LENGTH && (classes >= CLASSES_OK || len >= LEN_LONG)) score += 1
+        if (classes < CLASSES_OK && len < LEN_LONG) hints += StrengthHint.Variety
+
+        val distinct = password.codePoints().distinct().count().toInt()
+        val lowVariety = distinct * DISTINCT_RATIO < len
+        if (repeatedRun.containsMatchIn(password) || lowVariety) {
+            score -= 1
+            hints += StrengthHint.Repeats
+        }
+        if (lowVariety) score = minOf(score, 0)
+        if (hasSequence(password)) {
+            score -= 1
+            hints += StrengthHint.Sequence
+        }
+        val lower = password.lowercase()
+        if (identityParts(username, email).any { lower.contains(it) }) {
+            score -= IDENTITY_PENALTY
+            hints += StrengthHint.Identity
+        }
+        return PasswordStrengthResult(score.coerceIn(0, MAX_SCORE), hints)
+    }
+}

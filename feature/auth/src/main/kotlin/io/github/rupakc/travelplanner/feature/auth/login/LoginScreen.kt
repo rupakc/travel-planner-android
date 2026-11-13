@@ -284,7 +284,7 @@ private fun PendingAccountCard(pending: PendingAccount, onEvent: (LoginEvent) ->
 @Composable
 private fun SocialSignIn(comingSoonProvider: String?, onEvent: (LoginEvent) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-        SocialProvider.entries.filter { it != SocialProvider.APPLE }.forEach { provider ->
+        SocialProvider.entries.forEach { provider ->
             SocialSignInButton(
                 provider = provider,
                 label = stringResource(R.string.auth_continue_with, provider.displayName),

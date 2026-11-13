@@ -32,15 +32,14 @@ class LoginSocialTest {
         compose.setContent { TravelTheme(themeMode = ThemeMode.LIGHT) { LoginScreen(state, onEvent) } }
 
     @Test
-    fun `three provider buttons in order Google, Facebook, GitHub (no Apple on Android)`() {
+    fun `four provider buttons in order Apple, Google, Facebook, GitHub`() {
         show()
         val tops =
-            listOf("Google", "Facebook", "GitHub").map {
+            listOf("Apple", "Google", "Facebook", "GitHub").map {
                 compose.onNodeWithText("Continue with $it").assertExists().getUnclippedBoundsInRoot().top
             }
         assertEquals(tops.sorted(), tops)
-        assertEquals(3, tops.distinct().size)
-        compose.onNodeWithText("Continue with Apple").assertDoesNotExist()
+        assertEquals(4, tops.distinct().size)
         // Then the "or" divider, then the form.
         val divider = compose.onNodeWithText("or").getUnclippedBoundsInRoot().top
         val username = compose.onNodeWithText("Username").getUnclippedBoundsInRoot().top

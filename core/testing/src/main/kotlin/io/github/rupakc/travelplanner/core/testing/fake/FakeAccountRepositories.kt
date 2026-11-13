@@ -115,6 +115,13 @@ class FakeSignupRepository : SignupRepository {
 
     override suspend fun verifyEmail(token: String) = verifyResult.also { calls += "verifyEmail:$token" }
 
+    override suspend fun redeemEmailToken(token: String) = verifyResult.also { calls += "redeem:$token" }
+
+    override suspend fun storeSession(response: VerifyEmailResponse): AppResult<Unit> {
+        calls += "store:${response.session?.user?.username}"
+        return AppResult.Success(Unit)
+    }
+
     override suspend fun requestPasswordReset(email: String, locale: String?) = requestResetResult.also { calls += "requestReset:$email" }
 
     override suspend fun confirmPasswordReset(token: String, newPassword: String) = confirmResetResult.also { calls += "confirmReset:$token" }

@@ -98,4 +98,7 @@
     <string name="account_err_sessions">No se pudieron cargar tus dispositivos.</string>
     <string name="account_err_revoke">No se pudo cerrar sesión en ese dispositivo.</string>
     <string name="account_err_signout_all">No se pudo cerrar sesión en todas partes. Inténtalo de nuevo.</string>
+    <string name="account_link_coming_soon">El inicio de sesión con %1$s llegará pronto.</string>
+    <string name="account_err_link_failed">No se pudo iniciar la vinculación. Inténtalo de nuevo.</string>
+    <string name="account_link_done">Método de inicio de sesión vinculado.</string>
 </resources>

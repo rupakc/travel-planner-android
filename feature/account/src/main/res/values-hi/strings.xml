@@ -98,4 +98,7 @@
     <string name="account_err_sessions">आपके डिवाइस लोड नहीं हो सके।</string>
     <string name="account_err_revoke">उस डिवाइस को साइन आउट नहीं किया जा सका।</string>
     <string name="account_err_signout_all">हर जगह साइन आउट नहीं हो सका। फिर कोशिश करें।</string>
+    <string name="account_link_coming_soon">%1$s से साइन-इन जल्द आ रहा है।</string>
+    <string name="account_err_link_failed">लिंक करना शुरू नहीं हो सका। फिर से कोशिश करें।</string>
+    <string name="account_link_done">साइन-इन तरीका लिंक हो गया।</string>
 </resources>

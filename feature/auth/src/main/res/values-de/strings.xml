@@ -126,4 +126,20 @@
     <string name="auth_oauth_username_submit">Registrierung abschließen</string>
     <string name="auth_oauth_username_submitting">Wird abgeschlossen…</string>
     <string name="auth_oauth_username_cancel">Abbrechen</string>
+    <string name="auth_strength_label">Stärke: %1$s</string>
+    <string name="auth_strength_level_0">sehr schwach</string>
+    <string name="auth_strength_level_1">schwach</string>
+    <string name="auth_strength_level_2">mittel</string>
+    <string name="auth_strength_level_3">gut</string>
+    <string name="auth_strength_level_4">stark</string>
+    <string name="auth_strength_hint_too_short">mindestens 10 Zeichen verwenden</string>
+    <string name="auth_strength_hint_longer">länger ist stärker</string>
+    <string name="auth_strength_hint_variety">Buchstaben, Ziffern und Symbole mischen</string>
+    <string name="auth_strength_hint_repeats">wiederholte Zeichen vermeiden</string>
+    <string name="auth_strength_hint_sequence">Folgen wie abc oder 123 vermeiden</string>
+    <string name="auth_strength_hint_identity">Benutzername oder E-Mail nicht verwenden</string>
+    <string name="auth_verify_switch_title">Konto wechseln?</string>
+    <string name="auth_verify_switch_body">Dieser Link hat das Konto %2$s bestätigt, du bist aber als %1$s angemeldet. Zu %2$s wechseln?</string>
+    <string name="auth_verify_switch_confirm">Abmelden und wechseln</string>
+    <string name="auth_verify_switch_cancel">Angemeldet bleiben</string>
 </resources>

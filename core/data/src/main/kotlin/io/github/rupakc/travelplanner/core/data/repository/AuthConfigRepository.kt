@@ -15,7 +15,7 @@ data class AuthFlags(
     val minPasswordLength: Int = DEFAULT_MIN_PASSWORD_LENGTH,
 ) {
     companion object {
-        const val DEFAULT_MIN_PASSWORD_LENGTH = 8
+        const val DEFAULT_MIN_PASSWORD_LENGTH = 10
     }
 }
 

@@ -12,16 +12,17 @@ import io.github.rupakc.travelplanner.feature.account.SessionsRoute as SessionsS
  * [onChangePassword] opens `AccountChangePasswordRoute`; [onSignedOut] runs after an account delete or
  * "Sign out everywhere" (the session is already cleared, the auth gate shows Login).
  *
- * [onLinkProvider] is the hook for linking another sign-in method (Task 4): it receives the provider id
- * (`google`, `github`, `facebook`) and starts the browser flow (`OauthRepository.linkTicket` then the same
- * Custom Tab hand-off). While it is null the Link buttons read "Coming soon". After the flow returns the
- * shell can simply re-enter this screen: it reloads the account (and its linked methods) on every entry.
+ * [onLinkProvider] is the shell's browser hand-off for linking another sign-in method: the screen checks the provider
+ * is configured (`/api/auth/providers`, else a "coming soon" note), takes a link ticket, then passes the safe
+ * same-origin start URL here for the Custom Tab. The browser's return link is exchanged by the screen itself
+ * and the account reloads. While it is null the Link buttons read "Coming soon".
  */
 fun NavGraphBuilder.accountGraph(
     onBack: () -> Unit,
     onChangePassword: () -> Unit,
     onOpenSessions: () -> Unit,
     onSignedOut: () -> Unit,
+    /** Opens the given start URL in a Custom Tab. */
     onLinkProvider: ((String) -> Unit)? = null,
 ) {
     composable<AccountRoute> { AccountScreenRoute(onBack, onChangePassword, onOpenSessions, onSignedOut, onLinkProvider) }

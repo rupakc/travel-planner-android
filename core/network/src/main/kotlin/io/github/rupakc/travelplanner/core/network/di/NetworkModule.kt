@@ -15,6 +15,7 @@ import io.github.rupakc.travelplanner.core.network.AiLocaleInterceptor
 import io.github.rupakc.travelplanner.core.network.ApiRefreshCall
 import io.github.rupakc.travelplanner.core.network.AuthInterceptor
 import io.github.rupakc.travelplanner.core.network.BaseUrlInterceptor
+import io.github.rupakc.travelplanner.core.network.EmailUnverifiedInterceptor
 import io.github.rupakc.travelplanner.core.network.PLACEHOLDER_BASE_URL
 import io.github.rupakc.travelplanner.core.network.RedactingHttpLogger
 import io.github.rupakc.travelplanner.core.network.RefreshCall
@@ -95,6 +96,7 @@ object NetworkModule {
         baseUrl: BaseUrlInterceptor,
         auth: AuthInterceptor,
         aiLocale: AiLocaleInterceptor,
+        emailUnverified: EmailUnverifiedInterceptor,
         buildInfo: AppBuildInfo,
     ): OkHttpClient =
         OkHttpClient.Builder()
@@ -105,6 +107,8 @@ object NetworkModule {
             // Adds `locale` to AI bodies; before baseUrl so the host is still the placeholder. @AiHttp and
             // @StreamingHttp derive from this client, so all three carry it.
             .addInterceptor(aiLocale)
+            // Raises the "confirm your email" banner on `403 email_unverified`; sees the placeholder host too.
+            .addInterceptor(emailUnverified)
             .addInterceptor(baseUrl)
             .apply {
                 if (buildInfo.debug) {

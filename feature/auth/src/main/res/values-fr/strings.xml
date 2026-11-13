@@ -126,4 +126,20 @@
     <string name="auth_oauth_username_submit">Terminer l\'inscription</string>
     <string name="auth_oauth_username_submitting">Finalisation…</string>
     <string name="auth_oauth_username_cancel">Annuler</string>
+    <string name="auth_strength_label">Robustesse : %1$s</string>
+    <string name="auth_strength_level_0">très faible</string>
+    <string name="auth_strength_level_1">faible</string>
+    <string name="auth_strength_level_2">moyenne</string>
+    <string name="auth_strength_level_3">bonne</string>
+    <string name="auth_strength_level_4">forte</string>
+    <string name="auth_strength_hint_too_short">utilisez au moins 10 caractères</string>
+    <string name="auth_strength_hint_longer">plus long, c\'est plus sûr</string>
+    <string name="auth_strength_hint_variety">mélangez lettres, chiffres et symboles</string>
+    <string name="auth_strength_hint_repeats">évitez les caractères répétés</string>
+    <string name="auth_strength_hint_sequence">évitez les suites comme abc ou 123</string>
+    <string name="auth_strength_hint_identity">n\'incluez pas votre identifiant ou e-mail</string>
+    <string name="auth_verify_switch_title">Changer de compte ?</string>
+    <string name="auth_verify_switch_body">Ce lien a confirmé le compte %2$s, mais vous êtes connecté en tant que %1$s. Passer à %2$s ?</string>
+    <string name="auth_verify_switch_confirm">Se déconnecter et changer</string>
+    <string name="auth_verify_switch_cancel">Rester connecté</string>
 </resources>

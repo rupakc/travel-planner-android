@@ -92,4 +92,20 @@ class SignupSupportTest {
         assertFalse(PasswordRules.check("jane@example.com", 10, email = "jane@example.com").distinctFromIdentity)
         assertTrue(PasswordRules.check("correct horse battery", 10, username = "jane_doe", email = "jane@x.com").ok)
     }
+
+    /** Expected values come from running the web's `utils/passwordStrength.js` on the same inputs. */
+    @Test
+    fun `strength matches the web heuristic`() {
+        fun check(pw: String, score: Int, vararg hints: StrengthHint, username: String = "", email: String = "") =
+            assertEquals(pw, PasswordStrengthResult(score, hints.toList()), PasswordStrength.of(pw, username, email))
+        check("", 0)
+        check("short", 0, StrengthHint.TooShort, StrengthHint.Variety)
+        check("abcdefghij", 0, StrengthHint.Longer, StrengthHint.Variety, StrengthHint.Sequence)
+        check("Tr0ub4dor&3x", 3, StrengthHint.Longer)
+        check("aaaaaaaaaaaa", 0, StrengthHint.Longer, StrengthHint.Variety, StrengthHint.Repeats)
+        check("jane12345678", 0, StrengthHint.Longer, StrengthHint.Variety, StrengthHint.Sequence, StrengthHint.Identity, username = "jane")
+        check("Correct-Horse-Battery-9", 4)
+        check("password1234", 1, StrengthHint.Longer, StrengthHint.Variety, StrengthHint.Sequence, email = "x@y.com")
+        check("1234567890Ab!", 2, StrengthHint.Longer, StrengthHint.Sequence)
+    }
 }

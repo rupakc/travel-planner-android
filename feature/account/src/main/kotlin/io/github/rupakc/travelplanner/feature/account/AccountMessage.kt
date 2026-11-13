@@ -10,9 +10,11 @@ import io.github.rupakc.travelplanner.core.common.userFacingDetail
 internal data class AccountMessage(
     @param:StringRes val res: Int,
     val detail: String? = null,
+    /** The one `%1$s` of [res], when it has one. */
+    val arg: String? = null,
 ) {
     @Composable
-    fun text(): String = detail ?: stringResource(res)
+    fun text(): String = detail ?: if (arg != null) stringResource(res, arg) else stringResource(res)
 }
 
 /** Maps a failure to copy: structured `error_code` first, then 429/network, then the backend detail, then [fallback]. */

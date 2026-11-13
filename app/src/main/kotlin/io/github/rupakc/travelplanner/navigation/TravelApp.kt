@@ -106,6 +106,7 @@ import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.model.social.IdeaKind
 import io.github.rupakc.travelplanner.core.ui.game.GameDeltaHost
 import io.github.rupakc.travelplanner.core.ui.privacy.ConsentPrompt
+import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher
 import io.github.rupakc.travelplanner.core.ui.share.ShareLauncher
 import io.github.rupakc.travelplanner.core.ui.social.IdeaLauncher
@@ -277,6 +278,8 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
         onDispose { activity?.removeOnNewIntentListener(listener) }
     }
     val snackbarHostState = remember { SnackbarHostState() }
+    // Custom Tab hand-off for linking a sign-in method from the account area (http/https only).
+    val linkOpener = rememberLinkOpener()
     val expiredMessage = stringResource(R.string.session_expired)
     LaunchedEffect(shellViewModel) {
         shellViewModel.sessionExpired.collect { snackbarHostState.showSnackbar(expiredMessage) }
@@ -312,6 +315,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
         tabs = tabs,
         showSettingsAction = !shell.journey,
         belowBar = {
+            VerifyBanner()
             if (topLevel == TopLevelDestination.EXPLORE) {
                 ExploreEntries(
                     onOpenChat = { navController.navigate(ChatRoute()) },
@@ -430,6 +434,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 onOpenSessions = { navController.navigate(io.github.rupakc.travelplanner.core.model.navigation.SessionsRoute) },
                 // The session is already cleared (account delete, sign out everywhere): the gate shows Login.
                 onSignedOut = {},
+                onLinkProvider = linkOpener,
             )
             composable<YouRoute> {
                 YouScreen(

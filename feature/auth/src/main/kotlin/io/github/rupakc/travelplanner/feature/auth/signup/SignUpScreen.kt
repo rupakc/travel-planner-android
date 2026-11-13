@@ -1,8 +1,14 @@
 package io.github.rupakc.travelplanner.feature.auth.signup
 
+import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -13,15 +19,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
@@ -107,6 +118,7 @@ internal fun SignUpScreen(
             imeAction = ImeAction.Next,
             onImeAction = { focus.moveFocus(FocusDirection.Down) },
         )
+        PasswordStrengthMeter(state.password, state.username, state.email)
         PasswordRulesList(state.passwordCheck, state.minPasswordLength, state.password.isNotEmpty())
         AuthTextField(
             value = state.displayName,
@@ -175,3 +187,65 @@ private fun RuleLine(text: String, met: Boolean, started: Boolean) {
         modifier = Modifier.semantics { stateDescription = state },
     )
 }
+
+private val LevelRes =
+    listOf(
+        R.string.auth_strength_level_0,
+        R.string.auth_strength_level_1,
+        R.string.auth_strength_level_2,
+        R.string.auth_strength_level_3,
+        R.string.auth_strength_level_4,
+    )
+
+@StringRes
+private fun levelRes(score: Int): Int = LevelRes[score.coerceIn(0, LevelRes.lastIndex)]
+
+@StringRes
+private fun hintRes(hint: StrengthHint): Int =
+    when (hint) {
+        StrengthHint.TooShort -> R.string.auth_strength_hint_too_short
+        StrengthHint.Longer -> R.string.auth_strength_hint_longer
+        StrengthHint.Variety -> R.string.auth_strength_hint_variety
+        StrengthHint.Repeats -> R.string.auth_strength_hint_repeats
+        StrengthHint.Sequence -> R.string.auth_strength_hint_sequence
+        StrengthHint.Identity -> R.string.auth_strength_hint_identity
+    }
+
+/**
+ * Four-segment meter plus the first two hints (web `PasswordStrengthMeter`). Advice only: the server decides
+ * what is accepted. Shows nothing until something is typed; the level is also spoken, never colour alone.
+ */
+@Composable
+internal fun PasswordStrengthMeter(password: String, username: String, email: String, modifier: Modifier = Modifier) {
+    if (password.isEmpty()) return
+    val result = remember(password, username, email) { PasswordStrength.of(password, username, email) }
+    val level = stringResource(levelRes(result.score))
+    val hintTexts = result.hints.take(MAX_HINTS).map { stringResource(hintRes(it)) }
+    val label = stringResource(R.string.auth_strength_label, level) + hintTexts.joinToString("") { " · $it" }
+    val filled =
+        when {
+            result.score <= 1 -> TravelTheme.colors.error
+            result.score == 2 -> TravelTheme.colors.tertiary
+            else -> TravelTheme.colors.primary
+        }
+    Column(
+        modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+        verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs),
+    ) {
+        Row(Modifier.fillMaxWidth().clearAndSetSemantics {}, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
+            repeat(SEGMENTS) { index ->
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(SEGMENT_HEIGHT)
+                        .background(if (index < maxOf(result.score, 1)) filled else TravelTheme.colors.outlineVariant, RoundedCornerShape(SEGMENT_HEIGHT)),
+                )
+            }
+        }
+        Text(label, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+    }
+}
+
+private const val SEGMENTS = 4
+private const val MAX_HINTS = 2
+private val SEGMENT_HEIGHT = 6.dp

@@ -161,4 +161,20 @@
     <string name="auth_oauth_username_submit">Finish sign-up</string>
     <string name="auth_oauth_username_submitting">Finishing…</string>
     <string name="auth_oauth_username_cancel">Cancel</string>
+    <string name="auth_strength_label">Strength: %1$s</string>
+    <string name="auth_strength_level_0">very weak</string>
+    <string name="auth_strength_level_1">weak</string>
+    <string name="auth_strength_level_2">fair</string>
+    <string name="auth_strength_level_3">good</string>
+    <string name="auth_strength_level_4">strong</string>
+    <string name="auth_strength_hint_too_short">use at least 10 characters</string>
+    <string name="auth_strength_hint_longer">longer is stronger</string>
+    <string name="auth_strength_hint_variety">mix letters, numbers and symbols</string>
+    <string name="auth_strength_hint_repeats">avoid repeated characters</string>
+    <string name="auth_strength_hint_sequence">avoid sequences like abc or 123</string>
+    <string name="auth_strength_hint_identity">don\'t include your username or email</string>
+    <string name="auth_verify_switch_title">Switch account?</string>
+    <string name="auth_verify_switch_body">This link confirmed the account %2$s, but you are signed in as %1$s. Switch to %2$s?</string>
+    <string name="auth_verify_switch_confirm">Sign out and switch</string>
+    <string name="auth_verify_switch_cancel">Stay signed in</string>
 </resources>

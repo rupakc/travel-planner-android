@@ -126,4 +126,20 @@
     <string name="auth_oauth_username_submit">完成注册</string>
     <string name="auth_oauth_username_submitting">正在完成…</string>
     <string name="auth_oauth_username_cancel">取消</string>
+    <string name="auth_strength_label">强度：%1$s</string>
+    <string name="auth_strength_level_0">非常弱</string>
+    <string name="auth_strength_level_1">弱</string>
+    <string name="auth_strength_level_2">一般</string>
+    <string name="auth_strength_level_3">良好</string>
+    <string name="auth_strength_level_4">强</string>
+    <string name="auth_strength_hint_too_short">至少使用 10 个字符</string>
+    <string name="auth_strength_hint_longer">越长越安全</string>
+    <string name="auth_strength_hint_variety">混合字母、数字和符号</string>
+    <string name="auth_strength_hint_repeats">避免重复字符</string>
+    <string name="auth_strength_hint_sequence">避免 abc 或 123 这样的连续字符</string>
+    <string name="auth_strength_hint_identity">不要包含用户名或邮箱</string>
+    <string name="auth_verify_switch_title">切换账号？</string>
+    <string name="auth_verify_switch_body">此链接确认的是账号 %2$s，但你当前以 %1$s 登录。要切换到 %2$s 吗？</string>
+    <string name="auth_verify_switch_confirm">退出并切换</string>
+    <string name="auth_verify_switch_cancel">保持登录</string>
 </resources>
