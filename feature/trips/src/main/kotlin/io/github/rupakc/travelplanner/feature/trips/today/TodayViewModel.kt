@@ -9,6 +9,7 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.userFacingDetail
+import io.github.rupakc.travelplanner.core.data.repository.GameEvents
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.data.repository.TripsRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
@@ -47,6 +48,10 @@ data class TodayUiState(
     val sending: Boolean = false,
     val streak: Streak? = null,
     val newCountry: Boolean = false,
+    /** ISO code of the country just stamped (with [city] when known); the passport stamp shows only while [newCountry]. */
+    val countryCode: String? = null,
+    /** False under `hide_game` / game off: the stamp then falls back to the plain line. */
+    val gameVisible: Boolean = false,
     val failure: CheckinFailure? = null,
 ) {
     val dayNumber: Int? get() = trip?.dayIndex
@@ -73,6 +78,7 @@ class TodayViewModel
         private val plans: PlansRepository,
         private val telemetry: Telemetry,
         private val clock: AppClock,
+        private val gameEvents: GameEvents,
     ) : ViewModel() {
         private val tripId: Long = savedStateHandle.get<Long>(TripViewModel.TRIP_ID_ARG) ?: -1L
         private val _state = MutableStateFlow(TodayUiState())
@@ -161,6 +167,8 @@ class TodayViewModel
                     sending = false,
                     checkedIn = true,
                     newCountry = r.newCountry,
+                    gameVisible = gameEvents.visible.value,
+                    countryCode = r.countryCode?.takeIf { c -> c.isNotBlank() },
                     streak = r.streak ?: it.streak,
                     city = r.city?.takeIf { c -> c.isNotBlank() } ?: it.city,
                 )

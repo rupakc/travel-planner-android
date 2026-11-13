@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delight_deal_title">Cazaofertas</string>
+    <string name="delight_deal_next">Próxima insignia: %1$s</string>
+    <string name="delight_deal_progress">%1$d de %2$d</string>
+    <string name="delight_deal_all_done">Cazaofertas: has logrado todas las insignias.</string>
+    <string name="delight_bucket_title">Países visitados</string>
+    <string name="delight_bucket_label">%1$d de %2$d países visitados</string>
+    <string name="delight_stamp_title">País nuevo</string>
+    <string name="delight_stamp_desc">Sello de país nuevo: %1$s</string>
+</resources>

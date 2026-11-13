@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.core.ui.game
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -91,15 +92,18 @@ private fun CelebrationSheet(item: GameCelebration, onDismiss: () -> Unit) {
         )
     } else {
         ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
-            Column(
-                Modifier.fillMaxWidth().padding(TravelTheme.spacing.xl).semantics { liveRegion = LiveRegionMode.Polite },
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
-            ) {
-                Icon(Icons.Filled.Star, contentDescription = null, tint = TravelTheme.colors.primary, modifier = Modifier.size(48.dp))
-                Text(title(item), style = TravelTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
-                subtitle(item)?.let { Text(it, style = TravelTheme.typography.bodyMedium) }
-                TpTextButton(onClick = onDismiss, tid = "ui.game_celebration_ok_2") { Text(stringResource(R.string.game_celebration_ok)) }
+            Box {
+                if (item is GameCelebration.Badge) ConfettiBurst(Modifier.matchParentSize())
+                Column(
+                    Modifier.fillMaxWidth().padding(TravelTheme.spacing.xl).semantics { liveRegion = LiveRegionMode.Polite },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
+                ) {
+                    Icon(Icons.Filled.Star, contentDescription = null, tint = TravelTheme.colors.primary, modifier = Modifier.size(48.dp))
+                    Text(title(item), style = TravelTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
+                    subtitle(item)?.let { Text(it, style = TravelTheme.typography.bodyMedium) }
+                    TpTextButton(onClick = onDismiss, tid = "ui.game_celebration_ok_2") { Text(stringResource(R.string.game_celebration_ok)) }
+                }
             }
         }
     }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delight_deal_title">优惠猎人</string>
+    <string name="delight_deal_next">下一枚徽章：%1$s</string>
+    <string name="delight_deal_progress">%1$d / %2$d</string>
+    <string name="delight_deal_all_done">优惠猎人：已获得全部徽章。</string>
+    <string name="delight_bucket_title">已到访国家</string>
+    <string name="delight_bucket_label">已到访 %1$d / %2$d 个国家</string>
+    <string name="delight_stamp_title">新国家</string>
+    <string name="delight_stamp_desc">新国家印章：%1$s</string>
+</resources>

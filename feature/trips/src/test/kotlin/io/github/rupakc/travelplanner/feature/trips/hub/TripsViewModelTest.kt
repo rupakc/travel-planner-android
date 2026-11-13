@@ -4,10 +4,13 @@ import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.model.trips.CountryStat
 import io.github.rupakc.travelplanner.core.model.trips.Phase
+import io.github.rupakc.travelplanner.core.model.trips.Stats
 import io.github.rupakc.travelplanner.core.model.trips.Trip
 import io.github.rupakc.travelplanner.core.model.trips.TripsResponse
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
+import io.github.rupakc.travelplanner.core.testing.fake.FakeGameEvents
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTripsRepository
 import java.time.Instant
@@ -24,6 +27,7 @@ class TripsViewModelTest {
 
     private val repo = FakeTripsRepository()
     private val telemetry = FakeTelemetry()
+    private val events = FakeGameEvents()
     private val clock =
         object : AppClock {
             override fun now(): Instant = Instant.parse("2026-11-12T23:30:00Z")
@@ -31,7 +35,7 @@ class TripsViewModelTest {
             override fun zone() = ZoneOffset.ofHours(5)
         }
 
-    private fun vm() = TripsViewModel(repo, telemetry, clock)
+    private fun vm() = TripsViewModel(repo, telemetry, clock, events)
 
     private fun trip(id: Long, phase: Phase, title: String = "T$id") = Trip(id = id, title = title, phase = phase)
 
@@ -138,13 +142,13 @@ class TripsViewModelTest {
     fun `coming back to the hub refetches silently, and the first resume does not`() {
         repo.listResult = AppResult.Success(TripsResponse(listOf(trip(1, Phase.PLANNING, "Old")), pinnedId = 1))
         val vm = vm()
-        val after = repo.calls.size
+        val after = repo.calls.count { it.startsWith("list:") }
         vm.onEvent(TripsEvent.Resumed)
-        assertEquals(after, repo.calls.size)
+        assertEquals(after, repo.calls.count { it.startsWith("list:") })
 
         repo.listResult = AppResult.Success(TripsResponse(listOf(trip(1, Phase.PLANNING, "Renamed")), pinnedId = 1))
         vm.onEvent(TripsEvent.Resumed)
-        assertEquals(after + 1, repo.calls.size)
+        assertEquals(after + 1, repo.calls.count { it.startsWith("list:") })
         assertEquals("Renamed", vm.state.value.pinned?.title)
         assertFalse(vm.state.value.loading)
     }
@@ -158,5 +162,24 @@ class TripsViewModelTest {
         vm.onEvent(TripsEvent.Resumed)
         assertNull(vm.state.value.error)
         assertEquals(1L, vm.state.value.pinned?.id)
+    }
+
+    @Test
+    fun `bucket ring comes from stats and the goal`() {
+        repo.statsResult = AppResult.Success(Stats(countries = listOf(CountryStat("JP"), CountryStat("FR")), bucketGoal = 10))
+        val b = vm().state.value.bucket
+        assertEquals(2, b?.count)
+        assertEquals(10, b?.goal)
+    }
+
+    @Test
+    fun `no bucket ring without a goal, with failed stats or when the game is hidden`() {
+        repo.statsResult = AppResult.Success(Stats(countries = listOf(CountryStat("JP"))))
+        assertNull(vm().state.value.bucket)
+        repo.statsResult = AppResult.Failure(AppError.Network())
+        assertNull(vm().state.value.bucket)
+        repo.statsResult = AppResult.Success(Stats(bucketGoal = 5))
+        events.setVisible(false)
+        assertNull(vm().state.value.bucket)
     }
 }

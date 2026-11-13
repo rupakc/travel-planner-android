@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delight_deal_title">Deal hunter</string>
+    <string name="delight_deal_next">Next badge: %1$s</string>
+    <string name="delight_deal_progress">%1$d of %2$d</string>
+    <string name="delight_deal_all_done">Deal hunter: every badge earned.</string>
+    <string name="delight_bucket_title">Countries visited</string>
+    <string name="delight_bucket_label">%1$d of %2$d countries visited</string>
+    <string name="delight_stamp_title">New country</string>
+    <string name="delight_stamp_desc">New country stamp: %1$s</string>
+</resources>
