@@ -26,7 +26,7 @@ sealed interface NotificationTarget {
     /** A head-to-head match (`/play/h2h/{id}`): an invite or a result. */
     data class H2h(val matchId: String) : NotificationTarget
 
-    /** The Play tab (`/play`): the daily quiz reminder, or a head-to-head kind without a usable match id. */
+    /** The Play tab (`/play`): the daily quiz reminder. */
     data object Play : NotificationTarget
 
     /** The notification list: the safe fallback when nothing more specific is known. */
@@ -108,9 +108,9 @@ fun resolveNotificationTarget(
     return if (priceLike || alert.watchId != null || link?.startsWith("/alerts") == true) NotificationTarget.Alert(alert) else NotificationTarget.Inbox
 }
 
-/** A quiz row: the match its link names (head-to-head kinds), else the Play tab. */
+/** A quiz row: the daily reminder opens the Play tab; a head-to-head kind opens its match, else the list. */
 private fun quizTarget(kind: String?, link: String?): NotificationTarget =
-    if (kind == "quiz_daily") NotificationTarget.Play else parseH2hPath(link)?.let(NotificationTarget::H2h) ?: NotificationTarget.Play
+    if (kind == "quiz_daily") NotificationTarget.Play else parseH2hPath(link)?.let(NotificationTarget::H2h) ?: NotificationTarget.Inbox
 
 /** A social row: the idea or profile its web [link] names (allow-listed), else the feed. */
 private fun socialTarget(link: String?): NotificationTarget =
