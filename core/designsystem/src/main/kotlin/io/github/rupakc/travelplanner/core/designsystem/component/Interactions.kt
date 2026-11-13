@@ -337,6 +337,7 @@ fun TpTab(
     icon: @Composable (() -> Unit)? = null,
     selectedContentColor: Color = LocalContentColor.current,
     unselectedContentColor: Color = selectedContentColor,
+    interactionSource: MutableInteractionSource? = null,
 ) {
     val sink = LocalUiEventSink.current
     Tab(
@@ -351,6 +352,7 @@ fun TpTab(
         icon = icon,
         selectedContentColor = selectedContentColor,
         unselectedContentColor = unselectedContentColor,
+        interactionSource = interactionSource,
     )
 }
 
@@ -364,6 +366,7 @@ fun TpDropdownMenuItem(
     trailingIcon: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
     colors: MenuItemColors = MenuDefaults.itemColors(),
+    interactionSource: MutableInteractionSource? = null,
 ) {
     val sink = LocalUiEventSink.current
     DropdownMenuItem(
@@ -377,6 +380,7 @@ fun TpDropdownMenuItem(
         trailingIcon = trailingIcon,
         enabled = enabled,
         colors = colors,
+        interactionSource = interactionSource,
     )
 }
 

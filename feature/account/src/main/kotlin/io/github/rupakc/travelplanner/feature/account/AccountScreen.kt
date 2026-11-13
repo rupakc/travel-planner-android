@@ -145,6 +145,7 @@ internal fun AccountScreen(
                     message = state.error?.text(),
                     modifier = Modifier.padding(padding).fillMaxSize(),
                     onRetry = { onEvent(AccountEvent.Refresh) },
+                    tid = "account.account_retry",
                 )
             }
 

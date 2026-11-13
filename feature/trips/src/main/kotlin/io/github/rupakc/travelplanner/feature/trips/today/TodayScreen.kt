@@ -107,7 +107,7 @@ fun TodayScreen(
         }
 
         state.failed -> {
-            ErrorState(null, modifier, title = stringResource(R.string.today_load_failed), onRetry = { onEvent(TodayEvent.Retry) })
+            ErrorState(null, modifier, title = stringResource(R.string.today_load_failed), onRetry = { onEvent(TodayEvent.Retry) }, tid = "trips.today_retry")
         }
 
         else -> {

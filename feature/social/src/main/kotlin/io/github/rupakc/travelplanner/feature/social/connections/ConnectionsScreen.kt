@@ -93,7 +93,7 @@ private fun TabContent(state: ConnectionsUiState, onEvent: (ConnectionsEvent) ->
         }
 
         current.error != null && !current.loaded -> {
-            ErrorState(errorText(current.error), modifier, onRetry = { onEvent(ConnectionsEvent.Retry) })
+            ErrorState(errorText(current.error), modifier, onRetry = { onEvent(ConnectionsEvent.Retry) }, tid = "social.connections_retry")
         }
 
         current.handles.isEmpty() -> {

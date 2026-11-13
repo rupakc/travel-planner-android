@@ -107,7 +107,7 @@ internal fun MySharesScreen(state: MySharesUiState, onEvent: (MySharesEvent) -> 
             }
 
             state.phase == MySharesPhase.Error -> {
-                ErrorState(errorText(state.error), content.fillMaxSize(), onRetry = { onEvent(MySharesEvent.Retry) })
+                ErrorState(errorText(state.error), content.fillMaxSize(), onRetry = { onEvent(MySharesEvent.Retry) }, tid = "share.my_shares_retry")
             }
 
             state.isEmpty -> {

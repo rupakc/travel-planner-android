@@ -114,7 +114,7 @@ private fun ScopeContent(state: FeedUiState, onEvent: (FeedEvent) -> Unit, onOpe
         }
 
         current.error != null && !current.loaded -> {
-            ErrorState(errorText(current.error), modifier, onRetry = { onEvent(FeedEvent.Refresh) })
+            ErrorState(errorText(current.error), modifier, onRetry = { onEvent(FeedEvent.Refresh) }, tid = "social.feed_retry")
         }
 
         current.ideas.isEmpty() -> {

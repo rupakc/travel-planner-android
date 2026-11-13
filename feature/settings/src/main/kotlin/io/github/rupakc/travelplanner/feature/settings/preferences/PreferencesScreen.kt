@@ -113,6 +113,7 @@ fun PreferencesScreen(
                 ErrorState(
                     message = state.loadError.message ?: stringResource(R.string.settings_prefs_load_failed),
                     onRetry = { onEvent(PreferencesEvent.Retry) },
+                    tid = "settings.preferences_retry",
                 )
             }
 
@@ -440,7 +441,9 @@ private fun Interests(selected: List<String>, onEvent: (PreferencesEvent) -> Uni
         Text(stringResource(R.string.settings_prefs_interests), style = TravelTheme.typography.labelLarge)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             InterestIds.forEach { id ->
-                TpChip(label = stringResource(interestLabelRes(id)), selected = id in selected, onClick = { onEvent(PreferencesEvent.ToggleInterest(id)) })
+                TpChip(label = stringResource(interestLabelRes(id)), selected = id in selected, onClick = {
+                    onEvent(PreferencesEvent.ToggleInterest(id))
+                }, tid = "settings.preferences_chip")
             }
         }
     }

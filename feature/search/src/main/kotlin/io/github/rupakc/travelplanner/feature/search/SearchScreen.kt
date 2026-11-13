@@ -277,12 +277,16 @@ fun SearchScreen(
             title = { androidx.compose.material3.Text(stringResource(R.string.search_new_plan_title)) },
             text = { androidx.compose.material3.Text(stringResource(R.string.search_new_plan_message)) },
             confirmButton = {
-                androidx.compose.material3.TextButton(onClick = { onEvent(SearchFormEvent.ConfirmNewPlan) }) {
+                io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton(onClick = {
+                    onEvent(SearchFormEvent.ConfirmNewPlan)
+                }, tid = "search.new_plan_confirm") {
                     androidx.compose.material3.Text(stringResource(R.string.search_new_plan_confirm))
                 }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { onEvent(SearchFormEvent.CancelNewPlan) }) {
+                io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton(onClick = {
+                    onEvent(SearchFormEvent.CancelNewPlan)
+                }, tid = "search.new_plan_keep") {
                     androidx.compose.material3.Text(stringResource(R.string.search_new_plan_keep))
                 }
             },
@@ -329,6 +333,7 @@ private fun ModeChips(state: SearchUiState, onEvent: (SearchFormEvent) -> Unit, 
                 selected = state.mode == mode,
                 onClick = { onEvent(SearchFormEvent.SelectMode(mode)) },
                 modifier = Modifier.testTag("mode_${mode.routeValue}"),
+                tid = "search.search_chip",
             )
         }
     }

@@ -181,7 +181,9 @@ internal fun FlightFilterSheet(current: FlightFilters?, data: FlightsData?, onAp
                 1 to R.string.results_filter_one_stop,
                 2 to R.string.results_filter_two_stops,
             )
-                .forEach { (value, label) -> TpChip(stringResource(label), selected = stops == value, onClick = { stops = value }) }
+                .forEach { (value, label) ->
+                    TpChip(stringResource(label), selected = stops == value, onClick = { stops = value }, tid = "results.filter_sheets_chip_1")
+                }
         }
         PriceSlider(stringResource(R.string.results_filter_max_price_pp), maxPrice, FLIGHT_PRICE_FLOOR, ceilPrice) { maxPrice = it }
         TimeRange(stringResource(R.string.results_filter_departure), dep) { dep = it }
@@ -255,11 +257,15 @@ internal fun HotelFilterSheet(current: HotelFilters?, data: HotelsData?, onApply
     ) {
         Label(stringResource(R.string.results_filter_beds))
         ChipRow {
-            TpChip(stringResource(R.string.results_filter_any), selected = beds == null, onClick = { beds = null })
+            TpChip(stringResource(R.string.results_filter_any), selected = beds == null, onClick = { beds = null }, tid = "results.filter_sheets_chip_2")
             for (n in 1 until BEDS_PLUS) {
-                TpChip(pluralStringResource(R.plurals.results_filter_beds_n, n, n), selected = beds == n, onClick = { beds = n })
+                TpChip(pluralStringResource(R.plurals.results_filter_beds_n, n, n), selected = beds == n, onClick = {
+                    beds = n
+                }, tid = "results.filter_sheets_chip_3")
             }
-            TpChip(stringResource(R.string.results_filter_beds_plus, BEDS_PLUS), selected = beds == BEDS_PLUS, onClick = { beds = BEDS_PLUS })
+            TpChip(stringResource(R.string.results_filter_beds_plus, BEDS_PLUS), selected = beds == BEDS_PLUS, onClick = {
+                beds = BEDS_PLUS
+            }, tid = "results.filter_sheets_chip_4")
         }
         PriceSlider(stringResource(R.string.results_filter_max_night), maxPrice, HOTEL_PRICE_FLOOR, ceilPrice) { maxPrice = it }
         Label(stringResource(R.string.results_filter_wifi))
@@ -270,7 +276,9 @@ internal fun HotelFilterSheet(current: HotelFilters?, data: HotelsData?, onApply
                 "good" to R.string.results_filter_wifi_good,
                 "excellent" to R.string.results_filter_wifi_excellent,
             )
-                .forEach { (value, label) -> TpChip(stringResource(label), selected = wifi == value, onClick = { wifi = value }) }
+                .forEach { (value, label) ->
+                    TpChip(stringResource(label), selected = wifi == value, onClick = { wifi = value }, tid = "results.filter_sheets_chip_5")
+                }
         }
         val km = distance ?: DISTANCE_MAX
         val kmText = stringResource(R.string.results_filter_km, "%.1f".format(km))
@@ -351,7 +359,16 @@ internal fun ActivityFilterSheet(
         Label(stringResource(R.string.results_filter_interests))
         ChipRow {
             ACTIVITY_INTERESTS.forEach { id ->
-                TpChip(interestLabel(id), selected = id in interests, onClick = { interests = if (id in interests) interests - id else interests + id })
+                TpChip(interestLabel(id), selected = id in interests, onClick = {
+                    interests =
+                        if (id in
+                            interests
+                        ) {
+                            interests - id
+                        } else {
+                            interests + id
+                        }
+                }, tid = "results.filter_sheets_chip_6")
             }
         }
         PriceSlider(stringResource(R.string.results_filter_max_cost_pp), maxPrice, 0f, ceilPrice) { maxPrice = it }
@@ -372,6 +389,7 @@ internal fun ActivityFilterSheet(
                         ?: stringResource(R.string.results_filter_any),
                     selected = rating == r,
                     onClick = { rating = r },
+                    tid = "results.filter_sheets_chip_7",
                 )
             }
         }

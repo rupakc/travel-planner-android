@@ -71,7 +71,9 @@ fun JournalScreen(state: JournalUiState, onEvent: (JournalEvent) -> Unit, modifi
         }
 
         state.failed -> {
-            ErrorState(null, modifier, title = stringResource(R.string.journal_load_failed), onRetry = { onEvent(JournalEvent.Retry) })
+            ErrorState(null, modifier, title = stringResource(R.string.journal_load_failed), onRetry = {
+                onEvent(JournalEvent.Retry)
+            }, tid = "trips.journal_retry")
         }
 
         else -> {

@@ -72,6 +72,7 @@ fun QuizScreen(state: QuizUiState, onEvent: (QuizEvent) -> Unit, onBack: () -> U
                     modifier = body,
                     actionLabel = stringResource(R.string.play_result_back),
                     onAction = onBack,
+                    tid = "play.quiz_empty_action_1",
                 )
             }
 
@@ -81,6 +82,7 @@ fun QuizScreen(state: QuizUiState, onEvent: (QuizEvent) -> Unit, onBack: () -> U
                     modifier = body,
                     actionLabel = stringResource(R.string.play_quiz_start_again),
                     onAction = { onEvent(QuizEvent.Retry) },
+                    tid = "play.quiz_empty_action_2",
                 )
             }
 
@@ -89,6 +91,7 @@ fun QuizScreen(state: QuizUiState, onEvent: (QuizEvent) -> Unit, onBack: () -> U
                     message = phase.message ?: stringResource(R.string.play_quiz_error),
                     modifier = body,
                     onRetry = { onEvent(QuizEvent.Retry) },
+                    tid = "play.quiz_retry",
                 )
             }
 

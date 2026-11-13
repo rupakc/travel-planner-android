@@ -86,9 +86,19 @@ internal fun MyProfileScreen(
     ) { padding ->
         val content = Modifier.padding(padding)
         when (state.phase) {
-            ProfilePhase.Loading -> SkeletonList(content.padding(TravelTheme.spacing.gutter), lines = 5)
-            ProfilePhase.Error -> ErrorState(errorText(state.error), content.fillMaxSize(), onRetry = { onEvent(MyProfileEvent.Retry) })
-            ProfilePhase.Content -> ProfileForm(state, onEvent, onOpenProfile, onOpenConnections, content)
+            ProfilePhase.Loading -> {
+                SkeletonList(content.padding(TravelTheme.spacing.gutter), lines = 5)
+            }
+
+            ProfilePhase.Error -> {
+                ErrorState(errorText(state.error), content.fillMaxSize(), onRetry = {
+                    onEvent(MyProfileEvent.Retry)
+                }, tid = "social.my_profile_retry")
+            }
+
+            ProfilePhase.Content -> {
+                ProfileForm(state, onEvent, onOpenProfile, onOpenConnections, content)
+            }
         }
     }
 }

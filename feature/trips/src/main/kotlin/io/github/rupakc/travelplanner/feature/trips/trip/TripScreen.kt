@@ -115,7 +115,9 @@ fun TripScreen(
             }
 
             trip == null -> {
-                ErrorState(state.error?.message, title = stringResource(R.string.trip_error_failed), onRetry = { onEvent(TripEvent.Refresh) })
+                ErrorState(state.error?.message, title = stringResource(R.string.trip_error_failed), onRetry = {
+                    onEvent(TripEvent.Refresh)
+                }, tid = "trips.trip_retry_1")
             }
 
             else -> {
@@ -325,7 +327,9 @@ private fun Overview(state: TripUiState, trip: Trip, onEvent: (TripEvent) -> Uni
 
             PlanStatus.Failed -> {
                 item(key = "plan-failed", contentType = "failed") {
-                    ErrorState(null, title = stringResource(R.string.trip_plan_load_failed), onRetry = { onEvent(TripEvent.RetryPlan) })
+                    ErrorState(null, title = stringResource(R.string.trip_plan_load_failed), onRetry = {
+                        onEvent(TripEvent.RetryPlan)
+                    }, tid = "trips.trip_retry_2")
                 }
             }
 

@@ -115,8 +115,9 @@ fun EmptyState(
     icon: ImageVector = Icons.Filled.Info,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null,
+    tid: String = "state.empty_action",
 ) {
-    StateLayout(modifier, icon, TravelTheme.colors.onSurfaceVariant, title, message, actionLabel, onAction, TpButtonVariant.Tonal)
+    StateLayout(modifier, icon, TravelTheme.colors.onSurfaceVariant, title, message, actionLabel, onAction, TpButtonVariant.Tonal, tid)
 }
 
 /**
@@ -129,6 +130,7 @@ fun ErrorState(
     modifier: Modifier = Modifier,
     title: String = stringResource(R.string.ds_error_generic),
     onRetry: (() -> Unit)? = null,
+    tid: String = "state.retry",
 ) {
     StateLayout(
         modifier.semantics { liveRegion = LiveRegionMode.Polite },
@@ -139,6 +141,7 @@ fun ErrorState(
         stringResource(R.string.ds_retry).takeIf { onRetry != null },
         onRetry,
         TpButtonVariant.Primary,
+        tid,
     )
 }
 
@@ -152,6 +155,7 @@ private fun StateLayout(
     actionLabel: String?,
     onAction: (() -> Unit)?,
     actionVariant: TpButtonVariant,
+    tid: String,
 ) {
     Column(
         modifier.fillMaxWidth().padding(TravelTheme.spacing.xl),
@@ -168,6 +172,6 @@ private fun StateLayout(
                 textAlign = TextAlign.Center,
             )
         }
-        if (actionLabel != null && onAction != null) TpButton(actionLabel, onAction, variant = actionVariant)
+        if (actionLabel != null && onAction != null) TpButton(actionLabel, onAction, variant = actionVariant, tid = tid)
     }
 }

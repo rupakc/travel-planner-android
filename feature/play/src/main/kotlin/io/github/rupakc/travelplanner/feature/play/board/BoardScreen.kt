@@ -85,7 +85,9 @@ fun BoardScreen(state: BoardUiState, onEvent: (BoardEvent) -> Unit, onBack: () -
 
                 is BoardPhase.Error -> {
                     item(key = "error", contentType = "error") {
-                        ErrorState(phase.message ?: stringResource(R.string.play_board_error), Modifier.fillMaxWidth(), onRetry = { onEvent(BoardEvent.Retry) })
+                        ErrorState(phase.message ?: stringResource(R.string.play_board_error), Modifier.fillMaxWidth(), onRetry = {
+                            onEvent(BoardEvent.Retry)
+                        }, tid = "play.board_retry")
                     }
                 }
 

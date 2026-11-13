@@ -375,6 +375,7 @@ internal fun QuickJumpRow(
                             }
                         }
                     },
+                tid = "results.results_header_chip",
             )
         }
     }

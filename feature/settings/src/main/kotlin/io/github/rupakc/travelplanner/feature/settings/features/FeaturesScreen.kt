@@ -54,6 +54,7 @@ fun FeaturesScreen(state: FeaturesUiState, onEvent: (FeaturesEvent) -> Unit, onB
                             icon = featureIcon(row.iconName.orEmpty()),
                             checked = row.on,
                             onCheckedChange = { onEvent(FeaturesEvent.Toggle(row.id, it)) },
+                            tid = "settings.features_switch",
                         )
                     }
                 }

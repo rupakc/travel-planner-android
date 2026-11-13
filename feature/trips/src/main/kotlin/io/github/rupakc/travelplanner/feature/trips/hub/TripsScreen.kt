@@ -91,6 +91,7 @@ fun TripsScreen(state: TripsUiState, onEvent: (TripsEvent) -> Unit, modifier: Mo
                             message = state.error.message,
                             title = stringResource(R.string.trips_load_failed),
                             onRetry = { onEvent(TripsEvent.Refresh) },
+                            tid = "trips.trips_retry",
                         )
                     }
                 }
@@ -102,6 +103,7 @@ fun TripsScreen(state: TripsUiState, onEvent: (TripsEvent) -> Unit, modifier: Mo
                             icon = Icons.Filled.Place,
                             actionLabel = stringResource(R.string.trips_empty_plan),
                             onAction = { onEvent(TripsEvent.PlanTrip) },
+                            tid = "trips.trips_empty_action",
                         )
                         TpButton(
                             text = stringResource(R.string.trips_empty_idea),

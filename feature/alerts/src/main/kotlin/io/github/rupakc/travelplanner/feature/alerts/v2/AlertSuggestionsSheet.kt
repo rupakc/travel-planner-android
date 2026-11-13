@@ -66,7 +66,12 @@ private fun SuggestionsBody(load: SuggestionsLoad, onWatch: (Int) -> Unit, onDis
         }
 
         is SuggestionsLoad.Failed -> {
-            ErrorState(load.message, title = stringResource(R.string.alerts_suggest_load_failed), onRetry = onRetry)
+            ErrorState(
+                load.message,
+                title = stringResource(R.string.alerts_suggest_load_failed),
+                onRetry = onRetry,
+                tid = "alerts.alert_suggestions_sheet_retry",
+            )
         }
 
         is SuggestionsLoad.Ready -> {

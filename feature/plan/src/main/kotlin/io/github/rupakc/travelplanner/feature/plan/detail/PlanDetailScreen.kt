@@ -124,6 +124,7 @@ internal fun PlanDetailScreen(
                     ErrorState(
                         message = state.error.message ?: stringResource(R.string.plan_not_found),
                         onRetry = { onEvent(PlanDetailEvent.Retry) },
+                        tid = "plan.plan_detail_retry",
                     )
                 }
 

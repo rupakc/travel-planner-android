@@ -110,7 +110,7 @@ internal fun ShareScreen(
 
                 state.error is AppError.Network -> {
                     WithPrivacyFooter(onEvent) {
-                        ErrorState(stringResource(R.string.share_offline), onRetry = { onEvent(ShareEvent.Retry) })
+                        ErrorState(stringResource(R.string.share_offline), onRetry = { onEvent(ShareEvent.Retry) }, tid = "share.share_retry")
                     }
                 }
 
@@ -121,6 +121,7 @@ internal fun ShareScreen(
                             message = stringResource(R.string.share_unavailable_message),
                             actionLabel = stringResource(R.string.share_plan_own),
                             onAction = onPlanOwn,
+                            tid = "share.share_empty_action",
                         )
                     }
                 }

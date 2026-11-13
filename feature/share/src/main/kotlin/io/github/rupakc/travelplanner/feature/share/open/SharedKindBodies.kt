@@ -103,6 +103,7 @@ internal fun UnknownShareBody(plainLink: String?, onOpenLink: (String) -> Unit, 
             message = stringResource(R.string.share_unknown_message),
             actionLabel = plainLink?.let { stringResource(R.string.share_unknown_open) },
             onAction = { plainLink?.let(onOpenLink) },
+            tid = "share.shared_kind_bodies_empty_action",
         )
         TpButton(stringResource(R.string.share_plan_own), onClick = onPlanOwn, variant = TpButtonVariant.Text, tid = "share.share_plan_own_2")
         footer()

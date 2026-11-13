@@ -98,9 +98,22 @@ fun AlertPrefsScreen(state: AlertPrefsUiState, actions: AlertPrefsActions, onBac
     Scaffold(modifier, topBar = { TpTopBar(stringResource(R.string.alerts_prefs_title), onBack = onBack) }) { padding ->
         Column(Modifier.padding(padding)) {
             when (state) {
-                AlertPrefsUiState.Loading -> SkeletonList(message = stringResource(R.string.alerts_loading_short))
-                is AlertPrefsUiState.Failed -> ErrorState(state.message, title = stringResource(R.string.alerts_prefs_load_failed), onRetry = actions.onRetry)
-                is AlertPrefsUiState.Content -> PrefsForm(state, actions)
+                AlertPrefsUiState.Loading -> {
+                    SkeletonList(message = stringResource(R.string.alerts_loading_short))
+                }
+
+                is AlertPrefsUiState.Failed -> {
+                    ErrorState(
+                        state.message,
+                        title = stringResource(R.string.alerts_prefs_load_failed),
+                        onRetry = actions.onRetry,
+                        tid = "alerts.alert_prefs_retry",
+                    )
+                }
+
+                is AlertPrefsUiState.Content -> {
+                    PrefsForm(state, actions)
+                }
             }
         }
     }

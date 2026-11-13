@@ -186,7 +186,7 @@ fun NearbyScreen(
                 NearbyPhase.NoFix -> {
                     ErrorState(stringResource(R.string.nearby_no_fix), title = stringResource(R.string.nearby_no_fix_title), onRetry = {
                         onEvent(NearbyEvent.Refresh)
-                    })
+                    }, tid = "nearby.nearby_retry_1")
                 }
 
                 is NearbyPhase.NoPlace -> {
@@ -197,11 +197,12 @@ fun NearbyScreen(
                         icon = Icons.Filled.Place,
                         actionLabel = stringResource(R.string.nearby_try_again),
                         onAction = { onEvent(NearbyEvent.Refresh) },
+                        tid = "nearby.nearby_empty_action",
                     )
                 }
 
                 is NearbyPhase.Failed -> {
-                    ErrorState(failureText(phase), onRetry = { onEvent(NearbyEvent.Refresh) })
+                    ErrorState(failureText(phase), onRetry = { onEvent(NearbyEvent.Refresh) }, tid = "nearby.nearby_retry_2")
                 }
 
                 NearbyPhase.Loaded -> {

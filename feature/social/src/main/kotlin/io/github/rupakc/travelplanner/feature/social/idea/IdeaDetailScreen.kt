@@ -129,7 +129,7 @@ internal fun IdeaDetailScreen(
             }
 
             state.phase == IdeaPhase.Error || idea == null -> {
-                ErrorState(errorText(state.error), body, onRetry = { onEvent(IdeaDetailEvent.Retry) })
+                ErrorState(errorText(state.error), body, onRetry = { onEvent(IdeaDetailEvent.Retry) }, tid = "social.idea_detail_retry")
             }
 
             else -> {

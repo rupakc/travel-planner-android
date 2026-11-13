@@ -59,7 +59,9 @@ fun TasteProfileScreen(state: TasteUiState, onEvent: (TasteEvent) -> Unit, onBac
             }
 
             state.error != null -> {
-                ErrorState(state.error.message ?: stringResource(R.string.settings_taste_load_failed), onRetry = { onEvent(TasteEvent.Retry) })
+                ErrorState(state.error.message ?: stringResource(R.string.settings_taste_load_failed), onRetry = {
+                    onEvent(TasteEvent.Retry)
+                }, tid = "settings.taste_profile_retry")
             }
 
             !state.hasSignals -> {

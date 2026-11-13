@@ -82,7 +82,7 @@ fun H2hListScreen(
             }
 
             is H2hListPhase.Error -> {
-                ErrorState(phase.message ?: stringResource(R.string.play_h2h_error), body, onRetry = { onEvent(H2hListEvent.Retry) })
+                ErrorState(phase.message ?: stringResource(R.string.play_h2h_error), body, onRetry = { onEvent(H2hListEvent.Retry) }, tid = "play.h2hs_retry_1")
             }
 
             H2hListPhase.Loaded -> {
@@ -257,11 +257,14 @@ fun H2hDetailScreen(state: H2hDetailUiState, onEvent: (H2hDetailEvent) -> Unit, 
                     modifier = body,
                     actionLabel = stringResource(R.string.play_h2h_back),
                     onAction = onBack,
+                    tid = "play.h2hs_empty_action",
                 )
             }
 
             is H2hDetailPhase.Error -> {
-                ErrorState(phase.message ?: stringResource(R.string.play_h2h_error), body, onRetry = { onEvent(H2hDetailEvent.Retry) })
+                ErrorState(phase.message ?: stringResource(R.string.play_h2h_error), body, onRetry = {
+                    onEvent(H2hDetailEvent.Retry)
+                }, tid = "play.h2hs_retry_2")
             }
 
             H2hDetailPhase.Loaded -> {

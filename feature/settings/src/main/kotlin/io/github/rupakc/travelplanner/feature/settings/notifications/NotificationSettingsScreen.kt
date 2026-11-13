@@ -126,6 +126,7 @@ fun NotificationSettingsScreen(
                     icon = Icons.Filled.DateRange,
                     checked = settings.tripNotifications,
                     onCheckedChange = { onToggle(SetToggle(NotificationToggle.TRIP, it)) },
+                    tid = "settings.notification_settings_switch_1",
                 )
                 SettingsSwitchRow(
                     title = stringResource(R.string.settings_notif_price),
@@ -133,6 +134,7 @@ fun NotificationSettingsScreen(
                     icon = Icons.Filled.Notifications,
                     checked = settings.priceAlertNotifications,
                     onCheckedChange = { onToggle(SetToggle(NotificationToggle.PRICE_ALERTS, it)) },
+                    tid = "settings.notification_settings_switch_2",
                 )
                 SettingsSwitchRow(
                     title = stringResource(R.string.settings_notif_nearby),
@@ -140,6 +142,7 @@ fun NotificationSettingsScreen(
                     icon = Icons.Filled.LocationOn,
                     checked = settings.nearbyNotifications,
                     onCheckedChange = { onToggle(SetToggle(NotificationToggle.NEARBY, it)) },
+                    tid = "settings.notification_settings_switch_3",
                 )
             }
             // The background check never asks for a fresh fix: it reuses the coarse cell stored by Near me.
@@ -150,6 +153,7 @@ fun NotificationSettingsScreen(
                 checked = settings.nearbyNotificationsAlways && settings.nearbyNotifications,
                 enabled = settings.nearbyNotifications,
                 onCheckedChange = { onToggle(SetToggle(NotificationToggle.NEARBY_ALWAYS, it)) },
+                tid = "settings.notification_settings_switch_4",
             )
             SettingsHeading(stringResource(R.string.settings_notif_system))
             SettingsNote(stringResource(R.string.settings_notif_system_note))

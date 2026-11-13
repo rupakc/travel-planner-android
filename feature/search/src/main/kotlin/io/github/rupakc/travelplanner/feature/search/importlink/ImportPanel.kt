@@ -106,7 +106,9 @@ private fun ImportInputCard(state: ImportUiState, onEvent: (ImportEvent) -> Unit
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                 examples.forEach { (label, text) ->
                     val body = stringResource(text)
-                    TpChip(label = stringResource(label), selected = state.text == body, onClick = { onEvent(ImportEvent.Example(body)) })
+                    TpChip(label = stringResource(label), selected = state.text == body, onClick = {
+                        onEvent(ImportEvent.Example(body))
+                    }, tid = "search.import_panel_chip")
                 }
             }
             val submitLabel =

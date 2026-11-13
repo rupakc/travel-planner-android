@@ -72,6 +72,7 @@ internal fun ServerNotificationsSection(
                 ErrorState(
                     state.loadError?.message ?: stringResource(R.string.settings_notifsrv_error_load),
                     onRetry = { onEvent(ServerNotificationsEvent.Retry) },
+                    tid = "settings.server_notifications_section_retry",
                 )
             }
 
@@ -110,6 +111,7 @@ private fun Categories(state: ServerNotificationsUiState, onEvent: (ServerNotifi
             checked = state.isOn(category),
             enabled = !state.saving,
             onCheckedChange = { onEvent(ServerNotificationsEvent.SetCategory(category, it)) },
+            tid = "settings.server_notifications_section_switch_1",
         )
     }
 }
@@ -125,6 +127,7 @@ private fun QuietAndLimits(state: ServerNotificationsUiState, settings: Notifica
         checked = quiet.enabled,
         enabled = !state.saving,
         onCheckedChange = { onEvent(ServerNotificationsEvent.SetQuietEnabled(it)) },
+        tid = "settings.server_notifications_section_switch_2",
     )
     if (quiet.enabled) {
         SettingsRow(
