@@ -51,6 +51,8 @@ data class TripsUiState(
     val sheet: NewTripSheet? = null,
     /** Countries visited against the bucket-list goal (null: no goal, game hidden, or stats unavailable). */
     val bucket: Delight.Bucket? = null,
+    /** ISO codes of the visited countries (from `/trips/stats`), drawn on the scratch map. */
+    val visitedCountries: List<String> = emptyList(),
 ) {
     val isEmpty: Boolean get() = !loading && error == null && pinned == null && groups.isEmpty()
 }
@@ -197,7 +199,7 @@ class TripsViewModel
             viewModelScope.launch {
                 val stats = (repository.stats() as? AppResult.Success)?.value
                 val bucket = stats?.let { Delight.bucket(it.countries.size, it.bucketGoal, gameEvents.visible.value) }
-                _state.update { it.copy(bucket = bucket) }
+                _state.update { it.copy(bucket = bucket, visitedCountries = stats?.countries?.map { c -> c.code }.orEmpty()) }
             }
         }
 

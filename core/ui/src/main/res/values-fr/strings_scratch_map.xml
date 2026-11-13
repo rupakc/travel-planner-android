@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scratch_map_title">Carte à gratter</string>
+    <plurals name="scratch_map_cd">
+        <item quantity="one">%d pays visité sur la carte du monde</item>
+        <item quantity="many">%d pays visités sur la carte du monde</item>
+        <item quantity="other">%d pays visités sur la carte du monde</item>
+    </plurals>
+    <string name="scratch_map_visited">%1$s, visité</string>
+    <string name="scratch_map_not_visited">%1$s, pas encore visité</string>
+    <string name="scratch_map_hint">Touchez un pays pour voir son nom</string>
+</resources>

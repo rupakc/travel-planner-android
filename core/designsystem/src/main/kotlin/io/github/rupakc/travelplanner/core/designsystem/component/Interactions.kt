@@ -2,6 +2,7 @@ package io.github.rupakc.travelplanner.core.designsystem.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.selection.selectable
@@ -52,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
@@ -77,6 +79,18 @@ fun Modifier.tpClickable(
     return clickable(enabled = enabled, onClickLabel = onClickLabel, role = role) {
         sink.report(UiEventKind.TAP, tid)
         onClick()
+    }
+}
+
+/** Tap detector that reports TAP under [tid] and hands the tap position to [onTap] (for canvases such as the scratch map). */
+@Composable
+fun Modifier.tpTapPosition(tid: String, onTap: (androidx.compose.ui.geometry.Offset) -> Unit): Modifier {
+    val sink = LocalUiEventSink.current
+    return pointerInput(tid) {
+        detectTapGestures { offset ->
+            sink.report(UiEventKind.TAP, tid)
+            onTap(offset)
+        }
     }
 }
 

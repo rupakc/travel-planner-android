@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scratch_map_title">Rubbelkarte</string>
+    <plurals name="scratch_map_cd">
+        <item quantity="one">%d Land auf der Weltkarte besucht</item>
+        <item quantity="other">%d Länder auf der Weltkarte besucht</item>
+    </plurals>
+    <string name="scratch_map_visited">%1$s, besucht</string>
+    <string name="scratch_map_not_visited">%1$s, noch nicht besucht</string>
+    <string name="scratch_map_hint">Tippe auf ein Land, um seinen Namen zu sehen</string>
+</resources>

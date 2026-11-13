@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scratch_map_title">स्क्रैच मैप</string>
+    <plurals name="scratch_map_cd">
+        <item quantity="one">विश्व मानचित्र पर %d देश देखा गया</item>
+        <item quantity="other">विश्व मानचित्र पर %d देश देखे गए</item>
+    </plurals>
+    <string name="scratch_map_visited">%1$s, देखा गया</string>
+    <string name="scratch_map_not_visited">%1$s, अभी नहीं देखा</string>
+    <string name="scratch_map_hint">नाम देखने के लिए किसी देश पर टैप करें</string>
+</resources>
