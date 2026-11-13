@@ -399,6 +399,8 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 onOpenProfile = navController.profileEntry(shell.social),
                 // The match screen hides itself when Play is off, so no flag check here.
                 onOpenH2h = { navController.navigate(H2hDestination(it)) { launchSingleTop = true } },
+                // The Play tab hides itself (-> Trips / Home) when the game is off.
+                onOpenPlay = { navController.navigateToTopLevel(TopLevelDestination.PLAY) },
             )
             settingsGraph(
                 onBack = { navController.popBackStack() },

@@ -26,6 +26,9 @@ sealed interface NotificationTarget {
     /** A head-to-head match (`/play/h2h/{id}`): an invite or a result. */
     data class H2h(val matchId: String) : NotificationTarget
 
+    /** The Play tab (`/play`): the daily quiz reminder, or a head-to-head kind without a usable match id. */
+    data object Play : NotificationTarget
+
     /** The notification list: the safe fallback when nothing more specific is known. */
     data object Inbox : NotificationTarget
 }
@@ -56,11 +59,12 @@ private const val MAX_ID_DIGITS = 15
 private const val MAX_MATCH_ID = 64
 private val H2H_PATH = Regex("^/play/h2h/([A-Za-z0-9_-]{1,$MAX_MATCH_ID})/?$")
 
-/** Social kinds (category `social`); both open the feed. */
-val SOCIAL_PUSH_KINDS: Set<String> = setOf("social_idea_saved", "social_new_follower")
+/** Social kinds (category `social`); each opens the idea or profile its link names, else the feed. */
+val SOCIAL_PUSH_KINDS: Set<String> =
+    setOf("social_idea_saved", "social_new_follower", "social_idea_liked", "social_idea_comment")
 
-/** Head-to-head kinds (category `quiz`). */
-val QUIZ_PUSH_KINDS: Set<String> = setOf("quiz_h2h_invite", "quiz_h2h_result")
+/** Quiz kinds (category `quiz`): head-to-head invite / result and the daily reminder. */
+val QUIZ_PUSH_KINDS: Set<String> = setOf("quiz_h2h_invite", "quiz_h2h_result", "quiz_daily")
 
 /** The match id of a `/play/h2h/{id}` web path and nothing else. */
 fun parseH2hPath(path: String?): String? = path?.let { H2H_PATH.matchEntire(it.substringBefore('?')) }?.groupValues?.get(1)
@@ -98,11 +102,15 @@ fun resolveNotificationTarget(
         return id?.let(NotificationTarget::TripToday) ?: NotificationTarget.Inbox
     }
     if (kind in SOCIAL_PUSH_KINDS) return socialTarget(link)
-    if (kind in QUIZ_PUSH_KINDS) return parseH2hPath(link)?.let(NotificationTarget::H2h) ?: NotificationTarget.Inbox
+    if (kind in QUIZ_PUSH_KINDS) return quizTarget(kind, link)
     val alert = parseAlertsPath(link) ?: AlertLink(watchKind, watchId)
     val priceLike = notificationCategory(category, kind) == NotificationCategory.PRICE_DROPS
     return if (priceLike || alert.watchId != null || link?.startsWith("/alerts") == true) NotificationTarget.Alert(alert) else NotificationTarget.Inbox
 }
+
+/** A quiz row: the match its link names (head-to-head kinds), else the Play tab. */
+private fun quizTarget(kind: String?, link: String?): NotificationTarget =
+    if (kind == "quiz_daily") NotificationTarget.Play else parseH2hPath(link)?.let(NotificationTarget::H2h) ?: NotificationTarget.Play
 
 /** A social row: the idea or profile its web [link] names (allow-listed), else the feed. */
 private fun socialTarget(link: String?): NotificationTarget =

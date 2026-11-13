@@ -21,6 +21,6 @@ class NotificationLinksH2hTest {
         val ok = resolveNotificationTarget("quiz_h2h_invite", "/play/h2h/m_7", null, null, null, "quiz")
         assertEquals(NotificationTarget.H2h("m_7"), ok)
         val bad = resolveNotificationTarget("quiz_h2h_result", "https://evil.example/x", null, null, null, "quiz")
-        assertEquals(NotificationTarget.Inbox, bad)
+        assertEquals(NotificationTarget.Play, bad)
     }
 }
