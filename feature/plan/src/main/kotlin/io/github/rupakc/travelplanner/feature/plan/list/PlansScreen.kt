@@ -62,6 +62,9 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonBlock
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
@@ -136,7 +139,7 @@ internal fun PlansScreen(
 @Composable
 private fun SearchField(query: String, onEvent: (PlansEvent) -> Unit) {
     val keyboard = LocalSoftwareKeyboardController.current
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = query,
         onValueChange = { onEvent(PlansEvent.QueryChanged(it)) },
         modifier = Modifier.fillMaxWidth().padding(horizontal = TravelTheme.spacing.gutter, vertical = TravelTheme.spacing.sm),
@@ -145,7 +148,7 @@ private fun SearchField(query: String, onEvent: (PlansEvent) -> Unit) {
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
         trailingIcon = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = { onEvent(PlansEvent.QueryChanged("")) }) {
+                TpIconButton(onClick = { onEvent(PlansEvent.QueryChanged("")) }, tid = "plan.plan_search_clear") {
                     Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.plan_search_clear))
                 }
             }
@@ -155,6 +158,7 @@ private fun SearchField(query: String, onEvent: (PlansEvent) -> Unit) {
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
         shape = TravelShape.Input,
+        tid = "plan.plan_search_hint",
     )
 }
 
@@ -200,13 +204,14 @@ private fun SortChip(sort: TripSort, onEvent: (PlansEvent) -> Unit) {
         TpChip(label = stringResource(R.string.plan_sort_by, current), selected = false, onClick = { open = true })
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             listOf(TripSort.TRIP_DATE to R.string.plan_sort_trip_date, TripSort.UPDATED to R.string.plan_sort_updated).forEach { (option, label) ->
-                DropdownMenuItem(
+                TpDropdownMenuItem(
                     text = { Text(stringResource(label)) },
                     onClick = {
                         open = false
                         onEvent(PlansEvent.SortChanged(option))
                     },
                     modifier = Modifier.semantics { selected = option == sort },
+                    tid = "plan.plans_screen_dropdown_menu_item",
                 )
             }
         }

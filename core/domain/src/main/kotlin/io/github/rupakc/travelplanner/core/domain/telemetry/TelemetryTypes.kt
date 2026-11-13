@@ -41,6 +41,8 @@ object TelemetryEvents {
     const val SCREEN_TIME = "screen_time"
     const val UI_TAP = "ui_tap"
     const val UI_TOGGLE = "ui_toggle"
+    const val UI_CHANGE = "ui_change"
+    const val UI_SUBMIT = "ui_submit"
     const val THEME_CHANGE = "theme_change"
     const val LANGUAGE_CHANGE = "language_change"
     const val CONSENT = "consent"

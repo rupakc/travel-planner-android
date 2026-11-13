@@ -42,6 +42,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.search.formatTripDates
@@ -71,7 +73,7 @@ internal fun RecentSearchesSection(
             Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = TravelTheme.spacing.minTouchTarget)
-                .clickable(role = Role.Button, onClick = onToggle)
+                .tpClickable(tid = "search.recent_searches_clickable", role = Role.Button, onClick = onToggle)
                 .semantics {
                     heading()
                     stateDescription = stateText
@@ -109,7 +111,13 @@ private fun RecentCard(card: RecentSearchCard, onLoad: (String) -> Unit, onRerun
             Column(
                 Modifier
                     .weight(1f)
-                    .clickable(onClickLabel = stringResource(R.string.search_recent_load, summary.route), role = Role.Button) { onLoad(card.id) },
+                    .tpClickable(
+                        tid = "search.search_recent_load",
+                        onClickLabel = stringResource(R.string.search_recent_load, summary.route),
+                        role = Role.Button,
+                    ) {
+                        onLoad(card.id)
+                    },
             ) {
                 Text(summary.route, style = TravelTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Row {
@@ -160,7 +168,7 @@ private fun RecentCard(card: RecentSearchCard, onLoad: (String) -> Unit, onRerun
                     )
                 }
             }
-            IconButton(onClick = { onRemove(card.id) }) {
+            TpIconButton(onClick = { onRemove(card.id) }, tid = "search.search_recent_remove") {
                 Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_recent_remove, summary.route))
             }
         }
@@ -171,6 +179,7 @@ private fun RecentCard(card: RecentSearchCard, onLoad: (String) -> Unit, onRerun
             modifier = Modifier.semantics { if (card.datesPassed) stateDescription = passedHint },
             variant = TpButtonVariant.Text,
             leadingIcon = Icons.Filled.Refresh,
+            tid = "search.search_recent_again",
         )
     }
 }
@@ -190,7 +199,9 @@ internal fun RecentNoticeBanner(notice: RecentNotice, onDismiss: () -> Unit, mod
                 style = TravelTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f).padding(vertical = TravelTheme.spacing.sm).semantics { liveRegion = LiveRegionMode.Polite },
             )
-            IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_dismiss)) }
+            TpIconButton(onClick = onDismiss, tid = "search.search_dismiss") {
+                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_dismiss))
+            }
         }
     }
 }

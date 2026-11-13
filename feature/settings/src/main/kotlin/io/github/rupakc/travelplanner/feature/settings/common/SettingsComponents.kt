@@ -33,6 +33,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.settings.R
 
@@ -121,7 +123,15 @@ internal fun SettingsRow(
             modifier
                 .highlighted(highlighted)
                 .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier),
+                .then(
+                    if (onClick !=
+                        null
+                    ) {
+                        Modifier.tpClickable(tid = "settings.settings_components_clickable", role = Role.Button, onClick = onClick)
+                    } else {
+                        Modifier
+                    },
+                ),
     )
 }
 
@@ -136,6 +146,7 @@ internal fun SettingsSwitchRow(
     icon: ImageVector? = null,
     enabled: Boolean = true,
     highlighted: Boolean = false,
+    tid: String = "settings.switch_row",
 ) {
     val state = stringResource(if (checked) R.string.settings_state_on else R.string.settings_state_off)
     ListItem(
@@ -148,7 +159,13 @@ internal fun SettingsSwitchRow(
             modifier
                 .highlighted(highlighted)
                 .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
+                .tpToggleable(
+                    tid = tid,
+                    value = checked,
+                    enabled = enabled,
+                    role = Role.Switch,
+                    onValueChange = onCheckedChange,
+                )
                 .semantics { stateDescription = state },
     )
 }

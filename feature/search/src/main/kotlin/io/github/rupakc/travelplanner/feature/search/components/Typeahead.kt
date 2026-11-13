@@ -40,6 +40,9 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.reference.Airport
@@ -128,7 +131,7 @@ internal fun <T> TypeaheadField(
 
     val suggestionsLabel = pluralStringResource(R.plurals.search_suggestions, results.size, results.size)
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it && results.isNotEmpty() }, modifier = modifier) {
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = display,
             onValueChange = {
                 display = it
@@ -151,14 +154,16 @@ internal fun <T> TypeaheadField(
                     }
 
                     display.isNotEmpty() -> {
-                        IconButton(onClick = {
+                        TpIconButton(onClick = {
                             display = ""
                             emitted = ""
                             onValueChange("")
                             query = null
                             results = emptyList()
                             expanded = false
-                        }) { Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.search_clear_field, label)) }
+                        }, tid = "search.typeahead_icon_button") {
+                            Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.search_clear_field, label))
+                        }
                     }
                 }
             },
@@ -167,10 +172,11 @@ internal fun <T> TypeaheadField(
             singleLine = true,
             shape = TravelShape.Input,
             keyboardOptions = KeyboardOptions(capitalization = capitalization, imeAction = ImeAction.Next),
+            tid = "search.search_clear_field",
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             results.forEach { item ->
-                DropdownMenuItem(
+                TpDropdownMenuItem(
                     text = { itemContent(item) },
                     onClick = {
                         display = toDisplay(item)
@@ -181,6 +187,7 @@ internal fun <T> TypeaheadField(
                         expanded = false
                     },
                     modifier = Modifier.testTag("suggestion:${itemKey(item)}"),
+                    tid = "search.typeahead_dropdown_menu_item",
                 )
             }
         }

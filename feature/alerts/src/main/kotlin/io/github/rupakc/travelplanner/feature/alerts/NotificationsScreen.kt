@@ -63,7 +63,9 @@ import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertAction
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertIcon
@@ -284,7 +286,7 @@ fun NotificationsScreen(state: NotificationsUiState, onEvent: (NotificationsEven
                 onBack = onBack,
                 actions = {
                     if (state.unread > 0) {
-                        IconButton(onClick = { onEvent(NotificationsEvent.MarkAllRead) }) {
+                        TpIconButton(onClick = { onEvent(NotificationsEvent.MarkAllRead) }, tid = "alerts.alerts_mark_all_read") {
                             Icon(Icons.Filled.Done, contentDescription = stringResource(R.string.alerts_mark_all_read))
                         }
                     }
@@ -362,7 +364,7 @@ internal fun NotificationRow(n: AppNotification, now: Instant, gameVisible: Bool
         Modifier
             .fillMaxWidth()
             .heightIn(min = TravelTheme.spacing.minTouchTarget)
-            .clickable(role = Role.Button, onClick = onOpen)
+            .tpClickable(tid = "alerts.notifications_screen_clickable", role = Role.Button, onClick = onOpen)
             .semantics(mergeDescendants = true) { stateDescription = stateText }
             .padding(horizontal = TravelTheme.spacing.gutter, vertical = TravelTheme.spacing.md),
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
@@ -458,7 +460,7 @@ fun NotificationBellAction(onOpen: () -> Unit, viewModel: NotificationBellViewMo
 fun NotificationBell(unread: Int, onOpen: () -> Unit, modifier: Modifier = Modifier) {
     val label = if (unread > 0) pluralStringResource(R.plurals.alerts_bell_unread, unread, unread) else stringResource(R.string.alerts_bell)
     // The label carries the count; as a polite live region it is announced when the count changes.
-    IconButton(
+    TpIconButton(
         onClick = onOpen,
         // Full 48 dp layout bounds as a top-bar action (E2E O2); the badge stays inside them.
         modifier =
@@ -466,6 +468,7 @@ fun NotificationBell(unread: Int, onOpen: () -> Unit, modifier: Modifier = Modif
                 contentDescription = label
                 liveRegion = LiveRegionMode.Polite
             },
+        tid = "alerts.notifications_screen_icon_button",
     ) {
         BadgedBox(
             badge = {

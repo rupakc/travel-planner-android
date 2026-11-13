@@ -39,6 +39,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVarian
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.trips.ExpenseCategories
 import io.github.rupakc.travelplanner.core.model.trips.Trip
@@ -249,7 +251,7 @@ private fun ExpenseFormCard(form: ExpenseForm, state: ExpensesUiState, onEvent: 
 private fun FormFields(form: ExpenseForm, state: ExpensesUiState, onEvent: (ExpensesEvent) -> Unit, problem: ExpenseRules.Problem?, error: String?) {
     Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
         Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = form.amount,
                 onValueChange = { onEvent(ExpensesEvent.Amount(it)) },
                 label = { Text(stringResource(R.string.money_amount)) },
@@ -257,18 +259,20 @@ private fun FormFields(form: ExpenseForm, state: ExpensesUiState, onEvent: (Expe
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
+                tid = "trips.money_amount",
             )
             CurrencyPicker(form.currency, ExpenseRules.currencyChoices(state.rate?.local, form.currency)) { onEvent(ExpensesEvent.Currency(it)) }
         }
         CategoryChips(form.category) { onEvent(ExpensesEvent.Category(it)) }
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = form.note,
             onValueChange = { onEvent(ExpensesEvent.Note(it)) },
             label = { Text(stringResource(R.string.money_note)) },
             isError = problem == ExpenseRules.Problem.NoteTooLong,
             modifier = Modifier.fillMaxWidth(),
+            tid = "trips.money_note",
         )
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = form.spentOn,
             onValueChange = { onEvent(ExpensesEvent.SpentOn(it)) },
             label = { Text(stringResource(R.string.money_date)) },
@@ -277,6 +281,7 @@ private fun FormFields(form: ExpenseForm, state: ExpensesUiState, onEvent: (Expe
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth(),
+            tid = "trips.money_date",
         )
         if (error != null) {
             Text(
@@ -300,10 +305,10 @@ private fun CurrencyPicker(current: String, choices: List<String>, onPick: (Stri
         TpButton(current, { open = true }, variant = TpButtonVariant.Tonal, tid = "money.currency")
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             choices.forEach { c ->
-                DropdownMenuItem(text = { Text(c) }, onClick = {
+                TpDropdownMenuItem(text = { Text(c) }, onClick = {
                     open = false
                     onPick(c)
-                })
+                }, tid = "trips.expenses_screen_dropdown_menu_item")
             }
         }
     }

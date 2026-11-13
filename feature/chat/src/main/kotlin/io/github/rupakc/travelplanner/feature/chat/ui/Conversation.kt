@@ -57,6 +57,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpFilledIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpSmallFloatingActionButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.ui.format.localUsd
@@ -137,12 +140,13 @@ private fun MessageList(state: ChatUiState, plan: PlanCallbacks, onEvent: (ChatU
         }
         if (showJump) {
             val label = stringResource(R.string.chat_jump_latest)
-            SmallFloatingActionButton(
+            TpSmallFloatingActionButton(
                 onClick = {
                     stickToBottom = true
                     scope.launch { listState.animateScrollToItem(0) }
                 },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(TravelTheme.spacing.gutter).semantics { contentDescription = label },
+                tid = "chat.conversation_small_floating_action_button",
             ) {
                 Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null)
             }
@@ -276,7 +280,7 @@ internal fun Composer(isStreaming: Boolean, onSend: (String) -> Unit, onStop: ()
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
         ) {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
                 modifier = Modifier.weight(1f).heightIn(max = ChatDimens.ComposerMaxHeight).testTag(ChatTags.INPUT),
@@ -286,17 +290,24 @@ internal fun Composer(isStreaming: Boolean, onSend: (String) -> Unit, onStop: ()
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
                 keyboardActions = KeyboardActions(onSend = { send() }),
                 maxLines = COMPOSER_MAX_LINES,
+                tid = "chat.chat_input_placeholder",
             )
             if (isStreaming) {
-                FilledIconButton(
+                TpFilledIconButton(
                     onClick = onStop,
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = TravelTheme.colors.error, contentColor = TravelTheme.colors.onError),
                     modifier = Modifier.size(TravelTheme.spacing.minTouchTarget),
+                    tid = "chat.conversation_filled_icon_button",
                 ) {
                     Icon(painterResource(R.drawable.ic_chat_stop), contentDescription = stringResource(R.string.chat_stop))
                 }
             } else {
-                FilledIconButton(onClick = send, enabled = text.isNotBlank(), modifier = Modifier.size(TravelTheme.spacing.minTouchTarget)) {
+                TpFilledIconButton(
+                    onClick = send,
+                    enabled = text.isNotBlank(),
+                    modifier = Modifier.size(TravelTheme.spacing.minTouchTarget),
+                    tid = "chat.chat_send",
+                ) {
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.chat_send))
                 }
             }

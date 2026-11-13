@@ -110,7 +110,7 @@ fun NotificationSettingsScreen(
                 ) {
                     Column(Modifier.padding(TravelTheme.spacing.md)) {
                         Text(stringResource(R.string.settings_notif_system_off), color = TravelTheme.extendedColors.onWarningContainer)
-                        TpButton(stringResource(R.string.settings_notif_turn_on), onClick = { onOpenSystem(null) })
+                        TpButton(stringResource(R.string.settings_notif_turn_on), onClick = { onOpenSystem(null) }, tid = "settings.settings_notif_turn_on")
                     }
                 }
             }

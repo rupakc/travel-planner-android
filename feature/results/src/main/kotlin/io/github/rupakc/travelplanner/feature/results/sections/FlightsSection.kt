@@ -18,6 +18,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.results.airlineName
 import io.github.rupakc.travelplanner.core.domain.results.flightNo
@@ -224,7 +225,7 @@ private fun FlightLegRow(leg: FlightLeg, outbound: Boolean, onLayover: (io.githu
                             ?: stringResource(R.string.results_layover_stop, place)
                     Pill(text, tone = if (long) PillTone.Warning else PillTone.Neutral)
                     if (long) {
-                        TextButton(onClick = { onLayover(lv) }) {
+                        TpTextButton(onClick = { onLayover(lv) }, tid = "results.results_layover_make_most") {
                             Text(stringResource(R.string.results_layover_make_most), style = TravelTheme.typography.labelMedium)
                         }
                     }

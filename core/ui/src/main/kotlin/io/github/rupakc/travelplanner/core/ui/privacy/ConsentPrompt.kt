@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.LocalUiEventSink
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
 import io.github.rupakc.travelplanner.core.designsystem.component.UiEventKind
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -55,7 +55,6 @@ fun ConsentPrompt(
     val spacing = TravelTheme.spacing
     val title = stringResource(R.string.privacy_prompt_title, stringResource(R.string.brand_name))
     val openLink = rememberLinkOpener()
-    val sink = LocalUiEventSink.current
     Card(
         modifier =
             modifier.semantics {
@@ -73,10 +72,7 @@ fun ConsentPrompt(
                     modifier = Modifier.weight(1f).semantics { heading() },
                 )
                 if (currentAllowed != null) {
-                    IconButton(onClick = {
-                        runCatching { sink.onUiEvent(UiEventKind.TAP, "privacy.close", null) }
-                        onClose()
-                    }) {
+                    TpIconButton(onClick = onClose, tid = "privacy.close") {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.privacy_close))
                     }
                 }

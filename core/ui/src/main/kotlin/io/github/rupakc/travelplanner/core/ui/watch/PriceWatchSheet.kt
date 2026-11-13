@@ -253,7 +253,13 @@ internal fun SuggestionRow(s: PriceSuggestion, busy: Boolean, onWatch: () -> Uni
                         modifier = Modifier.weight(1f),
                     )
                 }
-                TpButton(stringResource(R.string.watch_this_instead), onWatch, enabled = !busy, variant = TpButtonVariant.Secondary)
+                TpButton(
+                    stringResource(R.string.watch_this_instead),
+                    onWatch,
+                    enabled = !busy,
+                    variant = TpButtonVariant.Secondary,
+                    tid = "ui.watch_this_instead",
+                )
             }
         }
     }
@@ -422,6 +428,7 @@ private fun HotelTracked(state: PriceWatchDialogState, watch: PriceWatch, onEven
                     Modifier.semantics {
                         stateDescription = expanded
                     },
+                tid = "ui.watch_not_this_one",
             )
             if (state.swap.open) {
                 alternatives.forEachIndexed { i, alt ->
@@ -476,7 +483,13 @@ private fun ActivityMatched(watch: PriceWatch) {
             stringResource(R.string.watch_activity_source, provider) +
                 if (currency != "USD") " " + stringResource(R.string.watch_activity_currency, currency) else "",
         )
-        if (link != null) TpButton(stringResource(R.string.watch_activity_see_on, provider), { open(link) }, variant = TpButtonVariant.Text)
+        if (link !=
+            null
+        ) {
+            TpButton(stringResource(R.string.watch_activity_see_on, provider), {
+                open(link)
+            }, variant = TpButtonVariant.Text, tid = "ui.watch_activity_see_on")
+        }
     }
 }
 

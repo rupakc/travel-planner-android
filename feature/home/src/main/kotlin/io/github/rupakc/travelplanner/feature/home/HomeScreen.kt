@@ -55,10 +55,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonBlock
+import io.github.rupakc.travelplanner.core.designsystem.component.TpAssistChip
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
@@ -181,11 +183,12 @@ private fun Greeting(userName: String?, types: List<TravellerType>, onEvent: (Ho
                 types.map { stringResource(it.titleRes()) }.joinToString(stringResource(R.string.home_type_joiner))
             }
         val typeDescription = stringResource(R.string.home_type_a11y, typeLabel)
-        AssistChip(
+        TpAssistChip(
             onClick = { onEvent(HomeEvent.OpenTravellerType) },
             label = { Text(typeLabel) },
             leadingIcon = { Icon(Icons.Filled.Face, contentDescription = null) },
             modifier = Modifier.heightIn(min = TravelTheme.spacing.minTouchTarget).semantics { contentDescription = typeDescription },
+            tid = "home.face_assist_chip",
         )
     }
 }
@@ -201,7 +204,7 @@ private fun SearchBarButton(onClick: () -> Unit) {
                 .fillMaxWidth()
                 .heightIn(min = TravelTheme.spacing.minTouchTarget)
                 .clip(TravelShape.Pill)
-                .clickable(role = Role.Button, onClickLabel = stringResource(R.string.home_search_open), onClick = onClick),
+                .tpClickable(tid = "home.home_search_open", role = Role.Button, onClickLabel = stringResource(R.string.home_search_open), onClick = onClick),
     ) {
         Row(
             Modifier.padding(horizontal = TravelTheme.spacing.lg, vertical = TravelTheme.spacing.md),
@@ -224,8 +227,10 @@ private fun RefreshErrorBanner(message: String?, onEvent: (HomeEvent) -> Unit) {
                 color = TravelTheme.extendedColors.onWarningContainer,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                TpButton(stringResource(R.string.home_retry), onClick = { onEvent(HomeEvent.Refresh) }, variant = TpButtonVariant.Text)
-                TpButton(stringResource(R.string.home_dismiss), onClick = { onEvent(HomeEvent.DismissError) }, variant = TpButtonVariant.Text)
+                TpButton(stringResource(R.string.home_retry), onClick = { onEvent(HomeEvent.Refresh) }, variant = TpButtonVariant.Text, tid = "home.home_retry")
+                TpButton(stringResource(R.string.home_dismiss), onClick = {
+                    onEvent(HomeEvent.DismissError)
+                }, variant = TpButtonVariant.Text, tid = "home.home_dismiss")
             }
         }
     }
@@ -291,7 +296,9 @@ private fun PlanNextTripCard(onEvent: (HomeEvent) -> Unit) {
                 modifier = Modifier.semantics { heading() },
             )
             Text(stringResource(R.string.home_plan_next_message), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
-            TpButton(stringResource(R.string.home_plan_trip), onClick = { onEvent(HomeEvent.PlanTrip) }, leadingIcon = Icons.Filled.Search)
+            TpButton(stringResource(R.string.home_plan_trip), onClick = {
+                onEvent(HomeEvent.PlanTrip)
+            }, leadingIcon = Icons.Filled.Search, tid = "home.home_plan_trip")
         }
     }
 }
@@ -382,6 +389,7 @@ private fun BecauseYouSearchedRow(because: BecauseYouSearched, names: Map<String
                     stringResource(R.string.home_because_again),
                     onClick = { onEvent(HomeEvent.OpenRecentSearch(because.recentSearchId)) },
                     variant = TpButtonVariant.Tonal,
+                    tid = "home.home_because_again",
                 )
             }
         }
@@ -394,10 +402,11 @@ private fun TasteRow(values: List<String>, onEvent: (HomeEvent) -> Unit) {
         SectionHeading(stringResource(R.string.home_taste_heading))
         FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             values.forEach { value ->
-                AssistChip(
+                TpAssistChip(
                     onClick = { onEvent(HomeEvent.OpenTasteGraph) },
                     label = { Text(value) },
                     modifier = Modifier.heightIn(min = TravelTheme.spacing.minTouchTarget),
+                    tid = "home.home_screen_assist_chip",
                 )
             }
         }

@@ -38,6 +38,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.search.ExtraStop
@@ -129,6 +131,7 @@ internal fun KnownSearchForm(state: SearchUiState, lookups: SearchLookups, onEve
                 onClick = { onEvent(SearchFormEvent.Submit) },
                 modifier = Modifier.fillMaxWidth().testTag("search_submit"),
                 leadingIcon = Icons.Filled.Search,
+                tid = "search.search_submit",
             )
         }
     }
@@ -161,6 +164,7 @@ private fun RouteSpine(state: SearchUiState, lookups: SearchLookups, onEvent: (S
                     onClick = { onEvent(SearchFormEvent.AddStop) },
                     variant = TpButtonVariant.Text,
                     leadingIcon = Icons.Filled.Add,
+                    tid = "search.search_add_stop",
                 )
             }
         }
@@ -215,7 +219,7 @@ private fun StopRow(index: Int, stop: ExtraStop, state: SearchUiState, lookups: 
                 modifier = Modifier.weight(1f),
                 errorText = cityError,
             )
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = stop.nights,
                 onValueChange = { v -> onEvent(SearchFormEvent.UpdateStop(index, stop.copy(nights = v.filter(Char::isDigit).take(2)))) },
                 modifier = Modifier.width(SearchDimens.NightsField),
@@ -225,8 +229,11 @@ private fun StopRow(index: Int, stop: ExtraStop, state: SearchUiState, lookups: 
                 isError = nightsError != null,
                 shape = TravelShape.Input,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                tid = "search.search_stop_nights",
             )
-            IconButton(onClick = { onEvent(SearchFormEvent.RemoveStop(index)) }, modifier = Modifier.padding(top = TravelTheme.spacing.sm)) {
+            TpIconButton(onClick = {
+                onEvent(SearchFormEvent.RemoveStop(index))
+            }, modifier = Modifier.padding(top = TravelTheme.spacing.sm), tid = "search.search_remove_stop") {
                 Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_remove_stop, number))
             }
         }

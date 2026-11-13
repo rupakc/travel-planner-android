@@ -35,6 +35,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.play.H2hMatch
@@ -168,7 +169,7 @@ fun H2hCreateScreen(state: H2hCreateUiState, onEvent: (H2hCreateEvent) -> Unit, 
             Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(TravelTheme.spacing.gutter),
             verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
         ) {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = state.handle,
                 onValueChange = { onEvent(H2hCreateEvent.Handle(it)) },
                 label = { Text(stringResource(R.string.play_h2h_handle_label)) },
@@ -177,6 +178,7 @@ fun H2hCreateScreen(state: H2hCreateUiState, onEvent: (H2hCreateEvent) -> Unit, 
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, imeAction = ImeAction.Done, autoCorrectEnabled = false),
                 modifier = Modifier.fillMaxWidth(),
+                tid = "play.play_h2h_handle_label",
             )
             Text(stringResource(R.string.play_h2h_pack_label), style = TravelTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
             QuizPack.entries.forEach { pack ->

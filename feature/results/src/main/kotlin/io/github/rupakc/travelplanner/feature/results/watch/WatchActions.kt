@@ -63,5 +63,6 @@ private fun WatchButton(idle: String, idleA11y: String, state: WatchState?, onWa
         variant = if (watching) TpButtonVariant.Tonal else TpButtonVariant.Text,
         loading = state?.busy == true,
         leadingIcon = if (watching) Icons.Filled.CheckCircle else Icons.Filled.Notifications,
+        tid = "results.watch_actions_tp_button",
     )
 }

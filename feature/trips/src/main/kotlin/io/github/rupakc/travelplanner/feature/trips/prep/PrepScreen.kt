@@ -42,6 +42,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.TpCheckbox
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.journey.PrepRules
 import io.github.rupakc.travelplanner.core.model.trips.PrepItem
@@ -112,7 +114,7 @@ private fun Checklist(state: PrepUiState, onEvent: (PrepEvent) -> Unit, onOpenUr
             item(key = "na-header", contentType = "na-header") {
                 Row(
                     Modifier.fillMaxWidth().defaultMinSize(minHeight = TravelTheme.spacing.minTouchTarget)
-                        .clickable { showNotNeeded = !showNotNeeded }
+                        .tpClickable(tid = "trips.prep_screen_clickable") { showNotNeeded = !showNotNeeded }
                         .semantics { stateDescription = if (showNotNeeded) "expanded" else "collapsed" },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -188,11 +190,12 @@ private fun PrepRow(item: PrepItem, busy: Boolean, onToggle: (Boolean) -> Unit, 
     TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item, accent = if (overdue) TravelTheme.extendedColors.warning else null) {
         Row(Modifier.padding(TravelTheme.spacing.sm), horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalAlignment = Alignment.Top) {
             if (PrepRules.canToggle(item)) {
-                Checkbox(
+                TpCheckbox(
                     checked = done,
                     onCheckedChange = { onToggle(it) },
                     enabled = !busy,
                     modifier = Modifier.semantics { contentDescription = title },
+                    tid = "trips.prep_screen_checkbox",
                 )
             } else {
                 AutoMark(done)

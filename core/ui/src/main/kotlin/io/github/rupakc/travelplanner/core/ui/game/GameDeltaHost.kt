@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.game.GameDelta
@@ -75,7 +76,7 @@ private fun CelebrationSheet(item: GameCelebration, onDismiss: () -> Unit) {
     if (reduced) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.game_celebration_ok)) } },
+            confirmButton = { TpTextButton(onClick = onDismiss, tid = "ui.game_celebration_ok") { Text(stringResource(R.string.game_celebration_ok)) } },
             icon = { Icon(Icons.Filled.Star, contentDescription = null, tint = TravelTheme.colors.primary) },
             title = {
                 Text(
@@ -98,7 +99,7 @@ private fun CelebrationSheet(item: GameCelebration, onDismiss: () -> Unit) {
                 Icon(Icons.Filled.Star, contentDescription = null, tint = TravelTheme.colors.primary, modifier = Modifier.size(48.dp))
                 Text(title(item), style = TravelTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
                 subtitle(item)?.let { Text(it, style = TravelTheme.typography.bodyMedium) }
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.game_celebration_ok)) }
+                TpTextButton(onClick = onDismiss, tid = "ui.game_celebration_ok_2") { Text(stringResource(R.string.game_celebration_ok)) }
             }
         }
     }

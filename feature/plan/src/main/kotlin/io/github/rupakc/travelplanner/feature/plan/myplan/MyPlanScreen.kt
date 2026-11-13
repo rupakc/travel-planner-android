@@ -38,6 +38,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -79,7 +81,7 @@ internal fun MyPlanScreen(
                 title = stringResource(R.string.plan_my_plan_title),
                 onBack = onBack,
                 actions = {
-                    IconButton(onClick = onOpenTrips) {
+                    TpIconButton(onClick = onOpenTrips, tid = "plan.plan_open_trips") {
                         Icon(Icons.AutoMirrored.Filled.List, contentDescription = stringResource(R.string.plan_open_trips))
                     }
                 },
@@ -142,13 +144,14 @@ private fun PlanBody(content: MyPlanContent, onEvent: (MyPlanEvent) -> Unit, onO
 @Composable
 private fun NameBlock(content: MyPlanContent, onEvent: (MyPlanEvent) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = content.name,
             onValueChange = { onEvent(MyPlanEvent.NameChanged(it)) },
             label = { Text(stringResource(R.string.plan_name_label)) },
             singleLine = true,
             shape = TravelShape.Input,
             modifier = Modifier.fillMaxWidth(),
+            tid = "plan.plan_name_label",
         )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
             if (content.planId != null) StatusTag(stringResource(R.string.plan_editing_saved), warning = true)
@@ -195,12 +198,14 @@ private fun ExportRow(onEvent: (MyPlanEvent) -> Unit) {
             onClick = { onEvent(MyPlanEvent.ExportCalendar) },
             variant = TpButtonVariant.Tonal,
             leadingIcon = Icons.Filled.DateRange,
+            tid = "plan.plan_action_calendar",
         )
         TpButton(
             stringResource(R.string.plan_action_share_text),
             onClick = { onEvent(MyPlanEvent.ShareAsText) },
             variant = TpButtonVariant.Tonal,
             leadingIcon = Icons.Filled.Share,
+            tid = "plan.plan_action_share_text",
         )
     }
 }
@@ -228,6 +233,7 @@ private fun SaveBar(content: MyPlanContent, saving: Boolean, onEvent: (MyPlanEve
                     loading = saving,
                     enabled = !content.isEmpty,
                     modifier = Modifier.weight(1f),
+                    tid = "plan.plan_saving",
                 )
                 if (content.planId != null) {
                     TpButton(
@@ -235,9 +241,12 @@ private fun SaveBar(content: MyPlanContent, saving: Boolean, onEvent: (MyPlanEve
                         onClick = { onEvent(MyPlanEvent.SaveAsNew) },
                         variant = TpButtonVariant.Secondary,
                         enabled = !saving,
+                        tid = "plan.plan_save_as_new",
                     )
                 }
-                TpButton(stringResource(R.string.plan_new), onClick = { onEvent(MyPlanEvent.NewPlan) }, variant = TpButtonVariant.Text, enabled = !saving)
+                TpButton(stringResource(R.string.plan_new), onClick = {
+                    onEvent(MyPlanEvent.NewPlan)
+                }, variant = TpButtonVariant.Text, enabled = !saving, tid = "plan.plan_new")
             }
         }
     }

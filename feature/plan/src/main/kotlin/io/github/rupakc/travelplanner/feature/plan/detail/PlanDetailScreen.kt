@@ -50,6 +50,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -140,19 +142,20 @@ private const val SKELETON_LINES = 6
 private fun OverflowMenu(onEvent: (PlanDetailEvent) -> Unit, deleteEnabled: Boolean) {
     var open by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { open = true }) {
+        TpIconButton(onClick = { open = true }, tid = "plan.plan_more_actions") {
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.plan_more_actions))
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            DropdownMenuItem(
+            TpDropdownMenuItem(
                 text = { Text(stringResource(R.string.plan_action_share_text)) },
                 leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
                 onClick = {
                     open = false
                     onEvent(PlanDetailEvent.ShareAsText)
                 },
+                tid = "plan.plan_action_share_text",
             )
-            DropdownMenuItem(
+            TpDropdownMenuItem(
                 enabled = deleteEnabled,
                 text = { Text(stringResource(R.string.plan_action_delete)) },
                 leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null) },
@@ -160,6 +163,7 @@ private fun OverflowMenu(onEvent: (PlanDetailEvent) -> Unit, deleteEnabled: Bool
                     open = false
                     onEvent(PlanDetailEvent.Delete)
                 },
+                tid = "plan.plan_action_delete",
             )
         }
     }
@@ -238,6 +242,7 @@ private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (
             stringResource(R.string.plan_action_open_results),
             onClick = { onEvent(PlanDetailEvent.OpenInResults) },
             modifier = Modifier.fillMaxWidth(),
+            tid = "plan.plan_action_open_results",
         )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             TpButton(
@@ -247,12 +252,14 @@ private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (
                 loading = state.shareBusy,
                 enabled = !state.offline,
                 leadingIcon = Icons.Filled.Share,
+                tid = "plan.plan_action_share_link",
             )
             TpButton(
                 stringResource(R.string.plan_action_calendar),
                 onClick = { onEvent(PlanDetailEvent.ShowCalendarEvents) },
                 variant = TpButtonVariant.Tonal,
                 leadingIcon = Icons.Filled.DateRange,
+                tid = "plan.plan_action_calendar",
             )
             IdeaEntryButton(summary.id, IdeaKind.PLAN, tid = "plan.share_idea")
             if (onWatchTrip != null) {
@@ -262,6 +269,7 @@ private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (
                     variant = TpButtonVariant.Tonal,
                     enabled = !state.offline,
                     leadingIcon = Icons.Filled.Notifications,
+                    tid = "plan.plan_action_watch_trip",
                 )
             }
         }
@@ -278,6 +286,7 @@ private fun ActionRow(summary: TripSummary, state: PlanDetailUiState, onEvent: (
                         onClick = { onEvent(PlanDetailEvent.RevokeShare) },
                         variant = TpButtonVariant.Text,
                         enabled = !state.shareBusy && !state.offline,
+                        tid = "plan.plan_action_revoke",
                     )
                 }
             }
@@ -357,6 +366,7 @@ private fun CalendarSheet(events: List<PlanCalendarEvent>, onEvent: (PlanDetailE
                         stringResource(R.string.plan_calendar_export_all),
                         onClick = { onEvent(PlanDetailEvent.ExportCalendar) },
                         modifier = Modifier.fillMaxWidth(),
+                        tid = "plan.plan_calendar_export_all",
                     )
                     Text(
                         stringResource(R.string.plan_calendar_export_hint),
@@ -392,6 +402,7 @@ private fun CalendarEventRow(event: PlanCalendarEvent, onEvent: (PlanDetailEvent
             onClick = { onEvent(PlanDetailEvent.AddEventToCalendar(event)) },
             variant = TpButtonVariant.Secondary,
             modifier = Modifier.semantics { contentDescription = a11y },
+            tid = "plan.plan_calendar_add_one",
         )
     }
 }
@@ -471,7 +482,7 @@ private fun StaleBanner(error: io.github.rupakc.travelplanner.core.common.AppErr
                 style = TravelTheme.typography.bodyMedium,
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
-            TpButton(stringResource(R.string.plan_refresh), onClick = onRetry, variant = TpButtonVariant.Text)
+            TpButton(stringResource(R.string.plan_refresh), onClick = onRetry, variant = TpButtonVariant.Text, tid = "plan.plan_refresh")
         }
     }
 }

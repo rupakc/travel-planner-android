@@ -54,6 +54,11 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.search.DraftPlace
@@ -142,7 +147,9 @@ private fun FoundHeader(preview: ImportPreview, placeCount: Int) {
                 )
             }
             if (link != null) {
-                TpButton(stringResource(R.string.search_import_open_source), { openLink(link) }, variant = TpButtonVariant.Text)
+                TpButton(stringResource(R.string.search_import_open_source), {
+                    openLink(link)
+                }, variant = TpButtonVariant.Text, tid = "search.search_import_open_source")
             }
         }
     }
@@ -179,18 +186,22 @@ private fun StopChip(stop: DraftStop, canToggle: Boolean, onEvent: (ImportEvent)
         Row(Modifier.padding(start = TravelTheme.spacing.md), verticalAlignment = Alignment.CenterVertically) {
             Text(city, style = TravelTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold)
             if (stop.included) {
-                IconButton(onClick = { onEvent(ImportEvent.ChangeNights(stop.name, -1)) }, enabled = stop.nights > 1) {
+                TpIconButton(onClick = {
+                    onEvent(ImportEvent.ChangeNights(stop.name, -1))
+                }, enabled = stop.nights > 1, tid = "search.search_import_less_night") {
                     Icon(painterResource(R.drawable.search_ic_remove), contentDescription = stringResource(R.string.search_import_less_night, city))
                 }
                 Text(pluralStringResource(R.plurals.search_import_nights, stop.nights, stop.nights), style = TravelTheme.typography.labelMedium)
-                IconButton(onClick = { onEvent(ImportEvent.ChangeNights(stop.name, 1)) }, enabled = stop.nights < ImportLimits.MAX_STOP_NIGHTS) {
+                TpIconButton(onClick = {
+                    onEvent(ImportEvent.ChangeNights(stop.name, 1))
+                }, enabled = stop.nights < ImportLimits.MAX_STOP_NIGHTS, tid = "search.search_import_more_night") {
                     Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_import_more_night, city))
                 }
             } else {
                 Text(" · " + stringResource(R.string.search_import_left_out), style = TravelTheme.typography.labelMedium)
             }
             if (canToggle) {
-                IconButton(onClick = { onEvent(ImportEvent.ToggleStop(stop.name)) }) {
+                TpIconButton(onClick = { onEvent(ImportEvent.ToggleStop(stop.name)) }, tid = "search.import_review_icon_button") {
                     Icon(
                         if (stop.included) Icons.Filled.Close else Icons.Filled.Add,
                         contentDescription = stringResource(if (stop.included) R.string.search_import_leave_out else R.string.search_import_add_back, city),
@@ -214,12 +225,14 @@ private fun StopPlaces(stop: DraftStop, rows: List<DraftPlace>, numbers: Map<Str
             Text(stop.destination.country, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
             val allLabel = stringResource(R.string.search_import_select_all, city)
             val noneLabel = stringResource(R.string.search_import_select_none, city)
-            TextButton(onClick = { onEvent(ImportEvent.SelectStopPlaces(stop.name, true)) }, modifier = Modifier.semantics { contentDescription = allLabel }) {
+            TpTextButton(onClick = {
+                onEvent(ImportEvent.SelectStopPlaces(stop.name, true))
+            }, modifier = Modifier.semantics { contentDescription = allLabel }, tid = "search.search_import_all") {
                 Text(stringResource(R.string.search_import_all))
             }
-            TextButton(onClick = {
+            TpTextButton(onClick = {
                 onEvent(ImportEvent.SelectStopPlaces(stop.name, false))
-            }, modifier = Modifier.semantics { contentDescription = noneLabel }) {
+            }, modifier = Modifier.semantics { contentDescription = noneLabel }, tid = "search.import_review_text_button") {
                 Text(stringResource(R.string.search_import_none))
             }
         }
@@ -251,7 +264,7 @@ private fun PlaceRow(draft: DraftPlace, number: Int, stops: List<DraftStop>, onE
     Row(
         Modifier
             .fillMaxWidth()
-            .toggleable(draft.selected, role = Role.Checkbox) { onEvent(ImportEvent.TogglePlace(place.id)) }
+            .tpToggleable(tid = "search.import_review_toggleable", draft.selected, role = Role.Checkbox) { onEvent(ImportEvent.TogglePlace(place.id)) }
             .padding(vertical = TravelTheme.spacing.sm)
             .testTag("place_${place.id}"),
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
@@ -321,23 +334,32 @@ private fun StopPicker(label: String, current: String?, stops: List<DraftStop>, 
     var open by rememberSaveable { mutableStateOf(false) }
     val leaveOut = stringResource(R.string.search_import_leave_out_option)
     Box {
-        TextButton(onClick = { open = true }, modifier = Modifier.semantics { contentDescription = "$label: ${current?.let(::shortCity) ?: leaveOut}" }) {
+        TpTextButton(
+            onClick = {
+                open = true
+            },
+            modifier =
+                Modifier.semantics {
+                    contentDescription = "$label: ${current?.let(::shortCity) ?: leaveOut}"
+                },
+            tid = "search.import_review_text_button_2",
+        ) {
             Icon(Icons.Filled.Place, contentDescription = null)
             Text(current?.let(::shortCity) ?: leaveOut)
             Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             if (allowLeaveOut) {
-                DropdownMenuItem(text = { Text(leaveOut) }, onClick = {
+                TpDropdownMenuItem(text = { Text(leaveOut) }, onClick = {
                     onPick(null)
                     open = false
-                })
+                }, tid = "search.import_review_dropdown_menu_item")
             }
             stops.forEach { stop ->
-                DropdownMenuItem(text = { Text(shortCity(stop.name)) }, onClick = {
+                TpDropdownMenuItem(text = { Text(shortCity(stop.name)) }, onClick = {
                     onPick(stop.name)
                     open = false
-                })
+                }, tid = "search.import_review_dropdown_menu_item_2")
             }
         }
     }
@@ -359,13 +381,14 @@ private fun UnresolvedPlaces(state: ImportUiState, places: List<DraftPlace>, sto
                 Text(place.name, style = TravelTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                     val townLabel = stringResource(R.string.search_import_town_for, place.name)
-                    OutlinedTextField(
+                    TpOutlinedTextField(
                         value = lookup.town,
                         onValueChange = { onEvent(ImportEvent.TownChanged(place.id, it)) },
                         modifier = Modifier.weight(1f).semantics { contentDescription = townLabel },
                         placeholder = { Text(stringResource(R.string.search_import_which_town)) },
                         singleLine = true,
                         shape = TravelShape.Input,
+                        tid = "search.search_import_which_town",
                     )
                     TpButton(
                         stringResource(if (lookup.busy) R.string.search_import_placing else R.string.search_import_place_it),
@@ -376,6 +399,7 @@ private fun UnresolvedPlaces(state: ImportUiState, places: List<DraftPlace>, sto
                         enabled = lookup.town.isNotBlank() && !lookup.busy,
                         loading = lookup.busy,
                         variant = TpButtonVariant.Tonal,
+                        tid = "search.search_import_placing",
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -497,9 +521,10 @@ private fun PlanFooter(state: ImportUiState, onEvent: (ImportEvent) -> Unit) {
             { onEvent(ImportEvent.Plan) },
             enabled = state.planIssue == null,
             modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = TravelTheme.spacing.minTouchTarget).testTag("import_plan"),
+            tid = "search.search_import_plan",
         )
         TpButton(stringResource(R.string.search_import_start_over), {
             onEvent(ImportEvent.StartOver)
-        }, variant = TpButtonVariant.Secondary, modifier = Modifier.fillMaxWidth())
+        }, variant = TpButtonVariant.Secondary, modifier = Modifier.fillMaxWidth(), tid = "search.search_import_start_over")
     }
 }

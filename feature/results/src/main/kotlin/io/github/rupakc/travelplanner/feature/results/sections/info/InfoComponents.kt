@@ -174,7 +174,9 @@ internal fun CityChip(city: String?, modifier: Modifier = Modifier) {
 @Composable
 internal fun LinkButton(label: String, url: String?, onOpen: (String) -> Unit, modifier: Modifier = Modifier) {
     val safe = safeHttpUrl(url) ?: return
-    TpButton(label, onClick = { onOpen(safe) }, modifier = modifier, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp)
+    TpButton(label, onClick = {
+        onOpen(safe)
+    }, modifier = modifier, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp, tid = "results.info_components_tp_button")
 }
 
 /**

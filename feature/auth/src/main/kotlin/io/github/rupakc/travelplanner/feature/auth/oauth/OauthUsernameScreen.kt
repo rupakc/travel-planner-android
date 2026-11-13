@@ -82,6 +82,7 @@ internal fun OauthUsernameScreen(state: OauthUsernameUiState, onEvent: (OauthUse
             { onEvent(OauthUsernameEvent.Cancel) },
             variant = TpButtonVariant.Text,
             modifier = Modifier.fillMaxWidth(),
+            tid = "auth.auth_oauth_username_cancel",
         )
     }
 }

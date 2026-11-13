@@ -49,7 +49,13 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpInputChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
@@ -156,7 +162,7 @@ private fun PreferenceItem(key: String, state: PreferencesUiState, onEvent: (Pre
         }
 
         SettingsEntry.RESIDENCE.key -> {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = prefs.currentResidence,
                 onValueChange = { onEvent(PreferencesEvent.ResidenceChanged(it)) },
                 label = { Text(stringResource(R.string.settings_prefs_residence)) },
@@ -165,6 +171,7 @@ private fun PreferenceItem(key: String, state: PreferencesUiState, onEvent: (Pre
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = modifier.then(pad).fillMaxWidth(),
+                tid = "settings.settings_prefs_residence",
             )
         }
 
@@ -228,7 +235,9 @@ private fun BudgetOptions(selected: String, onEvent: (PreferencesEvent) -> Unit,
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .selectable(selected = isSelected, role = Role.RadioButton, onClick = { onEvent(PreferencesEvent.SetBudget(category)) }),
+                        .tpSelectable(tid = "settings.preferences_screen_selectable", selected = isSelected, role = Role.RadioButton, onClick = {
+                            onEvent(PreferencesEvent.SetBudget(category))
+                        }),
             ) {
                 Column(Modifier.padding(TravelTheme.spacing.md)) {
                     Text(stringResource(budgetLabelRes(category)), style = TravelTheme.typography.titleSmall)
@@ -242,7 +251,7 @@ private fun BudgetOptions(selected: String, onEvent: (PreferencesEvent) -> Unit,
 @Composable
 private fun NationalityField(value: String, suggestions: List<Nationality>, onEvent: (PreferencesEvent) -> Unit, modifier: Modifier) {
     Column(modifier) {
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = value,
             onValueChange = { onEvent(PreferencesEvent.NationalityChanged(it)) },
             label = { Text(stringResource(R.string.settings_prefs_nationality)) },
@@ -250,13 +259,14 @@ private fun NationalityField(value: String, suggestions: List<Nationality>, onEv
             singleLine = true,
             trailingIcon = {
                 if (value.isNotEmpty()) {
-                    IconButton(onClick = { onEvent(PreferencesEvent.NationalityChanged("")) }) {
+                    TpIconButton(onClick = { onEvent(PreferencesEvent.NationalityChanged("")) }, tid = "settings.settings_prefs_nationality_clear") {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.settings_prefs_nationality_clear))
                     }
                 }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth(),
+            tid = "settings.settings_prefs_nationality",
         )
         if (suggestions.isNotEmpty()) {
             TpCard(Modifier.fillMaxWidth().padding(top = TravelTheme.spacing.xs)) {
@@ -265,7 +275,7 @@ private fun NationalityField(value: String, suggestions: List<Nationality>, onEv
                         Modifier
                             .fillMaxWidth()
                             .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                            .clickable(role = Role.Button) { onEvent(PreferencesEvent.NationalityPicked(nat)) }
+                            .tpClickable(tid = "settings.preferences_screen_clickable", role = Role.Button) { onEvent(PreferencesEvent.NationalityPicked(nat)) }
                             .padding(horizontal = TravelTheme.spacing.md, vertical = TravelTheme.spacing.sm),
                     ) {
                         Text(nat.nationality.orEmpty(), style = TravelTheme.typography.bodyLarge)
@@ -290,7 +300,7 @@ private fun EmailField(state: PreferencesUiState, onEvent: (PreferencesEvent) ->
         }
     val isError = status == EmailStatus.Invalid || status is EmailStatus.Failed
     Column(modifier, verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = state.email,
             onValueChange = { onEvent(PreferencesEvent.EmailChanged(it)) },
             label = { Text(stringResource(R.string.settings_prefs_email)) },
@@ -301,12 +311,14 @@ private fun EmailField(state: PreferencesUiState, onEvent: (PreferencesEvent) ->
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { onEvent(PreferencesEvent.SaveEmail) }),
             modifier = Modifier.fillMaxWidth(),
+            tid = "settings.settings_prefs_email",
         )
         TpButton(
             stringResource(R.string.settings_prefs_email_save),
             onClick = { onEvent(PreferencesEvent.SaveEmail) },
             variant = TpButtonVariant.Secondary,
             loading = state.emailSaving,
+            tid = "settings.settings_prefs_email_save",
         )
     }
 }
@@ -328,26 +340,29 @@ private fun TagInput(
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                 tags.forEach { tag ->
                     val remove = stringResource(R.string.settings_prefs_tag_remove, tag)
-                    InputChip(
+                    TpInputChip(
                         selected = false,
                         onClick = { onRemove(tag) },
                         label = { Text(tag) },
                         trailingIcon = { Icon(Icons.Filled.Close, contentDescription = null) },
                         modifier = Modifier.semantics { contentDescription = remove },
+                        tid = "settings.close_input_chip",
                     )
                 }
             }
         }
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = input,
             onValueChange = onInputChange,
             placeholder = { Text(placeholder) },
             singleLine = true,
             trailingIcon = {
                 if (input.isNotBlank()) {
-                    IconButton(onClick = {
+                    TpIconButton(onClick = {
                         onAdd(input)
-                    }) { Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_prefs_tag_add, input.trim())) }
+                    }, tid = "settings.settings_prefs_tag_add_2") {
+                        Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_prefs_tag_add, input.trim()))
+                    }
                 }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -355,6 +370,7 @@ private fun TagInput(
                 KeyboardActions(onDone = { onAdd(input) }),
             supportingText = { Text(stringResource(R.string.settings_prefs_tag_help)) },
             modifier = Modifier.fillMaxWidth().onFocusChanged { if (!it.isFocused && input.isNotBlank()) onAdd(input) },
+            tid = "settings.settings_prefs_tag_add",
         )
     }
 }
@@ -372,7 +388,9 @@ private fun TravelGroup(prefs: Preferences, onEvent: (PreferencesEvent) -> Unit,
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                    .toggleable(value = checked, role = Role.Checkbox, onValueChange = { onEvent(PreferencesEvent.ToggleAccessibility(id)) }),
+                    .tpToggleable(tid = "settings.preferences_screen_toggleable", value = checked, role = Role.Checkbox, onValueChange = {
+                        onEvent(PreferencesEvent.ToggleAccessibility(id))
+                    }),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Checkbox(checked = checked, onCheckedChange = null)
@@ -393,7 +411,9 @@ private fun Stepper(prefs: Preferences, field: TravellerField, onEvent: (Prefere
             Text(label, style = TravelTheme.typography.bodyLarge)
             Text(stringResource(field.ageRes()), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
         }
-        IconButton(onClick = { onEvent(PreferencesEvent.ChangeCount(field, -1)) }, enabled = PreferencesRules.canDecrease(prefs, field)) {
+        TpIconButton(onClick = {
+            onEvent(PreferencesEvent.ChangeCount(field, -1))
+        }, enabled = PreferencesRules.canDecrease(prefs, field), tid = "settings.settings_prefs_decrease") {
             Icon(painterResource(R.drawable.settings_ic_remove), contentDescription = stringResource(R.string.settings_prefs_decrease, label))
         }
         val countDescription = stringResource(R.string.settings_prefs_count_a11y, label, count)
@@ -406,7 +426,9 @@ private fun Stepper(prefs: Preferences, field: TravellerField, onEvent: (Prefere
                     liveRegion = LiveRegionMode.Polite
                 },
         )
-        IconButton(onClick = { onEvent(PreferencesEvent.ChangeCount(field, 1)) }, enabled = PreferencesRules.canIncrease(prefs)) {
+        TpIconButton(onClick = {
+            onEvent(PreferencesEvent.ChangeCount(field, 1))
+        }, enabled = PreferencesRules.canIncrease(prefs), tid = "settings.settings_prefs_increase") {
             Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.settings_prefs_increase, label))
         }
     }
@@ -433,6 +455,7 @@ private fun SaveBar(state: PreferencesUiState, onEvent: (PreferencesEvent) -> Un
             onClick = { onEvent(PreferencesEvent.Save) },
             loading = state.saving,
             modifier = Modifier.fillMaxWidth(),
+            tid = "settings.settings_prefs_saving",
         )
         val message =
             when (status) {

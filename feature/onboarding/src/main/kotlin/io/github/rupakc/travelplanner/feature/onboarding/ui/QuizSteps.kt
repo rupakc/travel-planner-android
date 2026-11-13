@@ -37,6 +37,8 @@ import androidx.compose.ui.semantics.stateDescription
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.profile.QuizQuestion
@@ -53,7 +55,9 @@ internal fun WelcomeStep(state: OnboardingUiState, onEvent: (OnboardingEvent) ->
         onClose = onClose.takeIf { state.fromSettings },
         onSkipAll = skipAllAction(state, onEvent),
         actions = {
-            TpButton(stringResource(R.string.onboarding_get_started), { onEvent(OnboardingEvent.Start) }, Modifier.fillMaxWidth())
+            TpButton(stringResource(R.string.onboarding_get_started), {
+                onEvent(OnboardingEvent.Start)
+            }, Modifier.fillMaxWidth(), tid = "onboarding.onboarding_get_started")
         },
     ) {
         Column(
@@ -117,12 +121,15 @@ internal fun QuestionStep(state: OnboardingUiState, onEvent: (OnboardingEvent) -
         onSkipAll = skipAllAction(state, onEvent),
         top = { StepProgress(step = state.questionIndex + 1, total = state.questionCount) },
         actions = {
-            TpButton(stringResource(R.string.onboarding_skip), { onEvent(OnboardingEvent.Skip) }, variant = TpButtonVariant.Text)
+            TpButton(stringResource(R.string.onboarding_skip), {
+                onEvent(OnboardingEvent.Skip)
+            }, variant = TpButtonVariant.Text, tid = "onboarding.onboarding_skip")
             Spacer(Modifier.weight(1f))
             TpButton(
                 stringResource(if (last) R.string.onboarding_see_result else R.string.onboarding_next),
                 { onEvent(OnboardingEvent.Next) },
                 enabled = answer.isNotEmpty(),
+                tid = "onboarding.onboarding_see_result",
             )
         },
     ) {
@@ -168,9 +175,9 @@ private fun OptionCard(copy: OptionCopy, selected: Boolean, multiChoice: Boolean
     val state = stringResource(if (selected) R.string.onboarding_selected else R.string.onboarding_not_selected)
     val interaction =
         if (multiChoice) {
-            Modifier.toggleable(value = selected, role = Role.Checkbox, onValueChange = { onClick() })
+            Modifier.tpToggleable(tid = "onboarding.quiz_steps_toggleable", value = selected, role = Role.Checkbox, onValueChange = { onClick() })
         } else {
-            Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            Modifier.tpSelectable(tid = "onboarding.quiz_steps_selectable", selected = selected, role = Role.RadioButton, onClick = onClick)
         }
     TpCard(
         Modifier

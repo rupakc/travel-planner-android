@@ -44,6 +44,9 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.social.ProfileBadge
@@ -122,23 +125,25 @@ internal fun PublicProfileScreen(state: PublicProfileUiState, onEvent: (PublicPr
 private fun MoreMenu(onEvent: (PublicProfileEvent) -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { open = true }) {
+        TpIconButton(onClick = { open = true }, tid = "social.social_more_actions") {
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.social_more_actions))
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            DropdownMenuItem(
+            TpDropdownMenuItem(
                 text = { Text(stringResource(R.string.social_report_profile)) },
                 onClick = {
                     open = false
                     onEvent(PublicProfileEvent.AskReport)
                 },
+                tid = "social.social_report_profile",
             )
-            DropdownMenuItem(
+            TpDropdownMenuItem(
                 text = { Text(stringResource(R.string.social_block)) },
                 onClick = {
                     open = false
                     onEvent(PublicProfileEvent.AskBlock)
                 },
+                tid = "social.social_block",
             )
         }
     }
@@ -249,8 +254,12 @@ private fun BlockDialog(handle: String, onEvent: (PublicProfileEvent) -> Unit) {
         onDismissRequest = { onEvent(PublicProfileEvent.DismissBlock) },
         title = { Text(stringResource(R.string.social_block_title, handle)) },
         text = { Text(stringResource(R.string.social_block_body)) },
-        confirmButton = { TextButton(onClick = { onEvent(PublicProfileEvent.ConfirmBlock) }) { Text(stringResource(R.string.social_block)) } },
-        dismissButton = { TextButton(onClick = { onEvent(PublicProfileEvent.DismissBlock) }) { Text(stringResource(R.string.social_cancel)) } },
+        confirmButton = {
+            TpTextButton(onClick = { onEvent(PublicProfileEvent.ConfirmBlock) }, tid = "social.social_block_2") { Text(stringResource(R.string.social_block)) }
+        },
+        dismissButton = {
+            TpTextButton(onClick = { onEvent(PublicProfileEvent.DismissBlock) }, tid = "social.social_cancel") { Text(stringResource(R.string.social_cancel)) }
+        },
     )
 }
 

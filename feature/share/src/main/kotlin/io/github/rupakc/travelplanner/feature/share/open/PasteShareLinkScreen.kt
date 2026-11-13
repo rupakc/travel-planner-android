@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -61,7 +62,7 @@ internal fun PasteShareLinkScreen(onBack: () -> Unit, onOpen: (token: String) ->
                     modifier = Modifier.semantics { heading() },
                 )
                 Text(stringResource(R.string.share_paste_message), style = TravelTheme.typography.bodyMedium)
-                OutlinedTextField(
+                TpOutlinedTextField(
                     value = pasted,
                     onValueChange = {
                         pasted = it
@@ -75,6 +76,7 @@ internal fun PasteShareLinkScreen(onBack: () -> Unit, onOpen: (token: String) ->
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go, autoCorrectEnabled = false),
                     keyboardActions = KeyboardActions(onGo = { submit() }),
                     modifier = Modifier.fillMaxWidth(),
+                    tid = "share.share_paste_label",
                 )
                 TpButton(
                     stringResource(R.string.share_paste_open),

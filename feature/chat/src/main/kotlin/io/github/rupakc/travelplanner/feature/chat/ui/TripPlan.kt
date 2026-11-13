@@ -56,6 +56,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.chat.ChatItinerary
@@ -105,6 +107,7 @@ internal fun TripPlanView(
                 onClick = onSave,
                 loading = saving,
                 modifier = Modifier.fillMaxWidth(),
+                tid = "chat.chat_save_as_plan",
             )
         }
     }
@@ -205,7 +208,7 @@ private fun RouteStop(marker: Int?, title: String, subtitle: String?, last: Bool
             Text(title, style = TravelTheme.typography.titleSmall)
             subtitle?.let { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
         }
-        IconButton(onClick = onOpenMaps) {
+        TpIconButton(onClick = onOpenMaps, tid = "chat.chat_open_in_maps") {
             Icon(Icons.Filled.Place, contentDescription = stringResource(R.string.chat_open_in_maps, title), tint = TravelTheme.colors.primary)
         }
     }
@@ -253,6 +256,7 @@ private fun DayCards(days: List<ChatItineraryDay>, tripMap: ChatTripMap) {
             text = stringResource(if (allOpen) R.string.chat_collapse_all else R.string.chat_expand_all),
             onClick = { allOpen = !allOpen },
             variant = TpButtonVariant.Text,
+            tid = "chat.chat_collapse_all",
         )
     }
     val cityIndex = remember(tripMap) { tripMap.cities.mapIndexedNotNull { i, c -> c.city?.lowercase()?.let { it to i } }.toMap() }
@@ -281,7 +285,7 @@ private fun DayCard(day: ChatItineraryDay, number: Int, open: Boolean, cityIndex
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                    .clickable(role = Role.Button, onClick = onToggle)
+                    .tpClickable(tid = "chat.trip_plan_clickable", role = Role.Button, onClick = onToggle)
                     .semantics { stateDescription = state }
                     .padding(horizontal = TravelTheme.spacing.md, vertical = TravelTheme.spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,

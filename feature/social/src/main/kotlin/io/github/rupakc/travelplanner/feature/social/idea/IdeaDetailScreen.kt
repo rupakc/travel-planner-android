@@ -47,7 +47,12 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.social.Comment
@@ -180,7 +185,9 @@ private fun IdeaContent(idea: Idea, state: IdeaDetailUiState, onEvent: (IdeaDeta
                 item(key = "comments-error", contentType = "error") {
                     Column {
                         Text(stringResource(R.string.social_comments_error), color = TravelTheme.colors.error, style = TravelTheme.typography.bodyMedium)
-                        TextButton(onClick = { onEvent(IdeaDetailEvent.RetryComments) }) { Text(stringResource(R.string.social_retry)) }
+                        TpTextButton(onClick = {
+                            onEvent(IdeaDetailEvent.RetryComments)
+                        }, tid = "social.social_retry") { Text(stringResource(R.string.social_retry)) }
                     }
                 }
             }
@@ -219,7 +226,7 @@ private fun IdeaHeader(idea: Idea, state: IdeaDetailUiState, onEvent: (IdeaDetai
         Text(idea.title, style = TravelTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
         Text(
             stringResource(R.string.social_idea_author, idea.author.handle),
-            Modifier.heightIn(min = TravelTheme.spacing.minTouchTarget).clickable {
+            Modifier.heightIn(min = TravelTheme.spacing.minTouchTarget).tpClickable(tid = "social.idea_detail_screen_clickable") {
                 onOpenProfile(idea.author.handle)
             }.padding(vertical = TravelTheme.spacing.sm),
             style = TravelTheme.typography.titleSmall,
@@ -280,7 +287,7 @@ private fun CommentRow(comment: Comment, idea: Idea, busy: Boolean, onEvent: (Id
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 stringResource(R.string.social_idea_author, comment.author.handle),
-                Modifier.weight(1f).heightIn(min = TravelTheme.spacing.minTouchTarget).clickable {
+                Modifier.weight(1f).heightIn(min = TravelTheme.spacing.minTouchTarget).tpClickable(tid = "social.idea_detail_screen_clickable_2") {
                     onOpenProfile(comment.author.handle)
                 }.padding(vertical = TravelTheme.spacing.sm),
                 style = TravelTheme.typography.labelLarge,
@@ -309,35 +316,38 @@ private fun CommentMenu(comment: Comment, idea: Idea, busy: Boolean, onEvent: (I
     if (!canDelete && !canMark && !canReport) return
     var open by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { open = true }, enabled = !busy) {
+        TpIconButton(onClick = { open = true }, enabled = !busy, tid = "social.social_more_actions") {
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.social_more_actions))
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             if (canMark) {
-                DropdownMenuItem(
+                TpDropdownMenuItem(
                     text = { Text(stringResource(if (comment.helpful) R.string.social_comment_unmark_helpful else R.string.social_comment_mark_helpful)) },
                     onClick = {
                         open = false
                         onEvent(IdeaDetailEvent.ToggleHelpful(comment.id))
                     },
+                    tid = "social.social_comment_unmark_helpful",
                 )
             }
             if (canDelete) {
-                DropdownMenuItem(
+                TpDropdownMenuItem(
                     text = { Text(stringResource(R.string.social_comment_delete)) },
                     onClick = {
                         open = false
                         onEvent(IdeaDetailEvent.DeleteComment(comment.id))
                     },
+                    tid = "social.social_comment_delete",
                 )
             }
             if (canReport) {
-                DropdownMenuItem(
+                TpDropdownMenuItem(
                     text = { Text(stringResource(R.string.social_comment_report)) },
                     onClick = {
                         open = false
                         onEvent(IdeaDetailEvent.AskReport(ReportSubject.OfComment(comment.id)))
                     },
+                    tid = "social.social_comment_report",
                 )
             }
         }
@@ -348,32 +358,35 @@ private fun CommentMenu(comment: Comment, idea: Idea, busy: Boolean, onEvent: (I
 private fun IdeaMenu(idea: Idea, onEvent: (IdeaDetailEvent) -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { open = true }) {
+        TpIconButton(onClick = { open = true }, tid = "social.social_more_actions_2") {
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.social_more_actions))
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             if (idea.mine) {
-                DropdownMenuItem(
+                TpDropdownMenuItem(
                     text = { Text(stringResource(R.string.social_delete_idea)) },
                     onClick = {
                         open = false
                         onEvent(IdeaDetailEvent.AskDelete)
                     },
+                    tid = "social.social_delete_idea",
                 )
             } else {
-                DropdownMenuItem(
+                TpDropdownMenuItem(
                     text = { Text(stringResource(R.string.social_report_idea)) },
                     onClick = {
                         open = false
                         onEvent(IdeaDetailEvent.AskReport(ReportSubject.OfIdea))
                     },
+                    tid = "social.social_report_idea",
                 )
-                DropdownMenuItem(
+                TpDropdownMenuItem(
                     text = { Text(stringResource(R.string.social_block_author, idea.author.handle)) },
                     onClick = {
                         open = false
                         onEvent(IdeaDetailEvent.AskBlock)
                     },
+                    tid = "social.social_block_author",
                 )
             }
         }
@@ -388,7 +401,7 @@ private fun CommentBox(state: IdeaDetailUiState, onEvent: (IdeaDetailEvent) -> U
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
         ) {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = state.draft,
                 onValueChange = { onEvent(IdeaDetailEvent.DraftChanged(it)) },
                 modifier = Modifier.weight(1f),
@@ -396,6 +409,7 @@ private fun CommentBox(state: IdeaDetailUiState, onEvent: (IdeaDetailEvent) -> U
                 supportingText = { Text(stringResource(R.string.social_bio_count, state.draft.length, COMMENT_MAX)) },
                 enabled = !state.posting,
                 maxLines = 3,
+                tid = "social.social_comment_hint",
             )
             TpButton(
                 stringResource(R.string.social_comment_post),
@@ -422,8 +436,8 @@ private fun ConfirmDialog(
         onDismissRequest = onDismiss,
         title = { Text(titleText ?: stringResource(requireNotNull(title))) },
         text = { Text(stringResource(body), Modifier.semantics { liveRegion = LiveRegionMode.Polite }) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(confirm)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.social_cancel)) } },
+        confirmButton = { TpTextButton(onClick = onConfirm, tid = "social.social_cancel") { Text(stringResource(confirm)) } },
+        dismissButton = { TpTextButton(onClick = onDismiss, tid = "social.social_cancel_2") { Text(stringResource(R.string.social_cancel)) } },
     )
 }
 

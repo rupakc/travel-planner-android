@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.server.ServerUrlResult
@@ -60,7 +61,7 @@ internal fun ServerContent(state: ServerUiState, onEvent: (ServerEvent) -> Unit,
             style = TravelTheme.typography.bodyMedium,
             color = TravelTheme.colors.onSurfaceVariant,
         )
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = state.input,
             onValueChange = { onEvent(ServerEvent.InputChanged(it)) },
             label = { Text(stringResource(R.string.auth_server_url)) },
@@ -71,6 +72,7 @@ internal fun ServerContent(state: ServerUiState, onEvent: (ServerEvent) -> Unit,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done, autoCorrectEnabled = false),
             keyboardActions = KeyboardActions(onDone = { onEvent(ServerEvent.Test) }),
             modifier = Modifier.fillMaxWidth().semantics { if (errorText != null) error(errorText) },
+            tid = "auth.auth_server_url",
         )
         Text(
             if (state.defaultUrl.isBlank()) stringResource(R.string.auth_server_no_default) else stringResource(R.string.auth_server_default, state.defaultUrl),
@@ -84,10 +86,13 @@ internal fun ServerContent(state: ServerUiState, onEvent: (ServerEvent) -> Unit,
                 { onEvent(ServerEvent.Test) },
                 variant = TpButtonVariant.Secondary,
                 loading = state.testing,
+                tid = "auth.auth_server_testing",
             )
-            TpButton(stringResource(R.string.auth_server_save), { onEvent(ServerEvent.Save) }, enabled = !state.testing)
+            TpButton(stringResource(R.string.auth_server_save), { onEvent(ServerEvent.Save) }, enabled = !state.testing, tid = "auth.auth_server_save")
             if (state.isOverride) {
-                TpButton(stringResource(R.string.auth_server_reset), { onEvent(ServerEvent.Reset) }, variant = TpButtonVariant.Text, enabled = !state.testing)
+                TpButton(stringResource(R.string.auth_server_reset), {
+                    onEvent(ServerEvent.Reset)
+                }, variant = TpButtonVariant.Text, enabled = !state.testing, tid = "auth.auth_server_reset")
             }
         }
     }

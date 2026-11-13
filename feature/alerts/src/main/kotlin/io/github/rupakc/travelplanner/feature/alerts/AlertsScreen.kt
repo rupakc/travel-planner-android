@@ -57,6 +57,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonBlock
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -233,14 +235,18 @@ private fun LazyGridScope.content(
         full("fares-error") {
             ToneBox(Tone.WARN, live = true) {
                 Text(state.faresError ?: stringResource(R.string.alerts_fares_error))
-                TpButton(stringResource(R.string.alerts_try_again), { onEvent(AlertsEvent.Retry) }, variant = TpButtonVariant.Secondary)
+                TpButton(stringResource(R.string.alerts_try_again), {
+                    onEvent(AlertsEvent.Retry)
+                }, variant = TpButtonVariant.Secondary, tid = "alerts.alerts_try_again")
             }
         }
     } else if (state.pricesFailed) {
         full("prices-error") {
             ToneBox(Tone.NEUTRAL, live = true) {
                 Text(stringResource(R.string.alerts_prices_error))
-                TpButton(stringResource(R.string.alerts_try_again), { onEvent(AlertsEvent.RetryPrices) }, variant = TpButtonVariant.Secondary)
+                TpButton(stringResource(R.string.alerts_try_again), {
+                    onEvent(AlertsEvent.RetryPrices)
+                }, variant = TpButtonVariant.Secondary, tid = "alerts.alerts_try_again_2")
             }
         }
     }
@@ -328,7 +334,7 @@ private fun LazyGridScope.section(
 @Composable
 private fun SearchBox(query: String, onQuery: (String) -> Unit) {
     val keyboard = LocalSoftwareKeyboardController.current
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = query,
         onValueChange = onQuery,
         singleLine = true,
@@ -339,11 +345,14 @@ private fun SearchBox(query: String, onQuery: (String) -> Unit) {
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
         trailingIcon = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = { onQuery("") }) { Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.alerts_search_clear)) }
+                TpIconButton(onClick = {
+                    onQuery("")
+                }, tid = "alerts.alerts_search_clear") { Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.alerts_search_clear)) }
             }
         },
         shape = TravelShape.Input,
         modifier = Modifier.fillMaxWidth(),
+        tid = "alerts.alerts_search_label",
     )
 }
 

@@ -103,7 +103,7 @@ private fun PasswordUpdated(onBack: () -> Unit) {
                 color = TravelTheme.extendedColors.success,
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
-            TpButton(stringResource(R.string.auth_done), onClick = onBack, modifier = Modifier.fillMaxWidth())
+            TpButton(stringResource(R.string.auth_done), onClick = onBack, modifier = Modifier.fillMaxWidth(), tid = "auth.auth_done")
         }
     }
 }
@@ -163,6 +163,7 @@ private fun PasswordForm(state: ChangePasswordUiState, forced: Boolean, onEvent:
                 enabled = state.canSubmit || state.loading,
                 loading = state.loading,
                 modifier = Modifier.fillMaxWidth(),
+                tid = "auth.change_password_screen_tp_button",
             )
         }
     }

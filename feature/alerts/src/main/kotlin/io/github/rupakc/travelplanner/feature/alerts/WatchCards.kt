@@ -222,7 +222,14 @@ private fun ProblemBox(problem: String?, fare: Boolean, retrying: Boolean, onRet
     ToneBox(Tone.WARN) {
         val hold = stringResource(if (fare) R.string.alerts_on_hold_fare else R.string.alerts_on_hold_price)
         Text(listOfNotNull(problem, hold).joinToString(" "))
-        TpButton(stringResource(R.string.alerts_retry), onRetry, loading = retrying, variant = TpButtonVariant.Secondary, leadingIcon = Icons.Filled.Refresh)
+        TpButton(
+            stringResource(R.string.alerts_retry),
+            onRetry,
+            loading = retrying,
+            variant = TpButtonVariant.Secondary,
+            leadingIcon = Icons.Filled.Refresh,
+            tid = "alerts.alerts_retry",
+        )
     }
 }
 
@@ -544,7 +551,9 @@ private fun TripDetails(watch: PriceWatch, past: Boolean, callbacks: CardCallbac
         // Only when the watch has a live flight route to search again (web `tripReplanFare`).
         val replannable = !past && tripReplanRequest(watch, null) != null
         if (replannable) {
-            TpButton(stringResource(R.string.alerts_replan_trip), { callbacks.onReplan(false) }, variant = TpButtonVariant.Secondary)
+            TpButton(stringResource(R.string.alerts_replan_trip), {
+                callbacks.onReplan(false)
+            }, variant = TpButtonVariant.Secondary, tid = "alerts.alerts_replan_trip")
         }
     }
 }
@@ -577,18 +586,19 @@ private fun CardActions(
     val price = (item as? AnyWatch.Price)?.watch
     FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
         if (fare != null && !past) {
-            TpButton(stringResource(R.string.alerts_replan_fare), { callbacks.onReplan(false) })
+            TpButton(stringResource(R.string.alerts_replan_fare), { callbacks.onReplan(false) }, tid = "alerts.alerts_replan_fare")
             cheaperNearby(fare)?.let { c ->
                 TpButton(
                     stringResource(R.string.alerts_leave_and_save, formatDay(c.departureDate, currentLocale()).orEmpty(), localUsd(c.saving)),
                     { callbacks.onReplan(true) },
                     variant = TpButtonVariant.Tonal,
+                    tid = "alerts.alerts_leave_and_save",
                 )
             }
             fare.bookingUrl?.let { url ->
                 TpButton(stringResource(R.string.alerts_book_google_flights), {
                     callbacks.onOpenLink(url)
-                }, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp)
+                }, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp, tid = "alerts.alerts_book_google_flights")
             }
         }
         val link = price?.link ?: price?.lastObservation.str("link")
@@ -599,7 +609,9 @@ private fun CardActions(
                     PriceWatchKinds.TRIP -> R.string.alerts_open
                     else -> R.string.alerts_open_listing
                 }
-            TpButton(stringResource(label), { callbacks.onOpenLink(link) }, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp)
+            TpButton(stringResource(label), {
+                callbacks.onOpenLink(link)
+            }, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp, tid = "alerts.watch_cards_tp_button")
         }
         if (!past && item.status != WatchStatuses.ERROR) {
             TpButton(
@@ -608,6 +620,7 @@ private fun CardActions(
                 variant = TpButtonVariant.Text,
                 loading = busy == CardAction.CHECK,
                 leadingIcon = Icons.Filled.Refresh,
+                tid = "alerts.alerts_checking",
             )
         }
         StoryButton(title, callbacks.onStory)
@@ -619,10 +632,13 @@ private fun CardActions(
                 variant = TpButtonVariant.Text,
                 leadingIcon = Icons.Filled.Search,
                 modifier = Modifier.semantics { contentDescription = a11y },
+                tid = "alerts.alerts_live_check",
             )
         }
         if (item.status == WatchStatuses.ACTIVE) {
-            TpButton(stringResource(R.string.alerts_pause), { callbacks.onStatus(false) }, variant = TpButtonVariant.Text, enabled = busy != CardAction.STATUS)
+            TpButton(stringResource(R.string.alerts_pause), {
+                callbacks.onStatus(false)
+            }, variant = TpButtonVariant.Text, enabled = busy != CardAction.STATUS, tid = "alerts.alerts_pause")
         }
         if (item.status == WatchStatuses.PAUSED) {
             TpButton(
@@ -631,10 +647,11 @@ private fun CardActions(
                 variant = TpButtonVariant.Text,
                 enabled = busy != CardAction.STATUS,
                 leadingIcon = Icons.Filled.PlayArrow,
+                tid = "alerts.alerts_resume",
             )
         }
         if (!past && !editing) {
-            TpButton(stringResource(R.string.alerts_edit), onEdit, variant = TpButtonVariant.Text, leadingIcon = Icons.Filled.Edit)
+            TpButton(stringResource(R.string.alerts_edit), onEdit, variant = TpButtonVariant.Text, leadingIcon = Icons.Filled.Edit, tid = "alerts.alerts_edit")
         }
         if (!confirmDelete) {
             val a11y = stringResource(R.string.alerts_delete_a11y, title)
@@ -644,12 +661,13 @@ private fun CardActions(
                 variant = TpButtonVariant.Text,
                 leadingIcon = Icons.Filled.Delete,
                 modifier = Modifier.semantics { contentDescription = a11y },
+                tid = "alerts.alerts_delete",
             )
         } else {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
                 Text(stringResource(R.string.alerts_stop_watching), style = TravelTheme.typography.bodyMedium)
-                TpButton(stringResource(R.string.alerts_delete), callbacks.onDelete, variant = TpButtonVariant.Destructive)
-                TpButton(stringResource(R.string.alerts_keep), { onConfirmDelete(false) }, variant = TpButtonVariant.Text)
+                TpButton(stringResource(R.string.alerts_delete), callbacks.onDelete, variant = TpButtonVariant.Destructive, tid = "alerts.alerts_delete_2")
+                TpButton(stringResource(R.string.alerts_keep), { onConfirmDelete(false) }, variant = TpButtonVariant.Text, tid = "alerts.alerts_keep")
             }
         }
     }
@@ -706,7 +724,7 @@ private fun EditPanel(
             if (emailAvailable) EmailOption(email, userEmail, { email = it })
             blockedBy?.let { SaveBlockedNote(it) }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm, Alignment.End)) {
-                TpButton(stringResource(R.string.alerts_cancel), onCancel, variant = TpButtonVariant.Text)
+                TpButton(stringResource(R.string.alerts_cancel), onCancel, variant = TpButtonVariant.Text, tid = "alerts.alerts_cancel")
                 TpButton(
                     stringResource(R.string.alerts_save),
                     {
@@ -732,6 +750,7 @@ private fun EditPanel(
                     },
                     loading = saving,
                     enabled = blockedBy == null,
+                    tid = "alerts.alerts_save",
                 )
             }
         }

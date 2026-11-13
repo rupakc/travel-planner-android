@@ -47,6 +47,9 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTab
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -160,7 +163,9 @@ private fun Loaded(
                 modifier = Modifier.semantics { contentDescription = label },
             ) {
                 tabs.visible.forEach { tab ->
-                    Tab(selected = tab == tabs.selected, onClick = { onEvent(TripEvent.SelectTab(tab)) }, text = { Text(stringResource(tabLabel(tab))) })
+                    TpTab(selected = tab == tabs.selected, onClick = {
+                        onEvent(TripEvent.SelectTab(tab))
+                    }, text = { Text(stringResource(tabLabel(tab))) }, tid = "trips.trip_screen_tab")
                 }
             }
         }
@@ -191,20 +196,22 @@ private fun tabLabel(tab: TripTab): Int =
 @Composable
 private fun MoreMenu(onEvent: (TripEvent) -> Unit) {
     var open by remember { mutableStateOf(false) }
-    IconButton(onClick = { open = true }) { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.trip_more_options)) }
+    TpIconButton(onClick = {
+        open = true
+    }, tid = "trips.trip_more_options") { Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.trip_more_options)) }
     DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-        DropdownMenuItem(text = { Text(stringResource(R.string.trip_rename)) }, onClick = {
+        TpDropdownMenuItem(text = { Text(stringResource(R.string.trip_rename)) }, onClick = {
             open = false
             onEvent(TripEvent.OpenRename)
-        })
-        DropdownMenuItem(text = { Text(stringResource(R.string.trip_edit_dates)) }, onClick = {
+        }, tid = "trips.trip_rename")
+        TpDropdownMenuItem(text = { Text(stringResource(R.string.trip_edit_dates)) }, onClick = {
             open = false
             onEvent(TripEvent.OpenDates)
-        })
-        DropdownMenuItem(text = { Text(stringResource(R.string.trip_delete)) }, onClick = {
+        }, tid = "trips.trip_edit_dates")
+        TpDropdownMenuItem(text = { Text(stringResource(R.string.trip_delete)) }, onClick = {
             open = false
             onEvent(TripEvent.AskDelete)
-        })
+        }, tid = "trips.trip_delete")
     }
 }
 
@@ -269,15 +276,16 @@ private fun PhaseMenu(trip: Trip, phase: Phase, busy: Boolean, onEvent: (TripEve
             modifier = Modifier.padding(horizontal = TravelTheme.spacing.lg, vertical = TravelTheme.spacing.xs).semantics { heading() },
         )
         Phase.entries.forEach { p ->
-            DropdownMenuItem(
+            TpDropdownMenuItem(
                 text = { Text(phaseLabel(p) + if (p == trip.phase && trip.phaseSource == "manual") " ✓" else "") },
                 onClick = {
                     open = false
                     onEvent(TripEvent.SetPhase(p))
                 },
+                tid = "trips.trip_screen_dropdown_menu_item",
             )
         }
-        DropdownMenuItem(
+        TpDropdownMenuItem(
             text = {
                 Column {
                     Text(stringResource(R.string.trip_phase_follow))
@@ -288,6 +296,7 @@ private fun PhaseMenu(trip: Trip, phase: Phase, busy: Boolean, onEvent: (TripEve
                 open = false
                 onEvent(TripEvent.SetPhase(null))
             },
+            tid = "trips.trip_phase_follow",
         )
     }
 }

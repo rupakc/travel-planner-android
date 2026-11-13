@@ -36,6 +36,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.share.ShareDates
@@ -215,8 +216,14 @@ private fun ConfirmDialog(onEvent: (MySharesEvent) -> Unit) {
         onDismissRequest = { onEvent(MySharesEvent.Dismiss) },
         title = { Text(stringResource(R.string.myshares_confirm_title)) },
         text = { Text(stringResource(R.string.myshares_confirm_body)) },
-        confirmButton = { TextButton(onClick = { onEvent(MySharesEvent.ConfirmRevoke) }) { Text(stringResource(R.string.myshares_confirm_yes)) } },
-        dismissButton = { TextButton(onClick = { onEvent(MySharesEvent.Dismiss) }) { Text(stringResource(R.string.myshares_confirm_no)) } },
+        confirmButton = {
+            TpTextButton(onClick = {
+                onEvent(MySharesEvent.ConfirmRevoke)
+            }, tid = "share.myshares_confirm_yes") { Text(stringResource(R.string.myshares_confirm_yes)) }
+        },
+        dismissButton = {
+            TpTextButton(onClick = { onEvent(MySharesEvent.Dismiss) }, tid = "share.myshares_confirm_no") { Text(stringResource(R.string.myshares_confirm_no)) }
+        },
     )
 }
 

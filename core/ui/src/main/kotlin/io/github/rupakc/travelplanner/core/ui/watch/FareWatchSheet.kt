@@ -270,9 +270,16 @@ internal fun SheetButtons(
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm, Alignment.End),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TpButton(secondary, onSecondary, variant = TpButtonVariant.Text)
+        TpButton(secondary, onSecondary, variant = TpButtonVariant.Text, tid = "ui.fare_watch_sheet_tp_button")
         if (showPrimary) {
-            TpButton(primary, onPrimary, enabled = primaryEnabled, loading = loading, leadingIcon = Icons.Filled.Notifications)
+            TpButton(
+                primary,
+                onPrimary,
+                enabled = primaryEnabled,
+                loading = loading,
+                leadingIcon = Icons.Filled.Notifications,
+                tid = "ui.fare_watch_sheet_tp_button_2",
+            )
         }
     }
 }

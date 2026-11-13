@@ -42,6 +42,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.auth.AuthMessage
@@ -153,7 +155,7 @@ internal fun AuthTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     enabled: Boolean = true,
 ) {
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
@@ -165,6 +167,7 @@ internal fun AuthTextField(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         modifier = modifier.fillMaxWidth().semantics { if (contentType != null) this.contentType = contentType },
+        tid = "auth.auth_components_outlined_text_field",
     )
 }
 
@@ -186,14 +189,21 @@ internal fun PasswordTextField(
 ) {
     val toggleLabel = stringResource(if (visible) R.string.auth_hide_password else R.string.auth_show_password)
     val toggleState = stringResource(if (visible) R.string.auth_password_shown else R.string.auth_password_hidden)
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         placeholder = placeholder?.let { { Text(it) } },
         leadingIcon = leadingIcon?.let { { Icon(it, contentDescription = null) } },
         trailingIcon = {
-            IconButton(onClick = onToggleVisible, modifier = Modifier.semantics { stateDescription = toggleState }) {
+            TpIconButton(
+                onClick = onToggleVisible,
+                modifier =
+                    Modifier.semantics {
+                        stateDescription = toggleState
+                    },
+                tid = "auth.auth_components_icon_button",
+            ) {
                 Icon(
                     painterResource(if (visible) R.drawable.ic_visibility_off else R.drawable.ic_visibility),
                     contentDescription = toggleLabel,
@@ -207,5 +217,6 @@ internal fun PasswordTextField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = imeAction),
         keyboardActions = KeyboardActions(onAny = { onImeAction() }),
         modifier = modifier.fillMaxWidth().semantics { this.contentType = contentType },
+        tid = "auth.auth_components_outlined_text_field_2",
     )
 }

@@ -30,7 +30,9 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTab
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.social.R
 import io.github.rupakc.travelplanner.feature.social.profile.errorText
@@ -67,11 +69,12 @@ internal fun ConnectionsScreen(
         Column(Modifier.padding(padding).fillMaxSize()) {
             PrimaryScrollableTabRow(selectedTabIndex = state.tab.ordinal, edgePadding = TravelTheme.spacing.gutter) {
                 ConnectionTab.entries.forEach { tab ->
-                    Tab(
+                    TpTab(
                         selected = tab == state.tab,
                         onClick = { onEvent(ConnectionsEvent.SelectTab(tab)) },
                         modifier = Modifier.heightIn(min = TravelTheme.spacing.minTouchTarget),
                         text = { Text(stringResource(tab.titleRes())) },
+                        tid = "social.connections_screen_tab",
                     )
                 }
             }
@@ -134,7 +137,7 @@ private fun HandleRow(
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
     ) {
         // A blocked profile is not viewable (404), so that row has no link.
-        val open = if (tab == ConnectionTab.Blocked) Modifier else Modifier.clickable { onOpenProfile(handle) }
+        val open = if (tab == ConnectionTab.Blocked) Modifier else Modifier.tpClickable(tid = "social.connections_screen_clickable") { onOpenProfile(handle) }
         Text(
             "@$handle",
             Modifier.weight(1f).heightIn(min = TravelTheme.spacing.minTouchTarget).then(open).padding(vertical = TravelTheme.spacing.sm),

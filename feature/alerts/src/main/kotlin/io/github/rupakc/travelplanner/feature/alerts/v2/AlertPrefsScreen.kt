@@ -44,7 +44,11 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpSwitch
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertPrefsRules
 import io.github.rupakc.travelplanner.core.model.alerts.AlertPrefs
@@ -143,7 +147,7 @@ private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean = true, 
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(label, Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange, enabled = enabled)
+        TpSwitch(checked = checked, onCheckedChange = onChange, enabled = enabled, tid = "alerts.alert_prefs_screen_switch")
     }
 }
 
@@ -173,7 +177,9 @@ private fun InstantSection(p: AlertPrefs, a: AlertPrefsActions, idle: Boolean) {
             AlertPrefsRules.INSTANT_TARGETS_ONLY to R.string.alerts_prefs_instant_targets,
         ).forEach { (mode, label) ->
             Row(
-                Modifier.fillMaxWidth().widthIn(min = 48.dp).selectable(selected = current == mode, enabled = idle, role = Role.RadioButton, onClick = {
+                Modifier.fillMaxWidth().widthIn(
+                    min = 48.dp,
+                ).tpSelectable(tid = "alerts.alert_prefs_screen_selectable", selected = current == mode, enabled = idle, role = Role.RadioButton, onClick = {
                     a.onInstant(mode)
                 }),
                 verticalAlignment = Alignment.CenterVertically,
@@ -312,12 +318,16 @@ private fun Stepper(
 ) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, Modifier.weight(1f))
-        IconButton(onClick = { onChange((value - step).coerceAtLeast(min)) }, enabled = enabled && value > min) {
+        TpIconButton(onClick = {
+            onChange((value - step).coerceAtLeast(min))
+        }, enabled = enabled && value > min, tid = "alerts.alert_prefs_screen_icon_button") {
             // No minus glyph in material-icons-core: a text minus, named for TalkBack on the button.
             Text("\u2212", Modifier.clearAndSetSemantics { contentDescription = lessA11y }, style = TravelTheme.typography.titleLarge)
         }
         Text(valueText, Modifier.widthIn(min = 56.dp).semantics { liveRegion = LiveRegionMode.Polite }, style = TravelTheme.typography.titleMedium)
-        IconButton(onClick = { onChange((value + step).coerceAtMost(max)) }, enabled = enabled && value < max) {
+        TpIconButton(onClick = {
+            onChange((value + step).coerceAtMost(max))
+        }, enabled = enabled && value < max, tid = "alerts.alert_prefs_screen_icon_button_2") {
             Icon(Icons.Filled.Add, contentDescription = moreA11y)
         }
     }
@@ -339,13 +349,14 @@ private fun <T> Picker(label: String, value: String, options: List<Pair<T, Strin
                     contentDescription = "$label: $value"
                     stateDescription = value
                 },
+            tid = "alerts.alert_prefs_screen_tp_button",
         )
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             options.forEach { (key, text) ->
-                DropdownMenuItem(text = { Text(text) }, onClick = {
+                TpDropdownMenuItem(text = { Text(text) }, onClick = {
                     open = false
                     onPick(key)
-                })
+                }, tid = "alerts.alert_prefs_screen_dropdown_menu_item")
             }
         }
     }
