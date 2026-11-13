@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="onboarding_title">Te damos la bienvenida a %1$s</string>
-    <string name="onboarding_message">Seis preguntas rápidas adaptan tu inicio y tus funciones a tu forma de viajar.</string>
+    <string name="onboarding_message">Planifica viajes con IA: vuelos, hoteles, actividades y un itinerario día a día, todo en un solo lugar.</string>
     <string name="onboarding_retake_title">Repite el cuestionario</string>
     <string name="onboarding_retake_message">Tus respuestas actuales ya están marcadas. Cambia lo que sea distinto y actualizaremos tu tipo de viajero y tus funciones.</string>
     <string name="onboarding_get_started">Empezar</string>
@@ -27,13 +27,9 @@
 
     <string name="onboarding_q_budget">¿Cuál es tu presupuesto habitual?</string>
     <string name="onboarding_opt_budget_shoestring">Muy ajustado</string>
-    <string name="onboarding_opt_budget_shoestring_hint">Albergues, comida callejera, transporte público</string>
     <string name="onboarding_opt_budget_mid_range">Intermedio</string>
-    <string name="onboarding_opt_budget_mid_range_hint">Hoteles cómodos, buenos restaurantes</string>
     <string name="onboarding_opt_budget_comfort">Cómodo</string>
-    <string name="onboarding_opt_budget_comfort_hint">Buenos hoteles y algún capricho</string>
     <string name="onboarding_opt_budget_luxury">Lujo</string>
-    <string name="onboarding_opt_budget_luxury_hint">Hoteles premium, alta cocina, tours privados</string>
 
     <string name="onboarding_q_interests">¿Qué te encanta hacer?</string>
     <string name="onboarding_opt_interests_food">Gastronomía</string>
@@ -49,11 +45,8 @@
 
     <string name="onboarding_q_pace">¿Qué ritmo prefieres?</string>
     <string name="onboarding_opt_pace_relaxed">Tranquilo</string>
-    <string name="onboarding_opt_pace_relaxed_hint">Mucho tiempo libre</string>
     <string name="onboarding_opt_pace_balanced">Equilibrado</string>
-    <string name="onboarding_opt_pace_balanced_hint">Visitas y tiempo libre a partes iguales</string>
     <string name="onboarding_opt_pace_packed">Intenso</string>
-    <string name="onboarding_opt_pace_packed_hint">Ver todo lo posible</string>
 
     <string name="onboarding_q_planning">¿Cómo planificas?</string>
     <string name="onboarding_opt_planning_ahead_deals">Reservo con antelación y busco ofertas</string>
@@ -94,7 +87,7 @@
     <string name="onboarding_continue_anyway">Continuar sin sincronizar</string>
 
     <string name="onboarding_notifications_title">Mantente al día de tus viajes</string>
-    <string name="onboarding_notifications_message">Recibe recordatorios antes de salir, alertas de bajadas de precio de lo que vigilas y sugerencias cercanas durante el viaje. Puedes desactivar cada una en Ajustes.</string>
+    <string name="onboarding_notifications_message">Recibe recordatorios de viaje y alertas de bajada de precio. Puedes desactivar cada uno en Ajustes.</string>
     <string name="onboarding_notifications_allow">Permitir notificaciones</string>
     <string name="onboarding_notifications_later">Ahora no</string>
     <!-- Flujo compartido de 5 pasos -->

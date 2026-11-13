@@ -5,11 +5,10 @@ import io.github.rupakc.travelplanner.core.domain.profile.TravellerQuiz
 import io.github.rupakc.travelplanner.core.domain.traveller.TravellerType
 import io.github.rupakc.travelplanner.feature.onboarding.R
 
-/** Display copy for one quiz option: label, optional hint and a decorative emoji glyph (web uses emoji for interests). */
+/** Display copy for one quiz option: label and a decorative emoji glyph (web uses emoji for interests). */
 internal data class OptionCopy(
     @param:StringRes val label: Int,
     val glyph: String,
-    @param:StringRes val hint: Int? = null,
 )
 
 /** Question heading for a [TravellerQuiz] question id. */
@@ -33,10 +32,10 @@ internal val OPTION_COPY: Map<String, OptionCopy> =
         "companions/family_kids" to OptionCopy(R.string.onboarding_opt_companions_family_kids, "👨‍👩‍👧"),
         "companions/friends" to OptionCopy(R.string.onboarding_opt_companions_friends, "🎉"),
         "companions/work" to OptionCopy(R.string.onboarding_opt_companions_work, "💼"),
-        "budget/shoestring" to OptionCopy(R.string.onboarding_opt_budget_shoestring, "🪙", R.string.onboarding_opt_budget_shoestring_hint),
-        "budget/mid_range" to OptionCopy(R.string.onboarding_opt_budget_mid_range, "🏨", R.string.onboarding_opt_budget_mid_range_hint),
-        "budget/comfort" to OptionCopy(R.string.onboarding_opt_budget_comfort, "🛎️", R.string.onboarding_opt_budget_comfort_hint),
-        "budget/luxury" to OptionCopy(R.string.onboarding_opt_budget_luxury, "💎", R.string.onboarding_opt_budget_luxury_hint),
+        "budget/shoestring" to OptionCopy(R.string.onboarding_opt_budget_shoestring, "🪙"),
+        "budget/mid_range" to OptionCopy(R.string.onboarding_opt_budget_mid_range, "🏨"),
+        "budget/comfort" to OptionCopy(R.string.onboarding_opt_budget_comfort, "🛎️"),
+        "budget/luxury" to OptionCopy(R.string.onboarding_opt_budget_luxury, "💎"),
         "interests/food" to OptionCopy(R.string.onboarding_opt_interests_food, "🍜"),
         "interests/history_culture" to OptionCopy(R.string.onboarding_opt_interests_history_culture, "🏛️"),
         "interests/nature" to OptionCopy(R.string.onboarding_opt_interests_nature, "🌿"),
@@ -47,9 +46,9 @@ internal val OPTION_COPY: Map<String, OptionCopy> =
         "interests/beaches" to OptionCopy(R.string.onboarding_opt_interests_beaches, "🏖️"),
         "interests/photography" to OptionCopy(R.string.onboarding_opt_interests_photography, "📷"),
         "interests/wellness" to OptionCopy(R.string.onboarding_opt_interests_wellness, "🧘"),
-        "pace/relaxed" to OptionCopy(R.string.onboarding_opt_pace_relaxed, "🐢", R.string.onboarding_opt_pace_relaxed_hint),
-        "pace/balanced" to OptionCopy(R.string.onboarding_opt_pace_balanced, "⚖️", R.string.onboarding_opt_pace_balanced_hint),
-        "pace/packed" to OptionCopy(R.string.onboarding_opt_pace_packed, "⚡", R.string.onboarding_opt_pace_packed_hint),
+        "pace/relaxed" to OptionCopy(R.string.onboarding_opt_pace_relaxed, "🐢"),
+        "pace/balanced" to OptionCopy(R.string.onboarding_opt_pace_balanced, "⚖️"),
+        "pace/packed" to OptionCopy(R.string.onboarding_opt_pace_packed, "⚡"),
         "planning/ahead_deals" to OptionCopy(R.string.onboarding_opt_planning_ahead_deals, "📅"),
         "planning/loose" to OptionCopy(R.string.onboarding_opt_planning_loose, "🗺️"),
         "planning/spontaneous" to OptionCopy(R.string.onboarding_opt_planning_spontaneous, "🎲"),

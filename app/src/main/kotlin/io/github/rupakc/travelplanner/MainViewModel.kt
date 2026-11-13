@@ -64,6 +64,8 @@ data class MainUiState(
     val hold: Boolean = false,
     /** The signed-in user's game is on (not hidden by `hide_game`); false until known. */
     val gameVisible: Boolean = false,
+    /** The signed-in user's `hide_community` setting; false (shown) until known or when absent. */
+    val communityHidden: Boolean = false,
 )
 
 /** The shell's view of [MainUiState]: tabs, start screen, celebrations and the Offline tab. */
@@ -79,7 +81,7 @@ fun MainUiState.shellMode(): ShellMode =
         gameEnabled = flags.game && gameVisible,
         offlinePack = flags.offlinePack,
         sharing = flags.sharing,
-        social = flags.social,
+        social = flags.social && !communityHidden,
         play = flags.play,
     )
 
@@ -121,9 +123,9 @@ class MainViewModel
         /** Set only from a fresh `GET /api/config` answer (200 or 404), never from the cache. */
         private val freshFlags = MutableStateFlow<JourneyFlags?>(null)
 
-        private data class Extras(val count: Int?, val countKnown: Boolean, val over: Boolean, val gameVisible: Boolean)
+        private data class Extras(val count: Int?, val countKnown: Boolean, val over: Boolean, val gameVisible: Boolean, val communityHidden: Boolean)
 
-        private val extras = combine(tripCount, tripCountKnown, waitOver, gameEvents.visible, ::Extras)
+        private val extras = combine(tripCount, tripCountKnown, waitOver, gameEvents.visible, gameEvents.communityHidden, ::Extras)
 
         /** The signed-in user's key; null when signed out. Per-user work restarts when it changes. */
         private val userKeys = authRepository.session.map { s -> s?.let { it.userId ?: it.user.username } }.distinctUntilChanged()
@@ -136,13 +138,14 @@ class MainViewModel
             ) { session, profile, settings -> Triple(session, gateFor(session, profile), settings) }
 
         val state: StateFlow<MainUiState> =
-            combine(base, flags, extras) { (session, gate, settings), f, (count, countKnown, over, gameVisible) ->
+            combine(base, flags, extras) { (session, gate, settings), f, x ->
+                val (count, countKnown, over) = x
                 val resolved = f ?: JourneyFlags.OFF
                 val signedIn = session != null
                 val hold =
                     gate != AuthGate.LOADING &&
                         StartGate.hold(f != null, resolved, signedIn && gate == AuthGate.READY, countKnown, if (over) StartGate.MAX_WAIT_MS else 0L)
-                MainUiState(gate, settings, resolved, resolveStartRoute(resolved, signedIn, count), hold, gameVisible)
+                MainUiState(gate, settings, resolved, resolveStartRoute(resolved, signedIn, count), hold, x.gameVisible, x.communityHidden)
             }.stateIn(viewModelScope, SharingStarted.Eagerly, MainUiState())
 
         init {
@@ -181,6 +184,7 @@ class MainViewModel
 
         private suspend fun applyGameVisibility(key: String?, game: Boolean, accounts: Boolean) {
             gameEvents.setVisible(false)
+            gameEvents.setCommunityHidden(false)
             if (key == null || !game) return
             // Without accounts there is no `hide_game` setting to read; with them, settings() updates the visibility.
             if (accounts) accountRepository.settings() else gameEvents.setVisible(true)

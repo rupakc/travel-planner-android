@@ -2,7 +2,7 @@
 <resources>
     <!-- Welcome -->
     <string name="onboarding_title">Welcome to %1$s</string>
-    <string name="onboarding_message">Six quick questions tailor your home screen and features to how you travel.</string>
+    <string name="onboarding_message">Plan trips with AI: flights, hotels, activities and a day-by-day itinerary, all in one place.</string>
     <string name="onboarding_retake_title">Retake the quiz</string>
     <string name="onboarding_retake_message">Your current answers are filled in. Change what\'s different and we\'ll update your traveller type and features.</string>
     <string name="onboarding_get_started">Get started</string>
@@ -30,13 +30,9 @@
 
     <string name="onboarding_q_budget">What\'s your typical budget?</string>
     <string name="onboarding_opt_budget_shoestring">Shoestring</string>
-    <string name="onboarding_opt_budget_shoestring_hint">Hostels, street food, public transport</string>
     <string name="onboarding_opt_budget_mid_range">Mid-range</string>
-    <string name="onboarding_opt_budget_mid_range_hint">Comfortable hotels, nice restaurants</string>
     <string name="onboarding_opt_budget_comfort">Comfort</string>
-    <string name="onboarding_opt_budget_comfort_hint">Good hotels and a few treats</string>
     <string name="onboarding_opt_budget_luxury">Luxury</string>
-    <string name="onboarding_opt_budget_luxury_hint">Premium hotels, fine dining, private tours</string>
 
     <string name="onboarding_q_interests">What do you love doing?</string>
     <string name="onboarding_opt_interests_food">Food</string>
@@ -52,11 +48,8 @@
 
     <string name="onboarding_q_pace">What pace do you like?</string>
     <string name="onboarding_opt_pace_relaxed">Relaxed</string>
-    <string name="onboarding_opt_pace_relaxed_hint">Plenty of downtime</string>
     <string name="onboarding_opt_pace_balanced">Balanced</string>
-    <string name="onboarding_opt_pace_balanced_hint">A mix of sights and free time</string>
     <string name="onboarding_opt_pace_packed">Packed</string>
-    <string name="onboarding_opt_pace_packed_hint">See as much as possible</string>
 
     <string name="onboarding_q_planning">How do you plan?</string>
     <string name="onboarding_opt_planning_ahead_deals">Book far ahead and hunt deals</string>
@@ -99,7 +92,7 @@
 
     <!-- Notifications rationale -->
     <string name="onboarding_notifications_title">Stay on top of your trips</string>
-    <string name="onboarding_notifications_message">Get trip reminders before you leave, price-drop alerts for what you watch, and suggestions nearby while you travel. You can turn each one off in Settings.</string>
+    <string name="onboarding_notifications_message">Get trip reminders and price-drop alerts. You can turn each one off in Settings.</string>
     <string name="onboarding_notifications_allow">Allow notifications</string>
     <string name="onboarding_notifications_later">Not now</string>
     <!-- Shared 5-step flow (web steps 3 and 5, Skip setup, resume) -->

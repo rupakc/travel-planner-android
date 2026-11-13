@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="onboarding_title">欢迎使用 %1$s</string>
-    <string name="onboarding_message">六个简短的问题，让主页和功能贴合你的旅行方式。</string>
+    <string name="onboarding_message">用 AI 规划旅行：航班、酒店、活动和逐日行程，一站搞定。</string>
     <string name="onboarding_retake_title">重新测验</string>
     <string name="onboarding_retake_message">已填入你当前的答案。修改有变化的部分，我们会更新你的旅行者类型和功能。</string>
     <string name="onboarding_welcome_note">每个问题都可以跳过。你可以随时在设置中重新测验。</string>
@@ -22,7 +22,6 @@
     <string name="onboarding_q_budget">你通常的预算是多少？</string>
     <string name="onboarding_opt_budget_shoestring">经济</string>
     <string name="onboarding_opt_budget_comfort">舒适</string>
-    <string name="onboarding_opt_budget_comfort_hint">不错的酒店，偶尔犒劳自己</string>
     <string name="onboarding_q_interests">你喜欢做什么？</string>
     <string name="onboarding_opt_interests_history_culture">历史与文化</string>
     <string name="onboarding_opt_interests_nature">自然与户外</string>
@@ -32,11 +31,8 @@
     <string name="onboarding_opt_interests_photography">摄影</string>
     <string name="onboarding_q_pace">你喜欢什么节奏？</string>
     <string name="onboarding_opt_pace_relaxed">悠闲</string>
-    <string name="onboarding_opt_pace_relaxed_hint">大量休息时间</string>
     <string name="onboarding_opt_pace_balanced">均衡</string>
-    <string name="onboarding_opt_pace_balanced_hint">景点与自由时间相结合</string>
     <string name="onboarding_opt_pace_packed">紧凑</string>
-    <string name="onboarding_opt_pace_packed_hint">尽可能多看</string>
     <string name="onboarding_q_planning">你如何规划行程？</string>
     <string name="onboarding_opt_planning_ahead_deals">提前很久预订，寻找优惠</string>
     <string name="onboarding_opt_planning_loose">随性规划</string>
@@ -68,7 +64,7 @@
     <string name="onboarding_sync_failed_message">你的旅行者类型和功能已保存在此设备上。你的兴趣、预算和同行人员未能同步到你的账户。</string>
     <string name="onboarding_continue_anyway">不同步，继续</string>
     <string name="onboarding_notifications_title">随时掌握你的行程</string>
-    <string name="onboarding_notifications_message">出发前收到行程提醒，关注项目降价时收到提醒，旅途中收到附近推荐。每一项都可以在设置中关闭。</string>
+    <string name="onboarding_notifications_message">获取行程提醒和降价提醒。你可以在设置中分别关闭。</string>
     <string name="onboarding_notifications_allow">允许通知</string>
     <!-- Shared 5-step flow: copy from the web onboarding namespace (web.* and steps.*) -->
     <string name="onboarding_skip_all">跳过设置</string>

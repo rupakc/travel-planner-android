@@ -56,10 +56,15 @@ class AccountRepositoryImpl
                 .map { it.user }
                 .onSuccess { sessionStore.updateUser(it) }
 
-        override suspend fun settings(): AppResult<AccountSettings> = apiCall { api.settings() }.onSuccess { gameEvents.setVisible(!it.hideGame) }
+        override suspend fun settings(): AppResult<AccountSettings> = apiCall { api.settings() }.onSuccess { applySettings(it) }
 
         override suspend fun patchSettings(patch: JsonObject): AppResult<AccountSettings> =
-            apiCall { api.patchSettings(patch) }.onSuccess { gameEvents.setVisible(!it.hideGame) }
+            apiCall { api.patchSettings(patch) }.onSuccess { applySettings(it) }
+
+        private fun applySettings(s: AccountSettings) {
+            gameEvents.setVisible(!s.hideGame)
+            gameEvents.setCommunityHidden(s.hideCommunity)
+        }
 
         override suspend fun putOnboarding(request: OnboardingRequest): AppResult<OnboardingResponse> =
             apiCall { api.putOnboarding(request) }.onSuccess { gameEvents.publish(it.game) }

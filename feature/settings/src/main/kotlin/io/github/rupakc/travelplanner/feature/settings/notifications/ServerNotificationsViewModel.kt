@@ -178,9 +178,11 @@ class ServerNotificationsViewModel
         }
 
         private suspend fun categoriesFor(gates: JourneyFlags): List<NotificationCategory> {
-            val quiz = gates.play && gates.game && (account.settings() as? AppResult.Success)?.value?.hideGame != true
+            val settings = (account.settings() as? AppResult.Success)?.value
+            val quiz = gates.play && gates.game && settings?.hideGame != true
+            val social = gates.social && settings?.hideCommunity != true
             return ListedCategories +
-                listOfNotNull(NotificationCategory.SOCIAL.takeIf { gates.social }, NotificationCategory.QUIZ.takeIf { quiz })
+                listOfNotNull(NotificationCategory.SOCIAL.takeIf { social }, NotificationCategory.QUIZ.takeIf { quiz })
         }
 
         private fun load(silent: Boolean) {

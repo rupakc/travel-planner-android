@@ -92,6 +92,16 @@ class MainViewModelSessionTest {
             assertFalse(vm.state.value.shellMode().gameEnabled)
         }
 
+    @Test fun `hide_community drops the social entries and missing means shown`() =
+        runTest(timeout = 30.seconds) {
+            val vm = vm(FeaturesDto(accounts = true, game = true, social = 1))
+            assertTrue(vm.state.value.shellMode().social)
+            game.setCommunityHidden(true)
+            assertFalse(vm.state.value.shellMode().social)
+            game.setCommunityHidden(false)
+            assertTrue(vm.state.value.shellMode().social)
+        }
+
     @Test fun `the game flag off keeps celebrations off`() =
         runTest(timeout = 30.seconds) {
             val vm = vm(FeaturesDto(accounts = true, game = false))
