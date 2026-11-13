@@ -140,6 +140,16 @@ class NotificationsViewModel
         /** A social row (idea saved, new follower) was tapped: open the ideas feed. */
         val openFeed: Flow<Unit> = feedOpens.receiveAsFlow()
 
+        private val ideaOpens = Channel<Long>(Channel.BUFFERED)
+
+        /** A social row that names an idea (`/feed/{id}`). */
+        val openIdea: Flow<Long> = ideaOpens.receiveAsFlow()
+
+        private val profileOpens = Channel<String>(Channel.BUFFERED)
+
+        /** A social row that names a profile (`/u/{handle}`). */
+        val openProfile: Flow<String> = profileOpens.receiveAsFlow()
+
         private val h2hOpens = Channel<String>(Channel.BUFFERED)
 
         /** A head-to-head match to open (an invite or result row). */
@@ -215,6 +225,10 @@ class NotificationsViewModel
                     // No trip id (or a category this screen does not route): the list is already open.
                     NotificationTarget.Feed -> feedOpens.send(Unit)
 
+                    is NotificationTarget.Idea -> ideaOpens.send(target.ideaId)
+
+                    is NotificationTarget.Profile -> profileOpens.send(target.handle)
+
                     is NotificationTarget.H2h -> h2hOpens.send(target.matchId)
 
                     NotificationTarget.Inbox -> Unit
@@ -246,6 +260,8 @@ fun NotificationsInboxRoute(
     onOpenTrip: (Long) -> Unit = {},
     onOpenFeed: () -> Unit = {},
     onOpenH2h: (String) -> Unit = {},
+    onOpenIdea: (Long) -> Unit = {},
+    onOpenProfile: (String) -> Unit = {},
     viewModel: NotificationsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -253,6 +269,8 @@ fun NotificationsInboxRoute(
     LaunchedEffect(viewModel) { viewModel.openTrip.collect(onOpenTrip) }
     LaunchedEffect(viewModel) { viewModel.openFeed.collect { onOpenFeed() } }
     LaunchedEffect(viewModel) { viewModel.openH2h.collect(onOpenH2h) }
+    LaunchedEffect(viewModel) { viewModel.openIdea.collect(onOpenIdea) }
+    LaunchedEffect(viewModel) { viewModel.openProfile.collect(onOpenProfile) }
     NotificationsScreen(state, viewModel::onEvent, onBack)
 }
 

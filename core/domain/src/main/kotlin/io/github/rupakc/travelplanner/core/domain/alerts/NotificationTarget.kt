@@ -17,6 +17,12 @@ sealed interface NotificationTarget {
     /** The ideas feed (`/feed`): a social kind (idea saved, new follower). */
     data object Feed : NotificationTarget
 
+    /** One idea (`/feed/{id}`). */
+    data class Idea(val ideaId: Long) : NotificationTarget
+
+    /** One public profile (`/u/{handle}`, lower case). */
+    data class Profile(val handle: String) : NotificationTarget
+
     /** A head-to-head match (`/play/h2h/{id}`): an invite or a result. */
     data class H2h(val matchId: String) : NotificationTarget
 
@@ -59,6 +65,15 @@ val QUIZ_PUSH_KINDS: Set<String> = setOf("quiz_h2h_invite", "quiz_h2h_result")
 /** The match id of a `/play/h2h/{id}` web path and nothing else. */
 fun parseH2hPath(path: String?): String? = path?.let { H2H_PATH.matchEntire(it.substringBefore('?')) }?.groupValues?.get(1)
 
+private val IDEA_PATH = Regex("^/feed/(\\d{1,$MAX_ID_DIGITS})/?$")
+private val PROFILE_PATH = Regex("^/u/([A-Za-z0-9_]{3,20})/?$")
+
+/** The idea id of a `/feed/{id}` web path and nothing else (allow-list). */
+fun parseIdeaPath(path: String?): Long? = path?.let { IDEA_PATH.matchEntire(it.substringBefore('?')) }?.groupValues?.get(1)?.toLongOrNull()?.takeIf { it > 0 }
+
+/** The (lower-case) handle of a `/u/{handle}` web path and nothing else (allow-list). */
+fun parseProfilePath(path: String?): String? = path?.let { PROFILE_PATH.matchEntire(it.substringBefore('?')) }?.groupValues?.get(1)?.lowercase()
+
 private val TRIP_PATH = Regex("^/trips/(\\d{1,$MAX_ID_DIGITS})(/today)?/?$")
 
 /** The trip id of a web trip path (`/trips/12`, `/trips/12/today`) and nothing else (allow-list, never a free-form URL). */
@@ -82,7 +97,11 @@ fun resolveNotificationTarget(
         val id = planId?.trim()?.takeIf { it.length <= MAX_ID_DIGITS }?.toLongOrNull()?.takeIf { it > 0 } ?: parseTripPath(link)
         return id?.let(NotificationTarget::TripToday) ?: NotificationTarget.Inbox
     }
-    if (kind in SOCIAL_PUSH_KINDS) return NotificationTarget.Feed
+    if (kind in SOCIAL_PUSH_KINDS) {
+        parseIdeaPath(link)?.let { return NotificationTarget.Idea(it) }
+        parseProfilePath(link)?.let { return NotificationTarget.Profile(it) }
+        return NotificationTarget.Feed
+    }
     if (kind in QUIZ_PUSH_KINDS) return parseH2hPath(link)?.let(NotificationTarget::H2h) ?: NotificationTarget.Inbox
     val alert = parseAlertsPath(link) ?: AlertLink(watchKind, watchId)
     val priceLike = notificationCategory(category, kind) == NotificationCategory.PRICE_DROPS

@@ -133,6 +133,12 @@ object DeepLinks {
     /** The ideas feed (`travelplanner://feed`); built by social notifications. */
     const val FEED_PATTERN = "$SCHEME://feed"
 
+    /** One idea (`travelplanner://idea/{ideaId}`); built by social notifications. */
+    const val IDEA_PATTERN = "$SCHEME://idea/{ideaId}"
+
+    /** One public profile (`travelplanner://u/{handle}`); built by social notifications. */
+    const val PROFILE_PATTERN = "$SCHEME://u/{handle}"
+
     /** A head-to-head match (`travelplanner://play/h2h/{matchId}`); built by quiz notifications. */
     const val H2H_PATTERN = "$SCHEME://play/h2h/{matchId}"
 }

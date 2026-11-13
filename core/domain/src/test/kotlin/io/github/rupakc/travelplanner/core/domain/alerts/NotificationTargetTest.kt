@@ -78,4 +78,28 @@ class NotificationTargetTest {
         assertEquals(NotificationTarget.Inbox, resolveNotificationTarget("quiz_h2h_result", null, null, null, null))
         assertEquals(NotificationTarget.Inbox, resolveNotificationTarget("quiz_h2h_invite", "https://evil.test/x", null, null, null))
     }
+
+    @Test
+    fun `social kinds open the idea or the profile their link names, else the feed`() {
+        val saved = "social_idea_saved"
+        val follower = "social_new_follower"
+        assertEquals(NotificationTarget.Idea(42), resolveNotificationTarget(saved, "/feed/42", null, null, null))
+        assertEquals(NotificationTarget.Idea(42), resolveNotificationTarget(saved, "/feed/42/?x=1", null, null, null))
+        assertEquals(NotificationTarget.Profile("ann_9"), resolveNotificationTarget(follower, "/u/Ann_9", null, null, null))
+        for (bad in listOf(
+            null,
+            "",
+            "/feed",
+            "/feed/abc",
+            "/feed/0",
+            "/feed/42/../x",
+            "https://evil.example/feed/42",
+            "/u/a",
+            "/u/ann smith",
+            "/u/../x",
+            "/u/" + "a".repeat(21),
+        )) {
+            assertEquals(bad, NotificationTarget.Feed, resolveNotificationTarget(saved, bad, null, null, null))
+        }
+    }
 }
