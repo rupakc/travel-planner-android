@@ -67,6 +67,18 @@ class ServerNotificationsViewModelTest {
         }
 
     @Test
+    fun `turning the morning brief on also turns the local trip switch on`() =
+        runTest(timeout = 30.seconds) {
+            local.state.value = AppSettings(tripNotifications = false, nearbyNotifications = true)
+            val vm = vm()
+            vm.onEvent(ServerNotificationsEvent.SetCategory(NotificationCategory.MORNING_BRIEF, true))
+            assertTrue(local.state.value.tripNotifications)
+            assertTrue(vm.state.value.isOn(NotificationCategory.MORNING_BRIEF))
+            vm.onEvent(ServerNotificationsEvent.SetCategory(NotificationCategory.MORNING_BRIEF, false))
+            assertTrue(local.state.value.tripNotifications)
+        }
+
+    @Test
     fun `without the notifications_api flag nothing is called`() =
         runTest(timeout = 30.seconds) {
             flags.flags = JourneyFlags()

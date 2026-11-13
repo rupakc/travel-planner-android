@@ -216,6 +216,8 @@ class ServerNotificationsViewModel
         private fun setCategory(category: NotificationCategory, enabled: Boolean) {
             save(NotificationSettingsUpdate.category(category, enabled)) {
                 category.localSwitch()?.let { applyLocal(it, enabled) }
+                // The brief rides the trip switch: turning it on must not stay off behind a local trip switch that is off.
+                if (category == NotificationCategory.MORNING_BRIEF && enabled) applyLocal(NotificationToggle.TRIP, true)
                 telemetry.emit(TelemetryEvents.NOTIF_CATEGORY_TOGGLE, mapOf("category" to category.wire, "on" to enabled))
             }
         }
