@@ -17,12 +17,17 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.common.AppClock
+import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
+import io.github.rupakc.travelplanner.core.data.repository.NotificationCatalogRepository
+import io.github.rupakc.travelplanner.core.data.repository.NotificationSettingsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.domain.alerts.parseIsoDate
+import io.github.rupakc.travelplanner.core.model.alerts.QuietHours
 import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
+import io.github.rupakc.travelplanner.core.model.notifications.NotificationCategory
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.core.notifications.NotificationIds
 import io.github.rupakc.travelplanner.core.notifications.NotificationLinks
@@ -53,11 +58,20 @@ object NearbyNotificationPolicy {
     /** Quiet hours end (exclusive), local time. */
     val QUIET_END: LocalTime = LocalTime.of(8, 0)
 
-    fun shouldNotify(enabled: Boolean, always: Boolean, onTrip: Boolean, lastPostedAt: Instant?, now: Instant, zone: ZoneId): Boolean {
+    @Suppress("LongParameterList")
+    fun shouldNotify(
+        enabled: Boolean,
+        always: Boolean,
+        onTrip: Boolean,
+        lastPostedAt: Instant?,
+        now: Instant,
+        zone: ZoneId,
+        userQuietHours: QuietHours? = null,
+    ): Boolean {
         if (!enabled) return false
         if (!always && !onTrip) return false
         val local = now.atZone(zone)
-        if (isQuiet(local.toLocalTime())) return false
+        if (isQuiet(local.toLocalTime()) || NearbyArrivalText.inUserQuietHours(userQuietHours, local.toLocalTime())) return false
         return lastPostedAt == null || lastPostedAt.atZone(zone).toLocalDate() != local.toLocalDate()
     }
 
@@ -114,6 +128,7 @@ class SharedPrefsNearbyPostLog
  * user's request, never a background job. The remembered ~5 km cell is read only to check that Near me
  * was used in the last [MAX_AGE] (it is never sent anywhere from here).
  */
+@Suppress("LongParameterList")
 @HiltWorker
 class NearbySuggestionWorker
     @AssistedInject
@@ -127,23 +142,36 @@ class NearbySuggestionWorker
         private val log: NearbyPostLog,
         private val notifier: Notifier,
         private val clock: AppClock,
+        private val catalog: NotificationCatalogRepository,
+        private val serverSettings: NotificationSettingsRepository,
+        private val arrivals: NearbyArrivalSource,
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
-            if (!allowed() || !notifier.canPost()) return Result.success()
-            usableLocation(nearby.lastLocation(), clock.now()) ?: return Result.success()
+            // Best effort: the server's `nearby` switch and quiet hours. Offline or without the API the device rules stand alone.
+            val server = (serverSettings.settings() as? AppResult.Success)?.value
+            if (server?.isEnabled(NotificationCategory.NEARBY) == false) return Result.success()
+            if (!allowed(server?.quietHours) || !notifier.canPost()) return Result.success()
+            val cell = usableLocation(nearby.lastLocation(), clock.now()) ?: return Result.success()
             val res = applicationContext.resources
+            val arrival = arrivals.arrival(cell)
+            val body =
+                if (arrival == null) {
+                    res.getString(R.string.nearby_notification_body)
+                } else {
+                    NearbyArrivalText.body(catalog.catalog(settings.settings.first().localeTag).templates, arrival)
+                }
             notifier.post(
                 TravelChannel.NEARBY,
                 NotificationIds.NEARBY,
                 res.getString(R.string.nearby_notification_title),
-                res.getString(R.string.nearby_notification_body),
+                body,
                 NotificationLinks.NEARBY,
             )
             log.markPosted(clock.now())
             return Result.success()
         }
 
-        private suspend fun allowed(): Boolean {
+        private suspend fun allowed(userQuietHours: QuietHours?): Boolean {
             val s = settings.settings.first()
             val trips = listOfNotNull(currentPlan.draftRequest()) + plans.plans.first().mapNotNull { it.searchRequest }
             val onTrip = NearbyNotificationPolicy.isOnTrip(trips, clock.today())
@@ -154,6 +182,7 @@ class NearbySuggestionWorker
                 log.lastPostedAt(),
                 clock.now(),
                 clock.zone(),
+                userQuietHours,
             )
         }
     }
