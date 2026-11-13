@@ -8,6 +8,8 @@ import io.github.rupakc.travelplanner.core.model.social.Idea
 import io.github.rupakc.travelplanner.core.model.social.IdeaAuthor
 import io.github.rupakc.travelplanner.core.model.social.IdeaPage
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
+import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
+import io.github.rupakc.travelplanner.core.testing.fake.FakeJourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSocialRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import kotlin.time.Duration.Companion.seconds
@@ -35,9 +37,23 @@ class FeedViewModelTest {
             likes = 1,
         )
 
-    private fun vm() = FeedViewModel(social, telemetry, changes)
+    private val flags = FakeJourneyFlagsRepository(JourneyFlags(social = true))
+
+    private fun vm() = FeedViewModel(social, telemetry, changes, flags)
 
     private fun events(name: String) = telemetry.events.filter { it.first == name }.map { it.second }
+
+    @Test
+    fun `with social off nothing is requested or counted`() {
+        flags.flags = JourneyFlags(social = false)
+        val v = vm()
+        v.onEvent(FeedEvent.Refresh)
+        v.onEvent(FeedEvent.SelectScope(FeedScope.NEW))
+        assertTrue(social.calls.none { it.startsWith("feed") })
+        assertTrue(events("social_feed_view").isEmpty())
+        assertTrue(v.state.value.current.ideas.isEmpty())
+        assertEquals(false, v.state.value.current.loading)
+    }
 
     @Test
     fun `for you loads first and is counted with its scope`() {
