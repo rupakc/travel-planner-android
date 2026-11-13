@@ -219,4 +219,22 @@ class QuizViewModelTest {
             assertEquals(0, play.calls.count { it.startsWith("answer") })
             assertEquals(QuizPhase.Running, vm.state.value.phase)
         }
+
+    @Test(timeout = 10_000)
+    fun `a head-to-head session is fetched by id, never created again`() =
+        runTest(timeout = kotlin.time.Duration.parse("10s")) {
+            play.sessionResult = AppResult.Success(session.copy(sessionId = "h1", mode = "h2h", pack = "capitals"))
+            val vm = QuizViewModel(SavedStateHandle(mapOf("mode" to "h2h", "sessionId" to "h1")), play, telemetry, events)
+            assertEquals(QuizPhase.Running, vm.state.value.phase)
+            assertEquals(listOf("quiz(h1)"), play.calls)
+            assertEquals(mapOf("mode" to "h2h", "pack" to "capitals"), telemetry.events.single().second)
+        }
+
+    @Test(timeout = 10_000)
+    fun `a head-to-head quiz without a session id is an error`() =
+        runTest(timeout = kotlin.time.Duration.parse("10s")) {
+            val vm = QuizViewModel(SavedStateHandle(mapOf("mode" to "h2h")), play, telemetry, events)
+            assertEquals(QuizPhase.Error(null), vm.state.value.phase)
+            assertTrue(play.calls.isEmpty())
+        }
 }

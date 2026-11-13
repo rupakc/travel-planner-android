@@ -81,6 +81,9 @@ object NotificationLinks {
     /** The trip's Today tab (`travelplanner://trip/{id}?tab=today`). */
     fun tripToday(planId: Long): String = "${DeepLinks.SCHEME}://trip/$planId?tab=today"
 
+    /** A head-to-head match (`travelplanner://play/h2h/{id}`); [matchId] is allow-listed by `parseH2hPath`. */
+    fun h2h(matchId: String): String = "${DeepLinks.SCHEME}://play/h2h/$matchId"
+
     /** The notification list. */
     val INBOX: String = "${DeepLinks.SCHEME}://notifications"
 
@@ -100,8 +103,9 @@ object NotificationLinks {
 
                 NotificationTarget.Feed -> FEED
 
-                // The match screens land with T5.5; until then the list is the safe destination (no dead end).
-                is NotificationTarget.H2h, NotificationTarget.Inbox -> INBOX
+                is NotificationTarget.H2h -> h2h(target.matchId)
+
+                NotificationTarget.Inbox -> INBOX
             }
         if (category == null) return base
         return base + (if ('?' in base) "&" else "?") + "$OPEN_CATEGORY_PARAM=${category.wire}"

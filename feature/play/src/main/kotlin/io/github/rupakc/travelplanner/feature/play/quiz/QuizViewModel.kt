@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * One quiz session (daily, pack or the weekly challenge; head-to-head sessions are T5.5's [startSession] extension point).
+ * One quiz session (daily, pack or the weekly challenge; head-to-head sessions come by `sessionId`).
  * Answers are sent at once and judged and timed by the server (R12): this class shows the server's `correct`, `correct_choice` and
  * `points` and never computes a score. A started session is resumed by the server (`resumed`, `answers`).
  * Route args (`mode`, optional `pack`) come from the navigation [SavedStateHandle].
@@ -43,6 +43,7 @@ class QuizViewModel
     ) : ViewModel() {
         private val mode = QuizMode.from(handle.get<String>(ARG_MODE))
         private val pack = QuizPack.from(handle.get<String>(ARG_PACK))
+        private val sessionArg: String? = handle.get<String>(ARG_SESSION)
 
         private val mutable = MutableStateFlow(QuizUiState())
         val state: StateFlow<QuizUiState> = mutable.asStateFlow()
@@ -74,14 +75,22 @@ class QuizViewModel
             }
         }
 
-        /** The one place a session is obtained: T5.5 adds the h2h create/accept sources here. */
-        private suspend fun startSession(): AppResult<QuizSession> = play.startQuiz(mode, pack)
+        /**
+         * The one place a session is obtained. A head-to-head session was already created or accepted by its own screen, so it is
+         * only fetched (and resumed) by id; retrying never creates a second match.
+         */
+        private suspend fun startSession(): AppResult<QuizSession> =
+            if (mode == QuizMode.H2H) {
+                sessionArg?.let { play.quiz(it) } ?: AppResult.Failure(AppError.Unknown(null))
+            } else {
+                play.startQuiz(mode, pack)
+            }
 
         private fun begin(session: QuizSession) {
             sessionId = session.sessionId
             telemetry.emit(
                 TelemetryEvents.PLAY_QUIZ_START,
-                mapOf("mode" to (session.quizMode.wire ?: mode.wire ?: "daily"), "pack" to (pack?.wire ?: "none")),
+                mapOf("mode" to (session.quizMode.wire ?: mode.wire ?: "daily"), "pack" to (QuizPack.from(session.pack)?.wire ?: pack?.wire ?: "none")),
             )
             val summary = session.summary
             if (session.done && summary != null) {
@@ -193,6 +202,7 @@ class QuizViewModel
         companion object {
             const val ARG_MODE = "mode"
             const val ARG_PACK = "pack"
+            const val ARG_SESSION = "sessionId"
             private const val TICK_MS = 1_000L
             private const val MS_PER_S = 1_000
         }

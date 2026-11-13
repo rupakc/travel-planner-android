@@ -74,7 +74,10 @@ class PlayHubViewModel
                                     openH2h = s.openH2h ?: 0,
                                     history = history,
                                 )
-                            if (firstView) telemetry.emit(TelemetryEvents.PLAY_STATE_VIEW, emptyMap())
+                            if (firstView) {
+                                telemetry.emit(TelemetryEvents.PLAY_STATE_VIEW, emptyMap())
+                                if (s.challenge != null) telemetry.emit(TelemetryEvents.PLAY_CHALLENGE_VIEW, emptyMap())
+                            }
                         }
                     }
                 }

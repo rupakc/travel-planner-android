@@ -131,6 +131,9 @@ object DeepLinks {
 
     /** The ideas feed (`travelplanner://feed`); built by social notifications. */
     const val FEED_PATTERN = "$SCHEME://feed"
+
+    /** A head-to-head match (`travelplanner://play/h2h/{matchId}`); built by quiz notifications. */
+    const val H2H_PATTERN = "$SCHEME://play/h2h/{matchId}"
 }
 
 // --- Phase 1: accounts ----------------------------------------------------

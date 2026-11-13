@@ -50,6 +50,7 @@ class PlayHubViewModelTest {
             vm.onEvent(PlayHubEvent.Resumed)
             vm.onEvent(PlayHubEvent.Resumed)
             assertEquals(1, telemetry.events.count { it.first == "play_state_view" })
+            assertEquals(1, telemetry.events.count { it.first == "play_challenge_view" })
             assertEquals(2, play.calls.count { it == "state" })
         }
 
