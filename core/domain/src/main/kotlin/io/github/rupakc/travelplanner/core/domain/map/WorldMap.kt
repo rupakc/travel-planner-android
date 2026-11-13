@@ -30,8 +30,24 @@ class MapRing(val xy: FloatArray) {
 
 /** The bundled world map: ISO 3166-1 alpha-2 code to outline rings. */
 class WorldMapData(val countries: Map<String, List<MapRing>>) {
-    /** The ISO2 code of the country under the map-unit point, or null over sea. */
-    fun hit(x: Float, y: Float): String? = countries.entries.firstOrNull { (_, rings) -> rings.any { it.contains(x, y) } }?.key
+    /**
+     * Draw order: larger bounding boxes first, so an enclave (Lesotho inside South Africa) is painted over its host and
+     * stays visible. Ties keep the code order.
+     */
+    val drawOrder: List<String> =
+        countries.keys.sortedWith(
+            compareByDescending<String> { code ->
+                val rings = countries.getValue(code)
+                if (rings.isEmpty()) {
+                    0f
+                } else {
+                    (rings.maxOf { it.maxX } - rings.minOf { it.minX }) * (rings.maxOf { it.maxY } - rings.minOf { it.minY })
+                }
+            }.thenBy { it },
+        )
+
+    /** The ISO2 code of the country under the map-unit point (the topmost drawn one), or null over sea. */
+    fun hit(x: Float, y: Float): String? = drawOrder.asReversed().firstOrNull { code -> countries.getValue(code).any { it.contains(x, y) } }
 
     companion object {
         const val WIDTH = 360f

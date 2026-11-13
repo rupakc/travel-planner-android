@@ -8,7 +8,7 @@
     <string name="settings_notifsrv_morning_brief">सुबह की झलक</string>
     <string name="settings_notifsrv_morning_brief_hint">यात्रा के दौरान आपके दिन की योजना।</string>
     <string name="settings_notifsrv_weather">मौसम</string>
-    <string name="settings_notifsrv_weather_hint">आपकी यात्रा के लिए मौसम की जानकारी।</string>
+    <string name="settings_notifsrv_weather_hint">आपकी यात्रा के लिए मौसम की जानकारी। मौसम डेटा Open-Meteo.com से.</string>
     <string name="settings_notifsrv_nearby">आपके आस-पास</string>
     <string name="settings_notifsrv_nearby_hint">जब आप किसी दिलचस्प जगह के पास हों तो इस डिवाइस पर सुझाव।</string>
     <string name="settings_notifsrv_limits_heading">शांत घंटे और सीमाएँ</string>

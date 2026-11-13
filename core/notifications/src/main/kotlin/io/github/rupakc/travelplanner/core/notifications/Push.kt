@@ -17,6 +17,7 @@ import dagger.multibindings.IntoSet
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppLogger
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.common.SystemAppClock
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.DevicesRepository
@@ -87,6 +88,8 @@ class FirebasePushTokenSource
 @InstallIn(SingletonComponent::class)
 abstract class PushModule {
     @Binds abstract fun pushTokenSource(impl: FirebasePushTokenSource): PushTokenSource
+
+    @Binds abstract fun recentPushKeys(impl: SharedPrefsRecentPushKeys): RecentPushKeys
 
     @Binds abstract fun registrationLog(impl: SharedPrefsPushRegistrationLog): PushRegistrationLog
 
@@ -233,12 +236,14 @@ class PushAlertHandler
         private val notifications: NotificationsRepository,
         private val settings: SettingsRepository,
         private val notifier: Notifier,
+        private val recent: RecentPushKeys = RecentPushKeys.InMemory(),
+        private val clock: AppClock = SystemAppClock(),
     ) {
         suspend fun handle(data: Map<String, String>): Boolean {
             val id = data[PushDataKeys.NOTIFICATION_ID]?.toLongOrNull() ?: return false
             notifications.markSeen(listOf(id))
             // Signed out (e.g. an unregister that never reached the server): never show a user's alerts (API review I1).
-            if (auth.session.first() == null) return false
+            if (auth.session.first() == null || isResend(data)) return false
             val category = notificationCategory(data[PushDataKeys.CATEGORY], data[PushDataKeys.KIND])
             if (!localSwitchAllows(category, settings.settings.first())) return false
             val title = data[KEY_TITLE].orEmpty()
@@ -255,6 +260,10 @@ class PushAlertHandler
             return true
         }
 
+        /** The server's outbox may resend after a lost ack: one notification per dedupe_key (24 h, last 100 keys). */
+        private fun isResend(data: Map<String, String>): Boolean =
+            data[KEY_DEDUPE]?.takeIf { it.isNotBlank() }?.let { !recent.firstSeen(it, clock.now().toEpochMilli()) } ?: false
+
         /** The on-device switches that mirror the server categories: price drops, and trip reminders with the morning brief. */
         private fun localSwitchAllows(category: NotificationCategory?, s: io.github.rupakc.travelplanner.core.model.settings.AppSettings): Boolean =
             when (category) {
@@ -266,6 +275,60 @@ class PushAlertHandler
         companion object {
             const val KEY_TITLE = "title"
             const val KEY_BODY = "body"
+            const val KEY_DEDUPE = "dedupe_key"
+        }
+    }
+
+private const val RECENT_MAX = 100
+private val RECENT_TTL_MILLIS: Long = Duration.ofHours(24).toMillis()
+
+/** Remembers the last push `dedupe_key`s so a resent push shows once. */
+interface RecentPushKeys {
+    /** True the first time [key] is seen inside the window (and records it); false for a repeat. */
+    fun firstSeen(key: String, nowMillis: Long): Boolean
+
+    class InMemory : RecentPushKeys {
+        private val seen = RecentKeyWindow()
+
+        @Synchronized
+        override fun firstSeen(key: String, nowMillis: Long) = seen.firstSeen(key, nowMillis)
+    }
+}
+
+/** Insertion-ordered key to time map: entries older than [ttlMillis] or beyond the newest [max] are dropped. */
+class RecentKeyWindow(private val max: Int = RECENT_MAX, private val ttlMillis: Long = RECENT_TTL_MILLIS) {
+    private val keys = LinkedHashMap<String, Long>()
+
+    constructor(max: Int, ttlMillis: Long, initial: Map<String, Long>) : this(max, ttlMillis) {
+        keys.putAll(initial)
+    }
+
+    fun firstSeen(key: String, nowMillis: Long): Boolean {
+        keys.entries.removeAll { nowMillis - it.value >= ttlMillis }
+        if (key in keys) return false
+        keys[key] = nowMillis
+        while (keys.size > max) keys.remove(keys.keys.first())
+        return true
+    }
+
+    fun snapshot(): Map<String, Long> = keys.toMap()
+}
+
+/** [RecentPushKeys] persisted in app-private prefs (the FCM service may run in a fresh process). */
+@Singleton
+class SharedPrefsRecentPushKeys
+    @Inject
+    constructor(
+        @param:ApplicationContext private val context: Context,
+    ) : RecentPushKeys {
+        private val prefs by lazy { context.getSharedPreferences("push_recent_keys", Context.MODE_PRIVATE) }
+
+        @Synchronized
+        override fun firstSeen(key: String, nowMillis: Long): Boolean {
+            val window = RecentKeyWindow(RECENT_MAX, RECENT_TTL_MILLIS, prefs.all.mapNotNull { (k, v) -> (v as? Long)?.let { k to it } }.toMap())
+            val first = window.firstSeen(key, nowMillis)
+            if (first) prefs.edit().clear().apply { window.snapshot().forEach { (k, v) -> putLong(k, v) } }.apply()
+            return first
         }
     }
 
