@@ -9,6 +9,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.AppearanceRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChangePasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ChatRoute
 import io.github.rupakc.travelplanner.core.model.navigation.CheckEmailRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ConnectionsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ExpensesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.FeaturesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ForgotPasswordRoute
@@ -17,6 +18,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
 import io.github.rupakc.travelplanner.core.model.navigation.JournalRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MyPlanRoute
+import io.github.rupakc.travelplanner.core.model.navigation.MyProfileRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MySharesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NearbyRoute
 import io.github.rupakc.travelplanner.core.model.navigation.NotificationSettingsRoute
@@ -28,6 +30,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.PlanDetailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlansRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlayRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PreferencesRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ProfileRoute
 import io.github.rupakc.travelplanner.core.model.navigation.RecapRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResetPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
@@ -97,6 +100,9 @@ object TelemetryRoutes {
             SessionsRoute::class to "/account/sessions",
             PlayRoute::class to "/play",
             SocialRoute::class to "/feed",
+            MyProfileRoute::class to "/you/profile",
+            ProfileRoute::class to "/u/:handle",
+            ConnectionsRoute::class to "/you/connections",
             TripsRoute::class to "/trips",
             TripRoute::class to "/trips/:id",
             TodayRoute::class to "/trips/:id/:tab",

@@ -155,6 +155,15 @@ object DeepLinks {
 /** Social entry (profile, follows, ideas feed; `feature:social`). Reached only when `features.social >= 1`. */
 @Serializable data object SocialRoute : AppRoute
 
+/** The caller's own social profile: create or edit it, and reach follow requests, followers, following and blocks. */
+@Serializable data object MyProfileRoute : AppRoute
+
+/** A public profile by [handle] (follow, block, report). */
+@Serializable data class ProfileRoute(val handle: String) : AppRoute
+
+/** Follow requests, followers, following and blocked users; [tab] is `requests`, `followers`, `following` or `blocked`. */
+@Serializable data class ConnectionsRoute(val tab: String = "requests") : AppRoute
+
 // --- Phase 2: journey -------------------------------------------------------
 @Serializable data object TripsRoute : AppRoute
 

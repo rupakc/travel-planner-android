@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AssistChip
@@ -38,6 +39,7 @@ fun YouScreen(
     modifier: Modifier = Modifier,
     onOpenShares: (() -> Unit)? = null,
     onOpenShareLink: () -> Unit = {},
+    onOpenProfile: (() -> Unit)? = null,
 ) {
     Column(modifier.fillMaxWidth()) {
         YouRow(Icons.Filled.AccountCircle, R.string.you_account, onOpenAccount)
@@ -47,6 +49,11 @@ fun YouScreen(
         // Share links 2.0 (`features.sharing`): without the flag there is nothing to manage.
         if (onOpenShares != null) {
             YouRow(Icons.Filled.Share, R.string.you_my_shares, onOpenShares)
+            HorizontalDivider()
+        }
+        // Social profile (`features.social`): without the flag there is no profile to manage.
+        if (onOpenProfile != null) {
+            YouRow(Icons.Filled.Person, R.string.you_profile, onOpenProfile)
             HorizontalDivider()
         }
         YouRow(Icons.Filled.Settings, R.string.nav_settings, onOpenSettings)
