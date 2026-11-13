@@ -152,6 +152,8 @@ class NotificationsViewModel
         /** A social row that names a profile (`/u/{handle}`). */
         val openProfile: Flow<String> = profileOpens.receiveAsFlow()
 
+        private val playOpens = Channel<Unit>(Channel.BUFFERED)
+        val openPlay: Flow<Unit> = playOpens.receiveAsFlow()
         private val h2hOpens = Channel<String>(Channel.BUFFERED)
 
         /** A head-to-head match to open (an invite or result row). */
@@ -233,6 +235,8 @@ class NotificationsViewModel
 
                     is NotificationTarget.H2h -> h2hOpens.send(target.matchId)
 
+                    NotificationTarget.Play -> playOpens.send(Unit)
+
                     NotificationTarget.Inbox -> Unit
                 }
             }
@@ -262,6 +266,7 @@ fun NotificationsInboxRoute(
     onOpenTrip: (Long) -> Unit = {},
     onOpenFeed: () -> Unit = {},
     onOpenH2h: (String) -> Unit = {},
+    onOpenPlay: () -> Unit = {},
     onOpenIdea: (Long) -> Unit = {},
     onOpenProfile: (String) -> Unit = {},
     viewModel: NotificationsViewModel = hiltViewModel(),
@@ -271,6 +276,7 @@ fun NotificationsInboxRoute(
     LaunchedEffect(viewModel) { viewModel.openTrip.collect(onOpenTrip) }
     LaunchedEffect(viewModel) { viewModel.openFeed.collect { onOpenFeed() } }
     LaunchedEffect(viewModel) { viewModel.openH2h.collect(onOpenH2h) }
+    LaunchedEffect(viewModel) { viewModel.openPlay.collect { onOpenPlay() } }
     LaunchedEffect(viewModel) { viewModel.openIdea.collect(onOpenIdea) }
     LaunchedEffect(viewModel) { viewModel.openProfile.collect(onOpenProfile) }
     NotificationsScreen(state, viewModel::onEvent, onBack)

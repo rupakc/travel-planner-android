@@ -103,6 +103,7 @@ object NotificationLinks {
                 is NotificationTarget.Idea -> "${DeepLinks.SCHEME}://idea/${target.ideaId}"
                 is NotificationTarget.Profile -> "${DeepLinks.SCHEME}://u/${target.handle}"
                 is NotificationTarget.H2h -> h2h(target.matchId)
+                NotificationTarget.Play -> DeepLinks.PLAY_PATTERN
                 NotificationTarget.Inbox -> INBOX
             }
         if (category == null) return base

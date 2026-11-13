@@ -49,7 +49,7 @@ fun NavGraphBuilder.playGraph(
     quizEnabled: Boolean = false,
     onOpenProfile: (() -> Unit)? = null,
 ) {
-    composable<PlayRoute> {
+    composable<PlayRoute>(deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.PLAY_PATTERN })) {
         PlayScreenRoute(
             onHidden = onHidden,
             quizEnabled = quizEnabled && navController != null,

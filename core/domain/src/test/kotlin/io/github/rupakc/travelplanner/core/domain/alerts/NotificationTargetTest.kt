@@ -77,6 +77,13 @@ class NotificationTargetTest {
         assertEquals(NotificationTarget.H2h("m1"), resolveNotificationTarget("quiz_h2h_result", "/play/h2h/m1", null, null, null, "quiz"))
         assertEquals(NotificationTarget.Inbox, resolveNotificationTarget("quiz_h2h_result", null, null, null, null))
         assertEquals(NotificationTarget.Inbox, resolveNotificationTarget("quiz_h2h_invite", "https://evil.test/x", null, null, null))
+        assertEquals(NotificationTarget.Play, resolveNotificationTarget("quiz_daily", "/play", null, null, null, "quiz"))
+        assertEquals(NotificationTarget.Play, resolveNotificationTarget("quiz_daily", null, null, null, null))
+        for (kind in listOf("social_idea_liked", "social_idea_comment")) {
+            assertEquals(NotificationTarget.Feed, resolveNotificationTarget(kind, "/feed", null, null, null, "social"))
+            assertEquals(NotificationTarget.Idea(9), resolveNotificationTarget(kind, "/feed/9", null, null, null, "social"))
+            assertEquals(NotificationTarget.Feed, resolveNotificationTarget(kind, null, null, null, null))
+        }
     }
 
     @Test

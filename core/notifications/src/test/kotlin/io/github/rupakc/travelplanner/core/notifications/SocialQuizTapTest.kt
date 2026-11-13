@@ -17,6 +17,9 @@ class SocialQuizTapTest {
             "social_new_follower" to "/u/ada",
             "quiz_h2h_invite" to "/play/h2h/m1",
             "quiz_h2h_result" to "/play/h2h/m2",
+            "social_idea_liked" to "/feed",
+            "social_idea_comment" to "/feed",
+            "quiz_daily" to "/play",
         )
 
     @Test
@@ -41,11 +44,26 @@ class SocialQuizTapTest {
         assertEquals("travelplanner://u/ada", link("social_new_follower"))
         assertEquals("travelplanner://play/h2h/m1", link("quiz_h2h_invite"))
         assertEquals("travelplanner://play/h2h/m2", link("quiz_h2h_result"))
+        assertEquals("travelplanner://feed", link("social_idea_liked"))
+        assertEquals("travelplanner://feed", link("social_idea_comment"))
+        assertEquals("travelplanner://play", link("quiz_daily"))
+    }
+
+    @Test
+    fun `the Play target is the plain play deep link and carries the tap category`() {
+        assertEquals("travelplanner://play", io.github.rupakc.travelplanner.core.model.navigation.DeepLinks.PLAY_PATTERN)
+        assertEquals("travelplanner://play", NotificationLinks.of(NotificationTarget.Play))
+        assertEquals(
+            "travelplanner://play?notif_cat=quiz",
+            NotificationLinks.of(NotificationTarget.Play, io.github.rupakc.travelplanner.core.model.notifications.NotificationCategory.QUIZ),
+        )
+        assertEquals("travelplanner://idea/9", NotificationLinks.of(resolveNotificationTarget("social_idea_saved", "/feed/9", null, null, null)))
     }
 
     @Test
     fun `a kind with a bad or missing link still opens the list`() {
         assertEquals(NotificationTarget.Inbox, resolveNotificationTarget("quiz_h2h_invite", null, null, null, null))
+        assertEquals(NotificationTarget.Inbox, resolveNotificationTarget("quiz_h2h_result", null, null, null, null))
         assertEquals(NotificationTarget.Feed, resolveNotificationTarget("social_new_follower", null, null, null, null))
     }
 }
