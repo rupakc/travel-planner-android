@@ -235,7 +235,7 @@ private fun Header(trip: Trip, busy: Boolean, onEvent: (TripEvent) -> Unit) {
         if (dates == null) {
             TpButton(stringResource(R.string.trip_add_dates), { onEvent(TripEvent.OpenDates) }, variant = TpButtonVariant.Text, tid = "trip.add_dates")
         } else {
-            Text(dates, style = TravelTheme.typography.bodyMedium)
+            Text(dates, style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onBackground)
         }
         timeLine(trip)?.let { Text(it, style = TravelTheme.typography.titleSmall, color = TravelTheme.colors.primary) }
     }
@@ -314,7 +314,11 @@ private fun Overview(state: TripUiState, trip: Trip, onEvent: (TripEvent) -> Uni
         verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
     ) {
         val where = trip.destinations.ifEmpty { listOfNotNull(trip.destination) }.joinToString(" · ")
-        if (where.isNotBlank()) item(key = "where", contentType = "where") { Text(where, style = TravelTheme.typography.titleMedium) }
+        if (where.isNotBlank()) {
+            item(key = "where", contentType = "where") {
+                Text(where, style = TravelTheme.typography.titleMedium, color = TravelTheme.colors.onBackground)
+            }
+        }
         if (trip.prep.total > 0 && trip.phase != Phase.DREAMING) {
             item(key = "prep", contentType = "prep") { PrepCard(trip, onClick = { onEvent(TripEvent.SelectTab(TripTab.Prep)) }) }
         }
