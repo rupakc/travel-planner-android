@@ -41,4 +41,8 @@
     </plurals>
     <string name="settings_notifsrv_alert_prefs">提醒设置</string>
     <string name="settings_notifsrv_alert_prefs_sub">降价提醒摘要、即时提醒和上限</string>
+    <string name="settings_notifsrv_social">社交</string>
+    <string name="settings_notifsrv_social_hint">点赞、评论和新关注者。</string>
+    <string name="settings_notifsrv_quiz">测验与挑战</string>
+    <string name="settings_notifsrv_quiz_hint">对战邀请和结果。</string>
 </resources>

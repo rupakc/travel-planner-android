@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.AccountRepository
 import io.github.rupakc.travelplanner.core.data.repository.JourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.data.repository.NotificationSettingsRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.notifications.NotificationSettingsRules
+import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
 import io.github.rupakc.travelplanner.core.model.alerts.QuietHours
 import io.github.rupakc.travelplanner.core.model.notifications.NotificationCategory
@@ -24,7 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** The categories the screen lists (`social` and `quiz` have no sender yet and are not shown, like the web). */
+/** The categories always listed; `social` and `quiz` are added when their feature is on ([ServerNotificationsUiState.categories]). */
 val ListedCategories: List<NotificationCategory> =
     listOf(
         NotificationCategory.PRICE_DROPS,
@@ -57,6 +59,8 @@ data class ServerNotificationsUiState(
     val local: AppSettings = AppSettings(),
     /** Alerts v2 exists on this backend, so the alert preferences screen can be linked. */
     val alertPrefsAvailable: Boolean = false,
+    /** The switches shown: [ListedCategories] plus `social` (`features.social`) and `quiz` (play on and the game visible). */
+    val categories: List<NotificationCategory> = ListedCategories,
 ) {
     /**
      * Whether [category] shows as on. The three categories that also gate an on-device notifier (trip, price, nearby)
@@ -64,7 +68,9 @@ data class ServerNotificationsUiState(
      */
     fun isOn(category: NotificationCategory): Boolean {
         val server = settings?.isEnabled(category) ?: return false
-        return server && (category.localSwitch()?.let { local.isOn(it) } ?: true)
+        // The morning brief rides the trip switch on the device (the push is dropped when it is off), so it shows off too.
+        val toggle = category.localSwitch() ?: NotificationToggle.TRIP.takeIf { category == NotificationCategory.MORNING_BRIEF }
+        return server && (toggle?.let { local.isOn(it) } ?: true)
     }
 
     /** Quiet hours as shown: the server value, else the default window, switched off. */
@@ -130,6 +136,7 @@ class ServerNotificationsViewModel
         private val flags: JourneyFlagsRepository,
         private val settingsRepository: SettingsRepository,
         private val telemetry: Telemetry,
+        private val account: AccountRepository,
     ) : ViewModel() {
         private val mutable = MutableStateFlow(ServerNotificationsUiState())
         val state: StateFlow<ServerNotificationsUiState> = mutable.asStateFlow()
@@ -170,12 +177,18 @@ class ServerNotificationsViewModel
             }
         }
 
+        private suspend fun categoriesFor(gates: JourneyFlags): List<NotificationCategory> {
+            val quiz = gates.play && gates.game && (account.settings() as? AppResult.Success)?.value?.hideGame != true
+            return ListedCategories +
+                listOfNotNull(NotificationCategory.SOCIAL.takeIf { gates.social }, NotificationCategory.QUIZ.takeIf { quiz })
+        }
+
         private fun load(silent: Boolean) {
             loadJob?.cancel()
             loadJob =
                 viewModelScope.launch {
                     val gates = flags.flags()
-                    mutable.update { it.copy(alertPrefsAvailable = gates.alerts.v2Available) }
+                    mutable.update { it.copy(alertPrefsAvailable = gates.alerts.v2Available, categories = categoriesFor(gates)) }
                     if (!gates.notifications.apiAvailable) {
                         mutable.update { it.copy(available = false, loading = false) }
                         return@launch

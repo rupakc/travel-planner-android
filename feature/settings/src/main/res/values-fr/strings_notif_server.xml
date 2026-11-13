@@ -45,4 +45,8 @@
     </plurals>
     <string name="settings_notifsrv_alert_prefs">Réglages des alertes</string>
     <string name="settings_notifsrv_alert_prefs_sub">Récap des alertes de prix, alertes instantanées et limites</string>
+    <string name="settings_notifsrv_social">Social</string>
+    <string name="settings_notifsrv_social_hint">J\'aime, commentaires et nouveaux abonnés.</string>
+    <string name="settings_notifsrv_quiz">Quiz et défis</string>
+    <string name="settings_notifsrv_quiz_hint">Invitations et résultats des duels.</string>
 </resources>

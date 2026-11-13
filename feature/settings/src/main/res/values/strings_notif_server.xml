@@ -43,4 +43,8 @@
     </plurals>
     <string name="settings_notifsrv_alert_prefs">Alert settings</string>
     <string name="settings_notifsrv_alert_prefs_sub">Price alert digest, instant alerts and limits</string>
+    <string name="settings_notifsrv_social">Social</string>
+    <string name="settings_notifsrv_social_hint">Likes, comments and new followers.</string>
+    <string name="settings_notifsrv_quiz">Quizzes and challenges</string>
+    <string name="settings_notifsrv_quiz_hint">Head-to-head invites and results.</string>
 </resources>
