@@ -79,7 +79,6 @@ object TelemetryEvents {
     const val NOTIF_QUIET_HOURS_CHANGE = "notif_quiet_hours_change"
     const val NOTIF_CAP_CHANGE = "notif_cap_change"
     const val NOTIF_OPEN = "notif_open"
-    const val ALERT_SAVINGS_SHARE = "alert_savings_share"
     const val SHARE_OPEN = "share_open"
     const val SHARE_CREATE = "share_create"
     const val SHARE_ACTION = "share_action"
@@ -165,8 +164,7 @@ object TelemetryEnums {
     val PLACE_ACTION = setOf("visited", "unvisited", "rate", "unrate")
     val PLACE_KIND = setOf("activity", "place", "food", "hotel", "event", "tour", "nearby", "other")
     val RECAP_ACTION = setOf("view", "complete", "share", "where_next")
-    val ALERT_SAVINGS_SHARE_TARGET = setOf("native", "download", "copy")
-    val SHARE_KIND = setOf("plan", "recap", "savings")
+    val SHARE_KIND = setOf("plan", "recap", "savings", "quiz", "status")
     val SHARE_DATES = setOf("hidden", "month", "exact")
     val SHARE_TARGET = setOf("native", "copy", "download", "x", "facebook", "whatsapp", "linkedin")
     val COMPLETENESS_SURFACE = setOf("drawer", "trip")
