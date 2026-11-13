@@ -128,6 +128,9 @@ object DeepLinks {
     /** A trip, optionally on a tab (`travelplanner://trip/12?tab=today`); built by notifications. */
     const val TRIP_PATTERN = "$SCHEME://trip/{tripId}?tab={tab}"
     const val NOTIFICATIONS_PATTERN = "$SCHEME://notifications"
+
+    /** The ideas feed (`travelplanner://feed`); built by social notifications. */
+    const val FEED_PATTERN = "$SCHEME://feed"
 }
 
 // --- Phase 1: accounts ----------------------------------------------------
@@ -154,6 +157,12 @@ object DeepLinks {
 
 /** Social entry (profile, follows, ideas feed; `feature:social`). Reached only when `features.social >= 1`. */
 @Serializable data object SocialRoute : AppRoute
+
+/** One idea of the feed with its comments (`feature:social`). */
+@Serializable data class IdeaRoute(val ideaId: Long) : AppRoute
+
+/** Publish (or update) an idea from the caller's plan; [kind] is `plan` or `recap` (`feature:social`, opened through `LocalIdeaLauncher`). */
+@Serializable data class PublishIdeaRoute(val planId: Long, val kind: String = "plan") : AppRoute
 
 /** The caller's own social profile: create or edit it, and reach follow requests, followers, following and blocks. */
 @Serializable data object MyProfileRoute : AppRoute
