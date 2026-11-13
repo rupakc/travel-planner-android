@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="share_entry_button">लिंक शेयर करें</string>
+    <string name="share_entry_score">मेरा स्कोर साझा करें</string>
+    <string name="share_entry_status">स्थिति साझा करें</string>
 </resources>

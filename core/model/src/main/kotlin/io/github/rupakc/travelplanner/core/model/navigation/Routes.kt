@@ -100,10 +100,11 @@ sealed interface AppRoute
 @Serializable data class ShareRoute(val token: String) : AppRoute
 
 /**
- * The share dialog (Share links 2.0): [kind] is a `ShareKind.wire` (`plan`, `recap`, `savings`), [planId] the plan or trip's
- * plan (null for savings). Features open it through `LocalShareLauncher`; only `feature:share` implements it.
+ * The share dialog (Share links 2.0): [kind] is a `ShareKind.wire` (`plan`, `recap`, `savings`, `quiz`, `status`),
+ * [planId] the plan or trip's plan (null for savings and quiz), [sessionId] the finished quiz session (`quiz` only).
+ * Features open it through `LocalShareLauncher`; only `feature:share` implements it.
  */
-@Serializable data class ShareCreateRoute(val kind: String, val planId: Long? = null) : AppRoute
+@Serializable data class ShareCreateRoute(val kind: String, val planId: Long? = null, val sessionId: String? = null) : AppRoute
 
 /** The caller's own share links (Share links 2.0 "My shares"): list, copy, share again, revoke. Reached from the You tab. */
 @Serializable data object MySharesRoute : AppRoute

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="share_entry_button">লিঙ্ক শেয়ার করুন</string>
+    <string name="share_entry_score">আমার স্কোর শেয়ার করুন</string>
+    <string name="share_entry_status">স্ট্যাটাস শেয়ার করুন</string>
 </resources>

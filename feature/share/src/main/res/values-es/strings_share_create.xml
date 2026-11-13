@@ -39,4 +39,8 @@
     <string name="share_create_card_unavailable">No se pudo cargar la tarjeta, así que solo se comparte el enlace.</string>
     <string name="share_create_link_pending">Las opciones cambiaron. Actualiza el enlace para compartirlo.</string>
     <string name="share_create_chooser">Compartir con</string>
+    <string name="share_create_title_quiz">Comparte tu puntuación</string>
+    <string name="share_create_title_status">Comparte el estado de tu viaje</string>
+    <string name="share_create_text_quiz">Mi puntuación en el quiz de Voyager</string>
+    <string name="share_create_text_status">Dónde estoy en mi viaje, con Voyager</string>
 </resources>

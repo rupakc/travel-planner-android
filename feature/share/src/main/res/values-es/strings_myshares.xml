@@ -22,4 +22,6 @@
     <string name="myshares_created">Creado el %1$s</string>
     <string name="myshares_offline">Sin conexión. Conéctate para cargar tus enlaces.</string>
     <string name="myshares_error_load">No se pudieron cargar tus enlaces.</string>
+    <string name="myshares_kind_quiz">Puntuación del quiz</string>
+    <string name="myshares_kind_status">Estado del viaje</string>
 </resources>

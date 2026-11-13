@@ -116,6 +116,7 @@ internal class ShareCreateViewModel
     ) : ViewModel() {
         private val kind = ShareKind.from(savedStateHandle.get<String>(KIND_ARG))
         private val planId: Long? = savedStateHandle.get<Long>(PLAN_ARG)
+        private val sessionId: String? = savedStateHandle.get<String>(SESSION_ARG)
         private val _state = MutableStateFlow(ShareCreateUiState(kind = kind))
         val state: StateFlow<ShareCreateUiState> = _state.asStateFlow()
         private val _effects = Channel<ShareCreateEffect>(Channel.BUFFERED)
@@ -159,7 +160,7 @@ internal class ShareCreateViewModel
             val updating = current.created != null
             _state.update { it.copy(working = true, message = null) }
             viewModelScope.launch {
-                when (val result = shares.create(kind, planId, current.options)) {
+                when (val result = shares.create(kind, planId, current.options, sessionId)) {
                     is AppResult.Success -> {
                         kindProp()?.let {
                             telemetry.emit(TelemetryEvents.SHARE_CREATE, mapOf("kind" to it, "dates" to current.options.dates))
@@ -236,6 +237,7 @@ internal class ShareCreateViewModel
             /** Type-safe navigation stores `ShareCreateRoute` fields under their property names. */
             const val KIND_ARG = "kind"
             const val PLAN_ARG = "planId"
+            const val SESSION_ARG = "sessionId"
             private const val TARGET_NATIVE = "native"
             private const val TARGET_COPY = "copy"
         }

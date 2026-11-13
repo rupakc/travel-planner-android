@@ -14,10 +14,10 @@ import java.io.File
 interface SharesRepository {
     /**
      * `POST /shares`, idempotent per (kind, plan): the same token comes back and its [options] are replaced. [planId] is
-     * required for `plan` and `recap`. The page language is the UI language. `404 plan_not_found|sharing_disabled`,
+     * required for `plan`, `recap` and `status`; [sessionId] for `quiz`. The page language is the UI language. `404 plan_not_found|sharing_disabled`,
      * `422 invalid_kind`, 429.
      */
-    suspend fun create(kind: ShareKind, planId: Long?, options: ShareOptions): AppResult<CreatedShare>
+    suspend fun create(kind: ShareKind, planId: Long?, options: ShareOptions, sessionId: String? = null): AppResult<CreatedShare>
 
     /** `GET /shares`: own shares newest first plus the legacy plan shares. */
     suspend fun list(): AppResult<SharesList>

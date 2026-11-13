@@ -29,13 +29,13 @@ class FakeSharesRepository : SharesRepository {
     var listResult: AppResult<SharesList> = AppResult.Success(SharesList())
     var revokeResult: AppResult<Unit> = AppResult.Success(Unit)
 
-    data class CreateCall(val kind: ShareKind, val planId: Long?, val options: ShareOptions)
+    data class CreateCall(val kind: ShareKind, val planId: Long?, val options: ShareOptions, val sessionId: String? = null)
 
     val createCalls = mutableListOf<CreateCall>()
     val revoked = mutableListOf<String>()
 
-    override suspend fun create(kind: ShareKind, planId: Long?, options: ShareOptions): AppResult<CreatedShare> =
-        createResult.also { createCalls += CreateCall(kind, planId, options) }
+    override suspend fun create(kind: ShareKind, planId: Long?, options: ShareOptions, sessionId: String?): AppResult<CreatedShare> =
+        createResult.also { createCalls += CreateCall(kind, planId, options, sessionId) }
 
     override suspend fun list(): AppResult<SharesList> = listResult
 

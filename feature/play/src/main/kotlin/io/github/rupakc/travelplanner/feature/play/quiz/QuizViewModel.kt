@@ -88,6 +88,7 @@ class QuizViewModel
 
         private fun begin(session: QuizSession) {
             sessionId = session.sessionId
+            mutable.update { it.copy(sessionId = session.sessionId) }
             telemetry.emit(
                 TelemetryEvents.PLAY_QUIZ_START,
                 mapOf("mode" to (session.quizMode.wire ?: mode.wire ?: "daily"), "pack" to (QuizPack.from(session.pack)?.wire ?: pack?.wire ?: "none")),

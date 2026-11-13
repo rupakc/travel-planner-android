@@ -39,4 +39,8 @@
     <string name="share_create_card_unavailable">কার্ড লোড করা যায়নি, তাই শুধু লিঙ্ক শেয়ার করা হচ্ছে।</string>
     <string name="share_create_link_pending">বিকল্প বদলেছে। শেয়ার করতে লিঙ্ক আপডেট করুন।</string>
     <string name="share_create_chooser">যার মাধ্যমে শেয়ার করবেন</string>
+    <string name="share_create_title_quiz">আপনার স্কোর শেয়ার করুন</string>
+    <string name="share_create_title_status">আপনার ভ্রমণের স্ট্যাটাস শেয়ার করুন</string>
+    <string name="share_create_text_quiz">Voyager-এ আমার কুইজ স্কোর</string>
+    <string name="share_create_text_status">Voyager-এ আমার ভ্রমণের অবস্থা</string>
 </resources>

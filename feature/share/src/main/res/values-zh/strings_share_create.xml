@@ -39,4 +39,8 @@
     <string name="share_create_card_unavailable">无法加载卡片，因此只分享链接。</string>
     <string name="share_create_link_pending">选项已更改。请先更新链接再分享。</string>
     <string name="share_create_chooser">分享方式</string>
+    <string name="share_create_title_quiz">分享你的得分</string>
+    <string name="share_create_title_status">分享你的旅行状态</string>
+    <string name="share_create_text_quiz">我在 Voyager 的测验得分</string>
+    <string name="share_create_text_status">我在 Voyager 上的旅行进度</string>
 </resources>

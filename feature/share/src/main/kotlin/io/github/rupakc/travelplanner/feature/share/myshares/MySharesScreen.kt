@@ -58,6 +58,8 @@ internal fun MySharesRouteScreen(onBack: () -> Unit, viewModel: MySharesViewMode
             ShareKind.PLAN.wire to stringResource(R.string.share_create_text_plan),
             ShareKind.RECAP.wire to stringResource(R.string.share_create_text_recap),
             ShareKind.SAVINGS.wire to stringResource(R.string.share_create_text_savings),
+            ShareKind.QUIZ.wire to stringResource(R.string.share_create_text_quiz),
+            ShareKind.STATUS.wire to stringResource(R.string.share_create_text_status),
         )
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -244,6 +246,8 @@ private fun kindLabel(kind: ShareKind): Int =
         ShareKind.PLAN -> R.string.myshares_kind_plan
         ShareKind.RECAP -> R.string.myshares_kind_recap
         ShareKind.SAVINGS -> R.string.myshares_kind_savings
+        ShareKind.QUIZ -> R.string.myshares_kind_quiz
+        ShareKind.STATUS -> R.string.myshares_kind_status
         ShareKind.UNKNOWN -> R.string.myshares_kind_other
     }
 

@@ -39,4 +39,8 @@
     <string name="share_create_card_unavailable">The card could not be loaded, so only the link is shared.</string>
     <string name="share_create_link_pending">Options changed. Update the link to share it.</string>
     <string name="share_create_chooser">Share via</string>
+    <string name="share_create_title_quiz">Share your score</string>
+    <string name="share_create_title_status">Share your trip status</string>
+    <string name="share_create_text_quiz">My quiz score on Voyager</string>
+    <string name="share_create_text_status">Where I am on my trip, with Voyager</string>
 </resources>

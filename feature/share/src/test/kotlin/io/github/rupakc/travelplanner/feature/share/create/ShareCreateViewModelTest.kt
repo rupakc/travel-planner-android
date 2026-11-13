@@ -29,18 +29,37 @@ class ShareCreateViewModelTest {
     private val cards = FakeShareCardStore()
     private val telemetry = FakeTelemetry()
 
-    private fun vm(kind: String = "plan", planId: Long? = 4) =
+    private fun vm(kind: String = "plan", planId: Long? = 4, sessionId: String? = null) =
         ShareCreateViewModel(
             SavedStateHandle(
                 buildMap {
                     put("kind", kind)
                     if (planId != null) put("planId", planId)
+                    if (sessionId != null) put("sessionId", sessionId)
                 },
             ),
             shares,
             cards,
             telemetry,
         )
+
+    @Test
+    fun `a quiz share sends its session and a status share its trip`() =
+        runTest(timeout = 30.seconds) {
+            val quiz = vm(kind = "quiz", planId = null, sessionId = "sess-1")
+            quiz.onEvent(ShareCreateEvent.Submit)
+            val status = vm(kind = "status", planId = 7)
+            status.onEvent(ShareCreateEvent.Submit)
+            assertEquals(
+                listOf(
+                    FakeSharesRepository.CreateCall(ShareKind.QUIZ, null, ShareOptions.PRIVATE, "sess-1"),
+                    FakeSharesRepository.CreateCall(ShareKind.STATUS, 7, ShareOptions.PRIVATE, null),
+                ),
+                shares.createCalls,
+            )
+            assertEquals(ShareKind.QUIZ, quiz.state.value.kind)
+            assertTrue(telemetry.events.contains("share_create" to mapOf<String, Any?>("kind" to "quiz", "dates" to "hidden")))
+        }
 
     @Test
     fun `opening reports the kind and starts private`() {
