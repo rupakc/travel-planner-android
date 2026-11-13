@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -28,6 +29,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
@@ -39,20 +41,56 @@ import io.github.rupakc.travelplanner.core.ui.game.badgeDescText
 import io.github.rupakc.travelplanner.core.ui.game.badgeNameText
 import io.github.rupakc.travelplanner.core.ui.game.levelNameText
 import io.github.rupakc.travelplanner.core.ui.game.ruleNameText
+import io.github.rupakc.travelplanner.feature.play.hub.PlayHubEvent
+import io.github.rupakc.travelplanner.feature.play.hub.PlayHubPhase
+import io.github.rupakc.travelplanner.feature.play.hub.PlayHubUiState
+import io.github.rupakc.travelplanner.feature.play.hub.PlayHubViewModel
+import io.github.rupakc.travelplanner.feature.play.hub.StartQuiz
+import io.github.rupakc.travelplanner.feature.play.hub.playHubItems
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 /** The Play tab. [onHidden] is called when the game is off (404 or `hide_game`) so the shell can leave the screen. */
 @Composable
-fun PlayRoute(onHidden: () -> Unit, viewModel: PlayViewModel = hiltViewModel()) {
+fun PlayRoute(
+    onHidden: () -> Unit,
+    quizEnabled: Boolean = false,
+    onStartQuiz: StartQuiz = { _, _ -> },
+    viewModel: PlayViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.phase) { if (state.phase == PlayPhase.Hidden) onHidden() }
-    PlayScreen(state = state, onEvent = viewModel::onEvent)
+    // The quiz hub exists only with `features.play`; without it nothing calls /play/* and the tab is the progress screen alone.
+    val hubModel = if (quizEnabled) hiltViewModel<PlayHubViewModel>() else null
+    val hub = hubModel?.state?.collectAsStateWithLifecycle()?.value
+    if (hubModel != null) {
+        LifecycleResumeEffect(hubModel) {
+            hubModel.onEvent(PlayHubEvent.Resumed)
+            onPauseOrDispose {}
+        }
+    }
+    LaunchedEffect(hub?.phase) { if (hub?.phase == PlayHubPhase.GameHidden) onHidden() }
+    PlayScreen(
+        state = state,
+        onEvent = viewModel::onEvent,
+        hub = hub,
+        onHubEvent = { hubModel?.onEvent(it) },
+        onStartQuiz = onStartQuiz,
+    )
 }
 
 /** Stateless Play screen. Nothing is drawn while the game is hidden. */
 @Composable
-fun PlayScreen(state: PlayUiState, onEvent: (PlayEvent) -> Unit, modifier: Modifier = Modifier) {
+fun PlayScreen(
+    state: PlayUiState,
+    onEvent: (PlayEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    hub: PlayHubUiState? = null,
+    onHubEvent: (PlayHubEvent) -> Unit = {},
+    onStartQuiz: StartQuiz = { _, _ -> },
+    /** Extension point for T5.5: head-to-head, boards and the challenge detail rows, drawn after the quiz hub. */
+    extraItems: LazyListScope.() -> Unit = {},
+) {
     Scaffold(modifier = modifier, topBar = { TpTopBar(title = stringResource(R.string.play_title)) }) { padding ->
         when (val phase = state.phase) {
             PlayPhase.Loading -> {
@@ -72,20 +110,31 @@ fun PlayScreen(state: PlayUiState, onEvent: (PlayEvent) -> Unit, modifier: Modif
             }
 
             PlayPhase.Loaded -> {
-                PlayContent(state, Modifier.padding(padding))
+                PlayContent(state, hub, onHubEvent, onStartQuiz, extraItems, Modifier.padding(padding))
             }
         }
     }
 }
 
 @Composable
-private fun PlayContent(state: PlayUiState, modifier: Modifier) {
+private fun PlayContent(
+    state: PlayUiState,
+    hub: PlayHubUiState?,
+    onHubEvent: (PlayHubEvent) -> Unit,
+    onStartQuiz: StartQuiz,
+    extraItems: LazyListScope.() -> Unit,
+    modifier: Modifier,
+) {
     val gap = TravelTheme.spacing.md
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(TravelTheme.spacing.gutter),
         verticalArrangement = Arrangement.spacedBy(gap),
     ) {
+        if (hub != null) {
+            playHubItems(hub, onHubEvent, onStartQuiz)
+            extraItems()
+        }
         item(key = "level", contentType = "level") { LevelCard(state) }
         if (state.streaks.isNotEmpty()) {
             item(key = "streaks-h", contentType = "heading") { Heading(stringResource(R.string.play_streaks)) }

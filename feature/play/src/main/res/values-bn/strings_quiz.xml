@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="play_daily_title">দৈনিক কুইজ</string>
+    <string name="play_daily_hint">পাঁচটি প্রশ্ন, আজ সবার জন্য একই। দিনে একবারই চেষ্টা।</string>
+    <string name="play_daily_start">আজকের কুইজ খেলুন</string>
+    <plurals name="play_daily_streak">
+        <item quantity="one">টানা %1$d দিন কুইজ</item>
+        <item quantity="other">টানা %1$d দিন কুইজ</item>
+    </plurals>
+    <plurals name="play_daily_done">
+        <item quantity="one">আজ শেষ: %1$d পয়েন্ট</item>
+        <item quantity="other">আজ শেষ: %1$d পয়েন্ট</item>
+    </plurals>
+    <string name="play_challenge_title">যাওয়ার আগে জানুন</string>
+    <string name="play_challenge_destination">%1$s সম্পর্কে পাঁচটি প্রশ্ন, আপনার পরের ভ্রমণ।</string>
+    <string name="play_challenge_featured">এই সপ্তাহের বিশেষ প্যাক: পাঁচটি প্রশ্ন।</string>
+    <string name="play_challenge_start">চ্যালেঞ্জ শুরু করুন</string>
+    <string name="play_challenge_done">এই সপ্তাহে শেষ। দারুণ!</string>
+    <string name="play_packs_title">অনুশীলন প্যাক</string>
+    <string name="play_pack_flags">পতাকা</string>
+    <string name="play_pack_capitals">রাজধানী</string>
+    <string name="play_pack_landmarks">ল্যান্ডমার্ক</string>
+    <string name="play_pack_cuisine">খাবার</string>
+    <string name="play_quiz_prompt_flag">এই পতাকা কোন দেশের?</string>
+    <string name="play_quiz_prompt_capital_of">%1$s-এর রাজধানী কোনটি?</string>
+    <string name="play_quiz_prompt_country_of_capital">%1$s কোন দেশের রাজধানী?</string>
+    <string name="play_quiz_prompt_landmark_country">%1$s কোন দেশে?</string>
+    <string name="play_quiz_prompt_dish_country">%1$s কোন দেশের খাবার?</string>
+    <string name="play_quiz_flag_alt">পতাকা</string>
+    <string name="play_quiz_progress">প্রশ্ন %1$d / %2$d</string>
+    <plurals name="play_quiz_timer">
+        <item quantity="one">%1$d সেকেন্ড বাকি</item>
+        <item quantity="other">%1$d সেকেন্ড বাকি</item>
+    </plurals>
+    <string name="play_quiz_correct">সঠিক উত্তর</string>
+    <string name="play_quiz_wrong">আপনার উত্তর, ভুল</string>
+    <plurals name="play_quiz_correct_points">
+        <item quantity="one">সঠিক! +%1$d পয়েন্ট</item>
+        <item quantity="other">সঠিক! +%1$d পয়েন্ট</item>
+    </plurals>
+    <string name="play_quiz_wrong_note">এবার নয়। সঠিক উত্তর চিহ্নিত আছে।</string>
+    <string name="play_quiz_next">পরের প্রশ্ন</string>
+    <string name="play_quiz_finish">ফলাফল দেখুন</string>
+    <string name="play_result_title">আপনার ফলাফল</string>
+    <string name="play_result_correct" tools:ignore="PluralsCandidate">%2$d-এর মধ্যে %1$d সঠিক</string>
+    <plurals name="play_result_xp">
+        <item quantity="one">+%1$d XP</item>
+        <item quantity="other">+%1$d XP</item>
+    </plurals>
+    <plurals name="play_result_streak">
+        <item quantity="one">টানা %1$d দিন</item>
+        <item quantity="other">টানা %1$d দিন</item>
+    </plurals>
+    <string name="play_result_back">Play-এ ফিরুন</string>
+    <string name="play_quiz_title">কুইজ</string>
+    <string name="play_quiz_prompt_generic">প্রশ্ন</string>
+    <string name="play_quiz_error">কুইজ লোড করা যায়নি। আপনার সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।</string>
+    <string name="play_quiz_already_done">আপনি এই কুইজটি ইতিমধ্যে খেলেছেন। পরেরটির জন্য পরে আবার আসুন।</string>
+    <string name="play_quiz_expired">এই কুইজ সেশনের মেয়াদ শেষ হয়েছে। খেলতে আবার শুরু করুন।</string>
+    <string name="play_quiz_start_again">আবার শুরু করুন</string>
+    <string name="play_quiz_answer_failed">আপনার উত্তর পাঠানো যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="play_quiz_resumed">যেখানে থেমেছিলেন সেখান থেকে চালু হচ্ছে।</string>
+    <string name="play_streak_freeze">স্ট্রিক ফ্রিজ পাওয়া যাচ্ছে</string>
+    <string name="play_hub_error">কুইজগুলো লোড করা যায়নি। আপনার সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।</string>
+    <string name="play_retry">আবার চেষ্টা করুন</string>
+    <string name="play_history_title">সাম্প্রতিক কুইজ</string>
+    <string name="play_history_empty">এখনও কোনো কুইজ খেলা হয়নি।</string>
+    <string name="play_history_correct">সঠিক: %1$d</string>
+    <string name="play_mode_daily">দৈনিক কুইজ</string>
+    <string name="play_mode_pack">অনুশীলন প্যাক</string>
+    <string name="play_mode_challenge">সাপ্তাহিক চ্যালেঞ্জ</string>
+    <string name="play_mode_h2h">মুখোমুখি</string>
+    <string name="play_daily_unavailable">আজকের কুইজ এখনই পাওয়া যাচ্ছে না।</string>
+    <plurals name="play_history_points">
+        <item quantity="one">%1$d পয়েন্ট</item>
+        <item quantity="other">%1$d পয়েন্ট</item>
+    </plurals>
+</resources>
