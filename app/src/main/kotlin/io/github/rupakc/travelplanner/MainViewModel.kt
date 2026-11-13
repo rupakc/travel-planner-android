@@ -170,9 +170,9 @@ class MainViewModel
             }
             // `hide_game` decides whether celebrations show: hidden until known, reset whenever the user changes.
             viewModelScope.launch {
-                combine(userKeys, flags) { key, f -> Triple(key, f?.game == true, f?.accounts == true) }
+                combine(userKeys, flags) { key, f -> Triple(key, f?.game == true, f?.accounts == true) to (f?.social == true) }
                     .distinctUntilChanged()
-                    .collectLatest { (key, game, accounts) -> applyGameVisibility(key, game, accounts) }
+                    .collectLatest { (a, social) -> applyGameVisibility(a.first, a.second, a.third, social) }
             }
             // The server says offline packs are off: drop the packs and queued snapshot uploads (not expenses or journal).
             viewModelScope.launch {
@@ -182,12 +182,19 @@ class MainViewModel
             }
         }
 
-        private suspend fun applyGameVisibility(key: String?, game: Boolean, accounts: Boolean) {
+        private suspend fun applyGameVisibility(key: String?, game: Boolean, accounts: Boolean, social: Boolean) {
             gameEvents.setVisible(false)
             gameEvents.setCommunityHidden(false)
-            if (key == null || !game) return
-            // Without accounts there is no `hide_game` setting to read; with them, settings() updates the visibility.
-            if (accounts) accountRepository.settings() else gameEvents.setVisible(true)
+            if (key == null) return
+            // Without accounts there is no `hide_game` / `hide_community` setting to read. With them, settings() applies both
+            // (independent of the game flag: social can be on while the game is off); the game stays hidden when it is off.
+            if (accounts && (game || social)) {
+                accountRepository.settings()
+                if (!game) gameEvents.setVisible(false)
+                if (!social) gameEvents.setCommunityHidden(false)
+            } else if (game && !accounts) {
+                gameEvents.setVisible(true)
+            }
         }
 
         /** `GET /api/config`; null when it could not be read (offline, older backend without it keeps every flag off). */

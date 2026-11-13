@@ -16,18 +16,25 @@ import io.github.rupakc.travelplanner.feature.social.profile.PublicProfileRoute 
  * Profile destinations: the caller's own profile (create / edit), a public profile by handle and the connections lists.
  * Screens leave through [onNavigate] (a route from `core:model`) and [onBack]. Reached only when `features.social >= 1`.
  */
-fun NavGraphBuilder.socialProfileGraph(onBack: () -> Unit, onNavigate: (AppRoute) -> Unit) {
+fun NavGraphBuilder.socialProfileGraph(
+    onBack: () -> Unit,
+    onNavigate: (AppRoute) -> Unit,
+    enabled: Boolean = true,
+    onBlocked: () -> Unit = {},
+) {
     composable<MyProfileRoute> {
-        MyProfileScreenRoute(
-            onBack = onBack,
-            onOpenProfile = { onNavigate(ProfileRoute(it)) },
-            onOpenConnections = { onNavigate(ConnectionsRoute(it.wire)) },
-        )
+        SocialGate(enabled, onBlocked) {
+            MyProfileScreenRoute(
+                onBack = onBack,
+                onOpenProfile = { onNavigate(ProfileRoute(it)) },
+                onOpenConnections = { onNavigate(ConnectionsRoute(it.wire)) },
+            )
+        }
     }
     composable<ProfileRoute>(deepLinks = listOf(navDeepLink<ProfileRoute>(basePath = DeepLinks.PROFILE_PATTERN.substringBefore("/{")))) {
-        PublicProfileScreenRoute(onBack = onBack)
+        SocialGate(enabled, onBlocked) { PublicProfileScreenRoute(onBack = onBack) }
     }
     composable<ConnectionsRoute> {
-        ConnectionsScreenRoute(onBack = onBack, onOpenProfile = { onNavigate(ProfileRoute(it)) })
+        SocialGate(enabled, onBlocked) { ConnectionsScreenRoute(onBack = onBack, onOpenProfile = { onNavigate(ProfileRoute(it)) }) }
     }
 }

@@ -451,8 +451,20 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
             shareCreateGraph(onClose = { navController.popBackStack() })
             mySharesGraph(onBack = { navController.popBackStack() })
             // Social (profile, feed): the entry points are gated on `shell.social`; the screens land with the feature tasks.
-            socialGraph(onBack = { navController.popBackStack() }, onNavigate = { route -> navController.navigateTo(route) })
-            socialProfileGraph(onBack = { navController.popBackStack() }, onNavigate = { route -> navController.navigateTo(route) })
+            // A deep link or notification into a social screen while `shell.social` is false (hide_community) lands on home.
+            val leaveSocial: () -> Unit = { navController.navigate(shell.home) { popUpTo(0) { inclusive = true } } }
+            socialGraph(
+                onBack = { navController.popBackStack() },
+                onNavigate = { route -> navController.navigateTo(route) },
+                enabled = shell.social,
+                onBlocked = leaveSocial,
+            )
+            socialProfileGraph(
+                onBack = { navController.popBackStack() },
+                onNavigate = { route -> navController.navigateTo(route) },
+                enabled = shell.social,
+                onBlocked = leaveSocial,
+            )
             shareGraph(
                 onBack = {
                     if (!navController.popBackStack()) {

@@ -20,14 +20,25 @@ import io.github.rupakc.travelplanner.feature.social.publish.PublishIdeaRoute as
  * comments and "Share as an idea". Screens leave through [onBack] and [onNavigate] (a route from `core:model`). The app shell shows
  * entry points only when `features.social >= 1`; profile screens are in [socialProfileGraph].
  */
-fun NavGraphBuilder.socialGraph(onBack: () -> Unit = {}, onNavigate: (AppRoute) -> Unit = {}) {
+fun NavGraphBuilder.socialGraph(
+    onBack: () -> Unit = {},
+    onNavigate: (AppRoute) -> Unit = {},
+    enabled: Boolean = true,
+    onBlocked: () -> Unit = {},
+) {
     composable<SocialRoute>(deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.FEED_PATTERN })) {
-        FeedRoute(onBack = onBack, onOpenIdea = { onNavigate(IdeaRoute(it)) }, onOpenPlan = { onNavigate(PlanDetailRoute(it)) })
+        SocialGate(enabled, onBlocked) {
+            FeedRoute(onBack = onBack, onOpenIdea = { onNavigate(IdeaRoute(it)) }, onOpenPlan = { onNavigate(PlanDetailRoute(it)) })
+        }
     }
     composable<IdeaRoute>(deepLinks = listOf(navDeepLink<IdeaRoute>(basePath = DeepLinks.IDEA_PATTERN.substringBefore("/{")))) {
-        IdeaDetailRoute(onBack = onBack, onOpenProfile = { onNavigate(ProfileRoute(it)) }, onOpenPlan = { onNavigate(PlanDetailRoute(it)) })
+        SocialGate(enabled, onBlocked) {
+            IdeaDetailRoute(onBack = onBack, onOpenProfile = { onNavigate(ProfileRoute(it)) }, onOpenPlan = { onNavigate(PlanDetailRoute(it)) })
+        }
     }
     composable<PublishIdeaRoute> {
-        PublishIdeaScreenRoute(onBack = onBack, onOpenProfile = { onNavigate(MyProfileRoute) }, onOpenIdea = { onNavigate(IdeaRoute(it)) })
+        SocialGate(enabled, onBlocked) {
+            PublishIdeaScreenRoute(onBack = onBack, onOpenProfile = { onNavigate(MyProfileRoute) }, onOpenIdea = { onNavigate(IdeaRoute(it)) })
+        }
     }
 }
