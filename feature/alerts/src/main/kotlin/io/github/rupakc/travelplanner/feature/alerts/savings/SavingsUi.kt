@@ -99,7 +99,8 @@ internal fun SavingsCard(view: SavingsView, livePricesPaused: Boolean, modifier:
 private fun SavingsBody(view: SavingsView) {
     if (view.totalUsd > 0) {
         Text(
-            stringResource(R.string.alerts_savings_amount, localUsd(view.totalUsd)),
+            // The card title already says "Drops caught"; the headline is just the amount.
+            localUsd(view.totalUsd),
             style = TravelTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
         )
@@ -108,7 +109,7 @@ private fun SavingsBody(view: SavingsView) {
     if (view.otherCurrencies.isNotEmpty()) {
         Text(stringResource(R.string.alerts_savings_other_currencies), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.onSurfaceVariant)
         view.otherCurrencies.forEach { (code, amount) ->
-            Text(stringResource(R.string.alerts_savings_amount, localPrice(amount, code)), style = TravelTheme.typography.bodyMedium)
+            Text(localPrice(amount, code), style = TravelTheme.typography.bodyMedium)
         }
     }
     Text(

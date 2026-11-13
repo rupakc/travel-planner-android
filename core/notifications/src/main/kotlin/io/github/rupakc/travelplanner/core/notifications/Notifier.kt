@@ -127,12 +127,8 @@ class SystemNotifier
             return permitted && manager.areNotificationsEnabled()
         }
 
-        private fun open(requestCode: Int, deepLink: String): PendingIntent {
-            val intent =
-                Intent(Intent.ACTION_VIEW, deepLink.toUri()).setPackage(context.packageName)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        }
+        private fun open(requestCode: Int, deepLink: String): PendingIntent =
+            PendingIntent.getActivity(context, requestCode, appOpenIntent(context, deepLink), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
         override fun post(
             channel: TravelChannel,
@@ -184,4 +180,17 @@ class SystemNotifier
 @InstallIn(SingletonComponent::class)
 abstract class NotifierModule {
     @Binds abstract fun notifier(impl: SystemNotifier): Notifier
+}
+
+/**
+ * The intent a notification tap fires: a VIEW of [deepLink] sent explicitly to the app's launcher activity
+ * (`MainActivity`), because the manifest filters only declare some hosts (`trip`, `notifications`, `feed`, `play`,
+ * `u` and others have none, so an implicit intent would resolve to nothing). Explicit is safe here: the link is built
+ * by this app, and `MainActivity` still sanitizes whatever it receives. Falls back to the package-scoped implicit
+ * intent if the launcher activity cannot be resolved.
+ */
+internal fun appOpenIntent(context: Context, deepLink: String): Intent {
+    val intent = Intent(Intent.ACTION_VIEW, deepLink.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    val launcher = context.packageManager.getLaunchIntentForPackage(context.packageName)?.component
+    return if (launcher != null) intent.setComponent(launcher) else intent.setPackage(context.packageName)
 }
