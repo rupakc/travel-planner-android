@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="delight_deal_title">डील हंटर</string>
     <string name="delight_deal_next">अगला बैज: %1$s</string>
     <string name="delight_deal_progress">%2$d में से %1$d</string>
     <string name="delight_deal_all_done">डील हंटर: सभी बैज मिल चुके हैं।</string>

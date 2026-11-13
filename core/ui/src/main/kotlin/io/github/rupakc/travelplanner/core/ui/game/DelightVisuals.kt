@@ -161,7 +161,7 @@ fun DealHunterTrack(state: DealHunterState, modifier: Modifier = Modifier) {
             Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        stringResource(R.string.delight_deal_title) + ": " + title,
+                        title,
                         style = TravelTheme.typography.labelLarge,
                         modifier = Modifier.weight(1f),
                     )
@@ -173,6 +173,8 @@ fun DealHunterTrack(state: DealHunterState, modifier: Modifier = Modifier) {
                 }
                 LinearProgressIndicator(
                     progress = { state.percent / PERCENT },
+                    color = TravelTheme.colors.primary,
+                    trackColor = TravelTheme.colors.surfaceVariant,
                     modifier =
                         Modifier
                             .fillMaxWidth()

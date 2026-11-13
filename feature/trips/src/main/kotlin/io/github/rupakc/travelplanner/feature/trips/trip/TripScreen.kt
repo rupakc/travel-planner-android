@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.feature.trips.trip
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -103,7 +104,7 @@ fun TripScreen(
     modifier: Modifier = Modifier,
 ) {
     val trip = state.trip
-    Column(modifier.fillMaxSize()) {
+    Column(modifier.fillMaxSize().background(TravelTheme.colors.background)) {
         TpTopBar(
             title = trip?.title?.ifBlank { trip.destination.orEmpty() } ?: stringResource(R.string.trip_all_trips),
             onBack = { onEvent(TripEvent.Back) },

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="delight_deal_title">ডিল হান্টার</string>
     <string name="delight_deal_next">পরের ব্যাজ: %1$s</string>
     <string name="delight_deal_progress">%2$d-এর মধ্যে %1$d</string>
     <string name="delight_deal_all_done">ডিল হান্টার: সব ব্যাজ অর্জিত।</string>
