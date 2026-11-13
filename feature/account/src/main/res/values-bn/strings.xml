@@ -98,4 +98,7 @@
     <string name="account_err_sessions">আপনার ডিভাইস লোড করা যায়নি।</string>
     <string name="account_err_revoke">ওই ডিভাইস সাইন আউট করা যায়নি।</string>
     <string name="account_err_signout_all">সব জায়গা থেকে সাইন আউট করা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="account_link_coming_soon">%1$s দিয়ে সাইন-ইন শীঘ্রই আসছে।</string>
+    <string name="account_err_link_failed">লিংক শুরু করা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="account_link_done">সাইন-ইন পদ্ধতি লিংক হয়েছে।</string>
 </resources>

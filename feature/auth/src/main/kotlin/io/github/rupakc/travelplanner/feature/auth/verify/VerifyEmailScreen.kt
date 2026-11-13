@@ -45,6 +45,7 @@ internal fun VerifyEmailScreen(
         when (state.phase) {
             VerifyPhase.SignedIn, VerifyPhase.Confirmed -> R.string.auth_verify_confirmed
             VerifyPhase.Working -> R.string.auth_verify_working
+            VerifyPhase.ConfirmSwitch -> R.string.auth_verify_switch_title
             else -> R.string.auth_verify_paste_title
         }
     AuthCardScaffold(title = stringResource(title), subtitle = null, modifier = modifier) {
@@ -52,6 +53,23 @@ internal fun VerifyEmailScreen(
         when (state.phase) {
             VerifyPhase.Working -> {
                 AuthStatusText(stringResource(R.string.auth_verify_working))
+            }
+
+            VerifyPhase.ConfirmSwitch -> {
+                AuthStatusText(stringResource(R.string.auth_verify_switch_body, state.currentUsername))
+                TpButton(
+                    stringResource(R.string.auth_verify_switch_confirm),
+                    { onEvent(VerifyEmailEvent.SignOutAndVerify) },
+                    modifier = Modifier.fillMaxWidth(),
+                    tid = "verify.switch_confirm",
+                )
+                TpButton(
+                    stringResource(R.string.auth_verify_switch_cancel),
+                    { onEvent(VerifyEmailEvent.CancelSwitch) },
+                    variant = TpButtonVariant.Text,
+                    modifier = Modifier.fillMaxWidth(),
+                    tid = "verify.switch_cancel",
+                )
             }
 
             VerifyPhase.SignedIn, VerifyPhase.Confirmed -> {

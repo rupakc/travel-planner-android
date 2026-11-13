@@ -98,4 +98,7 @@
     <string name="account_err_sessions">Deine Geräte konnten nicht geladen werden.</string>
     <string name="account_err_revoke">Das Gerät konnte nicht abgemeldet werden.</string>
     <string name="account_err_signout_all">Überall abmelden fehlgeschlagen. Versuche es erneut.</string>
+    <string name="account_link_coming_soon">Die Anmeldung mit %1$s kommt bald.</string>
+    <string name="account_err_link_failed">Das Verknüpfen konnte nicht gestartet werden. Bitte versuche es erneut.</string>
+    <string name="account_link_done">Anmeldemethode verknüpft.</string>
 </resources>

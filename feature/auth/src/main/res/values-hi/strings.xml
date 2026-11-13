@@ -126,4 +126,20 @@
     <string name="auth_oauth_username_submit">साइन-अप पूरा करें</string>
     <string name="auth_oauth_username_submitting">पूरा हो रहा है…</string>
     <string name="auth_oauth_username_cancel">रद्द करें</string>
+    <string name="auth_strength_label">मज़बूती: %1$s</string>
+    <string name="auth_strength_level_0">बहुत कमज़ोर</string>
+    <string name="auth_strength_level_1">कमज़ोर</string>
+    <string name="auth_strength_level_2">ठीक-ठाक</string>
+    <string name="auth_strength_level_3">अच्छा</string>
+    <string name="auth_strength_level_4">मज़बूत</string>
+    <string name="auth_strength_hint_too_short">कम से कम 10 अक्षर रखें</string>
+    <string name="auth_strength_hint_longer">जितना लंबा, उतना मज़बूत</string>
+    <string name="auth_strength_hint_variety">अक्षर, अंक और चिह्न मिलाएँ</string>
+    <string name="auth_strength_hint_repeats">दोहराए गए अक्षर न रखें</string>
+    <string name="auth_strength_hint_sequence">abc या 123 जैसे क्रम से बचें</string>
+    <string name="auth_strength_hint_identity">उपयोगकर्ता नाम या ईमेल शामिल न करें</string>
+    <string name="auth_verify_switch_title">खाता बदलें?</string>
+    <string name="auth_verify_switch_body">आप %1$s के रूप में साइन इन हैं। इस लिंक की पुष्टि करने पर पहले आपको साइन आउट किया जाएगा।</string>
+    <string name="auth_verify_switch_confirm">साइन आउट करें और पुष्टि करें</string>
+    <string name="auth_verify_switch_cancel">रद्द करें</string>
 </resources>

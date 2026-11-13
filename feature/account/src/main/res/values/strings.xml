@@ -98,4 +98,7 @@
     <string name="account_err_sessions">Couldn’t load your devices.</string>
     <string name="account_err_revoke">Couldn’t sign that device out.</string>
     <string name="account_err_signout_all">Couldn’t sign out everywhere. Try again.</string>
+    <string name="account_link_coming_soon">%1$s sign-in is coming soon.</string>
+    <string name="account_err_link_failed">Could not start linking. Please try again.</string>
+    <string name="account_link_done">Sign-in method linked.</string>
 </resources>

@@ -11,9 +11,11 @@ import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.auth.VerificationSentDto
 import io.github.rupakc.travelplanner.core.model.auth.VerifyEmailResponse
 import io.github.rupakc.travelplanner.core.model.game.GameDelta
+import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAppLanguage
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthConfigRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSignupRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import io.github.rupakc.travelplanner.feature.auth.AuthMessage
@@ -68,10 +70,12 @@ class SignupViewModelsTest {
     }
 
     @Test
-    fun `an old backend without the setting uses 8`() {
+    fun `an old backend without the setting uses the web's 10`() {
         config.flags = AuthFlags()
         val vm = signUp()
-        vm.fill("12345678")
+        vm.fill("123456789")
+        assertFalse(vm.state.value.canSubmit)
+        vm.onEvent(SignUpEvent.PasswordChanged("1234567890"))
         assertTrue(vm.state.value.canSubmit)
     }
 
@@ -165,7 +169,41 @@ class SignupViewModelsTest {
 
     // ---- verify
 
-    private fun verify(token: String? = null) = VerifyEmailViewModel(SavedStateHandle(mapOf("token" to token)), repo, telemetry, language)
+    private val auth = FakeAuthRepository()
+
+    private fun verify(token: String? = null) = VerifyEmailViewModel(SavedStateHandle(mapOf("token" to token)), repo, auth, telemetry, language)
+
+    @Test
+    fun `a link is not redeemed while another user is signed in until they sign out`() {
+        auth.sessionFlow.value = Session("t", User(username = "bob"))
+        val vm = verify("abc")
+        assertEquals(VerifyPhase.ConfirmSwitch, vm.state.value.phase)
+        assertEquals("bob", vm.state.value.currentUsername)
+        assertTrue(repo.calls.isEmpty())
+        vm.onEvent(VerifyEmailEvent.SignOutAndVerify)
+        assertEquals(1, auth.logoutCalls)
+        assertTrue(repo.calls.contains("verifyEmail:abc"))
+    }
+
+    @Test
+    fun `cancelling the switch drops the link and keeps the user`() {
+        auth.sessionFlow.value = Session("t", User(username = "bob"))
+        val vm = verify("abc")
+        vm.onEvent(VerifyEmailEvent.CancelSwitch)
+        assertEquals(VerifyPhase.NeedsToken, vm.state.value.phase)
+        assertEquals(0, auth.logoutCalls)
+        assertTrue(repo.calls.isEmpty())
+    }
+
+    @Test
+    fun `a pasted link also waits for the signed-in user`() {
+        auth.sessionFlow.value = Session("t", User(username = "bob"))
+        val vm = verify(null)
+        vm.onEvent(VerifyEmailEvent.PastedChanged("xyz"))
+        vm.onEvent(VerifyEmailEvent.SubmitPasted)
+        assertEquals(VerifyPhase.ConfirmSwitch, vm.state.value.phase)
+        assertTrue(repo.calls.isEmpty())
+    }
 
     @Test
     fun `verify with a route token signs in and shows the XP`() {

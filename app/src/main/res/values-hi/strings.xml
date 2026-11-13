@@ -26,4 +26,9 @@
     <string name="coach_skip">सुझाव छोड़ें</string>
     <string name="you_open_share_link">साझा लिंक खोलें</string>
     <string name="explore_ideas">आइडिया</string>
+    <string name="verify_banner_text">AI प्लानर का उपयोग करने के लिए अपने ईमेल की पुष्टि करें</string>
+    <string name="verify_banner_send">लिंक भेजें</string>
+    <string name="verify_banner_sent">लिंक भेजा गया। अपना इनबॉक्स देखें।</string>
+    <string name="verify_banner_dismiss">बंद करें</string>
+    <string name="verify_banner_error">लिंक नहीं भेजा जा सका। फिर से कोशिश करें।</string>
 </resources>

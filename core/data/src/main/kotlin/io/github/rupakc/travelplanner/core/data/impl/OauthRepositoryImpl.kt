@@ -146,8 +146,8 @@ class OauthRepositoryImpl
             const val MAX_DEVICE_NAME = 64
             const val MILLIS = 1000L
 
-            /** Apple is omitted on Android (ruling R2). */
+            /** Apple shows on Android too (audit X2): the button reads "coming soon" until the server reports it configured. */
             val OWN_PARAMS = setOf("client", "challenge", "redirect_uri")
-            val PROVIDERS = setOf("google", "github", "facebook")
+            val PROVIDERS = setOf("apple", "google", "github", "facebook")
         }
     }

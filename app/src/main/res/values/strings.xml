@@ -30,4 +30,9 @@
     <string name="coach_skip">Skip tips</string>
     <string name="you_open_share_link">Open a share link</string>
     <string name="explore_ideas">Ideas</string>
+    <string name="verify_banner_text">Confirm your email to use the AI planner</string>
+    <string name="verify_banner_send">Send link</string>
+    <string name="verify_banner_sent">Link sent. Check your inbox.</string>
+    <string name="verify_banner_dismiss">Dismiss</string>
+    <string name="verify_banner_error">Could not send the link. Please try again.</string>
 </resources>

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppLanguage
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.SignupRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
@@ -21,6 +22,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -35,6 +37,9 @@ enum class VerifyPhase {
     /** `session == null`: an email on an already active account was confirmed. */
     Confirmed,
     Failed,
+
+    /** Someone else is signed in: redeeming the link would swap accounts, so the user decides first. */
+    ConfirmSwitch,
 }
 
 @Immutable
@@ -48,6 +53,8 @@ data class VerifyEmailUiState(
     val sending: Boolean = false,
     val resent: Boolean = false,
     val cooldownSeconds: Int = 0,
+    /** The signed-in username shown while [VerifyPhase.ConfirmSwitch] waits. */
+    val currentUsername: String = "",
 ) {
     val canSubmitPaste: Boolean get() = pasted.isNotBlank() && phase != VerifyPhase.Working
     val canSendResend: Boolean get() = email.contains('@') && !sending && cooldownSeconds == 0
@@ -61,11 +68,18 @@ sealed interface VerifyEmailEvent {
     data class EmailChanged(val value: String) : VerifyEmailEvent
 
     data object Resend : VerifyEmailEvent
+
+    /** ConfirmSwitch: sign the current user out, then redeem the link. */
+    data object SignOutAndVerify : VerifyEmailEvent
+
+    /** ConfirmSwitch: keep the current user, drop the link. */
+    data object CancelSwitch : VerifyEmailEvent
 }
 
 /**
  * `POST /auth/verify-email`. The token comes from the deep link (route argument, a link or a bare token) or is
- * pasted (a full URL or a bare code). The repository stores the session when one is returned.
+ * pasted (a full URL or a bare code). The repository stores the session when one is returned. A link is never
+ * redeemed while a user is signed in (it would silently swap accounts): the user signs out first or cancels.
  */
 @HiltViewModel
 class VerifyEmailViewModel
@@ -73,6 +87,7 @@ class VerifyEmailViewModel
     constructor(
         savedState: SavedStateHandle,
         private val signup: SignupRepository,
+        private val auth: AuthRepository,
         private val telemetry: Telemetry,
         private val language: AppLanguage,
     ) : ViewModel() {
@@ -80,16 +95,62 @@ class VerifyEmailViewModel
         val state: StateFlow<VerifyEmailUiState> = mutableState.asStateFlow()
         private val cooldown = Cooldown(viewModelScope) { left -> mutableState.update { it.copy(cooldownSeconds = left) } }
 
+        private var heldToken: String? = null
+
         init {
-            LinkTokens.extract(savedState.get<String>("token"))?.let(::verify)
+            LinkTokens.extract(savedState.get<String>("token"))?.let(::redeemOrAsk)
         }
 
         fun onEvent(event: VerifyEmailEvent) {
             when (event) {
-                is VerifyEmailEvent.PastedChanged -> mutableState.update { it.copy(pasted = event.value, error = null) }
-                VerifyEmailEvent.SubmitPasted -> submitPasted()
-                is VerifyEmailEvent.EmailChanged -> mutableState.update { it.copy(email = event.value) }
-                VerifyEmailEvent.Resend -> resend()
+                is VerifyEmailEvent.PastedChanged -> {
+                    mutableState.update { it.copy(pasted = event.value, error = null) }
+                }
+
+                VerifyEmailEvent.SubmitPasted -> {
+                    submitPasted()
+                }
+
+                is VerifyEmailEvent.EmailChanged -> {
+                    mutableState.update { it.copy(email = event.value) }
+                }
+
+                VerifyEmailEvent.Resend -> {
+                    resend()
+                }
+
+                VerifyEmailEvent.SignOutAndVerify -> {
+                    signOutAndVerify()
+                }
+
+                VerifyEmailEvent.CancelSwitch -> {
+                    heldToken = null
+                    mutableState.update { it.copy(phase = VerifyPhase.NeedsToken, currentUsername = "") }
+                }
+            }
+        }
+
+        /** Signed out: redeem now. Signed in: hold the token and ask first. */
+        private fun redeemOrAsk(token: String) {
+            mutableState.update { it.copy(phase = VerifyPhase.Working, error = null, canResend = false) }
+            viewModelScope.launch {
+                val current = auth.session.first()
+                if (current == null) {
+                    verify(token)
+                } else {
+                    heldToken = token
+                    mutableState.update { it.copy(phase = VerifyPhase.ConfirmSwitch, currentUsername = current.user.username) }
+                }
+            }
+        }
+
+        private fun signOutAndVerify() {
+            val token = heldToken ?: return
+            heldToken = null
+            mutableState.update { it.copy(phase = VerifyPhase.Working, currentUsername = "") }
+            viewModelScope.launch {
+                auth.logout()
+                verify(token)
             }
         }
 
@@ -99,7 +160,7 @@ class VerifyEmailViewModel
                 telemetry.emit(TelemetryEvents.EMAIL_VERIFY, mapOf("result" to "invalid"))
                 mutableState.update { it.copy(error = AuthMessage.Local(R.string.auth_err_token_invalid)) }
             } else {
-                verify(token)
+                redeemOrAsk(token)
             }
         }
 

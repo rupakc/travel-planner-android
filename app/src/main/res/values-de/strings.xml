@@ -26,4 +26,9 @@
     <string name="coach_skip">Tipps überspringen</string>
     <string name="you_open_share_link">Geteilten Link öffnen</string>
     <string name="explore_ideas">Ideen</string>
+    <string name="verify_banner_text">Bestätige deine E-Mail, um den KI-Planer zu nutzen</string>
+    <string name="verify_banner_send">Link senden</string>
+    <string name="verify_banner_sent">Link gesendet. Prüfe dein Postfach.</string>
+    <string name="verify_banner_dismiss">Schließen</string>
+    <string name="verify_banner_error">Der Link konnte nicht gesendet werden. Bitte versuche es erneut.</string>
 </resources>

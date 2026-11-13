@@ -156,4 +156,20 @@
     <string name="auth_oauth_username_submit">Terminar registro</string>
     <string name="auth_oauth_username_submitting">Terminando…</string>
     <string name="auth_oauth_username_cancel">Cancelar</string>
+    <string name="auth_strength_label">Seguridad: %1$s</string>
+    <string name="auth_strength_level_0">muy débil</string>
+    <string name="auth_strength_level_1">débil</string>
+    <string name="auth_strength_level_2">aceptable</string>
+    <string name="auth_strength_level_3">buena</string>
+    <string name="auth_strength_level_4">fuerte</string>
+    <string name="auth_strength_hint_too_short">usa al menos 10 caracteres</string>
+    <string name="auth_strength_hint_longer">cuanto más larga, más segura</string>
+    <string name="auth_strength_hint_variety">mezcla letras, números y símbolos</string>
+    <string name="auth_strength_hint_repeats">evita caracteres repetidos</string>
+    <string name="auth_strength_hint_sequence">evita secuencias como abc o 123</string>
+    <string name="auth_strength_hint_identity">no incluyas tu usuario ni tu correo</string>
+    <string name="auth_verify_switch_title">¿Cambiar de cuenta?</string>
+    <string name="auth_verify_switch_body">Has iniciado sesión como %1$s. Al confirmar este enlace se cerrará esa sesión primero.</string>
+    <string name="auth_verify_switch_confirm">Cerrar sesión y confirmar</string>
+    <string name="auth_verify_switch_cancel">Cancelar</string>
 </resources>

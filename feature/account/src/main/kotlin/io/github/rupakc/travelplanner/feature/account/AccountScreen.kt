@@ -81,6 +81,7 @@ internal fun AccountRoute(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is AccountEffect.ShareExport -> shareExport(context, effect.file)
+                is AccountEffect.OpenLink -> onLinkProvider?.invoke(effect.url)
                 AccountEffect.SignedOut -> onSignedOut()
             }
         }
@@ -91,7 +92,7 @@ internal fun AccountRoute(
         onBack = onBack,
         onChangePassword = onChangePassword,
         onOpenSessions = onOpenSessions,
-        onLinkProvider = onLinkProvider,
+        canLink = onLinkProvider != null,
     )
 }
 
@@ -115,7 +116,7 @@ internal fun AccountScreen(
     onBack: () -> Unit,
     onChangePassword: () -> Unit,
     onOpenSessions: () -> Unit,
-    onLinkProvider: ((String) -> Unit)?,
+    canLink: Boolean,
 ) {
     val snackbar = remember { SnackbarHostState() }
     val message = state.message?.text()
@@ -143,7 +144,7 @@ internal fun AccountScreen(
             }
 
             AccountPhase.Loaded -> {
-                AccountContent(state, onEvent, onChangePassword, onOpenSessions, onLinkProvider, Modifier.padding(padding))
+                AccountContent(state, onEvent, onChangePassword, onOpenSessions, canLink, Modifier.padding(padding))
             }
         }
     }
@@ -158,7 +159,7 @@ private fun AccountContent(
     onEvent: (AccountEvent) -> Unit,
     onChangePassword: () -> Unit,
     onOpenSessions: () -> Unit,
-    onLinkProvider: ((String) -> Unit)?,
+    canLink: Boolean,
     modifier: Modifier,
 ) {
     val user = state.user ?: return
@@ -169,7 +170,7 @@ private fun AccountContent(
     ) {
         item(key = "profile") { ProfileCard(state, onEvent) }
         if (user.email != null || !user.emailVerified) item(key = "email") { EmailCard(state, onEvent) }
-        item(key = "signin") { SignInCard(state, onEvent, onChangePassword, onLinkProvider) }
+        item(key = "signin") { SignInCard(state, onEvent, onChangePassword, canLink) }
         item(key = "quota") { QuotaCard(state) }
         item(key = "settings") { SettingsCard(state.settings, onEvent) }
         item(key = "devices") {
@@ -262,7 +263,7 @@ private fun SignInCard(
     state: AccountUiState,
     onEvent: (AccountEvent) -> Unit,
     onChangePassword: () -> Unit,
-    onLinkProvider: ((String) -> Unit)?,
+    canLink: Boolean,
 ) {
     val linked = state.identities.mapNotNull { it.provider }.toSet()
     TpCard(modifier = Modifier.fillMaxWidth()) {
@@ -281,11 +282,13 @@ private fun SignInCard(
                 }
                 if (id in linked) {
                     TextButton(onClick = { onEvent(AccountEvent.AskUnlink(id)) }) { Text(stringResource(R.string.account_unlink)) }
-                } else if (onLinkProvider != null) {
-                    TextButton(onClick = {
-                        onEvent(AccountEvent.LinkRequested(id))
-                        onLinkProvider(id)
-                    }) { Text(stringResource(R.string.account_link)) }
+                } else if (canLink) {
+                    TpButton(
+                        stringResource(R.string.account_link),
+                        onClick = { onEvent(AccountEvent.LinkRequested(id)) },
+                        variant = TpButtonVariant.Text,
+                        tid = "account.link_$id",
+                    )
                 } else {
                     Text(stringResource(R.string.account_coming_soon), style = TravelTheme.typography.bodySmall)
                 }

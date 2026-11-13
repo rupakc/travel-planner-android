@@ -98,4 +98,7 @@
     <string name="account_err_sessions">无法加载设备列表。</string>
     <string name="account_err_revoke">无法退出该设备。</string>
     <string name="account_err_signout_all">无法在所有设备上退出,请重试。</string>
+    <string name="account_link_coming_soon">即将支持使用 %1$s 登录。</string>
+    <string name="account_err_link_failed">无法开始关联，请重试。</string>
+    <string name="account_link_done">已关联登录方式。</string>
 </resources>

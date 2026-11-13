@@ -126,4 +126,20 @@
     <string name="auth_oauth_username_submit">সাইন-আপ সম্পূর্ণ করুন</string>
     <string name="auth_oauth_username_submitting">সম্পূর্ণ হচ্ছে…</string>
     <string name="auth_oauth_username_cancel">বাতিল করুন</string>
+    <string name="auth_strength_label">শক্তি: %1$s</string>
+    <string name="auth_strength_level_0">খুব দুর্বল</string>
+    <string name="auth_strength_level_1">দুর্বল</string>
+    <string name="auth_strength_level_2">মোটামুটি</string>
+    <string name="auth_strength_level_3">ভালো</string>
+    <string name="auth_strength_level_4">শক্তিশালী</string>
+    <string name="auth_strength_hint_too_short">কমপক্ষে ১০টি অক্ষর ব্যবহার করুন</string>
+    <string name="auth_strength_hint_longer">যত লম্বা, তত শক্তিশালী</string>
+    <string name="auth_strength_hint_variety">অক্ষর, সংখ্যা ও চিহ্ন মেশান</string>
+    <string name="auth_strength_hint_repeats">পুনরাবৃত্ত অক্ষর এড়িয়ে চলুন</string>
+    <string name="auth_strength_hint_sequence">abc বা 123 এর মতো ক্রম এড়িয়ে চলুন</string>
+    <string name="auth_strength_hint_identity">ইউজারনেম বা ইমেইল ব্যবহার করবেন না</string>
+    <string name="auth_verify_switch_title">অ্যাকাউন্ট বদলাবেন?</string>
+    <string name="auth_verify_switch_body">আপনি %1$s হিসেবে সাইন ইন করা আছেন। এই লিংক নিশ্চিত করলে আগে সেই অ্যাকাউন্ট থেকে সাইন আউট হবে।</string>
+    <string name="auth_verify_switch_confirm">সাইন আউট করে নিশ্চিত করুন</string>
+    <string name="auth_verify_switch_cancel">বাতিল করুন</string>
 </resources>

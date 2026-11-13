@@ -29,4 +29,9 @@
     <string name="coach_skip">Omitir consejos</string>
     <string name="you_open_share_link">Abrir un enlace compartido</string>
     <string name="explore_ideas">Ideas</string>
+    <string name="verify_banner_text">Confirma tu correo para usar el planificador de IA</string>
+    <string name="verify_banner_send">Enviar enlace</string>
+    <string name="verify_banner_sent">Enlace enviado. Revisa tu bandeja de entrada.</string>
+    <string name="verify_banner_dismiss">Cerrar</string>
+    <string name="verify_banner_error">No se pudo enviar el enlace. Inténtalo de nuevo.</string>
 </resources>

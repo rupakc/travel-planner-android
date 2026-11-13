@@ -3,18 +3,26 @@ package io.github.rupakc.travelplanner.feature.account
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.AuthProviderInfo
+import io.github.rupakc.travelplanner.core.data.repository.AuthProvidersRepository
+import io.github.rupakc.travelplanner.core.data.repository.OauthInbox
+import io.github.rupakc.travelplanner.core.domain.auth.OauthCallback
 import io.github.rupakc.travelplanner.core.model.auth.AccountDto
 import io.github.rupakc.travelplanner.core.model.auth.AccountSettings
 import io.github.rupakc.travelplanner.core.model.auth.IdentityDto
+import io.github.rupakc.travelplanner.core.model.auth.LinkTicketResponse
+import io.github.rupakc.travelplanner.core.model.auth.OauthResult
 import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAccountRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeConsentRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeOauthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
@@ -35,8 +43,49 @@ class AccountViewModelTest {
 
     private val jane = User(username = "jane", id = "u1", displayName = "Jane", email = "j@x.com", emailVerified = false, hasPassword = true)
 
+    private val providers = FakeProviders()
+    private val oauth = FakeOauthRepository()
+    private val inbox = OauthInbox()
+
     private fun vm(): AccountViewModel =
-        AccountViewModel(repo, consent, appSettings, telemetry) { AccountRules.exportTarget(cache) }
+        AccountViewModel(repo, consent, appSettings, telemetry, { AccountRules.exportTarget(cache) }, providers, oauth, inbox)
+
+    private class FakeProviders(var map: Map<String, AuthProviderInfo> = emptyMap()) : AuthProvidersRepository {
+        override suspend fun providers() = map
+    }
+
+    @Test fun `link with an unconfigured provider says coming soon and opens nothing`() =
+        runTest(timeout = 30.seconds) {
+            repo.accountResult = account()
+            val vm = vm()
+            vm.onEvent(AccountEvent.LinkRequested("google"))
+            assertEquals(AccountMessage(R.string.account_link_coming_soon, arg = "Google"), vm.state.value.message)
+            assertTrue(oauth.calls.isEmpty())
+            assertTrue(telemetry.events.contains("account_action" to mapOf("action" to "link")))
+        }
+
+    @Test fun `link with a configured provider takes a ticket and hands the url to the shell`() =
+        runTest(timeout = 30.seconds) {
+            repo.accountResult = account()
+            providers.map = mapOf("github" to AuthProviderInfo(configured = true, startUrl = "/api/auth/oauth/github/start"))
+            oauth.linkTicketResult = AppResult.Success(LinkTicketResponse("http://h/api/auth/oauth/github/start?link=T"))
+            val vm = vm()
+            vm.onEvent(AccountEvent.LinkRequested("github"))
+            assertEquals(AccountEffect.OpenLink("http://h/api/auth/oauth/github/start?link=T"), vm.effects.first())
+            assertEquals(listOf("linkTicket:github"), oauth.calls)
+        }
+
+    @Test fun `a returning link code reloads the account`() =
+        runTest(timeout = 30.seconds) {
+            repo.accountResult = account()
+            val vm = vm()
+            oauth.pending = true
+            oauth.exchangeResult = AppResult.Success(OauthResult(status = "linked"))
+            repo.accountResult = account(identities = listOf(IdentityDto(provider = "github")))
+            inbox.post(OauthCallback.Code("c1"))
+            assertEquals(AccountMessage(R.string.account_link_done), vm.state.value.message)
+            assertEquals(listOf("github"), vm.state.value.identities.mapNotNull { it.provider })
+        }
 
     private fun account(user: User = jane, settings: AccountSettings = AccountSettings(), identities: List<IdentityDto> = emptyList()) =
         AppResult.Success(AccountDto(user = user, identities = identities, settings = settings))

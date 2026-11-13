@@ -70,9 +70,10 @@ class OauthRepositoryImplTest {
         }
 
     @Test
-    fun `apple and unknown providers are refused`() =
+    fun `apple starts like the others and unknown providers are refused`() =
         runTest(timeout = 30.seconds) {
-            assertTrue(repo.begin("apple") is AppResult.Failure)
+            assertTrue(repo.begin("apple") is AppResult.Success)
+            repo.cancelPendingAttempt()
             assertTrue(repo.begin("../x") is AppResult.Failure)
             assertFalse(repo.hasPendingAttempt())
         }

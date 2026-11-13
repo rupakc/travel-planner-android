@@ -26,4 +26,9 @@
     <string name="coach_skip">跳过提示</string>
     <string name="you_open_share_link">打开分享链接</string>
     <string name="explore_ideas">灵感</string>
+    <string name="verify_banner_text">请确认你的邮箱以使用 AI 规划器</string>
+    <string name="verify_banner_send">发送链接</string>
+    <string name="verify_banner_sent">链接已发送，请查看收件箱。</string>
+    <string name="verify_banner_dismiss">关闭</string>
+    <string name="verify_banner_error">无法发送链接，请重试。</string>
 </resources>

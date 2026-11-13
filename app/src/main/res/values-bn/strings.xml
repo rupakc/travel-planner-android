@@ -26,4 +26,9 @@
     <string name="coach_skip">টিপস বাদ দিন</string>
     <string name="you_open_share_link">শেয়ার লিঙ্ক খুলুন</string>
     <string name="explore_ideas">আইডিয়া</string>
+    <string name="verify_banner_text">AI প্ল্যানার ব্যবহার করতে আপনার ইমেইল নিশ্চিত করুন</string>
+    <string name="verify_banner_send">লিংক পাঠান</string>
+    <string name="verify_banner_sent">লিংক পাঠানো হয়েছে। আপনার ইনবক্স দেখুন।</string>
+    <string name="verify_banner_dismiss">বন্ধ করুন</string>
+    <string name="verify_banner_error">লিংক পাঠানো যায়নি। আবার চেষ্টা করুন।</string>
 </resources>

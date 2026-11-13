@@ -8,12 +8,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.repository.AccountRepository
+import io.github.rupakc.travelplanner.core.data.repository.AuthProvidersRepository
+import io.github.rupakc.travelplanner.core.data.repository.OauthInbox
+import io.github.rupakc.travelplanner.core.data.repository.OauthRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.ConsentRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
+import io.github.rupakc.travelplanner.core.domain.auth.OauthCallback
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
 import io.github.rupakc.travelplanner.core.model.auth.AccountSettings
 import io.github.rupakc.travelplanner.core.model.auth.IdentityDto
+import io.github.rupakc.travelplanner.core.model.auth.OauthResultKind
 import io.github.rupakc.travelplanner.core.model.auth.QuotaDto
 import io.github.rupakc.travelplanner.core.model.auth.User
 import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
@@ -112,6 +117,9 @@ internal sealed interface AccountEffect {
     data class ShareExport(val file: File) : AccountEffect
 
     data object SignedOut : AccountEffect
+
+    /** The safe, same-origin browser URL that links a sign-in method; the shell opens it. */
+    data class OpenLink(val url: String) : AccountEffect
 }
 
 /** The account area: profile, linked sign-in methods, allowance, settings, export and deletion. */
@@ -124,6 +132,9 @@ internal class AccountViewModel
         private val appSettings: SettingsRepository,
         private val telemetry: Telemetry,
         private val exportTarget: ExportTarget,
+        private val providers: AuthProvidersRepository,
+        private val oauth: OauthRepository,
+        private val inbox: OauthInbox,
     ) : ViewModel() {
         private val mutable = MutableStateFlow(AccountUiState())
         val state: StateFlow<AccountUiState> = mutable.asStateFlow()
@@ -132,6 +143,8 @@ internal class AccountViewModel
 
         init {
             load()
+            // The browser's return link (`voyager://auth/callback`) after a link attempt this screen started.
+            viewModelScope.launch { inbox.callbacks.collect(::onLinkCallback) }
         }
 
         fun onEvent(event: AccountEvent) {
@@ -144,7 +157,7 @@ internal class AccountViewModel
                 is AccountEvent.AvatarPicked -> uploadAvatar(event.bytes)
                 AccountEvent.RemoveAvatar -> removeAvatar()
                 AccountEvent.VerifyEmail -> verifyEmail()
-                is AccountEvent.LinkRequested -> track("link")
+                is AccountEvent.LinkRequested -> link(event.provider)
                 is AccountEvent.AskUnlink -> mutable.update { it.copy(unlinking = event.provider) }
                 AccountEvent.DismissUnlink -> mutable.update { it.copy(unlinking = null) }
                 AccountEvent.ConfirmUnlink -> unlink()
@@ -277,6 +290,60 @@ internal class AccountViewModel
                         mutable.update { it.copy(verifyBusy = false, message = r.error.toMessage(R.string.account_err_verify)) }
                         // 409 already_verified: the account moved on elsewhere, so reload it.
                         if (AccountRules.codeOf(r.error) == "already_verified") load()
+                    }
+                }
+            }
+        }
+
+        /** Linking needs a provider the server reports configured; otherwise "coming soon" (web `SocialSignInButtons`). */
+        private fun link(provider: String) {
+            track("link")
+            viewModelScope.launch {
+                val info = this@AccountViewModel.providers.providers()[provider]
+                if (info == null || !info.configured || info.startUrl == null) {
+                    val label = LinkableProviders.firstOrNull { it.first == provider }?.second ?: provider
+                    mutable.update { it.copy(message = AccountMessage(R.string.account_link_coming_soon, arg = label)) }
+                    return@launch
+                }
+                when (val ticket = oauth.linkTicket(provider)) {
+                    is AppResult.Success -> {
+                        val url = ticket.value.startUrl
+                        if (url != null) {
+                            effectChannel.trySend(AccountEffect.OpenLink(url))
+                        } else {
+                            mutable.update { it.copy(message = AccountMessage(R.string.account_err_link_failed)) }
+                        }
+                    }
+
+                    is AppResult.Failure -> {
+                        mutable.update { it.copy(message = ticket.error.toMessage(R.string.account_err_link_failed)) }
+                    }
+                }
+            }
+        }
+
+        private suspend fun onLinkCallback(callback: OauthCallback) {
+            if (!oauth.hasPendingAttempt()) return
+            when (callback) {
+                is OauthCallback.Error -> {
+                    oauth.cancelPendingAttempt()
+                    if (callback.error != "cancelled") mutable.update { it.copy(message = AccountMessage(R.string.account_err_link_failed)) }
+                }
+
+                is OauthCallback.Code -> {
+                    when (val result = oauth.exchange(callback.code)) {
+                        is AppResult.Success -> {
+                            if (result.value.kind == OauthResultKind.LINKED) {
+                                mutable.update { it.copy(message = AccountMessage(R.string.account_link_done)) }
+                                load()
+                            } else {
+                                mutable.update { it.copy(message = AccountMessage(R.string.account_err_link_failed)) }
+                            }
+                        }
+
+                        is AppResult.Failure -> {
+                            mutable.update { it.copy(message = result.error.toMessage(R.string.account_err_link_failed)) }
+                        }
                     }
                 }
             }
