@@ -55,7 +55,12 @@ import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpSwitch
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.auth.AccountSettings
 import java.io.File
@@ -211,13 +216,15 @@ private fun ProfileCard(state: AccountUiState, onEvent: (AccountEvent) -> Unit) 
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), modifier = Modifier.padding(top = TravelTheme.spacing.sm)) {
-            TextButton(onClick = { picker.launch("image/*") }, enabled = !state.avatarBusy) { Text(stringResource(R.string.account_avatar_change)) }
+            TpTextButton(onClick = {
+                picker.launch("image/*")
+            }, enabled = !state.avatarBusy, tid = "account.account_avatar_change") { Text(stringResource(R.string.account_avatar_change)) }
             if (user.avatarUrl != null) {
-                TextButton(onClick = {
+                TpTextButton(onClick = {
                     onEvent(AccountEvent.RemoveAvatar)
-                }, enabled = !state.avatarBusy) { Text(stringResource(R.string.account_avatar_remove)) }
+                }, enabled = !state.avatarBusy, tid = "account.account_avatar_remove") { Text(stringResource(R.string.account_avatar_remove)) }
             }
-            TextButton(onClick = { onEvent(AccountEvent.EditName) }) { Text(stringResource(R.string.account_name_edit)) }
+            TpTextButton(onClick = { onEvent(AccountEvent.EditName) }, tid = "account.account_name_edit") { Text(stringResource(R.string.account_name_edit)) }
         }
     }
 }
@@ -268,7 +275,7 @@ private fun SignInCard(
     val linked = state.identities.mapNotNull { it.provider }.toSet()
     TpCard(modifier = Modifier.fillMaxWidth()) {
         Heading(stringResource(R.string.account_signin_methods))
-        TextButton(onClick = onChangePassword) {
+        TpTextButton(onClick = onChangePassword, tid = "account.account_password_set") {
             Text(stringResource(if (state.user?.hasPassword == false) R.string.account_password_set else R.string.account_password_change))
         }
         LinkableProviders.forEach { (id, label) ->
@@ -281,7 +288,9 @@ private fun SignInCard(
                     )
                 }
                 if (id in linked) {
-                    TextButton(onClick = { onEvent(AccountEvent.AskUnlink(id)) }) { Text(stringResource(R.string.account_unlink)) }
+                    TpTextButton(onClick = {
+                        onEvent(AccountEvent.AskUnlink(id))
+                    }, tid = "account.account_unlink") { Text(stringResource(R.string.account_unlink)) }
                 } else if (canLink) {
                     TpButton(
                         stringResource(R.string.account_link),
@@ -405,7 +414,9 @@ private fun ChoiceRow(label: String, value: String, options: List<Pair<String?, 
     var open by remember { mutableStateOf(false) }
     Box {
         Row(
-            Modifier.fillMaxWidth().clickable(role = Role.DropdownList) { open = true }.padding(vertical = TravelTheme.spacing.sm),
+            Modifier.fillMaxWidth().tpClickable(tid = "account.account_screen_clickable", role = Role.DropdownList) {
+                open = true
+            }.padding(vertical = TravelTheme.spacing.sm),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(label, style = TravelTheme.typography.bodyMedium)
@@ -413,10 +424,10 @@ private fun ChoiceRow(label: String, value: String, options: List<Pair<String?, 
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             options.forEach { (key, text) ->
-                DropdownMenuItem(text = { Text(text) }, onClick = {
+                TpDropdownMenuItem(text = { Text(text) }, onClick = {
                     open = false
                     onSelect(key)
-                })
+                }, tid = "account.account_screen_dropdown_menu_item")
             }
         }
     }
@@ -426,7 +437,7 @@ private fun ChoiceRow(label: String, value: String, options: List<Pair<String?, 
 private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, style = TravelTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange)
+        TpSwitch(checked = checked, onCheckedChange = onChange, tid = "account.account_screen_switch")
     }
 }
 
@@ -458,16 +469,21 @@ private fun NameDialog(draft: String, error: AccountMessage?, onEvent: (AccountE
         onDismissRequest = { onEvent(AccountEvent.DismissName) },
         title = { Text(stringResource(R.string.account_name_title)) },
         text = {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = draft,
                 onValueChange = { onEvent(AccountEvent.NameChanged(it)) },
                 singleLine = true,
                 isError = error != null,
                 supportingText = { error?.let { Text(it.text()) } },
+                tid = "account.account_screen_outlined_text_field",
             )
         },
-        confirmButton = { TextButton(onClick = { onEvent(AccountEvent.SaveName) }) { Text(stringResource(R.string.account_save)) } },
-        dismissButton = { TextButton(onClick = { onEvent(AccountEvent.DismissName) }) { Text(stringResource(R.string.account_cancel)) } },
+        confirmButton = {
+            TpTextButton(onClick = { onEvent(AccountEvent.SaveName) }, tid = "account.account_save") { Text(stringResource(R.string.account_save)) }
+        },
+        dismissButton = {
+            TpTextButton(onClick = { onEvent(AccountEvent.DismissName) }, tid = "account.account_cancel") { Text(stringResource(R.string.account_cancel)) }
+        },
     )
 }
 
@@ -478,8 +494,12 @@ private fun UnlinkDialog(provider: String, onEvent: (AccountEvent) -> Unit) {
         onDismissRequest = { onEvent(AccountEvent.DismissUnlink) },
         title = { Text(stringResource(R.string.account_unlink_title, label)) },
         text = { Text(stringResource(R.string.account_unlink_body)) },
-        confirmButton = { TextButton(onClick = { onEvent(AccountEvent.ConfirmUnlink) }) { Text(stringResource(R.string.account_unlink)) } },
-        dismissButton = { TextButton(onClick = { onEvent(AccountEvent.DismissUnlink) }) { Text(stringResource(R.string.account_cancel)) } },
+        confirmButton = {
+            TpTextButton(onClick = { onEvent(AccountEvent.ConfirmUnlink) }, tid = "account.account_unlink_2") { Text(stringResource(R.string.account_unlink)) }
+        },
+        dismissButton = {
+            TpTextButton(onClick = { onEvent(AccountEvent.DismissUnlink) }, tid = "account.account_cancel_2") { Text(stringResource(R.string.account_cancel)) }
+        },
     )
 }
 
@@ -491,7 +511,7 @@ private fun DeleteDialogView(dialog: DeleteDialog, hasPassword: Boolean, onEvent
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                 Text(stringResource(R.string.account_delete_body))
-                OutlinedTextField(
+                TpOutlinedTextField(
                     value = dialog.input,
                     onValueChange = { onEvent(AccountEvent.DeleteInput(it)) },
                     label = { Text(stringResource(if (hasPassword) R.string.account_delete_password else R.string.account_delete_username)) },
@@ -503,14 +523,19 @@ private fun DeleteDialogView(dialog: DeleteDialog, hasPassword: Boolean, onEvent
                         ),
                     isError = dialog.error != null,
                     supportingText = { dialog.error?.let { Text(it.text()) } },
+                    tid = "account.account_delete_password",
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onEvent(AccountEvent.ConfirmDelete) }, enabled = !dialog.busy) { Text(stringResource(R.string.account_delete_confirm)) }
+            TpTextButton(onClick = {
+                onEvent(AccountEvent.ConfirmDelete)
+            }, enabled = !dialog.busy, tid = "account.account_delete_confirm") { Text(stringResource(R.string.account_delete_confirm)) }
         },
         dismissButton = {
-            TextButton(onClick = { onEvent(AccountEvent.DismissDelete) }, enabled = !dialog.busy) { Text(stringResource(R.string.account_cancel)) }
+            TpTextButton(onClick = {
+                onEvent(AccountEvent.DismissDelete)
+            }, enabled = !dialog.busy, tid = "account.account_cancel_3") { Text(stringResource(R.string.account_cancel)) }
         },
     )
 }

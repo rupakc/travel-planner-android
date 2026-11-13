@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.section.Embassy
@@ -172,6 +173,7 @@ internal fun EmergencyBody(data: EmergencyCardData, onOpenLink: (String) -> Unit
                 },
                 variant = TpButtonVariant.Secondary,
                 leadingIcon = Icons.Filled.Share,
+                tid = "results.emergency_parts_tp_button",
             )
         }
         Callout(stringResource(R.string.emergency_disclaimer), tone = Tone.Warning)
@@ -253,7 +255,15 @@ private fun NumberTile(label: String, value: String?, tone: Tone, modifier: Modi
         modifier
             .defaultMinSize(minHeight = InfoDimens.NumberTileMinHeight)
             .background(colors.container, TravelShape.Input)
-            .then(if (number != null) Modifier.clickable(role = Role.Button) { dial(context, number) } else Modifier)
+            .then(
+                if (number !=
+                    null
+                ) {
+                    Modifier.tpClickable(tid = "results.emergency_parts_clickable", role = Role.Button) { dial(context, number) }
+                } else {
+                    Modifier
+                },
+            )
             .clearAndSetSemantics {
                 contentDescription = a11y
                 if (number != null) role = Role.Button
@@ -283,7 +293,9 @@ private fun PhoneLine(phone: String?, suffix: String? = null) {
     if (number == null) {
         MetaText(text)
     } else {
-        TpButton(text, onClick = { dial(context, number) }, variant = TpButtonVariant.Text, leadingIcon = Icons.Filled.Call)
+        TpButton(text, onClick = {
+            dial(context, number)
+        }, variant = TpButtonVariant.Text, leadingIcon = Icons.Filled.Call, tid = "results.emergency_parts_tp_button_2")
     }
 }
 

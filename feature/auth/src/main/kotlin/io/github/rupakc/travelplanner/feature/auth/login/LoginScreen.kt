@@ -144,7 +144,7 @@ internal fun LoginScreen(
                 state.error?.let { error ->
                     AuthErrorBanner(error)
                     if ((error as? AuthMessage.Local)?.suggestServer == true) {
-                        TpButton(stringResource(R.string.auth_server), onOpenServer, variant = TpButtonVariant.Tonal)
+                        TpButton(stringResource(R.string.auth_server), onOpenServer, variant = TpButtonVariant.Tonal, tid = "auth.auth_server")
                     }
                 }
                 state.pending?.let { PendingAccountCard(it, onEvent) }
@@ -190,6 +190,7 @@ internal fun LoginScreen(
                     enabled = state.canSubmit || state.loading,
                     loading = state.loading,
                     modifier = Modifier.fillMaxWidth(),
+                    tid = "auth.auth_signing_in",
                 )
             }
         }
@@ -218,6 +219,7 @@ internal fun LoginScreen(
                 },
             onClick = onOpenServer,
             variant = TpButtonVariant.Text,
+            tid = "auth.auth_server_button_unset",
         )
         TpButton(
             text = stringResource(R.string.auth_privacy_choices),

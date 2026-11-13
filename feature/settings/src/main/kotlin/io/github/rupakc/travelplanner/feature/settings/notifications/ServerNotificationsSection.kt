@@ -33,6 +33,8 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.notifications.NotificationSettingsRules
 import io.github.rupakc.travelplanner.core.model.alerts.QuietHours
@@ -192,9 +194,10 @@ private fun CapRow(state: ServerNotificationsUiState, onEvent: (ServerNotificati
             Text(stringResource(R.string.settings_notifsrv_cap), style = TravelTheme.typography.bodyLarge, color = TravelTheme.colors.onSurface)
             Text(stringResource(R.string.settings_notifsrv_cap_hint), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
         }
-        IconButton(
+        TpIconButton(
             onClick = { onEvent(ServerNotificationsEvent.SetCap(cap - 1)) },
             enabled = !state.saving && cap > NotificationSettingsRules.MIN_CAP,
+            tid = "settings.server_notifications_section_icon_button",
         ) { Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.settings_notifsrv_cap_less)) }
         Text(
             value,
@@ -205,9 +208,10 @@ private fun CapRow(state: ServerNotificationsUiState, onEvent: (ServerNotificati
                     stateDescription = value
                 },
         )
-        IconButton(
+        TpIconButton(
             onClick = { onEvent(ServerNotificationsEvent.SetCap(cap + 1)) },
             enabled = !state.saving && cap < NotificationSettingsRules.MAX_CAP,
+            tid = "settings.server_notifications_section_icon_button_2",
         ) { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = stringResource(R.string.settings_notifsrv_cap_more)) }
     }
 }
@@ -244,8 +248,10 @@ private fun QuietTimeDialog(title: String, initialHour: Int, initialMinute: Int,
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { TimePicker(state = picker) },
-        confirmButton = { TextButton(onClick = { onConfirm(picker.hour, picker.minute) }) { Text(stringResource(android.R.string.ok)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) } },
+        confirmButton = {
+            TpTextButton(onClick = { onConfirm(picker.hour, picker.minute) }, tid = "settings.ok") { Text(stringResource(android.R.string.ok)) }
+        },
+        dismissButton = { TpTextButton(onClick = onDismiss, tid = "settings.cancel") { Text(stringResource(android.R.string.cancel)) } },
     )
 }
 

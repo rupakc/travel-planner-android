@@ -44,7 +44,10 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.TpCheckbox
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.trips.JournalMoods
 import io.github.rupakc.travelplanner.core.model.trips.Trip
@@ -134,7 +137,7 @@ private fun Composer(state: JournalUiState, onEvent: (JournalEvent) -> Unit) {
     TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item) {
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             val tooLong = state.draft.length > JournalRules.MAX_BODY
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = state.draft,
                 onValueChange = { onEvent(JournalEvent.DraftChanged(it)) },
                 label = { Text(stringResource(R.string.journal_hint)) },
@@ -142,6 +145,7 @@ private fun Composer(state: JournalUiState, onEvent: (JournalEvent) -> Unit) {
                 supportingText = if (tooLong) ({ Text(stringResource(R.string.journal_too_long)) }) else null,
                 minLines = 3,
                 modifier = Modifier.fillMaxWidth(),
+                tid = "trips.journal_hint",
             )
             Text(stringResource(R.string.journal_mood), style = TravelTheme.typography.labelMedium)
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
@@ -217,10 +221,11 @@ private fun PlaceCard(place: JournalRules.PlaceRow, onEvent: (JournalEvent) -> U
     TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item) {
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
+                TpCheckbox(
                     checked = place.visited,
                     onCheckedChange = { onEvent(JournalEvent.SetVisited(place.key, it)) },
                     modifier = Modifier.semantics { contentDescription = visitedLabel },
+                    tid = "trips.journal_screen_checkbox",
                 )
                 Text(place.name, style = TravelTheme.typography.titleSmall, modifier = Modifier.weight(1f))
             }
@@ -233,7 +238,9 @@ private fun PlaceCard(place: JournalRules.PlaceRow, onEvent: (JournalEvent) -> U
             ) {
                 for (n in JournalRules.MIN_STARS..JournalRules.MAX_STARS) {
                     val label = stringResource(R.string.journal_stars, place.name, n)
-                    IconButton(onClick = { onEvent(JournalEvent.Rate(place.key, n)) }, modifier = Modifier.semantics { contentDescription = label }) {
+                    TpIconButton(onClick = {
+                        onEvent(JournalEvent.Rate(place.key, n))
+                    }, modifier = Modifier.semantics { contentDescription = label }, tid = "trips.journal_screen_icon_button") {
                         Icon(
                             Icons.Filled.Star,
                             contentDescription = null,
@@ -246,11 +253,12 @@ private fun PlaceCard(place: JournalRules.PlaceRow, onEvent: (JournalEvent) -> U
                 TpButton(stringResource(R.string.journal_note), { noteOpen = true }, variant = TpButtonVariant.Text, tid = "journal.place.note")
                 place.note?.takeIf { it.isNotBlank() }?.let { Text(it, style = TravelTheme.typography.bodySmall) }
             } else {
-                OutlinedTextField(
+                TpOutlinedTextField(
                     value = note,
                     onValueChange = { note = it.take(JournalRules.MAX_NOTE) },
                     label = { Text(stringResource(R.string.journal_note_label)) },
                     modifier = Modifier.fillMaxWidth(),
+                    tid = "trips.journal_note_label",
                 )
                 TpButton(
                     stringResource(R.string.journal_note_save),

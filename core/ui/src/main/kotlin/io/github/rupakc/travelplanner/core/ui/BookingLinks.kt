@@ -69,5 +69,7 @@ fun BookingLinkButton(
     val open = rememberLinkOpener()
     val label = providerName?.let { stringResource(R.string.booking_open, it) } ?: stringResource(R.string.booking_open_generic)
     val described = if (accessibilityLabel != null) modifier.semantics { contentDescription = accessibilityLabel } else modifier
-    TpButton(label, onClick = { open(url) }, modifier = described, variant = variant, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp)
+    TpButton(label, onClick = {
+        open(url)
+    }, modifier = described, variant = variant, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp, tid = "ui.booking_links_tp_button")
 }

@@ -61,6 +61,7 @@ import io.github.rupakc.travelplanner.AuthGate
 import io.github.rupakc.travelplanner.R
 import io.github.rupakc.travelplanner.core.data.telemetry.ConsentPromptState
 import io.github.rupakc.travelplanner.core.designsystem.component.LocalUiEventSink
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
 import io.github.rupakc.travelplanner.core.designsystem.component.UiEventKind
 import io.github.rupakc.travelplanner.core.designsystem.component.UiEventSink
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -537,9 +538,9 @@ fun TravelAppScaffold(
                     TopAppBar(
                         title = { Text(stringResource(currentTopLevel.labelRes), modifier = Modifier.semantics { heading() }) },
                         actions = {
-                            TopBarAction(Icons.Filled.Search, stringResource(R.string.nav_global_search), onOpenSearch)
+                            TopBarAction(Icons.Filled.Search, stringResource(R.string.nav_global_search), "nav.global_search", onOpenSearch)
                             bell()
-                            if (showSettingsAction) TopBarAction(Icons.Filled.Settings, stringResource(R.string.nav_settings), onOpenSettings)
+                            if (showSettingsAction) TopBarAction(Icons.Filled.Settings, stringResource(R.string.nav_settings), "nav.settings", onOpenSettings)
                         },
                         // Above the screen below it: a list item scrolled under the bar must not count as covering
                         // the bar's 48 dp actions (accessibility services read the z-order, not the clip).
@@ -578,8 +579,8 @@ fun TravelAppScaffold(
  * with the rest as touch padding, which the Accessibility Test Framework measured as too small; E2E O2).
  */
 @Composable
-private fun TopBarAction(icon: ImageVector, label: String, onClick: () -> Unit) {
-    IconButton(onClick = onClick, modifier = Modifier.size(TravelTheme.spacing.minTouchTarget)) {
+private fun TopBarAction(icon: ImageVector, label: String, tid: String, onClick: () -> Unit) {
+    TpIconButton(onClick = onClick, tid = tid, modifier = Modifier.size(TravelTheme.spacing.minTouchTarget)) {
         Icon(icon, contentDescription = label)
     }
 }

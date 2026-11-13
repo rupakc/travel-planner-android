@@ -30,6 +30,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.onboarding.OnboardingEvent
@@ -54,6 +56,7 @@ internal fun HomePassportStep(
                 { onEvent(OnboardingEvent.HomeNext(askNotifications)) },
                 Modifier.fillMaxWidth(),
                 loading = state.saving,
+                tid = "onboarding.onboarding_saving",
             )
         },
     ) {
@@ -63,7 +66,7 @@ internal fun HomePassportStep(
         ) {
             if (state.resumed) ResumeNote()
             StepIntro(R.string.onboarding_home_title, stringResource(R.string.onboarding_home_message))
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = state.homeAirport,
                 onValueChange = { onEvent(OnboardingEvent.SetHomeAirport(it)) },
                 label = { Text(stringResource(R.string.onboarding_home_airport)) },
@@ -72,13 +75,14 @@ internal fun HomePassportStep(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth(),
+                tid = "onboarding.onboarding_home_airport",
             )
             state.airportSuggestions.forEach { airport ->
                 val code = airport.iataCode.orEmpty()
                 val place = listOfNotNull(airport.city ?: airport.name, airport.country).joinToString(", ")
                 SuggestionRow(listOf(code, place).filter { it.isNotBlank() }.joinToString(" - ")) { onEvent(OnboardingEvent.PickHomeAirport(airport)) }
             }
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = state.passport,
                 onValueChange = { onEvent(OnboardingEvent.SetPassport(it)) },
                 label = { Text(stringResource(R.string.onboarding_passport)) },
@@ -87,6 +91,7 @@ internal fun HomePassportStep(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth(),
+                tid = "onboarding.onboarding_passport",
             )
             state.passportSuggestions.forEach { nationality ->
                 val label = nationality.nationality.orEmpty()
@@ -108,12 +113,14 @@ internal fun FirstTripStep(state: OnboardingUiState, onEvent: (OnboardingEvent) 
                 { onEvent(OnboardingEvent.Complete(planTrip = false)) },
                 variant = TpButtonVariant.Text,
                 enabled = !state.saving,
+                tid = "onboarding.onboarding_just_explore",
             )
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
                 TpButton(
                     stringResource(if (state.saving) R.string.onboarding_saving else R.string.onboarding_plan_first_trip),
                     { onEvent(OnboardingEvent.Complete(planTrip = true)) },
                     loading = state.saving,
+                    tid = "onboarding.onboarding_saving_2",
                 )
             }
         },
@@ -157,7 +164,7 @@ private fun SuggestionRow(text: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .heightIn(min = TravelTheme.spacing.minTouchTarget)
             .clip(TravelShape.ItemCard)
-            .clickable(onClick = onClick)
+            .tpClickable(tid = "onboarding.journey_steps_clickable", onClick = onClick)
             .padding(horizontal = TravelTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),

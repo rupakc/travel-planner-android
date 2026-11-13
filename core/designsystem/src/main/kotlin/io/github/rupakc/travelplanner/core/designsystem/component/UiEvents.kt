@@ -3,8 +3,11 @@ package io.github.rupakc.travelplanner.core.designsystem.component
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 
-/** What the user did: a tap on a button, or a toggle of a chip (with its new state). */
-enum class UiEventKind { TAP, TOGGLE }
+/**
+ * What the user did: a tap on a control, a toggle (with its new state), the first edit of a text field in a focus
+ * session (CHANGE, never the text), or a keyboard submit (SUBMIT).
+ */
+enum class UiEventKind { TAP, TOGGLE, CHANGE, SUBMIT }
 
 /**
  * Receives UI interaction events from design-system controls. The app installs a sink that forwards to

@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
 import io.github.rupakc.travelplanner.core.model.settings.AppSettings
@@ -65,7 +66,12 @@ fun AppearanceScreen(
                         Modifier
                             .fillMaxWidth()
                             .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                            .selectable(selected = settings.themeMode == mode, role = Role.RadioButton, onClick = { onEvent(AppearanceEvent.SetTheme(mode)) })
+                            .tpSelectable(
+                                tid = "settings.appearance_theme_mode",
+                                selected = settings.themeMode == mode,
+                                role = Role.RadioButton,
+                                onClick = { onEvent(AppearanceEvent.SetTheme(mode)) },
+                            )
                             .padding(horizontal = TravelTheme.spacing.gutter),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {

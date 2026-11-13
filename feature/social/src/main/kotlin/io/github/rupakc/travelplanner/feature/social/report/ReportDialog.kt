@@ -23,6 +23,8 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.social.ReportReason
 import io.github.rupakc.travelplanner.feature.social.R
@@ -54,7 +56,13 @@ fun ReportDialog(
                             Modifier
                                 .fillMaxWidth()
                                 .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                                .selectable(selected = picked == reason, enabled = !sending, role = Role.RadioButton, onClick = { picked = reason }),
+                                .tpSelectable(
+                                    tid = "social.report_reason",
+                                    selected = picked == reason,
+                                    enabled = !sending,
+                                    role = Role.RadioButton,
+                                    onClick = { picked = reason },
+                                ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RadioButton(selected = picked == reason, onClick = null, enabled = !sending)
@@ -73,12 +81,12 @@ fun ReportDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { picked?.let(onSubmit) }, enabled = picked != null && !sending) {
+            TpTextButton(onClick = { picked?.let(onSubmit) }, enabled = picked != null && !sending, tid = "social.social_report_send") {
                 Text(stringResource(R.string.social_report_send))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = !sending) { Text(stringResource(R.string.social_cancel)) }
+            TpTextButton(onClick = onDismiss, enabled = !sending, tid = "social.social_cancel") { Text(stringResource(R.string.social_cancel)) }
         },
     )
 }

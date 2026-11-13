@@ -168,6 +168,7 @@ private fun RecheckLine(view: HealthView, rechecking: Boolean, onRecheck: () -> 
             loading = rechecking,
             variant = TpButtonVariant.Secondary,
             leadingIcon = Icons.Filled.Refresh,
+            tid = "results.health_rechecking",
         )
     }
     view.error?.let {

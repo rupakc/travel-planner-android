@@ -152,7 +152,9 @@ internal fun VerificationSheet(detail: VerificationDetail, onOpenLink: (String) 
                     check.label?.let { Text(it, style = TravelTheme.typography.titleSmall) }
                     check.detail?.let { Text(it, style = TravelTheme.typography.bodySmall) }
                     check.url?.takeIf { it.startsWith("http") }?.let { url ->
-                        TpButton(stringResource(R.string.results_source), onClick = { onOpenLink(url) }, variant = TpButtonVariant.Text)
+                        TpButton(stringResource(R.string.results_source), onClick = {
+                            onOpenLink(url)
+                        }, variant = TpButtonVariant.Text, tid = "results.results_source")
                     }
                 }
             }

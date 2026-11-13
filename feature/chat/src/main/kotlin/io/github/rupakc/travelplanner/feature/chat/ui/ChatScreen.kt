@@ -45,6 +45,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import io.github.rupakc.travelplanner.core.data.repository.ChatThread
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.chat.ChatUiEvent
 import io.github.rupakc.travelplanner.feature.chat.ChatUiState
@@ -98,8 +101,14 @@ fun ChatScreen(
             onDismissRequest = { onEvent(ChatUiEvent.DismissReplacePlan) },
             title = { Text(stringResource(R.string.chat_replace_title)) },
             text = { Text(stringResource(R.string.chat_replace_message)) },
-            confirmButton = { TextButton(onClick = { onEvent(ChatUiEvent.ConfirmReplacePlan) }) { Text(stringResource(R.string.chat_replace_confirm)) } },
-            dismissButton = { TextButton(onClick = { onEvent(ChatUiEvent.DismissReplacePlan) }) { Text(stringResource(R.string.chat_cancel)) } },
+            confirmButton = {
+                TpTextButton(onClick = {
+                    onEvent(ChatUiEvent.ConfirmReplacePlan)
+                }, tid = "chat.chat_replace_confirm") { Text(stringResource(R.string.chat_replace_confirm)) }
+            },
+            dismissButton = {
+                TpTextButton(onClick = { onEvent(ChatUiEvent.DismissReplacePlan) }, tid = "chat.chat_cancel") { Text(stringResource(R.string.chat_cancel)) }
+            },
         )
     }
 }
@@ -129,7 +138,9 @@ private fun ConversationHeader(state: ChatUiState, onEvent: (ChatUiEvent) -> Uni
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (showThreadsButton) {
-                IconButton(onClick = onShowThreads) { Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.chat_threads_show)) }
+                TpIconButton(onClick = onShowThreads, tid = "chat.chat_threads_show") {
+                    Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.chat_threads_show))
+                }
             }
             Text(
                 state.currentTitle ?: stringResource(R.string.chat_new),
@@ -138,7 +149,7 @@ private fun ConversationHeader(state: ChatUiState, onEvent: (ChatUiEvent) -> Uni
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f).padding(horizontal = TravelTheme.spacing.sm).semantics { heading() },
             )
-            IconButton(onClick = { onEvent(ChatUiEvent.NewChat) }, enabled = !state.isStreaming && state.currentThreadId != null) {
+            TpIconButton(onClick = { onEvent(ChatUiEvent.NewChat) }, enabled = !state.isStreaming && state.currentThreadId != null, tid = "chat.chat_new") {
                 Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.chat_new))
             }
             val planA11y = pluralStringResource(R.plurals.chat_my_plan_a11y, state.planCount, state.planCount)
@@ -150,6 +161,7 @@ private fun ConversationHeader(state: ChatUiState, onEvent: (ChatUiEvent) -> Uni
                     onClick = { onEvent(ChatUiEvent.OpenMyPlan) },
                     variant = TpButtonVariant.Text,
                     modifier = Modifier.semantics { contentDescription = planA11y },
+                    tid = "chat.chat_my_plan",
                 )
             }
         }
@@ -163,14 +175,17 @@ private fun RenameDialog(thread: ChatThread, onDismiss: () -> Unit, onSave: (Str
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.chat_rename_title)) },
         text = {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text(stringResource(R.string.chat_rename_label)) },
                 singleLine = true,
+                tid = "chat.chat_rename_label",
             )
         },
-        confirmButton = { TextButton(onClick = { onSave(title) }, enabled = title.isNotBlank()) { Text(stringResource(R.string.chat_save)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.chat_cancel)) } },
+        confirmButton = {
+            TpTextButton(onClick = { onSave(title) }, enabled = title.isNotBlank(), tid = "chat.chat_save") { Text(stringResource(R.string.chat_save)) }
+        },
+        dismissButton = { TpTextButton(onClick = onDismiss, tid = "chat.chat_cancel_2") { Text(stringResource(R.string.chat_cancel)) } },
     )
 }

@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.export.safeUrl
 import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
@@ -155,13 +156,13 @@ private fun SelectionRow(
         }
         if (link != null) {
             val label = stringResource(R.string.plan_open_link_a11y, title)
-            IconButton(onClick = { onOpenLink(link) }) {
+            TpIconButton(onClick = { onOpenLink(link) }, tid = "plan.selection_views_icon_button") {
                 Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = label)
             }
         }
         val removal = entry.removal
         if (onRemove != null && removal != null) {
-            IconButton(onClick = { onRemove(removal, entry.title) }) {
+            TpIconButton(onClick = { onRemove(removal, entry.title) }, tid = "plan.plan_remove_a11y") {
                 Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.plan_remove_a11y, title))
             }
         }

@@ -28,6 +28,9 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.alerts.AlertMode
@@ -96,7 +99,7 @@ internal fun ModeOption(
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                    .selectable(selected = selected, onClick = onSelect, role = Role.RadioButton),
+                    .tpSelectable(tid = "ui.watch_sheet_parts_selectable", selected = selected, onClick = onSelect, role = Role.RadioButton),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 RadioButton(selected = selected, onClick = null)
@@ -122,7 +125,7 @@ internal fun CheckRow(
         modifier
             .fillMaxWidth()
             .heightIn(min = TravelTheme.spacing.minTouchTarget)
-            .toggleable(value = checked, enabled = enabled, role = Role.Checkbox, onValueChange = onChange),
+            .tpToggleable(tid = "ui.watch_sheet_parts_toggleable", value = checked, enabled = enabled, role = Role.Checkbox, onValueChange = onChange),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(checked = checked, onCheckedChange = null, enabled = enabled)
@@ -162,7 +165,7 @@ fun AlertModeGroup(
         ModeOption(mode == AlertMode.BELOW_TARGET, stringResource(R.string.watch_mode_below_target), { onMode(AlertMode.BELOW_TARGET) }) {
             if (mode == AlertMode.BELOW_TARGET) {
                 val label = stringResource(R.string.watch_target_label, currencyLabel(currency))
-                OutlinedTextField(
+                TpOutlinedTextField(
                     value = target,
                     onValueChange = onTarget,
                     label = { Text(label) },
@@ -173,6 +176,7 @@ fun AlertModeGroup(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     shape = TravelShape.Input,
                     modifier = Modifier.fillMaxWidth().padding(top = TravelTheme.spacing.xs),
+                    tid = "ui.watch_sheet_parts_outlined_text_field",
                 )
             }
         }

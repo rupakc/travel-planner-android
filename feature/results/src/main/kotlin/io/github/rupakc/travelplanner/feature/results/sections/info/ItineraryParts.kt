@@ -45,6 +45,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.itinerary.ArrangedItinerary
@@ -311,8 +313,9 @@ private fun ChangeBar(changeCount: Int, canUndo: Boolean, onUndo: () -> Unit, on
                 enabled = canUndo,
                 variant = TpButtonVariant.Text,
                 leadingIcon = Icons.Filled.Refresh,
+                tid = "results.itin_undo",
             )
-            if (changeCount > 0) TpButton(stringResource(R.string.itin_reset), onClick = onReset, variant = TpButtonVariant.Text)
+            if (changeCount > 0) TpButton(stringResource(R.string.itin_reset), onClick = onReset, variant = TpButtonVariant.Text, tid = "results.itin_reset")
         }
     }
 }
@@ -370,7 +373,7 @@ private fun EditableSlot(
         if (noteOpen) {
             // Local text (cursor-stable, no dropped characters); every change is pushed to the plan draft.
             var noteText by rememberSaveable(key) { mutableStateOf(note) }
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = noteText,
                 onValueChange = { text ->
                     noteText = text
@@ -379,6 +382,7 @@ private fun EditableSlot(
                 placeholder = { Text(stringResource(R.string.itin_note_placeholder_personal)) },
                 label = { Text(stringResource(R.string.itin_field_note)) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = TravelTheme.spacing.lg, vertical = TravelTheme.spacing.sm),
+                tid = "results.itin_note_placeholder_personal",
             )
         }
     }
@@ -392,6 +396,7 @@ private fun SmallAction(text: String, a11y: String, icon: androidx.compose.ui.gr
         variant = if (emphasized) TpButtonVariant.Tonal else TpButtonVariant.Text,
         leadingIcon = icon,
         modifier = Modifier.semantics { contentDescription = a11y },
+        tid = "results.itinerary_parts_tp_button",
     )
 }
 
@@ -418,6 +423,7 @@ private fun MoveMenu(
                     contentDescription = label
                     stateDescription = menuState
                 },
+            tid = "results.itin_move",
         )
         DropdownMenu(expanded = open, onDismissRequest = { open = false }, modifier = Modifier.semantics { paneTitle = label }) {
             targets.groupBy { it.dayNumber }.forEach { (day, items) ->
@@ -438,24 +444,26 @@ private fun MoveMenu(
                         } else {
                             stringResource(R.string.itin_move_to_a11y, t.dayNumber ?: 0, tod)
                         }
-                    DropdownMenuItem(
+                    TpDropdownMenuItem(
                         text = { Text(text) },
                         onClick = {
                             open = false
                             onMove(t)
                         },
                         modifier = Modifier.semantics { contentDescription = a11y },
+                        tid = "results.itinerary_parts_dropdown_menu_item",
                     )
                 }
             }
             // destructive action last, as on the web
             HorizontalDivider()
-            DropdownMenuItem(
+            TpDropdownMenuItem(
                 text = { Text(stringResource(R.string.itin_remove_from_day), color = TravelTheme.colors.error) },
                 onClick = {
                     open = false
                     onRemove()
                 },
+                tid = "results.itin_remove_from_day",
             )
         }
     }
@@ -469,7 +477,7 @@ private fun SlotEditor(slot: ItinerarySlot, key: String, edit: SlotEdit, note: S
     var noteText by rememberSaveable(key) { mutableStateOf(note) }
     var costText by rememberSaveable(key) { mutableStateOf((edit.cost ?: slot.estimatedCostUsd)?.plain().orEmpty()) }
     Column(Modifier.fillMaxWidth().padding(TravelTheme.spacing.lg), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = activityText,
             onValueChange = { v ->
                 activityText = v
@@ -477,9 +485,10 @@ private fun SlotEditor(slot: ItinerarySlot, key: String, edit: SlotEdit, note: S
             },
             label = { Text(stringResource(R.string.itin_field_activity)) },
             modifier = Modifier.fillMaxWidth(),
+            tid = "results.itin_field_activity",
         )
         Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = locationText,
                 onValueChange = { v ->
                     locationText = v
@@ -487,9 +496,10 @@ private fun SlotEditor(slot: ItinerarySlot, key: String, edit: SlotEdit, note: S
                 },
                 label = { Text(stringResource(R.string.itin_field_location)) },
                 modifier = Modifier.weight(1f),
+                tid = "results.itin_field_location",
             )
             val locale = currentLocale()
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = costText,
                 onValueChange = { v ->
                     costText = v
@@ -498,9 +508,10 @@ private fun SlotEditor(slot: ItinerarySlot, key: String, edit: SlotEdit, note: S
                 label = { Text(stringResource(R.string.itin_field_cost)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
+                tid = "results.itin_field_cost",
             )
         }
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = noteText,
             onValueChange = { v ->
                 noteText = v
@@ -510,8 +521,9 @@ private fun SlotEditor(slot: ItinerarySlot, key: String, edit: SlotEdit, note: S
             placeholder = { Text(stringResource(R.string.itin_note_placeholder)) },
             minLines = 2,
             modifier = Modifier.fillMaxWidth(),
+            tid = "results.itin_field_note",
         )
-        TpButton(stringResource(R.string.itin_done), onClick = onDone, leadingIcon = Icons.Filled.Check)
+        TpButton(stringResource(R.string.itin_done), onClick = onDone, leadingIcon = Icons.Filled.Check, tid = "results.itin_done")
     }
 }
 
@@ -548,6 +560,7 @@ private fun RemovedList(
                             variant = TpButtonVariant.Text,
                             leadingIcon = Icons.Filled.Refresh,
                             modifier = Modifier.semantics { contentDescription = a11y },
+                            tid = "results.itin_restore",
                         )
                     }
                 }

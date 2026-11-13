@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedButton
 import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -109,10 +110,11 @@ fun ChipRow(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
 @Composable
 fun HiddenByBudgetRow(count: Int, onShowAll: () -> Unit, modifier: Modifier = Modifier) {
     if (count <= 0) return
-    OutlinedButton(
+    TpOutlinedButton(
         onClick = onShowAll,
         modifier = modifier.fillMaxWidth().heightIn(min = TravelTheme.spacing.minTouchTarget),
         shape = TravelShape.ItemCard,
+        tid = "results.commerce_parts_outlined_button",
     ) {
         Text(pluralStringResource(R.plurals.results_budget_hidden, count, count), style = TravelTheme.typography.labelMedium)
     }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.rupakc.travelplanner.core.designsystem.component.TpAssistChip
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.section.Verification
@@ -52,12 +53,13 @@ fun VerificationChip(verification: Verification, modifier: Modifier = Modifier, 
             VerificationLevel.CONFLICT -> Icons.Filled.Warning to TravelTheme.extendedColors.warning
             VerificationLevel.UNVERIFIED, null -> Icons.Filled.Info to TravelTheme.colors.onSurfaceVariant
         }
-    AssistChip(
+    TpAssistChip(
         onClick = onClick,
         label = { Text(label, style = TravelTheme.typography.labelSmall) },
         modifier = modifier,
         shape = TravelShape.Pill,
         leadingIcon = { Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(AssistChipDefaults.IconSize)) },
         border = AssistChipDefaults.assistChipBorder(enabled = true, borderWidth = 1.dp),
+        tid = "ui.verification_chip_assist_chip",
     )
 }

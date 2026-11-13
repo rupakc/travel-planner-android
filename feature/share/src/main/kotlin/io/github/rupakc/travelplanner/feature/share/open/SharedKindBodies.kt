@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
+import io.github.rupakc.travelplanner.core.designsystem.component.TpAssistChip
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
@@ -72,12 +73,15 @@ internal fun ShareCardBody(card: ShareCardSnapshot, ownerName: String?, onPlanOw
         if (chips.isNotEmpty()) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
                 chips.forEach { (stat, plural) ->
-                    AssistChip(onClick = {}, enabled = false, label = { Text(pluralStringResource(plural, stat.count, stat.count)) })
+                    TpAssistChip(onClick = {
+                    }, enabled = false, label = {
+                        Text(pluralStringResource(plural, stat.count, stat.count))
+                    }, tid = "share.shared_kind_bodies_assist_chip")
                 }
             }
         }
         ownerName?.let { Text(stringResource(R.string.share_shared_by, it), style = TravelTheme.typography.bodyMedium) }
-        TpButton(stringResource(R.string.share_plan_own), onClick = onPlanOwn, modifier = Modifier.fillMaxWidth())
+        TpButton(stringResource(R.string.share_plan_own), onClick = onPlanOwn, modifier = Modifier.fillMaxWidth(), tid = "share.share_plan_own")
         Text(
             stringResource(R.string.share_footer),
             style = TravelTheme.typography.bodySmall,
@@ -100,7 +104,7 @@ internal fun UnknownShareBody(plainLink: String?, onOpenLink: (String) -> Unit, 
             actionLabel = plainLink?.let { stringResource(R.string.share_unknown_open) },
             onAction = { plainLink?.let(onOpenLink) },
         )
-        TpButton(stringResource(R.string.share_plan_own), onClick = onPlanOwn, variant = TpButtonVariant.Text)
+        TpButton(stringResource(R.string.share_plan_own), onClick = onPlanOwn, variant = TpButtonVariant.Text, tid = "share.share_plan_own_2")
         footer()
     }
 }

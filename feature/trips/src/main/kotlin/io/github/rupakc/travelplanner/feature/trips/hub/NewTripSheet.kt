@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.trips.R
 
@@ -39,7 +40,7 @@ internal fun NewTripSheetContent(sheet: NewTripSheet, onEvent: (TripsEvent) -> U
         ) {
             Text(stringResource(R.string.trips_create_heading), style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
             val titleError = sheet.error == NewTripError.Title
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = sheet.title,
                 onValueChange = { onEvent(TripsEvent.SetTitle(it)) },
                 label = { Text(stringResource(R.string.trips_create_title)) },
@@ -48,14 +49,16 @@ internal fun NewTripSheetContent(sheet: NewTripSheet, onEvent: (TripsEvent) -> U
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth(),
+                tid = "trips.trips_create_title",
             )
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = sheet.destination,
                 onValueChange = { onEvent(TripsEvent.SetDestination(it)) },
                 label = { Text(stringResource(R.string.trips_create_destination)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth(),
+                tid = "trips.trips_create_destination",
             )
             val datesError = sheet.error == NewTripError.Dates
             Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
@@ -100,7 +103,7 @@ internal fun NewTripSheetContent(sheet: NewTripSheet, onEvent: (TripsEvent) -> U
 
 @Composable
 private fun DateField(value: String, label: Int, error: Boolean, onChange: (String) -> Unit, modifier: Modifier) {
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = value,
         onValueChange = onChange,
         label = { Text(stringResource(label)) },
@@ -109,5 +112,6 @@ private fun DateField(value: String, label: Int, error: Boolean, onChange: (Stri
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = modifier,
+        tid = "trips.trips_date_hint",
     )
 }

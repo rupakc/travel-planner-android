@@ -31,6 +31,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTab
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.social.FeedScope
@@ -76,7 +78,9 @@ internal fun FeedScreen(
                 title = stringResource(R.string.social_feed_title),
                 onBack = onBack,
                 actions = {
-                    IconButton(onClick = { onEvent(FeedEvent.Refresh) }, modifier = Modifier.heightIn(min = TravelTheme.spacing.minTouchTarget)) {
+                    TpIconButton(onClick = {
+                        onEvent(FeedEvent.Refresh)
+                    }, modifier = Modifier.heightIn(min = TravelTheme.spacing.minTouchTarget), tid = "social.social_feed_refresh") {
                         Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.social_feed_refresh))
                     }
                 },
@@ -87,11 +91,12 @@ internal fun FeedScreen(
         Column(Modifier.padding(padding).fillMaxSize()) {
             PrimaryTabRow(selectedTabIndex = state.scope.ordinal) {
                 FeedScope.entries.forEach { scope ->
-                    Tab(
+                    TpTab(
                         selected = scope == state.scope,
                         onClick = { onEvent(FeedEvent.SelectScope(scope)) },
                         modifier = Modifier.heightIn(min = TravelTheme.spacing.minTouchTarget),
                         text = { Text(stringResource(scope.titleRes())) },
+                        tid = "social.feed_screen_tab",
                     )
                 }
             }

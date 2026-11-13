@@ -67,7 +67,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpInputChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpSlider
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.readsWithoutEmoji
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.search.ACCESSIBILITY_IDS
@@ -215,7 +223,7 @@ internal fun TripDatesField(
         DatePickerDialog(
             onDismissRequest = { open = false },
             confirmButton = {
-                TextButton(
+                TpTextButton(
                     onClick = {
                         state.selectedStartDateMillis?.let { start ->
                             onChange(start.utcDate().toString(), state.selectedEndDateMillis?.utcDate()?.toString().orEmpty())
@@ -223,9 +231,12 @@ internal fun TripDatesField(
                         open = false
                     },
                     enabled = state.selectedStartDateMillis != null,
+                    tid = "search.form_fields_text_button",
                 ) { Text(stringResource(R.string.search_dates_ok)) }
             },
-            dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.search_dates_cancel)) } },
+            dismissButton = {
+                TpTextButton(onClick = { open = false }, tid = "search.search_dates_cancel") { Text(stringResource(R.string.search_dates_cancel)) }
+            },
         ) {
             DateRangePicker(
                 state = state,
@@ -257,12 +268,14 @@ internal fun SingleDateField(label: String, value: String, today: LocalDate, onC
         DatePickerDialog(
             onDismissRequest = { open = false },
             confirmButton = {
-                TextButton(onClick = {
+                TpTextButton(onClick = {
                     state.selectedDateMillis?.let { onChange(it.utcDate().toString()) }
                     open = false
-                }) { Text(stringResource(R.string.search_dates_ok)) }
+                }, tid = "search.form_fields_text_button_2") { Text(stringResource(R.string.search_dates_ok)) }
             },
-            dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.search_dates_cancel)) } },
+            dismissButton = {
+                TpTextButton(onClick = { open = false }, tid = "search.search_dates_cancel_2") { Text(stringResource(R.string.search_dates_cancel)) }
+            },
         ) { DatePicker(state = state) }
     }
 }
@@ -297,7 +310,7 @@ internal fun BudgetField(
     modifier: Modifier = Modifier,
     errorText: String? = null,
 ) {
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = value,
         onValueChange = { onValueChange(it.filter { c -> c.isDigit() || c == '.' }) },
         modifier = modifier.fillMaxWidth(),
@@ -309,6 +322,7 @@ internal fun BudgetField(
         supportingText = errorText?.let { { Text(it) } },
         shape = TravelShape.Input,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
+        tid = "search.search_usd_prefix",
     )
 }
 
@@ -370,7 +384,10 @@ internal fun TravellersField(
             Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = TravelTheme.spacing.minTouchTarget)
-                .clickable(onClickLabel = stringResource(R.string.search_travelers_edit), role = Role.Button) { open = !open }
+                .tpClickable(tid = "search.search_travelers_edit", onClickLabel = stringResource(R.string.search_travelers_edit), role = Role.Button) {
+                    open =
+                        !open
+                }
                 .semantics { stateDescription = expandedText }
                 .padding(TravelTheme.spacing.md),
             verticalAlignment = Alignment.CenterVertically,
@@ -400,7 +417,9 @@ internal fun TravellersField(
                         Modifier
                             .fillMaxWidth()
                             .defaultMinSize(minHeight = TravelTheme.spacing.minTouchTarget)
-                            .toggleable(checked, role = Role.Checkbox) { onAccessibilityChange(accessibilityNeeds.toggle(id)) },
+                            .tpToggleable(tid = "search.form_fields_toggleable", checked, role = Role.Checkbox) {
+                                onAccessibilityChange(accessibilityNeeds.toggle(id))
+                            },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Checkbox(checked = checked, onCheckedChange = null)
@@ -423,7 +442,7 @@ private fun TravellerStepper(kind: TravellerKind, counts: TravellerCounts, onCou
             Text(label, style = TravelTheme.typography.bodyLarge)
             Text(stringResource(kind.subRes()), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
         }
-        IconButton(onClick = { onCountsChange(counts.change(kind, -1)) }, enabled = counts.canDecrement(kind)) {
+        TpIconButton(onClick = { onCountsChange(counts.change(kind, -1)) }, enabled = counts.canDecrement(kind), tid = "search.search_remove_one") {
             Icon(painterResource(R.drawable.search_ic_remove), contentDescription = stringResource(R.string.search_remove_one, label))
         }
         Text(
@@ -432,7 +451,7 @@ private fun TravellerStepper(kind: TravellerKind, counts: TravellerCounts, onCou
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.semantics { contentDescription = "$label ${counts[kind]}" },
         )
-        IconButton(onClick = { onCountsChange(counts.change(kind, 1)) }, enabled = counts.canIncrement(kind)) {
+        TpIconButton(onClick = { onCountsChange(counts.change(kind, 1)) }, enabled = counts.canIncrement(kind), tid = "search.search_add_one") {
             Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.search_add_one, label))
         }
     }
@@ -456,7 +475,7 @@ internal fun TagInputField(
         input = ""
     }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = input,
             onValueChange = { text -> if (text.endsWith(",")) add(text) else input = text },
             modifier = Modifier.fillMaxWidth(),
@@ -467,11 +486,12 @@ internal fun TagInputField(
             shape = TravelShape.Input,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { add(input) }),
+            tid = "search.search_tag_hint",
         )
         if (values.isNotEmpty()) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                 values.forEach { tag ->
-                    InputChip(
+                    TpInputChip(
                         selected = true,
                         onClick = { onChange(values - tag) },
                         label = { Text(tag) },
@@ -484,6 +504,7 @@ internal fun TagInputField(
                         },
                         shape = TravelShape.Pill,
                         colors = InputChipDefaults.inputChipColors(),
+                        tid = "search.search_tag_remove",
                     )
                 }
             }
@@ -537,7 +558,7 @@ internal fun SerendipityDial(value: Double, onChange: (Double) -> Unit, modifier
             FieldGroupLabel(stringResource(R.string.search_discovery_style), Modifier.weight(1f))
             Text(style, style = TravelTheme.typography.labelLarge, color = TravelTheme.colors.primary)
         }
-        Slider(
+        TpSlider(
             value = value.toFloat(),
             onValueChange = { onChange(Math.round(it * STEPS_PER_UNIT) / STEPS_PER_UNIT) },
             steps = SLIDER_STEPS,
@@ -546,6 +567,7 @@ internal fun SerendipityDial(value: Double, onChange: (Double) -> Unit, modifier
                     contentDescription = dialLabel
                     stateDescription = style
                 },
+            tid = "search.form_fields_slider",
         )
         Row {
             Text(stringResource(R.string.search_style_start), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
@@ -576,7 +598,7 @@ internal fun PaceSelector(value: String, onChange: (String) -> Unit, modifier: M
                     Modifier
                         .weight(1f)
                         .defaultMinSize(minHeight = TravelTheme.spacing.minTouchTarget)
-                        .selectable(selected = value == id, role = Role.RadioButton) { onChange(id) },
+                        .tpSelectable(tid = "search.form_fields_selectable", selected = value == id, role = Role.RadioButton) { onChange(id) },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RadioButton(selected = value == id, onClick = null)

@@ -29,6 +29,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.auth.SessionInfo
@@ -69,8 +70,14 @@ internal fun SessionsScreen(state: SessionsUiState, onEvent: (SessionsEvent) -> 
             onDismissRequest = { onEvent(SessionsEvent.Dismiss) },
             title = { Text(stringResource(R.string.account_signout_all_title)) },
             text = { Text(stringResource(R.string.account_signout_all_body)) },
-            confirmButton = { TextButton(onClick = { onEvent(SessionsEvent.ConfirmSignOutAll) }) { Text(stringResource(R.string.account_signout_all)) } },
-            dismissButton = { TextButton(onClick = { onEvent(SessionsEvent.Dismiss) }) { Text(stringResource(R.string.account_cancel)) } },
+            confirmButton = {
+                TpTextButton(onClick = {
+                    onEvent(SessionsEvent.ConfirmSignOutAll)
+                }, tid = "account.account_signout_all") { Text(stringResource(R.string.account_signout_all)) }
+            },
+            dismissButton = {
+                TpTextButton(onClick = { onEvent(SessionsEvent.Dismiss) }, tid = "account.account_cancel") { Text(stringResource(R.string.account_cancel)) }
+            },
         )
     }
 }
@@ -98,7 +105,9 @@ private fun SessionsList(state: SessionsUiState, onEvent: (SessionsEvent) -> Uni
                         if (session.current) Text(stringResource(R.string.account_sessions_this_device), style = TravelTheme.typography.labelMedium)
                     }
                     if (!session.current) {
-                        TextButton(onClick = { onEvent(SessionsEvent.AskRevoke(session)) }, enabled = state.revoking != session.id) {
+                        TpTextButton(onClick = {
+                            onEvent(SessionsEvent.AskRevoke(session))
+                        }, enabled = state.revoking != session.id, tid = "account.account_sessions_revoke") {
                             Text(stringResource(R.string.account_sessions_revoke))
                         }
                     }
@@ -124,8 +133,14 @@ private fun RevokeDialog(session: SessionInfo, onEvent: (SessionsEvent) -> Unit)
         onDismissRequest = { onEvent(SessionsEvent.Dismiss) },
         title = { Text(stringResource(R.string.account_sessions_revoke_title)) },
         text = { Text(session.deviceName ?: stringResource(R.string.account_sessions_unknown_device)) },
-        confirmButton = { TextButton(onClick = { onEvent(SessionsEvent.ConfirmRevoke) }) { Text(stringResource(R.string.account_sessions_revoke)) } },
-        dismissButton = { TextButton(onClick = { onEvent(SessionsEvent.Dismiss) }) { Text(stringResource(R.string.account_cancel)) } },
+        confirmButton = {
+            TpTextButton(onClick = {
+                onEvent(SessionsEvent.ConfirmRevoke)
+            }, tid = "account.account_sessions_revoke_2") { Text(stringResource(R.string.account_sessions_revoke)) }
+        },
+        dismissButton = {
+            TpTextButton(onClick = { onEvent(SessionsEvent.Dismiss) }, tid = "account.account_cancel_2") { Text(stringResource(R.string.account_cancel)) }
+        },
     )
 }
 

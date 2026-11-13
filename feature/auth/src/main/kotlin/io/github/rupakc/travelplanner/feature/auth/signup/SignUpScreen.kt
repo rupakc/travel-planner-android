@@ -78,7 +78,7 @@ internal fun SignUpScreen(
         modifier = modifier,
         below = {
             Text(stringResource(R.string.auth_su_have_account), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
-            TpButton(stringResource(R.string.auth_su_sign_in), onSignIn, variant = TpButtonVariant.Text)
+            TpButton(stringResource(R.string.auth_su_sign_in), onSignIn, variant = TpButtonVariant.Text, tid = "auth.auth_su_sign_in")
         },
     ) {
         state.error?.let { AuthErrorBanner(it) }

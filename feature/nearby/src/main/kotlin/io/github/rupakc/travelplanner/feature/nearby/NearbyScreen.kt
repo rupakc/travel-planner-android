@@ -56,6 +56,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.live.LiveFailure
@@ -141,7 +143,7 @@ fun NearbyScreen(
                 onBack = onBack,
                 actions = {
                     if (state.phase == NearbyPhase.Loaded || state.phase is NearbyPhase.Failed || state.phase is NearbyPhase.NoPlace) {
-                        IconButton(onClick = { onEvent(NearbyEvent.Refresh) }) {
+                        TpIconButton(onClick = { onEvent(NearbyEvent.Refresh) }, tid = "nearby.nearby_refresh") {
                             Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.nearby_refresh))
                         }
                     }
@@ -224,7 +226,7 @@ private fun Rationale(onRequestPermission: () -> Unit) {
         Text(stringResource(R.string.nearby_message), style = TravelTheme.typography.bodyLarge)
         Text(stringResource(R.string.nearby_rationale_precise), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
         Text(stringResource(R.string.nearby_background_note), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
-        TpButton(stringResource(R.string.nearby_allow), onRequestPermission, leadingIcon = Icons.Filled.LocationOn)
+        TpButton(stringResource(R.string.nearby_allow), onRequestPermission, leadingIcon = Icons.Filled.LocationOn, tid = "nearby.nearby_allow")
     }
 }
 
@@ -240,8 +242,8 @@ private fun Message(title: String, body: String, primary: Pair<String, () -> Uni
         Icon(Icons.Filled.Warning, contentDescription = null, tint = TravelTheme.extendedColors.warning)
         Text(title, style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
         Text(body, style = TravelTheme.typography.bodyMedium, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
-        TpButton(primary.first, primary.second)
-        TpButton(secondary.first, secondary.second, variant = TpButtonVariant.Text)
+        TpButton(primary.first, primary.second, tid = "nearby.nearby_screen_tp_button")
+        TpButton(secondary.first, secondary.second, variant = TpButtonVariant.Text, tid = "nearby.nearby_screen_tp_button_2")
     }
 }
 
@@ -348,6 +350,7 @@ private fun PlaceCard(card: NearbyCard, onOpenMaps: (NearbyCard) -> Unit, canMar
                 variant = TpButtonVariant.Text,
                 leadingIcon = Icons.Filled.Place,
                 modifier = Modifier.semantics { contentDescription = a11y },
+                tid = "nearby.nearby_open_maps",
             )
             if (canMark) {
                 val hereA11y = stringResource(R.string.nearby_here_a11y, card.name)
@@ -358,6 +361,7 @@ private fun PlaceCard(card: NearbyCard, onOpenMaps: (NearbyCard) -> Unit, canMar
                     enabled = !marked,
                     leadingIcon = Icons.Filled.Check,
                     modifier = Modifier.semantics { contentDescription = hereA11y },
+                    tid = "nearby.nearby_here_done",
                 )
             }
         }
@@ -372,12 +376,14 @@ private fun TripPicker(trips: List<HereTrip>, onPick: (Long) -> Unit, onDismiss:
         text = {
             Column {
                 trips.forEach { trip ->
-                    TextButton(onClick = { onPick(trip.id) }, modifier = Modifier.fillMaxWidth()) { Text(trip.title) }
+                    TpTextButton(onClick = {
+                        onPick(trip.id)
+                    }, modifier = Modifier.fillMaxWidth(), tid = "nearby.nearby_screen_text_button") { Text(trip.title) }
                 }
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.nearby_here_cancel)) } },
+        dismissButton = { TpTextButton(onClick = onDismiss, tid = "nearby.nearby_here_cancel") { Text(stringResource(R.string.nearby_here_cancel)) } },
     )
 }
 
@@ -392,6 +398,7 @@ private fun Sources(sources: List<GroundingSource>, onOpen: (String) -> Unit) {
                 { onOpen(uri) },
                 variant = TpButtonVariant.Text,
                 leadingIcon = Icons.AutoMirrored.Filled.ExitToApp,
+                tid = "nearby.nearby_screen_tp_button_3",
             )
         }
     }

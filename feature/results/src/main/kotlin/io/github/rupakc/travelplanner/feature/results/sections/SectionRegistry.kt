@@ -98,7 +98,12 @@ internal fun ResultsSectionCard(
                         style = TravelTheme.typography.bodyMedium,
                         color = TravelTheme.colors.onSurfaceVariant,
                     )
-                    TpButton(stringResource(R.string.results_run_search), onClick = onRunSearch, variant = TpButtonVariant.Tonal)
+                    TpButton(
+                        stringResource(R.string.results_run_search),
+                        onClick = onRunSearch,
+                        variant = TpButtonVariant.Tonal,
+                        tid = "results.results_run_search",
+                    )
                 }
 
                 data == null && section.status == SectionStatus.DONE -> {

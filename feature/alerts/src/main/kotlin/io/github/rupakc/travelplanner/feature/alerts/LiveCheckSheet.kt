@@ -91,7 +91,13 @@ internal fun LiveCheckContent(live: LiveCheckUi, title: String?, onRetry: () -> 
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
                 if (error.failure != LiveFailure.NOT_FOUND && error.failure != LiveFailure.WATCH_EXPIRED) {
-                    TpButton(stringResource(R.string.alerts_retry), onRetry, variant = TpButtonVariant.Secondary, leadingIcon = Icons.Filled.Refresh)
+                    TpButton(
+                        stringResource(R.string.alerts_retry),
+                        onRetry,
+                        variant = TpButtonVariant.Secondary,
+                        leadingIcon = Icons.Filled.Refresh,
+                        tid = "alerts.alerts_retry",
+                    )
                 }
             }
 
@@ -100,7 +106,7 @@ internal fun LiveCheckContent(live: LiveCheckUi, title: String?, onRetry: () -> 
             }
         }
         HorizontalDivider(color = TravelTheme.colors.outlineVariant)
-        TpButton(stringResource(R.string.alerts_live_close), onClose, variant = TpButtonVariant.Text)
+        TpButton(stringResource(R.string.alerts_live_close), onClose, variant = TpButtonVariant.Text, tid = "alerts.alerts_live_close")
     }
 }
 
@@ -127,6 +133,7 @@ private fun LiveResult(result: LiveCheckResult, onOpen: (String) -> Unit) {
                     { onOpen(uri) },
                     variant = TpButtonVariant.Text,
                     leadingIcon = Icons.AutoMirrored.Filled.ExitToApp,
+                    tid = "alerts.alerts_live_quote_source",
                 )
             }
         }
@@ -135,7 +142,9 @@ private fun LiveResult(result: LiveCheckResult, onOpen: (String) -> Unit) {
         Text(stringResource(R.string.alerts_live_searched_for), style = TravelTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
         FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
             result.searchedFor.forEach { q ->
-                TpButton(q, { onOpen(googleSearchUrl(q)) }, variant = TpButtonVariant.Text, leadingIcon = Icons.Filled.Search)
+                TpButton(q, {
+                    onOpen(googleSearchUrl(q))
+                }, variant = TpButtonVariant.Text, leadingIcon = Icons.Filled.Search, tid = "alerts.live_check_sheet_tp_button")
             }
         }
     }
@@ -146,7 +155,7 @@ private fun LiveResult(result: LiveCheckResult, onOpen: (String) -> Unit) {
             val uri = src.uri ?: return@forEach
             TpButton(src.title?.takeIf(String::isNotBlank) ?: uri, {
                 onOpen(uri)
-            }, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp)
+            }, variant = TpButtonVariant.Text, leadingIcon = Icons.AutoMirrored.Filled.ExitToApp, tid = "alerts.live_check_sheet_tp_button_2")
         }
     }
     Text(

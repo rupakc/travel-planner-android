@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.core.domain.telemetry
 
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -130,5 +131,97 @@ class TelemetryRegistryMirrorTest {
             assertEquals(size, set.size)
             assertTrue(set.all(TelemetryProps::isToken))
         }
+    }
+
+    /**
+     * event name -> prop name -> registry type, from the committed snapshot of the server registry.
+     *
+     * To regenerate `src/test/resources/telemetry/registry-snapshot.txt` after the web registry changes: read
+     * `EVENTS` from `backend/app/telemetry/registry.py` on the web repo's origin/main and write one line per event
+     * (sorted): the name, then tab-separated `prop=type` pairs (enums as `enum:a|b|c`), keeping the `#` header.
+     */
+    private val registry: Map<String, Map<String, String>> by lazy {
+        val text =
+            checkNotNull(javaClass.getResourceAsStream("/telemetry/registry-snapshot.txt")) { "registry snapshot missing" }
+                .bufferedReader().readText()
+        text.lines().filter { it.isNotBlank() && !it.startsWith("#") }.associate { line ->
+            val parts = line.split('\t')
+            parts[0] to parts.drop(1).associate { it.substringBefore('=') to it.substringAfter('=') }
+        }
+    }
+
+    private fun repoRoot(): File {
+        var dir: File? = File(System.getProperty("user.dir")).absoluteFile
+        while (dir != null && !File(dir, "settings.gradle.kts").exists()) dir = dir.parentFile
+        return checkNotNull(dir) { "settings.gradle.kts not found above ${System.getProperty("user.dir")}" }
+    }
+
+    private fun mainSources(): List<File> =
+        repoRoot().walkTopDown()
+            .onEnter { it.name != "build" && it.name != ".git" && it.name != ".gradle" }
+            .filter { it.isFile && it.extension == "kt" && "/src/main/" in it.path }
+            .toList()
+
+    private fun constants(): Map<String, String> =
+        TelemetryEvents::class.java.declaredFields
+            .filter { java.lang.reflect.Modifier.isStatic(it.modifiers) && it.type == String::class.java }
+            .associate { it.name to (it.apply { isAccessible = true }.get(null) as String) }
+
+    @Test
+    fun `every event constant exists in the server registry snapshot`() {
+        val missing = constants().filterValues { it !in registry }
+        assertTrue("Events missing from the registry snapshot: $missing", missing.isEmpty())
+    }
+
+    private val emitCall = Regex("""TelemetryEvents\.([A-Z_0-9]+)\s*,\s*mapOf\(""")
+    private val propKey = Regex(""""([a-z_0-9]+)"\s+to\b""")
+
+    /** The text of the `mapOf(...)` argument starting right after its opening parenthesis at [start]. */
+    private fun balanced(src: String, start: Int): String {
+        var depth = 1
+        var i = start
+        while (i < src.length && depth > 0) {
+            if (src[i] == '(') {
+                depth++
+            } else if (src[i] == ')') {
+                depth--
+            }
+            i++
+        }
+        return src.substring(start, i - 1)
+    }
+
+    private fun undeclared(file: File, consts: Map<String, String>): Pair<Int, List<String>> {
+        val src = file.readText()
+        val calls = emitCall.findAll(src).toList()
+        val problems =
+            calls.flatMap { m ->
+                val event = consts[m.groupValues[1]]
+                val declared = event?.let { registry[it] }
+                if (event == null || declared == null) {
+                    emptyList()
+                } else {
+                    propKey.findAll(balanced(src, m.range.last + 1)).map { it.groupValues[1] }
+                        .filter { it !in declared }.map { "${file.name}: $event sends undeclared prop $it" }.toList()
+                }
+            }
+        return calls.size to problems
+    }
+
+    @Test
+    fun `every emit site sends only props the registry declares for that event`() {
+        val consts = constants()
+        val results = mainSources().map { undeclared(it, consts) }
+        assertTrue("No emit sites found; the scan is broken", results.sumOf { it.first } > 20)
+        val problems = results.flatMap { it.second }
+        assertTrue(problems.joinToString("\n"), problems.isEmpty())
+    }
+
+    @Test
+    fun `ui events carry only a tid and a route (never text or values)`() {
+        assertEquals(mapOf("tid" to "id", "route" to "id"), registry.getValue(TelemetryEvents.UI_TAP))
+        assertEquals(mapOf("tid" to "id", "route" to "id"), registry.getValue(TelemetryEvents.UI_CHANGE))
+        assertEquals(mapOf("tid" to "id", "route" to "id"), registry.getValue(TelemetryEvents.UI_SUBMIT))
+        assertEquals(mapOf("tid" to "id", "route" to "id", "on" to "bool"), registry.getValue(TelemetryEvents.UI_TOGGLE))
     }
 }

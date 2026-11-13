@@ -32,10 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.common.AppError
-import io.github.rupakc.travelplanner.core.designsystem.component.LocalUiEventSink
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
-import io.github.rupakc.travelplanner.core.designsystem.component.UiEventKind
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.share.ShareDates
 import io.github.rupakc.travelplanner.core.model.share.ShareErrorCode
@@ -140,7 +140,6 @@ internal fun ShareCreateScreen(state: ShareCreateUiState, onEvent: (ShareCreateE
 
 @Composable
 private fun DatesGroup(state: ShareCreateUiState, onEvent: (ShareCreateEvent) -> Unit) {
-    val sink = LocalUiEventSink.current
     Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
         Text(stringResource(R.string.share_create_dates), style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.onSurfaceVariant)
         ShareDates.entries.forEach { mode ->
@@ -149,14 +148,12 @@ private fun DatesGroup(state: ShareCreateUiState, onEvent: (ShareCreateEvent) ->
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                    .selectable(
+                    .tpSelectable(
+                        tid = "share.dates.${mode.wire}",
                         selected = selected,
                         enabled = !state.busy,
                         role = Role.RadioButton,
-                        onClick = {
-                            runCatching { sink.onUiEvent(UiEventKind.TAP, "share.dates.${mode.wire}", null) }
-                            onEvent(ShareCreateEvent.SetDates(mode))
-                        },
+                        onClick = { onEvent(ShareCreateEvent.SetDates(mode)) },
                     ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
@@ -171,19 +168,16 @@ private fun DatesGroup(state: ShareCreateUiState, onEvent: (ShareCreateEvent) ->
 
 @Composable
 private fun SwitchRow(label: Int, checked: Boolean, enabled: Boolean, tid: String, onChange: (Boolean) -> Unit) {
-    val sink = LocalUiEventSink.current
     Row(
         Modifier
             .fillMaxWidth()
             .heightIn(min = TravelTheme.spacing.minTouchTarget)
-            .toggleable(
+            .tpToggleable(
+                tid = tid,
                 value = checked,
                 enabled = enabled,
                 role = Role.Switch,
-                onValueChange = {
-                    runCatching { sink.onUiEvent(UiEventKind.TOGGLE, tid, it) }
-                    onChange(it)
-                },
+                onValueChange = onChange,
             ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),

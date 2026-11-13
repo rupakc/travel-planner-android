@@ -79,7 +79,13 @@ internal fun VerifyEmailScreen(
             VerifyPhase.NeedsToken, VerifyPhase.Failed -> {
                 if (state.canResend) ResendBlock(state, onEvent)
                 PasteBlock(state, onEvent)
-                TpButton(stringResource(R.string.auth_check_back), onDone, variant = TpButtonVariant.Text, modifier = Modifier.fillMaxWidth())
+                TpButton(
+                    stringResource(R.string.auth_check_back),
+                    onDone,
+                    variant = TpButtonVariant.Text,
+                    modifier = Modifier.fillMaxWidth(),
+                    tid = "auth.auth_check_back",
+                )
             }
         }
     }

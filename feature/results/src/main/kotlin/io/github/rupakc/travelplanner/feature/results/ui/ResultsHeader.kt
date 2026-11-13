@@ -56,6 +56,9 @@ import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -143,13 +146,13 @@ internal fun StreamBanner(state: ResultsUiState, onRetry: () -> Unit, onRunSaved
     when {
         state.canRunSavedSearch -> {
             Banner(stringResource(R.string.results_saved_no_results), PillTone.Info, modifier) {
-                TpButton(stringResource(R.string.results_run_search), onClick = onRunSaved, variant = TpButtonVariant.Tonal)
+                TpButton(stringResource(R.string.results_run_search), onClick = onRunSaved, variant = TpButtonVariant.Tonal, tid = "results.results_run_search")
             }
         }
 
         state.fromSnapshot -> {
             Banner(stringResource(R.string.results_restored), PillTone.Neutral, modifier) {
-                TpButton(stringResource(R.string.results_search_again), onClick = onRetry, variant = TpButtonVariant.Text)
+                TpButton(stringResource(R.string.results_search_again), onClick = onRetry, variant = TpButtonVariant.Text, tid = "results.results_search_again")
             }
         }
 
@@ -170,13 +173,13 @@ internal fun StreamBanner(state: ResultsUiState, onRetry: () -> Unit, onRunSaved
 
         state.phase == StreamPhase.INTERRUPTED || state.phase == StreamPhase.CANCELLED -> {
             Banner(stringResource(R.string.results_interrupted), PillTone.Warning, modifier.then(live)) {
-                TpButton(stringResource(R.string.results_retry), onClick = onRetry, variant = TpButtonVariant.Tonal)
+                TpButton(stringResource(R.string.results_retry), onClick = onRetry, variant = TpButtonVariant.Tonal, tid = "results.results_retry")
             }
         }
 
         state.phase == StreamPhase.FAILED -> {
             Banner(state.error?.message ?: stringResource(R.string.results_failed), PillTone.Warning, modifier.then(live)) {
-                TpButton(stringResource(R.string.results_retry), onClick = onRetry, variant = TpButtonVariant.Tonal)
+                TpButton(stringResource(R.string.results_retry), onClick = onRetry, variant = TpButtonVariant.Tonal, tid = "results.results_retry_2")
             }
         }
 
@@ -253,9 +256,10 @@ internal fun TravelEaseBanner(data: ConfidenceData, modifier: Modifier = Modifie
                     data.destination?.let { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
                 }
                 val stateText = stringResource(if (expanded) R.string.results_state_expanded else R.string.results_state_collapsed)
-                TextButton(
+                TpTextButton(
                     onClick = { expanded = !expanded },
                     modifier = Modifier.semantics { stateDescription = stateText },
+                    tid = "results.results_header_text_button",
                 ) { Text(stringResource(if (expanded) R.string.results_less else R.string.results_details)) }
             }
             ChipRow {
@@ -279,7 +283,7 @@ internal fun TravelEaseBanner(data: ConfidenceData, modifier: Modifier = Modifie
 @Composable
 internal fun ResultsSearchField(query: String, hidden: Int, onQuery: (String) -> Unit, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth()) {
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = query,
             onValueChange = onQuery,
             modifier = Modifier.fillMaxWidth(),
@@ -289,10 +293,13 @@ internal fun ResultsSearchField(query: String, hidden: Int, onQuery: (String) ->
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
             trailingIcon = {
                 if (query.isNotEmpty()) {
-                    IconButton(onClick = { onQuery("") }) { Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.results_search_clear)) }
+                    TpIconButton(onClick = {
+                        onQuery("")
+                    }, tid = "results.results_search_clear") { Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.results_search_clear)) }
                 }
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            tid = "results.results_search_label",
         )
         if (query.isNotBlank() && hidden > 0) {
             Text(

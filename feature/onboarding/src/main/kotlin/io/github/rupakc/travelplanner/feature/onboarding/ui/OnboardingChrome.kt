@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.onboarding.OnboardingEvent
@@ -73,16 +74,16 @@ internal fun OnboardingFrame(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (onBack != null) {
-                    IconButton(onClick = onBack) {
+                    TpIconButton(onClick = onBack, tid = "onboarding.onboarding_back") {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.onboarding_back))
                     }
                 }
                 Spacer(Modifier.weight(1f))
                 if (onSkipAll != null) {
-                    TpButton(stringResource(R.string.onboarding_skip_all), onSkipAll, variant = TpButtonVariant.Text)
+                    TpButton(stringResource(R.string.onboarding_skip_all), onSkipAll, variant = TpButtonVariant.Text, tid = "onboarding.onboarding_skip_all")
                 }
                 if (onClose != null) {
-                    IconButton(onClick = onClose) {
+                    TpIconButton(onClick = onClose, tid = "onboarding.onboarding_close") {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.onboarding_close))
                     }
                 }

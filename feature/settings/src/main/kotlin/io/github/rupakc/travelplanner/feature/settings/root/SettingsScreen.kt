@@ -53,7 +53,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.LocalUiEventSink
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.component.UiEventKind
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.globalsearch.SettingsEntry
@@ -388,6 +390,7 @@ private fun TravellerTypeCard(types: List<TravellerType>, highlighted: Boolean, 
             onClick = { onNav(SettingsNav.RetakeQuiz) },
             variant = TpButtonVariant.Tonal,
             leadingIcon = Icons.Filled.Refresh,
+            tid = "settings.settings_retake_quiz",
         )
     }
 }
@@ -413,16 +416,13 @@ private fun SignOutRow(signingOut: Boolean, highlighted: Boolean, onEvent: (Sett
 
 @Composable
 private fun PrivacyBlock(allowed: Boolean, highlighted: Boolean, onEvent: (SettingsEvent) -> Unit, onNav: (SettingsNav) -> Unit) {
-    val sink = LocalUiEventSink.current
     Column(Modifier.fillMaxWidth().highlighted(highlighted)) {
         SettingsSwitchRow(
             title = stringResource(R.string.settings_privacy_switch_label, stringResource(io.github.rupakc.travelplanner.core.ui.R.string.brand_name)),
             subtitle = stringResource(R.string.settings_privacy_switch_hint),
             checked = allowed,
-            onCheckedChange = {
-                runCatching { sink.onUiEvent(UiEventKind.TOGGLE, "privacy.switch", it) }
-                onEvent(SettingsEvent.SetPrivacy(it))
-            },
+            onCheckedChange = { onEvent(SettingsEvent.SetPrivacy(it)) },
+            tid = "privacy.switch",
             modifier = Modifier.testTag("privacy.switch"),
         )
         SettingsRow(stringResource(R.string.settings_privacy_policy), onClick = { onNav(SettingsNav.OpenLink(PrivacyLinks.POLICY_URL)) })
@@ -437,11 +437,15 @@ private fun AboutBlock(versionName: String, highlighted: Boolean, onNav: (Settin
         SettingsRow(stringResource(R.string.settings_licences), onClick = { onNav(SettingsNav.OpenLink(LICENCE_URL)) })
         SettingsNote(stringResource(R.string.settings_geonames_attribution))
         FlowRow(Modifier.padding(horizontal = TravelTheme.spacing.sm)) {
-            TpButton(stringResource(R.string.settings_link_geonames), onClick = { onNav(SettingsNav.OpenLink(GEONAMES_URL)) }, variant = TpButtonVariant.Text)
-            TpButton(stringResource(R.string.settings_link_cc_by), onClick = { onNav(SettingsNav.OpenLink(CC_BY_URL)) }, variant = TpButtonVariant.Text)
+            TpButton(stringResource(R.string.settings_link_geonames), onClick = {
+                onNav(SettingsNav.OpenLink(GEONAMES_URL))
+            }, variant = TpButtonVariant.Text, tid = "settings.settings_link_geonames")
+            TpButton(stringResource(R.string.settings_link_cc_by), onClick = {
+                onNav(SettingsNav.OpenLink(CC_BY_URL))
+            }, variant = TpButtonVariant.Text, tid = "settings.settings_link_cc_by")
             TpButton(stringResource(R.string.settings_link_ourairports), onClick = {
                 onNav(SettingsNav.OpenLink(OURAIRPORTS_URL))
-            }, variant = TpButtonVariant.Text)
+            }, variant = TpButtonVariant.Text, tid = "settings.settings_link_ourairports")
         }
         SettingsNote(stringResource(R.string.settings_ourairports_attribution))
     }
@@ -479,7 +483,9 @@ private fun LanguageDialog(current: String?, perApp: Boolean, onEvent: (Settings
                             Modifier
                                 .fillMaxWidth()
                                 .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                                .selectable(selected = tag == current, role = Role.RadioButton, onClick = { onEvent(SettingsEvent.SetLanguage(tag)) }),
+                                .tpSelectable(tid = "settings.settings_screen_selectable", selected = tag == current, role = Role.RadioButton, onClick = {
+                                    onEvent(SettingsEvent.SetLanguage(tag))
+                                }),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RadioButton(selected = tag == current, onClick = null)
@@ -494,13 +500,17 @@ private fun LanguageDialog(current: String?, perApp: Boolean, onEvent: (Settings
         },
         confirmButton = {
             if (!perApp) {
-                TextButton(onClick = {
+                TpTextButton(onClick = {
                     onEvent(SettingsEvent.DismissDialog)
                     onNav(SettingsNav.SystemLanguageSettings)
-                }) { Text(stringResource(R.string.settings_language_open_system)) }
+                }, tid = "settings.settings_screen_text_button") { Text(stringResource(R.string.settings_language_open_system)) }
             }
         },
-        dismissButton = { TextButton(onClick = { onEvent(SettingsEvent.DismissDialog) }) { Text(stringResource(R.string.settings_cancel)) } },
+        dismissButton = {
+            TpTextButton(onClick = {
+                onEvent(SettingsEvent.DismissDialog)
+            }, tid = "settings.settings_cancel") { Text(stringResource(R.string.settings_cancel)) }
+        },
     )
 }
 
@@ -510,8 +520,16 @@ private fun SignOutDialog(onEvent: (SettingsEvent) -> Unit) {
         onDismissRequest = { onEvent(SettingsEvent.DismissDialog) },
         title = { Text(stringResource(R.string.settings_sign_out_confirm_title)) },
         text = { Text(stringResource(R.string.settings_sign_out_confirm_message)) },
-        confirmButton = { TextButton(onClick = { onEvent(SettingsEvent.ConfirmSignOut) }) { Text(stringResource(R.string.settings_sign_out)) } },
-        dismissButton = { TextButton(onClick = { onEvent(SettingsEvent.DismissDialog) }) { Text(stringResource(R.string.settings_cancel)) } },
+        confirmButton = {
+            TpTextButton(onClick = {
+                onEvent(SettingsEvent.ConfirmSignOut)
+            }, tid = "settings.settings_sign_out") { Text(stringResource(R.string.settings_sign_out)) }
+        },
+        dismissButton = {
+            TpTextButton(onClick = {
+                onEvent(SettingsEvent.DismissDialog)
+            }, tid = "settings.settings_cancel_2") { Text(stringResource(R.string.settings_cancel)) }
+        },
     )
 }
 

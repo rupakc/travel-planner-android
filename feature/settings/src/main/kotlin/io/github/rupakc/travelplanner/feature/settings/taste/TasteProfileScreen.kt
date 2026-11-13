@@ -31,6 +31,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.preferences.TasteProfile
@@ -79,8 +80,14 @@ fun TasteProfileScreen(state: TasteUiState, onEvent: (TasteEvent) -> Unit, onBac
             onDismissRequest = { onEvent(TasteEvent.CancelReset) },
             title = { Text(stringResource(R.string.settings_taste_reset)) },
             text = { Text(stringResource(R.string.settings_taste_reset_confirm)) },
-            confirmButton = { TextButton(onClick = { onEvent(TasteEvent.ConfirmReset) }) { Text(stringResource(R.string.settings_taste_reset)) } },
-            dismissButton = { TextButton(onClick = { onEvent(TasteEvent.CancelReset) }) { Text(stringResource(R.string.settings_cancel)) } },
+            confirmButton = {
+                TpTextButton(onClick = {
+                    onEvent(TasteEvent.ConfirmReset)
+                }, tid = "settings.settings_taste_reset") { Text(stringResource(R.string.settings_taste_reset)) }
+            },
+            dismissButton = {
+                TpTextButton(onClick = { onEvent(TasteEvent.CancelReset) }, tid = "settings.settings_cancel") { Text(stringResource(R.string.settings_cancel)) }
+            },
         )
     }
 }
@@ -123,6 +130,7 @@ private fun Signals(state: TasteUiState, onEvent: (TasteEvent) -> Unit) {
             variant = TpButtonVariant.Destructive,
             loading = state.resetting,
             leadingIcon = Icons.Filled.Delete,
+            tid = "settings.settings_taste_reset_2",
         )
         state.resetError?.let {
             Text(

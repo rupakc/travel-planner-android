@@ -149,9 +149,16 @@ internal fun ConfirmDialog(
         title = { Text(title, modifier = Modifier.semantics { heading() }) },
         text = { Text(message) },
         confirmButton = {
-            TpButton(confirmLabel, onConfirm, variant = if (destructive) TpButtonVariant.Destructive else TpButtonVariant.Primary)
+            TpButton(
+                confirmLabel,
+                onConfirm,
+                variant = if (destructive) TpButtonVariant.Destructive else TpButtonVariant.Primary,
+                tid = "plan.plan_confirm_cancel",
+            )
         },
-        dismissButton = { TpButton(stringResource(R.string.plan_confirm_cancel), onDismiss, variant = TpButtonVariant.Text) },
+        dismissButton = {
+            TpButton(stringResource(R.string.plan_confirm_cancel), onDismiss, variant = TpButtonVariant.Text, tid = "plan.plan_confirm_cancel_2")
+        },
     )
 }
 

@@ -29,6 +29,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import io.github.rupakc.travelplanner.R
+import io.github.rupakc.travelplanner.core.designsystem.component.TpAssistChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 
 /** The You tab (journey on): account, saved plans and settings, which the classic shell reaches from the top bar / My trips. */
@@ -68,7 +71,7 @@ private fun YouRow(icon: ImageVector, label: Int, onClick: () -> Unit) {
     ListItem(
         headlineContent = { Text(stringResource(label)) },
         leadingContent = { Icon(icon, contentDescription = null) },
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = Modifier.tpClickable(tid = "app.shell_screens_clickable", onClick = onClick),
     )
 }
 
@@ -79,22 +82,25 @@ fun ExploreEntries(onOpenChat: () -> Unit, onOpenNearby: () -> Unit, modifier: M
         modifier.fillMaxWidth().padding(horizontal = TravelTheme.spacing.md, vertical = TravelTheme.spacing.xs),
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
     ) {
-        AssistChip(
+        TpAssistChip(
             onClick = onOpenChat,
             label = { Text(stringResource(R.string.explore_chat)) },
             leadingIcon = { Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null) },
+            tid = "app.explore_chat",
         )
-        AssistChip(
+        TpAssistChip(
             onClick = onOpenNearby,
             label = { Text(stringResource(R.string.explore_near_me)) },
             leadingIcon = { Icon(Icons.Filled.LocationOn, contentDescription = null) },
+            tid = "app.explore_near_me",
         )
         // Social ideas feed (features.social).
         if (onOpenIdeas != null) {
-            AssistChip(
+            TpAssistChip(
                 onClick = onOpenIdeas,
                 label = { Text(stringResource(R.string.explore_ideas)) },
                 leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
+                tid = "app.explore_ideas",
             )
         }
     }
@@ -108,8 +114,8 @@ fun CoachMarkCard(tip: CoachTip, onGotIt: () -> Unit, onSkipAll: () -> Unit, mod
             Text(stringResource(tip.title), style = TravelTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
             Text(stringResource(tip.body), style = TravelTheme.typography.bodyMedium)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                TextButton(onClick = onSkipAll) { Text(stringResource(R.string.coach_skip)) }
-                TextButton(onClick = onGotIt) { Text(stringResource(R.string.coach_got_it)) }
+                TpTextButton(onClick = onSkipAll, tid = "app.coach_skip") { Text(stringResource(R.string.coach_skip)) }
+                TpTextButton(onClick = onGotIt, tid = "app.coach_got_it") { Text(stringResource(R.string.coach_got_it)) }
             }
         }
     }

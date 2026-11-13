@@ -33,6 +33,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.LoadingIndicator
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
@@ -67,7 +69,7 @@ fun ServerScreen(state: ServerUiState, onEvent: (ServerEvent) -> Unit, onBack: (
                     UrlProblem.HTTPS_REQUIRED -> stringResource(R.string.settings_server_https)
                     null -> null
                 }
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = state.input,
                 onValueChange = { onEvent(ServerEvent.InputChanged(it)) },
                 label = { Text(stringResource(R.string.settings_server_label)) },
@@ -83,20 +85,23 @@ fun ServerScreen(state: ServerUiState, onEvent: (ServerEvent) -> Unit, onBack: (
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { onEvent(ServerEvent.Save) }),
                 modifier = Modifier.fillMaxWidth(),
+                tid = "settings.settings_server_label",
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                TpButton(stringResource(R.string.settings_server_save), onClick = { onEvent(ServerEvent.Save) })
+                TpButton(stringResource(R.string.settings_server_save), onClick = { onEvent(ServerEvent.Save) }, tid = "settings.settings_server_save")
                 TpButton(
                     stringResource(R.string.settings_server_test),
                     onClick = { onEvent(ServerEvent.Test) },
                     variant = TpButtonVariant.Secondary,
                     loading = state.test == ConnectionTest.Running,
+                    tid = "settings.settings_server_test",
                 )
                 TpButton(
                     stringResource(R.string.settings_server_default),
                     onClick = { onEvent(ServerEvent.UseDefault) },
                     variant = TpButtonVariant.Text,
                     enabled = !state.usingDefault || state.input.isNotEmpty(),
+                    tid = "settings.settings_server_default",
                 )
             }
             SettingsNote(stringResource(R.string.settings_server_test_note))
@@ -108,8 +113,16 @@ fun ServerScreen(state: ServerUiState, onEvent: (ServerEvent) -> Unit, onBack: (
             onDismissRequest = { onEvent(ServerEvent.CancelSwitch) },
             title = { Text(stringResource(R.string.settings_server_switch_title)) },
             text = { Text(stringResource(R.string.settings_server_switch_message, state.pendingUrl ?: state.defaultUrl)) },
-            confirmButton = { TextButton(onClick = { onEvent(ServerEvent.ConfirmSwitch) }) { Text(stringResource(R.string.settings_server_switch_confirm)) } },
-            dismissButton = { TextButton(onClick = { onEvent(ServerEvent.CancelSwitch) }) { Text(stringResource(R.string.settings_cancel)) } },
+            confirmButton = {
+                TpTextButton(onClick = {
+                    onEvent(ServerEvent.ConfirmSwitch)
+                }, tid = "settings.settings_server_switch_confirm") { Text(stringResource(R.string.settings_server_switch_confirm)) }
+            },
+            dismissButton = {
+                TpTextButton(onClick = {
+                    onEvent(ServerEvent.CancelSwitch)
+                }, tid = "settings.settings_cancel") { Text(stringResource(R.string.settings_cancel)) }
+            },
         )
     }
 }

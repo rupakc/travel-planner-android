@@ -104,6 +104,7 @@ internal fun DiscoverForm(state: DiscoverUiState, lookups: SearchLookups, onEven
                 loading = state.loading,
                 leadingIcon = Icons.Filled.Search,
                 modifier = Modifier.fillMaxWidth().testTag("discover_submit"),
+                tid = "search.search_discover_busy",
             )
         }
     }
@@ -186,6 +187,7 @@ internal fun DestinationCard(dest: DiscoveredDestination, onPlan: () -> Unit, mo
                 text = stringResource(R.string.search_plan_this_trip),
                 onClick = onPlan,
                 modifier = Modifier.fillMaxWidth().semantics { contentDescription = planLabel },
+                tid = "search.search_plan_this_trip",
             )
         }
     }

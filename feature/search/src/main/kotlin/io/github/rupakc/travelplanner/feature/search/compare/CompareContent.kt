@@ -40,6 +40,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.search.CompareErrorReason
@@ -100,7 +101,9 @@ internal fun CompareForm(state: CompareUiState, lookups: SearchLookups, onEvent:
                         modifier = Modifier.weight(1f),
                     )
                     if (state.canRemoveDestination) {
-                        IconButton(onClick = { onEvent(CompareEvent.RemoveDestination(i)) }, modifier = Modifier.padding(top = TravelTheme.spacing.sm)) {
+                        TpIconButton(onClick = {
+                            onEvent(CompareEvent.RemoveDestination(i))
+                        }, modifier = Modifier.padding(top = TravelTheme.spacing.sm), tid = "search.search_compare_remove") {
                             Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_compare_remove, i + 1))
                         }
                     }
@@ -109,7 +112,7 @@ internal fun CompareForm(state: CompareUiState, lookups: SearchLookups, onEvent:
             if (state.canAddDestination) {
                 TpButton(stringResource(R.string.search_compare_add), {
                     onEvent(CompareEvent.AddDestination)
-                }, variant = TpButtonVariant.Text, leadingIcon = Icons.Filled.Add)
+                }, variant = TpButtonVariant.Text, leadingIcon = Icons.Filled.Add, tid = "search.search_compare_add")
             }
             TripDatesField(
                 departure = form.departureDate,
@@ -153,6 +156,7 @@ internal fun CompareForm(state: CompareUiState, lookups: SearchLookups, onEvent:
                 loading = state.loading,
                 leadingIcon = Icons.Filled.Search,
                 modifier = Modifier.fillMaxWidth().testTag("compare_submit"),
+                tid = "search.search_compare_busy",
             )
         }
     }
@@ -269,6 +273,7 @@ private fun ColumnHeader(index: Int, col: CompareColumn, onRetry: (Int) -> Unit)
                         { onRetry(index) },
                         variant = TpButtonVariant.Text,
                         modifier = Modifier.semantics { contentDescription = retryLabel }.testTag("compare_retry_$index"),
+                        tid = "search.search_compare_retry",
                     )
                 }
             }
@@ -305,6 +310,7 @@ private fun PlanButton(index: Int, col: CompareColumn, onPlan: (Int) -> Unit) {
         stringResource(R.string.search_plan_this_trip),
         { onPlan(index) },
         modifier = Modifier.fillMaxWidth().semantics { contentDescription = label }.testTag("compare_plan_$index"),
+        tid = "search.search_plan_this_trip",
     )
 }
 

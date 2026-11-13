@@ -32,5 +32,6 @@ fun AddToPlanButton(selected: Boolean, itemName: String, onToggle: () -> Unit, m
             },
         variant = if (selected) TpButtonVariant.Tonal else TpButtonVariant.Secondary,
         leadingIcon = if (selected) Icons.Filled.Check else Icons.Filled.Add,
+        tid = "ui.plan_added",
     )
 }

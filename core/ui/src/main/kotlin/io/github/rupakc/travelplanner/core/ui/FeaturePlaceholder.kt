@@ -40,7 +40,7 @@ fun FeaturePlaceholder(
             verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
         ) {
             EmptyState(title = title, message = message)
-            actions.forEach { TpButton(it.label, it.onClick, variant = TpButtonVariant.Secondary) }
+            actions.forEach { TpButton(it.label, it.onClick, variant = TpButtonVariant.Secondary, tid = "ui.feature_placeholder_tp_button") }
         }
     }
 }

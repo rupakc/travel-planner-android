@@ -359,18 +359,19 @@ private fun androidx.compose.foundation.layout.RowScope.SectionHeaderActions(
                     onClick = { onEvent(ResultsEvent.ToggleFareCalendar) },
                     variant = if (state.fareCalendar.open) TpButtonVariant.Tonal else TpButtonVariant.Text,
                     modifier = Modifier.semantics { stateDescription = pressed },
+                    tid = "results.results_fare_calendar",
                 )
             }
             WatchFareAction(state.watches.fareAvailable, state.watches.fare, onWatch = { onEvent(ResultsEvent.WatchFare) })
-            TpButton(filters, onClick = { onOpenFilters(FilterSheet.Flights) }, variant = TpButtonVariant.Text)
+            TpButton(filters, onClick = { onOpenFilters(FilterSheet.Flights) }, variant = TpButtonVariant.Text, tid = "results.results_screen_tp_button")
         }
 
         SectionId.HOTELS -> {
-            TpButton(filters, onClick = { onOpenFilters(FilterSheet.Hotels) }, variant = TpButtonVariant.Text)
+            TpButton(filters, onClick = { onOpenFilters(FilterSheet.Hotels) }, variant = TpButtonVariant.Text, tid = "results.results_screen_tp_button_2")
         }
 
         SectionId.ACTIVITIES -> {
-            TpButton(filters, onClick = { onOpenFilters(FilterSheet.Activities) }, variant = TpButtonVariant.Text)
+            TpButton(filters, onClick = { onOpenFilters(FilterSheet.Activities) }, variant = TpButtonVariant.Text, tid = "results.results_screen_tp_button_3")
         }
 
         else -> {

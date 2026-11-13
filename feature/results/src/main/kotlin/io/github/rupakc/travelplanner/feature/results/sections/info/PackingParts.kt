@@ -43,6 +43,9 @@ import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.section.PackingCategory
 import io.github.rupakc.travelplanner.core.model.section.PackingItem
@@ -99,11 +102,12 @@ internal fun PackingBody(
                     variant = TpButtonVariant.Tonal,
                     leadingIcon = Icons.Filled.Check,
                     modifier = Modifier.semantics { contentDescription = a11y },
+                    tid = "results.packing_saved",
                 )
             } else {
                 TpButton(stringResource(R.string.packing_save), onClick = {
                     onSave(state.toPlanJson(data, rawCategories))
-                }, variant = TpButtonVariant.Secondary)
+                }, variant = TpButtonVariant.Secondary, tid = "results.packing_save")
             }
         }
         AdaptiveGrid(data.categories) { category, cell ->
@@ -153,7 +157,7 @@ private fun CategoryCard(
                 PackingRow(item, state.isChecked(name, label)) { onToggle(label) }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                OutlinedTextField(
+                TpOutlinedTextField(
                     value = input,
                     onValueChange = onInput,
                     placeholder = { Text(stringResource(R.string.packing_add_item)) },
@@ -162,8 +166,9 @@ private fun CategoryCard(
                     keyboardActions = KeyboardActions(onDone = { onAdd() }),
                     textStyle = TravelTheme.typography.bodySmall,
                     modifier = Modifier.weight(1f),
+                    tid = "results.packing_add_item",
                 )
-                IconButton(onClick = onAdd) {
+                TpIconButton(onClick = onAdd, tid = "results.packing_add_item_a11y") {
                     Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.packing_add_item_a11y, name))
                 }
             }
@@ -180,7 +185,7 @@ private fun PackingRow(item: PackingItem, checked: Boolean, onToggle: () -> Unit
         Modifier
             .fillMaxWidth()
             .heightIn(min = TravelTheme.spacing.minTouchTarget)
-            .toggleable(value = checked, role = Role.Checkbox, onValueChange = { onToggle() })
+            .tpToggleable(tid = "results.packing_parts_toggleable", value = checked, role = Role.Checkbox, onValueChange = { onToggle() })
             .semantics(mergeDescendants = true) { contentDescription = a11y },
         verticalAlignment = Alignment.CenterVertically,
     ) {

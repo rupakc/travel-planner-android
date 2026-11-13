@@ -42,7 +42,10 @@ import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
+import io.github.rupakc.travelplanner.core.designsystem.component.tpSelectable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.social.HandleReason
 import io.github.rupakc.travelplanner.core.model.social.ProfileVisibility
@@ -117,7 +120,7 @@ private fun ProfileForm(
                 }
             }
         }
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = form.bio,
             onValueChange = { onEvent(MyProfileEvent.BioChanged(it)) },
             modifier = Modifier.fillMaxWidth(),
@@ -132,8 +135,9 @@ private fun ProfileForm(
             isError = state.problem == FieldProblem.BioRejected,
             minLines = 2,
             maxLines = 4,
+            tid = "social.social_bio_label",
         )
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = form.homeCountry,
             onValueChange = { onEvent(MyProfileEvent.CountryChanged(it)) },
             modifier = Modifier.fillMaxWidth(),
@@ -145,6 +149,7 @@ private fun ProfileForm(
             isError = state.problem == FieldProblem.CountryInvalid || !isCountryComplete(form.homeCountry),
             singleLine = true,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters, imeAction = ImeAction.Done),
+            tid = "social.social_country_label",
         )
         SectionTitle(R.string.social_optins_title)
         Text(stringResource(R.string.social_optins_body), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
@@ -229,7 +234,7 @@ private fun HandleField(state: MyProfileUiState, onEvent: (MyProfileEvent) -> Un
                 stringResource(R.string.social_handle_hint)
             }
         }
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = state.form.handle,
         onValueChange = { onEvent(MyProfileEvent.HandleChanged(it)) },
         modifier = Modifier.fillMaxWidth(),
@@ -239,6 +244,7 @@ private fun HandleField(state: MyProfileUiState, onEvent: (MyProfileEvent) -> Un
         isError = isError,
         singleLine = true,
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, imeAction = ImeAction.Next),
+        tid = "social.social_handle_label",
     )
 }
 
@@ -257,7 +263,9 @@ private fun SectionTitle(text: Int) {
 @Composable
 private fun RadioRow(selected: Boolean, label: String, hint: String, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = TravelTheme.spacing.minTouchTarget).selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
+        Modifier.fillMaxWidth().heightIn(
+            min = TravelTheme.spacing.minTouchTarget,
+        ).tpSelectable(tid = "social.my_profile_screen_selectable", selected = selected, role = Role.RadioButton, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         RadioButton(selected = selected, onClick = null)
@@ -271,7 +279,9 @@ private fun RadioRow(selected: Boolean, label: String, hint: String, onClick: ()
 @Composable
 private fun SwitchRow(label: Int, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
-        Modifier.fillMaxWidth().heightIn(min = TravelTheme.spacing.minTouchTarget).toggleable(value = checked, role = Role.Switch, onValueChange = onChange),
+        Modifier.fillMaxWidth().heightIn(
+            min = TravelTheme.spacing.minTouchTarget,
+        ).tpToggleable(tid = "social.my_profile_screen_toggleable", value = checked, role = Role.Switch, onValueChange = onChange),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {

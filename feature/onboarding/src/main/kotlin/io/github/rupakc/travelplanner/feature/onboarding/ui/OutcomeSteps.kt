@@ -45,6 +45,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
@@ -70,7 +71,9 @@ internal fun ResultStep(state: OnboardingUiState, onEvent: (OnboardingEvent) -> 
         onClose = onClose.takeIf { state.fromSettings },
         onSkipAll = skipAllAction(state, onEvent),
         actions = {
-            TpButton(stringResource(R.string.onboarding_continue), { onEvent(OnboardingEvent.ConfirmResult) }, Modifier.fillMaxWidth())
+            TpButton(stringResource(R.string.onboarding_continue), {
+                onEvent(OnboardingEvent.ConfirmResult)
+            }, Modifier.fillMaxWidth(), tid = "onboarding.onboarding_continue")
         },
     ) {
         Column(
@@ -95,6 +98,7 @@ internal fun ResultStep(state: OnboardingUiState, onEvent: (OnboardingEvent) -> 
                 stringResource(R.string.onboarding_change_answers),
                 { onEvent(OnboardingEvent.ChangeAnswers) },
                 variant = TpButtonVariant.Text,
+                tid = "onboarding.onboarding_change_answers",
             )
         }
     }
@@ -184,6 +188,7 @@ internal fun FeaturesStep(
                 ),
                 onFinish,
                 loading = state.saving,
+                tid = "onboarding.onboarding_saving",
             )
         },
     ) {
@@ -249,7 +254,7 @@ private fun FeatureRow(id: FeatureId, checked: Boolean, enabled: Boolean, onTogg
         Modifier
             .fillMaxWidth()
             .clip(TravelShape.ItemCard)
-            .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = { onToggle() })
+            .tpToggleable(tid = "onboarding.outcome_steps_toggleable", value = checked, enabled = enabled, role = Role.Switch, onValueChange = { onToggle() })
             .padding(vertical = TravelTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md),
@@ -280,8 +285,12 @@ internal fun SyncErrorCard(message: String?, onEvent: (OnboardingEvent) -> Unit)
             )
             Text(message ?: stringResource(R.string.onboarding_sync_failed_message), style = TravelTheme.typography.bodyMedium)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-                TpButton(stringResource(R.string.onboarding_retry), { onEvent(OnboardingEvent.RetrySync) }, variant = TpButtonVariant.Tonal)
-                TpButton(stringResource(R.string.onboarding_continue_anyway), { onEvent(OnboardingEvent.ContinueWithoutSync) }, variant = TpButtonVariant.Text)
+                TpButton(stringResource(R.string.onboarding_retry), {
+                    onEvent(OnboardingEvent.RetrySync)
+                }, variant = TpButtonVariant.Tonal, tid = "onboarding.onboarding_retry")
+                TpButton(stringResource(R.string.onboarding_continue_anyway), {
+                    onEvent(OnboardingEvent.ContinueWithoutSync)
+                }, variant = TpButtonVariant.Text, tid = "onboarding.onboarding_continue_anyway")
             }
         }
     }
@@ -294,9 +303,14 @@ internal fun NotificationsStep(onAllow: () -> Unit, onLater: () -> Unit, onSkipA
         modifier = modifier,
         onSkipAll = onSkipAll,
         actions = {
-            TpButton(stringResource(R.string.onboarding_notifications_later), onLater, variant = TpButtonVariant.Text)
+            TpButton(
+                stringResource(R.string.onboarding_notifications_later),
+                onLater,
+                variant = TpButtonVariant.Text,
+                tid = "onboarding.onboarding_notifications_later",
+            )
             Spacer(Modifier.weight(1f))
-            TpButton(stringResource(R.string.onboarding_notifications_allow), onAllow)
+            TpButton(stringResource(R.string.onboarding_notifications_allow), onAllow, tid = "onboarding.onboarding_notifications_allow")
         },
     ) {
         Column(

@@ -40,6 +40,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpSuggestionChip
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.chat.parseFollowUps
@@ -113,6 +114,7 @@ internal fun AssistantMessage(
                         onClick = { onEvent(ChatUiEvent.OpenImport(url)) },
                         variant = TpButtonVariant.Tonal,
                         leadingIcon = null,
+                        tid = "chat.chat_import_link",
                     )
                 }
             }
@@ -234,6 +236,7 @@ private fun MessageActions(turn: ChatTurn, body: String, onEvent: (ChatUiEvent) 
                     copied = true
                 },
                 variant = TpButtonVariant.Text,
+                tid = "chat.chat_copied",
             )
         }
         if (turn.canRetry && turn.id > 0) {
@@ -242,6 +245,7 @@ private fun MessageActions(turn: ChatTurn, body: String, onEvent: (ChatUiEvent) 
                 onClick = { onEvent(ChatUiEvent.Retry(turn.id)) },
                 variant = TpButtonVariant.Text,
                 leadingIcon = Icons.Filled.Refresh,
+                tid = "chat.chat_retry",
             )
         }
         if (turn.stopped) {
@@ -259,7 +263,7 @@ internal fun SuggestionChips(chips: List<String>, onSelect: (String) -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
     ) {
         chips.forEach { chip ->
-            SuggestionChip(onClick = { onSelect(chip) }, label = { Text(chip) }, shape = TravelShape.Pill)
+            TpSuggestionChip(onClick = { onSelect(chip) }, label = { Text(chip) }, shape = TravelShape.Pill, tid = "chat.messages_suggestion_chip")
         }
     }
 }

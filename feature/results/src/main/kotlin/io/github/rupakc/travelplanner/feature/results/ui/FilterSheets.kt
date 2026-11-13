@@ -44,6 +44,12 @@ import androidx.compose.ui.semantics.stateDescription
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpRangeSlider
+import io.github.rupakc.travelplanner.core.designsystem.component.TpSlider
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.search.ActivityFilters
@@ -110,7 +116,13 @@ private fun SheetScaffold(
             Text(title, style = TravelTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
             content()
             Row(Modifier.fillMaxWidth().padding(bottom = TravelTheme.spacing.lg), verticalAlignment = Alignment.CenterVertically) {
-                TpButton(stringResource(R.string.results_filter_clear), onClick = onClear, variant = TpButtonVariant.Text, enabled = activeCount > 0)
+                TpButton(
+                    stringResource(R.string.results_filter_clear),
+                    onClick = onClear,
+                    variant = TpButtonVariant.Text,
+                    enabled = activeCount > 0,
+                    tid = "results.results_filter_clear",
+                )
                 androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
                 TpButton(
                     text =
@@ -124,6 +136,7 @@ private fun SheetScaffold(
                     onClick = onApply,
                     enabled = applyEnabled,
                     modifier = Modifier.testTag("apply_filters"),
+                    tid = "results.results_filter_apply_count",
                 )
             }
         }
@@ -190,12 +203,13 @@ private fun TimeRange(label: String, value: Pair<Float, Float>, onChange: (Pair<
             androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
             Text(text, style = TravelTheme.typography.labelLarge)
         }
-        RangeSlider(
+        TpRangeSlider(
             value = value.first..value.second,
             onValueChange = { r -> if (r.endInclusive - r.start >= 1f) onChange(r.start.roundToInt().toFloat() to r.endInclusive.roundToInt().toFloat()) },
             valueRange = 0f..HOURS,
             steps = HOURS.toInt() - 1,
             modifier = Modifier.semantics { stateDescription = "$label $text" },
+            tid = "results.filter_sheets_range_slider",
         )
     }
 }
@@ -210,11 +224,12 @@ private fun PriceSlider(label: String, value: Float?, floor: Float, ceil: Float,
             androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
             Text(text, style = TravelTheme.typography.labelLarge)
         }
-        Slider(
+        TpSlider(
             value = shown.coerceIn(floor, ceil.coerceAtLeast(floor + 1)),
             onValueChange = { onChange(it.roundToInt().toFloat()) },
             valueRange = floor..ceil.coerceAtLeast(floor + 1),
             modifier = Modifier.semantics { stateDescription = "$label $text" },
+            tid = "results.filter_sheets_slider",
         )
     }
 }
@@ -265,15 +280,18 @@ internal fun HotelFilterSheet(current: HotelFilters?, data: HotelsData?, onApply
                 androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
                 Text(kmText, style = TravelTheme.typography.labelLarge)
             }
-            Slider(
+            TpSlider(
                 value = km,
                 onValueChange = { distance = (it * 2).roundToInt() / 2f },
                 valueRange = DISTANCE_MIN..DISTANCE_MAX,
                 modifier = Modifier.semantics { stateDescription = kmText },
+                tid = "results.filter_sheets_slider_2",
             )
         }
         Row(
-            Modifier.fillMaxWidth().heightIn(min = TravelTheme.spacing.minTouchTarget).toggleable(washroom, role = Role.Switch, onValueChange = {
+            Modifier.fillMaxWidth().heightIn(
+                min = TravelTheme.spacing.minTouchTarget,
+            ).tpToggleable(tid = "results.filter_sheets_toggleable", washroom, role = Role.Switch, onValueChange = {
                 washroom = it
             }),
             verticalAlignment = Alignment.CenterVertically,
@@ -377,7 +395,7 @@ internal fun availabilityValid(from: String, to: String): Boolean {
 private fun DateField(label: String, value: String, min: LocalDate, max: LocalDate?, modifier: Modifier, onChange: (String) -> Unit) {
     var open by rememberSaveable { mutableStateOf(false) }
     val pick = stringResource(R.string.results_filter_pick_date, label)
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = formatDate(value.takeIf(String::isNotBlank), currentLocale()).orEmpty(),
         onValueChange = {},
         readOnly = true,
@@ -385,7 +403,10 @@ private fun DateField(label: String, value: String, min: LocalDate, max: LocalDa
         singleLine = true,
         shape = TravelShape.Input,
         label = { Text(label) },
-        trailingIcon = { IconButton(onClick = { open = true }) { Icon(Icons.Filled.DateRange, contentDescription = pick) } },
+        trailingIcon = {
+            TpIconButton(onClick = { open = true }, tid = "results.filter_sheets_icon_button") { Icon(Icons.Filled.DateRange, contentDescription = pick) }
+        },
+        tid = "results.date_range_outlined_text_field",
     )
     if (!open) return
     val state =
@@ -404,15 +425,16 @@ private fun DateField(label: String, value: String, min: LocalDate, max: LocalDa
     DatePickerDialog(
         onDismissRequest = { open = false },
         confirmButton = {
-            TextButton(
+            TpTextButton(
                 enabled = state.selectedDateMillis != null,
                 onClick = {
                     state.selectedDateMillis?.let { onChange(Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate().toString()) }
                     open = false
                 },
+                tid = "results.filter_sheets_text_button",
             ) { Text(stringResource(R.string.results_ok)) }
         },
-        dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.results_cancel)) } },
+        dismissButton = { TpTextButton(onClick = { open = false }, tid = "results.results_cancel") { Text(stringResource(R.string.results_cancel)) } },
     ) { DatePicker(state) }
 }
 

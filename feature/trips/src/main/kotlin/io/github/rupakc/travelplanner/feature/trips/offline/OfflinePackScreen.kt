@@ -42,6 +42,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -344,13 +345,14 @@ private fun CurrencyCard(c: PackCurrency, state: OfflinePackUiState, onEvent: (O
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
         ) {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = state.amount,
                 onValueChange = { onEvent(OfflinePackEvent.SetAmount(it)) },
                 label = { Text(stringResource(R.string.offline_currency_amount, from)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
+                tid = "trips.offline_currency_amount",
             )
             TpButton("⇄", { onEvent(OfflinePackEvent.Swap) }, variant = TpButtonVariant.Secondary, tid = "offlinePack.swap")
         }

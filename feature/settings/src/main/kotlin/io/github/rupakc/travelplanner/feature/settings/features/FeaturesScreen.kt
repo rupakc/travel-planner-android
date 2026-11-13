@@ -65,6 +65,7 @@ fun FeaturesScreen(state: FeaturesUiState, onEvent: (FeaturesEvent) -> Unit, onB
                     variant = TpButtonVariant.Secondary,
                     enabled = state.hasOverrides,
                     modifier = Modifier.padding(TravelTheme.spacing.gutter),
+                    tid = "settings.settings_features_reset",
                 )
             }
         }

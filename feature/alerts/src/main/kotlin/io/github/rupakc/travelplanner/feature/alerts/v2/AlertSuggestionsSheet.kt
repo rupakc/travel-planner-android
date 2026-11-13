@@ -109,6 +109,7 @@ private fun SuggestionCard(row: SuggestionRow, onWatch: (Int) -> Unit, onDismiss
                     enabled = false,
                     variant = TpButtonVariant.Tonal,
                     leadingIcon = Icons.Filled.CheckCircle,
+                    tid = "alerts.alerts_suggest_already",
                 )
             } else {
                 TpButton(

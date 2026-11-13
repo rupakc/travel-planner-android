@@ -136,8 +136,8 @@ internal fun StoryChart(model: ChartModel?, observed: Int, currency: String?, mo
         }
         Text(pointText, style = TravelTheme.typography.labelLarge)
         Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalAlignment = Alignment.CenterVertically) {
-            TpButton(aFirst, { selected = 0 }, variant = TpButtonVariant.Text, enabled = idx != 0)
-            TpButton(aLatest, { selected = size - 1 }, variant = TpButtonVariant.Text, enabled = idx != size - 1)
+            TpButton(aFirst, { selected = 0 }, variant = TpButtonVariant.Text, enabled = idx != 0, tid = "alerts.story_chart_tp_button")
+            TpButton(aLatest, { selected = size - 1 }, variant = TpButtonVariant.Text, enabled = idx != size - 1, tid = "alerts.story_chart_tp_button_2")
         }
     }
 }

@@ -43,6 +43,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVarian
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.search.ImageProblem
@@ -79,7 +81,7 @@ internal fun ImportPanel(state: ImportUiState, onEvent: (ImportEvent) -> Unit, o
 private fun ImportInputCard(state: ImportUiState, onEvent: (ImportEvent) -> Unit, onPickImages: () -> Unit) {
     TpCard(modifier = Modifier.fillMaxWidth(), size = TpCardSize.Large) {
         Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md)) {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = state.text,
                 onValueChange = { onEvent(ImportEvent.TextChanged(it)) },
                 modifier = Modifier.fillMaxWidth().testTag("import_input"),
@@ -90,6 +92,7 @@ private fun ImportInputCard(state: ImportUiState, onEvent: (ImportEvent) -> Unit
                 isError = state.tooLong,
                 shape = TravelShape.Input,
                 supportingText = { InputHint(state) },
+                tid = "search.search_import_input_label",
             )
             ScreenshotRow(state, onEvent, onPickImages)
             state.error?.let { ErrorCard(it, onEvent) }
@@ -117,6 +120,7 @@ private fun ImportInputCard(state: ImportUiState, onEvent: (ImportEvent) -> Unit
                 { onEvent(ImportEvent.Submit) },
                 enabled = state.canSubmit,
                 modifier = Modifier.fillMaxWidth().testTag("import_submit"),
+                tid = "search.import_panel_tp_button",
             )
         }
     }
@@ -155,7 +159,7 @@ private fun ScreenshotRow(state: ImportUiState, onEvent: (ImportEvent) -> Unit, 
                         Image(it, contentDescription = shot.name, contentScale = ContentScale.Crop, modifier = Modifier.size(SearchDimens.Thumbnail))
                     }
                     Surface(shape = CircleShape, color = TravelTheme.colors.inverseSurface, modifier = Modifier.align(Alignment.TopEnd)) {
-                        IconButton(onClick = { onEvent(ImportEvent.RemoveShot(shot.id)) }) {
+                        TpIconButton(onClick = { onEvent(ImportEvent.RemoveShot(shot.id)) }, tid = "search.import_panel_icon_button") {
                             Icon(
                                 Icons.Filled.Close,
                                 contentDescription = stringResource(R.string.search_import_remove_shot, shot.name),
@@ -171,6 +175,7 @@ private fun ScreenshotRow(state: ImportUiState, onEvent: (ImportEvent) -> Unit, 
                     onPickImages,
                     variant = TpButtonVariant.Secondary,
                     modifier = Modifier.testTag("import_pick"),
+                    tid = "search.search_import_add_shots",
                 )
             }
         }
@@ -242,13 +247,13 @@ private fun ErrorCard(error: ImportErrorView, onEvent: (ImportEvent) -> Unit) {
                             ImportAction.TEXT -> {
                                 TpButton(stringResource(R.string.search_import_action_text), {
                                     onEvent(ImportEvent.RunAction(action))
-                                }, variant = TpButtonVariant.Secondary)
+                                }, variant = TpButtonVariant.Secondary, tid = "search.search_import_action_text")
                             }
 
                             ImportAction.IMAGES -> {
                                 TpButton(stringResource(R.string.search_import_action_images), {
                                     onEvent(ImportEvent.RunAction(action))
-                                }, variant = TpButtonVariant.Secondary)
+                                }, variant = TpButtonVariant.Secondary, tid = "search.search_import_action_images")
                             }
 
                             ImportAction.RETRY -> {
@@ -257,6 +262,7 @@ private fun ErrorCard(error: ImportErrorView, onEvent: (ImportEvent) -> Unit) {
                                     { onEvent(ImportEvent.RunAction(action)) },
                                     variant = TpButtonVariant.Secondary,
                                     leadingIcon = Icons.Filled.Refresh,
+                                    tid = "search.search_import_action_retry",
                                 )
                             }
                         }
@@ -298,7 +304,13 @@ private fun ImportProgress(busy: ImportBusy, onCancel: () -> Unit) {
                     color = TravelTheme.colors.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                TpButton(stringResource(R.string.search_import_cancel), onCancel, variant = TpButtonVariant.Text, modifier = Modifier.testTag("import_cancel"))
+                TpButton(
+                    stringResource(R.string.search_import_cancel),
+                    onCancel,
+                    variant = TpButtonVariant.Text,
+                    modifier = Modifier.testTag("import_cancel"),
+                    tid = "search.search_import_cancel",
+                )
             }
             SkeletonList(lines = 3)
         }

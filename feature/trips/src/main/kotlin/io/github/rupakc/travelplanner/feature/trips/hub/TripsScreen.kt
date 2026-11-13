@@ -107,6 +107,7 @@ fun TripsScreen(state: TripsUiState, onEvent: (TripsEvent) -> Unit, modifier: Mo
                             onClick = { onEvent(TripsEvent.OpenCreate) },
                             variant = TpButtonVariant.Secondary,
                             modifier = Modifier.fillMaxWidth(),
+                            tid = "trips.trips_empty_idea",
                         )
                     }
                 }

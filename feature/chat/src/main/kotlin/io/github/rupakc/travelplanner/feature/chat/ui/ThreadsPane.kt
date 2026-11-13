@@ -42,6 +42,10 @@ import io.github.rupakc.travelplanner.core.data.repository.ChatThread
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpDropdownMenuItem
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.chat.ChatUiEvent
@@ -77,9 +81,10 @@ internal fun ThreadsPane(
                 },
                 variant = TpButtonVariant.Tonal,
                 leadingIcon = Icons.Filled.Add,
+                tid = "chat.chat_new",
             )
         }
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = query,
             onValueChange = { onEvent(ChatUiEvent.SearchThreads(it)) },
             modifier = Modifier.fillMaxWidth().padding(horizontal = TravelTheme.spacing.gutter),
@@ -87,7 +92,7 @@ internal fun ThreadsPane(
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
             trailingIcon = {
                 if (query.isNotEmpty()) {
-                    IconButton(onClick = { onEvent(ChatUiEvent.SearchThreads("")) }) {
+                    TpIconButton(onClick = { onEvent(ChatUiEvent.SearchThreads("")) }, tid = "chat.chat_threads_clear_search") {
                         Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.chat_threads_clear_search))
                     }
                 }
@@ -95,6 +100,7 @@ internal fun ThreadsPane(
             singleLine = true,
             shape = TravelShape.Input,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            tid = "chat.chat_threads_search",
         )
         if (threads.isEmpty()) {
             EmptyState(
@@ -131,7 +137,7 @@ private fun ThreadRow(thread: ChatThread, selected: Boolean, nowMillis: Long, on
             .heightIn(min = TravelTheme.spacing.minTouchTarget)
             .background(background)
             .semantics { this.selected = selected }
-            .clickable(role = Role.Button, onClick = onOpen)
+            .tpClickable(tid = "chat.threads_pane_clickable", role = Role.Button, onClick = onOpen)
             .padding(start = TravelTheme.spacing.gutter, top = TravelTheme.spacing.sm, bottom = TravelTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -146,18 +152,18 @@ private fun ThreadRow(thread: ChatThread, selected: Boolean, nowMillis: Long, on
             }
         }
         Box {
-            IconButton(onClick = { menu = true }) {
+            TpIconButton(onClick = { menu = true }, tid = "chat.chat_thread_menu") {
                 Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.chat_thread_menu, thread.title))
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.chat_rename)) }, onClick = {
+                TpDropdownMenuItem(text = { Text(stringResource(R.string.chat_rename)) }, onClick = {
                     menu = false
                     onRename()
-                })
-                DropdownMenuItem(text = { Text(stringResource(R.string.chat_delete)) }, onClick = {
+                }, tid = "chat.chat_rename")
+                TpDropdownMenuItem(text = { Text(stringResource(R.string.chat_delete)) }, onClick = {
                     menu = false
                     onDelete()
-                })
+                }, tid = "chat.chat_delete")
             }
         }
     }

@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.section.SectionId
@@ -101,7 +102,7 @@ fun SectionScaffold(
                     .fillMaxWidth()
                     .heightIn(min = TravelTheme.spacing.minTouchTarget)
                     .background(accent.tint)
-                    .clickable(role = Role.Button, onClickLabel = stateText, onClick = onToggle)
+                    .tpClickable(tid = "ui.section_scaffold_clickable", role = Role.Button, onClickLabel = stateText, onClick = onToggle)
                     .padding(horizontal = TravelTheme.spacing.md, vertical = TravelTheme.spacing.sm)
                     .semantics { stateDescription = stateText },
                 verticalAlignment = Alignment.CenterVertically,

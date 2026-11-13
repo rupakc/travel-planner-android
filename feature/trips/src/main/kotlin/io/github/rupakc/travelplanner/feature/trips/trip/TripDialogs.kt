@@ -17,6 +17,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.feature.trips.R
 
@@ -74,7 +75,7 @@ private fun RenameDialog(dialog: TripDialog.Rename, onEvent: (TripEvent) -> Unit
         onDismissRequest = { onEvent(TripEvent.DismissDialog) },
         title = { Text(stringResource(R.string.trip_rename)) },
         text = {
-            OutlinedTextField(
+            TpOutlinedTextField(
                 value = dialog.title,
                 onValueChange = { onEvent(TripEvent.EditTitle(it)) },
                 label = { Text(stringResource(R.string.trip_title_label)) },
@@ -82,6 +83,7 @@ private fun RenameDialog(dialog: TripDialog.Rename, onEvent: (TripEvent) -> Unit
                 supportingText = if (dialog.invalid) ({ Text(stringResource(R.string.trips_title_invalid)) }) else null,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+                tid = "trips.trip_title_label",
             )
         },
         confirmButton = {
@@ -127,7 +129,7 @@ private fun DatesDialog(dialog: TripDialog.Dates, onEvent: (TripEvent) -> Unit) 
 
 @Composable
 private fun DateField(value: String, label: Int, error: Boolean, onChange: (String) -> Unit, modifier: Modifier) {
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = value,
         onValueChange = onChange,
         label = { Text(stringResource(label)) },
@@ -136,5 +138,6 @@ private fun DateField(value: String, label: Int, error: Boolean, onChange: (Stri
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = modifier,
+        tid = "trips.trips_date_hint",
     )
 }

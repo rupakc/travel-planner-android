@@ -66,8 +66,15 @@ internal fun ResetPasswordScreen(
                     { onEvent(ResetPasswordEvent.UsePasted) },
                     enabled = state.pasted.isNotBlank(),
                     modifier = Modifier.fillMaxWidth(),
+                    tid = "auth.auth_reset_use_link",
                 )
-                TpButton(stringResource(R.string.auth_reset_request_new), onRequestNew, variant = TpButtonVariant.Text, modifier = Modifier.fillMaxWidth())
+                TpButton(
+                    stringResource(R.string.auth_reset_request_new),
+                    onRequestNew,
+                    variant = TpButtonVariant.Text,
+                    modifier = Modifier.fillMaxWidth(),
+                    tid = "auth.auth_reset_request_new",
+                )
             }
 
             else -> {

@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconToggleButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.social.Idea
 import io.github.rupakc.travelplanner.feature.social.R
@@ -53,7 +54,9 @@ internal fun ideaCounts(idea: Idea): String {
 internal fun LikeButton(liked: Boolean, count: Int, enabled: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
     val label = stringResource(if (liked) R.string.social_idea_unlike else R.string.social_idea_like)
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        IconToggleButton(checked = liked, onCheckedChange = { onToggle() }, enabled = enabled, modifier = Modifier.semantics { stateDescription = label }) {
+        TpIconToggleButton(checked = liked, onCheckedChange = {
+            onToggle()
+        }, enabled = enabled, modifier = Modifier.semantics { stateDescription = label }, tid = "social.idea_card_icon_toggle_button") {
             Icon(
                 if (liked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = label,

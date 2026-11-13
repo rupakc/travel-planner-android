@@ -130,6 +130,7 @@ private fun <T> LimitedList(items: List<T>, limit: Int, key: String, row: @Compo
             text = if (all) stringResource(R.string.chat_show_less) else pluralStringResource(R.plurals.chat_show_more, hidden, hidden),
             onClick = { all = !all },
             variant = TpButtonVariant.Text,
+            tid = "chat.chat_show_less",
         )
     }
 }
@@ -158,7 +159,7 @@ private fun ItemRow(
 @Composable
 private fun LinkButton(label: String, url: String?, onOpenLink: (String) -> Unit) {
     if (url.isNullOrBlank() || !(url.startsWith("http://") || url.startsWith("https://"))) return
-    TpButton(label, onClick = { onOpenLink(url) }, variant = TpButtonVariant.Text)
+    TpButton(label, onClick = { onOpenLink(url) }, variant = TpButtonVariant.Text, tid = "chat.section_cards_tp_button")
 }
 
 @Composable

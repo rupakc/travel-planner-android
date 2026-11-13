@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonBlock
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpTextButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.results.FareCalendarRules
@@ -100,7 +101,7 @@ fun PricingAdvisorBanner(data: PricingAdvisorData, daysUntilDeparture: Long, mod
                 data.recommendationDetail?.let { Text(it, style = TravelTheme.typography.bodySmall) }
                 data.optimalBookingWindow?.let { Text(stringResource(R.string.results_advisor_window, it), style = TravelTheme.typography.bodySmall) }
             }
-            TextButton(onClick = { expanded = !expanded }) {
+            TpTextButton(onClick = { expanded = !expanded }, tid = "results.results_less") {
                 Text(stringResource(if (expanded) R.string.results_less else R.string.results_advisor_why))
             }
             HorizontalDivider(color = TravelTheme.colors.outlineVariant)
@@ -208,7 +209,9 @@ fun FareCalendarStrip(state: FareCalendarUi, onEvent: (ResultsEvent) -> Unit, mo
                             color = TravelTheme.extendedColors.warning,
                             modifier = Modifier.weight(1f),
                         )
-                        TpButton(stringResource(R.string.results_retry), onClick = { onEvent(ResultsEvent.RetryFareCalendar) }, variant = TpButtonVariant.Text)
+                        TpButton(stringResource(R.string.results_retry), onClick = {
+                            onEvent(ResultsEvent.RetryFareCalendar)
+                        }, variant = TpButtonVariant.Text, tid = "results.results_retry")
                     }
                 }
 
@@ -234,8 +237,10 @@ fun FareCalendarStrip(state: FareCalendarUi, onEvent: (ResultsEvent) -> Unit, mo
                     Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                         TpButton(stringResource(R.string.results_cancel), onClick = {
                             onEvent(ResultsEvent.PickFareDate(null))
-                        }, variant = TpButtonVariant.Text)
-                        TpButton(stringResource(R.string.results_fare_replan), onClick = { onEvent(ResultsEvent.ConfirmFareReplan) })
+                        }, variant = TpButtonVariant.Text, tid = "results.results_cancel")
+                        TpButton(stringResource(R.string.results_fare_replan), onClick = {
+                            onEvent(ResultsEvent.ConfirmFareReplan)
+                        }, tid = "results.results_fare_replan")
                     }
                 }
             }

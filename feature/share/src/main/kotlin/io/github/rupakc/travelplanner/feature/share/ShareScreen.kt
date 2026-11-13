@@ -48,6 +48,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -211,13 +212,16 @@ private fun TripBody(
                 val savedId = state.savedPlanId
                 if (savedId != null) {
                     // Saved once: open the copy instead of creating duplicates.
-                    TpButton(stringResource(R.string.share_open_copy), onClick = { onOpenSaved(savedId) }, modifier = Modifier.fillMaxWidth())
+                    TpButton(stringResource(R.string.share_open_copy), onClick = {
+                        onOpenSaved(savedId)
+                    }, modifier = Modifier.fillMaxWidth(), tid = "share.share_open_copy")
                 } else if (state.canSaveCopy) {
                     TpButton(
                         stringResource(if (state.isSaving) R.string.share_saving else R.string.share_save_copy),
                         onClick = { onEvent(ShareEvent.SaveCopy) },
                         loading = state.isSaving,
                         modifier = Modifier.fillMaxWidth(),
+                        tid = "share.share_saving",
                     )
                 }
                 TpButton(
@@ -225,6 +229,7 @@ private fun TripBody(
                     onClick = onPlanOwn,
                     variant = if (state.canSaveCopy) TpButtonVariant.Secondary else TpButtonVariant.Primary,
                     modifier = Modifier.fillMaxWidth(),
+                    tid = "share.share_plan_own",
                 )
                 Text(
                     stringResource(R.string.share_footer),
@@ -261,7 +266,7 @@ private fun Poster(trip: SharedTrip, onOpenLink: (String) -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.share_inspired_by, title), style = TravelTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                     if (link != null) {
-                        IconButton(onClick = { onOpenLink(link) }) {
+                        TpIconButton(onClick = { onOpenLink(link) }, tid = "share.share_open_link_a11y") {
                             Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = stringResource(R.string.share_open_link_a11y, title))
                         }
                     }
@@ -463,7 +468,7 @@ private fun Line(title: String?, details: List<String>, link: String? = null, on
             if (details.isNotEmpty()) Text(details.joinToString(" · "), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
         }
         if (link != null && onOpenLink != null) {
-            IconButton(onClick = { onOpenLink(link) }) {
+            TpIconButton(onClick = { onOpenLink(link) }, tid = "share.share_open_link_a11y_2") {
                 Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = stringResource(R.string.share_open_link_a11y, name))
             }
         }

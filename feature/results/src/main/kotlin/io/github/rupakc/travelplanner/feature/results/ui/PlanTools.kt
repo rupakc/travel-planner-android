@@ -52,6 +52,10 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVarian
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.TpSlider
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
+import io.github.rupakc.travelplanner.core.designsystem.component.tpToggleable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
@@ -121,9 +125,12 @@ internal fun BestValueCard(ui: BestValueUi, onEvent: (ResultsEvent) -> Unit, onO
                 text = stringResource(if (ui.applied) R.string.results_package_added else R.string.results_package_add),
                 onClick = { onEvent(ResultsEvent.ApplyPackage) },
                 enabled = !ui.applied && !ui.disabled,
+                tid = "results.results_package_added",
             )
             if (ui.applied && ui.canUndo) {
-                TpButton(stringResource(R.string.results_undo), onClick = { onEvent(ResultsEvent.UndoPackage) }, variant = TpButtonVariant.Secondary)
+                TpButton(stringResource(R.string.results_undo), onClick = {
+                    onEvent(ResultsEvent.UndoPackage)
+                }, variant = TpButtonVariant.Secondary, tid = "results.results_undo")
             }
         }
         val note =
@@ -167,7 +174,15 @@ private fun PackageRow(entry: PackageItem, onOpenLink: (String) -> Unit) {
         Modifier
             .fillMaxWidth()
             .heightIn(min = TravelTheme.spacing.minTouchTarget)
-            .then(if (safe != null) Modifier.clickable(role = Role.Button, onClickLabel = openLabel) { onOpenLink(safe) } else Modifier)
+            .then(
+                if (safe !=
+                    null
+                ) {
+                    Modifier.tpClickable(tid = "results.plan_tools_clickable", role = Role.Button, onClickLabel = openLabel) { onOpenLink(safe) }
+                } else {
+                    Modifier
+                },
+            )
             .padding(vertical = TravelTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -323,7 +338,7 @@ internal fun BudgetPlannerCard(ui: BudgetUi, onEvent: (ResultsEvent) -> Unit, mo
             Modifier
                 .fillMaxWidth()
                 .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                .toggleable(value = open, role = Role.Button, onValueChange = { open = it })
+                .tpToggleable(tid = "results.plan_tools_toggleable", value = open, role = Role.Button, onValueChange = { open = it })
                 .semantics { stateDescription = stateText },
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -346,12 +361,13 @@ internal fun BudgetPlannerCard(ui: BudgetUi, onEvent: (ResultsEvent) -> Unit, mo
                     Text(localPrice(value), style = TravelTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                 }
                 val valueText = stringResource(R.string.results_budget_slider_value, localPrice(value), label)
-                Slider(
+                TpSlider(
                     value = value.toFloat(),
                     onValueChange = { onEvent(ResultsEvent.BudgetShare(category, (Math.round(it / BUDGET_STEP) * BUDGET_STEP).toDouble())) },
                     valueRange = 0f..total.toFloat().coerceAtLeast(1f),
                     modifier = Modifier.semantics { stateDescription = valueText },
                     colors = SliderDefaults.colors(thumbColor = categoryColor(category), activeTrackColor = categoryColor(category)),
+                    tid = "results.plan_tools_slider",
                 )
                 Text(fitText, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
                 if (category == BudgetCategory.STAY && ui.offerCheaperHotels) {
@@ -360,6 +376,7 @@ internal fun BudgetPlannerCard(ui: BudgetUi, onEvent: (ResultsEvent) -> Unit, mo
                         onClick = { onEvent(ResultsEvent.FindCheaperHotels) },
                         variant = TpButtonVariant.Tonal,
                         loading = ui.findingCheaperHotels,
+                        tid = "results.results_finding_cheaper_hotels",
                     )
                 }
             }
@@ -375,7 +392,9 @@ internal fun BudgetPlannerCard(ui: BudgetUi, onEvent: (ResultsEvent) -> Unit, mo
             Modifier
                 .fillMaxWidth()
                 .heightIn(min = TravelTheme.spacing.minTouchTarget)
-                .toggleable(value = ui.showOnlyFits, role = Role.Switch, onValueChange = { onEvent(ResultsEvent.ShowOnlyFits(it)) }),
+                .tpToggleable(tid = "results.plan_tools_toggleable_2", value = ui.showOnlyFits, role = Role.Switch, onValueChange = {
+                    onEvent(ResultsEvent.ShowOnlyFits(it))
+                }),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(stringResource(R.string.results_show_only_fits), style = TravelTheme.typography.labelLarge, modifier = Modifier.weight(1f))
@@ -392,7 +411,7 @@ private fun TotalField(total: Long, onCommit: (Double) -> Unit, onReset: () -> U
         Unit
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
-        OutlinedTextField(
+        TpOutlinedTextField(
             value = draft,
             onValueChange = { draft = it.filter(Char::isDigit) },
             modifier = Modifier.weight(1f),
@@ -403,9 +422,10 @@ private fun TotalField(total: Long, onCommit: (Double) -> Unit, onReset: () -> U
             supportingText = { Text(stringResource(R.string.results_per_person)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { commit() }),
+            tid = "results.results_budget_total",
         )
-        TpButton(stringResource(R.string.results_apply), onClick = commit, variant = TpButtonVariant.Tonal)
-        TpButton(stringResource(R.string.results_reset), onClick = onReset, variant = TpButtonVariant.Text)
+        TpButton(stringResource(R.string.results_apply), onClick = commit, variant = TpButtonVariant.Tonal, tid = "results.results_apply")
+        TpButton(stringResource(R.string.results_reset), onClick = onReset, variant = TpButtonVariant.Text, tid = "results.results_reset")
     }
 }
 
@@ -533,7 +553,7 @@ internal fun RemixComparisonBanner(ui: RemixUi, onDismiss: () -> Unit, modifier:
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.results_remixed, remixLabel(ui.preset)), style = TravelTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-                TpButton(stringResource(R.string.results_dismiss), onClick = onDismiss, variant = TpButtonVariant.Text)
+                TpButton(stringResource(R.string.results_dismiss), onClick = onDismiss, variant = TpButtonVariant.Text, tid = "results.results_dismiss")
             }
             if (rows.isEmpty()) {
                 Text(stringResource(R.string.results_remix_no_data), style = TravelTheme.typography.bodySmall)
@@ -604,7 +624,7 @@ internal fun PlanBar(plan: PlanSummary, onOpen: () -> Unit, modifier: Modifier =
                     style = TravelTheme.typography.bodySmall,
                 )
             }
-            TpButton(stringResource(R.string.results_open_my_plan), onClick = onOpen, variant = TpButtonVariant.Primary)
+            TpButton(stringResource(R.string.results_open_my_plan), onClick = onOpen, variant = TpButtonVariant.Primary, tid = "results.results_open_my_plan")
         }
     }
 }

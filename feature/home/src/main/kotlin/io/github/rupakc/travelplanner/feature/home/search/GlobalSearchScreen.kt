@@ -60,6 +60,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.TpChip
+import io.github.rupakc.travelplanner.core.designsystem.component.TpIconButton
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
+import io.github.rupakc.travelplanner.core.designsystem.component.tpClickable
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.globalsearch.GlobalSearch
@@ -103,10 +106,10 @@ fun GlobalSearchScreen(
                     Modifier.fillMaxWidth().padding(end = TravelTheme.spacing.gutter, top = TravelTheme.spacing.sm),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    IconButton(onClick = onBack) {
+                    TpIconButton(onClick = onBack, tid = "home.home_search_back") {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.home_search_back))
                     }
-                    OutlinedTextField(
+                    TpOutlinedTextField(
                         value = state.query,
                         onValueChange = { onEvent(GlobalSearchEvent.QueryChanged(it)) },
                         modifier = Modifier.weight(1f).focusRequester(focus),
@@ -114,7 +117,7 @@ fun GlobalSearchScreen(
                         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                         trailingIcon = {
                             if (state.query.isNotEmpty()) {
-                                IconButton(onClick = { onEvent(GlobalSearchEvent.QueryChanged("")) }) {
+                                TpIconButton(onClick = { onEvent(GlobalSearchEvent.QueryChanged("")) }, tid = "home.home_search_clear") {
                                     Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.home_search_clear))
                                 }
                             }
@@ -123,6 +126,7 @@ fun GlobalSearchScreen(
                         shape = TravelShape.Pill,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
+                        tid = "home.home_search_hint",
                     )
                 }
                 if (state.query.isNotBlank()) FilterChips(state, onEvent)
@@ -219,7 +223,10 @@ private fun ResultRow(item: SearchableItem, hidden: Boolean, onEvent: (GlobalSea
                 { Text(lines.joinToString("\n"), maxLines = 3, overflow = TextOverflow.Ellipsis) }
             },
         leadingContent = { Icon(item.icon(), contentDescription = null, tint = TravelTheme.colors.onSurfaceVariant) },
-        modifier = Modifier.clickable(onClickLabel = stringResource(R.string.home_search_open_result)) { onEvent(GlobalSearchEvent.Open(item)) },
+        modifier =
+            Modifier.tpClickable(tid = "home.home_search_open_result", onClickLabel = stringResource(R.string.home_search_open_result)) {
+                onEvent(GlobalSearchEvent.Open(item))
+            },
     )
 }
 

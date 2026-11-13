@@ -53,6 +53,12 @@ internal fun CheckEmailScreen(
             modifier = Modifier.fillMaxWidth(),
             tid = "check_email.resend",
         )
-        TpButton(stringResource(R.string.auth_check_back), onBackToLogin, variant = TpButtonVariant.Text, modifier = Modifier.fillMaxWidth())
+        TpButton(
+            stringResource(R.string.auth_check_back),
+            onBackToLogin,
+            variant = TpButtonVariant.Text,
+            modifier = Modifier.fillMaxWidth(),
+            tid = "auth.auth_check_back",
+        )
     }
 }

@@ -25,6 +25,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButton
 import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVariant
+import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedTextField
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -74,7 +75,7 @@ internal fun PublishIdeaScreen(
 @Composable
 private fun Form(state: PublishIdeaUiState, onEvent: (PublishIdeaEvent) -> Unit, onOpenProfile: () -> Unit) {
     Text(stringResource(R.string.social_publish_intro), style = TravelTheme.typography.bodyMedium)
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = state.title,
         onValueChange = { onEvent(PublishIdeaEvent.TitleChanged(it)) },
         modifier = Modifier.fillMaxWidth(),
@@ -84,8 +85,9 @@ private fun Form(state: PublishIdeaUiState, onEvent: (PublishIdeaEvent) -> Unit,
         enabled = !state.publishing,
         isError = state.problem == PublishProblem.TitleInvalid,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        tid = "social.social_publish_title_label",
     )
-    OutlinedTextField(
+    TpOutlinedTextField(
         value = state.caption,
         onValueChange = { onEvent(PublishIdeaEvent.CaptionChanged(it)) },
         modifier = Modifier.fillMaxWidth(),
@@ -95,6 +97,7 @@ private fun Form(state: PublishIdeaUiState, onEvent: (PublishIdeaEvent) -> Unit,
         maxLines = 6,
         enabled = !state.publishing,
         isError = state.problem == PublishProblem.ContentRejected,
+        tid = "social.social_publish_caption_label",
     )
     Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
         state.problem?.let { problem ->

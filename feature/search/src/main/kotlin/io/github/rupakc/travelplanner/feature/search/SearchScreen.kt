@@ -308,6 +308,7 @@ private fun Hero(state: SearchUiState, onEvent: (SearchFormEvent) -> Unit, modif
                 variant = TpButtonVariant.Tonal,
                 leadingIcon = null,
                 modifier = Modifier.testTag("hero_paste_link"),
+                tid = "search.search_paste_link_prompt",
             )
         }
     }
