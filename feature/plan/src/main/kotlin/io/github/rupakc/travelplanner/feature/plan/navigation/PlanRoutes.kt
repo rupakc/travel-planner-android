@@ -138,7 +138,8 @@ private fun DetailContent(viewModel: PlanDetailViewModel, onBack: (() -> Unit)?,
     val tripWatch: TripWatchViewModel = hiltViewModel()
     WatchOutcomes(tripWatch, snackbar)
     val savedPlanId = viewModel.currentPlan?.id
-    LaunchedEffect(savedPlanId) { savedPlanId?.let(tripWatch::loadOffer) }
+    // Only right after a save (chat's "save itinerary" marks it), not on every open of a saved plan.
+    LaunchedEffect(savedPlanId) { savedPlanId?.let(tripWatch::loadOfferIfJustSaved) }
     val watchAvailable by tripWatch.available.collectAsStateWithLifecycle()
     val plan = viewModel.currentPlan
     val onWatchTrip = plan?.takeIf { watchAvailable && tripWatch.canWatch(it) }?.let { p -> { tripWatch.open(p) } }

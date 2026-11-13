@@ -6,6 +6,7 @@ import io.github.rupakc.travelplanner.core.data.repository.ChatThread
 import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchOutcome
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
+import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
 import io.github.rupakc.travelplanner.feature.chat.model.ChatTurn
 
 /** What the polite live region announces when an assistant reply finishes. */
@@ -41,6 +42,8 @@ data class ChatUiState(
     val announcement: ReplyAnnouncement? = null,
     /** One-tap "Watch price" may show on flight, hotel and activity cards. */
     val watchAvailable: Boolean = false,
+    /** The shared plan draft's trip: a card shows "Watch price" only when it belongs to this trip. */
+    val watchTrip: TravelSearchRequest? = null,
 ) {
     val isStreaming: Boolean get() = streaming?.streaming == true
 

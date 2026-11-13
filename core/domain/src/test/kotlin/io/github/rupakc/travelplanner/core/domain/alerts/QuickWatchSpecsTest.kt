@@ -37,6 +37,13 @@ class QuickWatchSpecsTest {
         assertNull(QuickWatchSpecs.forItem(PlanItem.ActivityItem(Activity()), trip, today))
     }
 
+    @Test fun `a card matches only the trip it belongs to`() {
+        val lisbon = trip.copy(destination = "Lisbon, Portugal")
+        assertEquals(true, QuickWatchSpecs.matchesTrip(PlanItem.HotelItem(Hotel(name = "Lumen", city = "Lisbon")), lisbon))
+        assertEquals(false, QuickWatchSpecs.matchesTrip(PlanItem.HotelItem(Hotel(name = "Ritz", city = "Paris")), lisbon))
+        assertEquals(false, QuickWatchSpecs.matchesTrip(PlanItem.HotelItem(Hotel(name = "Lumen", city = "Lisbon")), null))
+    }
+
     @Test fun `the whole trip is kind trip with the plan id`() {
         val draft = QuickWatchSpecs.forTrip(9, "Lisbon")
         assertEquals("trip", draft.kind)

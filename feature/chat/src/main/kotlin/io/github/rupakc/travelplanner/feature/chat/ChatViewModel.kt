@@ -7,6 +7,7 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppException
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.alerts.PlanWatchOffers
 import io.github.rupakc.travelplanner.core.data.alerts.QuickWatcher
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.data.offline.PlanJourney
@@ -81,6 +82,7 @@ class ChatViewModel
         @param:ApplicationScope private val appScope: CoroutineScope,
         private val quickWatcher: QuickWatcher,
         private val clock: AppClock,
+        private val offers: PlanWatchOffers,
     ) : ViewModel() {
         private val currentThread = MutableStateFlow<Long?>(null)
         private val query = MutableStateFlow("")
@@ -136,6 +138,7 @@ class ChatViewModel
                     confirmReplaceTurnId = l.confirmReplaceTurnId,
                     announcement = l.announcement,
                     watchAvailable = l.watchAvailable,
+                    watchTrip = draft.searchRequest,
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState())
 
@@ -185,7 +188,8 @@ class ChatViewModel
         /** One-tap watch for a flight, hotel or activity card, built from the plan draft's search (surface `chat`). */
         private fun watchItem(item: PlanItem) {
             viewModelScope.launch {
-                val draft = QuickWatchSpecs.forItem(item, planStore.draft.value.searchRequest, clock.today())
+                val trip = planStore.draft.value.searchRequest
+                val draft = if (QuickWatchSpecs.matchesTrip(item, trip)) QuickWatchSpecs.forItem(item, trip, clock.today()) else null
                 val outcome =
                     if (draft == null) {
                         QuickWatchOutcome.Invalid(null)
@@ -398,6 +402,7 @@ class ChatViewModel
                     is AppResult.Success -> {
                         // Same snapshot as the results screen (emergency card, forex, visa, packing, weather), behind features.trips.
                         journey.onPlanSaved(result.value.id, turn.sections.mapValues { it.value.raw }.let(::JsonObject))
+                        offers.markSaved(result.value.id)
                         effects.trySend(ChatEffect.OpenPlan(result.value.id))
                     }
 

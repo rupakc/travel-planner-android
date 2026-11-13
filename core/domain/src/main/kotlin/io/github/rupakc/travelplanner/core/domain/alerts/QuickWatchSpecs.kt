@@ -71,6 +71,24 @@ object QuickWatchSpecs {
             }
         }
 
+    /**
+     * True when [item] belongs to [search]'s trip: its city (hotel, activity) or arrival (flight) is the trip's destination or one of
+     * its stops. Chat cards can come from another question than the shared plan draft's trip, so the button is hidden when unsure.
+     */
+    fun matchesTrip(item: PlanItem, search: TravelSearchRequest?): Boolean {
+        if (search == null) return false
+        val places = (listOf(search.destination) + search.destinations.orEmpty()).map { WatchSpecs.foldedCityKey(it) }.filter { it.isNotEmpty() }
+        val place =
+            when (item) {
+                is PlanItem.HotelItem -> item.hotel.city
+                is PlanItem.ActivityItem -> item.activity.city
+                is PlanItem.FlightItem -> item.flight.outbound?.destination
+                else -> null
+            }
+        val key = WatchSpecs.foldedCityKey(place)
+        return key.isNotEmpty() && key in places
+    }
+
     /** The whole saved trip (kind `trip`, spec `{plan_id}`). */
     fun forTrip(planId: Long, name: String): QuickWatchDraft =
         QuickWatchDraft(PriceWatchKinds.TRIP, name, null, TravelJson.encodeToJsonElement(TripWatchSpec.serializer(), TripWatchSpec(planId)) as JsonObject)

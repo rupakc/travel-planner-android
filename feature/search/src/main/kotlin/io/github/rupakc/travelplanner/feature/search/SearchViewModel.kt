@@ -231,11 +231,9 @@ class SearchViewModel
                         recentSearchesRepository.recent.first().firstOrNull { it.id == id }?.let(::loadRecent)
                     }
                 }
-                // A destination from the route (Recap "Where next" → Plan this) pre-fills the known form once, after preferences.
-                if (restored == null) {
-                    route.destination?.trim()?.takeIf(String::isNotEmpty)?.let { place ->
-                        _state.update { it.copy(mode = SearchMode.KNOWN, form = it.form.copy(destination = place)) }
-                    }
+                // An explicit destination from the route (Recap "Where next" → Plan this) wins over a restored form.
+                route.destination?.trim()?.takeIf(String::isNotEmpty)?.let { place ->
+                    _state.update { it.copy(mode = SearchMode.KNOWN, form = it.form.copy(destination = place)) }
                 }
                 // Spec §6.1 Q4: the onboarding pace answer seeds the form when nothing else set it.
                 if (!loadedRecent && !paceTouched) {

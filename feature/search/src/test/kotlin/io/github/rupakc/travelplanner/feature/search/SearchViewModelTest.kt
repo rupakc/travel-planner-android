@@ -287,6 +287,20 @@ class SearchViewModelTest {
     }
 
     @Test
+    fun `a route destination prefills the known form and overrides a restored form`() {
+        val fresh = vm(SearchRoute(destination = "Porto, Portugal")).state.value
+        assertEquals("Porto, Portugal", fresh.form.destination)
+        assertEquals(SearchMode.KNOWN, fresh.mode)
+        val handle = SavedStateHandle(SearchRoute(destination = "Porto, Portugal"))
+        val first = vm(handle = handle)
+        first.onEvent(SearchFormEvent.UpdateForm(first.state.value.form.copy(destination = "HND")))
+        first.onEvent(SearchFormEvent.SelectMode(SearchMode.COMPARE))
+        val restored = vm(handle = handle).state.value
+        assertEquals("Porto, Portugal", restored.form.destination)
+        assertEquals(SearchMode.KNOWN, restored.mode)
+    }
+
+    @Test
     fun `rerun is ignored for passed dates and runs the exact search otherwise`() {
         runBlocking { recent.add(RecentSearchIn("A", "B", "2026-01-01")) }
         val vm = vm()

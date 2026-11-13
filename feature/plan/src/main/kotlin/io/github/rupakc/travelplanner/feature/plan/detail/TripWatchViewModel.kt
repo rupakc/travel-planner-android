@@ -76,6 +76,11 @@ internal class TripWatchViewModel
             }
         }
 
+        /** [loadOffer] only when the plan was saved a moment ago (see [PlanWatchOffers.markSaved]). */
+        fun loadOfferIfJustSaved(planId: Long) {
+            if (offers.takeJustSaved(planId)) loadOffer(planId)
+        }
+
         fun watchOffer(index: Int) {
             val o = offer.value ?: return
             if (o.states.getOrNull(index) != WatchOfferState.Idle) return

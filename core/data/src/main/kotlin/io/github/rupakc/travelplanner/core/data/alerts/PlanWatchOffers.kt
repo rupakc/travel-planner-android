@@ -24,6 +24,15 @@ class PlanWatchOffers
         private val telemetry: Telemetry,
     ) {
         private val dismissedPlans: MutableSet<Long> = ConcurrentHashMap.newKeySet()
+        private val justSaved: MutableSet<Long> = ConcurrentHashMap.newKeySet()
+
+        /** A save of [planId] just finished: the next [takeJustSaved] for it is true (once). */
+        fun markSaved(planId: Long) {
+            justSaved += planId
+        }
+
+        /** True once after [markSaved], so a screen offers watches right after a save and not on every open. */
+        fun takeJustSaved(planId: Long): Boolean = justSaved.remove(planId)
 
         /** Suggestions not yet watched for [planId]; empty when unavailable, dismissed, failed or none. */
         suspend fun load(planId: Long): List<AlertSuggestion> {

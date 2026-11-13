@@ -3,6 +3,7 @@ package io.github.rupakc.travelplanner.feature.chat
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.SystemAppClock
+import io.github.rupakc.travelplanner.core.data.alerts.PlanWatchOffers
 import io.github.rupakc.travelplanner.core.model.chat.ChatMessage
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.section.Activity
@@ -45,14 +46,16 @@ class ChatViewModelTest {
 
     private val journey = io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney()
 
+    private fun offers(q: FakeQuickWatch = FakeQuickWatch()) = PlanWatchOffers(q.watcher, q.alerts, q.telemetry)
+
     private fun viewModel() =
-        ChatViewModel(repo, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, FakeQuickWatch().watcher, SystemAppClock())
+        ChatViewModel(repo, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, FakeQuickWatch().watcher, SystemAppClock(), offers())
 
     @Test
     fun `watch availability follows the one-tap gate and an item without a trip is refused, not sent`() =
         runTest {
             val on = FakeQuickWatch.on()
-            val vm = ChatViewModel(repo, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, on.watcher, SystemAppClock())
+            val vm = ChatViewModel(repo, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, on.watcher, SystemAppClock(), offers(on))
             vm.uiState.test {
                 assertTrue(expectMostRecentItemMatching { it.watchAvailable }.watchAvailable)
                 cancelAndIgnoreRemainingEvents()
@@ -183,7 +186,17 @@ class ChatViewModelTest {
                             emit(ChatEvent.Done)
                         }
                 }
-            val vm = ChatViewModel(slow, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, FakeQuickWatch().watcher, SystemAppClock())
+            val vm =
+                ChatViewModel(
+                    slow,
+                    store,
+                    journey.journey,
+                    TestAppDispatchers(main.testDispatcher),
+                    appScope,
+                    FakeQuickWatch().watcher,
+                    SystemAppClock(),
+                    offers(),
+                )
             vm.uiState.test {
                 vm.onEvent(ChatUiEvent.Send("tell me about Rome"))
                 val streaming = expectMostRecentItemMatching { it.isStreaming && it.streaming?.content == "Half an answer" }
@@ -206,7 +219,16 @@ class ChatViewModelTest {
                         flow { gate.await() }
                 }
             val vm =
-                ChatViewModel(silent, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, FakeQuickWatch().watcher, SystemAppClock())
+                ChatViewModel(
+                    silent,
+                    store,
+                    journey.journey,
+                    TestAppDispatchers(main.testDispatcher),
+                    appScope,
+                    FakeQuickWatch().watcher,
+                    SystemAppClock(),
+                    offers(),
+                )
             vm.uiState.test {
                 vm.onEvent(ChatUiEvent.Send("hello"))
                 expectMostRecentItemMatching { it.isStreaming }
