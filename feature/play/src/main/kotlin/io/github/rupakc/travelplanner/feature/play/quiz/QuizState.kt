@@ -48,6 +48,8 @@ data class QuizUiState(
     val summary: QuizSummary? = null,
     /** XP and streak lines show only while the game is visible (`hide_game`, ruling R4). */
     val gameVisible: Boolean = false,
+    /** The session the screen shows; "Share my score" uses it once the session is finished. */
+    val sessionId: String? = null,
 ) {
     val current: QuizQuestion? get() = questions.getOrNull(position)
     val isLast: Boolean get() = position >= questions.lastIndex

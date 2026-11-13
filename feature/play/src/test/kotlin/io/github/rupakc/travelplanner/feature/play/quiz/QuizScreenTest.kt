@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.play.quiz
 
 import android.app.Application
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -12,6 +13,9 @@ import io.github.rupakc.travelplanner.core.model.game.GameDelta
 import io.github.rupakc.travelplanner.core.model.play.QuizOption
 import io.github.rupakc.travelplanner.core.model.play.QuizQuestion
 import io.github.rupakc.travelplanner.core.model.play.QuizSummary
+import io.github.rupakc.travelplanner.core.model.share.ShareKind
+import io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher
+import io.github.rupakc.travelplanner.core.ui.share.ShareLauncher
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -61,6 +65,54 @@ class QuizScreenTest {
         compose.setContent { TravelTheme { QuizScreen(done, onEvent = {}, onBack = {}) } }
         compose.onNodeWithText("3 of 5 correct").assertIsDisplayed()
         compose.onNodeWithText("+10 XP").assertDoesNotExist()
+    }
+
+    private fun finished(visible: Boolean, session: String?, launcher: ShareLauncher?) =
+        compose.setContent {
+            TravelTheme {
+                CompositionLocalProvider(LocalShareLauncher provides launcher) {
+                    QuizScreen(
+                        QuizUiState(
+                            phase = QuizPhase.Finished,
+                            summary = QuizSummary(score = 420, correct = 3, total = 5),
+                            gameVisible = visible,
+                            sessionId = session,
+                        ),
+                        onEvent = {},
+                        onBack = {},
+                    )
+                }
+            }
+        }
+
+    @Test(timeout = 60_000)
+    fun `share my score opens the finished session`() {
+        val sessions = mutableListOf<String>()
+        finished(
+            true,
+            "s-1",
+            object : ShareLauncher {
+                override fun open(kind: ShareKind, planId: Long?) = Unit
+
+                override fun openQuiz(sessionId: String) {
+                    sessions += sessionId
+                }
+            },
+        )
+        compose.onNodeWithText("Share my score").performClick()
+        assertEquals(listOf("s-1"), sessions)
+    }
+
+    @Test(timeout = 60_000)
+    fun `share my score is hidden when sharing is off or the game is hidden`() {
+        finished(true, "s-1", null)
+        compose.onNodeWithText("Share my score").assertDoesNotExist()
+    }
+
+    @Test(timeout = 60_000)
+    fun `share my score is hidden for a hidden game`() {
+        finished(false, "s-1", ShareLauncher { _, _ -> })
+        compose.onNodeWithText("Share my score").assertDoesNotExist()
     }
 
     @Test(timeout = 60_000)

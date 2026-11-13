@@ -20,10 +20,10 @@ class SharesRepositoryImpl
         private val api: SharesApi,
         private val language: AppLanguage,
     ) : SharesRepository {
-        override suspend fun create(kind: ShareKind, planId: Long?, options: ShareOptions): AppResult<CreatedShare> {
+        override suspend fun create(kind: ShareKind, planId: Long?, options: ShareOptions, sessionId: String?): AppResult<CreatedShare> {
             val wire = kind.wire ?: return AppResult.Failure(io.github.rupakc.travelplanner.core.common.AppError.Unknown(null))
             // plan_id is ignored by the server for savings; it is not sent so the body is exactly the contract's.
-            val body = CreateShareRequest(wire, planId.takeIf { kind.needsPlan }, options, language.current())
+            val body = CreateShareRequest(wire, planId.takeIf { kind.needsPlan }, options, language.current(), sessionId.takeIf { kind.needsSession })
             return apiCall { api.create(body) }
         }
 

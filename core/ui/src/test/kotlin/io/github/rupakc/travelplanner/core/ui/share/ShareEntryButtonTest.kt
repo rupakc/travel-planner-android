@@ -50,6 +50,49 @@ class ShareEntryButtonTest {
     }
 
     @Test
+    fun `a quiz opens its session and needs one`() {
+        val sessions = mutableListOf<String>()
+        val launcher =
+            object : ShareLauncher {
+                override fun open(kind: ShareKind, planId: Long?) = Unit
+
+                override fun openQuiz(sessionId: String) {
+                    sessions += sessionId
+                }
+            }
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                CompositionLocalProvider(LocalShareLauncher provides launcher) {
+                    ShareEntryButton(
+                        ShareKind.QUIZ,
+                        null,
+                        sessionId = null,
+                        label = io.github.rupakc.travelplanner.core.ui.R.string.share_entry_score,
+                        tid = "no",
+                    )
+                    ShareEntryButton(ShareKind.QUIZ, null, sessionId = "s-9", label = io.github.rupakc.travelplanner.core.ui.R.string.share_entry_score)
+                }
+            }
+        }
+        compose.onNodeWithText("Share my score").performClick()
+        assertEquals(listOf("s-9"), sessions)
+    }
+
+    @Test
+    fun `a status share needs its plan`() {
+        val opened = mutableListOf<Pair<ShareKind, Long?>>()
+        compose.setContent {
+            TravelTheme(themeMode = ThemeMode.LIGHT) {
+                CompositionLocalProvider(LocalShareLauncher provides ShareLauncher { k, p -> opened += k to p }) {
+                    ShareEntryButton(ShareKind.STATUS, null, label = io.github.rupakc.travelplanner.core.ui.R.string.share_entry_status)
+                }
+            }
+        }
+        compose.onNodeWithText("Share status").assertDoesNotExist()
+        assertEquals(emptyList<Pair<ShareKind, Long?>>(), opened)
+    }
+
+    @Test
     fun `a plan kind without a plan id draws nothing`() {
         show({ _, _ -> }, ShareKind.PLAN, null)
         compose.onNodeWithText("Share link").assertDoesNotExist()

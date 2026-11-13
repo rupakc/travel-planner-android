@@ -55,6 +55,8 @@ internal fun ShareCreateDialogRoute(onClose: () -> Unit) {
             ShareKind.PLAN to stringResource(R.string.share_create_text_plan),
             ShareKind.RECAP to stringResource(R.string.share_create_text_recap),
             ShareKind.SAVINGS to stringResource(R.string.share_create_text_savings),
+            ShareKind.QUIZ to stringResource(R.string.share_create_text_quiz),
+            ShareKind.STATUS to stringResource(R.string.share_create_text_status),
         )
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -301,6 +303,8 @@ private fun titleRes(kind: ShareKind): Int =
     when (kind) {
         ShareKind.RECAP -> R.string.share_create_title_recap
         ShareKind.SAVINGS -> R.string.share_create_title_savings
+        ShareKind.QUIZ -> R.string.share_create_title_quiz
+        ShareKind.STATUS -> R.string.share_create_title_status
         else -> R.string.share_create_title_plan
     }
 

@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.trips.today
 
 import android.app.Application
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -12,9 +13,12 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledSlot
 import io.github.rupakc.travelplanner.core.model.section.ItinerarySlot
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.Streak
 import io.github.rupakc.travelplanner.core.model.trips.Trip
+import io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher
+import io.github.rupakc.travelplanner.core.ui.share.ShareLauncher
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -49,6 +53,38 @@ class TodayScreenTest {
         assertEquals(TodayEvent.CheckIn, events.last())
         compose.onNodeWithText("Emergency info").performClick()
         assertEquals(1, emergency)
+    }
+
+    @Test
+    fun `share status opens the trip's status share only on an active trip with sharing on`() {
+        val opened = mutableListOf<Pair<ShareKind, Long?>>()
+        compose.setContent {
+            TravelTheme(ThemeMode.LIGHT) {
+                CompositionLocalProvider(LocalShareLauncher provides ShareLauncher { k, p -> opened += k to p }) {
+                    TodayScreen(base, {}, {}, null, null)
+                }
+            }
+        }
+        compose.onNodeWithText("Share status").performClick()
+        assertEquals(listOf(ShareKind.STATUS to 1L), opened)
+    }
+
+    @Test
+    fun `no share status without sharing or without a day index`() {
+        show(base)
+        compose.onNodeWithText("Share status").assertDoesNotExist()
+    }
+
+    @Test
+    fun `no share status before the trip starts`() {
+        compose.setContent {
+            TravelTheme(ThemeMode.LIGHT) {
+                CompositionLocalProvider(LocalShareLauncher provides ShareLauncher { _, _ -> }) {
+                    TodayScreen(base.copy(trip = base.trip!!.copy(dayIndex = null)), {}, {}, null, null)
+                }
+            }
+        }
+        compose.onNodeWithText("Share status").assertDoesNotExist()
     }
 
     @Test

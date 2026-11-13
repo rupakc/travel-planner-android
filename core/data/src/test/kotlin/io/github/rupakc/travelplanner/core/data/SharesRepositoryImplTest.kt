@@ -67,6 +67,22 @@ class SharesRepositoryImplTest {
         }
 
     @Test
+    fun `quiz sends its session id and no plan, status sends its plan and no session`() =
+        runTest(timeout = TIMEOUT) {
+            respond(200, """{"token":"q","kind":"quiz","url":"u"}""")
+            repo.create(ShareKind.QUIZ, 99, ShareOptions.PRIVATE, "sess-1")
+            assertEquals(
+                """{"kind":"quiz","options":{"dates":"hidden","show_origin":false,"show_name":false},"locale":"fr","session_id":"sess-1"}""",
+                server.takeRequest().body!!.utf8(),
+            )
+            respond(200, """{"token":"t","kind":"status","url":"u"}""")
+            repo.create(ShareKind.STATUS, 5, ShareOptions.PRIVATE, "ignored")
+            val body = server.takeRequest().body!!.utf8()
+            assertTrue(body.contains(""""plan_id":5"""))
+            assertFalse(body.contains("session_id"))
+        }
+
+    @Test
     fun `an unknown kind is never sent`() =
         runTest(timeout = TIMEOUT) {
             assertTrue(repo.create(ShareKind.UNKNOWN, null, ShareOptions.PRIVATE) is AppResult.Failure)

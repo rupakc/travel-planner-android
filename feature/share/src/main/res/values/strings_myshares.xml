@@ -22,4 +22,6 @@
     <string name="myshares_created">Created %1$s</string>
     <string name="myshares_offline">You\'re offline. Connect to load your shares.</string>
     <string name="myshares_error_load">Could not load your shares.</string>
+    <string name="myshares_kind_quiz">Quiz score</string>
+    <string name="myshares_kind_status">Trip status</string>
 </resources>

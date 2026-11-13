@@ -38,7 +38,9 @@ class SharesDecodeTest {
 
     @Test
     fun `unknown kind is a plain link`() {
-        assertEquals(ShareKind.UNKNOWN, ShareKind.from("quiz"))
+        assertEquals(ShareKind.QUIZ, ShareKind.from("quiz"))
+        assertEquals(ShareKind.STATUS, ShareKind.from("status"))
+        assertEquals(ShareKind.UNKNOWN, ShareKind.from("postcard"))
         assertEquals(ShareKind.UNKNOWN, ShareKind.from(null))
         assertEquals(ShareKind.SAVINGS, ShareKind.from("savings"))
         assertTrue(ShareKind.RECAP.needsPlan)

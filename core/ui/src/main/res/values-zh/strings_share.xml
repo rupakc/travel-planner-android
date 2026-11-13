@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="share_entry_button">分享链接</string>
+    <string name="share_entry_score">分享我的得分</string>
+    <string name="share_entry_status">分享状态</string>
 </resources>

@@ -22,4 +22,6 @@
     <string name="myshares_created">Créé le %1$s</string>
     <string name="myshares_offline">Vous êtes hors ligne. Connectez-vous pour charger vos liens.</string>
     <string name="myshares_error_load">Impossible de charger vos liens.</string>
+    <string name="myshares_kind_quiz">Score au quiz</string>
+    <string name="myshares_kind_status">Statut du voyage</string>
 </resources>

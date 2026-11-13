@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="share_entry_button">Compartir enlace</string>
+    <string name="share_entry_score">Compartir mi puntuación</string>
+    <string name="share_entry_status">Compartir estado</string>
 </resources>

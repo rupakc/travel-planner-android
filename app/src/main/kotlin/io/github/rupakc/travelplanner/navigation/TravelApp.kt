@@ -100,6 +100,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.TripRoute
 import io.github.rupakc.travelplanner.core.model.navigation.VerifyEmailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.YouRoute
 import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
+import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.model.social.IdeaKind
 import io.github.rupakc.travelplanner.core.ui.game.GameDeltaHost
 import io.github.rupakc.travelplanner.core.ui.privacy.ConsentPrompt
@@ -166,7 +167,19 @@ fun TravelApp(
     // Share links 2.0 entry points read this; null (no `features.sharing`) keeps the legacy plan share and hides the rest.
     val shareLauncher =
         remember(navController, shell.sharing) {
-            if (shell.sharing) ShareLauncher { kind, planId -> navController.navigate(ShareCreateRoute(kind.wire.orEmpty(), planId)) } else null
+            if (shell.sharing) {
+                object : ShareLauncher {
+                    override fun open(kind: ShareKind, planId: Long?) {
+                        navController.navigate(ShareCreateRoute(kind.wire.orEmpty(), planId))
+                    }
+
+                    override fun openQuiz(sessionId: String) {
+                        navController.navigate(ShareCreateRoute(ShareKind.QUIZ.wire.orEmpty(), null, sessionId))
+                    }
+                }
+            } else {
+                null
+            }
         }
     // "Share as an idea" entry points read this; null (no `features.social`) hides them.
     val ideaLauncher =

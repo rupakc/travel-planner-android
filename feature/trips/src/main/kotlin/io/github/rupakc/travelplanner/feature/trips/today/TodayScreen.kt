@@ -31,8 +31,10 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledSlot
+import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.model.trips.Trip
 import io.github.rupakc.travelplanner.core.ui.itinerary.ItineraryDayCard
+import io.github.rupakc.travelplanner.core.ui.share.ShareEntryButton
 import io.github.rupakc.travelplanner.feature.trips.R
 import io.github.rupakc.travelplanner.feature.trips.trip.LocalTripTabSelector
 import io.github.rupakc.travelplanner.feature.trips.trip.TripTab
@@ -117,6 +119,19 @@ fun TodayScreen(
                 item(key = "checkin", contentType = "checkin") { CheckinCard(state, onEvent) }
                 state.nextUp?.let { slot -> item(key = "next", contentType = "next") { NextUpCard(slot, onDirections) } }
                 item(key = "quick", contentType = "quick") { QuickActions(onOpenEmergency, onAddExpense) }
+                // "Day N in Place": only while the trip is on (the server gives a day index), and only when sharing is on.
+                val trip = state.trip
+                if (trip != null && state.dayNumber != null) {
+                    item(key = "share", contentType = "share") {
+                        ShareEntryButton(
+                            ShareKind.STATUS,
+                            trip.id,
+                            Modifier.fillMaxWidth(),
+                            tid = "today.share_status",
+                            label = io.github.rupakc.travelplanner.core.ui.R.string.share_entry_status,
+                        )
+                    }
+                }
                 val day = state.day
                 if (day == null || day.slots.isEmpty()) {
                     item(key = "empty", contentType = "empty") {

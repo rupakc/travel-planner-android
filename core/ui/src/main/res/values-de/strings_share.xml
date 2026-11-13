@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="share_entry_button">Link teilen</string>
+    <string name="share_entry_score">Mein Ergebnis teilen</string>
+    <string name="share_entry_status">Status teilen</string>
 </resources>

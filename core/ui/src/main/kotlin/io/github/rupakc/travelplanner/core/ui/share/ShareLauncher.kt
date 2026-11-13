@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.core.ui.share
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
@@ -19,6 +20,9 @@ import io.github.rupakc.travelplanner.core.ui.R
 fun interface ShareLauncher {
     /** Opens the dialog for [kind]; [planId] is the plan (or the trip's plan) and is null for [ShareKind.SAVINGS]. */
     fun open(kind: ShareKind, planId: Long?)
+
+    /** Opens the dialog for a finished quiz session ([ShareKind.QUIZ]). A launcher that predates quizzes ignores it. */
+    fun openQuiz(sessionId: String) {}
 }
 
 /** The launcher of the current shell, or null when sharing 2.0 is off. */
@@ -35,12 +39,15 @@ fun ShareEntryButton(
     modifier: Modifier = Modifier,
     variant: TpButtonVariant = TpButtonVariant.Secondary,
     tid: String = "share.entry",
+    sessionId: String? = null,
+    @StringRes label: Int = R.string.share_entry_button,
 ) {
     val launcher = LocalShareLauncher.current ?: return
     if (kind.needsPlan && planId == null) return
+    if (kind.needsSession && sessionId == null) return
     TpButton(
-        stringResource(R.string.share_entry_button),
-        { launcher.open(kind, planId) },
+        stringResource(label),
+        { if (kind.needsSession) launcher.openQuiz(sessionId.orEmpty()) else launcher.open(kind, planId) },
         modifier,
         variant,
         leadingIcon = Icons.Filled.Share,

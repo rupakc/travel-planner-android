@@ -39,6 +39,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.model.play.QuizOption
 import io.github.rupakc.travelplanner.core.model.play.QuizQuestion
+import io.github.rupakc.travelplanner.core.model.share.ShareKind
+import io.github.rupakc.travelplanner.core.ui.share.ShareEntryButton
 import io.github.rupakc.travelplanner.feature.play.R
 import java.util.Locale
 
@@ -231,6 +233,17 @@ private fun QuizSummaryContent(state: QuizUiState, onBack: () -> Unit, modifier:
                 }
                 if (state.gameVisible) GameLines(summary)
             }
+        }
+        // Finished session only (this screen), and not while the game is hidden. The entry draws nothing when sharing is off.
+        if (summary != null && state.gameVisible) {
+            ShareEntryButton(
+                ShareKind.QUIZ,
+                null,
+                Modifier.fillMaxWidth(),
+                tid = "play.quiz.share",
+                sessionId = state.sessionId,
+                label = io.github.rupakc.travelplanner.core.ui.R.string.share_entry_score,
+            )
         }
         TpButton(
             text = stringResource(R.string.play_result_back),

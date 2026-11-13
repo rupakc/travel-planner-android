@@ -9,11 +9,20 @@ enum class ShareKind(val wire: String?) {
     PLAN("plan"),
     RECAP("recap"),
     SAVINGS("savings"),
+
+    /** A finished quiz session (`session_id`): pack and score out of 5, never time or answers. */
+    QUIZ("quiz"),
+
+    /** "Day N in Place" of an active trip (`plan_id`). */
+    STATUS("status"),
     UNKNOWN(null),
     ;
 
     /** True when the share needs a `plan_id`. */
-    val needsPlan: Boolean get() = this == PLAN || this == RECAP
+    val needsPlan: Boolean get() = this == PLAN || this == RECAP || this == STATUS
+
+    /** True when the share needs a quiz `session_id`. */
+    val needsSession: Boolean get() = this == QUIZ
 
     companion object {
         /** Maps a wire `kind`; null or anything new is [UNKNOWN]. */
@@ -59,6 +68,8 @@ data class CreateShareRequest(
     @SerialName("plan_id") val planId: Long? = null,
     val options: ShareOptions = ShareOptions.PRIVATE,
     val locale: String? = null,
+    /** Only for `quiz`: the caller's finished session. Omitted from the body otherwise. */
+    @SerialName("session_id") val sessionId: String? = null,
 )
 
 /** The two card sizes: `link` 1200x630 (the preview), `story` 1080x1920 (chat apps). Either may be absent on a future server. */

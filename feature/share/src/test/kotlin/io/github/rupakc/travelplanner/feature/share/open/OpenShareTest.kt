@@ -103,9 +103,37 @@ class OpenShareTest {
         }
 
     @Test
+    fun `quiz and status shares render as cards without a name and skip stat keys they do not know`() =
+        runTest(timeout = TIMEOUT) {
+            repo.sharedPlans["quiz-token"] =
+                plan(
+                    """{"name":"Quiz","kind":"quiz","card":{"headline":"Flags: 4 out of 5","stats":[{"key":"score","count":4}]},
+                    "search_data":{},"selections":{}}""",
+                )
+            repo.sharedPlans["status-token"] =
+                plan(
+                    """{"name":"Day 3 in Lisbon","kind":"status","owner_name":"Ana",
+                    "card":{"headline":"Day 3 in Lisbon","destination":"Lisbon"},"search_data":{},"selections":{}}""",
+                )
+            vm("quiz-token").state.test {
+                val s = expectMostRecentItem()
+                assertEquals(ShareKind.QUIZ, s.kind)
+                assertEquals("Flags: 4 out of 5", s.card!!.headline)
+                assertFalse(s.unknownKind)
+                assertNull(s.ownerName)
+            }
+            vm("status-token").state.test {
+                val s = expectMostRecentItem()
+                assertEquals(ShareKind.STATUS, s.kind)
+                assertEquals("Ana", s.ownerName)
+                assertFalse(s.unknownKind)
+            }
+        }
+
+    @Test
     fun `an unknown kind is a plain link and is not reported`() =
         runTest(timeout = TIMEOUT) {
-            repo.sharedPlans["new-token"] = plan("""{"name":"X","kind":"quiz","card":{"headline":"h"},"search_data":{},"selections":{}}""")
+            repo.sharedPlans["new-token"] = plan("""{"name":"X","kind":"postcard","card":{"headline":"h"},"search_data":{},"selections":{}}""")
             vm("new-token").state.test {
                 val s = expectMostRecentItem()
                 assertEquals(ShareKind.UNKNOWN, s.kind)

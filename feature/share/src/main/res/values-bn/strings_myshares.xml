@@ -22,4 +22,6 @@
     <string name="myshares_created">তৈরি: %1$s</string>
     <string name="myshares_offline">আপনি অফলাইনে আছেন। শেয়ার লোড করতে সংযুক্ত হন।</string>
     <string name="myshares_error_load">আপনার শেয়ার লোড করা যায়নি।</string>
+    <string name="myshares_kind_quiz">কুইজ স্কোর</string>
+    <string name="myshares_kind_status">ভ্রমণের স্ট্যাটাস</string>
 </resources>
