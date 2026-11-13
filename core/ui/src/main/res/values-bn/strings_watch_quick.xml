@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_quick_button">দাম নজরে রাখুন</string>
+    <string name="watch_quick_watching">নজরে রাখা হচ্ছে</string>
+    <string name="watch_quick_watched">নজরে রাখা হচ্ছে। আমরা দাম দেখব এবং কমলে জানাব।</string>
+    <string name="watch_quick_existing">আপনি এটি ইতিমধ্যে নজরে রেখেছেন।</string>
+    <string name="watch_quick_live_off">লাইভ দাম যাচাই এখন বন্ধ, তাই আমরা এখনই এটি নজরে রাখতে পারছি না।</string>
+    <string name="watch_quick_limit">আপনি নজরদারির সীমায় পৌঁছেছেন। নতুন যোগ করতে একটি সরান।</string>
+    <string name="watch_quick_invalid">এটি এখনই নজরে রাখা যাবে না। ভবিষ্যতের ভ্রমণের তারিখ দরকার।</string>
+    <string name="watch_quick_failed">আমরা এই নজরদারি সেট করতে পারিনি। একটু পরে আবার চেষ্টা করুন।</string>
+    <string name="watch_offer_title">এই ভ্রমণের দাম নজরে রাখবেন?</string>
+    <string name="watch_offer_body">নজর রাখুন চাপুন, আমরা দাম দেখব এবং কমলে জানাব। প্রথম যাচাইয়ে একটু সময় লাগতে পারে।</string>
+    <string name="watch_offer_watch">নজর রাখুন</string>
+    <string name="watch_offer_dismiss">এখন নয়</string>
+</resources>

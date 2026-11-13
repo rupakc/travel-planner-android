@@ -62,6 +62,7 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedText
 import io.github.rupakc.travelplanner.core.designsystem.component.TpSmallFloatingActionButton
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
+import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchSpecs
 import io.github.rupakc.travelplanner.core.ui.format.localUsd
 import io.github.rupakc.travelplanner.feature.chat.ChatUiEvent
 import io.github.rupakc.travelplanner.feature.chat.ChatUiState
@@ -85,7 +86,16 @@ internal object ChatTags {
  */
 @Composable
 internal fun ConversationPane(state: ChatUiState, onEvent: (ChatUiEvent) -> Unit, onOpenLink: (String) -> Unit, modifier: Modifier = Modifier) {
-    val plan = remember(state.selections, onOpenLink) { PlanCallbacks(state.selections, { onEvent(ChatUiEvent.TogglePlanItem(it)) }, onOpenLink) }
+    val plan =
+        remember(state.selections, onOpenLink, state.watchAvailable, state.watchTrip) {
+            PlanCallbacks(
+                state.selections,
+                { onEvent(ChatUiEvent.TogglePlanItem(it)) },
+                onOpenLink,
+                onWatch = if (state.watchAvailable) ({ onEvent(ChatUiEvent.WatchItem(it)) }) else null,
+                canWatch = { QuickWatchSpecs.matchesTrip(it, state.watchTrip) },
+            )
+        }
     Column(modifier.fillMaxSize()) {
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when {

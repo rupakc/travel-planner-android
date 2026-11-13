@@ -419,7 +419,9 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 tabContent =
                     tripTabContent(shell.offlinePack, onAddExpense = { id ->
                         navController.navigate(TripRoute(id, tab = TripTab.Money.id)) { launchSingleTop = true }
-                    }, onWhereNext = { navController.navigateToTopLevel(TopLevelDestination.EXPLORE) }),
+                    }, onWhereNext = { navController.navigateToTopLevel(TopLevelDestination.EXPLORE) }, onPlanThis = { place ->
+                        navController.navigateToTopLevel(SearchRoute(destination = place))
+                    }),
             )
             offlinePackDestination(onBack = { navController.popBackStack() })
             // The Play tab hides itself when the game is off (the flag or the user's hide_game setting): leave for Trips / Home.
@@ -650,12 +652,17 @@ private const val GAME_DELTA_WINDOW_MS = 4_500L
 private val offlinePackTab: TripTabContent = { trip, modifier -> OfflinePackTabContent(trip.id, modifier) }
 
 /** The trip tabs this task wires (Overview and Prep are built in); Offline only when the server allows the pack. */
-private fun tripTabContent(offlinePack: Boolean, onAddExpense: (Long) -> Unit, onWhereNext: () -> Unit): Map<TripTab, TripTabContent> =
+private fun tripTabContent(
+    offlinePack: Boolean,
+    onAddExpense: (Long) -> Unit,
+    onWhereNext: () -> Unit,
+    onPlanThis: (String) -> Unit,
+): Map<TripTab, TripTabContent> =
     buildMap {
         put(TripTab.Today, todayTabContent(onAddExpense = onAddExpense))
         put(TripTab.Money, moneyTabContent())
         put(TripTab.Journal, journalTabContent())
-        put(TripTab.Recap, recapTabContent(onWhereNext = onWhereNext))
+        put(TripTab.Recap, recapTabContent(onWhereNext = onWhereNext, onPlanThis = onPlanThis))
         if (offlinePack) put(TripTab.Offline, offlinePackTab)
     }
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_quick_button">Preis beobachten</string>
+    <string name="watch_quick_watching">Wird beobachtet</string>
+    <string name="watch_quick_watched">Wird beobachtet. Wir prüfen den Preis und melden Preissenkungen.</string>
+    <string name="watch_quick_existing">Das beobachtest du bereits.</string>
+    <string name="watch_quick_live_off">Live-Preisabfragen sind gerade aus, daher können wir das noch nicht beobachten.</string>
+    <string name="watch_quick_limit">Du hast dein Limit an Beobachtungen erreicht. Entferne eine, um eine neue hinzuzufügen.</string>
+    <string name="watch_quick_invalid">Das lässt sich noch nicht beobachten. Es braucht Reisedaten in der Zukunft.</string>
+    <string name="watch_quick_failed">Wir konnten diese Beobachtung nicht einrichten. Versuche es gleich noch einmal.</string>
+    <string name="watch_offer_title">Preise für diese Reise beobachten?</string>
+    <string name="watch_offer_body">Tippe auf Beobachten, dann prüfen wir die Preise und melden Senkungen. Die erste Prüfung kann etwas dauern.</string>
+    <string name="watch_offer_watch">Beobachten</string>
+    <string name="watch_offer_dismiss">Jetzt nicht</string>
+</resources>

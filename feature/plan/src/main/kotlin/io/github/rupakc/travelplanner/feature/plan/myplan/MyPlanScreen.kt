@@ -72,6 +72,8 @@ internal fun MyPlanScreen(
     onOpenTrips: () -> Unit,
     modifier: Modifier = Modifier,
     snackbar: SnackbarHostState = remember { SnackbarHostState() },
+    /** The dismissible "watch prices for this trip?" prompt offered after a save; null/empty hides it. */
+    offerSlot: (@Composable () -> Unit)? = null,
 ) {
     val content = state.content
     Scaffold(
@@ -94,7 +96,7 @@ internal fun MyPlanScreen(
             if (content == null) {
                 SkeletonList(Modifier.padding(TravelTheme.spacing.gutter))
             } else {
-                PlanBody(content, onEvent, onOpenLink)
+                PlanBody(content, onEvent, onOpenLink, offerSlot)
             }
         }
     }
@@ -111,11 +113,12 @@ internal fun MyPlanScreen(
 }
 
 @Composable
-private fun PlanBody(content: MyPlanContent, onEvent: (MyPlanEvent) -> Unit, onOpenLink: (String) -> Unit) {
+private fun PlanBody(content: MyPlanContent, onEvent: (MyPlanEvent) -> Unit, onOpenLink: (String) -> Unit, offerSlot: (@Composable () -> Unit)?) {
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = TravelTheme.spacing.gutter, vertical = TravelTheme.spacing.md),
     ) {
+        offerSlot?.let { slot -> item(key = "watch_offer", contentType = "watch_offer") { slot() } }
         item(key = "name", contentType = "name") { NameBlock(content, onEvent) }
         if (content.isEmpty) {
             item(key = "empty", contentType = "empty") {

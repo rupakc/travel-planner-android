@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_quick_button">Vigilar precio</string>
+    <string name="watch_quick_watching">Vigilando</string>
+    <string name="watch_quick_watched">Vigilando. Revisaremos el precio y te avisaremos de las bajadas.</string>
+    <string name="watch_quick_existing">Ya estás vigilando esto.</string>
+    <string name="watch_quick_live_off">Las consultas de precios en vivo están desactivadas, así que aún no podemos vigilar esto.</string>
+    <string name="watch_quick_limit">Has alcanzado tu límite de vigilancias. Quita una para añadir otra.</string>
+    <string name="watch_quick_invalid">Esto aún no se puede vigilar. Necesita fechas de viaje futuras.</string>
+    <string name="watch_quick_failed">No pudimos configurar esta vigilancia. Inténtalo de nuevo en un momento.</string>
+    <string name="watch_offer_title">¿Vigilar los precios de este viaje?</string>
+    <string name="watch_offer_body">Pulsa Vigilar y revisaremos los precios y te avisaremos de las bajadas. La primera revisión puede tardar un poco.</string>
+    <string name="watch_offer_watch">Vigilar</string>
+    <string name="watch_offer_dismiss">Ahora no</string>
+</resources>

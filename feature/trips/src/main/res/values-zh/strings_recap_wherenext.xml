@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recap_wn_title">下一次旅行的灵感</string>
+    <string name="recap_wn_loading">正在根据你的旅行和喜好寻找灵感…</string>
+    <string name="recap_wn_note">这是 AI 建议，并非预订。费用仅为粗略估算。</string>
+    <string name="recap_wn_estimate">预估费用 %1$s–%2$s</string>
+    <string name="recap_wn_plan">规划这个</string>
+    <string name="recap_wn_empty">暂时没有新灵感，去“探索”看看吧。</string>
+    <string name="recap_wn_needs_profile">在设置中添加你的所在城市和国籍即可获得个性化灵感，或前往“探索”。</string>
+    <string name="recap_wn_ai_limit">AI 灵感暂时已达上限，你仍可前往“探索”。</string>
+    <string name="recap_wn_error">暂时无法获取灵感。</string>
+    <string name="recap_wn_retry">重试</string>
+    <string name="recap_wn_explore">打开探索</string>
+</resources>

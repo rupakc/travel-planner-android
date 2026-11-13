@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_quick_button">कीमत पर नज़र रखें</string>
+    <string name="watch_quick_watching">नज़र रखी जा रही है</string>
+    <string name="watch_quick_watched">नज़र रखी जा रही है। हम कीमत जाँचेंगे और गिरावट बताएँगे।</string>
+    <string name="watch_quick_existing">आप इसे पहले से देख रहे हैं।</string>
+    <string name="watch_quick_live_off">लाइव कीमत जाँच अभी बंद है, इसलिए हम इसे अभी नहीं देख सकते।</string>
+    <string name="watch_quick_limit">आप अपनी निगरानी सीमा तक पहुँच गए हैं। नया जोड़ने के लिए एक हटाएँ।</string>
+    <string name="watch_quick_invalid">इसे अभी नहीं देखा जा सकता। इसके लिए आगे की यात्रा तिथियाँ चाहिए।</string>
+    <string name="watch_quick_failed">हम यह निगरानी सेट नहीं कर सके। थोड़ी देर बाद फिर कोशिश करें।</string>
+    <string name="watch_offer_title">क्या इस यात्रा की कीमतों पर नज़र रखें?</string>
+    <string name="watch_offer_body">देखें दबाएँ, हम कीमतें जाँचेंगे और गिरावट बताएँगे। पहली जाँच में थोड़ा समय लग सकता है।</string>
+    <string name="watch_offer_watch">देखें</string>
+    <string name="watch_offer_dismiss">अभी नहीं</string>
+</resources>

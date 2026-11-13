@@ -1,7 +1,11 @@
 package io.github.rupakc.travelplanner.feature.plan.detail
 
 import io.github.rupakc.travelplanner.core.common.AppClock
+import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.alerts.PlanWatchOffers
+import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchOutcome
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatchKinds
+import io.github.rupakc.travelplanner.core.model.alerts.QuickWatchResponse
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
@@ -10,11 +14,13 @@ import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeHealthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePriceWatchesRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeQuickWatch
 import io.github.rupakc.travelplanner.core.testing.fake.TestUser
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -51,8 +57,31 @@ class TripWatchViewModelTest {
             )
         }
 
-    private fun vm(health: Health = Health(fareWatchAvailable = true)) =
-        TripWatchViewModel(FakePriceWatchesRepository(), FakeHealthRepository(health), FakeAuthRepository(Session("t", TestUser)), clock)
+    private fun vm(health: Health = Health(fareWatchAvailable = true), quick: FakeQuickWatch = FakeQuickWatch()) =
+        TripWatchViewModel(
+            FakePriceWatchesRepository(),
+            FakeHealthRepository(health),
+            FakeAuthRepository(Session("t", TestUser)),
+            clock,
+            quick.watcher,
+            PlanWatchOffers(quick.watcher, quick.alerts, quick.telemetry),
+        )
+
+    @Test
+    fun `with one-tap on the button watches the whole trip at once instead of opening the sheet`() =
+        runTest {
+            val quick = FakeQuickWatch.on()
+            quick.alerts.quickWatchResult =
+                AppResult.Success(QuickWatchResponse("trip", JsonObject(mapOf("id" to JsonPrimitive(3))), existing = false))
+            val vm = vm(quick = quick)
+            vm.open(upcoming)
+            assertNull(vm.sheet.value)
+            val sent = quick.alerts.quickWatchCalls.single()
+            assertEquals("trip", sent.kind)
+            assertEquals("trip", sent.surface)
+            assertEquals(7L, sent.planId)
+            assertEquals(QuickWatchOutcome.Added("trip", 3), vm.outcomeFlow.first())
+        }
 
     @Test
     fun `an upcoming saved trip opens the trip price-watch sheet with the plan id`() =

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recap_wn_title">आपकी अगली यात्रा के लिए विचार</string>
+    <string name="recap_wn_loading">आपकी यात्राओं और पसंद के आधार पर विचार खोजे जा रहे हैं…</string>
+    <string name="recap_wn_note">ये AI सुझाव हैं, बुकिंग नहीं। लागत मोटे अनुमान हैं।</string>
+    <string name="recap_wn_estimate">अनुमानित लागत %1$s–%2$s</string>
+    <string name="recap_wn_plan">इसकी योजना बनाएँ</string>
+    <string name="recap_wn_empty">अभी कोई नया विचार नहीं है। एक्सप्लोर आज़माएँ।</string>
+    <string name="recap_wn_needs_profile">व्यक्तिगत विचारों के लिए सेटिंग्स में अपना गृह शहर और राष्ट्रीयता जोड़ें, या एक्सप्लोर देखें।</string>
+    <string name="recap_wn_ai_limit">AI विचार फ़िलहाल अपनी सीमा तक पहुँच गए हैं। आप एक्सप्लोर देख सकते हैं।</string>
+    <string name="recap_wn_error">अभी हम विचार नहीं ला सके।</string>
+    <string name="recap_wn_retry">फिर कोशिश करें</string>
+    <string name="recap_wn_explore">एक्सप्लोर खोलें</string>
+</resources>

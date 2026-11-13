@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_quick_button">关注价格</string>
+    <string name="watch_quick_watching">关注中</string>
+    <string name="watch_quick_watched">已开始关注。我们会查看价格并在降价时通知你。</string>
+    <string name="watch_quick_existing">你已经在关注这一项了。</string>
+    <string name="watch_quick_live_off">实时价格查询目前已关闭，暂时无法关注。</string>
+    <string name="watch_quick_limit">已达到关注上限。移除一个后才能添加新的。</string>
+    <string name="watch_quick_invalid">暂时无法关注。需要尚未到来的出行日期。</string>
+    <string name="watch_quick_failed">无法设置此关注。请稍后再试。</string>
+    <string name="watch_offer_title">要关注这次旅行的价格吗？</string>
+    <string name="watch_offer_body">点按“关注”，我们会查看价格并在降价时通知你。首次检查可能需要一点时间。</string>
+    <string name="watch_offer_watch">关注</string>
+    <string name="watch_offer_dismiss">暂不</string>
+</resources>

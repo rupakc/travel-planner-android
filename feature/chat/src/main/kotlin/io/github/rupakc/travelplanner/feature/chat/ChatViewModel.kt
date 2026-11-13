@@ -3,13 +3,18 @@ package io.github.rupakc.travelplanner.feature.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppException
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.alerts.PlanWatchOffers
+import io.github.rupakc.travelplanner.core.data.alerts.QuickWatcher
 import io.github.rupakc.travelplanner.core.data.di.ApplicationScope
 import io.github.rupakc.travelplanner.core.data.offline.PlanJourney
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.repository.ChatRepository
+import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchOutcome
+import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchSpecs
 import io.github.rupakc.travelplanner.core.domain.chat.applyPlanAction
 import io.github.rupakc.travelplanner.core.domain.chat.buildApiHistory
 import io.github.rupakc.travelplanner.core.domain.chat.chatItinerarySlots
@@ -20,6 +25,7 @@ import io.github.rupakc.travelplanner.core.model.chat.ChatMessage
 import io.github.rupakc.travelplanner.core.model.chat.ChatRequest
 import io.github.rupakc.travelplanner.core.model.json.EmptyJsonObject
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
+import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.stream.ChatEvent
@@ -74,6 +80,9 @@ class ChatViewModel
         private val journey: PlanJourney,
         private val dispatchers: AppDispatchers,
         @param:ApplicationScope private val appScope: CoroutineScope,
+        private val quickWatcher: QuickWatcher,
+        private val clock: AppClock,
+        private val offers: PlanWatchOffers,
     ) : ViewModel() {
         private val currentThread = MutableStateFlow<Long?>(null)
         private val query = MutableStateFlow("")
@@ -128,6 +137,8 @@ class ChatViewModel
                     savingPlanTurnId = l.savingPlanTurnId,
                     confirmReplaceTurnId = l.confirmReplaceTurnId,
                     announcement = l.announcement,
+                    watchAvailable = l.watchAvailable,
+                    watchTrip = draft.searchRequest,
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState())
 
@@ -146,8 +157,14 @@ class ChatViewModel
             }
         }
 
+        init {
+            // One-tap "Watch price" on cards shows only with live prices and Alerts 2.0 (the Results gate).
+            viewModelScope.launch { local.update { it.copy(watchAvailable = runCatching { quickWatcher.available() }.getOrDefault(false)) } }
+        }
+
         fun onEvent(event: ChatUiEvent) {
             when (event) {
+                is ChatUiEvent.WatchItem -> watchItem(event.item)
                 is ChatUiEvent.Send -> send(event.text)
                 ChatUiEvent.Stop -> stop()
                 is ChatUiEvent.Retry -> retry(event.turnId)
@@ -165,6 +182,21 @@ class ChatViewModel
                 is ChatUiEvent.UndoDelete -> undoDelete(event.threadId)
                 is ChatUiEvent.CommitDelete -> commitDelete(event.threadId)
                 is ChatUiEvent.AnnouncementShown -> local.update { if (it.announcement?.seq == event.seq) it.copy(announcement = null) else it }
+            }
+        }
+
+        /** One-tap watch for a flight, hotel or activity card, built from the plan draft's search (surface `chat`). */
+        private fun watchItem(item: PlanItem) {
+            viewModelScope.launch {
+                val trip = planStore.draft.value.searchRequest
+                val draft = if (QuickWatchSpecs.matchesTrip(item, trip)) QuickWatchSpecs.forItem(item, trip, clock.today()) else null
+                val outcome =
+                    if (draft == null) {
+                        QuickWatchOutcome.Invalid(null)
+                    } else {
+                        quickWatcher.watch(draft.kind, draft.title, draft.subtitle, draft.spec, planStore.draft.value.planId, "chat")
+                    }
+                effects.trySend(ChatEffect.QuickWatched(outcome))
             }
         }
 
@@ -370,6 +402,7 @@ class ChatViewModel
                     is AppResult.Success -> {
                         // Same snapshot as the results screen (emergency card, forex, visa, packing, weather), behind features.trips.
                         journey.onPlanSaved(result.value.id, turn.sections.mapValues { it.value.raw }.let(::JsonObject))
+                        offers.markSaved(result.value.id)
                         effects.trySend(ChatEffect.OpenPlan(result.value.id))
                     }
 
@@ -386,6 +419,7 @@ class ChatViewModel
             val savingPlanTurnId: Long? = null,
             val confirmReplaceTurnId: Long? = null,
             val announcement: ReplyAnnouncement? = null,
+            val watchAvailable: Boolean = false,
         )
 
         private data class MessagesLoad(val threadId: Long?, val turns: List<ChatTurn>, val loading: Boolean)

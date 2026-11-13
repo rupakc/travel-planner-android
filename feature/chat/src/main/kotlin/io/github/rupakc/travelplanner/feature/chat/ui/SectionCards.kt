@@ -39,6 +39,7 @@ import io.github.rupakc.travelplanner.core.model.section.TipsData
 import io.github.rupakc.travelplanner.core.model.section.VisaData
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
 import io.github.rupakc.travelplanner.core.ui.PriceText
+import io.github.rupakc.travelplanner.core.ui.R as CoreUiR
 import io.github.rupakc.travelplanner.core.ui.SectionScaffold
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.chat.R
@@ -62,7 +63,15 @@ internal val CHAT_SECTION_ORDER =
     )
 
 /** Plan selection callbacks for section cards. */
-internal class PlanCallbacks(val selections: PlanSelections, val onToggle: (PlanItem) -> Unit, val onOpenLink: (String) -> Unit) {
+internal class PlanCallbacks(
+    val selections: PlanSelections,
+    val onToggle: (PlanItem) -> Unit,
+    val onOpenLink: (String) -> Unit,
+    /** One-tap "Watch price" for flight, hotel and activity cards; null hides the button (live prices / Alerts 2.0 off). */
+    val onWatch: ((PlanItem) -> Unit)? = null,
+    /** Only items of the trip the watch would be built from get the button. */
+    val canWatch: (PlanItem) -> Boolean = { false },
+) {
     fun isSelected(item: PlanItem): Boolean = PlanSelectionRules.isSelected(selections, item)
 }
 
@@ -143,13 +152,17 @@ private fun ItemRow(
     accent: Color,
     modifier: Modifier = Modifier,
     onToggle: (() -> Unit)? = null,
+    onWatch: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     TpCard(modifier = modifier.fillMaxWidth(), selected = selected, accent = accent) {
         Text(title, style = TravelTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
         content()
         if (onToggle != null) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                onWatch?.let {
+                    TpButton(stringResource(CoreUiR.string.watch_quick_button), it, variant = TpButtonVariant.Text, tid = "chat.section_cards_watch")
+                }
                 AddToPlanButton(selected = selected, itemName = title, onToggle = onToggle)
             }
         }
@@ -170,7 +183,16 @@ private fun ColumnScope.FlightsBody(data: FlightsData, estimate: Boolean, plan: 
     LimitedList(data.results, ChatDimens.SECTION_LIMIT, "flights") { f ->
         val item = PlanItem.FlightItem(f)
         val title = listOfNotNull(f.outbound?.airline, f.outbound?.flightNumber).joinToString(" ").ifBlank { "—" }
-        ItemRow(title, plan.isSelected(item), accent, onToggle = { plan.onToggle(item) }) {
+        ItemRow(
+            title,
+            plan.isSelected(item),
+            accent,
+            onToggle = { plan.onToggle(item) },
+            onWatch =
+                plan.onWatch?.takeIf { plan.canWatch(item) }?.let { w ->
+                    { w(item) }
+                },
+        ) {
             f.outbound?.let { leg ->
                 val route = stringResource(R.string.chat_route, leg.origin.orEmpty(), leg.destination.orEmpty())
                 Muted(if (f.returnLeg != null) "$route · ${stringResource(R.string.chat_round_trip)}" else route)
@@ -188,7 +210,18 @@ private fun ColumnScope.HotelsBody(data: HotelsData, estimate: Boolean, plan: Pl
     val accent = TravelTheme.sectionAccents[SectionId.HOTELS].icon
     LimitedList(data.results, ChatDimens.SECTION_LIMIT, "hotels") { h ->
         val item = PlanItem.HotelItem(h)
-        ItemRow(h.name.orEmpty(), plan.isSelected(item), accent, onToggle = { plan.onToggle(item) }) {
+        ItemRow(
+            h.name.orEmpty(),
+            plan.isSelected(item),
+            accent,
+            onToggle = {
+                plan.onToggle(item)
+            },
+            onWatch =
+                plan.onWatch?.takeIf { plan.canWatch(item) }?.let { w ->
+                    { w(item) }
+                },
+        ) {
             h.location?.let { Muted(it) }
             h.starRating?.takeIf { it > 0 }?.let { Muted("★".repeat(it.toInt().coerceIn(1, MAX_STARS))) }
             localPrice(h.pricePerNightUsd).takeIf(String::isNotEmpty)?.let {
@@ -205,7 +238,18 @@ private fun ColumnScope.ActivitiesBody(data: ActivitiesData, plan: PlanCallbacks
     val accent = TravelTheme.sectionAccents[SectionId.ACTIVITIES].icon
     LimitedList(data.results, ChatDimens.LIST_SECTION_LIMIT, "activities") { a ->
         val item = PlanItem.ActivityItem(a)
-        ItemRow(a.name.orEmpty(), plan.isSelected(item), accent, onToggle = { plan.onToggle(item) }) {
+        ItemRow(
+            a.name.orEmpty(),
+            plan.isSelected(item),
+            accent,
+            onToggle = {
+                plan.onToggle(item)
+            },
+            onWatch =
+                plan.onWatch?.takeIf { plan.canWatch(item) }?.let { w ->
+                    { w(item) }
+                },
+        ) {
             Row(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.md), verticalAlignment = Alignment.CenterVertically) {
                 PriceText(a.priceUsd, hideWhenUnknown = true, style = TravelTheme.typography.bodyMedium)
                 a.durationHours?.let { Muted(stringResource(R.string.chat_hours, trimNumber(it))) }

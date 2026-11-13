@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_quick_button">Suivre le prix</string>
+    <string name="watch_quick_watching">Suivi en cours</string>
+    <string name="watch_quick_watched">Suivi activé. Nous vérifierons le prix et vous préviendrons des baisses.</string>
+    <string name="watch_quick_existing">Vous suivez déjà ceci.</string>
+    <string name="watch_quick_live_off">Les vérifications de prix en direct sont désactivées, nous ne pouvons pas encore suivre ceci.</string>
+    <string name="watch_quick_limit">Vous avez atteint votre limite de suivis. Supprimez-en un pour en ajouter un autre.</string>
+    <string name="watch_quick_invalid">Impossible de suivre ceci pour l\'instant. Il faut des dates de voyage à venir.</string>
+    <string name="watch_quick_failed">Impossible de configurer ce suivi. Réessayez dans un instant.</string>
+    <string name="watch_offer_title">Suivre les prix de ce voyage ?</string>
+    <string name="watch_offer_body">Touchez Suivre et nous vérifierons les prix et vous préviendrons des baisses. La première vérification peut prendre un moment.</string>
+    <string name="watch_offer_watch">Suivre</string>
+    <string name="watch_offer_dismiss">Pas maintenant</string>
+</resources>
