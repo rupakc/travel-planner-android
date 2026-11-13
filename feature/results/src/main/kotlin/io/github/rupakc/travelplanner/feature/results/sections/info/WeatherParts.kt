@@ -96,6 +96,7 @@ internal fun WeatherBody(data: WeatherData, modifier: Modifier = Modifier) {
             WeatherStrip(data.days, keyPrefix = "all")
         }
         if (poor > 0) Callout(pluralStringResource(R.plurals.weather_poor_days, poor, poor), tone = Tone.Warning, icon = Icons.Filled.Warning)
+        Text(stringResource(R.string.weather_attribution), style = TravelTheme.typography.labelSmall, color = TravelTheme.colors.onSurfaceVariant)
     }
 }
 

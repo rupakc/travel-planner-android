@@ -196,12 +196,20 @@ class TripsViewModel
 
         /** `GET /trips/stats` for the bucket ring; a failure just leaves the ring out. */
         private fun loadBucket() {
-            viewModelScope.launch {
-                val stats = (repository.stats() as? AppResult.Success)?.value
-                val bucket = stats?.let { Delight.bucket(it.countries.size, it.bucketGoal, gameEvents.visible.value) }
-                _state.update { it.copy(bucket = bucket, visitedCountries = stats?.countries?.map { c -> c.code }.orEmpty()) }
-            }
+            bucketJob?.cancel()
+            bucketJob =
+                viewModelScope.launch {
+                    val stats = (repository.stats() as? AppResult.Success)?.value
+                    _state.update { it.copy(visitedCountries = stats?.countries?.map { c -> c.code }.orEmpty()) }
+                    // Reactive: toggling hide_game shows or hides the ring without reloading the hub.
+                    gameEvents.visible.collect { visible ->
+                        val bucket = stats?.let { Delight.bucket(it.countries.size, it.bucketGoal, visible) }
+                        _state.update { it.copy(bucket = bucket) }
+                    }
+                }
         }
+
+        private var bucketJob: kotlinx.coroutines.Job? = null
 
         /** One `trip_view` per hub visit, with the pinned trip's phase (enum) or `none`. */
         private fun view(phase: String) {

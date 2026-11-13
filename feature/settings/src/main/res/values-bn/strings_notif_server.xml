@@ -8,7 +8,7 @@
     <string name="settings_notifsrv_morning_brief">সকালের সারাংশ</string>
     <string name="settings_notifsrv_morning_brief_hint">ভ্রমণের সময় আপনার দিনের পরিকল্পনা।</string>
     <string name="settings_notifsrv_weather">আবহাওয়া</string>
-    <string name="settings_notifsrv_weather_hint">আপনার ভ্রমণের জন্য আবহাওয়ার তথ্য।</string>
+    <string name="settings_notifsrv_weather_hint">আপনার ভ্রমণের জন্য আবহাওয়ার তথ্য। আবহাওয়ার তথ্য Open-Meteo.com থেকে.</string>
     <string name="settings_notifsrv_nearby">আপনার কাছাকাছি</string>
     <string name="settings_notifsrv_nearby_hint">আকর্ষণীয় কিছুর কাছে থাকলে এই ডিভাইসে পরামর্শ।</string>
     <string name="settings_notifsrv_limits_heading">নিরিবিলি সময় ও সীমা</string>

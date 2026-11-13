@@ -8,7 +8,7 @@
     <string name="settings_notifsrv_morning_brief">早间简报</string>
     <string name="settings_notifsrv_morning_brief_hint">旅行期间当天的安排。</string>
     <string name="settings_notifsrv_weather">天气</string>
-    <string name="settings_notifsrv_weather_hint">与你行程相关的天气提示。</string>
+    <string name="settings_notifsrv_weather_hint">与你行程相关的天气提示。 天气数据来自 Open-Meteo.com.</string>
     <string name="settings_notifsrv_nearby">身边推荐</string>
     <string name="settings_notifsrv_nearby_hint">当你靠近有趣的地方时,在此设备上给出建议。</string>
     <string name="settings_notifsrv_limits_heading">免打扰时段与上限</string>

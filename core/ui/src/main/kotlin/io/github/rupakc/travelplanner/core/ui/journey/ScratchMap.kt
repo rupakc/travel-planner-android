@@ -101,7 +101,8 @@ fun ScratchMap(visited: Collection<String>, modifier: Modifier = Modifier) {
                 scale(p.scale, p.scale, pivot = androidx.compose.ui.geometry.Offset.Zero)
             }) {
                 val hair = Stroke(width = 0.6f / p.scale.coerceAtLeast(0.01f))
-                paths.forEach { (code, path) ->
+                loaded?.first?.drawOrder?.forEach { code ->
+                    val path = paths[code] ?: return@forEach
                     drawPath(path, if (code in filled) accent else land)
                     drawPath(
                         path,

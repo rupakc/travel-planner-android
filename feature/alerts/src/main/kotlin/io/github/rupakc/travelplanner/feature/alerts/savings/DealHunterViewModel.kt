@@ -37,7 +37,8 @@ class DealHunterViewModel
             viewModelScope.launch {
                 val me = (game.me() as? AppResult.Success)?.value
                 val catalog = (game.catalog() as? AppResult.Success)?.value
-                mutable.value = Delight.dealHunter(me, catalog, events.visible.value)
+                // Reactive: toggling hide_game updates the track without recreating the screen.
+                events.visible.collect { visible -> mutable.value = Delight.dealHunter(me, catalog, visible) }
             }
         }
     }

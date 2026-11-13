@@ -97,4 +97,26 @@ class BundledWorldMapTest {
         assertEquals("FR", at(2.5f, 47f))
         assertNull(at(-30f, 0f))
     }
+
+    @Test fun `enclave is drawn after its host and wins the hit test`() {
+        fun ring(o: DataOutputStream, vararg p: Int) {
+            o.writeShort(p.size / 2)
+            p.forEach { o.writeShort(it) }
+        }
+        val bytes = ByteArrayOutputStream()
+        val o = DataOutputStream(bytes)
+        o.writeShort(2)
+        // "LS" sorts before "ZA" but is the small square inside the big one.
+        o.write("LS".toByteArray())
+        o.writeShort(1)
+        ring(o, 5000, 5000, 5500, 5000, 5500, 5500, 5000, 5500, 5000, 5000)
+        o.write("ZA".toByteArray())
+        o.writeShort(1)
+        ring(o, 1000, 1000, 9000, 1000, 9000, 9000, 1000, 9000, 1000, 1000)
+        val m = WorldMapData.parse(bytes.toByteArray().inputStream())
+        assertEquals(listOf("ZA", "LS"), m.drawOrder)
+        assertEquals("LS", m.hit(52f, 52f))
+        assertEquals("ZA", m.hit(20f, 20f))
+        assertNull(m.hit(95f, 95f))
+    }
 }

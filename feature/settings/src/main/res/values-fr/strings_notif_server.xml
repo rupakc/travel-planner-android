@@ -8,7 +8,7 @@
     <string name="settings_notifsrv_morning_brief">Récap du matin</string>
     <string name="settings_notifsrv_morning_brief_hint">Votre programme du jour pendant le voyage.</string>
     <string name="settings_notifsrv_weather">Météo</string>
-    <string name="settings_notifsrv_weather_hint">Informations météo pour votre voyage.</string>
+    <string name="settings_notifsrv_weather_hint">Informations météo pour votre voyage. Données météo par Open-Meteo.com.</string>
     <string name="settings_notifsrv_nearby">Près de vous</string>
     <string name="settings_notifsrv_nearby_hint">Suggestions sur cet appareil lorsque vous êtes près d\'un lieu intéressant.</string>
     <string name="settings_notifsrv_limits_heading">Heures calmes et limites</string>

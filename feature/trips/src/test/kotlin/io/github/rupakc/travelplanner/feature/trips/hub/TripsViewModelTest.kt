@@ -182,4 +182,15 @@ class TripsViewModelTest {
         events.setVisible(false)
         assertNull(vm().state.value.bucket)
     }
+
+    @Test
+    fun `bucket ring follows hide_game live`() {
+        repo.statsResult = AppResult.Success(Stats(countries = listOf(CountryStat("JP")), bucketGoal = 5))
+        val vm = vm()
+        assertEquals(1, vm.state.value.bucket?.count)
+        events.setVisible(false)
+        assertNull(vm.state.value.bucket)
+        events.setVisible(true)
+        assertEquals(1, vm.state.value.bucket?.count)
+    }
 }
