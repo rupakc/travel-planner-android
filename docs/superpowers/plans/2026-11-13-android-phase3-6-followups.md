@@ -9,7 +9,7 @@ Shipped (PRs #94-#111 plus the fix PRs after the smoke test): Task 0 (offline tr
 - Web: extend the telemetry registry with the Android-only prop values if any are dropped; add the `currency` field of digest watches to `Alerts-API.md`.
 
 ## Engineering
-- Home shows no top or bottom bar right after sign-in until relaunch (open since the Phase 1+2 smoke test).
+- ~~Home shows no top or bottom bar right after sign-in until relaunch~~ Fixed in #114: the auth gate navigated to `HomeRoute` instead of `shell.home`, which is not a tab with the journey on, so no bar showed. Verified on the emulator after a clean build.
 - The quiz accepts an answer at "0 seconds left" (the server times answers; the countdown is cosmetic).
 - No watch button on My Plan items or chat cards, and no plan-scoped suggestions entry (`QuickWatcher.watch(planId, surface)` is ready).
 - Share: no card preview and no "Download card" button on Android (the share sheet covers saving); a recap shares `recap.tripId` as `plan_id` (the contract is silent); the unknown-kind "Open in browser" is hidden when the build has no `WEB_BASE_URL`; the classic shell has no entry to the paste-a-link screen; a `YYYY-MM` plan date is not shown on the poster.
