@@ -2,13 +2,13 @@ package io.github.rupakc.travelplanner.feature.social.profile
 
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.model.auth.AccountSettings
 import io.github.rupakc.travelplanner.core.model.social.HandleCheck
 import io.github.rupakc.travelplanner.core.model.social.OwnProfile
 import io.github.rupakc.travelplanner.core.model.social.ProfileVisibility
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAccountRepository
-import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.testing.fake.FakeJourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSocialRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry

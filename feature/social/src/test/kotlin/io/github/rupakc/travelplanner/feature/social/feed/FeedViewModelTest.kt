@@ -3,12 +3,12 @@ package io.github.rupakc.travelplanner.feature.social.feed
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.model.social.FeedScope
 import io.github.rupakc.travelplanner.core.model.social.Idea
 import io.github.rupakc.travelplanner.core.model.social.IdeaAuthor
 import io.github.rupakc.travelplanner.core.model.social.IdeaPage
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
-import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.testing.fake.FakeJourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSocialRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry

@@ -3,12 +3,12 @@ package io.github.rupakc.travelplanner.feature.play.h2h
 import androidx.lifecycle.SavedStateHandle
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.model.play.H2hList
 import io.github.rupakc.travelplanner.core.model.play.H2hMatch
 import io.github.rupakc.travelplanner.core.model.play.H2hOpponent
 import io.github.rupakc.travelplanner.core.model.play.QuizPack
 import io.github.rupakc.travelplanner.core.model.play.QuizSession
-import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeJourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlayRepository
