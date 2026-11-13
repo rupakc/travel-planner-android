@@ -2,14 +2,17 @@ package io.github.rupakc.travelplanner.core.designsystem.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
@@ -20,7 +23,10 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -44,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -111,6 +118,8 @@ fun TpIconButton(
     tid: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable () -> Unit,
 ) {
     val sink = LocalUiEventSink.current
@@ -121,6 +130,8 @@ fun TpIconButton(
         },
         modifier = modifier,
         enabled = enabled,
+        colors = colors,
+        interactionSource = interactionSource,
         content = content,
     )
 }
@@ -193,6 +204,9 @@ fun TpTextButton(
     tid: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    shape: Shape = ButtonDefaults.textShape,
+    colors: ButtonColors = ButtonDefaults.textButtonColors(),
+    interactionSource: MutableInteractionSource? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
     val sink = LocalUiEventSink.current
@@ -203,6 +217,9 @@ fun TpTextButton(
         },
         modifier = modifier,
         enabled = enabled,
+        shape = shape,
+        colors = colors,
+        interactionSource = interactionSource,
         content = content,
     )
 }
@@ -318,6 +335,8 @@ fun TpTab(
     enabled: Boolean = true,
     text: @Composable (() -> Unit)? = null,
     icon: @Composable (() -> Unit)? = null,
+    selectedContentColor: Color = LocalContentColor.current,
+    unselectedContentColor: Color = selectedContentColor,
 ) {
     val sink = LocalUiEventSink.current
     Tab(
@@ -330,6 +349,8 @@ fun TpTab(
         enabled = enabled,
         text = text,
         icon = icon,
+        selectedContentColor = selectedContentColor,
+        unselectedContentColor = unselectedContentColor,
     )
 }
 
@@ -342,6 +363,7 @@ fun TpDropdownMenuItem(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     enabled: Boolean = true,
+    colors: MenuItemColors = MenuDefaults.itemColors(),
 ) {
     val sink = LocalUiEventSink.current
     DropdownMenuItem(
@@ -354,6 +376,7 @@ fun TpDropdownMenuItem(
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         enabled = enabled,
+        colors = colors,
     )
 }
 
@@ -524,39 +547,7 @@ fun TpOutlinedTextField(
 ) {
     val sink = LocalUiEventSink.current
     var reported by remember { mutableStateOf(false) }
-    val actions =
-        KeyboardActions(
-            onDone =
-                keyboardActions.onDone?.let { f ->
-                    {
-                        sink.report(UiEventKind.SUBMIT, tid)
-                        f()
-                    }
-                },
-            onGo =
-                keyboardActions.onGo?.let { f ->
-                    {
-                        sink.report(UiEventKind.SUBMIT, tid)
-                        f()
-                    }
-                },
-            onNext = keyboardActions.onNext,
-            onPrevious = keyboardActions.onPrevious,
-            onSearch =
-                keyboardActions.onSearch?.let { f ->
-                    {
-                        sink.report(UiEventKind.SUBMIT, tid)
-                        f()
-                    }
-                },
-            onSend =
-                keyboardActions.onSend?.let { f ->
-                    {
-                        sink.report(UiEventKind.SUBMIT, tid)
-                        f()
-                    }
-                },
-        )
+    val actions = keyboardActions.reporting(sink, tid)
     OutlinedTextField(
         value = value,
         onValueChange = {
@@ -585,5 +576,24 @@ fun TpOutlinedTextField(
         minLines = minLines,
         shape = shape,
         colors = colors,
+    )
+}
+
+/** Wraps every keyboard action handler so it reports SUBMIT under [tid] before running; absent handlers stay absent. */
+private fun KeyboardActions.reporting(sink: UiEventSink, tid: String): KeyboardActions {
+    fun wrap(f: (KeyboardActionScope.() -> Unit)?): (KeyboardActionScope.() -> Unit)? =
+        f?.let { handler ->
+            {
+                sink.report(UiEventKind.SUBMIT, tid)
+                handler()
+            }
+        }
+    return KeyboardActions(
+        onDone = wrap(onDone),
+        onGo = wrap(onGo),
+        onNext = wrap(onNext),
+        onPrevious = wrap(onPrevious),
+        onSearch = wrap(onSearch),
+        onSend = wrap(onSend),
     )
 }

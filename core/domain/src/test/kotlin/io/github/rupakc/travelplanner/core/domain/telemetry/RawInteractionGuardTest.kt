@@ -8,6 +8,9 @@ import org.junit.Test
  * Every interaction must reach telemetry through the `core:designsystem` wrappers (`tpClickable`, `TpIconButton`,
  * `TpSwitch`, `TpOutlinedTextField`, ...). Raw foundation / Material3 controls are allowed only inside the
  * wrapper module, `core/designsystem/src/main`.
+ *
+ * This test lives in `core:domain` (pure JVM, so it runs in every CI test pass) but scans the `src/main` sources of
+ * every module in the repo, found by walking up from the working directory to `settings.gradle.kts`.
  */
 class RawInteractionGuardTest {
     private val raw =

@@ -133,7 +133,13 @@ class TelemetryRegistryMirrorTest {
         }
     }
 
-    /** event name -> prop name -> registry type, from the committed snapshot of the server registry. */
+    /**
+     * event name -> prop name -> registry type, from the committed snapshot of the server registry.
+     *
+     * To regenerate `src/test/resources/telemetry/registry-snapshot.txt` after the web registry changes: read
+     * `EVENTS` from `backend/app/telemetry/registry.py` on the web repo's origin/main and write one line per event
+     * (sorted): the name, then tab-separated `prop=type` pairs (enums as `enum:a|b|c`), keeping the `#` header.
+     */
     private val registry: Map<String, Map<String, String>> by lazy {
         val text =
             checkNotNull(javaClass.getResourceAsStream("/telemetry/registry-snapshot.txt")) { "registry snapshot missing" }
