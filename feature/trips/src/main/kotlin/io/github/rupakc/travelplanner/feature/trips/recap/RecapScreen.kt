@@ -54,6 +54,7 @@ import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.Recap
 import io.github.rupakc.travelplanner.core.model.trips.RecapCountry
 import io.github.rupakc.travelplanner.core.model.trips.Trip
+import io.github.rupakc.travelplanner.core.ui.journey.ScratchMap
 import io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher
 import io.github.rupakc.travelplanner.core.ui.share.ShareLauncher
 import io.github.rupakc.travelplanner.core.ui.social.IdeaEntryButton
@@ -285,6 +286,7 @@ private fun CountriesCard(countries: List<RecapCountry>, newCountries: Set<Strin
     TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item) {
         Column(Modifier.padding(TravelTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             Text(stringResource(R.string.recap_countries_title), style = TravelTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+            ScratchMap(countries.map { it.code })
             FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
                 countries.forEach { Stamp(it, isNew = it.new || it.code in newCountries) }
             }

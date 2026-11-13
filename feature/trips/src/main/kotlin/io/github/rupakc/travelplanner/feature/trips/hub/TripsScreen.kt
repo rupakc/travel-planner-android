@@ -44,6 +44,7 @@ import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.PrepSummary
 import io.github.rupakc.travelplanner.core.model.trips.Trip
 import io.github.rupakc.travelplanner.core.ui.game.BucketRing
+import io.github.rupakc.travelplanner.core.ui.journey.ScratchMap
 import io.github.rupakc.travelplanner.feature.trips.R
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -124,6 +125,16 @@ fun TripsScreen(state: TripsUiState, onEvent: (TripsEvent) -> Unit, modifier: Mo
 
 private fun androidx.compose.foundation.lazy.LazyListScope.content(state: TripsUiState, onEvent: (TripsEvent) -> Unit) {
     state.bucket?.let { bucket -> item(key = "bucket", contentType = "bucket") { BucketRing(bucket) } }
+    if (state.visitedCountries.isNotEmpty()) {
+        item(key = "scratch_map", contentType = "scratch_map") {
+            TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item) {
+                Column(Modifier.padding(TravelTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+                    SectionTitle(stringResource(io.github.rupakc.travelplanner.core.ui.R.string.scratch_map_title))
+                    ScratchMap(state.visitedCountries)
+                }
+            }
+        }
+    }
     state.pinned?.let { trip ->
         item(key = "pinned", contentType = "pinned") {
             Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {

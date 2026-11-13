@@ -11,3 +11,7 @@ Enabled by the server's journey flag (`JourneyFlags`); off keeps the classic tab
 - **Recap**: stats and highlights for a finished trip; share cards are Phase 4.
 - Dreaming-trip creation, rename, dates, phase override and delete are online only (R7).
 - Known gaps: standalone Today/Expenses/Journal/Recap routes are not wired, `gameEnabled` ignores `hide_game`, "Save as trip" does not copy dates from the request. See the follow-ups file in `docs/superpowers/plans/`.
+
+## Scratch map
+
+The Trips hub and each trip's Recap draw an offline world map with the visited countries filled in the accent colour (`ScratchMap` in `core:ui`). The outlines are Natural Earth 110m (public domain), simplified and packed by `tools/worldmap/build_world_map.py` into `core/ui/src/main/res/raw/world_map.bin` (about 18 KB, 16 KB zipped); rerun the script to regenerate. The file is parsed once off the main thread (`core:domain` `WorldMapData`), colours come from the theme, a tap names the country with `java.util.Locale` (no per-country strings), the reveal fade is skipped under reduced motion, and the recap's country list stays as the accessibility fallback. Telemetry is the existing `ui_tap` with tid `scratch_map` (no country is sent).

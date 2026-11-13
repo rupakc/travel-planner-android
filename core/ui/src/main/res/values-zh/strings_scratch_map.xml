@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scratch_map_title">刮刮地图</string>
+    <plurals name="scratch_map_cd">
+        <item quantity="other">世界地图上已到访 %d 个国家</item>
+    </plurals>
+    <string name="scratch_map_visited">%1$s，已到访</string>
+    <string name="scratch_map_not_visited">%1$s，尚未到访</string>
+    <string name="scratch_map_hint">点按国家查看名称</string>
+</resources>

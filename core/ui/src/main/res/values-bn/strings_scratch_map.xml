@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scratch_map_title">স্ক্র্যাচ ম্যাপ</string>
+    <plurals name="scratch_map_cd">
+        <item quantity="one">বিশ্ব মানচিত্রে %d টি দেশ ঘোরা হয়েছে</item>
+        <item quantity="other">বিশ্ব মানচিত্রে %d টি দেশ ঘোরা হয়েছে</item>
+    </plurals>
+    <string name="scratch_map_visited">%1$s, ঘোরা হয়েছে</string>
+    <string name="scratch_map_not_visited">%1$s, এখনও ঘোরা হয়নি</string>
+    <string name="scratch_map_hint">নাম দেখতে একটি দেশে ট্যাপ করুন</string>
+</resources>

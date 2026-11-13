@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scratch_map_title">Mapa para rascar</string>
+    <plurals name="scratch_map_cd">
+        <item quantity="one">%d país visitado en el mapamundi</item>
+        <item quantity="many">%d países visitados en el mapamundi</item>
+        <item quantity="other">%d países visitados en el mapamundi</item>
+    </plurals>
+    <string name="scratch_map_visited">%1$s, visitado</string>
+    <string name="scratch_map_not_visited">%1$s, aún no visitado</string>
+    <string name="scratch_map_hint">Toca un país para ver su nombre</string>
+</resources>
