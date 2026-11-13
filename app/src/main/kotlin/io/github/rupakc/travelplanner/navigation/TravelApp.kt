@@ -117,6 +117,7 @@ import io.github.rupakc.travelplanner.feature.home.navigation.homeGraph
 import io.github.rupakc.travelplanner.feature.nearby.navigation.nearbyGraph
 import io.github.rupakc.travelplanner.feature.onboarding.navigation.onboardingGraph
 import io.github.rupakc.travelplanner.feature.plan.navigation.planGraph
+import io.github.rupakc.travelplanner.feature.play.navigation.H2hDestination
 import io.github.rupakc.travelplanner.feature.play.navigation.playGraph
 import io.github.rupakc.travelplanner.feature.results.navigation.resultsGraph
 import io.github.rupakc.travelplanner.feature.search.navigation.searchGraph
@@ -374,6 +375,8 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 onOpenPrefs = { navController.navigate(AlertPrefsRoute) },
                 onOpenTrip = { navController.navigate(TripRoute(it, tab = TripTab.Today.id)) { launchSingleTop = true } },
                 onOpenFeed = navController.feedEntry(shell.social),
+                // The match screen hides itself when Play is off, so no flag check here.
+                onOpenH2h = { navController.navigate(H2hDestination(it)) { launchSingleTop = true } },
             )
             settingsGraph(
                 onBack = { navController.popBackStack() },
@@ -402,6 +405,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 onHidden = { navController.navigateToTopLevel(if (shell.journey) TopLevelDestination.TRIPS else TopLevelDestination.HOME) },
                 navController = navController,
                 quizEnabled = shell.play,
+                onOpenProfile = { navController.navigate(MyProfileRoute) }.takeIf { shell.social },
             )
             accountGraph(
                 onBack = { navController.popBackStack() },

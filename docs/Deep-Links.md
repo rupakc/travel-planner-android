@@ -20,3 +20,7 @@
 - A revoked or unknown token shows "This shared trip isn't available" (offline shows retry). Dates appear only when the server sent them (`dates` hidden removes them; month shows no day).
 - Telemetry: `share_view` with `kind` (`plan`, `recap`, `savings`) once per successful load; an unknown kind sends nothing.
 - Until the owner publishes `assetlinks.json` with the release certificate, Android may show a chooser for these links.
+
+## Head-to-head match
+
+- `travelplanner://play/h2h/<matchId>` opens the match screen (`H2hDestination`). A push of kind `quiz_h2h_invite` or `quiz_h2h_result` carries the web link `/play/h2h/<id>`; only that exact path (id of 1 to 64 URL-safe characters) is turned into this link (`parseH2hPath`), anything else opens the notification list. An inbox row of those kinds opens the same screen. With `features.play` off, `403 game_hidden` or `hide_game`, the screen hides itself and the shell leaves the Play tab.

@@ -56,6 +56,8 @@ fun PlayRoute(
     onHidden: () -> Unit,
     quizEnabled: Boolean = false,
     onStartQuiz: StartQuiz = { _, _ -> },
+    /** Head-to-head and board cards (T5.5), drawn after the quiz hub once it is loaded; gets the open match count. */
+    extraItems: LazyListScope.(openH2h: Int) -> Unit = {},
     viewModel: PlayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -76,6 +78,7 @@ fun PlayRoute(
         hub = hub,
         onHubEvent = { hubModel?.onEvent(it) },
         onStartQuiz = onStartQuiz,
+        extraItems = { if (hub?.phase == PlayHubPhase.Loaded) extraItems(hub.openH2h) },
     )
 }
 

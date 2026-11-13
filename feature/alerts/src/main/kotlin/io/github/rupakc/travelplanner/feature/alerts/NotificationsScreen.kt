@@ -140,6 +140,11 @@ class NotificationsViewModel
         /** A social row (idea saved, new follower) was tapped: open the ideas feed. */
         val openFeed: Flow<Unit> = feedOpens.receiveAsFlow()
 
+        private val h2hOpens = Channel<String>(Channel.BUFFERED)
+
+        /** A head-to-head match to open (an invite or result row). */
+        val openH2h: Flow<String> = h2hOpens.receiveAsFlow()
+
         init {
             load()
             viewModelScope.launch { gameEvents.visible.collect { v -> mutable.update { it.copy(gameVisible = v) } } }
@@ -210,7 +215,9 @@ class NotificationsViewModel
                     // No trip id (or a category this screen does not route): the list is already open.
                     NotificationTarget.Feed -> feedOpens.send(Unit)
 
-                    NotificationTarget.Inbox, is NotificationTarget.H2h -> Unit
+                    is NotificationTarget.H2h -> h2hOpens.send(target.matchId)
+
+                    NotificationTarget.Inbox -> Unit
                 }
             }
         }
@@ -238,12 +245,14 @@ fun NotificationsInboxRoute(
     onOpenAlert: (AlertLink) -> Unit,
     onOpenTrip: (Long) -> Unit = {},
     onOpenFeed: () -> Unit = {},
+    onOpenH2h: (String) -> Unit = {},
     viewModel: NotificationsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) { viewModel.open.collect(onOpenAlert) }
     LaunchedEffect(viewModel) { viewModel.openTrip.collect(onOpenTrip) }
     LaunchedEffect(viewModel) { viewModel.openFeed.collect { onOpenFeed() } }
+    LaunchedEffect(viewModel) { viewModel.openH2h.collect(onOpenH2h) }
     NotificationsScreen(state, viewModel::onEvent, onBack)
 }
 

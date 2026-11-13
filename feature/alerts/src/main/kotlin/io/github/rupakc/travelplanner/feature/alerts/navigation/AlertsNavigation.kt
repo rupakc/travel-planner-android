@@ -15,7 +15,9 @@ import io.github.rupakc.travelplanner.feature.alerts.v2.AlertPrefsRoute as Alert
  * Watched prices (deep link parity with web `/alerts?kind=&watch=`) and the notifications inbox.
  * [onReplan]: a re-plan search was started (show its results). [onOpenAlert]: open Alerts focused
  * on a watch (kind null = fare watch). [onSearch]: the empty state's "Search flights". [onOpenTrip]: open a trip's Today tab
- * (a trip-phase row was tapped). The inbox itself has the deep link `travelplanner://notifications`.
+ * (a trip-phase row was tapped).
+ * [onOpenH2h]: open a head-to-head match (a quiz invite or result row).
+ * The inbox itself has the deep link `travelplanner://notifications`.
  */
 fun NavGraphBuilder.alertsGraph(
     onReplan: () -> Unit,
@@ -25,6 +27,7 @@ fun NavGraphBuilder.alertsGraph(
     onOpenPrefs: () -> Unit = {},
     onOpenTrip: (tripId: Long) -> Unit = {},
     onOpenFeed: (() -> Unit)? = null,
+    onOpenH2h: (matchId: String) -> Unit = {},
 ) {
     composable<AlertsRoute>(
         deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.ALERTS_PATTERN }),
@@ -37,6 +40,7 @@ fun NavGraphBuilder.alertsGraph(
             onOpenTrip = onOpenTrip,
             onOpenFeed =
                 onOpenFeed ?: {},
+            onOpenH2h = onOpenH2h,
         )
     }
 }
