@@ -79,6 +79,9 @@ object TelemetryEvents {
     const val NOTIF_QUIET_HOURS_CHANGE = "notif_quiet_hours_change"
     const val NOTIF_CAP_CHANGE = "notif_cap_change"
     const val NOTIF_OPEN = "notif_open"
+
+    /** Android-only, tokens only: `kind` = `personalized` | `generic` (what the nearby notification said). */
+    const val NEARBY_NOTIF_POST = "nearby_notif_post"
     const val SHARE_OPEN = "share_open"
     const val SHARE_CREATE = "share_create"
     const val SHARE_ACTION = "share_action"

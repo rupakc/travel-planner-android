@@ -38,6 +38,8 @@ import io.github.rupakc.travelplanner.core.model.importlink.ImportPreview
 import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyItemsRequest
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyItemsResponse
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyRequest
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.plan.CreatePlanRequest
@@ -425,6 +427,12 @@ interface NearbyApi {
     suspend fun nearby(
         @Body body: NearbyRequest,
     ): NearbyResponse
+
+    /** v1 (no `sections`): the non-grounded answer, the only one a scheduled job may ask for. */
+    @POST("api/nearby")
+    suspend fun items(
+        @Body body: NearbyItemsRequest,
+    ): NearbyItemsResponse
 }
 
 /** "Search the web now" for one watch (Google Search grounding); the answer is never stored. */

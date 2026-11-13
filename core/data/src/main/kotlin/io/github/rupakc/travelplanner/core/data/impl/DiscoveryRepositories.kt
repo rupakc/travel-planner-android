@@ -23,6 +23,8 @@ import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
 import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyItemsRequest
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyItemsResponse
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyRequest
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.search.CompareSummary
@@ -193,6 +195,9 @@ class NearbyRepositoryImpl
     ) : NearbyRepository {
         override suspend fun nearby(lat: Double, lng: Double, limit: Int, language: String?): AppResult<NearbyResponse> =
             apiCall { api.nearby(NearbyRequest(lat = roundCoordinate(lat), lng = roundCoordinate(lng), limit = limit, sections = true, language = language)) }
+
+        override suspend fun nearbyItems(lat: Double, lng: Double, limit: Int): AppResult<NearbyItemsResponse> =
+            apiCall { api.items(NearbyItemsRequest(lat = roundCoordinate(lat), lng = roundCoordinate(lng), limit = limit)) }
 
         override suspend fun rememberLocation(lat: Double, lng: Double) {
             // The cell's centre: precise coordinates are never stored.

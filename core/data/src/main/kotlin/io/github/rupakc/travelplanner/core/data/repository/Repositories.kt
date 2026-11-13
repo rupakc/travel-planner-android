@@ -23,6 +23,7 @@ import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
 import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyItemsResponse
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyRequest
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.plan.Plan
@@ -303,6 +304,11 @@ interface DevicesRepository {
 interface NearbyRepository {
     /** `POST /api/nearby` with `sections: true`; [limit] per section, [language] for the summaries. */
     suspend fun nearby(lat: Double, lng: Double, limit: Int = NearbyRequest.DEFAULT_LIMIT, language: String? = null): AppResult<NearbyResponse>
+
+    /**
+     * `POST /api/nearby` v1 (no `sections`): non-grounded, so a background job may call it. Coordinates go only in this request.
+     */
+    suspend fun nearbyItems(lat: Double, lng: Double, limit: Int = 1): AppResult<NearbyItemsResponse>
 
     /** Remembers a foreground fix, rounded to its ~5 km cell, with the time (device-only). */
     suspend fun rememberLocation(lat: Double, lng: Double)
