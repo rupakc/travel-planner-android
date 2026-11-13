@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.JourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlayRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
@@ -69,6 +70,7 @@ class H2hDetailViewModel
         handle: SavedStateHandle,
         private val play: PlayRepository,
         private val telemetry: Telemetry,
+        private val journeyFlags: JourneyFlagsRepository,
     ) : ViewModel() {
         private val matchId: String = handle.get<String>(ARG_MATCH_ID).orEmpty()
         private val mutable = MutableStateFlow(H2hDetailUiState())
@@ -101,6 +103,12 @@ class H2hDetailViewModel
         private fun load(quiet: Boolean) {
             if (!quiet) mutable.value = H2hDetailUiState()
             viewModelScope.launch {
+                // Play (or the game) is off: nothing is requested, the shell leaves the screen.
+                val flags = journeyFlags.flags()
+                if (!flags.play || !flags.game) {
+                    mutable.update { it.copy(phase = H2hDetailPhase.Hidden) }
+                    return@launch
+                }
                 when (val result = play.h2hMatches()) {
                     is AppResult.Success -> shown(result.value.matches.firstOrNull { it.id == matchId })
                     is AppResult.Failure -> failed(result.error, quiet)

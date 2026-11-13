@@ -8,7 +8,9 @@ import io.github.rupakc.travelplanner.core.model.play.H2hMatch
 import io.github.rupakc.travelplanner.core.model.play.H2hOpponent
 import io.github.rupakc.travelplanner.core.model.play.QuizPack
 import io.github.rupakc.travelplanner.core.model.play.QuizSession
+import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
+import io.github.rupakc.travelplanner.core.testing.fake.FakeJourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlayRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import kotlinx.coroutines.flow.first
@@ -26,6 +28,7 @@ class H2hViewModelsTest {
 
     private val play = FakePlayRepository()
     private val telemetry = FakeTelemetry()
+    private val flags = FakeJourneyFlagsRepository(JourneyFlags(game = true, play = true))
 
     private fun match(id: String, state: String, you: Int? = null, them: Int? = null, winner: String? = null) =
         H2hMatch(id, H2hOpponent("ana"), "flags", state, you, them, winner, "2026-11-15T10:00:00Z")
@@ -34,13 +37,26 @@ class H2hViewModelsTest {
         play.h2hListResult = AppResult.Success(H2hList(m.toList()))
     }
 
+    // ---- flags off: no request ----
+
+    @Test(timeout = 10_000)
+    fun `list and detail are hidden without a request when play or the game is off`() =
+        runTest(timeout = kotlin.time.Duration.parse("10s")) {
+            for (off in listOf(JourneyFlags(game = true, play = false), JourneyFlags(game = false, play = true))) {
+                flags.flags = off
+                assertEquals(H2hListPhase.Hidden, H2hListViewModel(play, flags).state.value.phase)
+                assertEquals(H2hDetailPhase.Hidden, detail().state.value.phase)
+            }
+            assertTrue(play.calls.none { it == "h2hMatches" })
+        }
+
     // ---- list ----
 
     @Test(timeout = 10_000)
     fun `list loads matches and a quiet resume keeps them on failure`() =
         runTest(timeout = kotlin.time.Duration.parse("10s")) {
             api(match("a", "waiting_you"))
-            val vm = H2hListViewModel(play)
+            val vm = H2hListViewModel(play, flags)
             assertEquals(H2hListPhase.Loaded, vm.state.value.phase)
             assertEquals(1, vm.state.value.matches.size)
             vm.onEvent(H2hListEvent.Resumed)
@@ -55,11 +71,11 @@ class H2hViewModelsTest {
     fun `list hides for game_hidden and 404 and shows the backend text for 429`() =
         runTest(timeout = kotlin.time.Duration.parse("10s")) {
             play.h2hListResult = AppResult.Failure(AppError.Forbidden("hidden", "game_hidden"))
-            assertEquals(H2hListPhase.Hidden, H2hListViewModel(play).state.value.phase)
+            assertEquals(H2hListPhase.Hidden, H2hListViewModel(play, flags).state.value.phase)
             play.h2hListResult = AppResult.Failure(AppError.NotFound("nope"))
-            assertEquals(H2hListPhase.Hidden, H2hListViewModel(play).state.value.phase)
+            assertEquals(H2hListPhase.Hidden, H2hListViewModel(play, flags).state.value.phase)
             play.h2hListResult = AppResult.Failure(AppError.RateLimited("Slow down", 5))
-            assertEquals(H2hListPhase.Error("Slow down"), H2hListViewModel(play).state.value.phase)
+            assertEquals(H2hListPhase.Error("Slow down"), H2hListViewModel(play, flags).state.value.phase)
         }
 
     // ---- create ----
@@ -113,7 +129,7 @@ class H2hViewModelsTest {
 
     // ---- detail ----
 
-    private fun detail(id: String = "a") = H2hDetailViewModel(SavedStateHandle(mapOf("matchId" to id)), play, telemetry)
+    private fun detail(id: String = "a") = H2hDetailViewModel(SavedStateHandle(mapOf("matchId" to id)), play, telemetry, flags)
 
     @Test(timeout = 10_000)
     fun `detail finds the match and reports open once`() =

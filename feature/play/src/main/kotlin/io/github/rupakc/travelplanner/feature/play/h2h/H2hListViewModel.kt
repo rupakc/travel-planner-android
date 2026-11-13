@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.JourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlayRepository
 import io.github.rupakc.travelplanner.core.model.play.H2hMatch
 import io.github.rupakc.travelplanner.core.model.social.SocialErrorCode
@@ -46,6 +47,7 @@ class H2hListViewModel
     @Inject
     constructor(
         private val play: PlayRepository,
+        private val journeyFlags: JourneyFlagsRepository,
     ) : ViewModel() {
         private val mutable = MutableStateFlow(H2hListUiState())
         val state: StateFlow<H2hListUiState> = mutable.asStateFlow()
@@ -68,6 +70,12 @@ class H2hListViewModel
             if (!quiet) mutable.value = H2hListUiState()
             job =
                 viewModelScope.launch {
+                    // Play (or the game) is off: nothing is requested, the shell leaves the screen.
+                    val flags = journeyFlags.flags()
+                    if (!flags.play || !flags.game) {
+                        mutable.value = H2hListUiState(H2hListPhase.Hidden)
+                        return@launch
+                    }
                     when (val result = play.h2hMatches()) {
                         is AppResult.Success -> mutable.value = H2hListUiState(H2hListPhase.Loaded, result.value.matches)
                         is AppResult.Failure -> if (!quiet || mutable.value.phase != H2hListPhase.Loaded) mutable.value = H2hListUiState(failure(result.error))
