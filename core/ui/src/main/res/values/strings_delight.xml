@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="delight_deal_title">Deal hunter</string>
     <string name="delight_deal_next">Next badge: %1$s</string>
     <string name="delight_deal_progress">%1$d of %2$d</string>
     <string name="delight_deal_all_done">Deal hunter: every badge earned.</string>
