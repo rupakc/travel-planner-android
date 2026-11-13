@@ -292,7 +292,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
         val current = navController.currentDestination ?: return@LaunchedEffect
         val entry = navController.currentBackStackEntry
         val retakingQuiz = current.hasRoute(OnboardingRoute::class) && entry?.toRoute<OnboardingRoute>()?.fromSettings == true
-        val target = gateTarget(gate, current, retakingQuiz)
+        val target = gateTarget(gate, current, retakingQuiz, shell.home)
         val replay = deepLinks.onGateCheck(gate, target, current.isGateScreen() || current.isSignedOutScreen(), shell.home)
         target ?: return@LaunchedEffect
         navController.navigate(target) { popUpTo(0) { inclusive = true } }
@@ -450,7 +450,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
             shareGraph(
                 onBack = {
                     if (!navController.popBackStack()) {
-                        navController.navigate(if (gate == AuthGate.READY) HomeRoute else LoginRoute) { popUpTo(0) { inclusive = true } }
+                        navController.navigate(if (gate == AuthGate.READY) shell.home else LoginRoute) { popUpTo(0) { inclusive = true } }
                     }
                 },
                 onOpenPlan = { navController.navigate(PlanDetailRoute(it)) },
@@ -597,7 +597,7 @@ internal fun startDestinationFor(gate: AuthGate, home: AppRoute = HomeRoute): Ap
     }
 
 /** Where the gate must send the user from [current], or null to stay. The public share viewer is always allowed. */
-internal fun gateTarget(gate: AuthGate, current: NavDestination, retakingQuiz: Boolean, home: AppRoute = HomeRoute): AppRoute? {
+internal fun gateTarget(gate: AuthGate, current: NavDestination, retakingQuiz: Boolean, home: AppRoute): AppRoute? {
     if (current.hasRoute(ShareRoute::class)) return null
     return when (gate) {
         AuthGate.LOADING -> null
