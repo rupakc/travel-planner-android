@@ -43,4 +43,8 @@
     </plurals>
     <string name="settings_notifsrv_alert_prefs">অ্যালার্ট সেটিংস</string>
     <string name="settings_notifsrv_alert_prefs_sub">দামের অ্যালার্টের সারাংশ, তাৎক্ষণিক অ্যালার্ট ও সীমা</string>
+    <string name="settings_notifsrv_social">সোশ্যাল</string>
+    <string name="settings_notifsrv_social_hint">লাইক, মন্তব্য ও নতুন ফলোয়ার।</string>
+    <string name="settings_notifsrv_quiz">কুইজ ও চ্যালেঞ্জ</string>
+    <string name="settings_notifsrv_quiz_hint">মুখোমুখি আমন্ত্রণ ও ফলাফল।</string>
 </resources>

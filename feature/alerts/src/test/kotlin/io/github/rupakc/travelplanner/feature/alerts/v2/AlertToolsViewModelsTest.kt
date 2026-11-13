@@ -133,6 +133,24 @@ class AlertToolsViewModelsTest {
             assertEquals(listOf("alert_prefs_change" to mapOf("field" to "cap")), q.telemetry.events)
         }
 
+    @Test fun `a second change while a save is in flight is ignored`() =
+        runTest(timeout = 30.seconds) {
+            val q = FakeQuickWatch.on()
+            q.alerts.preferencesResult = AppResult.Success(prefs)
+            val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+            q.alerts.updatePreferencesGate = gate
+            val vm = prefsVm(q)
+            vm.setCap("hotel", 7)
+            assertTrue((vm.state.value as AlertPrefsUiState.Content).saving)
+            vm.setCap("hotel", 8)
+            vm.setGroupWindow(30)
+            assertEquals(1, q.alerts.preferenceUpdates.size)
+            gate.complete(Unit)
+            assertFalse((vm.state.value as AlertPrefsUiState.Content).saving)
+            vm.setGroupWindow(30)
+            assertEquals(2, q.alerts.preferenceUpdates.size)
+        }
+
     @Test fun `caps and the group window are clamped before sending`() =
         runTest(timeout = 30.seconds) {
             val q = FakeQuickWatch.on()

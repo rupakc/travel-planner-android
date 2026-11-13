@@ -22,6 +22,9 @@ class FakeAlertsV2Repository : AlertsV2Repository {
     var preferencesResult: AppResult<AlertPrefs> = AppResult.Success(AlertPrefs())
     var updatePreferencesResult: AppResult<AlertPrefs>? = null
 
+    /** When set, [updatePreferences] suspends until it completes (an in-flight save). */
+    var updatePreferencesGate: kotlinx.coroutines.CompletableDeferred<Unit>? = null
+
     val storyCalls = mutableListOf<Pair<AlertKind, Long>>()
     val adviceCalls = mutableListOf<Pair<AlertKind, Long>>()
     val quickWatchCalls = mutableListOf<QuickWatchRequest>()
@@ -42,6 +45,7 @@ class FakeAlertsV2Repository : AlertsV2Repository {
 
     override suspend fun updatePreferences(update: AlertPrefsUpdate): AppResult<AlertPrefs> {
         preferenceUpdates += update
+        updatePreferencesGate?.await()
         return updatePreferencesResult ?: AppResult.Success(preferencesResult.let { (it as? AppResult.Success)?.value ?: AlertPrefs() })
     }
 }

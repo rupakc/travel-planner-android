@@ -16,7 +16,7 @@
     <string name="alerts_drop_target">আপনার লক্ষ্যমূল্যে পৌঁছেছে</string>
     <string name="alerts_drop_caught">%1$s দাম কমা ধরা পড়েছে</string>
     <string name="alerts_drop_caught_pct">%1$s (%2$d%%) দাম কমা ধরা পড়েছে</string>
-    <string name="alerts_drop_now_at">এখন: %1$s</string>
+    <string name="alerts_drop_now_at">কমে হয়েছে %1$s</string>
     <string name="alerts_drop_xp">+%1$d XP</string>
     <string name="alerts_drop_note">এটি আমাদের দেখা দুটি দামের মধ্যে পার্থক্য। বুক করার আগে দাম বদলাতে পারে।</string>
     <string name="alerts_digest_week">সাপ্তাহিক সারসংক্ষেপ · %1$s</string>

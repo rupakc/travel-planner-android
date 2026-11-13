@@ -16,6 +16,7 @@ import io.github.rupakc.travelplanner.feature.alerts.v2.AlertPrefsRoute as Alert
  * [onReplan]: a re-plan search was started (show its results). [onOpenAlert]: open Alerts focused
  * on a watch (kind null = fare watch). [onSearch]: the empty state's "Search flights". [onOpenTrip]: open a trip's Today tab
  * (a trip-phase row was tapped).
+ * [onOpenIdea] / [onOpenProfile]: open the idea or profile a social row names (null: the feed).
  * [onOpenH2h]: open a head-to-head match (a quiz invite or result row).
  * The inbox itself has the deep link `travelplanner://notifications`.
  */
@@ -28,6 +29,8 @@ fun NavGraphBuilder.alertsGraph(
     onOpenTrip: (tripId: Long) -> Unit = {},
     onOpenFeed: (() -> Unit)? = null,
     onOpenH2h: (matchId: String) -> Unit = {},
+    onOpenIdea: ((ideaId: Long) -> Unit)? = null,
+    onOpenProfile: ((handle: String) -> Unit)? = null,
 ) {
     composable<AlertsRoute>(
         deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.ALERTS_PATTERN }),
@@ -41,6 +44,9 @@ fun NavGraphBuilder.alertsGraph(
             onOpenFeed =
                 onOpenFeed ?: {},
             onOpenH2h = onOpenH2h,
+            // A social row naming an idea or profile opens it; without the entry (social off) it falls back to the feed, else nothing.
+            onOpenIdea = onOpenIdea ?: { _: Long -> onOpenFeed?.invoke().let { } },
+            onOpenProfile = onOpenProfile ?: { _: String -> onOpenFeed?.invoke().let { } },
         )
     }
 }

@@ -16,7 +16,7 @@
     <string name="alerts_drop_target">Your target price is here</string>
     <string name="alerts_drop_caught">Caught a drop of %1$s</string>
     <string name="alerts_drop_caught_pct">Caught a drop of %1$s (%2$d%%)</string>
-    <string name="alerts_drop_now_at">Now at %1$s</string>
+    <string name="alerts_drop_now_at">Dropped to %1$s</string>
     <string name="alerts_drop_xp">+%1$d XP</string>
     <string name="alerts_drop_note">This is the drop between two prices we observed. Prices can change before you book.</string>
     <string name="alerts_digest_week">Weekly digest · %1$s</string>

@@ -2,12 +2,14 @@ package io.github.rupakc.travelplanner.feature.social.profile
 
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.model.auth.AccountSettings
 import io.github.rupakc.travelplanner.core.model.social.HandleCheck
 import io.github.rupakc.travelplanner.core.model.social.OwnProfile
 import io.github.rupakc.travelplanner.core.model.social.ProfileVisibility
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAccountRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeJourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSocialRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import kotlin.time.Duration.Companion.seconds
@@ -27,7 +29,9 @@ class MyProfileViewModelTest {
     private val account = FakeAccountRepository()
     private val telemetry = FakeTelemetry()
 
-    private fun vm() = MyProfileViewModel(social, account, telemetry)
+    private val flags = FakeJourneyFlagsRepository(JourneyFlags(social = true, game = true))
+
+    private fun vm() = MyProfileViewModel(social, account, telemetry, flags)
 
     private fun client(code: String, retryAfter: String? = null, status: Int = 422) =
         AppError.Client(status, "server said so", code, extras = retryAfter?.let { mapOf("retry_after" to it) } ?: emptyMap())
@@ -54,6 +58,12 @@ class MyProfileViewModelTest {
     @Test
     fun `hide_game hides the level and badge switches`() {
         account.settingsResult = AppResult.Success(AccountSettings(hideGame = true))
+        assertTrue(vm().state.value.hideGame)
+    }
+
+    @Test
+    fun `features game off also hides the level and badge switches`() {
+        flags.flags = JourneyFlags(social = true, game = false)
         assertTrue(vm().state.value.hideGame)
     }
 

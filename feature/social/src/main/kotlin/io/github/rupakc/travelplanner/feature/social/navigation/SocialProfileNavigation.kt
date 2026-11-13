@@ -2,8 +2,10 @@ package io.github.rupakc.travelplanner.feature.social.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import io.github.rupakc.travelplanner.core.model.navigation.AppRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ConnectionsRoute
+import io.github.rupakc.travelplanner.core.model.navigation.DeepLinks
 import io.github.rupakc.travelplanner.core.model.navigation.MyProfileRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ProfileRoute
 import io.github.rupakc.travelplanner.feature.social.connections.ConnectionsRoute as ConnectionsScreenRoute
@@ -22,7 +24,9 @@ fun NavGraphBuilder.socialProfileGraph(onBack: () -> Unit, onNavigate: (AppRoute
             onOpenConnections = { onNavigate(ConnectionsRoute(it.wire)) },
         )
     }
-    composable<ProfileRoute> { PublicProfileScreenRoute(onBack = onBack) }
+    composable<ProfileRoute>(deepLinks = listOf(navDeepLink<ProfileRoute>(basePath = DeepLinks.PROFILE_PATTERN.substringBefore("/{")))) {
+        PublicProfileScreenRoute(onBack = onBack)
+    }
     composable<ConnectionsRoute> {
         ConnectionsScreenRoute(onBack = onBack, onOpenProfile = { onNavigate(ProfileRoute(it)) })
     }

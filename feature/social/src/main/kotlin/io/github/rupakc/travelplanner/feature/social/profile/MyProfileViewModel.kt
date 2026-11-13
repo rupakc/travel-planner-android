@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.repository.AccountRepository
+import io.github.rupakc.travelplanner.core.data.repository.JourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.data.repository.SocialRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEnums
@@ -106,6 +107,7 @@ internal class MyProfileViewModel
         private val social: SocialRepository,
         private val account: AccountRepository,
         private val telemetry: Telemetry,
+        private val journeyFlags: JourneyFlagsRepository,
     ) : ViewModel() {
         private val _state = MutableStateFlow(MyProfileUiState())
         val state: StateFlow<MyProfileUiState> = _state.asStateFlow()
@@ -130,7 +132,8 @@ internal class MyProfileViewModel
         private fun load() {
             _state.update { it.copy(phase = ProfilePhase.Loading, error = null) }
             viewModelScope.launch {
-                val hideGame = (account.settings() as? AppResult.Success)?.value?.hideGame ?: false
+                // The user's hide_game setting, or the game is off server-side (`features.game == false`).
+                val hideGame = ((account.settings() as? AppResult.Success)?.value?.hideGame ?: false) || !journeyFlags.flags().game
                 when (val result = social.ownProfile()) {
                     is AppResult.Success -> {
                         _state.update {

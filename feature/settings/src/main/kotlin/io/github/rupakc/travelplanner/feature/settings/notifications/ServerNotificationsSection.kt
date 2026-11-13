@@ -101,7 +101,7 @@ internal fun ServerNotificationsSection(
 private fun Categories(state: ServerNotificationsUiState, onEvent: (ServerNotificationsEvent) -> Unit) {
     SettingsHeading(stringResource(R.string.settings_notif_in_app))
     SettingsNote(stringResource(R.string.settings_notifsrv_intro))
-    ListedCategories.forEach { category ->
+    state.categories.forEach { category ->
         SettingsSwitchRow(
             title = stringResource(category.titleRes()),
             subtitle = stringResource(category.hintRes()),
@@ -256,6 +256,8 @@ private fun NotificationCategory.titleRes(): Int =
         NotificationCategory.MORNING_BRIEF -> R.string.settings_notifsrv_morning_brief
         NotificationCategory.WEATHER -> R.string.settings_notifsrv_weather
         NotificationCategory.NEARBY -> R.string.settings_notifsrv_nearby
+        NotificationCategory.SOCIAL -> R.string.settings_notifsrv_social
+        NotificationCategory.QUIZ -> R.string.settings_notifsrv_quiz
         else -> R.string.settings_notifications
     }
 
@@ -266,6 +268,8 @@ private fun NotificationCategory.hintRes(): Int =
         NotificationCategory.MORNING_BRIEF -> R.string.settings_notifsrv_morning_brief_hint
         NotificationCategory.WEATHER -> R.string.settings_notifsrv_weather_hint
         NotificationCategory.NEARBY -> R.string.settings_notifsrv_nearby_hint
+        NotificationCategory.SOCIAL -> R.string.settings_notifsrv_social_hint
+        NotificationCategory.QUIZ -> R.string.settings_notifsrv_quiz_hint
         else -> R.string.settings_notifications_sub
     }
 

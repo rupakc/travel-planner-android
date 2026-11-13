@@ -100,6 +100,8 @@ object NotificationLinks {
                 is NotificationTarget.Alert -> target.link.toDeepLink()
                 is NotificationTarget.TripToday -> tripToday(target.planId)
                 NotificationTarget.Feed -> FEED
+                is NotificationTarget.Idea -> "${DeepLinks.SCHEME}://idea/${target.ideaId}"
+                is NotificationTarget.Profile -> "${DeepLinks.SCHEME}://u/${target.handle}"
                 is NotificationTarget.H2h -> h2h(target.matchId)
                 NotificationTarget.Inbox -> INBOX
             }

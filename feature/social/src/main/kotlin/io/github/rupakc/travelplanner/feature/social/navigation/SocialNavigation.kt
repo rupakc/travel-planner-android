@@ -24,7 +24,7 @@ fun NavGraphBuilder.socialGraph(onBack: () -> Unit = {}, onNavigate: (AppRoute) 
     composable<SocialRoute>(deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.FEED_PATTERN })) {
         FeedRoute(onBack = onBack, onOpenIdea = { onNavigate(IdeaRoute(it)) }, onOpenPlan = { onNavigate(PlanDetailRoute(it)) })
     }
-    composable<IdeaRoute> {
+    composable<IdeaRoute>(deepLinks = listOf(navDeepLink<IdeaRoute>(basePath = DeepLinks.IDEA_PATTERN.substringBefore("/{")))) {
         IdeaDetailRoute(onBack = onBack, onOpenProfile = { onNavigate(ProfileRoute(it)) }, onOpenPlan = { onNavigate(PlanDetailRoute(it)) })
     }
     composable<PublishIdeaRoute> {

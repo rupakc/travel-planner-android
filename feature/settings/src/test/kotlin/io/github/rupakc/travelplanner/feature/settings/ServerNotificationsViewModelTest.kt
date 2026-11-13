@@ -5,6 +5,7 @@ import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.domain.notifications.NotificationsFlags
 import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.model.alerts.QuietHours
+import io.github.rupakc.travelplanner.core.model.auth.AccountSettings
 import io.github.rupakc.travelplanner.core.model.notifications.CategorySetting
 import io.github.rupakc.travelplanner.core.model.notifications.NotificationCategory
 import io.github.rupakc.travelplanner.core.model.notifications.NotificationSettings
@@ -15,6 +16,7 @@ import io.github.rupakc.travelplanner.core.testing.fake.FakeJourneyFlagsReposito
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationSettingsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeSettingsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
+import io.github.rupakc.travelplanner.feature.settings.notifications.ListedCategories
 import io.github.rupakc.travelplanner.feature.settings.notifications.QuietWindow
 import io.github.rupakc.travelplanner.feature.settings.notifications.ServerNotificationsEvent
 import io.github.rupakc.travelplanner.feature.settings.notifications.ServerNotificationsViewModel
@@ -43,8 +45,26 @@ class ServerNotificationsViewModelTest {
     private val flags = FakeJourneyFlagsRepository(JourneyFlags(notifications = NotificationsFlags(notificationsApi = 1)))
     private val local = FakeSettingsRepository(AppSettings(nearbyNotifications = true))
     private val telemetry = FakeTelemetry()
+    private val account = io.github.rupakc.travelplanner.core.testing.fake.FakeAccountRepository()
 
-    private fun vm() = ServerNotificationsViewModel(repo, flags, local, telemetry)
+    private fun vm() = ServerNotificationsViewModel(repo, flags, local, telemetry, account)
+
+    @Test
+    fun `social and quiz are listed only with their features and a visible game, and the brief follows the trip switch`() =
+        runTest(timeout = 30.seconds) {
+            val api = NotificationsFlags(notificationsApi = 1)
+            assertEquals(ListedCategories, vm().state.value.categories)
+            flags.flags = JourneyFlags(notifications = api, social = true)
+            assertEquals(ListedCategories + NotificationCategory.SOCIAL, vm().state.value.categories)
+            flags.flags = JourneyFlags(notifications = api, social = true, play = true, game = true)
+            assertEquals(ListedCategories + NotificationCategory.SOCIAL + NotificationCategory.QUIZ, vm().state.value.categories)
+            account.settingsResult = AppResult.Success(AccountSettings(hideGame = true))
+            assertEquals(ListedCategories + NotificationCategory.SOCIAL, vm().state.value.categories)
+            local.state.value = AppSettings(tripNotifications = false, nearbyNotifications = true)
+            val v = vm()
+            assertFalse(v.state.value.isOn(NotificationCategory.MORNING_BRIEF))
+            assertFalse(v.state.value.isOn(NotificationCategory.TRIP_REMINDERS))
+        }
 
     @Test
     fun `without the notifications_api flag nothing is called`() =

@@ -37,8 +37,8 @@ class SocialQuizTapTest {
     @Test
     fun `each kind lands on its own screen`() {
         fun link(kind: String) = NotificationLinks.of(resolveNotificationTarget(kind, links.getValue(kind), null, null, null))
-        assertEquals("travelplanner://feed", link("social_idea_saved"))
-        assertEquals("travelplanner://feed", link("social_new_follower"))
+        assertEquals("travelplanner://idea/12", link("social_idea_saved"))
+        assertEquals("travelplanner://u/ada", link("social_new_follower"))
         assertEquals("travelplanner://play/h2h/m1", link("quiz_h2h_invite"))
         assertEquals("travelplanner://play/h2h/m2", link("quiz_h2h_result"))
     }

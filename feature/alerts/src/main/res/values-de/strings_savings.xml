@@ -16,7 +16,7 @@
     <string name="alerts_drop_target">Dein Zielpreis ist erreicht</string>
     <string name="alerts_drop_caught">Preissenkung von %1$s erkannt</string>
     <string name="alerts_drop_caught_pct">Preissenkung von %1$s (%2$d %%) erkannt</string>
-    <string name="alerts_drop_now_at">Jetzt: %1$s</string>
+    <string name="alerts_drop_now_at">Gesunken auf %1$s</string>
     <string name="alerts_drop_xp">+%1$d XP</string>
     <string name="alerts_drop_note">Das ist der Unterschied zwischen zwei beobachteten Preisen. Preise können sich ändern, bevor du buchst.</string>
     <string name="alerts_digest_week">Wochenübersicht · %1$s</string>

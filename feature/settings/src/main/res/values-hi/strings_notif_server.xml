@@ -43,4 +43,8 @@
     </plurals>
     <string name="settings_notifsrv_alert_prefs">अलर्ट सेटिंग</string>
     <string name="settings_notifsrv_alert_prefs_sub">मूल्य अलर्ट डाइजेस्ट, तुरंत अलर्ट और सीमाएँ</string>
+    <string name="settings_notifsrv_social">सोशल</string>
+    <string name="settings_notifsrv_social_hint">लाइक, टिप्पणियाँ और नए फ़ॉलोअर।</string>
+    <string name="settings_notifsrv_quiz">क्विज़ और चुनौतियाँ</string>
+    <string name="settings_notifsrv_quiz_hint">आमने-सामने के निमंत्रण और नतीजे।</string>
 </resources>

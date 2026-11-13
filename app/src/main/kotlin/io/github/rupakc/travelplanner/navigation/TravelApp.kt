@@ -76,6 +76,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.CheckEmailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ForgotPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
+import io.github.rupakc.travelplanner.core.model.navigation.IdeaRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MyPlanRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MyProfileRoute
@@ -86,6 +87,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.OauthUsernameRoute
 import io.github.rupakc.travelplanner.core.model.navigation.OnboardingRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlanDetailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlansRoute
+import io.github.rupakc.travelplanner.core.model.navigation.ProfileRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PublishIdeaRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResetPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
@@ -388,6 +390,8 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 onOpenPrefs = { navController.navigate(AlertPrefsRoute) },
                 onOpenTrip = { navController.navigate(TripRoute(it, tab = TripTab.Today.id)) { launchSingleTop = true } },
                 onOpenFeed = navController.feedEntry(shell.social),
+                onOpenIdea = navController.ideaEntry(shell.social),
+                onOpenProfile = navController.profileEntry(shell.social),
                 // The match screen hides itself when Play is off, so no flag check here.
                 onOpenH2h = { navController.navigate(H2hDestination(it)) { launchSingleTop = true } },
             )
@@ -658,6 +662,14 @@ private fun NavHostController.navigateToTopLevel(route: AppRoute) {
 
 /** Opens the ideas feed, or null (no entry shown) when `features.social` is off. */
 private fun NavHostController.feedEntry(enabled: Boolean): (() -> Unit)? = if (enabled) ({ navigate(SocialRoute) { launchSingleTop = true } }) else null
+
+/** Opens one idea, or null (no entry) when `features.social` is off. */
+private fun NavHostController.ideaEntry(enabled: Boolean): ((Long) -> Unit)? =
+    if (enabled) ({ id -> navigate(IdeaRoute(id)) { launchSingleTop = true } }) else null
+
+/** Opens one public profile by handle, or null (no entry) when `features.social` is off. */
+private fun NavHostController.profileEntry(enabled: Boolean): ((String) -> Unit)? =
+    if (enabled) ({ handle -> navigate(ProfileRoute(handle)) { launchSingleTop = true } }) else null
 
 /** Top-level routes switch tabs; everything else is pushed. */
 private fun NavHostController.navigateTo(route: AppRoute) {

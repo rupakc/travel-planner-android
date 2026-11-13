@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.repository.JourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.data.repository.SocialRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
@@ -84,7 +85,10 @@ internal class FeedViewModel
         private val social: SocialRepository,
         private val telemetry: Telemetry,
         private val changes: IdeaChanges,
+        private val journeyFlags: JourneyFlagsRepository,
     ) : ViewModel() {
+        private var off = false
+
         private val _state = MutableStateFlow(FeedUiState())
         val state: StateFlow<FeedUiState> = _state.asStateFlow()
         private val _effects = Channel<FeedEffect>(Channel.BUFFERED)
@@ -92,8 +96,15 @@ internal class FeedViewModel
 
         init {
             viewModelScope.launch { changes.changes.collect(::apply) }
-            telemetry.emit(TelemetryEvents.SOCIAL_FEED_VIEW, mapOf("scope" to FeedScope.FOR_YOU.wire))
-            loadFirst(FeedScope.FOR_YOU)
+            // `features.social` off (a stale deep link): no request, no count; the screen shows its empty state.
+            viewModelScope.launch {
+                if (journeyFlags.flags().social) {
+                    telemetry.emit(TelemetryEvents.SOCIAL_FEED_VIEW, mapOf("scope" to FeedScope.FOR_YOU.wire))
+                    loadFirst(FeedScope.FOR_YOU)
+                } else {
+                    off = true
+                }
+            }
         }
 
         fun onEvent(event: FeedEvent) {
@@ -109,7 +120,7 @@ internal class FeedViewModel
         }
 
         private fun selectScope(scope: FeedScope) {
-            if (scope == _state.value.scope) return
+            if (off || scope == _state.value.scope) return
             _state.update { it.copy(scope = scope) }
             telemetry.emit(TelemetryEvents.SOCIAL_FEED_VIEW, mapOf("scope" to scope.wire))
             if (_state.value.scopes[scope]?.loaded != true) loadFirst(scope)
@@ -120,6 +131,7 @@ internal class FeedViewModel
         }
 
         private fun loadFirst(scope: FeedScope) {
+            if (off) return
             setScope(scope) { it.copy(loading = true, error = null) }
             viewModelScope.launch {
                 when (val page = social.feed(scope)) {
@@ -140,6 +152,7 @@ internal class FeedViewModel
             val scope = _state.value.scope
             val current = _state.value.current
             val cursor = current.next ?: return
+            if (off) return
             if (current.loadingMore || current.loading) return
             setScope(scope) { it.copy(loadingMore = true) }
             viewModelScope.launch {
