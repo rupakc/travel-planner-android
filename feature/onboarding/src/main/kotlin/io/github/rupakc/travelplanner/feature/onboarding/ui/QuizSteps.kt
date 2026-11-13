@@ -200,6 +200,9 @@ private fun OptionCard(copy: OptionCopy, selected: Boolean, multiChoice: Boolean
             }
             Column(Modifier.weight(1f)) {
                 Text(stringResource(copy.label), style = TravelTheme.typography.titleMedium, color = TravelTheme.colors.onSurface)
+                copy.hint?.let {
+                    Text(stringResource(it), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+                }
             }
             if (selected) Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = TravelTheme.colors.primary)
         }

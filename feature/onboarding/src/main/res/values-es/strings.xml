@@ -27,9 +27,12 @@
 
     <string name="onboarding_q_budget">¿Cuál es tu presupuesto habitual?</string>
     <string name="onboarding_opt_budget_shoestring">Muy ajustado</string>
+    <string name="onboarding_opt_budget_shoestring_hint">Albergues, comida callejera, transporte público</string>
     <string name="onboarding_opt_budget_mid_range">Intermedio</string>
+    <string name="onboarding_opt_budget_mid_range_hint">Hoteles cómodos, buenos restaurantes</string>
     <string name="onboarding_opt_budget_comfort">Cómodo</string>
     <string name="onboarding_opt_budget_luxury">Lujo</string>
+    <string name="onboarding_opt_budget_luxury_hint">Hoteles premium, alta cocina, tours privados</string>
 
     <string name="onboarding_q_interests">¿Qué te encanta hacer?</string>
     <string name="onboarding_opt_interests_food">Gastronomía</string>

@@ -30,9 +30,12 @@
 
     <string name="onboarding_q_budget">What\'s your typical budget?</string>
     <string name="onboarding_opt_budget_shoestring">Shoestring</string>
+    <string name="onboarding_opt_budget_shoestring_hint">Hostels, street food, public transport</string>
     <string name="onboarding_opt_budget_mid_range">Mid-range</string>
+    <string name="onboarding_opt_budget_mid_range_hint">Comfortable hotels, nice restaurants</string>
     <string name="onboarding_opt_budget_comfort">Comfort</string>
     <string name="onboarding_opt_budget_luxury">Luxury</string>
+    <string name="onboarding_opt_budget_luxury_hint">Premium hotels, fine dining, private tours</string>
 
     <string name="onboarding_q_interests">What do you love doing?</string>
     <string name="onboarding_opt_interests_food">Food</string>
