@@ -20,6 +20,8 @@
     <string name="reminder_action_emergency">Notfallkarte</string>
     <string name="nearby_notification_title">Entdecke, was in deiner Nähe ist</string>
     <string name="nearby_notification_body">Sehenswertes, Restaurants, Shopping und Unterkünfte in deiner Umgebung. Tippe zum Ansehen.</string>
+    <string name="nearby_notification_personalized">%1$s ist in deiner Nähe — %2$s</string>
+    <string name="nearby_notification_personalized_plain">%1$s ist in deiner Nähe</string>
     <string name="channel_morning_brief">Morgenüberblick</string>
     <string name="channel_morning_brief_desc">Der Tagesplan an jedem Morgen einer Reise.</string>
     <string name="channel_weather">Wetter</string>

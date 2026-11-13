@@ -280,6 +280,7 @@ class WorkersTest {
     private val nearbyCatalog = FakeNotificationCatalogRepository()
     private val nearbyServer = FakeNotificationSettingsRepository()
     private var nearbyArrival: NearbyArrival? = null
+    private val nearbyTelemetry = io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry()
     private var nearbyFlags = FakeJourneyFlagsRepository(JourneyFlags(notifications = NotificationsFlags(notificationsApi = 1)))
     private var nearbyAuth = signedIn
 
@@ -305,6 +306,7 @@ class WorkersTest {
                 object : NearbyArrivalSource {
                     override suspend fun arrival(cell: LocationCell) = nearbyArrival
                 },
+                nearbyTelemetry,
             )
         })
 
@@ -317,6 +319,29 @@ class WorkersTest {
             assertEquals("Cerca de Lisbon: Time Out Market, 7 min", notifier.posts.single().body)
             assertEquals(listOf<String?>("es"), nearbyCatalog.requests)
             assertTrue(nearbyRepos.all { it.requests.isEmpty() })
+        }
+
+    @Test
+    fun `without minutes the text names the pick and its category, and telemetry says personalized`() =
+        runBlocking {
+            val on = AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true)
+            nearbyArrival = NearbyArrival("Lisbon", "Time Out Market", reason = "food")
+            nearbyWorker(on, emptyList(), MemoryLog()).doWork()
+            assertEquals("Time Out Market is near you — food", notifier.posts.single().body)
+            nearbyArrival = NearbyArrival("Lisbon", "Alfama")
+            nearbyWorker(on, emptyList(), MemoryLog()).doWork()
+            assertEquals("Alfama is near you", notifier.posts.last().body)
+            nearbyArrival = null
+            nearbyWorker(on, emptyList(), MemoryLog()).doWork()
+            assertEquals("Places to see, eat, shop and stay around you. Tap to look.", notifier.posts.last().body)
+            assertEquals(
+                listOf<Pair<String, Map<String, Any?>>>(
+                    "nearby_notif_post" to mapOf("kind" to "personalized"),
+                    "nearby_notif_post" to mapOf("kind" to "personalized"),
+                    "nearby_notif_post" to mapOf("kind" to "generic"),
+                ),
+                nearbyTelemetry.events,
+            )
         }
 
     @Test

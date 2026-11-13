@@ -37,6 +37,7 @@ import io.github.rupakc.travelplanner.core.model.importlink.ImportRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvePlaceRequest
 import io.github.rupakc.travelplanner.core.model.importlink.ResolvedPlace
 import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
+import io.github.rupakc.travelplanner.core.model.nearby.NearbyItemsResponse
 import io.github.rupakc.travelplanner.core.model.nearby.NearbyResponse
 import io.github.rupakc.travelplanner.core.model.preferences.Preferences
 import io.github.rupakc.travelplanner.core.model.preferences.RecentSearch
@@ -224,6 +225,20 @@ class FakeNearbyRepository(var result: AppResult<NearbyResponse> = AppResult.Suc
     override suspend fun nearby(lat: Double, lng: Double, limit: Int, language: String?): AppResult<NearbyResponse> {
         requests += NearbyCall(lat, lng, limit, language)
         return result
+    }
+
+    var itemsResult: AppResult<NearbyItemsResponse> = AppResult.Success(NearbyItemsResponse())
+
+    /** Delays [nearbyItems] by this long (timeout tests). */
+    var itemsDelayMs: Long = 0
+
+    /** Every v1 `/api/nearby` call (lat, lng, limit), oldest first. */
+    val itemCalls = mutableListOf<Triple<Double, Double, Int>>()
+
+    override suspend fun nearbyItems(lat: Double, lng: Double, limit: Int): AppResult<NearbyItemsResponse> {
+        itemCalls += Triple(lat, lng, limit)
+        if (itemsDelayMs > 0) kotlinx.coroutines.delay(itemsDelayMs)
+        return itemsResult
     }
 
     override suspend fun rememberLocation(lat: Double, lng: Double) {

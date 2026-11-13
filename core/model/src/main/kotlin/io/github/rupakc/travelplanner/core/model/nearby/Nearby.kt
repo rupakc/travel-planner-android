@@ -90,3 +90,31 @@ object NearbyPlaceItemListSerializer : TolerantListSerializer<NearbyPlaceItem>(N
  * taken. Device-only; gates the background "See what's near you" invitation (never sent anywhere by it).
  */
 data class LocationCell(val lat: Double, val lng: Double, val atEpochMillis: Long)
+
+/**
+ * `POST /api/nearby` v1 body (no `sections` field: the non-grounded answer a background job may use). The backend adds the
+ * user's saved interests and taste profile itself; [limit] is 1..20.
+ */
+@Serializable
+data class NearbyItemsRequest(
+    val lat: Double,
+    val lng: Double,
+    val limit: Int = 1,
+)
+
+/** v1 `{place, items[]}`: the activities agent's items for the nearest known place, best match first. Lenient like [NearbyResponse]. */
+@Serializable
+data class NearbyItemsResponse(
+    val place: NearbyPlace? = null,
+    @Serializable(with = NearbyItemListSerializer::class) val items: List<NearbyItem> = emptyList(),
+)
+
+/** A v1 item; v1 carries no coordinates, so no distance can be computed from it. */
+@Serializable
+data class NearbyItem(
+    val name: LenientString = null,
+    val category: LenientString = null,
+    val location: LenientString = null,
+)
+
+object NearbyItemListSerializer : TolerantListSerializer<NearbyItem>(NearbyItem.serializer())

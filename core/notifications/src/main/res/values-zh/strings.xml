@@ -20,6 +20,8 @@
     <string name="reminder_action_emergency">紧急卡片</string>
     <string name="nearby_notification_title">看看你附近有什么</string>
     <string name="nearby_notification_body">你周边值得看、吃、买和住的地方。点按查看。</string>
+    <string name="nearby_notification_personalized">%1$s 就在你附近 — %2$s</string>
+    <string name="nearby_notification_personalized_plain">%1$s 就在你附近</string>
     <string name="channel_morning_brief">早晨简报</string>
     <string name="channel_morning_brief_desc">旅行期间每天早晨的当日计划。</string>
     <string name="channel_weather">天气</string>

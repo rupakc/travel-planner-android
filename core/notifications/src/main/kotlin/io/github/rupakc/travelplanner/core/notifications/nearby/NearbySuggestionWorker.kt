@@ -26,7 +26,9 @@ import io.github.rupakc.travelplanner.core.data.repository.NotificationCatalogRe
 import io.github.rupakc.travelplanner.core.data.repository.NotificationSettingsRepository
 import io.github.rupakc.travelplanner.core.data.repository.PlansRepository
 import io.github.rupakc.travelplanner.core.data.repository.SettingsRepository
+import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.alerts.parseIsoDate
+import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
 import io.github.rupakc.travelplanner.core.model.alerts.QuietHours
 import io.github.rupakc.travelplanner.core.model.nearby.LocationCell
 import io.github.rupakc.travelplanner.core.model.notifications.NotificationCategory
@@ -126,9 +128,9 @@ class SharedPrefsNearbyPostLog
 
 /**
  * Posts one "See what's near you" invitation when [NearbyNotificationPolicy] allows; it opens Near me,
- * where the user's own request runs. Makes **no** network call: Google Maps grounding may only answer a
- * user's request, never a background job. The remembered ~5 km cell is read only to check that Near me
- * was used in the last [MAX_AGE] (it is never sent anywhere from here).
+ * where the user's own request runs. The only network call is [NearbyArrivalSource]'s single non-grounded v1
+ * `/api/nearby` request (Google Maps grounding may only answer a user's request, never a background job); on any
+ * failure the generic text is posted. The remembered ~5 km cell is sent only in that request.
  */
 @Suppress("LongParameterList")
 @HiltWorker
@@ -149,6 +151,7 @@ class NearbySuggestionWorker
         private val journeyFlags: JourneyFlagsRepository,
         private val auth: AuthRepository,
         private val arrivals: NearbyArrivalSource,
+        private val telemetry: Telemetry,
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
             // Device rules first: nothing goes to the server when they already say no.
@@ -167,11 +170,24 @@ class NearbySuggestionWorker
             val res = applicationContext.resources
             val arrival = arrivals.arrival(cell)
             val body =
-                if (arrival == null) {
-                    res.getString(R.string.nearby_notification_body)
-                } else {
-                    NearbyArrivalText.body(catalog.catalog(settings.settings.first().localeTag).templates, arrival)
+                when {
+                    arrival == null -> {
+                        res.getString(R.string.nearby_notification_body)
+                    }
+
+                    arrival.minutes != null -> {
+                        NearbyArrivalText.body(catalog.catalog(settings.settings.first().localeTag).templates, arrival)
+                    }
+
+                    arrival.reason != null -> {
+                        res.getString(R.string.nearby_notification_personalized, arrival.item, arrival.reason)
+                    }
+
+                    else -> {
+                        res.getString(R.string.nearby_notification_personalized_plain, arrival.item)
+                    }
                 }
+            telemetry.emit(TelemetryEvents.NEARBY_NOTIF_POST, mapOf("kind" to if (arrival == null) "generic" else "personalized"))
             notifier.post(
                 TravelChannel.NEARBY,
                 NotificationIds.NEARBY,

@@ -23,6 +23,8 @@
     <string name="reminder_action_nearby">Cerca de mí</string>
     <string name="nearby_notification_title">Mira qué hay cerca de ti</string>
     <string name="nearby_notification_body">Lugares para ver, comer, comprar y alojarte a tu alrededor. Toca para verlos.</string>
+    <string name="nearby_notification_personalized">%1$s está cerca de ti — %2$s</string>
+    <string name="nearby_notification_personalized_plain">%1$s está cerca de ti</string>
     <string name="channel_morning_brief">Resumen matinal</string>
     <string name="channel_morning_brief_desc">El plan del día cada mañana de un viaje.</string>
     <string name="channel_weather">Clima</string>
