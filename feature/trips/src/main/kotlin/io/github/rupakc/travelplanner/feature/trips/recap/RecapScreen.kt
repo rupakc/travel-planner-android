@@ -47,12 +47,14 @@ import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduce
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.journey.RecapRules
 import io.github.rupakc.travelplanner.core.model.share.ShareKind
+import io.github.rupakc.travelplanner.core.model.social.IdeaKind
 import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.Recap
 import io.github.rupakc.travelplanner.core.model.trips.RecapCountry
 import io.github.rupakc.travelplanner.core.model.trips.Trip
 import io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher
 import io.github.rupakc.travelplanner.core.ui.share.ShareLauncher
+import io.github.rupakc.travelplanner.core.ui.social.IdeaEntryButton
 import io.github.rupakc.travelplanner.feature.trips.R
 import io.github.rupakc.travelplanner.feature.trips.trip.TripTabContent
 import java.text.NumberFormat
@@ -314,6 +316,7 @@ private fun Actions(state: RecapUiState, recap: Recap, onEvent: (RecapEvent) -> 
             )
         }
         TpButton(stringResource(R.string.recap_share), onShare, Modifier.fillMaxWidth(), variant = TpButtonVariant.Secondary, tid = "recap.share")
+        IdeaEntryButton(recap.tripId.takeIf { it > 0 }, IdeaKind.RECAP, Modifier.fillMaxWidth(), TpButtonVariant.Secondary, tid = "recap.share_idea")
         onWhereNext?.let {
             TpButton(stringResource(R.string.recap_where_next), it, Modifier.fillMaxWidth(), variant = TpButtonVariant.Secondary, tid = "recap.where_next")
         }

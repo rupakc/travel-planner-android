@@ -86,6 +86,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.OauthUsernameRoute
 import io.github.rupakc.travelplanner.core.model.navigation.OnboardingRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlanDetailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlansRoute
+import io.github.rupakc.travelplanner.core.model.navigation.PublishIdeaRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResetPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SearchRoute
@@ -94,14 +95,18 @@ import io.github.rupakc.travelplanner.core.model.navigation.ShareCreateRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareOpenLinkRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ShareRoute
 import io.github.rupakc.travelplanner.core.model.navigation.SignUpRoute
+import io.github.rupakc.travelplanner.core.model.navigation.SocialRoute
 import io.github.rupakc.travelplanner.core.model.navigation.TripRoute
 import io.github.rupakc.travelplanner.core.model.navigation.VerifyEmailRoute
 import io.github.rupakc.travelplanner.core.model.navigation.YouRoute
 import io.github.rupakc.travelplanner.core.model.settings.ConsentChoice
+import io.github.rupakc.travelplanner.core.model.social.IdeaKind
 import io.github.rupakc.travelplanner.core.ui.game.GameDeltaHost
 import io.github.rupakc.travelplanner.core.ui.privacy.ConsentPrompt
 import io.github.rupakc.travelplanner.core.ui.share.LocalShareLauncher
 import io.github.rupakc.travelplanner.core.ui.share.ShareLauncher
+import io.github.rupakc.travelplanner.core.ui.social.IdeaLauncher
+import io.github.rupakc.travelplanner.core.ui.social.LocalIdeaLauncher
 import io.github.rupakc.travelplanner.feature.account.navigation.accountGraph
 import io.github.rupakc.travelplanner.feature.alerts.NotificationBellAction
 import io.github.rupakc.travelplanner.feature.alerts.navigation.alertsGraph
@@ -162,7 +167,21 @@ fun TravelApp(
         remember(navController, shell.sharing) {
             if (shell.sharing) ShareLauncher { kind, planId -> navController.navigate(ShareCreateRoute(kind.wire.orEmpty(), planId)) } else null
         }
-    CompositionLocalProvider(LocalUiEventSink provides uiEventSink, LocalShareLauncher provides shareLauncher) {
+    // "Share as an idea" entry points read this; null (no `features.social`) hides them.
+    val ideaLauncher =
+        remember(navController, shell.social) {
+            if (shell.social) {
+                IdeaLauncher {
+                    planId,
+                    kind,
+                    ->
+                    navController.navigate(PublishIdeaRoute(planId, kind.wire ?: IdeaKind.PLAN.wire.orEmpty()))
+                }
+            } else {
+                null
+            }
+        }
+    CompositionLocalProvider(LocalUiEventSink provides uiEventSink, LocalShareLauncher provides shareLauncher, LocalIdeaLauncher provides ideaLauncher) {
         Box(Modifier.fillMaxSize()) {
             TravelAppContent(gate, remember { start }, navController, shell)
             // Over every destination (Login and Share included), above the system navigation bar.
@@ -278,7 +297,11 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
         showSettingsAction = !shell.journey,
         belowBar = {
             if (topLevel == TopLevelDestination.EXPLORE) {
-                ExploreEntries(onOpenChat = { navController.navigate(ChatRoute()) }, onOpenNearby = { navController.navigate(NearbyRoute) })
+                ExploreEntries(
+                    onOpenChat = { navController.navigate(ChatRoute()) },
+                    onOpenNearby = { navController.navigate(NearbyRoute) },
+                    onOpenIdeas = navController.feedEntry(shell.social),
+                )
             }
             tip?.let {
                 CoachMarkCard(it, onGotIt = { services.markCoachSeen(setOf(it.id)) }, onSkipAll = { services.markCoachSeen(CoachMarks.ALL_IDS) })
@@ -350,6 +373,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 onSearch = { navController.navigateToTopLevel(TopLevelDestination.SEARCH) },
                 onOpenPrefs = { navController.navigate(AlertPrefsRoute) },
                 onOpenTrip = { navController.navigate(TripRoute(it, tab = TripTab.Today.id)) { launchSingleTop = true } },
+                onOpenFeed = navController.feedEntry(shell.social),
             )
             settingsGraph(
                 onBack = { navController.popBackStack() },
@@ -400,7 +424,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
             shareCreateGraph(onClose = { navController.popBackStack() })
             mySharesGraph(onBack = { navController.popBackStack() })
             // Social (profile, feed): the entry points are gated on `shell.social`; the screens land with the feature tasks.
-            socialGraph()
+            socialGraph(onBack = { navController.popBackStack() }, onNavigate = { route -> navController.navigateTo(route) })
             socialProfileGraph(onBack = { navController.popBackStack() }, onNavigate = { route -> navController.navigateTo(route) })
             shareGraph(
                 onBack = {
@@ -614,6 +638,9 @@ private fun NavHostController.navigateToTopLevel(route: AppRoute) {
         restoreState = restore
     }
 }
+
+/** Opens the ideas feed, or null (no entry shown) when `features.social` is off. */
+private fun NavHostController.feedEntry(enabled: Boolean): (() -> Unit)? = if (enabled) ({ navigate(SocialRoute) { launchSingleTop = true } }) else null
 
 /** Top-level routes switch tabs; everything else is pushed. */
 private fun NavHostController.navigateTo(route: AppRoute) {

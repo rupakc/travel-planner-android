@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_feed_title">Ideen</string>
+    <string name="social_feed_refresh">Aktualisieren</string>
+    <string name="social_scope_for_you">Für dich</string>
+    <string name="social_scope_following">Folge ich</string>
+    <string name="social_scope_new">Neu</string>
+    <string name="social_feed_empty">Hier gibt es noch keine Ideen</string>
+    <string name="social_feed_empty_following">Ideen von Personen, denen du folgst, erscheinen hier.</string>
+    <string name="social_feed_empty_body">Öffne einen deiner Pläne und wähle Als Idee teilen, um die erste zu posten.</string>
+    <string name="social_idea_title">Idee</string>
+    <string name="social_idea_author">@%1$s</string>
+    <string name="social_idea_like">Gefällt mir</string>
+    <string name="social_idea_unlike">Gefällt mir entfernen</string>
+    <string name="social_idea_save">Als meinen Plan speichern</string>
+    <string name="social_idea_saved">Gespeichert (zum Rückgängigmachen tippen)</string>
+    <string name="social_idea_gone">Diese Idee ist nicht mehr verfügbar.</string>
+    <string name="social_idea_unavailable">Diese Idee ist nicht verfügbar</string>
+    <string name="social_idea_unavailable_body">Sie wurde möglicherweise entfernt oder ausgeblendet.</string>
+    <string name="social_idea_held_notice">Wartet auf Prüfung. Nur du siehst diese Idee, bis sie freigegeben ist.</string>
+    <string name="social_idea_hidden_notice">Diese Idee ist ausgeblendet. Nur du siehst sie.</string>
+    <string name="social_idea_includes">Was enthalten ist</string>
+    <string name="social_section_flights">Flüge</string>
+    <string name="social_section_hotels">Hotels</string>
+    <string name="social_section_activities">Aktivitäten</string>
+    <string name="social_section_places">Sehenswürdigkeiten</string>
+    <string name="social_section_walking_tours">Kostenlose Walking Tours</string>
+    <string name="social_section_events">Veranstaltungen</string>
+    <string name="social_section_other">Außerdem enthalten</string>
+    <string name="social_comments_title">Kommentare</string>
+    <string name="social_comments_empty">Noch keine Kommentare. Schreib den ersten.</string>
+    <string name="social_comments_error">Kommentare konnten nicht geladen werden.</string>
+    <string name="social_retry">Erneut versuchen</string>
+    <string name="social_comment_hint">Kommentar hinzufügen</string>
+    <string name="social_comment_post">Senden</string>
+    <string name="social_comment_held">Dein Kommentar wartet auf Prüfung. Vorerst siehst nur du ihn.</string>
+    <string name="social_comment_held_label">Wartet auf Prüfung</string>
+    <string name="social_comment_helpful">Hilfreich</string>
+    <string name="social_comment_mark_helpful">Als hilfreich markieren</string>
+    <string name="social_comment_unmark_helpful">Hilfreich-Markierung entfernen</string>
+    <string name="social_comment_delete">Kommentar löschen</string>
+    <string name="social_comment_report">Kommentar melden</string>
+    <string name="social_delete_idea">Idee löschen</string>
+    <string name="social_delete_idea_title">Diese Idee löschen?</string>
+    <string name="social_delete_idea_body">Sie verschwindet aus dem Feed. Pläne, die andere daraus gespeichert haben, bleiben bei ihnen.</string>
+    <string name="social_delete_confirm">Löschen</string>
+    <string name="social_idea_deleted">Idee gelöscht</string>
+    <string name="social_report_idea">Idee melden</string>
+    <string name="social_block_author">@%1$s blockieren</string>
+    <string name="social_publish_title">Als Idee teilen</string>
+    <string name="social_publish_intro">Poste eine Momentaufnahme dieses Plans für andere Reisende. Sie zeigt Ziele, Tage und die gewählten Elemente, nie Daten, Startort, Preise, Notizen oder deinen Namen.</string>
+    <string name="social_publish_title_label">Titel</string>
+    <string name="social_publish_caption_label">Beschreibung (optional)</string>
+    <string name="social_publish_action">Veröffentlichen</string>
+    <string name="social_publish_done">Deine Idee ist veröffentlicht.</string>
+    <string name="social_publish_held">Deine Idee wartet auf Prüfung. Nur du siehst sie, bis sie freigegeben ist.</string>
+    <string name="social_publish_view">Idee ansehen</string>
+    <string name="social_publish_close">Fertig</string>
+    <string name="social_problem_profile">Zum Posten brauchst du einen Handle und ein nicht privates Profil. Richte zuerst eins ein.</string>
+    <string name="social_problem_profile_action">Profil einrichten</string>
+    <string name="social_problem_email">Bestätige deine E-Mail-Adresse, um Ideen zu posten. Den Link findest du in deinem Posteingang.</string>
+    <string name="social_problem_limit">Du hast das heutige Limit für Ideen erreicht. Versuche es morgen wieder.</string>
+    <string name="social_problem_content">Dieser Text kann nicht verwendet werden. Bitte ändere Titel oder Beschreibung.</string>
+    <string name="social_problem_restricted">Das Posten ist für dein Konto vorerst deaktiviert.</string>
+    <string name="social_problem_title">Gib einen Titel mit höchstens 80 Zeichen ein.</string>
+    <string name="social_problem_too_large">Dieser Plan ist zu groß zum Teilen. Versuche einen Plan mit weniger Elementen.</string>
+    <string name="social_problem_plan">Dieser Plan wurde nicht gefunden.</string>
+    <plurals name="social_idea_days">
+        <item quantity="one">%1$d Tag</item>
+        <item quantity="other">%1$d Tage</item>
+    </plurals>
+    <plurals name="social_idea_likes">
+        <item quantity="one">%1$d Like</item>
+        <item quantity="other">%1$d Likes</item>
+    </plurals>
+    <plurals name="social_idea_saves">
+        <item quantity="one">%1$d Mal gespeichert</item>
+        <item quantity="other">%1$d Mal gespeichert</item>
+    </plurals>
+    <plurals name="social_idea_comments">
+        <item quantity="one">%1$d Kommentar</item>
+        <item quantity="other">%1$d Kommentare</item>
+    </plurals>
+</resources>

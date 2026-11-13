@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_feed_title">灵感</string>
+    <string name="social_feed_refresh">刷新</string>
+    <string name="social_scope_for_you">为你推荐</string>
+    <string name="social_scope_following">关注</string>
+    <string name="social_scope_new">最新</string>
+    <string name="social_feed_empty">这里还没有灵感</string>
+    <string name="social_feed_empty_following">你关注的人分享的灵感会显示在这里。</string>
+    <string name="social_feed_empty_body">打开你的某个行程，选择“分享为灵感”来发布第一条。</string>
+    <string name="social_idea_title">灵感</string>
+    <string name="social_idea_author">@%1$s</string>
+    <string name="social_idea_like">点赞</string>
+    <string name="social_idea_unlike">取消点赞</string>
+    <string name="social_idea_save">保存为我的行程</string>
+    <string name="social_idea_saved">已保存（点按撤销）</string>
+    <string name="social_idea_gone">这条灵感已不可用。</string>
+    <string name="social_idea_unavailable">这条灵感不可用</string>
+    <string name="social_idea_unavailable_body">它可能已被删除或隐藏。</string>
+    <string name="social_idea_held_notice">等待审核。在通过之前，只有你能看到这条灵感。</string>
+    <string name="social_idea_hidden_notice">这条灵感已被隐藏，只有你能看到。</string>
+    <string name="social_idea_includes">包含内容</string>
+    <string name="social_section_flights">航班</string>
+    <string name="social_section_hotels">酒店</string>
+    <string name="social_section_activities">活动</string>
+    <string name="social_section_places">景点</string>
+    <string name="social_section_walking_tours">免费徒步团</string>
+    <string name="social_section_events">活动演出</string>
+    <string name="social_section_other">其他内容</string>
+    <string name="social_comments_title">评论</string>
+    <string name="social_comments_empty">还没有评论，来写第一条吧。</string>
+    <string name="social_comments_error">无法加载评论。</string>
+    <string name="social_retry">重试</string>
+    <string name="social_comment_hint">添加评论</string>
+    <string name="social_comment_post">发布</string>
+    <string name="social_comment_held">你的评论正在等待审核，目前只有你能看到。</string>
+    <string name="social_comment_held_label">等待审核</string>
+    <string name="social_comment_helpful">有帮助</string>
+    <string name="social_comment_mark_helpful">标记为有帮助</string>
+    <string name="social_comment_unmark_helpful">取消有帮助标记</string>
+    <string name="social_comment_delete">删除评论</string>
+    <string name="social_comment_report">举报评论</string>
+    <string name="social_delete_idea">删除灵感</string>
+    <string name="social_delete_idea_title">删除这条灵感？</string>
+    <string name="social_delete_idea_body">它会从动态中消失。其他人据此保存的行程会保留。</string>
+    <string name="social_delete_confirm">删除</string>
+    <string name="social_idea_deleted">灵感已删除</string>
+    <string name="social_report_idea">举报灵感</string>
+    <string name="social_block_author">屏蔽 @%1$s</string>
+    <string name="social_publish_title">分享为灵感</string>
+    <string name="social_publish_intro">为其他旅行者发布这个行程的快照。它只显示目的地、天数和你选的项目，绝不显示日期、出发地、价格、备注或你的姓名。</string>
+    <string name="social_publish_title_label">标题</string>
+    <string name="social_publish_caption_label">说明（可选）</string>
+    <string name="social_publish_action">发布</string>
+    <string name="social_publish_done">你的灵感已发布。</string>
+    <string name="social_publish_held">你的灵感正在等待审核，通过之前只有你能看到。</string>
+    <string name="social_publish_view">查看灵感</string>
+    <string name="social_publish_close">完成</string>
+    <string name="social_problem_profile">发布灵感需要用户名和非私密的个人资料，请先设置。</string>
+    <string name="social_problem_profile_action">设置个人资料</string>
+    <string name="social_problem_email">请先验证邮箱再发布灵感，链接在你的收件箱里。</string>
+    <string name="social_problem_limit">你已达到今天的灵感发布上限，请明天再试。</string>
+    <string name="social_problem_content">这段文字无法使用，请修改标题或说明。</string>
+    <string name="social_problem_restricted">你的账号暂时无法发布。</string>
+    <string name="social_problem_title">请输入不超过 80 个字符的标题。</string>
+    <string name="social_problem_too_large">这个行程太大，无法分享。请试试项目更少的行程。</string>
+    <string name="social_problem_plan">找不到这个行程。</string>
+    <plurals name="social_idea_days">
+        <item quantity="other">%1$d 天</item>
+    </plurals>
+    <plurals name="social_idea_likes">
+        <item quantity="other">%1$d 个赞</item>
+    </plurals>
+    <plurals name="social_idea_saves">
+        <item quantity="other">%1$d 次保存</item>
+    </plurals>
+    <plurals name="social_idea_comments">
+        <item quantity="other">%1$d 条评论</item>
+    </plurals>
+</resources>

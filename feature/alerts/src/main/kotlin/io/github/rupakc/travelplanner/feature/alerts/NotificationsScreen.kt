@@ -135,6 +135,10 @@ class NotificationsViewModel
 
         /** A trip-phase row (T-30, T-7, T-1, morning brief) was tapped: the trip whose Today tab to open (R8). */
         val openTrip: Flow<Long> = tripOpens.receiveAsFlow()
+        private val feedOpens = Channel<Unit>(Channel.BUFFERED)
+
+        /** A social row (idea saved, new follower) was tapped: open the ideas feed. */
+        val openFeed: Flow<Unit> = feedOpens.receiveAsFlow()
 
         init {
             load()
@@ -204,7 +208,9 @@ class NotificationsViewModel
                     is NotificationTarget.TripToday -> tripOpens.send(target.planId)
 
                     // No trip id (or a category this screen does not route): the list is already open.
-                    NotificationTarget.Inbox, NotificationTarget.Feed, is NotificationTarget.H2h -> Unit
+                    NotificationTarget.Feed -> feedOpens.send(Unit)
+
+                    NotificationTarget.Inbox, is NotificationTarget.H2h -> Unit
                 }
             }
         }
@@ -231,11 +237,13 @@ fun NotificationsInboxRoute(
     onBack: () -> Unit,
     onOpenAlert: (AlertLink) -> Unit,
     onOpenTrip: (Long) -> Unit = {},
+    onOpenFeed: () -> Unit = {},
     viewModel: NotificationsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(viewModel) { viewModel.open.collect(onOpenAlert) }
     LaunchedEffect(viewModel) { viewModel.openTrip.collect(onOpenTrip) }
+    LaunchedEffect(viewModel) { viewModel.openFeed.collect { onOpenFeed() } }
     NotificationsScreen(state, viewModel::onEvent, onBack)
 }
 
