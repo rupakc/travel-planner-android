@@ -40,7 +40,7 @@ notif_settings_view
 offline_pack	action=enum:save|refresh|open|remove	kb=int	result=enum:ok|error|unsupported|quota
 onboarding_result	secondary=int	type=enum:budget_backpacker|family|luxury|adventure|culture_foodie|business|relaxation|accessible
 onboarding_step	action=enum:view|next|skip|done	step=int
-outbox_flush	dropped=int	failed=int	sent=int
+outbox_flush	dropped=int	failed=int	rejected=int	sent=int
 password_reset	result=enum:ok|error|expired|invalid|used	step=enum:request|confirm
 perf	metric=enum:ttfb|fcp|lcp|inp|cls|long_task|cold_start	route=id	value=float
 place_action	action=enum:visited|unvisited|rate|unrate	kind=enum:activity|place|food|hotel|event|tour|nearby|other	stars=int
