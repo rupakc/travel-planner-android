@@ -35,6 +35,15 @@ class SocialQuizTapTest {
     }
 
     @Test
+    fun `each kind lands on its own screen`() {
+        fun link(kind: String) = NotificationLinks.of(resolveNotificationTarget(kind, links.getValue(kind), null, null, null))
+        assertEquals("travelplanner://feed", link("social_idea_saved"))
+        assertEquals("travelplanner://feed", link("social_new_follower"))
+        assertEquals("travelplanner://play/h2h/m1", link("quiz_h2h_invite"))
+        assertEquals("travelplanner://play/h2h/m2", link("quiz_h2h_result"))
+    }
+
+    @Test
     fun `a kind with a bad or missing link still opens the list`() {
         assertEquals(NotificationTarget.Inbox, resolveNotificationTarget("quiz_h2h_invite", null, null, null, null))
         assertEquals(NotificationTarget.Feed, resolveNotificationTarget("social_new_follower", null, null, null, null))
