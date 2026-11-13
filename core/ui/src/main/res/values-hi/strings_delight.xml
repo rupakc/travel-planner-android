@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="delight_deal_title">डील हंटर</string>
     <string name="delight_deal_next">अगला बैज: %1$s</string>
     <string name="delight_deal_progress">%2$d में से %1$d</string>
     <string name="delight_deal_all_done">डील हंटर: सभी बैज मिल चुके हैं।</string>
     <string name="delight_bucket_title">घूमे गए देश</string>
-    <string name="delight_bucket_label">%2$d में से %1$d देश घूमे गए</string>
+    <string name="delight_bucket_label" tools:ignore="PluralsCandidate">%2$d में से %1$d देश घूमे गए</string>
     <string name="delight_stamp_title">नया देश</string>
     <string name="delight_stamp_desc">नए देश की मुहर: %1$s</string>
 </resources>

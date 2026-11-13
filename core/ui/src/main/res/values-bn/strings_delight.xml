@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="delight_deal_title">ডিল হান্টার</string>
     <string name="delight_deal_next">পরের ব্যাজ: %1$s</string>
     <string name="delight_deal_progress">%2$d-এর মধ্যে %1$d</string>
     <string name="delight_deal_all_done">ডিল হান্টার: সব ব্যাজ অর্জিত।</string>
     <string name="delight_bucket_title">ঘোরা দেশ</string>
-    <string name="delight_bucket_label">%2$dটির মধ্যে %1$dটি দেশ ঘোরা হয়েছে</string>
+    <string name="delight_bucket_label" tools:ignore="PluralsCandidate">%2$dটির মধ্যে %1$dটি দেশ ঘোরা হয়েছে</string>
     <string name="delight_stamp_title">নতুন দেশ</string>
     <string name="delight_stamp_desc">নতুন দেশের সিল: %1$s</string>
 </resources>
