@@ -29,6 +29,7 @@ import io.github.rupakc.travelplanner.feature.auth.verify.CheckEmailViewModel
 import io.github.rupakc.travelplanner.feature.auth.verify.VerifyEmailEvent
 import io.github.rupakc.travelplanner.feature.auth.verify.VerifyEmailViewModel
 import io.github.rupakc.travelplanner.feature.auth.verify.VerifyPhase
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -173,44 +174,78 @@ class SignupViewModelsTest {
 
     private fun verify(token: String? = null) = VerifyEmailViewModel(SavedStateHandle(mapOf("token" to token)), repo, auth, telemetry, language)
 
-    @Test
-    fun `a link is not redeemed while another user is signed in until they sign out`() {
-        auth.sessionFlow.value = Session("t", User(username = "bob"))
-        val vm = verify("abc")
-        assertEquals(VerifyPhase.ConfirmSwitch, vm.state.value.phase)
-        assertEquals("bob", vm.state.value.currentUsername)
-        assertTrue(repo.calls.isEmpty())
-        vm.onEvent(VerifyEmailEvent.SignOutAndVerify)
-        assertEquals(1, auth.logoutCalls)
-        assertTrue(repo.calls.contains("verifyEmail:abc"))
+    private fun signedInAs(name: String) {
+        auth.sessionFlow.value = Session("t", User(username = name))
     }
 
     @Test
-    fun `cancelling the switch drops the link and keeps the user`() {
-        auth.sessionFlow.value = Session("t", User(username = "bob"))
-        val vm = verify("abc")
-        vm.onEvent(VerifyEmailEvent.CancelSwitch)
-        assertEquals(VerifyPhase.NeedsToken, vm.state.value.phase)
-        assertEquals(0, auth.logoutCalls)
-        assertTrue(repo.calls.isEmpty())
-    }
+    fun `the signed-in user's own link is stored without logout or a question`() =
+        runTest(timeout = 30.seconds) {
+            signedInAs("jane")
+            repo.verifyResult = AppResult.Success(VerifyEmailResponse("verified", session, GameDelta()))
+            val vm = verify("abc")
+            assertEquals(VerifyPhase.SignedIn, vm.state.value.phase)
+            assertEquals(0, auth.logoutCalls)
+            assertEquals(listOf("redeem:abc", "store:jane"), repo.calls)
+        }
 
     @Test
-    fun `a pasted link also waits for the signed-in user`() {
-        auth.sessionFlow.value = Session("t", User(username = "bob"))
-        val vm = verify(null)
-        vm.onEvent(VerifyEmailEvent.PastedChanged("xyz"))
-        vm.onEvent(VerifyEmailEvent.SubmitPasted)
-        assertEquals(VerifyPhase.ConfirmSwitch, vm.state.value.phase)
-        assertTrue(repo.calls.isEmpty())
-    }
+    fun `another user's link waits for the choice and nothing is stored or cleared`() =
+        runTest(timeout = 30.seconds) {
+            signedInAs("bob")
+            repo.verifyResult = AppResult.Success(VerifyEmailResponse("verified", session, GameDelta()))
+            val vm = verify("abc")
+            assertEquals(VerifyPhase.ConfirmSwitch, vm.state.value.phase)
+            assertEquals("bob", vm.state.value.currentUsername)
+            assertEquals("jane", vm.state.value.newUsername)
+            assertEquals(0, auth.logoutCalls)
+            assertEquals(listOf("redeem:abc"), repo.calls)
+            vm.onEvent(VerifyEmailEvent.SignOutAndVerify)
+            assertEquals(1, auth.logoutCalls)
+            assertEquals(listOf("redeem:abc", "store:jane"), repo.calls)
+            assertEquals(VerifyPhase.SignedIn, vm.state.value.phase)
+        }
+
+    @Test
+    fun `staying signed in keeps the user and the email stays confirmed`() =
+        runTest(timeout = 30.seconds) {
+            signedInAs("bob")
+            repo.verifyResult = AppResult.Success(VerifyEmailResponse("verified", session, GameDelta()))
+            val vm = verify("abc")
+            vm.onEvent(VerifyEmailEvent.CancelSwitch)
+            assertEquals(VerifyPhase.Confirmed, vm.state.value.phase)
+            assertEquals(0, auth.logoutCalls)
+            assertFalse(repo.calls.any { it.startsWith("store") })
+        }
+
+    @Test
+    fun `signed out the session is stored at once and a pasted link follows the same rule`() =
+        runTest(timeout = 30.seconds) {
+            repo.verifyResult = AppResult.Success(VerifyEmailResponse("verified", session, GameDelta()))
+            assertEquals(VerifyPhase.SignedIn, verify("abc").state.value.phase)
+            assertEquals(listOf("redeem:abc", "store:jane"), repo.calls)
+            signedInAs("bob")
+            val vm = verify(null)
+            vm.onEvent(VerifyEmailEvent.PastedChanged("xyz"))
+            vm.onEvent(VerifyEmailEvent.SubmitPasted)
+            assertEquals(VerifyPhase.ConfirmSwitch, vm.state.value.phase)
+        }
+
+    @Test
+    fun `a confirmation without a session never asks`() =
+        runTest(timeout = 30.seconds) {
+            signedInAs("bob")
+            repo.verifyResult = AppResult.Success(VerifyEmailResponse("verified", null, GameDelta()))
+            assertEquals(VerifyPhase.Confirmed, verify("abc").state.value.phase)
+            assertEquals(0, auth.logoutCalls)
+        }
 
     @Test
     fun `verify with a route token signs in and shows the XP`() {
         repo.verifyResult = AppResult.Success(VerifyEmailResponse("verified", session, GameDelta(xp = 50)))
         val vm = verify("https://h/verify?token=abc&x=1")
         assertEquals(VerifyPhase.SignedIn, vm.state.value.phase)
-        assertTrue(repo.calls.contains("verifyEmail:abc"))
+        assertTrue(repo.calls.contains("redeem:abc"))
         assertTrue(telemetry.events.contains("email_verify" to mapOf("result" to "ok")))
     }
 
@@ -232,7 +267,7 @@ class SignupViewModelsTest {
         assertTrue(repo.calls.isEmpty())
         vm.onEvent(VerifyEmailEvent.PastedChanged("https://h/verify?token=xyz"))
         vm.onEvent(VerifyEmailEvent.SubmitPasted)
-        assertTrue(repo.calls.contains("verifyEmail:xyz"))
+        assertTrue(repo.calls.contains("redeem:xyz"))
     }
 
     @Test

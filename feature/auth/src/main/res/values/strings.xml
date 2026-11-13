@@ -174,7 +174,7 @@
     <string name="auth_strength_hint_sequence">avoid sequences like abc or 123</string>
     <string name="auth_strength_hint_identity">don\'t include your username or email</string>
     <string name="auth_verify_switch_title">Switch account?</string>
-    <string name="auth_verify_switch_body">You are signed in as %1$s. Confirming this link signs that account out first.</string>
-    <string name="auth_verify_switch_confirm">Sign out and confirm</string>
-    <string name="auth_verify_switch_cancel">Cancel</string>
+    <string name="auth_verify_switch_body">This link confirmed the account %2$s, but you are signed in as %1$s. Switch to %2$s?</string>
+    <string name="auth_verify_switch_confirm">Sign out and switch</string>
+    <string name="auth_verify_switch_cancel">Stay signed in</string>
 </resources>

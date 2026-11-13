@@ -169,7 +169,7 @@
     <string name="auth_strength_hint_sequence">evita secuencias como abc o 123</string>
     <string name="auth_strength_hint_identity">no incluyas tu usuario ni tu correo</string>
     <string name="auth_verify_switch_title">¿Cambiar de cuenta?</string>
-    <string name="auth_verify_switch_body">Has iniciado sesión como %1$s. Al confirmar este enlace se cerrará esa sesión primero.</string>
-    <string name="auth_verify_switch_confirm">Cerrar sesión y confirmar</string>
-    <string name="auth_verify_switch_cancel">Cancelar</string>
+    <string name="auth_verify_switch_body">Este enlace confirmó la cuenta %2$s, pero has iniciado sesión como %1$s. ¿Cambiar a %2$s?</string>
+    <string name="auth_verify_switch_confirm">Cerrar sesión y cambiar</string>
+    <string name="auth_verify_switch_cancel">Seguir con mi sesión</string>
 </resources>

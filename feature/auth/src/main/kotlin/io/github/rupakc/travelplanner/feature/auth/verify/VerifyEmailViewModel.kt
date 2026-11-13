@@ -11,6 +11,7 @@ import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.SignupRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
+import io.github.rupakc.travelplanner.core.model.auth.VerifyEmailResponse
 import io.github.rupakc.travelplanner.feature.auth.AuthMessage
 import io.github.rupakc.travelplanner.feature.auth.R
 import io.github.rupakc.travelplanner.feature.auth.signup.Cooldown
@@ -38,7 +39,7 @@ enum class VerifyPhase {
     Confirmed,
     Failed,
 
-    /** Someone else is signed in: redeeming the link would swap accounts, so the user decides first. */
+    /** The link confirmed another account than the signed-in one: switching is the user's call. */
     ConfirmSwitch,
 }
 
@@ -55,6 +56,8 @@ data class VerifyEmailUiState(
     val cooldownSeconds: Int = 0,
     /** The signed-in username shown while [VerifyPhase.ConfirmSwitch] waits. */
     val currentUsername: String = "",
+    /** The account the redeemed link belongs to, while [VerifyPhase.ConfirmSwitch] waits. */
+    val newUsername: String = "",
 ) {
     val canSubmitPaste: Boolean get() = pasted.isNotBlank() && phase != VerifyPhase.Working
     val canSendResend: Boolean get() = email.contains('@') && !sending && cooldownSeconds == 0
@@ -69,17 +72,17 @@ sealed interface VerifyEmailEvent {
 
     data object Resend : VerifyEmailEvent
 
-    /** ConfirmSwitch: sign the current user out, then redeem the link. */
+    /** ConfirmSwitch: sign the current user out, then sign in as the link's account. */
     data object SignOutAndVerify : VerifyEmailEvent
 
-    /** ConfirmSwitch: keep the current user, drop the link. */
+    /** ConfirmSwitch: stay signed in as the current user. */
     data object CancelSwitch : VerifyEmailEvent
 }
 
 /**
  * `POST /auth/verify-email`. The token comes from the deep link (route argument, a link or a bare token) or is
- * pasted (a full URL or a bare code). The repository stores the session when one is returned. A link is never
- * redeemed while a user is signed in (it would silently swap accounts): the user signs out first or cancels.
+ * pasted (a full URL or a bare code). The repository stores the session when one is returned. A link that
+ * belongs to another account than the signed-in one never swaps sessions silently: the user decides first.
  */
 @HiltViewModel
 class VerifyEmailViewModel
@@ -95,10 +98,11 @@ class VerifyEmailViewModel
         val state: StateFlow<VerifyEmailUiState> = mutableState.asStateFlow()
         private val cooldown = Cooldown(viewModelScope) { left -> mutableState.update { it.copy(cooldownSeconds = left) } }
 
-        private var heldToken: String? = null
+        /** A redeemed response for another user, waiting for the user to switch or stay. */
+        private var held: VerifyEmailResponse? = null
 
         init {
-            LinkTokens.extract(savedState.get<String>("token"))?.let(::redeemOrAsk)
+            LinkTokens.extract(savedState.get<String>("token"))?.let(::verify)
         }
 
         fun onEvent(event: VerifyEmailEvent) {
@@ -124,33 +128,10 @@ class VerifyEmailViewModel
                 }
 
                 VerifyEmailEvent.CancelSwitch -> {
-                    heldToken = null
-                    mutableState.update { it.copy(phase = VerifyPhase.NeedsToken, currentUsername = "") }
+                    // The token is spent and the email confirmed; the signed-in user simply stays signed in.
+                    held = null
+                    mutableState.update { it.copy(phase = VerifyPhase.Confirmed, currentUsername = "", newUsername = "") }
                 }
-            }
-        }
-
-        /** Signed out: redeem now. Signed in: hold the token and ask first. */
-        private fun redeemOrAsk(token: String) {
-            mutableState.update { it.copy(phase = VerifyPhase.Working, error = null, canResend = false) }
-            viewModelScope.launch {
-                val current = auth.session.first()
-                if (current == null) {
-                    verify(token)
-                } else {
-                    heldToken = token
-                    mutableState.update { it.copy(phase = VerifyPhase.ConfirmSwitch, currentUsername = current.user.username) }
-                }
-            }
-        }
-
-        private fun signOutAndVerify() {
-            val token = heldToken ?: return
-            heldToken = null
-            mutableState.update { it.copy(phase = VerifyPhase.Working, currentUsername = "") }
-            viewModelScope.launch {
-                auth.logout()
-                verify(token)
             }
         }
 
@@ -160,20 +141,34 @@ class VerifyEmailViewModel
                 telemetry.emit(TelemetryEvents.EMAIL_VERIFY, mapOf("result" to "invalid"))
                 mutableState.update { it.copy(error = AuthMessage.Local(R.string.auth_err_token_invalid)) }
             } else {
-                redeemOrAsk(token)
+                verify(token)
             }
         }
 
+        private fun signOutAndVerify() {
+            val response = held ?: return
+            held = null
+            mutableState.update { it.copy(phase = VerifyPhase.Working, currentUsername = "", newUsername = "") }
+            viewModelScope.launch {
+                // Another user: the old session and its local data go first (the same sign-out as Settings).
+                auth.logout()
+                when (signup.storeSession(response)) {
+                    is AppResult.Success -> mutableState.update { it.copy(phase = VerifyPhase.SignedIn) }
+                    is AppResult.Failure -> mutableState.update { it.copy(phase = VerifyPhase.Confirmed) }
+                }
+            }
+        }
+
+        /**
+         * Redeems [token] without storing a session. Signed out or the same user: the session is stored at once (nothing is
+         * logged out, nothing is cleared). Another user: the choice is theirs, so the response waits ([VerifyPhase.ConfirmSwitch]).
+         */
         private fun verify(token: String) {
             mutableState.update { it.copy(phase = VerifyPhase.Working, error = null, canResend = false) }
             viewModelScope.launch {
-                when (val result = signup.verifyEmail(token)) {
+                when (val result = signup.redeemEmailToken(token)) {
                     is AppResult.Success -> {
-                        telemetry.emit(TelemetryEvents.EMAIL_VERIFY, mapOf("result" to "ok"))
-                        val response = result.value
-                        val phase = if (response.session != null) VerifyPhase.SignedIn else VerifyPhase.Confirmed
-                        telemetry.emit(TelemetryEvents.SIGNUP_STEP, mapOf("step" to "done"))
-                        mutableState.update { it.copy(phase = phase) }
+                        onRedeemed(result.value)
                     }
 
                     is AppResult.Failure -> {
@@ -184,6 +179,30 @@ class VerifyEmailViewModel
                             it.copy(phase = VerifyPhase.Failed, error = error.toAccountMessage(), canResend = resendable)
                         }
                     }
+                }
+            }
+        }
+
+        private suspend fun onRedeemed(response: VerifyEmailResponse) {
+            telemetry.emit(TelemetryEvents.EMAIL_VERIFY, mapOf("result" to "ok"))
+            telemetry.emit(TelemetryEvents.SIGNUP_STEP, mapOf("step" to "done"))
+            val session = response.session
+            val current = auth.session.first()?.user?.username
+            when {
+                session == null -> {
+                    mutableState.update { it.copy(phase = VerifyPhase.Confirmed) }
+                }
+
+                current != null && !current.equals(session.user.username, ignoreCase = true) -> {
+                    held = response
+                    mutableState.update {
+                        it.copy(phase = VerifyPhase.ConfirmSwitch, currentUsername = current, newUsername = session.user.username)
+                    }
+                }
+
+                else -> {
+                    val stored = signup.storeSession(response)
+                    mutableState.update { it.copy(phase = if (stored is AppResult.Success) VerifyPhase.SignedIn else VerifyPhase.Confirmed) }
                 }
             }
         }

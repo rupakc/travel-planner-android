@@ -139,7 +139,7 @@
     <string name="auth_strength_hint_sequence">Folgen wie abc oder 123 vermeiden</string>
     <string name="auth_strength_hint_identity">Benutzername oder E-Mail nicht verwenden</string>
     <string name="auth_verify_switch_title">Konto wechseln?</string>
-    <string name="auth_verify_switch_body">Du bist als %1$s angemeldet. Beim Bestätigen dieses Links wirst du zuerst abgemeldet.</string>
-    <string name="auth_verify_switch_confirm">Abmelden und bestätigen</string>
-    <string name="auth_verify_switch_cancel">Abbrechen</string>
+    <string name="auth_verify_switch_body">Dieser Link hat das Konto %2$s bestätigt, du bist aber als %1$s angemeldet. Zu %2$s wechseln?</string>
+    <string name="auth_verify_switch_confirm">Abmelden und wechseln</string>
+    <string name="auth_verify_switch_cancel">Angemeldet bleiben</string>
 </resources>

@@ -73,6 +73,12 @@ interface SignupRepository {
     /** Stores the session when the response carries one. */
     suspend fun verifyEmail(token: String): AppResult<VerifyEmailResponse>
 
+    /** Redeems the token but does not store a returned session: the caller decides with [storeSession] (e.g. another user is signed in). */
+    suspend fun redeemEmailToken(token: String): AppResult<VerifyEmailResponse>
+
+    /** Stores the session of a [redeemEmailToken] response (clears local data first when it is another user) and forwards the game delta. */
+    suspend fun storeSession(response: VerifyEmailResponse): AppResult<Unit>
+
     suspend fun requestPasswordReset(email: String, locale: String?): AppResult<Unit>
 
     /** Stores the returned session. */

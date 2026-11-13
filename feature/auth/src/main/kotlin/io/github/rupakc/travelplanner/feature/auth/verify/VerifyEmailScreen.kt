@@ -56,7 +56,7 @@ internal fun VerifyEmailScreen(
             }
 
             VerifyPhase.ConfirmSwitch -> {
-                AuthStatusText(stringResource(R.string.auth_verify_switch_body, state.currentUsername))
+                AuthStatusText(stringResource(R.string.auth_verify_switch_body, state.currentUsername, state.newUsername))
                 TpButton(
                     stringResource(R.string.auth_verify_switch_confirm),
                     { onEvent(VerifyEmailEvent.SignOutAndVerify) },

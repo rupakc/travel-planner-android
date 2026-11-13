@@ -139,7 +139,7 @@
     <string name="auth_strength_hint_sequence">abc या 123 जैसे क्रम से बचें</string>
     <string name="auth_strength_hint_identity">उपयोगकर्ता नाम या ईमेल शामिल न करें</string>
     <string name="auth_verify_switch_title">खाता बदलें?</string>
-    <string name="auth_verify_switch_body">आप %1$s के रूप में साइन इन हैं। इस लिंक की पुष्टि करने पर पहले आपको साइन आउट किया जाएगा।</string>
-    <string name="auth_verify_switch_confirm">साइन आउट करें और पुष्टि करें</string>
-    <string name="auth_verify_switch_cancel">रद्द करें</string>
+    <string name="auth_verify_switch_body">इस लिंक ने खाता %2$s की पुष्टि की, पर आप %1$s के रूप में साइन इन हैं। क्या %2$s पर जाएँ?</string>
+    <string name="auth_verify_switch_confirm">साइन आउट करें और बदलें</string>
+    <string name="auth_verify_switch_cancel">साइन इन रहें</string>
 </resources>

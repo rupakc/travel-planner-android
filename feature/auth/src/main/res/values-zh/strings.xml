@@ -139,7 +139,7 @@
     <string name="auth_strength_hint_sequence">避免 abc 或 123 这样的连续字符</string>
     <string name="auth_strength_hint_identity">不要包含用户名或邮箱</string>
     <string name="auth_verify_switch_title">切换账号？</string>
-    <string name="auth_verify_switch_body">你当前以 %1$s 登录。确认此链接会先退出该账号。</string>
-    <string name="auth_verify_switch_confirm">退出并确认</string>
-    <string name="auth_verify_switch_cancel">取消</string>
+    <string name="auth_verify_switch_body">此链接确认的是账号 %2$s，但你当前以 %1$s 登录。要切换到 %2$s 吗？</string>
+    <string name="auth_verify_switch_confirm">退出并切换</string>
+    <string name="auth_verify_switch_cancel">保持登录</string>
 </resources>
