@@ -98,13 +98,9 @@ object NotificationLinks {
         val base =
             when (target) {
                 is NotificationTarget.Alert -> target.link.toDeepLink()
-
                 is NotificationTarget.TripToday -> tripToday(target.planId)
-
                 NotificationTarget.Feed -> FEED
-
                 is NotificationTarget.H2h -> h2h(target.matchId)
-
                 NotificationTarget.Inbox -> INBOX
             }
         if (category == null) return base
