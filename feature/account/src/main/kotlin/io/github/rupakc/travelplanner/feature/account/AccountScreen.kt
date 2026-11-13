@@ -288,7 +288,9 @@ private fun SignInCard(
                     )
                 }
                 if (id in linked) {
-                    TpTextButton(onClick = { onEvent(AccountEvent.AskUnlink(id)) }, tid = "account.account_unlink") { Text(stringResource(R.string.account_unlink)) }
+                    TpTextButton(onClick = {
+                        onEvent(AccountEvent.AskUnlink(id))
+                    }, tid = "account.account_unlink") { Text(stringResource(R.string.account_unlink)) }
                 } else if (canLink) {
                     TpButton(
                         stringResource(R.string.account_link),
