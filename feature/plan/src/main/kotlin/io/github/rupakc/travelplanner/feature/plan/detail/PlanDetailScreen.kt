@@ -99,6 +99,8 @@ internal fun PlanDetailScreen(
     snackbar: SnackbarHostState = remember { SnackbarHostState() },
     /** "Watch whole trip" (Team G's price-watch sheet); null hides the button (not watchable / no live prices). */
     onWatchTrip: (() -> Unit)? = null,
+    /** The dismissible "watch prices for this trip?" prompt, shown under the header; null/empty hides it. */
+    offerSlot: (@Composable () -> Unit)? = null,
 ) {
     val content = state.content
     Scaffold(
@@ -115,7 +117,7 @@ internal fun PlanDetailScreen(
         Box(Modifier.padding(padding).fillMaxSize()) {
             when {
                 content != null -> {
-                    DetailBody(content, state, onEvent, onOpenLink, onWatchTrip)
+                    DetailBody(content, state, onEvent, onOpenLink, onWatchTrip, offerSlot)
                 }
 
                 state.error != null -> {
@@ -176,6 +178,7 @@ private fun DetailBody(
     onEvent: (PlanDetailEvent) -> Unit,
     onOpenLink: (String) -> Unit,
     onWatchTrip: (() -> Unit)?,
+    offerSlot: (@Composable () -> Unit)?,
 ) {
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -186,6 +189,7 @@ private fun DetailBody(
         }
         item(key = "header", contentType = "header") { TripHeader(content.summary) }
         item(key = "actions", contentType = "actions") { ActionRow(content.summary, state, onEvent, onWatchTrip) }
+        offerSlot?.let { slot -> item(key = "watch_offer", contentType = "watch_offer") { slot() } }
         if (content.costParts.isNotEmpty()) {
             item(key = "cost", contentType = "cost") {
                 CostCard(content.costParts, content.budgetStatus, content.hasTransport, Modifier.padding(top = TravelTheme.spacing.lg))

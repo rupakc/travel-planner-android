@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_quick_button">Watch price</string>
+    <string name="watch_quick_watching">Watching</string>
+    <string name="watch_quick_watched">Watching. We\'ll check the price and tell you about drops.</string>
+    <string name="watch_quick_existing">You\'re already watching this.</string>
+    <string name="watch_quick_live_off">Live price checks are off right now, so we can\'t watch this yet.</string>
+    <string name="watch_quick_limit">You\'ve reached your watch limit. Remove one to add another.</string>
+    <string name="watch_quick_invalid">This can\'t be watched yet. It needs trip dates that are still ahead.</string>
+    <string name="watch_quick_failed">We couldn\'t set up this watch. Try again in a moment.</string>
+    <string name="watch_offer_title">Watch prices for this trip?</string>
+    <string name="watch_offer_body">Tap Watch and we\'ll check prices and tell you about drops. The first check can take a little while.</string>
+    <string name="watch_offer_watch">Watch</string>
+    <string name="watch_offer_dismiss">Not now</string>
+</resources>

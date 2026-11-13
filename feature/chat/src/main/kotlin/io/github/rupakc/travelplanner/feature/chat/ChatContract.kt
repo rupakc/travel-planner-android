@@ -3,6 +3,7 @@ package io.github.rupakc.travelplanner.feature.chat
 import androidx.compose.runtime.Immutable
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.data.repository.ChatThread
+import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchOutcome
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.feature.chat.model.ChatTurn
@@ -38,6 +39,8 @@ data class ChatUiState(
     /** Turn whose itinerary waits for "replace your unsaved My Plan?" confirmation. */
     val confirmReplaceTurnId: Long? = null,
     val announcement: ReplyAnnouncement? = null,
+    /** One-tap "Watch price" may show on flight, hotel and activity cards. */
+    val watchAvailable: Boolean = false,
 ) {
     val isStreaming: Boolean get() = streaming?.streaming == true
 
@@ -59,6 +62,9 @@ sealed interface ChatUiEvent {
     data class Retry(val turnId: Long) : ChatUiEvent
 
     data class TogglePlanItem(val item: PlanItem) : ChatUiEvent
+
+    /** One-tap price watch for a flight, hotel or activity card. */
+    data class WatchItem(val item: PlanItem) : ChatUiEvent
 
     data class SaveItinerary(val turnId: Long) : ChatUiEvent
 
@@ -100,4 +106,7 @@ sealed interface ChatEffect {
     data class ThreadDeleted(val threadId: Long) : ChatEffect
 
     data class SaveFailed(val error: AppError) : ChatEffect
+
+    /** A one-tap watch ended as [outcome] (shown as a snackbar). */
+    data class QuickWatched(val outcome: QuickWatchOutcome) : ChatEffect
 }

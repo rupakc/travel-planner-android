@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -20,12 +21,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.core.ui.watch.PriceWatchSheet
+import io.github.rupakc.travelplanner.core.ui.watch.WatchOfferCard
+import io.github.rupakc.travelplanner.core.ui.watch.quickWatchText
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.detail.DetailNavigation
 import io.github.rupakc.travelplanner.feature.plan.detail.PlanDetailScreen
@@ -36,6 +41,7 @@ import io.github.rupakc.travelplanner.feature.plan.list.PlansEvent
 import io.github.rupakc.travelplanner.feature.plan.list.PlansMessage
 import io.github.rupakc.travelplanner.feature.plan.list.PlansScreen
 import io.github.rupakc.travelplanner.feature.plan.list.PlansViewModel
+import io.github.rupakc.travelplanner.feature.plan.myplan.MyPlanMessage
 import io.github.rupakc.travelplanner.feature.plan.myplan.MyPlanScreen
 import io.github.rupakc.travelplanner.feature.plan.myplan.MyPlanViewModel
 import io.github.rupakc.travelplanner.feature.plan.ui.PanePlaceholder
@@ -130,10 +136,21 @@ private fun DetailContent(viewModel: PlanDetailViewModel, onBack: (() -> Unit)?,
     ExportEffects(viewModel.exportRequests, snackbar)
     NavigationEffects(viewModel.navigationRequests, onOpenResults, onDeleted)
     val tripWatch: TripWatchViewModel = hiltViewModel()
+    WatchOutcomes(tripWatch, snackbar)
+    val savedPlanId = viewModel.currentPlan?.id
+    LaunchedEffect(savedPlanId) { savedPlanId?.let(tripWatch::loadOffer) }
     val watchAvailable by tripWatch.available.collectAsStateWithLifecycle()
     val plan = viewModel.currentPlan
     val onWatchTrip = plan?.takeIf { watchAvailable && tripWatch.canWatch(it) }?.let { p -> { tripWatch.open(p) } }
-    PlanDetailScreen(state, viewModel::onEvent, onOpenLink = openLink, onBack = onBack, snackbar = snackbar, onWatchTrip = onWatchTrip)
+    PlanDetailScreen(
+        state,
+        viewModel::onEvent,
+        onOpenLink = openLink,
+        onBack = onBack,
+        snackbar = snackbar,
+        onWatchTrip = onWatchTrip,
+        offerSlot = watchOfferSlot(tripWatch),
+    )
     val sheet by tripWatch.sheet.collectAsStateWithLifecycle()
     val email by tripWatch.userEmail.collectAsStateWithLifecycle()
     sheet?.let { controller ->
@@ -163,5 +180,41 @@ internal fun MyPlanRoute(onBack: () -> Unit, onOpenTrips: () -> Unit) {
     val snackbar = remember { SnackbarHostState() }
     val openLink = rememberLinkOpener()
     ExportEffects(viewModel.exportRequests, snackbar)
-    MyPlanScreen(state, viewModel::onEvent, onOpenLink = openLink, onBack = onBack, onOpenTrips = onOpenTrips, snackbar = snackbar)
+    // A save offers one-tap price watches for the saved plan (non-blocking; inert without live prices / Alerts 2.0).
+    val tripWatch: TripWatchViewModel = hiltViewModel()
+    WatchOutcomes(tripWatch, snackbar)
+    val saved = state.message == MyPlanMessage.Saved
+    val savedId = state.content?.planId
+    LaunchedEffect(saved, savedId) { if (saved && savedId != null) tripWatch.loadOffer(savedId) }
+    MyPlanScreen(
+        state,
+        viewModel::onEvent,
+        onOpenLink = openLink,
+        onBack = onBack,
+        onOpenTrips = onOpenTrips,
+        snackbar = snackbar,
+        offerSlot = watchOfferSlot(tripWatch),
+    )
+}
+
+/** Shows each one-tap watch outcome as a snackbar. */
+@Composable
+private fun WatchOutcomes(tripWatch: TripWatchViewModel, snackbar: SnackbarHostState) {
+    val context = LocalContext.current
+    LaunchedEffect(tripWatch) { tripWatch.outcomeFlow.collect { snackbar.showSnackbar(quickWatchText(context, it)) } }
+}
+
+@Composable
+private fun watchOfferSlot(tripWatch: TripWatchViewModel): (@Composable () -> Unit)? {
+    val rows by tripWatch.offerRows.collectAsStateWithLifecycle()
+    if (rows.isEmpty()) return null
+    return {
+        WatchOfferCard(
+            rows,
+            onWatch = tripWatch::watchOffer,
+            onDismiss = tripWatch::dismissOffer,
+            modifier = Modifier.padding(vertical = TravelTheme.spacing.md),
+            tidPrefix = "plan.watch_offer",
+        )
+    }
 }

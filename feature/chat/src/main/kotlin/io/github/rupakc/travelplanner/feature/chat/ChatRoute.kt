@@ -9,10 +9,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
+import io.github.rupakc.travelplanner.core.ui.watch.quickWatchText
 import io.github.rupakc.travelplanner.feature.chat.ui.ChatScreen
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -36,6 +38,7 @@ fun ChatRoute(
     val deleted = stringResource(R.string.chat_deleted)
     val undo = stringResource(R.string.chat_undo)
     val saveFailed = stringResource(R.string.chat_save_failed)
+    val context = LocalContext.current
     val import by rememberUpdatedState(onOpenImport)
     val myPlan by rememberUpdatedState(onOpenMyPlan)
     val plan by rememberUpdatedState(onOpenPlan)
@@ -59,6 +62,10 @@ fun ChatRoute(
 
                     is ChatEffect.SaveFailed -> {
                         launch { snackbar.showSnackbar(effect.error.message ?: saveFailed) }
+                    }
+
+                    is ChatEffect.QuickWatched -> {
+                        launch { snackbar.showSnackbar(quickWatchText(context, effect.outcome)) }
                     }
 
                     is ChatEffect.ThreadDeleted -> {

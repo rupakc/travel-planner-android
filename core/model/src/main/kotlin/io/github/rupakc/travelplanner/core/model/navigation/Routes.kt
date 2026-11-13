@@ -39,6 +39,8 @@ sealed interface AppRoute
     val mode: String? = null,
     val importUrl: String? = null,
     val recentSearchId: String? = null,
+    /** A destination text ("City, Country") that pre-fills the known-destination form (Recap "Where next" → Plan this). */
+    val destination: String? = null,
 ) : AppRoute
 
 /** Streamed results for the search currently held by `SearchRepository` / `CurrentPlanStore`. */

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recap_wn_title">Ideas for your next trip</string>
+    <string name="recap_wn_loading">Finding ideas based on your trips and taste…</string>
+    <string name="recap_wn_note">AI suggestions, not bookings. Costs are rough estimates.</string>
+    <string name="recap_wn_estimate">Estimated cost %1$s–%2$s</string>
+    <string name="recap_wn_plan">Plan this</string>
+    <string name="recap_wn_empty">No new ideas right now. Try Explore.</string>
+    <string name="recap_wn_needs_profile">Add your home city and nationality in Settings to get personal ideas, or browse Explore.</string>
+    <string name="recap_wn_ai_limit">AI ideas have reached their limit for now. You can still browse Explore.</string>
+    <string name="recap_wn_error">We couldn\'t get ideas just now.</string>
+    <string name="recap_wn_retry">Try again</string>
+    <string name="recap_wn_explore">Open Explore</string>
+</resources>

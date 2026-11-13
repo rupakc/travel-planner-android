@@ -46,6 +46,8 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpCardSize
 import io.github.rupakc.travelplanner.core.designsystem.component.rememberReduceMotion
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.journey.RecapRules
+import io.github.rupakc.travelplanner.core.domain.search.searchText
+import io.github.rupakc.travelplanner.core.model.search.DiscoveredDestination
 import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.model.social.IdeaKind
 import io.github.rupakc.travelplanner.core.model.trips.Phase
@@ -62,15 +64,23 @@ import java.util.Currency
 
 /**
  * The Recap tab for `TripTabContent` (`tripsGraph(tabContent = mapOf(TripTab.Recap to recapTabContent(...)))`).
- * [onWhereNext] opens Explore; a button whose lambda is null is not shown.
+ * [onWhereNext] opens Explore; a button whose lambda is null is not shown. With [onPlanThis] (a host that can prefill Search), the
+ * "Where next?" button shows up to five suggestions here instead, each with "Plan this" (the destination text goes to the host);
+ * Explore stays the fallback when suggestions cannot be had. Without it the button opens Explore as before.
  */
-fun recapTabContent(onWhereNext: (() -> Unit)? = null): TripTabContent =
+fun recapTabContent(onWhereNext: (() -> Unit)? = null, onPlanThis: ((destination: String) -> Unit)? = null): TripTabContent =
     { trip, modifier ->
-        RecapRoute(onWhereNext, modifier, trip.phase)
+        RecapRoute(onWhereNext, modifier, trip.phase, onPlanThis = onPlanThis)
     }
 
 @Composable
-fun RecapRoute(onWhereNext: (() -> Unit)?, modifier: Modifier = Modifier, phase: Phase? = null, viewModel: RecapViewModel = hiltViewModel()) {
+fun RecapRoute(
+    onWhereNext: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    phase: Phase? = null,
+    onPlanThis: ((destination: String) -> Unit)? = null,
+    viewModel: RecapViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     // A phase change (the user sets a stage, or the dates move it) refetches the recap instead of keeping the old one.
     LaunchedEffect(phase) { viewModel.onEvent(RecapEvent.PhaseShown(phase)) }
@@ -91,9 +101,12 @@ fun RecapRoute(onWhereNext: (() -> Unit)?, modifier: Modifier = Modifier, phase:
             onWhereNext?.let { f ->
                 {
                     viewModel.onEvent(RecapEvent.WhereNext)
-                    f()
+                    // A host that cannot prefill Search keeps the plain Explore link.
+                    if (onPlanThis == null) f()
                 }
             },
+        onPlanThis = onPlanThis,
+        onExplore = onWhereNext.takeIf { onPlanThis != null },
         modifier = modifier,
     )
 }
@@ -137,6 +150,8 @@ fun RecapScreen(
     onShare: () -> Unit,
     onWhereNext: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    onPlanThis: ((destination: String) -> Unit)? = null,
+    onExplore: (() -> Unit)? = null,
 ) {
     val recap = state.recap
     when {
@@ -160,6 +175,9 @@ fun RecapScreen(
                 if (points.size >= 2) item(key = "route", contentType = "route") { RouteCard(points) }
                 if (recap.countries.isNotEmpty()) item(key = "countries", contentType = "countries") { CountriesCard(recap.countries, state.newCountries) }
                 item(key = "actions", contentType = "actions") { Actions(state, recap, onEvent, onShare, onWhereNext) }
+                if (state.whereNext != WhereNextState.Idle && onPlanThis != null) {
+                    item(key = "where_next", contentType = "where_next") { WhereNextCard(state.whereNext, onEvent, onPlanThis, onExplore) }
+                }
             }
         }
     }
@@ -320,6 +338,70 @@ private fun Actions(state: RecapUiState, recap: Recap, onEvent: (RecapEvent) -> 
         onWhereNext?.let {
             TpButton(stringResource(R.string.recap_where_next), it, Modifier.fillMaxWidth(), variant = TpButtonVariant.Secondary, tid = "recap.where_next")
         }
+    }
+}
+
+/** Suggestions after a trip: loading, up to five picks (AI suggestions, estimated costs), or a reason and the way on. */
+@Composable
+private fun WhereNextCard(state: WhereNextState, onEvent: (RecapEvent) -> Unit, onPlanThis: (String) -> Unit, onExplore: (() -> Unit)?) {
+    TpCard(Modifier.fillMaxWidth(), size = TpCardSize.Item) {
+        Column(Modifier.padding(TravelTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+            Text(stringResource(R.string.recap_wn_title), style = TravelTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
+            Column(Modifier.semantics { liveRegion = LiveRegionMode.Polite }, verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+                when (state) {
+                    WhereNextState.Idle -> {}
+
+                    WhereNextState.Loading -> {
+                        Text(stringResource(R.string.recap_wn_loading), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.onSurfaceVariant)
+                    }
+
+                    is WhereNextState.Ready -> {
+                        if (state.picks.isEmpty()) {
+                            Text(stringResource(R.string.recap_wn_empty), style = TravelTheme.typography.bodyMedium)
+                        } else {
+                            Text(stringResource(R.string.recap_wn_note), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+                            state.picks.forEach { WhereNextPick(it, onPlanThis) }
+                        }
+                    }
+
+                    WhereNextState.NeedsProfile -> {
+                        Text(stringResource(R.string.recap_wn_needs_profile), style = TravelTheme.typography.bodyMedium)
+                    }
+
+                    WhereNextState.AiLimit -> {
+                        Text(stringResource(R.string.recap_wn_ai_limit), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.error)
+                    }
+
+                    WhereNextState.Failed -> {
+                        Text(stringResource(R.string.recap_wn_error), style = TravelTheme.typography.bodyMedium, color = TravelTheme.colors.error)
+                    }
+                }
+            }
+            val failed = state == WhereNextState.Failed
+            if (failed) TpButton(stringResource(R.string.recap_wn_retry), { onEvent(RecapEvent.WhereNext) }, variant = TpButtonVariant.Tonal, tid = "recap.where_next_retry")
+            if (onExplore != null && state !is WhereNextState.Loading && state !is WhereNextState.Ready) {
+                TpButton(stringResource(R.string.recap_wn_explore), onExplore, variant = TpButtonVariant.Text, tid = "recap.where_next_explore")
+            }
+        }
+    }
+}
+
+@Composable
+private fun WhereNextPick(pick: DiscoveredDestination, onPlanThis: (String) -> Unit) {
+    val place = pick.searchText()
+    val low = pick.estimatedCostUsdLow
+    val high = pick.estimatedCostUsdHigh
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
+        Text(place, style = TravelTheme.typography.titleMedium)
+        pick.matchReasons.firstOrNull()?.let { Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant) }
+        if (low != null && high != null) {
+            Text(
+                stringResource(R.string.recap_wn_estimate, usd(low), usd(high)),
+                style = TravelTheme.typography.bodySmall,
+                color = TravelTheme.colors.onSurfaceVariant,
+            )
+        }
+        TpButton(stringResource(R.string.recap_wn_plan), { onPlanThis(place) }, variant = TpButtonVariant.Tonal, tid = "recap.where_next_plan")
     }
 }
 

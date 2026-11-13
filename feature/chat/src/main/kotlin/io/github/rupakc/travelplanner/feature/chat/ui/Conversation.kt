@@ -85,7 +85,15 @@ internal object ChatTags {
  */
 @Composable
 internal fun ConversationPane(state: ChatUiState, onEvent: (ChatUiEvent) -> Unit, onOpenLink: (String) -> Unit, modifier: Modifier = Modifier) {
-    val plan = remember(state.selections, onOpenLink) { PlanCallbacks(state.selections, { onEvent(ChatUiEvent.TogglePlanItem(it)) }, onOpenLink) }
+    val plan =
+        remember(state.selections, onOpenLink, state.watchAvailable) {
+            PlanCallbacks(
+                state.selections,
+                { onEvent(ChatUiEvent.TogglePlanItem(it)) },
+                onOpenLink,
+                onWatch = if (state.watchAvailable) ({ onEvent(ChatUiEvent.WatchItem(it)) }) else null,
+            )
+        }
     Column(modifier.fillMaxSize()) {
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when {
