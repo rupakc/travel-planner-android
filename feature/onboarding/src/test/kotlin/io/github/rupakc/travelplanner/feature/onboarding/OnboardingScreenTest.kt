@@ -122,22 +122,13 @@ class OnboardingScreenTest {
     }
 
     @Test
-    fun `feature switches toggle and the five steps end with the first-trip choice`() {
+    fun `the five steps (no feature picker, like web) end with the first-trip choice`() {
         val vm = launch()
         vm.onEvent(OnboardingEvent.Start)
         vm.onEvent(OnboardingEvent.Select("work"))
         repeat(6) { vm.onEvent(OnboardingEvent.Next) }
         click("Continue")
-        compose.onNodeWithText("Pick your features").assertExists()
-        compose.onNodeWithText("You can change these any time in Settings.").assertExists()
-
-        val sim = hasText("SIM cards").and(isToggleable())
-        reveal(sim)
-        compose.onNode(sim).assertIsOn().performClick()
-        compose.onNode(sim).assertIsOff()
-
-        compose.onNodeWithText("Continue").performClick()
-        compose.waitForIdle()
+        compose.onNodeWithText("Pick your features").assertDoesNotExist()
         compose.onNodeWithText("Home and passport").assertExists()
         compose.onNodeWithText("Skip setup").assertExists()
         compose.onNodeWithText("Continue").performClick()
@@ -151,7 +142,6 @@ class OnboardingScreenTest {
         assertEquals(1, finished)
         assertTrue(plannedTrip)
         assertTrue(profile.profileState.value.onboardingCompleted)
-        assertTrue("sim" in profile.overridesState.value.disabled)
     }
 
     @Test
@@ -161,8 +151,6 @@ class OnboardingScreenTest {
         vm.onEvent(OnboardingEvent.Start)
         repeat(6) { vm.onEvent(OnboardingEvent.Skip) }
         click("Continue")
-        reveal(hasText("Search, results, My Plan and Settings are always on."))
-        compose.onNodeWithText("Continue").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Continue").performClick()
         compose.waitForIdle()

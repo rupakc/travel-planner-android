@@ -180,6 +180,13 @@ class FakeGameEvents : GameEvents {
         shown.value = value
     }
 
+    private val hidden = kotlinx.coroutines.flow.MutableStateFlow(false)
+    override val communityHidden: kotlinx.coroutines.flow.StateFlow<Boolean> = hidden
+
+    override fun setCommunityHidden(value: Boolean) {
+        hidden.value = value
+    }
+
     override fun publish(delta: GameDelta?) {
         if (delta == null || delta.isEmpty || !shown.value) return
         published += delta

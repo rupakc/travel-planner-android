@@ -45,6 +45,14 @@ class GameEventsImpl
             shown.value = value
         }
 
+        private val hiddenCommunity = MutableStateFlow(false)
+
+        override val communityHidden: StateFlow<Boolean> = hiddenCommunity.asStateFlow()
+
+        override fun setCommunityHidden(value: Boolean) {
+            hiddenCommunity.value = value
+        }
+
         override fun publish(delta: GameDelta?) {
             if (delta == null || delta.isEmpty || !shown.value) return
             delta.awards.forEach { telemetry.emit(TelemetryEvents.GAME_AWARD, mapOf("rule" to it.rule, "points" to it.points)) }

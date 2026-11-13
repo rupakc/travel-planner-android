@@ -39,6 +39,7 @@ class MainViewModelSessionTest {
     private val trips = FakeTripsRepository()
     private val packs = FakeOfflinePackRepository()
     private var hideGame = true
+    private var hideCommunity = false
     private var settingsCalls = 0
 
     private val account =
@@ -46,7 +47,8 @@ class MainViewModelSessionTest {
             coEvery { settings() } coAnswers {
                 settingsCalls++
                 game.setVisible(!hideGame)
-                AppResult.Success(AccountSettings(hideGame = hideGame))
+                game.setCommunityHidden(hideCommunity)
+                AppResult.Success(AccountSettings(hideGame = hideGame, hideCommunity = hideCommunity))
             }
         }
 
@@ -89,6 +91,25 @@ class MainViewModelSessionTest {
             hideGame = true
             auth.sessionFlow.value = Session("t2", User("bob"), userId = "u2")
             assertEquals(2, settingsCalls)
+            assertFalse(vm.state.value.shellMode().gameEnabled)
+        }
+
+    @Test fun `hide_community drops the social entries and missing means shown`() =
+        runTest(timeout = 30.seconds) {
+            val vm = vm(FeaturesDto(accounts = true, game = true, social = 1))
+            assertTrue(vm.state.value.shellMode().social)
+            game.setCommunityHidden(true)
+            assertFalse(vm.state.value.shellMode().social)
+            game.setCommunityHidden(false)
+            assertTrue(vm.state.value.shellMode().social)
+        }
+
+    @Test fun `hide_community is read and applied when the game is off and social is on`() =
+        runTest(timeout = 30.seconds) {
+            hideCommunity = true
+            val vm = vm(FeaturesDto(accounts = true, game = false, social = 1))
+            assertEquals(1, settingsCalls)
+            assertFalse(vm.state.value.shellMode().social)
             assertFalse(vm.state.value.shellMode().gameEnabled)
         }
 

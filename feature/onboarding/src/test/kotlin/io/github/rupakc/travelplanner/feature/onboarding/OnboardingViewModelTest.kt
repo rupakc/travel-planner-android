@@ -111,7 +111,7 @@ class OnboardingViewModelTest {
 
     @Test
     fun `features are pre-checked from the type and grouped`() {
-        val vm = onboardingViewModel(profile, preferences)
+        val vm = onboardingViewModel(profile, preferences, SavedStateHandle(mapOf("fromSettings" to true)))
         vm.answerAll(TravellerQuiz.COMPANIONS to listOf("work"))
         vm.onEvent(OnboardingEvent.ConfirmResult)
         val s = vm.state.value
@@ -124,7 +124,7 @@ class OnboardingViewModelTest {
 
     @Test
     fun `toggles survive a peek back at the result but reset when the type changes`() {
-        val vm = onboardingViewModel(profile, preferences)
+        val vm = onboardingViewModel(profile, preferences, SavedStateHandle(mapOf("fromSettings" to true)))
         vm.answerAll(TravellerQuiz.COMPANIONS to listOf("work"))
         vm.onEvent(OnboardingEvent.ConfirmResult)
         vm.onEvent(OnboardingEvent.ToggleFeature(FeatureId.WALKING_TOURS))
@@ -140,16 +140,15 @@ class OnboardingViewModelTest {
         assertEquals(DefaultFeatureCatalogue.defaultsFor(listOf(TravellerType.FAMILY)), vm.state.value.selectedFeatures)
     }
 
-    /** First-run tail after the picker: Finish → step 3 → (step 4) → step 5. */
+    /** First-run tail: Continue on the result applies default features and goes to step 3 (no picker, like web). */
     private fun OnboardingViewModel.toFirstTrip(ask: Boolean = false) {
         onEvent(OnboardingEvent.ConfirmResult)
-        onEvent(OnboardingEvent.Finish)
         onEvent(OnboardingEvent.HomeNext(askNotifications = ask))
         if (ask) onEvent(OnboardingEvent.NotificationsDone)
     }
 
     @Test
-    fun `finish saves profile and overrides then moves to home and passport without completing`() =
+    fun `continue on the result saves profile and default features then moves to home and passport without completing`() =
         runTest {
             val vm = onboardingViewModel(profile, preferences)
             vm.answerAll(
@@ -157,9 +156,6 @@ class OnboardingViewModelTest {
                 TravellerQuiz.NEEDS to listOf("hearing_impairment"),
             )
             vm.onEvent(OnboardingEvent.ConfirmResult)
-            vm.onEvent(OnboardingEvent.ToggleFeature(FeatureId.WALKING_TOURS)) // off by default for BUSINESS → on
-            vm.onEvent(OnboardingEvent.ToggleFeature(FeatureId.CHAT)) // on by default → off
-            vm.onEvent(OnboardingEvent.Finish)
 
             val s = vm.state.value
             assertEquals(OnboardingStage.HOME_PASSPORT, s.stage)
@@ -168,9 +164,19 @@ class OnboardingViewModelTest {
             assertFalse(stored.onboardingCompleted)
             assertEquals(s.classification!!.primary.name, stored.primaryType)
             assertTrue("ACCESSIBLE" in stored.secondaryTypes)
-            assertEquals(FeatureOverrides(enabled = setOf("walking_tours"), disabled = setOf("chat")), profile.overridesState.value)
+            assertEquals(FeatureOverrides(), profile.overridesState.value)
             assertTrue(preferences.saved.isEmpty())
         }
+
+    @Test
+    fun `first run has no feature picker and back from step 3 returns to the result`() {
+        val vm = onboardingViewModel(profile, preferences)
+        vm.answerAll(TravellerQuiz.COMPANIONS to listOf("work"))
+        vm.onEvent(OnboardingEvent.ConfirmResult)
+        assertEquals(OnboardingStage.HOME_PASSPORT, vm.state.value.stage)
+        vm.onEvent(OnboardingEvent.Back)
+        assertEquals(OnboardingStage.RESULT, vm.state.value.stage)
+    }
 
     @Test
     fun `completing syncs merged preferences and passport, puts done with the traveller type, and marks onboarding complete`() =
@@ -184,7 +190,6 @@ class OnboardingViewModelTest {
                 TravellerQuiz.NEEDS to listOf("hearing_impairment"),
             )
             vm.onEvent(OnboardingEvent.ConfirmResult)
-            vm.onEvent(OnboardingEvent.Finish)
             vm.onEvent(OnboardingEvent.SetPassport("French"))
             vm.onEvent(OnboardingEvent.SetHomeAirport("BLR"))
             vm.onEvent(OnboardingEvent.HomeNext(askNotifications = false))
@@ -225,7 +230,6 @@ class OnboardingViewModelTest {
         val vm = onboardingViewModel(profile, preferences)
         vm.answerAll()
         vm.onEvent(OnboardingEvent.ConfirmResult)
-        vm.onEvent(OnboardingEvent.Finish)
         vm.onEvent(OnboardingEvent.HomeNext(askNotifications = true))
         assertEquals(OnboardingStage.NOTIFICATIONS, vm.state.value.stage)
         assertFalse(profile.profileState.value.onboardingCompleted)
@@ -247,7 +251,6 @@ class OnboardingViewModelTest {
         val vm = onboardingViewModel(profile, preferences, search = search)
         vm.answerAll()
         vm.onEvent(OnboardingEvent.ConfirmResult)
-        vm.onEvent(OnboardingEvent.Finish)
         vm.onEvent(OnboardingEvent.SetHomeAirport("lon"))
         assertEquals(listOf("lon"), search.airportQueries)
         val airport = vm.state.value.airportSuggestions.first()
@@ -401,18 +404,15 @@ class OnboardingViewModelTest {
     }
 
     @Test
-    fun `feature toggles, step 3 text and the notification step survive process death`() {
+    fun `step 3 text and the notification step survive process death`() {
         val saved = SavedStateHandle()
         val first = onboardingViewModel(profile, preferences, saved)
         first.answerAll(TravellerQuiz.COMPANIONS to listOf("work"))
         first.onEvent(OnboardingEvent.ConfirmResult)
-        first.onEvent(OnboardingEvent.ToggleFeature(FeatureId.WALKING_TOURS))
 
         val secondHandle = saved.afterProcessDeath()
         val second = onboardingViewModel(profile, preferences, secondHandle)
-        assertEquals(OnboardingStage.FEATURES, second.state.value.stage)
-        assertTrue(FeatureId.WALKING_TOURS in second.state.value.selectedFeatures)
-        second.onEvent(OnboardingEvent.Finish)
+        assertEquals(OnboardingStage.HOME_PASSPORT, second.state.value.stage)
         second.onEvent(OnboardingEvent.SetPassport("Spanish"))
         second.onEvent(OnboardingEvent.HomeNext(askNotifications = true))
         assertEquals(OnboardingStage.NOTIFICATIONS, second.state.value.stage)
@@ -430,7 +430,6 @@ class OnboardingViewModelTest {
         val first = onboardingViewModel(profile, preferences, saved)
         first.answerAll()
         first.onEvent(OnboardingEvent.ConfirmResult)
-        first.onEvent(OnboardingEvent.Finish)
         first.onEvent(OnboardingEvent.HomeNext(askNotifications = true))
 
         val gate = CompletableDeferred<Unit>()

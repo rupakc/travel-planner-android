@@ -186,7 +186,7 @@ class OnboardingViewModel
                 OnboardingEvent.Skip -> skip()
                 OnboardingEvent.Back -> back()
                 OnboardingEvent.ChangeAnswers -> go(OnboardingStage.QUESTION, 0)
-                OnboardingEvent.ConfirmResult -> enterFeatures()
+                OnboardingEvent.ConfirmResult -> confirmResult()
                 is OnboardingEvent.ToggleFeature -> toggleFeature(event.id)
                 OnboardingEvent.Finish -> finish()
                 is OnboardingEvent.SetHomeAirport -> setHomeAirport(event.text)
@@ -325,7 +325,7 @@ class OnboardingViewModel
                 }
 
                 OnboardingStage.HOME_PASSPORT -> {
-                    go(OnboardingStage.FEATURES)
+                    go(if (s.fromSettings) OnboardingStage.FEATURES else OnboardingStage.RESULT)
                 }
 
                 else -> {
@@ -334,16 +334,30 @@ class OnboardingViewModel
             }
         }
 
-        private fun enterFeatures() {
+        /**
+         * Web has no feature picker: the first run applies the type's default features and moves on to step 3 (they stay
+         * adjustable in Settings). Only the retake from Settings shows the picker.
+         */
+        private fun confirmResult() {
+            if (mutableState.value.stage != OnboardingStage.RESULT) return
+            seedFeatures()
+            if (mutableState.value.fromSettings) {
+                mutableState.update { it.copy(stage = OnboardingStage.FEATURES) }
+                persist()
+            } else {
+                finish()
+            }
+        }
+
+        private fun seedFeatures() {
             val s = mutableState.value
-            if (s.stage != OnboardingStage.RESULT) return
             val classification = classifier.classify(s.answers)
             val basis = classification.key()
             val changed = basis != featuresBasis
             featuresBasis = basis
             savedState[KEY_BASIS] = basis
             mutableState.update {
-                val base = it.copy(classification = classification, stage = OnboardingStage.FEATURES)
+                val base = it.copy(classification = classification)
                 // Keep the user's toggles when they only peeked back at the result; re-seed when the type changed.
                 withFeatureGroups(base, if (changed) catalogue.visible(classification.types(), existingOverrides) else it.selectedFeatures)
             }
@@ -359,7 +373,7 @@ class OnboardingViewModel
 
         private fun finish() {
             val s = mutableState.value
-            if (s.stage != OnboardingStage.FEATURES) return
+            if (s.stage != OnboardingStage.FEATURES && s.stage != OnboardingStage.RESULT) return
             mutableState.update { it.copy(saving = true, syncError = null) }
             viewModelScope.launch {
                 val classification = classifier.classify(s.answers)

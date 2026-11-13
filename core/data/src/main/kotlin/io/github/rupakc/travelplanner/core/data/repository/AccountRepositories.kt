@@ -21,6 +21,7 @@ import io.github.rupakc.travelplanner.core.model.game.GameDelta
 import io.github.rupakc.travelplanner.core.model.game.GameMe
 import java.io.File
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.JsonObject
 
@@ -122,6 +123,12 @@ interface GameEvents {
 
     /** Records what `hide_game` / `GET /game/me` say; nothing is published or counted in telemetry while false. */
     fun setVisible(value: Boolean)
+
+    /** True when the user's `hide_community` setting hides every social surface; false (shown) until known or when absent. */
+    val communityHidden: StateFlow<Boolean> get() = MutableStateFlow(false)
+
+    /** Records the `hide_community` setting; the shell then drops the feed, profile and publish entries. */
+    fun setCommunityHidden(value: Boolean) {}
 
     /** Ignores null and empty deltas. */
     fun publish(delta: GameDelta?)

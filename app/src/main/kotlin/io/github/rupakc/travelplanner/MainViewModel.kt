@@ -64,6 +64,8 @@ data class MainUiState(
     val hold: Boolean = false,
     /** The signed-in user's game is on (not hidden by `hide_game`); false until known. */
     val gameVisible: Boolean = false,
+    /** The signed-in user's `hide_community` setting; false (shown) until known or when absent. */
+    val communityHidden: Boolean = false,
 )
 
 /** The shell's view of [MainUiState]: tabs, start screen, celebrations and the Offline tab. */
@@ -79,7 +81,7 @@ fun MainUiState.shellMode(): ShellMode =
         gameEnabled = flags.game && gameVisible,
         offlinePack = flags.offlinePack,
         sharing = flags.sharing,
-        social = flags.social,
+        social = flags.social && !communityHidden,
         play = flags.play,
     )
 
@@ -121,9 +123,9 @@ class MainViewModel
         /** Set only from a fresh `GET /api/config` answer (200 or 404), never from the cache. */
         private val freshFlags = MutableStateFlow<JourneyFlags?>(null)
 
-        private data class Extras(val count: Int?, val countKnown: Boolean, val over: Boolean, val gameVisible: Boolean)
+        private data class Extras(val count: Int?, val countKnown: Boolean, val over: Boolean, val gameVisible: Boolean, val communityHidden: Boolean)
 
-        private val extras = combine(tripCount, tripCountKnown, waitOver, gameEvents.visible, ::Extras)
+        private val extras = combine(tripCount, tripCountKnown, waitOver, gameEvents.visible, gameEvents.communityHidden, ::Extras)
 
         /** The signed-in user's key; null when signed out. Per-user work restarts when it changes. */
         private val userKeys = authRepository.session.map { s -> s?.let { it.userId ?: it.user.username } }.distinctUntilChanged()
@@ -136,13 +138,14 @@ class MainViewModel
             ) { session, profile, settings -> Triple(session, gateFor(session, profile), settings) }
 
         val state: StateFlow<MainUiState> =
-            combine(base, flags, extras) { (session, gate, settings), f, (count, countKnown, over, gameVisible) ->
+            combine(base, flags, extras) { (session, gate, settings), f, x ->
+                val (count, countKnown, over) = x
                 val resolved = f ?: JourneyFlags.OFF
                 val signedIn = session != null
                 val hold =
                     gate != AuthGate.LOADING &&
                         StartGate.hold(f != null, resolved, signedIn && gate == AuthGate.READY, countKnown, if (over) StartGate.MAX_WAIT_MS else 0L)
-                MainUiState(gate, settings, resolved, resolveStartRoute(resolved, signedIn, count), hold, gameVisible)
+                MainUiState(gate, settings, resolved, resolveStartRoute(resolved, signedIn, count), hold, x.gameVisible, x.communityHidden)
             }.stateIn(viewModelScope, SharingStarted.Eagerly, MainUiState())
 
         init {
@@ -167,9 +170,9 @@ class MainViewModel
             }
             // `hide_game` decides whether celebrations show: hidden until known, reset whenever the user changes.
             viewModelScope.launch {
-                combine(userKeys, flags) { key, f -> Triple(key, f?.game == true, f?.accounts == true) }
+                combine(userKeys, flags) { key, f -> Triple(key, f?.game == true, f?.accounts == true) to (f?.social == true) }
                     .distinctUntilChanged()
-                    .collectLatest { (key, game, accounts) -> applyGameVisibility(key, game, accounts) }
+                    .collectLatest { (a, social) -> applyGameVisibility(a.first, a.second, a.third, social) }
             }
             // The server says offline packs are off: drop the packs and queued snapshot uploads (not expenses or journal).
             viewModelScope.launch {
@@ -179,11 +182,19 @@ class MainViewModel
             }
         }
 
-        private suspend fun applyGameVisibility(key: String?, game: Boolean, accounts: Boolean) {
+        private suspend fun applyGameVisibility(key: String?, game: Boolean, accounts: Boolean, social: Boolean) {
             gameEvents.setVisible(false)
-            if (key == null || !game) return
-            // Without accounts there is no `hide_game` setting to read; with them, settings() updates the visibility.
-            if (accounts) accountRepository.settings() else gameEvents.setVisible(true)
+            gameEvents.setCommunityHidden(false)
+            if (key == null) return
+            // Without accounts there is no `hide_game` / `hide_community` setting to read. With them, settings() applies both
+            // (independent of the game flag: social can be on while the game is off); the game stays hidden when it is off.
+            if (accounts && (game || social)) {
+                accountRepository.settings()
+                if (!game) gameEvents.setVisible(false)
+                if (!social) gameEvents.setCommunityHidden(false)
+            } else if (game && !accounts) {
+                gameEvents.setVisible(true)
+            }
         }
 
         /** `GET /api/config`; null when it could not be read (offline, older backend without it keeps every flag off). */

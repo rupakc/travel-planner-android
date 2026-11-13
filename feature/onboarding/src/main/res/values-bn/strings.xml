@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="onboarding_title">%1$s-এ স্বাগতম</string>
-    <string name="onboarding_message">ছয়টি ছোট প্রশ্ন আপনার হোম স্ক্রিন ও ফিচারগুলো আপনার ভ্রমণের ধরন অনুযায়ী সাজিয়ে দেয়।</string>
+    <string name="onboarding_message">AI দিয়ে ভ্রমণের পরিকল্পনা করুন: ফ্লাইট, হোটেল, কার্যকলাপ এবং দিনভিত্তিক ভ্রমণসূচি, সবকিছু এক জায়গায়।</string>
     <string name="onboarding_retake_title">কুইজ আবার দিন</string>
     <string name="onboarding_retake_message">আপনার বর্তমান উত্তরগুলো ভরা আছে। যা আলাদা তা বদলান, আমরা আপনার ভ্রমণকারীর ধরন ও ফিচার হালনাগাদ করব।</string>
     <string name="onboarding_welcome_note">প্রতিটি প্রশ্ন এড়িয়ে যাওয়া যায়। সেটিংসে যেকোনো সময় কুইজ আবার দিতে পারবেন।</string>
@@ -22,7 +22,6 @@
     <string name="onboarding_q_budget">আপনার সাধারণ বাজেট কত?</string>
     <string name="onboarding_opt_budget_shoestring">সাশ্রয়ী</string>
     <string name="onboarding_opt_budget_comfort">আরামদায়ক</string>
-    <string name="onboarding_opt_budget_comfort_hint">ভালো হোটেল আর মাঝেমধ্যে একটু বিলাসিতা</string>
     <string name="onboarding_q_interests">আপনি কী করতে ভালোবাসেন?</string>
     <string name="onboarding_opt_interests_history_culture">ইতিহাস ও সংস্কৃতি</string>
     <string name="onboarding_opt_interests_nature">প্রকৃতি ও খোলা আকাশ</string>
@@ -32,11 +31,8 @@
     <string name="onboarding_opt_interests_photography">ফটোগ্রাফি</string>
     <string name="onboarding_q_pace">আপনি কেমন গতি পছন্দ করেন?</string>
     <string name="onboarding_opt_pace_relaxed">ধীরে-সুস্থে</string>
-    <string name="onboarding_opt_pace_relaxed_hint">বিশ্রামের জন্য প্রচুর সময়</string>
     <string name="onboarding_opt_pace_balanced">ভারসাম্যপূর্ণ</string>
-    <string name="onboarding_opt_pace_balanced_hint">দর্শনীয় স্থান আর অবসরের মিশেল</string>
     <string name="onboarding_opt_pace_packed">ঠাসা</string>
-    <string name="onboarding_opt_pace_packed_hint">যতটা সম্ভব দেখা</string>
     <string name="onboarding_q_planning">আপনি কীভাবে পরিকল্পনা করেন?</string>
     <string name="onboarding_opt_planning_ahead_deals">অনেক আগে বুক করা আর ভালো ডিল খোঁজা</string>
     <string name="onboarding_opt_planning_loose">হালকাভাবে পরিকল্পনা</string>
@@ -69,7 +65,7 @@
     <string name="onboarding_sync_failed_message">আপনার ভ্রমণকারীর ধরন ও ফিচার এই ডিভাইসে সংরক্ষিত আছে। আপনার আগ্রহ, বাজেট ও ভ্রমণ দল অ্যাকাউন্টে পৌঁছায়নি।</string>
     <string name="onboarding_continue_anyway">সিঙ্ক ছাড়াই চালিয়ে যান</string>
     <string name="onboarding_notifications_title">আপনার ভ্রমণের খবর রাখুন</string>
-    <string name="onboarding_notifications_message">রওনার আগে ট্রিপের রিমাইন্ডার, আপনার নজরে রাখা জিনিসের দাম কমলে অ্যালার্ট এবং ভ্রমণের সময় কাছাকাছি পরামর্শ পান। প্রতিটি আপনি সেটিংসে বন্ধ করতে পারবেন।</string>
+    <string name="onboarding_notifications_message">ভ্রমণের রিমাইন্ডার ও দাম কমার অ্যালার্ট পান। আপনি সেটিংসে যেকোনোটি বন্ধ করতে পারেন।</string>
     <string name="onboarding_notifications_allow">বিজ্ঞপ্তির অনুমতি দিন</string>
     <!-- Shared 5-step flow: copy from the web onboarding namespace (web.* and steps.*) -->
     <string name="onboarding_skip_all">সেটআপ এড়িয়ে যান</string>

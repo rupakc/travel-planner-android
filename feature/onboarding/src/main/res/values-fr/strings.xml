@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="onboarding_title">Bienvenue sur %1$s</string>
-    <string name="onboarding_message">Six questions rapides adaptent votre écran d’accueil et vos fonctionnalités à votre façon de voyager.</string>
+    <string name="onboarding_message">Planifiez vos voyages avec l\'IA : vols, hôtels, activités et un programme jour par jour, le tout au même endroit.</string>
     <string name="onboarding_retake_title">Refaire le quiz</string>
     <string name="onboarding_retake_message">Vos réponses actuelles sont déjà remplies. Modifiez ce qui a changé et nous mettrons à jour votre profil de voyageur et vos fonctionnalités.</string>
     <string name="onboarding_welcome_note">Vous pouvez passer chaque question. Vous pouvez refaire le quiz à tout moment dans les réglages.</string>
@@ -22,7 +22,6 @@
     <string name="onboarding_q_budget">Quel est votre budget habituel ?</string>
     <string name="onboarding_opt_budget_shoestring">Petit budget</string>
     <string name="onboarding_opt_budget_comfort">Confort</string>
-    <string name="onboarding_opt_budget_comfort_hint">De bons hôtels et quelques petits plaisirs</string>
     <string name="onboarding_q_interests">Qu’aimez-vous faire ?</string>
     <string name="onboarding_opt_interests_history_culture">Histoire et culture</string>
     <string name="onboarding_opt_interests_nature">Nature et plein air</string>
@@ -32,11 +31,8 @@
     <string name="onboarding_opt_interests_photography">Photographie</string>
     <string name="onboarding_q_pace">Quel rythme préférez-vous ?</string>
     <string name="onboarding_opt_pace_relaxed">Tranquille</string>
-    <string name="onboarding_opt_pace_relaxed_hint">Beaucoup de temps de repos</string>
     <string name="onboarding_opt_pace_balanced">Équilibré</string>
-    <string name="onboarding_opt_pace_balanced_hint">Un mélange de visites et de temps libre</string>
     <string name="onboarding_opt_pace_packed">Intense</string>
-    <string name="onboarding_opt_pace_packed_hint">Voir un maximum de choses</string>
     <string name="onboarding_q_planning">Comment planifiez-vous ?</string>
     <string name="onboarding_opt_planning_ahead_deals">Réserver longtemps à l’avance et chasser les bons plans</string>
     <string name="onboarding_opt_planning_loose">Planifier avec souplesse</string>
@@ -70,7 +66,7 @@
     <string name="onboarding_sync_failed_message">Votre profil de voyageur et vos fonctionnalités sont enregistrés sur cet appareil. Vos centres d’intérêt, votre budget et votre groupe de voyage n’ont pas atteint votre compte.</string>
     <string name="onboarding_continue_anyway">Continuer sans synchroniser</string>
     <string name="onboarding_notifications_title">Gardez vos voyages à l’œil</string>
-    <string name="onboarding_notifications_message">Recevez des rappels avant votre départ, des alertes de baisse de prix pour ce que vous suivez et des suggestions à proximité pendant le voyage. Vous pouvez désactiver chacune dans les réglages.</string>
+    <string name="onboarding_notifications_message">Recevez des rappels de voyage et des alertes de baisse de prix. Vous pouvez désactiver chacun d\'eux dans les Réglages.</string>
     <string name="onboarding_notifications_allow">Autoriser les notifications</string>
     <!-- Shared 5-step flow: copy from the web onboarding namespace (web.* and steps.*) -->
     <string name="onboarding_skip_all">Passer la configuration</string>
