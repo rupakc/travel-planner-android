@@ -4,8 +4,8 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.alerts.PlanWatchOffers
 import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchOutcome
-import io.github.rupakc.travelplanner.core.model.alerts.QuickWatchResponse
 import io.github.rupakc.travelplanner.core.model.alerts.PriceWatchKinds
+import io.github.rupakc.travelplanner.core.model.alerts.QuickWatchResponse
 import io.github.rupakc.travelplanner.core.model.health.Health
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest

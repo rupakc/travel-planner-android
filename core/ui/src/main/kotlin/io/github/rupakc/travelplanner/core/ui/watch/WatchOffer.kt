@@ -57,11 +57,21 @@ fun WatchOfferCard(
             Text(stringResource(R.string.watch_offer_title), style = TravelTheme.typography.titleSmall, modifier = Modifier.semantics { heading() })
             Text(stringResource(R.string.watch_offer_body), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
             rows.forEachIndexed { i, row ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Column(Modifier.weight(1f)) {
                         Text(row.title, style = TravelTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         row.subtitle?.let {
-                            Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                it,
+                                style = TravelTheme.typography.bodySmall,
+                                color = TravelTheme.colors.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
                     }
                     TpButton(

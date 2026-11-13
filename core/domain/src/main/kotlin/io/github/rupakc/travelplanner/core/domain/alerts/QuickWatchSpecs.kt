@@ -42,7 +42,12 @@ object QuickWatchSpecs {
                 if (name == null || spec == null) {
                     null
                 } else {
-                    QuickWatchDraft(PriceWatchKinds.HOTEL, name, item.hotel.city, TravelJson.encodeToJsonElement(HotelWatchSpec.serializer(), spec) as JsonObject)
+                    QuickWatchDraft(
+                        PriceWatchKinds.HOTEL,
+                        name,
+                        item.hotel.city,
+                        TravelJson.encodeToJsonElement(HotelWatchSpec.serializer(), spec) as JsonObject,
+                    )
                 }
             }
 

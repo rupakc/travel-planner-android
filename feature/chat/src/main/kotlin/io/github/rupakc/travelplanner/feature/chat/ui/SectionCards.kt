@@ -38,8 +38,8 @@ import io.github.rupakc.travelplanner.core.model.section.SimData
 import io.github.rupakc.travelplanner.core.model.section.TipsData
 import io.github.rupakc.travelplanner.core.model.section.VisaData
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
-import io.github.rupakc.travelplanner.core.ui.R as CoreUiR
 import io.github.rupakc.travelplanner.core.ui.PriceText
+import io.github.rupakc.travelplanner.core.ui.R as CoreUiR
 import io.github.rupakc.travelplanner.core.ui.SectionScaffold
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.chat.R

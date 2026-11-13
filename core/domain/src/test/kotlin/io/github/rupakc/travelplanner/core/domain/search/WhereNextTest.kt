@@ -11,7 +11,13 @@ import org.junit.Test
 class WhereNextTest {
     private val today = LocalDate.parse("2027-04-10")
     private val trip =
-        TravelSearchRequest(origin = "JFK", destination = "Lisbon, Portugal", departureDate = "2027-03-01", nationality = "American", interests = listOf("food"))
+        TravelSearchRequest(
+            origin = "JFK",
+            destination = "Lisbon, Portugal",
+            departureDate = "2027-03-01",
+            nationality = "American",
+            interests = listOf("food"),
+        )
 
     @Test fun `the request takes the trip's origin, nationality and interests with dates ahead and the trip's length`() {
         val r = whereNextRequest(trip, Preferences(nationality = "French"), 10, today)!!

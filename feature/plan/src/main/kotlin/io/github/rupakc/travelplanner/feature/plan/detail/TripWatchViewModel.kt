@@ -10,10 +10,10 @@ import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
 import io.github.rupakc.travelplanner.core.data.repository.PriceWatchesRepository
 import io.github.rupakc.travelplanner.core.domain.alerts.PricePreview
-import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchOutcome
-import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchSpecs
 import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogController
 import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogState
+import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchOutcome
+import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchSpecs
 import io.github.rupakc.travelplanner.core.domain.alerts.isWatchablePlan
 import io.github.rupakc.travelplanner.core.domain.alerts.tripPreviewParts
 import io.github.rupakc.travelplanner.core.domain.plan.computePlanCost
@@ -27,14 +27,14 @@ import io.github.rupakc.travelplanner.core.ui.watch.WatchOfferState
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 
@@ -95,6 +95,7 @@ internal class TripWatchViewModel
         private fun setOfferState(index: Int, value: WatchOfferState) {
             offer.update { o -> o?.let { Offer(it.planId, it.items, it.states.mapIndexed { i, st -> if (i == index) value else st }) } }
         }
+
         private val current = MutableStateFlow<PriceWatchDialogController?>(null)
         val sheet: StateFlow<PriceWatchDialogController?> = current.asStateFlow()
 

@@ -13,7 +13,14 @@ import org.junit.Test
 
 class QuickWatchSpecsTest {
     private val today = LocalDate.parse("2026-11-13")
-    private val trip = TravelSearchRequest(origin = "JFK", destination = "LIS", departureDate = "2027-03-01", returnDate = "2027-03-08", nationality = "American")
+    private val trip =
+        TravelSearchRequest(
+            origin = "JFK",
+            destination = "LIS",
+            departureDate = "2027-03-01",
+            returnDate = "2027-03-08",
+            nationality = "American",
+        )
 
     @Test fun `a flight card watches the trip's route and needs a future single-city trip`() {
         val flight = PlanItem.FlightItem(io.github.rupakc.travelplanner.core.model.section.Flight())

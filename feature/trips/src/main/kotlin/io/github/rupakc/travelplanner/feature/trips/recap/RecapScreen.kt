@@ -378,7 +378,14 @@ private fun WhereNextCard(state: WhereNextState, onEvent: (RecapEvent) -> Unit, 
                 }
             }
             val failed = state == WhereNextState.Failed
-            if (failed) TpButton(stringResource(R.string.recap_wn_retry), { onEvent(RecapEvent.WhereNext) }, variant = TpButtonVariant.Tonal, tid = "recap.where_next_retry")
+            if (failed) {
+                TpButton(
+                    stringResource(R.string.recap_wn_retry),
+                    { onEvent(RecapEvent.WhereNext) },
+                    variant = TpButtonVariant.Tonal,
+                    tid = "recap.where_next_retry",
+                )
+            }
             if (onExplore != null && state !is WhereNextState.Loading && state !is WhereNextState.Ready) {
                 TpButton(stringResource(R.string.recap_wn_explore), onExplore, variant = TpButtonVariant.Text, tid = "recap.where_next_explore")
             }

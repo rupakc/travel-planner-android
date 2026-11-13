@@ -23,8 +23,8 @@ import io.github.rupakc.travelplanner.core.domain.chat.parseFollowUps
 import io.github.rupakc.travelplanner.core.model.chat.ChatMessage
 import io.github.rupakc.travelplanner.core.model.chat.ChatRequest
 import io.github.rupakc.travelplanner.core.model.json.EmptyJsonObject
-import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanDraft
+import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.search.searchKey
 import io.github.rupakc.travelplanner.core.model.stream.ChatEvent

@@ -69,7 +69,11 @@ class RecapViewModelTest {
     fun `where next asks discover seeded from the trip and shows at most five picks without the place just visited`() =
         runTest(timeout = 30.seconds) {
             discover.result =
-                AppResult.Success(DiscoveryResponse(listOf("Lisbon", "Porto", "Rome", "Oslo", "Kyoto", "Lima", "Cusco").map { DiscoveredDestination(city = it, country = "X") }))
+                AppResult.Success(
+                    DiscoveryResponse(
+                        listOf("Lisbon", "Porto", "Rome", "Oslo", "Kyoto", "Lima", "Cusco").map { DiscoveredDestination(city = it, country = "X") },
+                    ),
+                )
             val vm = vm(searchData = tripData)
             vm.onEvent(RecapEvent.WhereNext)
             val picks = (vm.state.value.whereNext as WhereNextState.Ready).picks

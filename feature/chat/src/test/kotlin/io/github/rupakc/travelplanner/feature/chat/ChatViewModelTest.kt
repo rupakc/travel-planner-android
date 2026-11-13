@@ -12,8 +12,8 @@ import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
 import io.github.rupakc.travelplanner.core.testing.TestAppDispatchers
 import io.github.rupakc.travelplanner.core.testing.fake.FakeChatRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
-import io.github.rupakc.travelplanner.core.testing.fake.FakeQuickWatch
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
+import io.github.rupakc.travelplanner.core.testing.fake.FakeQuickWatch
 import io.github.rupakc.travelplanner.feature.chat.model.TurnError
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +45,8 @@ class ChatViewModelTest {
 
     private val journey = io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney()
 
-    private fun viewModel() = ChatViewModel(repo, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, FakeQuickWatch().watcher, SystemAppClock())
+    private fun viewModel() =
+        ChatViewModel(repo, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, FakeQuickWatch().watcher, SystemAppClock())
 
     @Test
     fun `watch availability follows the one-tap gate and an item without a trip is refused, not sent`() =
@@ -204,7 +205,8 @@ class ChatViewModelTest {
                     override fun send(request: io.github.rupakc.travelplanner.core.model.chat.ChatRequest): Flow<ChatEvent> =
                         flow { gate.await() }
                 }
-            val vm = ChatViewModel(silent, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, FakeQuickWatch().watcher, SystemAppClock())
+            val vm =
+                ChatViewModel(silent, store, journey.journey, TestAppDispatchers(main.testDispatcher), appScope, FakeQuickWatch().watcher, SystemAppClock())
             vm.uiState.test {
                 vm.onEvent(ChatUiEvent.Send("hello"))
                 expectMostRecentItemMatching { it.isStreaming }
