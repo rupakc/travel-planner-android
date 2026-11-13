@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="social_feed_title">আইডিয়া</string>
+    <string name="social_feed_refresh">রিফ্রেশ করুন</string>
+    <string name="social_scope_for_you">আপনার জন্য</string>
+    <string name="social_scope_following">অনুসরণ করছেন</string>
+    <string name="social_scope_new">নতুন</string>
+    <string name="social_feed_empty">এখানে এখনও কোনো আইডিয়া নেই</string>
+    <string name="social_feed_empty_following">আপনি যাদের অনুসরণ করেন তাদের আইডিয়া এখানে দেখা যাবে।</string>
+    <string name="social_feed_empty_body">আপনার কোনো প্ল্যান খুলে প্রথম আইডিয়া পোস্ট করতে আইডিয়া হিসেবে শেয়ার করুন বেছে নিন।</string>
+    <string name="social_idea_title">আইডিয়া</string>
+    <string name="social_idea_author">@%1$s</string>
+    <string name="social_idea_like">লাইক করুন</string>
+    <string name="social_idea_unlike">লাইক সরান</string>
+    <string name="social_idea_save">আমার প্ল্যান হিসেবে সংরক্ষণ করুন</string>
+    <string name="social_idea_saved">সংরক্ষিত (বাতিল করতে ট্যাপ করুন)</string>
+    <string name="social_idea_gone">এই আইডিয়াটি আর পাওয়া যাচ্ছে না।</string>
+    <string name="social_idea_unavailable">এই আইডিয়াটি পাওয়া যাচ্ছে না</string>
+    <string name="social_idea_unavailable_body">এটি হয়তো সরানো বা লুকানো হয়েছে।</string>
+    <string name="social_idea_held_notice">পর্যালোচনার অপেক্ষায়। অনুমোদন না হওয়া পর্যন্ত শুধু আপনিই এই আইডিয়া দেখতে পাবেন।</string>
+    <string name="social_idea_hidden_notice">এই আইডিয়াটি লুকানো আছে। শুধু আপনিই এটি দেখতে পাবেন।</string>
+    <string name="social_idea_includes">এতে যা আছে</string>
+    <string name="social_section_flights">ফ্লাইট</string>
+    <string name="social_section_hotels">হোটেল</string>
+    <string name="social_section_activities">কার্যক্রম</string>
+    <string name="social_section_places">দেখার জায়গা</string>
+    <string name="social_section_walking_tours">বিনামূল্যের ওয়াকিং ট্যুর</string>
+    <string name="social_section_events">ইভেন্ট</string>
+    <string name="social_section_other">আরও যা আছে</string>
+    <string name="social_comments_title">মন্তব্য</string>
+    <string name="social_comments_empty">এখনও কোনো মন্তব্য নেই। প্রথমটি আপনি করুন।</string>
+    <string name="social_comments_error">মন্তব্য লোড করা যায়নি।</string>
+    <string name="social_retry">আবার চেষ্টা করুন</string>
+    <string name="social_comment_hint">মন্তব্য যোগ করুন</string>
+    <string name="social_comment_post">পোস্ট করুন</string>
+    <string name="social_comment_held">আপনার মন্তব্য পর্যালোচনার অপেক্ষায়। আপাতত শুধু আপনিই এটি দেখতে পাবেন।</string>
+    <string name="social_comment_held_label">পর্যালোচনার অপেক্ষায়</string>
+    <string name="social_comment_helpful">সহায়ক</string>
+    <string name="social_comment_mark_helpful">সহায়ক হিসেবে চিহ্নিত করুন</string>
+    <string name="social_comment_unmark_helpful">সহায়ক চিহ্ন সরান</string>
+    <string name="social_comment_delete">মন্তব্য মুছুন</string>
+    <string name="social_comment_report">মন্তব্য রিপোর্ট করুন</string>
+    <string name="social_delete_idea">আইডিয়া মুছুন</string>
+    <string name="social_delete_idea_title">এই আইডিয়া মুছবেন?</string>
+    <string name="social_delete_idea_body">এটি ফিড থেকে সরে যাবে। অন্যরা এর থেকে যে প্ল্যান সংরক্ষণ করেছেন তা তাদের কাছেই থাকবে।</string>
+    <string name="social_delete_confirm">মুছুন</string>
+    <string name="social_idea_deleted">আইডিয়া মুছে ফেলা হয়েছে</string>
+    <string name="social_report_idea">আইডিয়া রিপোর্ট করুন</string>
+    <string name="social_block_author">@%1$s কে ব্লক করুন</string>
+    <string name="social_publish_title">আইডিয়া হিসেবে শেয়ার করুন</string>
+    <string name="social_publish_intro">অন্য ভ্রমণকারীদের জন্য এই প্ল্যানের একটি ঝলক পোস্ট করুন। এতে গন্তব্য, দিন ও আপনার বাছাই করা আইটেম দেখা যায়, কখনও তারিখ, যাত্রার শহর, দাম, নোট বা আপনার নাম নয়।</string>
+    <string name="social_publish_title_label">শিরোনাম</string>
+    <string name="social_publish_caption_label">ক্যাপশন (ঐচ্ছিক)</string>
+    <string name="social_publish_action">প্রকাশ করুন</string>
+    <string name="social_publish_done">আপনার আইডিয়া প্রকাশিত হয়েছে।</string>
+    <string name="social_publish_held">আপনার আইডিয়া পর্যালোচনার অপেক্ষায়। অনুমোদন না হওয়া পর্যন্ত শুধু আপনিই এটি দেখতে পাবেন।</string>
+    <string name="social_publish_view">আইডিয়া দেখুন</string>
+    <string name="social_publish_close">সম্পন্ন</string>
+    <string name="social_problem_profile">আইডিয়া পোস্ট করতে হ্যান্ডেল ও প্রাইভেট নয় এমন প্রোফাইল দরকার। আগে সেটি সেট করুন।</string>
+    <string name="social_problem_profile_action">প্রোফাইল সেট করুন</string>
+    <string name="social_problem_email">আইডিয়া পোস্ট করতে আপনার ইমেল যাচাই করুন। লিঙ্কটি ইনবক্সে আছে।</string>
+    <string name="social_problem_limit">আজকের জন্য আইডিয়ার সীমা শেষ। কাল আবার চেষ্টা করুন।</string>
+    <string name="social_problem_content">এই লেখা ব্যবহার করা যাবে না। শিরোনাম বা ক্যাপশন বদলান।</string>
+    <string name="social_problem_restricted">আপাতত আপনার অ্যাকাউন্টে পোস্ট করা বন্ধ আছে।</string>
+    <string name="social_problem_title">সর্বোচ্চ ৮০ অক্ষরের একটি শিরোনাম লিখুন।</string>
+    <string name="social_problem_too_large">এই প্ল্যান শেয়ার করার জন্য খুব বড়। কম আইটেমের প্ল্যান চেষ্টা করুন।</string>
+    <string name="social_problem_plan">এই প্ল্যান খুঁজে পাওয়া যায়নি।</string>
+    <plurals name="social_idea_days">
+        <item quantity="one">%1$d দিন</item>
+        <item quantity="other">%1$d দিন</item>
+    </plurals>
+    <plurals name="social_idea_likes">
+        <item quantity="one">%1$dটি লাইক</item>
+        <item quantity="other">%1$dটি লাইক</item>
+    </plurals>
+    <plurals name="social_idea_saves">
+        <item quantity="one">%1$dটি সংরক্ষণ</item>
+        <item quantity="other">%1$dটি সংরক্ষণ</item>
+    </plurals>
+    <plurals name="social_idea_comments">
+        <item quantity="one">%1$dটি মন্তব্য</item>
+        <item quantity="other">%1$dটি মন্তব্য</item>
+    </plurals>
+</resources>

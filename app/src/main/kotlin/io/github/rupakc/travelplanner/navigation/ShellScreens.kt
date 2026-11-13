@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
@@ -73,7 +74,7 @@ private fun YouRow(icon: ImageVector, label: Int, onClick: () -> Unit) {
 
 /** Explore is Search with Chat and Near me one tap away (R4). */
 @Composable
-fun ExploreEntries(onOpenChat: () -> Unit, onOpenNearby: () -> Unit, modifier: Modifier = Modifier) {
+fun ExploreEntries(onOpenChat: () -> Unit, onOpenNearby: () -> Unit, modifier: Modifier = Modifier, onOpenIdeas: (() -> Unit)? = null) {
     Row(
         modifier.fillMaxWidth().padding(horizontal = TravelTheme.spacing.md, vertical = TravelTheme.spacing.xs),
         horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm),
@@ -88,6 +89,14 @@ fun ExploreEntries(onOpenChat: () -> Unit, onOpenNearby: () -> Unit, modifier: M
             label = { Text(stringResource(R.string.explore_near_me)) },
             leadingIcon = { Icon(Icons.Filled.LocationOn, contentDescription = null) },
         )
+        // Social ideas feed (features.social).
+        if (onOpenIdeas != null) {
+            AssistChip(
+                onClick = onOpenIdeas,
+                label = { Text(stringResource(R.string.explore_ideas)) },
+                leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
+            )
+        }
     }
 }
 

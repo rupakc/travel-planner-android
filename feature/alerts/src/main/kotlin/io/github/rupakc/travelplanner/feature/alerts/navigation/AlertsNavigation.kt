@@ -24,12 +24,19 @@ fun NavGraphBuilder.alertsGraph(
     onSearch: () -> Unit = {},
     onOpenPrefs: () -> Unit = {},
     onOpenTrip: (tripId: Long) -> Unit = {},
+    onOpenFeed: (() -> Unit)? = null,
 ) {
     composable<AlertsRoute>(
         deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.ALERTS_PATTERN }),
     ) { WatchedPricesRoute(onReplanned = onReplan, onSearch = onSearch, onOpenPrefs = onOpenPrefs) }
     composable<AlertPrefsRoute> { AlertPrefsScreenRoute(onBack = onBack) }
     composable<NotificationsRoute>(deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.NOTIFICATIONS_PATTERN })) {
-        NotificationsInboxRoute(onBack = onBack, onOpenAlert = { link -> onOpenAlert(link.kind, link.watchId) }, onOpenTrip = onOpenTrip)
+        NotificationsInboxRoute(
+            onBack = onBack,
+            onOpenAlert = { link -> onOpenAlert(link.kind, link.watchId) },
+            onOpenTrip = onOpenTrip,
+            onOpenFeed =
+                onOpenFeed ?: {},
+        )
     }
 }

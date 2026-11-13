@@ -15,6 +15,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.FeaturesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ForgotPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.GlobalSearchRoute
 import io.github.rupakc.travelplanner.core.model.navigation.HomeRoute
+import io.github.rupakc.travelplanner.core.model.navigation.IdeaRoute
 import io.github.rupakc.travelplanner.core.model.navigation.JournalRoute
 import io.github.rupakc.travelplanner.core.model.navigation.LoginRoute
 import io.github.rupakc.travelplanner.core.model.navigation.MyPlanRoute
@@ -31,6 +32,7 @@ import io.github.rupakc.travelplanner.core.model.navigation.PlansRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PlayRoute
 import io.github.rupakc.travelplanner.core.model.navigation.PreferencesRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ProfileRoute
+import io.github.rupakc.travelplanner.core.model.navigation.PublishIdeaRoute
 import io.github.rupakc.travelplanner.core.model.navigation.RecapRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResetPasswordRoute
 import io.github.rupakc.travelplanner.core.model.navigation.ResultsRoute
@@ -88,6 +90,8 @@ class TelemetryRoutesTest {
             is MySharesRoute -> MySharesRoute::class
             is ShareOpenLinkRoute -> ShareOpenLinkRoute::class
             is SocialRoute -> SocialRoute::class
+            is IdeaRoute -> IdeaRoute::class
+            is PublishIdeaRoute -> PublishIdeaRoute::class
             is MyProfileRoute -> MyProfileRoute::class
             is ProfileRoute -> ProfileRoute::class
             is ConnectionsRoute -> ConnectionsRoute::class
@@ -142,6 +146,8 @@ class TelemetryRoutesTest {
                 MySharesRoute,
                 ShareOpenLinkRoute,
                 SocialRoute,
+                IdeaRoute(1),
+                PublishIdeaRoute(1),
                 MyProfileRoute,
                 ProfileRoute("x"),
                 ConnectionsRoute(),
