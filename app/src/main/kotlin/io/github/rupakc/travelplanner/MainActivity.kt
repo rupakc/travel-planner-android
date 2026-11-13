@@ -38,8 +38,10 @@ class MainActivity : AppCompatActivity() {
         // Then drop Navigation's internal deep-link extras and foreign data (exported activity, S-M1).
         DeepLinkIntents.sanitize(withPushDeepLink(intent))
         // Only a fresh launch counts the tap (a recreation replays the same intent).
-        if (savedInstanceState == null) PushTaps.consume(intent)?.let(viewModel::reportPushOpen)
+        // The tag is stripped now, but the ViewModel (Hilt) may only be created after super.onCreate.
+        val pushCategory = if (savedInstanceState == null) PushTaps.consume(intent) else null
         super.onCreate(savedInstanceState)
+        pushCategory?.let(viewModel::reportPushOpen)
         // Only a fresh launch: a recreation would replay the same (single-use) return.
         if (savedInstanceState == null) DeepLinkIntents.oauthCallback(intent)?.let(oauthInbox::post)
         val firstActivity = ColdStart.claimFirstActivity()

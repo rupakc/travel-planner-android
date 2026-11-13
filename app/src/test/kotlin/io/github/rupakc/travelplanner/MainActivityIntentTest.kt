@@ -47,4 +47,12 @@ class MainActivityIntentTest {
         assertEquals("travelplanner://plan/7", next.dataString)
         controller.pause().stop().destroy()
     }
+
+    @Test
+    fun `cold start from a tagged push link does not crash and strips the tag`() {
+        val intent = hostile("travelplanner://notifications?notif_cat=price_drops")
+        val controller = Robolectric.buildActivity(MainActivity::class.java, intent).setup()
+        assertEquals("travelplanner://notifications", controller.get().intent.dataString)
+        controller.pause().stop().destroy()
+    }
 }
