@@ -140,6 +140,7 @@ fun HomeScreen(state: HomeUiState, onEvent: (HomeEvent) -> Unit, modifier: Modif
                         message = stringResource(R.string.home_tools_empty_message),
                         actionLabel = stringResource(R.string.home_tools_empty_action),
                         onAction = { onEvent(HomeEvent.OpenTravellerType) },
+                        tid = "home.home_empty_action",
                     )
                 }
             } else {

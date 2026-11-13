@@ -59,9 +59,19 @@ internal fun SessionsScreen(state: SessionsUiState, onEvent: (SessionsEvent) -> 
     ) { padding ->
         val modifier = Modifier.padding(padding)
         when (state.phase) {
-            SessionsPhase.Loading -> SkeletonList(modifier.padding(TravelTheme.spacing.gutter), lines = 4)
-            SessionsPhase.Error -> ErrorState(state.error?.text(), modifier.fillMaxSize(), onRetry = { onEvent(SessionsEvent.Retry) })
-            SessionsPhase.List, SessionsPhase.Unsupported -> SessionsList(state, onEvent, modifier)
+            SessionsPhase.Loading -> {
+                SkeletonList(modifier.padding(TravelTheme.spacing.gutter), lines = 4)
+            }
+
+            SessionsPhase.Error -> {
+                ErrorState(state.error?.text(), modifier.fillMaxSize(), onRetry = {
+                    onEvent(SessionsEvent.Retry)
+                }, tid = "account.sessions_retry")
+            }
+
+            SessionsPhase.List, SessionsPhase.Unsupported -> {
+                SessionsList(state, onEvent, modifier)
+            }
         }
     }
     state.confirmRevoke?.let { RevokeDialog(it, onEvent) }

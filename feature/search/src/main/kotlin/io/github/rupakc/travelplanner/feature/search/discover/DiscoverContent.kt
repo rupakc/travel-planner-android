@@ -119,7 +119,12 @@ internal fun DiscoverResults(state: DiscoverUiState, onRetry: () -> Unit, modifi
         }
 
         state.error != null -> {
-            ErrorState(backendDetail(state.error) ?: stringResource(R.string.search_discover_error), modifier, onRetry = onRetry)
+            ErrorState(
+                backendDetail(state.error) ?: stringResource(R.string.search_discover_error),
+                modifier,
+                onRetry = onRetry,
+                tid = "search.discover_content_retry",
+            )
         }
 
         state.destinations?.isEmpty() == true -> {

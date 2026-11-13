@@ -148,6 +148,7 @@ private fun FilterChips(state: GlobalSearchUiState, onEvent: (GlobalSearchEvent)
                 label = stringResource(R.string.home_search_filter_all, total),
                 selected = state.filter.isEmpty(),
                 onClick = { onEvent(GlobalSearchEvent.ClearFilter) },
+                tid = "home.global_search_chip_1",
             )
         }
         items(GlobalSearchKind.entries, key = { it.name }) { kind ->
@@ -155,6 +156,7 @@ private fun FilterChips(state: GlobalSearchUiState, onEvent: (GlobalSearchEvent)
                 label = stringResource(kind.filterLabelRes(), state.results.counts[kind] ?: 0),
                 selected = kind in state.filter,
                 onClick = { onEvent(GlobalSearchEvent.ToggleFilter(kind)) },
+                tid = "home.global_search_chip_2",
             )
         }
     }
@@ -186,6 +188,7 @@ private fun Results(state: GlobalSearchUiState, onEvent: (GlobalSearchEvent) -> 
                 icon = Icons.Filled.Search,
                 actionLabel = stringResource(R.string.home_search_clear_filters).takeIf { state.filter.isNotEmpty() },
                 onAction = { onEvent(GlobalSearchEvent.ClearFilter) }.takeIf { state.filter.isNotEmpty() },
+                tid = "home.global_search_empty_action",
             )
         }
 

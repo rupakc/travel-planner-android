@@ -59,9 +59,19 @@ fun ExpensesRoute(modifier: Modifier = Modifier, viewModel: ExpensesViewModel = 
 @Composable
 fun ExpensesScreen(state: ExpensesUiState, onEvent: (ExpensesEvent) -> Unit, modifier: Modifier = Modifier) {
     when {
-        state.loading -> SkeletonList(modifier.padding(TravelTheme.spacing.gutter))
-        state.failed -> ErrorState(null, modifier, stringResource(R.string.money_load_failed), onRetry = { onEvent(ExpensesEvent.Retry) })
-        else -> ExpenseList(state, onEvent, modifier)
+        state.loading -> {
+            SkeletonList(modifier.padding(TravelTheme.spacing.gutter))
+        }
+
+        state.failed -> {
+            ErrorState(null, modifier, stringResource(R.string.money_load_failed), onRetry = {
+                onEvent(ExpensesEvent.Retry)
+            }, tid = "trips.expenses_retry")
+        }
+
+        else -> {
+            ExpenseList(state, onEvent, modifier)
+        }
     }
 }
 

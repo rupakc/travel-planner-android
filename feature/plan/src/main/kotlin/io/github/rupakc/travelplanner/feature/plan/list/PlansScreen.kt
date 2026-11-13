@@ -116,6 +116,7 @@ internal fun PlansScreen(
                     ErrorState(
                         message = state.error.message ?: stringResource(R.string.plan_load_error),
                         onRetry = { onEvent(PlansEvent.Refresh) },
+                        tid = "plan.plans_retry",
                     )
                 }
 
@@ -125,6 +126,7 @@ internal fun PlansScreen(
                         message = stringResource(R.string.plan_empty_message),
                         actionLabel = stringResource(R.string.plan_empty_action),
                         onAction = onPlanTrip,
+                        tid = "plan.plans_empty_action_1",
                     )
                 }
 
@@ -184,6 +186,7 @@ private fun FilterRow(controls: TripControls, onEvent: (PlansEvent) -> Unit) {
                 selected = controls.filter == filter,
                 onClick = { onEvent(PlansEvent.FilterChanged(filter)) },
                 modifier = Modifier.semantics { selected = controls.filter == filter },
+                tid = "plan.plans_chip_1",
             )
         }
         TpChip(
@@ -191,6 +194,7 @@ private fun FilterRow(controls: TripControls, onEvent: (PlansEvent) -> Unit) {
             selected = controls.sharedOnly,
             onClick = { onEvent(PlansEvent.SharedOnlyChanged(!controls.sharedOnly)) },
             leadingIcon = Icons.Filled.Share,
+            tid = "plan.plans_chip_2",
         )
         SortChip(controls.sort, onEvent)
     }
@@ -201,7 +205,7 @@ private fun SortChip(sort: TripSort, onEvent: (PlansEvent) -> Unit) {
     var open by remember { mutableStateOf(false) }
     val current = stringResource(if (sort == TripSort.TRIP_DATE) R.string.plan_sort_trip_date else R.string.plan_sort_updated)
     Box {
-        TpChip(label = stringResource(R.string.plan_sort_by, current), selected = false, onClick = { open = true })
+        TpChip(label = stringResource(R.string.plan_sort_by, current), selected = false, onClick = { open = true }, tid = "plan.plans_chip_3")
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             listOf(TripSort.TRIP_DATE to R.string.plan_sort_trip_date, TripSort.UPDATED to R.string.plan_sort_updated).forEach { (option, label) ->
                 TpDropdownMenuItem(
@@ -248,6 +252,7 @@ private fun TripList(state: PlansUiState, onEvent: (PlansEvent) -> Unit, onOpenT
                         onEvent(PlansEvent.SharedOnlyChanged(false))
                         onEvent(PlansEvent.FilterChanged(TripFilter.ALL))
                     },
+                    tid = "plan.plans_empty_action_2",
                 )
             }
         }

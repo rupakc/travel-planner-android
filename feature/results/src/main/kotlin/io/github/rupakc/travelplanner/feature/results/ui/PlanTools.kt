@@ -511,6 +511,7 @@ internal fun RemixBar(request: TravelSearchRequest, onEvent: (ResultsEvent) -> U
                     enabled = applicable,
                     onClick = { onEvent(ResultsEvent.Remix(preset)) },
                     modifier = Modifier.semantics { contentDescription = "$label. $description" },
+                    tid = "results.plan_tools_chip",
                 )
             }
         }

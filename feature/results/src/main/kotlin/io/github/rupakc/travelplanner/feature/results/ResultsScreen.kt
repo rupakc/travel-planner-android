@@ -148,6 +148,7 @@ private fun NoSearch(onBack: () -> Unit) {
         message = stringResource(R.string.results_empty_message),
         actionLabel = stringResource(R.string.results_new_search),
         onAction = onBack,
+        tid = "results.results_empty_action",
     )
 }
 

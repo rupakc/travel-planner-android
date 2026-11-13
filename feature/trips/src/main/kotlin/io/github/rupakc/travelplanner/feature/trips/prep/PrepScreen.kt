@@ -82,6 +82,7 @@ fun PrepScreen(state: PrepUiState, onEvent: (PrepEvent) -> Unit, onOpenUrl: (Str
                 modifier = modifier,
                 title = stringResource(R.string.prep_error),
                 onRetry = { onEvent(PrepEvent.Retry) },
+                tid = "trips.prep_retry",
             )
         }
 

@@ -304,7 +304,9 @@ fun NotificationsScreen(state: NotificationsUiState, onEvent: (NotificationsEven
             val items = state.items
             when {
                 state.failed -> {
-                    ErrorState(stringResource(R.string.alerts_notifications_error), onRetry = { onEvent(NotificationsEvent.Retry) })
+                    ErrorState(stringResource(R.string.alerts_notifications_error), onRetry = {
+                        onEvent(NotificationsEvent.Retry)
+                    }, tid = "alerts.notifications_retry")
                 }
 
                 items == null -> {

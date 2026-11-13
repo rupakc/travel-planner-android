@@ -124,7 +124,9 @@ internal fun ResultsSectionCard(
 
                 // Walking tours, events, health check and forex show the web's own error copy (Team E).
                 data.isError && !section.section.rendersOwnError -> {
-                    ErrorState(message = stringResource(R.string.results_section_error), onRetry = { actions.onRetry(section.section) })
+                    ErrorState(message = stringResource(R.string.results_section_error), onRetry = {
+                        actions.onRetry(section.section)
+                    }, tid = "results.section_registry_retry")
                 }
 
                 cardsOutside && data is FlightsData -> {

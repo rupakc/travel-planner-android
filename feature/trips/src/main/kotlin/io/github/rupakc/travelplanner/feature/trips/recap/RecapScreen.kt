@@ -160,7 +160,7 @@ fun RecapScreen(
         }
 
         state.failed || recap == null -> {
-            ErrorState(null, modifier, title = stringResource(R.string.recap_load_failed), onRetry = { onEvent(RecapEvent.Retry) })
+            ErrorState(null, modifier, title = stringResource(R.string.recap_load_failed), onRetry = { onEvent(RecapEvent.Retry) }, tid = "trips.recap_retry")
         }
 
         else -> {

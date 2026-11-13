@@ -102,7 +102,7 @@ internal fun PublicProfileScreen(state: PublicProfileUiState, onEvent: (PublicPr
             }
 
             state.phase == ViewPhase.Error -> {
-                ErrorState(errorText(state.error), content.fillMaxSize(), onRetry = { onEvent(PublicProfileEvent.Retry) })
+                ErrorState(errorText(state.error), content.fillMaxSize(), onRetry = { onEvent(PublicProfileEvent.Retry) }, tid = "social.public_profile_retry")
             }
 
             profile != null -> {

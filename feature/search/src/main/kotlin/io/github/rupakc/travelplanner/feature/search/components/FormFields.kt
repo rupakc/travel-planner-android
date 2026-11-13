@@ -535,7 +535,9 @@ internal fun InterestChips(label: String, selected: List<String>, onChange: (Lis
         FieldGroupLabel(label)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
             INTEREST_IDS.forEach { id ->
-                TpChip(label = stringResource(interestLabelRes(id)), selected = id in selected, onClick = { onChange(selected.toggle(id)) })
+                TpChip(label = stringResource(interestLabelRes(id)), selected = id in selected, onClick = {
+                    onChange(selected.toggle(id))
+                }, tid = "search.form_fields_chip")
             }
         }
     }

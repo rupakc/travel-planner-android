@@ -264,6 +264,7 @@ private fun LazyGridScope.content(
                 icon = Icons.Filled.Notifications,
                 actionLabel = stringResource(R.string.alerts_search_flights),
                 onAction = onSearch,
+                tid = "alerts.alerts_empty_action",
             )
         }
         return
@@ -386,6 +387,7 @@ private fun Tabs(selected: AlertTab, counts: Map<AlertTab, Int>, onSelect: (Aler
                         contentDescription = desc
                         stateDescription = state
                     },
+                tid = "alerts.alerts_chip",
             )
         }
     }

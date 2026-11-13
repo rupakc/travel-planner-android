@@ -109,6 +109,7 @@ fun PlayScreen(
                     message = phase.message ?: stringResource(R.string.play_error),
                     modifier = Modifier.padding(padding).fillMaxSize(),
                     onRetry = { onEvent(PlayEvent.Retry) },
+                    tid = "play.play_retry",
                 )
             }
 

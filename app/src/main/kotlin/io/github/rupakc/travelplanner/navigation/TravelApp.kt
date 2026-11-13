@@ -400,7 +400,7 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 // The match screen hides itself when Play is off, so no flag check here.
                 onOpenH2h = { navController.navigate(H2hDestination(it)) { launchSingleTop = true } },
                 // The Play tab hides itself (-> Trips / Home) when the game is off.
-                onOpenPlay = { navController.navigateToTopLevel(TopLevelDestination.PLAY) },
+                onOpenPlay = { navController.openPlay() },
             )
             settingsGraph(
                 onBack = { navController.popBackStack() },
@@ -670,6 +670,9 @@ private fun tripTabContent(
 
 private fun NavDestination.isGateScreen(): Boolean =
     hasRoute(LoginRoute::class) || hasRoute(ChangePasswordRoute::class) || hasRoute(OnboardingRoute::class)
+
+/** Alerts' daily-quiz row: switches to the Play tab (it hides itself when the game is off). */
+internal fun NavHostController.openPlay() = navigateToTopLevel(TopLevelDestination.PLAY)
 
 private fun NavHostController.navigateToTopLevel(dest: TopLevelDestination) = navigateToTopLevel(dest.route)
 
