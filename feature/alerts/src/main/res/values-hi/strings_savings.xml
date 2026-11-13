@@ -16,7 +16,7 @@
     <string name="alerts_drop_target">आपकी लक्ष्य कीमत आ गई है</string>
     <string name="alerts_drop_caught">%1$s की गिरावट पकड़ी गई</string>
     <string name="alerts_drop_caught_pct">%1$s (%2$d%%) की गिरावट पकड़ी गई</string>
-    <string name="alerts_drop_now_at">अब: %1$s</string>
+    <string name="alerts_drop_now_at">घटकर %1$s</string>
     <string name="alerts_drop_xp">+%1$d XP</string>
     <string name="alerts_drop_note">यह हमारे देखे गए दो दामों के बीच की गिरावट है। बुक करने से पहले दाम बदल सकते हैं।</string>
     <string name="alerts_digest_week">साप्ताहिक सारांश · %1$s</string>

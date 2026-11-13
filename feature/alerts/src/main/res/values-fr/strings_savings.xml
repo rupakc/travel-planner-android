@@ -16,7 +16,7 @@
     <string name="alerts_drop_target">Votre prix cible est atteint</string>
     <string name="alerts_drop_caught">Baisse de %1$s repérée</string>
     <string name="alerts_drop_caught_pct">Baisse de %1$s (%2$d %%) repérée</string>
-    <string name="alerts_drop_now_at">Maintenant : %1$s</string>
+    <string name="alerts_drop_now_at">Passé à %1$s</string>
     <string name="alerts_drop_xp">+%1$d XP</string>
     <string name="alerts_drop_note">Il s’agit de l’écart entre deux prix que nous avons observés. Les prix peuvent changer avant votre réservation.</string>
     <string name="alerts_digest_week">Résumé hebdomadaire · %1$s</string>
