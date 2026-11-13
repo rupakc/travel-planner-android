@@ -13,6 +13,7 @@ import io.github.rupakc.travelplanner.core.model.trips.Phase
 import io.github.rupakc.travelplanner.core.model.trips.Streak
 import io.github.rupakc.travelplanner.core.model.trips.Trip
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
+import io.github.rupakc.travelplanner.core.testing.fake.FakeGameEvents
 import io.github.rupakc.travelplanner.core.testing.fake.FakePlansRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTelemetry
 import io.github.rupakc.travelplanner.core.testing.fake.FakeTripsRepository
@@ -71,7 +72,7 @@ class TodayViewModelTest {
 
     private fun vm(): TodayViewModel {
         trips.getResult = AppResult.Success(trip)
-        return TodayViewModel(SavedStateHandle(mapOf("tripId" to 12L)), trips, plans(), telemetry, clock)
+        return TodayViewModel(SavedStateHandle(mapOf("tripId" to 12L)), trips, plans(), telemetry, clock, FakeGameEvents())
     }
 
     private fun client(code: String) =
@@ -155,6 +156,8 @@ class TodayViewModelTest {
             trips.checkinResult = AppResult.Success(CheckinResponse(newCountry = true, countryCode = "JP", streak = Streak(current = 1, longest = 1)))
             vm.onEvent(TodayEvent.CheckIn)
             assertTrue(vm.state.value.newCountry)
+            assertEquals("JP", vm.state.value.countryCode)
+            assertTrue(vm.state.value.gameVisible)
             assertEquals(1, vm.state.value.streak?.current)
             vm.onEvent(TodayEvent.DismissBanner)
             assertFalse(vm.state.value.newCountry)

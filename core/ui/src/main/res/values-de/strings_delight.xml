@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delight_deal_title">Schnäppchenjäger</string>
+    <string name="delight_deal_next">Nächstes Abzeichen: %1$s</string>
+    <string name="delight_deal_progress">%1$d von %2$d</string>
+    <string name="delight_deal_all_done">Schnäppchenjäger: alle Abzeichen erreicht.</string>
+    <string name="delight_bucket_title">Besuchte Länder</string>
+    <string name="delight_bucket_label">%1$d von %2$d Ländern besucht</string>
+    <string name="delight_stamp_title">Neues Land</string>
+    <string name="delight_stamp_desc">Stempel für neues Land: %1$s</string>
+</resources>

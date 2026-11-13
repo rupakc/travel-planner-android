@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.alerts.savings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,6 +37,7 @@ import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.core.ui.format.localUsd
+import io.github.rupakc.travelplanner.core.ui.game.ConfettiBurst
 import io.github.rupakc.travelplanner.core.ui.share.ShareEntryButton
 import io.github.rupakc.travelplanner.core.ui.watch.ToneBox
 import io.github.rupakc.travelplanner.feature.alerts.R
@@ -163,22 +165,25 @@ private fun Milestone(view: SavingsView) {
 /** The "caught a drop" block under a drop notification (target-hit variant, optional XP line per R4). */
 @Composable
 internal fun DropBlock(drop: DropView, modifier: Modifier = Modifier) {
-    ToneBox(Tone.GOOD, modifier) {
-        Text(
-            stringResource(if (drop.targetHit) R.string.alerts_drop_target else R.string.alerts_drop_title),
-            style = TravelTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold,
-        )
-        drop.amount?.let { amount ->
-            val money = localPrice(amount, drop.currency)
+    Box(modifier) {
+        ToneBox(Tone.GOOD, Modifier) {
             Text(
-                drop.percent?.let { stringResource(R.string.alerts_drop_caught_pct, money, it) } ?: stringResource(R.string.alerts_drop_caught, money),
-                style = TravelTheme.typography.bodyMedium,
+                stringResource(if (drop.targetHit) R.string.alerts_drop_target else R.string.alerts_drop_title),
+                style = TravelTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
             )
+            drop.amount?.let { amount ->
+                val money = localPrice(amount, drop.currency)
+                Text(
+                    drop.percent?.let { stringResource(R.string.alerts_drop_caught_pct, money, it) } ?: stringResource(R.string.alerts_drop_caught, money),
+                    style = TravelTheme.typography.bodyMedium,
+                )
+            }
+            drop.to?.let { Text(stringResource(R.string.alerts_drop_now_at, localPrice(it, drop.currency)), style = TravelTheme.typography.bodySmall) }
+            drop.xp?.let { Text(stringResource(R.string.alerts_drop_xp, it), style = TravelTheme.typography.labelMedium) }
+            Text(stringResource(R.string.alerts_drop_note), style = TravelTheme.typography.bodySmall)
         }
-        drop.to?.let { Text(stringResource(R.string.alerts_drop_now_at, localPrice(it, drop.currency)), style = TravelTheme.typography.bodySmall) }
-        drop.xp?.let { Text(stringResource(R.string.alerts_drop_xp, it), style = TravelTheme.typography.labelMedium) }
-        Text(stringResource(R.string.alerts_drop_note), style = TravelTheme.typography.bodySmall)
+        if (drop.targetHit) ConfettiBurst(Modifier.matchParentSize())
     }
 }
 

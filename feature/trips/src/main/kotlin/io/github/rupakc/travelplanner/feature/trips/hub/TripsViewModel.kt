@@ -8,8 +8,10 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.common.userFacingDetail
+import io.github.rupakc.travelplanner.core.data.repository.GameEvents
 import io.github.rupakc.travelplanner.core.data.repository.TripsRepository
 import io.github.rupakc.travelplanner.core.data.telemetry.Telemetry
+import io.github.rupakc.travelplanner.core.domain.game.Delight
 import io.github.rupakc.travelplanner.core.domain.telemetry.TelemetryEvents
 import io.github.rupakc.travelplanner.core.model.trips.CreateTripRequest
 import io.github.rupakc.travelplanner.core.model.trips.Trip
@@ -47,6 +49,8 @@ data class TripsUiState(
     val offline: Boolean = false,
     val error: HubError? = null,
     val sheet: NewTripSheet? = null,
+    /** Countries visited against the bucket-list goal (null: no goal, game hidden, or stats unavailable). */
+    val bucket: Delight.Bucket? = null,
 ) {
     val isEmpty: Boolean get() = !loading && error == null && pinned == null && groups.isEmpty()
 }
@@ -91,6 +95,7 @@ class TripsViewModel
         private val repository: TripsRepository,
         private val telemetry: Telemetry,
         private val clock: AppClock,
+        private val gameEvents: GameEvents,
     ) : ViewModel() {
         private val _state = MutableStateFlow(TripsUiState())
         val state: StateFlow<TripsUiState> = _state.asStateFlow()
@@ -175,6 +180,7 @@ class TripsViewModel
                             )
                         }
                         view(pinned?.phase?.wire ?: "none")
+                        loadBucket()
                     }
 
                     is AppResult.Failure -> {
@@ -183,6 +189,15 @@ class TripsViewModel
                         view("none")
                     }
                 }
+            }
+        }
+
+        /** `GET /trips/stats` for the bucket ring; a failure just leaves the ring out. */
+        private fun loadBucket() {
+            viewModelScope.launch {
+                val stats = (repository.stats() as? AppResult.Success)?.value
+                val bucket = stats?.let { Delight.bucket(it.countries.size, it.bucketGoal, gameEvents.visible.value) }
+                _state.update { it.copy(bucket = bucket) }
             }
         }
 

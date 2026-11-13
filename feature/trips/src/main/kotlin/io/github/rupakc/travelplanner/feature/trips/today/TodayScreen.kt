@@ -33,6 +33,7 @@ import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledSlot
 import io.github.rupakc.travelplanner.core.model.share.ShareKind
 import io.github.rupakc.travelplanner.core.model.trips.Trip
+import io.github.rupakc.travelplanner.core.ui.game.PassportStamp
 import io.github.rupakc.travelplanner.core.ui.itinerary.ItineraryDayCard
 import io.github.rupakc.travelplanner.core.ui.share.ShareEntryButton
 import io.github.rupakc.travelplanner.feature.trips.R
@@ -176,7 +177,12 @@ private fun CheckinCard(state: TodayUiState, onEvent: (TodayEvent) -> Unit) {
                     Text(stringResource(R.string.today_streak, it.current), style = TravelTheme.typography.bodyMedium)
                 }
                 if (state.newCountry) {
-                    Text(stringResource(R.string.today_new_country), style = TravelTheme.typography.titleSmall, color = TravelTheme.colors.primary)
+                    val code = state.countryCode
+                    if (state.gameVisible && code != null) {
+                        PassportStamp(code, state.city)
+                    } else {
+                        Text(stringResource(R.string.today_new_country), style = TravelTheme.typography.titleSmall, color = TravelTheme.colors.primary)
+                    }
                 }
                 state.failure?.let { f ->
                     val text =

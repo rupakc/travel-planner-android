@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -93,6 +94,13 @@ class TodayScreenTest {
         compose.onNodeWithText("Checked in today").assertIsNotEnabled()
         compose.onNodeWithText("Check-in streak: 4").assertIsDisplayed()
         compose.onNodeWithText("New country unlocked! It's on your passport now.").assertIsDisplayed()
+    }
+
+    @Test
+    fun `new country with the game visible shows the passport stamp instead of the banner`() {
+        show(base.copy(checkedIn = true, newCountry = true, countryCode = "JP", gameVisible = true, city = "Tokyo"))
+        compose.onNodeWithContentDescription("New country stamp: JP").assertIsDisplayed()
+        compose.onNodeWithText("New country unlocked! It's on your passport now.").assertDoesNotExist()
     }
 
     @Test

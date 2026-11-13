@@ -71,6 +71,7 @@ import io.github.rupakc.travelplanner.core.model.alerts.PriceWatch
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
 import io.github.rupakc.travelplanner.core.ui.rememberLinkOpener
 import io.github.rupakc.travelplanner.core.ui.watch.ToneBox
+import io.github.rupakc.travelplanner.feature.alerts.savings.DealHunterRoute
 import io.github.rupakc.travelplanner.feature.alerts.savings.SavingsHeaderRoute
 import io.github.rupakc.travelplanner.feature.alerts.story.PriceStorySheet
 import io.github.rupakc.travelplanner.feature.alerts.story.StoryGateViewModel
@@ -95,7 +96,12 @@ fun WatchedPricesRoute(
     Column(modifier) {
         // Alerts 2.0: suggestions (one-tap) and alert settings; renders nothing against a backend without the v2 API.
         AlertTools(onOpenPrefs = onOpenPrefs)
-        AlertsScreen(state, viewModel::onEvent, onSearch, Modifier.weight(1f), header = { SavingsHeaderRoute() }, storyAvailable = storyAvailable)
+        AlertsScreen(state, viewModel::onEvent, onSearch, Modifier.weight(1f), header = {
+            Column(verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.sm)) {
+                SavingsHeaderRoute()
+                DealHunterRoute()
+            }
+        }, storyAvailable = storyAvailable)
     }
 }
 
