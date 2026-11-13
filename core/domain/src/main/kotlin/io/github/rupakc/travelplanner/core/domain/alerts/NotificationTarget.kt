@@ -97,16 +97,16 @@ fun resolveNotificationTarget(
         val id = planId?.trim()?.takeIf { it.length <= MAX_ID_DIGITS }?.toLongOrNull()?.takeIf { it > 0 } ?: parseTripPath(link)
         return id?.let(NotificationTarget::TripToday) ?: NotificationTarget.Inbox
     }
-    if (kind in SOCIAL_PUSH_KINDS) {
-        parseIdeaPath(link)?.let { return NotificationTarget.Idea(it) }
-        parseProfilePath(link)?.let { return NotificationTarget.Profile(it) }
-        return NotificationTarget.Feed
-    }
+    if (kind in SOCIAL_PUSH_KINDS) return socialTarget(link)
     if (kind in QUIZ_PUSH_KINDS) return parseH2hPath(link)?.let(NotificationTarget::H2h) ?: NotificationTarget.Inbox
     val alert = parseAlertsPath(link) ?: AlertLink(watchKind, watchId)
     val priceLike = notificationCategory(category, kind) == NotificationCategory.PRICE_DROPS
     return if (priceLike || alert.watchId != null || link?.startsWith("/alerts") == true) NotificationTarget.Alert(alert) else NotificationTarget.Inbox
 }
+
+/** A social row: the idea or profile its web [link] names (allow-listed), else the feed. */
+private fun socialTarget(link: String?): NotificationTarget =
+    parseIdeaPath(link)?.let(NotificationTarget::Idea) ?: parseProfilePath(link)?.let(NotificationTarget::Profile) ?: NotificationTarget.Feed
 
 /** [resolveNotificationTarget] for an inbox row. */
 fun AppNotification.target(): NotificationTarget {

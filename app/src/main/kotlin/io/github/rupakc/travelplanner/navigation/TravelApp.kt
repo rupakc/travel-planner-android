@@ -390,8 +390,8 @@ private fun TravelAppContent(gate: AuthGate, startDestination: AppRoute, navCont
                 onOpenPrefs = { navController.navigate(AlertPrefsRoute) },
                 onOpenTrip = { navController.navigate(TripRoute(it, tab = TripTab.Today.id)) { launchSingleTop = true } },
                 onOpenFeed = navController.feedEntry(shell.social),
-                onOpenIdea = if (shell.social) ({ navController.navigate(IdeaRoute(it)) { launchSingleTop = true } }) else null,
-                onOpenProfile = if (shell.social) ({ navController.navigate(ProfileRoute(it)) { launchSingleTop = true } }) else null,
+                onOpenIdea = navController.ideaEntry(shell.social),
+                onOpenProfile = navController.profileEntry(shell.social),
                 // The match screen hides itself when Play is off, so no flag check here.
                 onOpenH2h = { navController.navigate(H2hDestination(it)) { launchSingleTop = true } },
             )
@@ -662,6 +662,14 @@ private fun NavHostController.navigateToTopLevel(route: AppRoute) {
 
 /** Opens the ideas feed, or null (no entry shown) when `features.social` is off. */
 private fun NavHostController.feedEntry(enabled: Boolean): (() -> Unit)? = if (enabled) ({ navigate(SocialRoute) { launchSingleTop = true } }) else null
+
+/** Opens one idea, or null (no entry) when `features.social` is off. */
+private fun NavHostController.ideaEntry(enabled: Boolean): ((Long) -> Unit)? =
+    if (enabled) ({ id -> navigate(IdeaRoute(id)) { launchSingleTop = true } }) else null
+
+/** Opens one public profile by handle, or null (no entry) when `features.social` is off. */
+private fun NavHostController.profileEntry(enabled: Boolean): ((String) -> Unit)? =
+    if (enabled) ({ handle -> navigate(ProfileRoute(handle)) { launchSingleTop = true } }) else null
 
 /** Top-level routes switch tabs; everything else is pushed. */
 private fun NavHostController.navigateTo(route: AppRoute) {
