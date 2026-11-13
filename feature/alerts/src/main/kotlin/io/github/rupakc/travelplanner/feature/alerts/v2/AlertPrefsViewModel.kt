@@ -35,7 +35,7 @@ sealed interface AlertPrefsUiState {
 
     data class Failed(val message: String?) : AlertPrefsUiState
 
-    /** [saving]: a PUT is in flight (controls stay editable; the last answer wins). [error] clears on the next edit. */
+    /** [saving]: a PUT is in flight (the controls are disabled, a second change is ignored). [error] clears on the next edit. */
     data class Content(val prefs: AlertPrefs, val saving: Boolean = false, val error: PrefsError? = null) : AlertPrefsUiState
 }
 
@@ -95,6 +95,8 @@ class AlertPrefsViewModel
 
         private fun save(update: AlertPrefsUpdate) {
             val before = mutable.value as? AlertPrefsUiState.Content ?: return
+            // One PUT at a time: a change made while one is in flight is not sent (the screen disables the controls meanwhile).
+            if (before.saving) return
             mutable.update { (it as? AlertPrefsUiState.Content)?.copy(saving = true, error = null) ?: it }
             viewModelScope.launch {
                 when (val result = alerts.updatePreferences(update)) {

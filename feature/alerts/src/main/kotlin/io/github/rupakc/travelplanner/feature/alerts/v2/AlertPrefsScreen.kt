@@ -118,15 +118,15 @@ private fun PrefsForm(state: AlertPrefsUiState.Content, a: AlertPrefsActions) {
         if (errorText != null) {
             Text(errorText, color = TravelTheme.colors.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive })
         }
-        DigestSection(p, a)
+        DigestSection(p, a, !state.saving)
         HorizontalDivider()
-        InstantSection(p, a)
+        InstantSection(p, a, !state.saving)
         HorizontalDivider()
-        QuietSection(p, a)
+        QuietSection(p, a, !state.saving)
         HorizontalDivider()
-        CapsSection(p, a)
+        CapsSection(p, a, !state.saving)
         HorizontalDivider()
-        GroupSection(p, a)
+        GroupSection(p, a, !state.saving)
     }
 }
 
@@ -148,23 +148,23 @@ private fun SwitchRow(label: String, checked: Boolean, enabled: Boolean = true, 
 }
 
 @Composable
-private fun DigestSection(p: AlertPrefs, a: AlertPrefsActions) {
+private fun DigestSection(p: AlertPrefs, a: AlertPrefsActions, idle: Boolean) {
     SectionTitle(stringResource(R.string.alerts_prefs_digest_section))
-    SwitchRow(stringResource(R.string.alerts_prefs_digest_weekly), p.digestWeekly, onChange = a.onDigestWeekly)
-    SwitchRow(stringResource(R.string.alerts_prefs_digest_push), p.digestPush, enabled = p.digestWeekly, onChange = a.onDigestPush)
+    SwitchRow(stringResource(R.string.alerts_prefs_digest_weekly), p.digestWeekly, enabled = idle, onChange = a.onDigestWeekly)
+    SwitchRow(stringResource(R.string.alerts_prefs_digest_push), p.digestPush, enabled = idle && p.digestWeekly, onChange = a.onDigestPush)
     val locale = currentLocale()
     val day = (p.digestDay ?: AlertPrefsRules.DAY_MIN).coerceIn(AlertPrefsRules.DAY_MIN, AlertPrefsRules.DAY_MAX)
     Picker(
         label = stringResource(R.string.alerts_prefs_digest_day),
         value = DayOfWeek.of(day).getDisplayName(TextStyle.FULL, locale),
         options = (AlertPrefsRules.DAY_MIN..AlertPrefsRules.DAY_MAX).map { it to DayOfWeek.of(it).getDisplayName(TextStyle.FULL, locale) },
-        enabled = p.digestWeekly,
+        enabled = idle && p.digestWeekly,
         onPick = a.onDigestDay,
     )
 }
 
 @Composable
-private fun InstantSection(p: AlertPrefs, a: AlertPrefsActions) {
+private fun InstantSection(p: AlertPrefs, a: AlertPrefsActions, idle: Boolean) {
     SectionTitle(stringResource(R.string.alerts_prefs_instant_section))
     val current = if (p.instant == AlertPrefsRules.INSTANT_TARGETS_ONLY) AlertPrefsRules.INSTANT_TARGETS_ONLY else AlertPrefsRules.INSTANT_ALL
     Column(Modifier.selectableGroup()) {
@@ -173,7 +173,9 @@ private fun InstantSection(p: AlertPrefs, a: AlertPrefsActions) {
             AlertPrefsRules.INSTANT_TARGETS_ONLY to R.string.alerts_prefs_instant_targets,
         ).forEach { (mode, label) ->
             Row(
-                Modifier.fillMaxWidth().widthIn(min = 48.dp).selectable(selected = current == mode, role = Role.RadioButton, onClick = { a.onInstant(mode) }),
+                Modifier.fillMaxWidth().widthIn(min = 48.dp).selectable(selected = current == mode, enabled = idle, role = Role.RadioButton, onClick = {
+                    a.onInstant(mode)
+                }),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 RadioButton(selected = current == mode, onClick = null)
@@ -184,11 +186,11 @@ private fun InstantSection(p: AlertPrefs, a: AlertPrefsActions) {
 }
 
 @Composable
-private fun QuietSection(p: AlertPrefs, a: AlertPrefsActions) {
+private fun QuietSection(p: AlertPrefs, a: AlertPrefsActions, idle: Boolean) {
     SectionTitle(stringResource(R.string.alerts_prefs_quiet_section))
     val q = p.quietHours
     val enabled = q?.enabled == true
-    SwitchRow(stringResource(R.string.alerts_prefs_quiet_switch), enabled, onChange = a.onQuietEnabled)
+    SwitchRow(stringResource(R.string.alerts_prefs_quiet_switch), enabled, enabled = idle, onChange = a.onQuietEnabled)
     val start = q?.start.takeIf(AlertPrefsRules::isValidTime) ?: AlertPrefsRules.DEFAULT_START
     val end = q?.end.takeIf(AlertPrefsRules::isValidTime) ?: AlertPrefsRules.DEFAULT_END
     val options = remember { timeOptions() }
@@ -202,7 +204,7 @@ private fun QuietSection(p: AlertPrefs, a: AlertPrefsActions) {
             options.map {
                 it to timeLabel(it)
             },
-            enabled,
+            enabled && idle,
             Modifier.weight(1f),
         ) { a.onQuietTimes(it, end) }
         Picker(
@@ -211,7 +213,7 @@ private fun QuietSection(p: AlertPrefs, a: AlertPrefsActions) {
             options.map {
                 it to timeLabel(it)
             },
-            enabled,
+            enabled && idle,
             Modifier.weight(1f),
         ) { a.onQuietTimes(start, it) }
     }
@@ -239,7 +241,7 @@ private fun QuietSection(p: AlertPrefs, a: AlertPrefsActions) {
 }
 
 @Composable
-private fun CapsSection(p: AlertPrefs, a: AlertPrefsActions) {
+private fun CapsSection(p: AlertPrefs, a: AlertPrefsActions, idle: Boolean) {
     SectionTitle(stringResource(R.string.alerts_prefs_caps_section))
     AlertPrefsRules.CAP_KINDS.forEach { kind ->
         val label = stringResource(kindLabel(kind))
@@ -253,12 +255,13 @@ private fun CapsSection(p: AlertPrefs, a: AlertPrefsActions) {
             moreA11y = stringResource(R.string.alerts_prefs_more_a11y, label),
             onChange = { a.onCap(kind, it) },
             step = 1,
+            enabled = idle,
         )
     }
 }
 
 @Composable
-private fun GroupSection(p: AlertPrefs, a: AlertPrefsActions) {
+private fun GroupSection(p: AlertPrefs, a: AlertPrefsActions, idle: Boolean) {
     SectionTitle(stringResource(R.string.alerts_prefs_group_section))
     Text(stringResource(R.string.alerts_prefs_group_desc), color = TravelTheme.colors.onSurfaceVariant)
     val minutes = p.groupWindowMin ?: 0
@@ -273,6 +276,7 @@ private fun GroupSection(p: AlertPrefs, a: AlertPrefsActions) {
         moreA11y = stringResource(R.string.alerts_prefs_more_a11y, label),
         onChange = a.onGroup,
         step = AlertPrefsRules.GROUP_STEP,
+        enabled = idle,
     )
 }
 
@@ -304,15 +308,16 @@ private fun Stepper(
     lessA11y: String,
     moreA11y: String,
     onChange: (Int) -> Unit,
+    enabled: Boolean = true,
 ) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, Modifier.weight(1f))
-        IconButton(onClick = { onChange((value - step).coerceAtLeast(min)) }, enabled = value > min) {
+        IconButton(onClick = { onChange((value - step).coerceAtLeast(min)) }, enabled = enabled && value > min) {
             // No minus glyph in material-icons-core: a text minus, named for TalkBack on the button.
             Text("\u2212", Modifier.clearAndSetSemantics { contentDescription = lessA11y }, style = TravelTheme.typography.titleLarge)
         }
         Text(valueText, Modifier.widthIn(min = 56.dp).semantics { liveRegion = LiveRegionMode.Polite }, style = TravelTheme.typography.titleMedium)
-        IconButton(onClick = { onChange((value + step).coerceAtMost(max)) }, enabled = value < max) {
+        IconButton(onClick = { onChange((value + step).coerceAtMost(max)) }, enabled = enabled && value < max) {
             Icon(Icons.Filled.Add, contentDescription = moreA11y)
         }
     }
