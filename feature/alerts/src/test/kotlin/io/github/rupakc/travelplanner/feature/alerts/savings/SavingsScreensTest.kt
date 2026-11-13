@@ -1,8 +1,10 @@
 package io.github.rupakc.travelplanner.feature.alerts.savings
 
 import android.app.Application
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -37,7 +39,8 @@ class SavingsScreensTest {
     fun `tally shows the caught total, the milestone and the honest caveat`() {
         val s = Savings(totalUsd = 245.0, dropsCaught = 4, targetsHit = 1, nextMilestone = 1000, progressPct = 24).view()
         show(SavingsUiState.Loaded(s, livePricesPaused = true))
-        compose.onNodeWithText("Drops caught: $245").assertIsDisplayed()
+        compose.onNodeWithText("$245").assertIsDisplayed()
+        compose.onAllNodesWithText("Drops caught").assertCountEquals(1)
         compose.onNodeWithText("24% of the way to $1,000").assertIsDisplayed()
         compose.onNodeWithText("4 drops caught · 1 target hit").assertIsDisplayed()
         compose.onNodeWithText("Live checks are paused, so these figures come from saved data.").assertIsDisplayed()
