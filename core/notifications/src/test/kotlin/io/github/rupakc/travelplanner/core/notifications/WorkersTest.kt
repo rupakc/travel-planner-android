@@ -16,6 +16,8 @@ import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.repository.NotificationsRepository
+import io.github.rupakc.travelplanner.core.domain.notifications.NotificationsFlags
+import io.github.rupakc.travelplanner.core.domain.server.JourneyFlags
 import io.github.rupakc.travelplanner.core.model.alerts.AppNotification
 import io.github.rupakc.travelplanner.core.model.alerts.MarkReadResponse
 import io.github.rupakc.travelplanner.core.model.alerts.NotificationsPage
@@ -45,6 +47,7 @@ import io.github.rupakc.travelplanner.core.notifications.reminders.TripReminderW
 import io.github.rupakc.travelplanner.core.notifications.reminders.WorkManagerTripReminderScheduler
 import io.github.rupakc.travelplanner.core.testing.fake.FakeAuthRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeCurrentPlanStore
+import io.github.rupakc.travelplanner.core.testing.fake.FakeJourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNearbyRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationCatalogRepository
 import io.github.rupakc.travelplanner.core.testing.fake.FakeNotificationSettingsRepository
@@ -277,6 +280,8 @@ class WorkersTest {
     private val nearbyCatalog = FakeNotificationCatalogRepository()
     private val nearbyServer = FakeNotificationSettingsRepository()
     private var nearbyArrival: NearbyArrival? = null
+    private var nearbyFlags = FakeJourneyFlagsRepository(JourneyFlags(notifications = NotificationsFlags(notificationsApi = 1)))
+    private var nearbyAuth = signedIn
 
     private fun nearbyWorker(settings: AppSettings, plans: List<Plan>, log: NearbyPostLog, cellAgeHours: Long? = 1) =
         build({ c, p ->
@@ -295,6 +300,8 @@ class WorkersTest {
                 clock,
                 nearbyCatalog,
                 nearbyServer,
+                nearbyFlags,
+                nearbyAuth,
                 object : NearbyArrivalSource {
                     override suspend fun arrival(cell: LocationCell) = nearbyArrival
                 },
@@ -317,6 +324,25 @@ class WorkersTest {
         val text = NearbyArrivalText.body(emptyMap(), NearbyArrival("Lisbon", "Time Out Market", 7))
         assertEquals("You're near Lisbon: Time Out Market is 7 min away", text)
     }
+
+    @Test
+    fun `the server settings are fetched only with the api, a session and passing local rules`() =
+        runBlocking {
+            val on = AppSettings(nearbyNotifications = true, nearbyNotificationsAlways = true)
+            nearbyFlags.flags = JourneyFlags()
+            nearbyWorker(on, emptyList(), MemoryLog()).doWork()
+            assertEquals(0, nearbyServer.settingsCalls)
+            assertEquals(1, notifier.posts.size)
+            nearbyFlags.flags = JourneyFlags(notifications = NotificationsFlags(notificationsApi = 1))
+            nearbyAuth = FakeAuthRepository(null)
+            nearbyWorker(on, emptyList(), MemoryLog()).doWork()
+            assertEquals(0, nearbyServer.settingsCalls)
+            nearbyAuth = signedIn
+            nearbyWorker(AppSettings(nearbyNotifications = false), emptyList(), MemoryLog()).doWork()
+            assertEquals(0, nearbyServer.settingsCalls)
+            nearbyWorker(on, emptyList(), MemoryLog()).doWork()
+            assertEquals(1, nearbyServer.settingsCalls)
+        }
 
     @Test
     fun `the server nearby switch and the user's quiet hours are honoured on the device`() =
@@ -436,6 +462,26 @@ class WorkersTest {
             repo.items.value = listOf(alert(3)) + repo.items.value
             poll()
             assertEquals(listOf(3L), notifier.priceAlerts.map { it.id })
+        }
+
+    @Test
+    fun `trip reminder and morning brief pushes honour the local trip switch`() =
+        runBlocking {
+            val off = FakeSettingsRepository(AppSettings(tripNotifications = false))
+            for ((i, category) in listOf("trip_reminders", "morning_brief").withIndex()) {
+                val data =
+                    mapOf(
+                        "kind" to "trip_phase",
+                        "category" to category,
+                        "notification_id" to "${70 + i}",
+                        "plan_id" to "3",
+                        "title" to "T",
+                        "body" to "B",
+                    )
+                assertFalse(PushAlertHandler(signedIn, FakeNotificationsRepository(), off, notifier).handle(data))
+                assertTrue(PushAlertHandler(signedIn, FakeNotificationsRepository(), FakeSettingsRepository(), notifier).handle(data))
+            }
+            assertEquals(2, notifier.posts.size)
         }
 
     @Test

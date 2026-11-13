@@ -19,6 +19,8 @@ import dagger.hilt.components.SingletonComponent
 import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
+import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
+import io.github.rupakc.travelplanner.core.data.repository.JourneyFlagsRepository
 import io.github.rupakc.travelplanner.core.data.repository.NearbyRepository
 import io.github.rupakc.travelplanner.core.data.repository.NotificationCatalogRepository
 import io.github.rupakc.travelplanner.core.data.repository.NotificationSettingsRepository
@@ -144,13 +146,23 @@ class NearbySuggestionWorker
         private val clock: AppClock,
         private val catalog: NotificationCatalogRepository,
         private val serverSettings: NotificationSettingsRepository,
+        private val journeyFlags: JourneyFlagsRepository,
+        private val auth: AuthRepository,
         private val arrivals: NearbyArrivalSource,
     ) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
-            // Best effort: the server's `nearby` switch and quiet hours. Offline or without the API the device rules stand alone.
-            val server = (serverSettings.settings() as? AppResult.Success)?.value
+            // Device rules first: nothing goes to the server when they already say no.
+            if (!allowed(null) || !notifier.canPost()) return Result.success()
+            // Best effort: the server's `nearby` switch and quiet hours, only with `notifications_api` and a session.
+            // Offline or without the API the device rules stand alone.
+            val server =
+                if (journeyFlags.flags().notifications.apiAvailable && auth.session.first() != null) {
+                    (serverSettings.settings() as? AppResult.Success)?.value
+                } else {
+                    null
+                }
             if (server?.isEnabled(NotificationCategory.NEARBY) == false) return Result.success()
-            if (!allowed(server?.quietHours) || !notifier.canPost()) return Result.success()
+            if (server != null && !allowed(server.quietHours)) return Result.success()
             val cell = usableLocation(nearby.lastLocation(), clock.now()) ?: return Result.success()
             val res = applicationContext.resources
             val arrival = arrivals.arrival(cell)

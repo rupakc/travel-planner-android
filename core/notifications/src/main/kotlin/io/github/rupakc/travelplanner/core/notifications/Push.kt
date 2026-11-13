@@ -240,7 +240,7 @@ class PushAlertHandler
             // Signed out (e.g. an unregister that never reached the server): never show a user's alerts (API review I1).
             if (auth.session.first() == null) return false
             val category = notificationCategory(data[PushDataKeys.CATEGORY], data[PushDataKeys.KIND])
-            if (category == NotificationCategory.PRICE_DROPS && !settings.settings.first().priceAlertNotifications) return false
+            if (!localSwitchAllows(category, settings.settings.first())) return false
             val title = data[KEY_TITLE].orEmpty()
             if (title.isBlank()) return false
             val grouped = (data[PushDataKeys.GROUP_COUNT]?.toIntOrNull() ?: 1) > 1
@@ -254,6 +254,14 @@ class PushAlertHandler
             )
             return true
         }
+
+        /** The on-device switches that mirror the server categories: price drops, and trip reminders with the morning brief. */
+        private fun localSwitchAllows(category: NotificationCategory?, s: io.github.rupakc.travelplanner.core.model.settings.AppSettings): Boolean =
+            when (category) {
+                NotificationCategory.PRICE_DROPS -> s.priceAlertNotifications
+                NotificationCategory.TRIP_REMINDERS, NotificationCategory.MORNING_BRIEF -> s.tripNotifications
+                else -> true
+            }
 
         companion object {
             const val KEY_TITLE = "title"
