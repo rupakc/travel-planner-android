@@ -36,6 +36,8 @@ import io.github.rupakc.travelplanner.telemetry.TelemetryUiBridge
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -86,6 +88,11 @@ fun MainUiState.shellMode(): ShellMode =
     )
 
 private const val HTTP_NOT_FOUND = 404
+
+/** How often the visible app re-reads `GET /api/config`. */
+const val FLAGS_REFRESH_MS = 15 * 60 * 1000L
+private const val FLAGS_MAX_ATTEMPTS = 5
+private const val FLAGS_RETRY_BASE_MS = 3_000L
 
 /** Pure gate rule, unit-tested. */
 fun gateFor(session: Session?, profile: TravellerProfile): AuthGate =
@@ -149,9 +156,7 @@ class MainViewModel
             }.stateIn(viewModelScope, SharingStarted.Eagerly, MainUiState())
 
         init {
-            viewModelScope.launch {
-                flags.value = loadFlags() ?: flags.value ?: JourneyFlags.OFF
-            }
+            viewModelScope.launch { refreshFlags() }
             viewModelScope.launch {
                 delay(StartGate.MAX_WAIT_MS)
                 waitOver.value = true
@@ -194,6 +199,36 @@ class MainViewModel
                 if (!social) gameEvents.setCommunityHidden(false)
             } else if (game && !accounts) {
                 gameEvents.setVisible(true)
+            }
+        }
+
+        /**
+         * Asks the server for the feature flags (launch, every return to the foreground, and every [FLAGS_REFRESH_MS] while
+         * the app is visible: see `MainActivity`). A failed read is retried with a short backoff instead of leaving the
+         * cached or "everything off" flags in place until the process dies; the previous flags are kept meanwhile.
+         */
+        suspend fun refreshFlags() {
+            // Callers that arrive while a read is running (cold start: ViewModel + activity) share it.
+            val running =
+                inFlight ?: viewModelScope.async { readFlagsWithRetry() }.also { job ->
+                    inFlight = job
+                    job.invokeOnCompletion { inFlight = null }
+                }
+            running.await()
+        }
+
+        private var inFlight: Deferred<Unit>? = null
+
+        private suspend fun readFlagsWithRetry() {
+            for (attempt in 0 until FLAGS_MAX_ATTEMPTS) {
+                val fresh = loadFlags()
+                if (fresh != null) {
+                    flags.value = fresh
+                    return
+                }
+                // Nothing cached and nothing fresh: let the shell proceed on the classic tabs while we keep trying.
+                if (flags.value == null) flags.value = JourneyFlags.OFF
+                if (attempt < FLAGS_MAX_ATTEMPTS - 1) delay(FLAGS_RETRY_BASE_MS shl attempt)
             }
         }
 

@@ -12,7 +12,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.OneShotPreDrawListener
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.rupakc.travelplanner.core.data.repository.OauthInbox
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
@@ -23,6 +26,8 @@ import io.github.rupakc.travelplanner.navigation.TravelApp
 import io.github.rupakc.travelplanner.telemetry.ColdStart
 import io.github.rupakc.travelplanner.telemetry.ColdStartGate
 import javax.inject.Inject
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /** AppCompatActivity (not ComponentActivity) so AppCompatDelegate per-app locales apply on API 26–32 too. */
 @AndroidEntryPoint
@@ -49,6 +54,15 @@ class MainActivity : AppCompatActivity() {
         // Keep the splash until the session/profile are read from DataStore (no Login flash).
         splash.setKeepOnScreenCondition { viewModel.state.value.let { it.gate == AuthGate.LOADING || it.hold } }
         enableEdgeToEdge()
+        // A surviving process re-reads the server's feature flags whenever the app comes back, then every 15 minutes while visible.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (true) {
+                    viewModel.refreshFlags()
+                    delay(FLAGS_REFRESH_MS)
+                }
+            }
+        }
         setContent {
             val state by viewModel.state.collectAsStateWithLifecycle()
             // Status/navigation bar icons follow the app's theme setting, not only the system's.
