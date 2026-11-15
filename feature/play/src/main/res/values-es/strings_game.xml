@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="play_title">Tu progreso</string>
     <string name="play_level">Nivel %1$d</string>
     <string name="play_xp">%1$d XP</string>
     <string name="play_progress_label">Progreso hacia el siguiente nivel</string>

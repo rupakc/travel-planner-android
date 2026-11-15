@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.play
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +35,6 @@ import io.github.rupakc.travelplanner.core.designsystem.component.EmptyState
 import io.github.rupakc.travelplanner.core.designsystem.component.ErrorState
 import io.github.rupakc.travelplanner.core.designsystem.component.SkeletonList
 import io.github.rupakc.travelplanner.core.designsystem.component.TpCard
-import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
 import io.github.rupakc.travelplanner.core.ui.game.badgeDescText
 import io.github.rupakc.travelplanner.core.ui.game.badgeNameText
@@ -94,10 +93,12 @@ fun PlayScreen(
     /** Extension point for T5.5: head-to-head, boards and the challenge detail rows, drawn after the quiz hub. */
     extraItems: LazyListScope.() -> Unit = {},
 ) {
-    Scaffold(modifier = modifier, topBar = { TpTopBar(title = stringResource(R.string.play_title)) }) { padding ->
+    // The shell owns this tab's top bar ("Play", search, bell). A second TpTopBar here stacked a "Your progress" bar under it
+    // and doubled the status-bar gap, so the tab is a plain body.
+    Box(modifier.fillMaxSize()) {
         when (val phase = state.phase) {
             PlayPhase.Loading -> {
-                SkeletonList(Modifier.padding(padding).padding(TravelTheme.spacing.gutter), lines = 5)
+                SkeletonList(Modifier.padding(TravelTheme.spacing.gutter), lines = 5)
             }
 
             PlayPhase.Hidden -> {
@@ -107,14 +108,14 @@ fun PlayScreen(
             is PlayPhase.Error -> {
                 ErrorState(
                     message = phase.message ?: stringResource(R.string.play_error),
-                    modifier = Modifier.padding(padding).fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     onRetry = { onEvent(PlayEvent.Retry) },
                     tid = "play.play_retry",
                 )
             }
 
             PlayPhase.Loaded -> {
-                PlayContent(state, hub, onHubEvent, onStartQuiz, extraItems, Modifier.padding(padding))
+                PlayContent(state, hub, onHubEvent, onStartQuiz, extraItems, Modifier)
             }
         }
     }
