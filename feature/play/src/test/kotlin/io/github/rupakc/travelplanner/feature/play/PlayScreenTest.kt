@@ -1,6 +1,9 @@
 package io.github.rupakc.travelplanner.feature.play
 
 import android.app.Application
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
@@ -45,6 +48,17 @@ class PlayScreenTest {
         compose.onNodeWithText("Gold").assertIsDisplayed()
         compose.onNode(hasScrollAction()).performScrollToNode(hasText("Mystery badge"))
         compose.onNodeWithText("Mystery badge").assertIsDisplayed()
+    }
+
+    @Test fun `the tab draws no top bar of its own because the shell already shows Play`() {
+        // Regression: a second TpTopBar ("Your progress") stacked under the shell's bar, doubling the status-bar gap.
+        var phase by mutableStateOf<PlayPhase>(PlayPhase.Loading)
+        compose.setContent { TravelTheme { PlayScreen(loaded.copy(phase = phase), onEvent = {}) } }
+        for (next in listOf(PlayPhase.Loading, PlayPhase.Loaded, PlayPhase.Error("x"))) {
+            phase = next
+            compose.waitForIdle()
+            compose.onNodeWithText("Your progress").assertDoesNotExist()
+        }
     }
 
     @Test fun `error retry sends the event`() {
