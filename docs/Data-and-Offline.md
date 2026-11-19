@@ -17,9 +17,10 @@ exported schema by hand.
 
 ## DataStore (`core:datastore`)
 
-Five Preferences DataStore files: `session` (JWT and user, sealed with Tink), `settings` (server override, theme mode, dynamic colour,
-locale tag, notification toggles), `traveller_profile`, `feature_overrides` and `last_location` (the coarse cell of the last Near me
-lookup, for background suggestions). Traveller profile and feature overrides are device-local because the server Preferences schema has no
+Preferences DataStore files: `session` (JWT and user, sealed with Tink), `settings` (server override, theme mode, dynamic colour,
+locale tag, notification toggles), `traveller_profile`, `feature_overrides`, `last_location` (the coarse cell of the last Near me
+lookup, for background suggestions), `coach_marks` and `carbon_prefs` (the carbon footprint card's meals choice, like the web's
+`tp_carbon_diet`). Traveller profile and feature overrides are device-local because the server Preferences schema has no
 field for them. The session and last-location files, the Room database, the Tink keyset and the notification bookkeeping
 SharedPreferences (`alert_poll`, `trip_reminders`, `nearby_notifications`, `push_registration`, and `server_capabilities`, the cached
 `/health` capabilities) are excluded from cloud backup and device transfer
