@@ -54,6 +54,7 @@ import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.model.section.WeatherData
 import io.github.rupakc.travelplanner.core.ui.StreamingStatusAnnouncer
+import io.github.rupakc.travelplanner.core.ui.carbon.CarbonFootprintCard
 import io.github.rupakc.travelplanner.core.ui.journey.CompletenessMeter
 import io.github.rupakc.travelplanner.feature.results.sections.CommerceRow
 import io.github.rupakc.travelplanner.feature.results.sections.CommerceRowContent
@@ -90,8 +91,11 @@ import kotlinx.coroutines.launch
 private val EXPANDED_WIDTH = 840.dp
 private val LIST_PANE_WIDTH = 380.dp
 
-/** Number of lazy items above the first section (summary, banner, remix ×2, best value, budget, ease, search). */
-private const val HEADER_ITEMS = 9
+/**
+ * Number of lazy items above the first section: summary, banner, remix ×2, best value, completeness, budget,
+ * carbon, ease, search.
+ */
+private const val HEADER_ITEMS = 10
 
 /**
  * Stateless results screen. Compact: one scrolling column (summary → banners → tools →
@@ -306,6 +310,13 @@ private fun LazyListScope.headerItems(state: ResultsUiState, onEvent: (ResultsEv
         if (meter != null && state.hasResults) CompletenessMeter(meter)
     }
     item(key = "budget", contentType = "budget") { state.budget?.let { BudgetPlannerCard(it, onEvent) } }
+    item(key = "carbon", contentType = "carbon") {
+        CarbonFootprintCard(
+            state.carbon,
+            onDiet = { onEvent(ResultsEvent.CarbonDiet(it)) },
+            onRetry = { onEvent(ResultsEvent.CarbonRetry) },
+        )
+    }
     item(key = "ease", contentType = "ease") { state.confidence?.let { TravelEaseBanner(it) } }
     item(key = "search", contentType = "search") {
         ResultsSearchField(state.query, state.hiddenByQuery, onQuery = { onEvent(ResultsEvent.Query(it)) })

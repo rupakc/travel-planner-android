@@ -391,6 +391,21 @@ interface SessionCleaner {
     suspend fun clearUserData()
 }
 
+/**
+ * Trip carbon footprint (`POST /api/carbon/trip`). Screens use `cardStates(bodies, retries)` (`….core.data.carbon`), which applies
+ * `features.carbon`, the debounce and the 404 rule and yields `CarbonCardState` (`….core.domain.carbon`); bodies come from
+ * `CarbonRequests.fromResults` / `fromSelections`.
+ */
+interface CarbonRepository {
+    suspend fun available(): Boolean
+
+    val diet: Flow<CarbonDiet>
+
+    suspend fun setDiet(diet: CarbonDiet)
+
+    suspend fun footprint(body: JsonObject): AppResult<CarbonFootprint>
+}
+
 /** Supplied by core:notifications when Firebase is configured (optional binding). */
 fun interface PushTokenSource {
     suspend fun token(): String?

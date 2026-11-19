@@ -25,6 +25,7 @@ Retrofit declarations are in `core/network/.../api/Apis.kt`; wire models in `cor
 | `POST /api/discover`, `POST /api/compare/destination` | `SearchApi` | `DiscoverRepository`, `CompareRepository` |
 | `POST /api/import/extract`, `/import/resolve-place` | `ImportApi` | `ImportRepository` |
 | `POST /api/feedback`, `POST /api/analytics/events` | `FeedbackApi` | `FeedbackRepository` |
+| `POST /api/carbon/trip` | `CarbonApi` | `CarbonRepository` (only when `features.carbon >= 1`; see [Trip carbon footprint](#trip-carbon-footprint-featurescarbon--1)) |
 | `GET /api/config` | `ClientConfigApi` | `ClientConfigRepository` (telemetry settings; a 404 means off) |
 | `POST /api/telemetry` (gzip) | `TelemetryApi` | `Telemetry` (queue, uploader, worker); see [Telemetry-and-Privacy](Telemetry-and-Privacy.md) |
 | `GET /api/auth/providers` | `AuthProvidersApi` | `AuthProvidersRepository` (feature-detected; 404 or error = all four providers "coming soon") |
@@ -47,6 +48,26 @@ Use the `add-api-endpoint` Claude skill: add the wire model (tolerant, lenient n
 
 Every price, link and fact comes from the response. Estimates and AI content keep the web's labels; `verification` is rendered as the chip.
 Price watches without a live price return `422 no_live_price`; surface it, never fabricate a price.
+
+## Trip carbon footprint (`features.carbon >= 1`)
+
+Port of the web `CarbonFootprint` card (web `docs/Carbon-Footprint.md`). The backend does all the arithmetic; `CarbonRequests`
+(`core:domain`, a port of the web `utils/carbon.js`) only trims the raw JSON the screen holds: on Results, once the stream is done (or the
+results came from the draft), the cheapest flight (per leg on multi-city; a missing or 0 price sorts last), the first hotel and the
+itinerary; in My Plan, the picked flight(s), hotel, transport and activities with the live itinerary (else the plan's saved one), and only
+once a flight or hotel is picked. `cardStates` (`core:data` `carbon/`) is the one state machine both screens use: Hidden first and while the flag
+is off (no request is sent; the flag is read again on each new body and after 5/15/30/60 s, so a failed `/api/config`, which is not
+cached, does not hide the card for the whole visit), a 350 ms debounce, the latest request wins, a 404 hides the card permanently (older backend or
+flag turned off), other failures show "The footprint isn't available right now." with Try again. The meals choice is device-local
+(`carbon_prefs` DataStore, the web's `tp_carbon_diet`) and shared by both cards. `CarbonFootprintCard` (`core:ui` `carbon/`) renders the
+total, per person, the breakdown bar (described for TalkBack) with a legend, the car-km and yearly-budget comparisons, the train hint,
+"Includes newer official data from the Voyager crawler" with each crawler source line (name, link, as-of date, attribution) when
+`crawler_sources` is present, the diet chips and "How we calculate" (each line with its method badge and its own `crawler_source`, the
+assumptions, the sources with licence and attribution). Lines and assumptions are translated from `kind`/`code` + `params`; an unknown one
+shows the backend's English `label`/`text`. Responses without the crawler fields render as before. Flight cards show the Google Travel Impact
+Model chip "≈ N kg CO₂e" (`EmissionsChip`) when a result carries `emissions`; a tap shows the per-class breakdown and the CC BY-SA credit,
+linked to TIM. Strings: `core/ui/src/main/res/values*/strings_carbon.xml`, copied from the web's `results:carbon.*`, `emissions.*` and
+`official.source|asOf` in all seven languages.
 
 ## Share links 2.0 (`features.sharing >= 1`)
 

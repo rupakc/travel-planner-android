@@ -24,6 +24,7 @@ object DataStoreFiles {
     const val FEATURES = "feature_overrides"
     const val LAST_LOCATION = "last_location"
     const val COACH_MARKS = "coach_marks"
+    const val CARBON = "carbon_prefs"
 }
 
 @Module
@@ -64,4 +65,9 @@ object DataStoreModule {
     fun coachMarkStore(
         @ApplicationContext context: Context,
     ): CoachMarkStore = PreferencesCoachMarkStore(context.store(DataStoreFiles.COACH_MARKS))
+
+    @Provides @Singleton
+    fun carbonPrefsStore(
+        @ApplicationContext context: Context,
+    ): CarbonPrefsStore = PreferencesCarbonPrefsStore(context.store(DataStoreFiles.CARBON))
 }

@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -25,6 +26,7 @@ import io.github.rupakc.travelplanner.core.domain.results.flightNo
 import io.github.rupakc.travelplanner.core.domain.results.outboundMinutes
 import io.github.rupakc.travelplanner.core.domain.results.outboundStops
 import io.github.rupakc.travelplanner.core.domain.results.sameFlight
+import io.github.rupakc.travelplanner.core.model.carbon.timEmissions
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.section.Flight
 import io.github.rupakc.travelplanner.core.model.section.FlightLeg
@@ -33,6 +35,7 @@ import io.github.rupakc.travelplanner.core.model.section.FlightsData
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.ui.AddToPlanButton
 import io.github.rupakc.travelplanner.core.ui.BookingLinkButton
+import io.github.rupakc.travelplanner.core.ui.carbon.EmissionsChip
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.results.R
 import io.github.rupakc.travelplanner.feature.results.ResultsEvent
@@ -161,6 +164,8 @@ internal fun FlightCard(
                 HorizontalDivider(color = TravelTheme.colors.outlineVariant)
                 FlightLegRow(it, outbound = false, onLayover = onLayover)
             }
+            val emissions = remember(flight) { flight.timEmissions() }
+            EmissionsChip(emissions)
             ChipRow {
                 BookingLinkButton(flight.bookingUrl, accessibilityLabel = stringResource(R.string.results_book_a11y, name))
                 AddToPlanButton(selected = selected, itemName = name, onToggle = onToggle)
