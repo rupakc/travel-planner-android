@@ -170,9 +170,11 @@ class ResultsViewModel
 
         private val carbonRetries = MutableStateFlow(0)
 
-        /** Web: the Results card appears once the stream is done (or results came from the draft), from the cheapest flight. */
-        // Kept for the ViewModel's life (not restarted with the screen's subscription): coming back to the screen
-        // shows the last card at once, without a fresh POST, and a remembered 404 stays remembered.
+        /**
+         * Web: the Results card appears once the stream is done (or results came from the draft), from the cheapest flight.
+         * Kept for the ViewModel's life (not restarted with the screen's subscription): coming back to the screen shows the
+         * last card at once, without a fresh POST, and a remembered 404 stays remembered.
+         */
         private val carbonCard: Flow<CarbonCardState> =
             carbon
                 .cardStates(source.map(::carbonBody).distinctUntilChanged().flowOn(dispatchers.default), carbonRetries)
