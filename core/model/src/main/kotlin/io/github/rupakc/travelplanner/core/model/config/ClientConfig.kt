@@ -40,6 +40,8 @@ data class FeaturesDto(
     val social: LenientInt = null,
     /** Play (quizzes, head-to-head, boards) version: 1 = the `/play` routes exist; null or 0 on older backends. */
     val play: LenientInt = null,
+    /** Trip carbon footprint version: 1 = `POST /carbon/trip` exists; null or 0 on older backends. */
+    val carbon: LenientInt = null,
 )
 
 /** `auth` of `GET /api/config`. [signupMode] is `open` | `invite`. */

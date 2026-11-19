@@ -91,3 +91,10 @@ interface CoachMarkStore {
 
     suspend fun markSeen(userKey: String, ids: Set<String>)
 }
+
+/** The footprint card's meals choice (device-local, web `localStorage tp_carbon_diet`); the wire value, or null. */
+interface CarbonPrefsStore {
+    val diet: Flow<String?>
+
+    suspend fun setDiet(wire: String)
+}

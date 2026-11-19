@@ -186,3 +186,11 @@ class PreferencesCoachMarkStore(private val store: DataStore<Preferences>) : Coa
         store.edit { it[key(userKey)] = (it[key(userKey)] ?: emptySet()) + ids }
     }
 }
+
+class PreferencesCarbonPrefsStore(private val store: DataStore<Preferences>) : CarbonPrefsStore {
+    private val dietKey = stringPreferencesKey("diet")
+
+    override val diet: Flow<String?> = store.safeData().map { it[dietKey] }.distinctUntilChanged()
+
+    override suspend fun setDiet(wire: String) = store.editKey(dietKey, wire)
+}

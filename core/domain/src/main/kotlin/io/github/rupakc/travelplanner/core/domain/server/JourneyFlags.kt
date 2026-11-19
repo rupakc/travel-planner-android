@@ -32,6 +32,8 @@ data class JourneyFlags(
     val social: Boolean = false,
     /** Quizzes, head-to-head, boards (`features.play >= 1`); the game must also be visible (`game`, `hide_game`). */
     val play: Boolean = false,
+    /** Trip carbon footprint card (`features.carbon >= 1`); off hides the card and never calls `/carbon/trip`. */
+    val carbon: Boolean = false,
 ) {
     companion object {
         /** Everything off (config not loaded, or an older backend). */
@@ -54,6 +56,7 @@ data class JourneyFlags(
                 sharing = (f.sharing ?: 0) >= 1,
                 social = (f.social ?: 0) >= 1,
                 play = (f.play ?: 0) >= 1,
+                carbon = (f.carbon ?: 0) >= 1,
             )
         }
     }
