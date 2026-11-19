@@ -3,7 +3,10 @@ package io.github.rupakc.travelplanner.feature.plan.myplan
 import app.cash.turbine.test
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
+import io.github.rupakc.travelplanner.core.domain.carbon.CarbonCardState
+import io.github.rupakc.travelplanner.core.domain.carbon.CarbonDiet
 import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
+import io.github.rupakc.travelplanner.core.model.carbon.CarbonFootprint
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.reference.Airport
 import io.github.rupakc.travelplanner.core.model.search.TravelSearchRequest
@@ -21,6 +24,9 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -48,7 +54,9 @@ class MyPlanViewModelTest {
     private val search = FakeSearchRepository()
     private val fakes = io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney()
 
-    private fun viewModel() = MyPlanViewModel(store, FixedClock(), TestAppDispatchers(main.testDispatcher), PlaceNameLookup(search), fakes.journey)
+    private val carbon = io.github.rupakc.travelplanner.core.testing.fake.FakeCarbonRepository()
+
+    private fun viewModel() = MyPlanViewModel(store, FixedClock(), TestAppDispatchers(main.testDispatcher), PlaceNameLookup(search), fakes.journey, carbon)
 
     @Test
     fun `the generated name uses the city of an airport code`() =
@@ -245,5 +253,60 @@ class MyPlanViewModelTest {
                 expectMostRecentItem()
             }
             assertEquals(setOf("forex"), fakes.packs.snapshots.single().second.keys)
+        }
+
+    @Test
+    fun `carbon card stays hidden and silent with the feature off`() =
+        runTest {
+            seed()
+            viewModel().state.test {
+                main.testDispatcher.scheduler.advanceUntilIdle()
+                assertEquals(CarbonCardState.Hidden(), expectMostRecentItem().carbon)
+            }
+            assertTrue(carbon.requests.isEmpty())
+        }
+
+    @Test
+    fun `carbon card waits for a flight or hotel, then sends the trimmed selections`() =
+        runTest {
+            carbon.enabled = true
+            store.attachSearch(request, null)
+            store.toggle(PlanItem.ActivityItem(Activity(name = "Sushi", priceUsd = 80.0)))
+            val vm = viewModel()
+            vm.state.test {
+                main.testDispatcher.scheduler.advanceUntilIdle()
+                assertEquals(CarbonCardState.Hidden(), expectMostRecentItem().carbon)
+                assertTrue(carbon.requests.isEmpty())
+                store.toggle(PlanItem.HotelItem(Hotel(name = "Park Hyatt", pricePerNightUsd = 500.0)))
+                main.testDispatcher.scheduler.advanceUntilIdle()
+                assertTrue(expectMostRecentItem().carbon is CarbonCardState.Ready)
+            }
+            val body = carbon.requests.last()
+            val selections = body["selections"]!!.jsonObject
+            assertEquals("Park Hyatt", selections["hotel"]!!.jsonObject["name"]!!.jsonPrimitive.content)
+            assertEquals("Sushi", selections["activities"]!!.jsonArray.single().jsonObject["name"]!!.jsonPrimitive.content)
+            assertEquals("Tokyo", body["search"]!!.jsonObject["destination"]!!.jsonPrimitive.content)
+            assertEquals("mixed", body["diet"]!!.jsonPrimitive.content)
+        }
+
+    @Test
+    fun `carbon diet choice is sent and retry asks again`() =
+        runTest {
+            carbon.enabled = true
+            carbon.result = io.github.rupakc.travelplanner.core.common.AppResult.Failure(AppError.Server(500, null))
+            seed()
+            val vm = viewModel()
+            vm.state.test {
+                main.testDispatcher.scheduler.advanceUntilIdle()
+                assertTrue(expectMostRecentItem().carbon is CarbonCardState.Failed)
+                carbon.result = io.github.rupakc.travelplanner.core.common.AppResult.Success(CarbonFootprint(totalKg = 5.0))
+                vm.onEvent(MyPlanEvent.CarbonRetry)
+                main.testDispatcher.scheduler.advanceUntilIdle()
+                assertTrue(expectMostRecentItem().carbon is CarbonCardState.Ready)
+                vm.onEvent(MyPlanEvent.CarbonDiet(CarbonDiet.VEGAN))
+                main.testDispatcher.scheduler.advanceUntilIdle()
+                assertEquals(CarbonDiet.VEGAN, expectMostRecentItem().carbon.diet)
+            }
+            assertEquals("vegan", carbon.requests.last()["diet"]!!.jsonPrimitive.content)
         }
 }

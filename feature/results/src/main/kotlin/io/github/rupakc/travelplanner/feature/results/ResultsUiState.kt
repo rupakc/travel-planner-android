@@ -69,6 +69,9 @@ data class ResultsUiState(
     val source: ResultsSource = ResultsSource.NONE,
     /** Plan completeness for the meter; null unless `features.trips` is on. */
     val completeness: io.github.rupakc.travelplanner.core.domain.journey.PlanCompleteness.Result? = null,
+    /** Trip carbon footprint card; hidden unless `features.carbon` is on and the stream is done. */
+    val carbon: io.github.rupakc.travelplanner.core.domain.carbon.CarbonCardState =
+        io.github.rupakc.travelplanner.core.domain.carbon.CarbonCardState.Hidden(),
 ) {
     val isDone: Boolean get() = phase == StreamPhase.DONE
     val isStreaming: Boolean get() = phase == StreamPhase.STREAMING
@@ -191,6 +194,12 @@ sealed interface ResultsMessage {
 /** Everything the user can do on the results screen. */
 sealed interface ResultsEvent {
     data class Toggle(val item: PlanItem) : ResultsEvent
+
+    /** Carbon card meals picker (remembered on the device, shared with My Plan). */
+    data class CarbonDiet(val diet: io.github.rupakc.travelplanner.core.domain.carbon.CarbonDiet) : ResultsEvent
+
+    /** Carbon card "Try again" after a failure. */
+    data object CarbonRetry : ResultsEvent
 
     data class ToggleSection(val id: SectionId) : ResultsEvent
 

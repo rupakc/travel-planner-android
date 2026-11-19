@@ -90,6 +90,7 @@ class ResultsViewModelTest {
     private val fareWatches = FakeFareWatchesRepository()
     private val priceWatches = FakePriceWatchesRepository()
     private val visibility = FakeFeatureVisibility()
+    private val carbon = io.github.rupakc.travelplanner.core.testing.fake.FakeCarbonRepository()
     private val fakeJourney = io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney()
     private var quick = io.github.rupakc.travelplanner.core.testing.fake.FakeQuickWatch(fare = fareWatches, price = priceWatches)
 
@@ -110,6 +111,7 @@ class ResultsViewModelTest {
             placeNames = PlaceNameLookup(search),
             journey = fakeJourney.journey,
             quickWatcher = quick.watcher,
+            carbon = carbon,
         )
 
     private fun ResultsUiState.section(id: SectionId) = sections.first { it.id == id }
@@ -364,6 +366,7 @@ class ResultsViewModelTest {
                     PlaceNameLookup(slow),
                     fakeJourney.journey,
                     quick.watcher,
+                    carbon,
                 )
             vm.state.test {
                 search.start(request)
@@ -399,6 +402,7 @@ class ResultsViewModelTest {
                     PlaceNameLookup(search),
                     fakeJourney.journey,
                     quick.watcher,
+                    carbon,
                 )
             first.state.test {
                 search.start(request)
@@ -424,6 +428,7 @@ class ResultsViewModelTest {
                     PlaceNameLookup(FakeSearchRepository()),
                     fakeJourney.journey,
                     quick.watcher,
+                    carbon,
                 )
             restored.state.test {
                 val s = expectMostRecentItem()

@@ -9,11 +9,13 @@ import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
 import io.github.rupakc.travelplanner.core.data.alerts.QuickWatcher
+import io.github.rupakc.travelplanner.core.data.carbon.cardStates
 import io.github.rupakc.travelplanner.core.data.offline.PlanJourney
 import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
 import io.github.rupakc.travelplanner.core.data.profile.FeatureVisibility
 import io.github.rupakc.travelplanner.core.data.repository.AuthRepository
+import io.github.rupakc.travelplanner.core.data.repository.CarbonRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareCalendarRepository
 import io.github.rupakc.travelplanner.core.data.repository.FareWatchesRepository
 import io.github.rupakc.travelplanner.core.data.repository.HealthRepository
@@ -28,6 +30,9 @@ import io.github.rupakc.travelplanner.core.domain.alerts.PriceWatchDialogState
 import io.github.rupakc.travelplanner.core.domain.alerts.QuickWatchOutcome
 import io.github.rupakc.travelplanner.core.domain.alerts.WatchTrip
 import io.github.rupakc.travelplanner.core.domain.alerts.WatchedOutcome
+import io.github.rupakc.travelplanner.core.domain.carbon.CarbonCardState
+import io.github.rupakc.travelplanner.core.domain.carbon.CarbonDiet
+import io.github.rupakc.travelplanner.core.domain.carbon.CarbonRequests
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.journey.PlanCompleteness
 import io.github.rupakc.travelplanner.core.domain.results.BestValuePackage
@@ -123,6 +128,7 @@ class ResultsViewModel
         private val placeNames: PlaceNameLookup,
         private val journey: PlanJourney,
         private val quickWatcher: QuickWatcher,
+        private val carbon: CarbonRepository,
     ) : ViewModel() {
         private val local = MutableStateFlow(LocalState())
         private val builder = ResultsStateBuilder()
@@ -161,13 +167,35 @@ class ResultsViewModel
         private val completeness: Flow<PlanCompleteness.Result?> =
             plan.draft.map { journey.completeness(it) }.distinctUntilChanged().flowOn(dispatchers.default)
 
+        private val carbonRetries = MutableStateFlow(0)
+
+        /** Web: the Results card appears once the stream is done (or results came from the draft), from the cheapest flight. */
+        private val carbonCard: Flow<CarbonCardState> =
+            carbon.cardStates(source.map(::carbonBody).distinctUntilChanged().flowOn(dispatchers.default), carbonRetries)
+
+        private fun carbonBody(sourced: SourcedResults): JsonObject? {
+            val results = sourced.results
+            if (results.phase != StreamPhase.DONE && sourced.source != ResultsSource.SNAPSHOT) return null
+            val request = results.request ?: return null
+            return CarbonRequests.fromResults(
+                search = TravelJson.encodeToJsonElement(TravelSearchRequest.serializer(), request) as? JsonObject,
+                flights = results.sections[SectionId.FLIGHTS]?.raw,
+                hotels = results.sections[SectionId.HOTELS]?.raw,
+                itinerary = results.sections[SectionId.ITINERARY]?.raw,
+                diet = CarbonDiet.MIXED,
+            )
+        }
+
         val state: StateFlow<ResultsUiState> =
             combine(
                 combine(source, plan.draft, local, health.capabilities, visibleFeatures) { sourced, draft, l, caps, visible ->
                     builder.build(sourced, draft, l, caps, visible, clock.today())
                 },
                 completeness,
-            ) { built, meter -> if (meter == null) built else built.copy(completeness = meter) }
+                carbonCard,
+            ) { built, meter, footprint ->
+                (if (meter == null) built else built.copy(completeness = meter)).copy(carbon = footprint)
+            }
                 .flowOn(dispatchers.default)
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ResultsUiState())
 
@@ -295,6 +323,14 @@ class ResultsViewModel
             when (event) {
                 is ResultsEvent.Toggle -> {
                     plan.toggle(event.item)
+                }
+
+                is ResultsEvent.CarbonDiet -> {
+                    viewModelScope.launch { carbon.setDiet(event.diet) }
+                }
+
+                ResultsEvent.CarbonRetry -> {
+                    carbonRetries.update { it + 1 }
                 }
 
                 is ResultsEvent.ToggleSection -> {

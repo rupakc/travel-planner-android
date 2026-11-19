@@ -110,6 +110,7 @@ class ResultsScreenTest {
                 io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup(search),
                 io.github.rupakc.travelplanner.core.testing.fake.FakePlanJourney().journey,
                 io.github.rupakc.travelplanner.core.testing.fake.FakeQuickWatch().watcher,
+                io.github.rupakc.travelplanner.core.testing.fake.FakeCarbonRepository(),
             )
         search.start(request)
         compose.setContent {

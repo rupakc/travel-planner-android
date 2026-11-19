@@ -8,9 +8,14 @@ import io.github.rupakc.travelplanner.core.common.AppClock
 import io.github.rupakc.travelplanner.core.common.AppDispatchers
 import io.github.rupakc.travelplanner.core.common.AppError
 import io.github.rupakc.travelplanner.core.common.AppResult
+import io.github.rupakc.travelplanner.core.data.carbon.cardStates
 import io.github.rupakc.travelplanner.core.data.offline.PlanJourney
 import io.github.rupakc.travelplanner.core.data.place.PlaceNameLookup
 import io.github.rupakc.travelplanner.core.data.plan.CurrentPlanStore
+import io.github.rupakc.travelplanner.core.data.repository.CarbonRepository
+import io.github.rupakc.travelplanner.core.domain.carbon.CarbonCardState
+import io.github.rupakc.travelplanner.core.domain.carbon.CarbonDiet
+import io.github.rupakc.travelplanner.core.domain.carbon.CarbonRequests
 import io.github.rupakc.travelplanner.core.domain.export.PlanExportInput
 import io.github.rupakc.travelplanner.core.domain.export.PlanIcs
 import io.github.rupakc.travelplanner.core.domain.journey.PlanCompleteness
@@ -41,6 +46,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -96,6 +102,8 @@ internal data class MyPlanUiState(
     val isSaving: Boolean = false,
     val confirmNewPlan: Boolean = false,
     val message: MyPlanMessage? = null,
+    /** Trip carbon footprint (web drawer card): hidden until a flight or hotel is picked, or with `features.carbon` off. */
+    val carbon: CarbonCardState = CarbonCardState.Hidden(),
 )
 
 internal sealed interface MyPlanEvent {
@@ -120,6 +128,10 @@ internal sealed interface MyPlanEvent {
     data object ShareAsText : MyPlanEvent
 
     data object MessageShown : MyPlanEvent
+
+    data class CarbonDiet(val diet: io.github.rupakc.travelplanner.core.domain.carbon.CarbonDiet) : MyPlanEvent
+
+    data object CarbonRetry : MyPlanEvent
 }
 
 /** My Plan: the shared draft (CurrentPlanStore) with save, save as new, new plan, removal with undo and export. */
@@ -133,6 +145,7 @@ internal class MyPlanViewModel
         dispatchers: AppDispatchers,
         private val placeNames: PlaceNameLookup,
         private val journey: PlanJourney,
+        private val carbon: CarbonRepository,
     ) : ViewModel() {
         private var meterReported = false
         private val status = MutableStateFlow(MyPlanUiState())
@@ -152,8 +165,13 @@ internal class MyPlanViewModel
                     placeNames.namesFor(places).map { names -> contentOf(draft, names).withMeter(draft) }
                 }.flowOn(dispatchers.default)
 
+        private val carbonRetries = MutableStateFlow(0)
+
+        private val carbonCard: Flow<CarbonCardState> =
+            carbon.cardStates(store.draft.map(::carbonBody).distinctUntilChanged().flowOn(dispatchers.default), carbonRetries)
+
         val state: StateFlow<MyPlanUiState> =
-            combine(content, status) { c, s -> s.copy(content = c) }
+            combine(content, status, carbonCard) { c, s, footprint -> s.copy(content = c, carbon = footprint) }
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), MyPlanUiState())
 
         fun onEvent(event: MyPlanEvent) {
@@ -169,6 +187,8 @@ internal class MyPlanViewModel
                 MyPlanEvent.ExportCalendar -> exportIcs()
                 MyPlanEvent.ShareAsText -> shareText()
                 MyPlanEvent.MessageShown -> status.update { it.copy(message = null) }
+                is MyPlanEvent.CarbonDiet -> viewModelScope.launch { carbon.setDiet(event.diet) }
+                MyPlanEvent.CarbonRetry -> carbonRetries.update { it + 1 }
             }
         }
 
@@ -217,6 +237,14 @@ internal class MyPlanViewModel
         }
 
         private fun liveItinerary(draft: PlanDraft): JsonObject? = draft.searchData?.get("itinerary") as? JsonObject
+
+        /** Web drawer: only once a flight or hotel is picked; the live itinerary, else the plan's saved one. */
+        private fun carbonBody(draft: PlanDraft): JsonObject? {
+            val selections = PlanSelectionsSerializer.toJson(draft.selections)
+            if (!CarbonRequests.selectionsHaveTravel(selections)) return null
+            val search = draft.searchRequest?.let { TravelJson.encodeToJsonElement(TravelSearchRequest.serializer(), it) as? JsonObject }
+            return CarbonRequests.fromSelections(search, selections, liveItinerary(draft) ?: draft.selections.itinerarySnapshot, CarbonDiet.MIXED)
+        }
 
         private fun remove(removal: Removal, title: String?) {
             val draft = store.snapshot()

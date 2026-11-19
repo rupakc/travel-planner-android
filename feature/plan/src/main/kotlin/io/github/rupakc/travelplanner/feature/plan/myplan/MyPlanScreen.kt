@@ -43,10 +43,12 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpOutlinedText
 import io.github.rupakc.travelplanner.core.designsystem.component.TpTopBar
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelShape
 import io.github.rupakc.travelplanner.core.designsystem.theme.TravelTheme
+import io.github.rupakc.travelplanner.core.domain.carbon.CarbonCardState
 import io.github.rupakc.travelplanner.core.domain.plan.BudgetStatus
 import io.github.rupakc.travelplanner.core.domain.plan.CostCategory
 import io.github.rupakc.travelplanner.core.domain.plan.CostPart
 import io.github.rupakc.travelplanner.core.model.settings.ThemeMode
+import io.github.rupakc.travelplanner.core.ui.carbon.CarbonFootprintCard
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.core.ui.journey.CompletenessMeter
 import io.github.rupakc.travelplanner.feature.plan.R
@@ -96,7 +98,7 @@ internal fun MyPlanScreen(
             if (content == null) {
                 SkeletonList(Modifier.padding(TravelTheme.spacing.gutter))
             } else {
-                PlanBody(content, onEvent, onOpenLink, offerSlot)
+                PlanBody(content, state.carbon, onEvent, onOpenLink, offerSlot)
             }
         }
     }
@@ -113,7 +115,13 @@ internal fun MyPlanScreen(
 }
 
 @Composable
-private fun PlanBody(content: MyPlanContent, onEvent: (MyPlanEvent) -> Unit, onOpenLink: (String) -> Unit, offerSlot: (@Composable () -> Unit)?) {
+private fun PlanBody(
+    content: MyPlanContent,
+    carbon: CarbonCardState,
+    onEvent: (MyPlanEvent) -> Unit,
+    onOpenLink: (String) -> Unit,
+    offerSlot: (@Composable () -> Unit)?,
+) {
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = TravelTheme.spacing.gutter, vertical = TravelTheme.spacing.md),
@@ -136,6 +144,15 @@ private fun PlanBody(content: MyPlanContent, onEvent: (MyPlanEvent) -> Unit, onO
         }
         item(key = "cost", contentType = "cost") {
             CostCard(content.costParts, content.budgetStatus, content.hasTransport, Modifier.padding(top = TravelTheme.spacing.md))
+        }
+        item(key = "carbon", contentType = "carbon") {
+            CarbonFootprintCard(
+                carbon,
+                onDiet = { onEvent(MyPlanEvent.CarbonDiet(it)) },
+                onRetry = { onEvent(MyPlanEvent.CarbonRetry) },
+                modifier = Modifier.padding(top = TravelTheme.spacing.md),
+                compact = true,
+            )
         }
         item(key = "export", contentType = "export") { ExportRow(onEvent) }
         selectionGroups(content.groups, onOpenLink, onRemove = { removal, title -> onEvent(MyPlanEvent.Remove(removal, title)) })
