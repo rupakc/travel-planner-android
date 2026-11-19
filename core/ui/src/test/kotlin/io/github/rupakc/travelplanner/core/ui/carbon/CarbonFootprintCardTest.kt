@@ -97,6 +97,41 @@ class CarbonFootprintCardTest {
     }
 
     @Test
+    fun `a zero total still shows live sources and the train hint, but no bar or comparisons`() {
+        val zero =
+            TravelJson.decodeFromString(
+                CarbonFootprint.serializer(),
+                """{"total_kg":0,"categories":[],"comparisons":{"car_km":0,"budget_share":0},
+                "lower_carbon":[{"route":"LHR–CDG","rail_km":417,"saving_kg":149.9}],
+                "crawler_sources":[{"name":"DESNZ 2027 factors","as_of":"2027-06-10"}]}""",
+            )
+        show(CarbonCardState.Ready(zero, CarbonDiet.MIXED))
+        compose.onNodeWithTag("carbon_live_sources").assertExists()
+        compose.onNodeWithTag("carbon_rail_hint").assertExists()
+        compose.onNodeWithTag("carbon_bar_flights", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithText("Like driving", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the bar leaves the remainder empty when shown shares add up to less than one`() {
+        val partial =
+            TravelJson.decodeFromString(
+                CarbonFootprint.serializer(),
+                """{"total_kg":100,"categories":[{"key":"flights","kg":60,"share":0.6,"included":true},
+                {"key":"brand_new_category","kg":40,"share":0.4,"included":true}]}""",
+            )
+        show(CarbonCardState.Ready(partial, CarbonDiet.MIXED))
+        compose.onNodeWithTag("carbon_bar_flights", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("carbon_bar_rest", useUnmergedTree = true).assertExists()
+    }
+
+    @Test
+    fun `the bar has no remainder when the shares fill it`() {
+        show(CarbonCardState.Ready(footprint, CarbonDiet.MIXED))
+        compose.onNodeWithTag("carbon_bar_rest", useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
     fun `the meals picker reports the new diet`() {
         var picked: CarbonDiet? = null
         show(CarbonCardState.Ready(footprint, CarbonDiet.MIXED), onDiet = { picked = it })

@@ -55,8 +55,9 @@ Port of the web `CarbonFootprint` card (web `docs/Carbon-Footprint.md`). The bac
 (`core:domain`, a port of the web `utils/carbon.js`) only trims the raw JSON the screen holds: on Results, once the stream is done (or the
 results came from the draft), the cheapest flight (per leg on multi-city; a missing or 0 price sorts last), the first hotel and the
 itinerary; in My Plan, the picked flight(s), hotel, transport and activities with the live itinerary (else the plan's saved one), and only
-once a flight or hotel is picked. `cardStates` (`core:data` `carbon/`) is the one state machine both screens use: Hidden first and for good
-when the flag is off (no request is sent), a 350 ms debounce, the latest request wins, a 404 hides the card permanently (older backend or
+once a flight or hotel is picked. `cardStates` (`core:data` `carbon/`) is the one state machine both screens use: Hidden first and while the flag
+is off (no request is sent; the flag is read again on each new body and after 5/15/30/60 s, so a failed `/api/config`, which is not
+cached, does not hide the card for the whole visit), a 350 ms debounce, the latest request wins, a 404 hides the card permanently (older backend or
 flag turned off), other failures show "The footprint isn't available right now." with Try again. The meals choice is device-local
 (`carbon_prefs` DataStore, the web's `tp_carbon_diet`) and shared by both cards. `CarbonFootprintCard` (`core:ui` `carbon/`) renders the
 total, per person, the breakdown bar (described for TalkBack) with a legend, the car-km and yearly-budget comparisons, the train hint,

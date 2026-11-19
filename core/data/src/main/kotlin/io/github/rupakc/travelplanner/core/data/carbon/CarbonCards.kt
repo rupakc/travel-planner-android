@@ -22,9 +22,18 @@ import kotlinx.serialization.json.JsonPrimitive
 const val CARBON_DEBOUNCE_MS = 350L
 
 /**
+ * While `features.carbon` reads off for the current body, ask again after these waits. A real "off" is cached by
+ * the flags repository, so these re-reads only reach the network after a failed `/api/config`.
+ */
+val CARBON_AVAILABILITY_RETRY_MS: List<Long> = listOf(5_000L, 15_000L, 30_000L, 60_000L)
+
+/**
  * The footprint card's state for a stream of request [bodies] (from `CarbonRequests`; null = nothing to show yet).
  * The remembered diet is written into each body. Rules, as on the web:
  * - Starts with [CarbonCardState.Hidden]; with `features.carbon` off it stays so and no request is ever sent.
+ *   The flag is read when the first body arrives. While it reads off (also when `/api/config` failed, which the
+ *   flags repository does not cache) it is read again after each of [availabilityRetryMillis] and on every new body,
+ *   so a cold start offline or a timed-out config shows the card once the network is back.
  * - A new body or diet shows Loading (or keeps the old numbers, refreshing) and asks again after [debounceMillis];
  *   an older answer never overwrites a newer request.
  * - A 404 hides the card for good (an older backend, or the flag turned off); any other failure is
@@ -35,18 +44,24 @@ fun CarbonRepository.cardStates(
     bodies: Flow<JsonObject?>,
     retries: Flow<Int> = flowOf(0),
     debounceMillis: Long = CARBON_DEBOUNCE_MS,
+    availabilityRetryMillis: List<Long> = CARBON_AVAILABILITY_RETRY_MS,
 ): Flow<CarbonCardState> =
     flow {
         // Hidden first, so a screen combining this never waits for `/api/config`.
         emit(CarbonCardState.Hidden())
-        if (!available()) return@flow
         var last: CarbonCardState = CarbonCardState.Hidden()
         var gone = false
+        var enabled = false
         emitAll(
             combine(bodies, diet, retries) { body, d, attempt -> Triple(body?.withDiet(d), d, attempt) }
                 .distinctUntilChanged()
                 .transformLatest { (body, d, _) ->
                     if (gone || body == null) {
+                        emit(CarbonCardState.Hidden(d))
+                        return@transformLatest
+                    }
+                    if (!enabled) enabled = awaitAvailable(availabilityRetryMillis)
+                    if (!enabled) {
                         emit(CarbonCardState.Hidden(d))
                         return@transformLatest
                     }
@@ -72,5 +87,15 @@ fun CarbonRepository.cardStates(
                 }.onEach { last = it },
         )
     }.distinctUntilChanged()
+
+/** True once `features.carbon` reads on, asking now and after each of [waits]; false when it still reads off. */
+private suspend fun CarbonRepository.awaitAvailable(waits: List<Long>): Boolean {
+    if (available()) return true
+    for (wait in waits) {
+        delay(wait)
+        if (available()) return true
+    }
+    return false
+}
 
 private fun JsonObject.withDiet(diet: CarbonDiet): JsonObject = JsonObject(this + ("diet" to JsonPrimitive(diet.wire)))

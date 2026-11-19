@@ -28,9 +28,41 @@ class CarbonCardsTest {
             val repo = FakeCarbonRepository(enabled = false)
             repo.cardStates(MutableStateFlow(body)).test {
                 assertEquals(CarbonCardState.Hidden(), awaitItem())
-                awaitComplete()
+                advanceTimeBy(5 * 60_000)
+                expectNoEvents()
             }
             assertTrue(repo.requests.isEmpty())
+        }
+
+    @Test
+    fun `a failed config read is retried and the card appears once the flag reads on`() =
+        runTest(timeout = 10.seconds) {
+            val repo = FakeCarbonRepository(enabled = false, result = AppResult.Success(ok))
+            repo.cardStates(MutableStateFlow(body), availabilityRetryMillis = listOf(1_000L, 2_000L)).test {
+                assertEquals(CarbonCardState.Hidden(), awaitItem())
+                advanceTimeBy(1_500)
+                expectNoEvents()
+                repo.enabled = true
+                assertEquals(CarbonCardState.Loading(CarbonDiet.MIXED), awaitItem())
+                assertEquals(CarbonCardState.Ready(ok, CarbonDiet.MIXED), awaitItem())
+            }
+            assertEquals(1, repo.requests.size)
+        }
+
+    @Test
+    fun `a new body reads the flag again after the retries ran out`() =
+        runTest(timeout = 10.seconds) {
+            val repo = FakeCarbonRepository(enabled = false, result = AppResult.Success(ok))
+            val bodies = MutableStateFlow<JsonObject?>(body)
+            repo.cardStates(bodies, availabilityRetryMillis = listOf(1_000L)).test {
+                assertEquals(CarbonCardState.Hidden(), awaitItem())
+                advanceTimeBy(5_000)
+                expectNoEvents()
+                repo.enabled = true
+                bodies.value = JsonObject(body + ("x" to JsonPrimitive(1)))
+                assertEquals(CarbonCardState.Loading(CarbonDiet.MIXED), awaitItem())
+                assertEquals(CarbonCardState.Ready(ok, CarbonDiet.MIXED), awaitItem())
+            }
         }
 
     @Test

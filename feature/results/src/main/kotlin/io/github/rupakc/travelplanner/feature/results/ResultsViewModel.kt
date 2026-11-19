@@ -94,6 +94,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -170,8 +171,12 @@ class ResultsViewModel
         private val carbonRetries = MutableStateFlow(0)
 
         /** Web: the Results card appears once the stream is done (or results came from the draft), from the cheapest flight. */
+        // Kept for the ViewModel's life (not restarted with the screen's subscription): coming back to the screen
+        // shows the last card at once, without a fresh POST, and a remembered 404 stays remembered.
         private val carbonCard: Flow<CarbonCardState> =
-            carbon.cardStates(source.map(::carbonBody).distinctUntilChanged().flowOn(dispatchers.default), carbonRetries)
+            carbon
+                .cardStates(source.map(::carbonBody).distinctUntilChanged().flowOn(dispatchers.default), carbonRetries)
+                .shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
         private fun carbonBody(sourced: SourcedResults): JsonObject? {
             val results = sourced.results

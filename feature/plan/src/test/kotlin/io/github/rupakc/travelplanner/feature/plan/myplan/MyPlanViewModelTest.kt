@@ -290,6 +290,27 @@ class MyPlanViewModelTest {
         }
 
     @Test
+    fun `coming back to My Plan keeps the footprint without asking again`() =
+        runTest {
+            carbon.enabled = true
+            carbon.result = io.github.rupakc.travelplanner.core.common.AppResult.Success(CarbonFootprint(totalKg = 5.0))
+            store.attachSearch(request, null)
+            store.toggle(PlanItem.HotelItem(Hotel(name = "Park Hyatt", pricePerNightUsd = 500.0)))
+            val vm = viewModel()
+            vm.state.test {
+                main.testDispatcher.scheduler.advanceUntilIdle()
+                assertTrue(expectMostRecentItem().carbon is CarbonCardState.Ready)
+            }
+            // Past the screen's stop timeout: the UI state restarts, the card flow does not.
+            main.testDispatcher.scheduler.advanceTimeBy(60_000)
+            vm.state.test {
+                main.testDispatcher.scheduler.advanceUntilIdle()
+                assertTrue(expectMostRecentItem().carbon is CarbonCardState.Ready)
+            }
+            assertEquals(1, carbon.requests.size)
+        }
+
+    @Test
     fun `carbon diet choice is sent and retry asks again`() =
         runTest {
             carbon.enabled = true

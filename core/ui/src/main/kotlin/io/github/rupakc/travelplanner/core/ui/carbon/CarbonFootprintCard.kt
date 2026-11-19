@@ -157,9 +157,11 @@ private fun ReadyBody(footprint: CarbonFootprint, compact: Boolean) {
             )
         }
     }
-    if (total <= 0) return
-    Breakdown(CarbonView.visibleCategories(footprint))
-    Comparisons(footprint)
+    // As on the web, only the bar, legend and comparisons need a positive total; live sources and the hint always show.
+    if (total > 0) {
+        Breakdown(CarbonView.visibleCategories(footprint))
+        Comparisons(footprint)
+    }
     LiveSources(CarbonView.liveSources(footprint))
     CarbonView.bestHint(footprint)?.let { RailHint(it) }
 }
@@ -181,9 +183,13 @@ private fun Breakdown(categories: List<CarbonCategory>) {
             .clearAndSetSemantics { contentDescription = barText },
         horizontalArrangement = Arrangement.spacedBy(1.dp),
     ) {
-        rows.forEach { (c, color, _) ->
-            Box(Modifier.weight((c.share ?: 0.0).toFloat().coerceAtLeast(MIN_WEIGHT)).fillMaxHeight().background(color).testTag("carbon_bar_${c.key}"))
+        val weights = rows.map { (c, _, _) -> (c.share ?: 0.0).toFloat().coerceAtLeast(MIN_WEIGHT) }
+        rows.forEachIndexed { i, (c, color, _) ->
+            Box(Modifier.weight(weights[i]).fillMaxHeight().background(color).testTag("carbon_bar_${c.key}"))
         }
+        // Web: each segment is `share * 100%` wide, so shares that add up to less than 1 leave the grey track showing.
+        val rest = 1f - weights.sum()
+        if (rest > MIN_WEIGHT) Spacer(Modifier.weight(rest).testTag("carbon_bar_rest"))
     }
     Column(Modifier.padding(top = TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xxs)) {
         rows.forEach { (c, color, label) ->
