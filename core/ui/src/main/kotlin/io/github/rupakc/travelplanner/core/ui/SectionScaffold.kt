@@ -57,6 +57,7 @@ fun SectionId.titleRes(): Int =
         SectionId.VISA -> R.string.section_visa
         SectionId.SIM -> R.string.section_sim
         SectionId.TIPS -> R.string.section_tips
+        SectionId.PLACE_FACTS -> R.string.section_place_facts
         SectionId.EMERGENCY_CARD -> R.string.section_emergency_card
         SectionId.GETTING_AROUND -> R.string.section_getting_around
         SectionId.FOREX -> R.string.section_forex

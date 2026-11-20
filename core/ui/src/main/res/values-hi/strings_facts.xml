@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Place facts (web results:facts.*, agents.facts, official.source|asOf|disagree). -->
+    <string name="section_place_facts">जगह के तथ्य</string>
+    <string name="facts_ai_label">AI का सुझाव, सत्यापित नहीं</string>
+    <string name="facts_ai_note">AI के सुझाए तथ्य मॉडल की सामान्य जानकारी से आते हैं और इनका कोई स्रोत नहीं है। भरोसा करने से पहले इन्हें जाँच लें।</string>
+    <string name="facts_machine_translated">मूल भाषा से मशीन अनुवाद</string>
+    <string name="facts_places_label">जगहें</string>
+    <string name="facts_groups_label">तथ्यों के समूह</string>
+    <string name="facts_scope_city">शहर</string>
+    <string name="facts_scope_place">गंतव्य</string>
+    <string name="facts_scope_region">क्षेत्र</string>
+    <string name="facts_scope_country">देश</string>
+    <string name="facts_group_historical">ऐतिहासिक</string>
+    <string name="facts_group_fun">मज़ेदार</string>
+    <string name="facts_group_popular">लोकप्रिय</string>
+    <string name="facts_group_unbelievable">अविश्वसनीय</string>
+    <string name="facts_group_little_known">कम ज्ञात</string>
+    <string name="facts_source">स्रोत: %1$s</string>
+    <string name="facts_as_of">%1$s तक</string>
+    <string name="facts_conflict">स्रोतों में मतभेद है — आधिकारिक साइट पर जाँचें।</string>
+    <string name="facts_group_count">%1$s (%2$d)</string>
+    <string name="facts_place_chip">%1$s · %2$s</string>
+    <string name="facts_place_prefix">"%1$s: "</string>
+</resources>

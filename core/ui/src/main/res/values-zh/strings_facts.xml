@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Place facts (web results:facts.*, agents.facts, official.source|asOf|disagree). -->
+    <string name="section_place_facts">地点趣闻</string>
+    <string name="facts_ai_label">AI 建议，未经核实</string>
+    <string name="facts_ai_note">AI 建议的内容来自模型的一般知识，没有来源。请在依赖之前自行核实。</string>
+    <string name="facts_machine_translated">由原文机器翻译</string>
+    <string name="facts_places_label">地点</string>
+    <string name="facts_groups_label">分类</string>
+    <string name="facts_scope_city">城市</string>
+    <string name="facts_scope_place">目的地</string>
+    <string name="facts_scope_region">地区</string>
+    <string name="facts_scope_country">国家</string>
+    <string name="facts_group_historical">历史</string>
+    <string name="facts_group_fun">趣味</string>
+    <string name="facts_group_popular">知名</string>
+    <string name="facts_group_unbelievable">难以置信</string>
+    <string name="facts_group_little_known">鲜为人知</string>
+    <string name="facts_source">来源：%1$s</string>
+    <string name="facts_as_of">截至 %1$s</string>
+    <string name="facts_conflict">各来源说法不一，请查看官方网站。</string>
+    <string name="facts_group_count">%1$s（%2$d）</string>
+    <string name="facts_place_chip">%1$s · %2$s</string>
+    <string name="facts_place_prefix">"%1$s："</string>
+</resources>
