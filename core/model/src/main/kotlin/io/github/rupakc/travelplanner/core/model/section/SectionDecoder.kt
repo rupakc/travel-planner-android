@@ -22,6 +22,7 @@ object SectionDecoder {
                 SectionId.VISA -> VisaData.serializer()
                 SectionId.SIM -> SimData.serializer()
                 SectionId.TIPS -> TipsData.serializer()
+                SectionId.PLACE_FACTS -> PlaceFactsData.serializer()
                 SectionId.EMERGENCY_CARD -> EmergencyCardData.serializer()
                 SectionId.GETTING_AROUND -> GettingAroundData.serializer()
                 SectionId.FOREX -> ForexData.serializer()

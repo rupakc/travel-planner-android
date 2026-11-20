@@ -1,5 +1,6 @@
 package io.github.rupakc.travelplanner.feature.results
 
+import io.github.rupakc.travelplanner.core.domain.facts.PlaceFactsView
 import io.github.rupakc.travelplanner.core.domain.feature.FeatureId
 import io.github.rupakc.travelplanner.core.domain.plan.computePlanCost
 import io.github.rupakc.travelplanner.core.domain.plan.getBudgetStatus
@@ -131,6 +132,10 @@ internal class ResultsStateBuilder {
         }
     }
 
+    /** An optional section (Place facts) is listed only once it holds something to show; an older backend never sends it. */
+    private fun optionalShown(id: SectionId, effective: Map<SectionId, Pair<SectionData, JsonObject>>): Boolean =
+        !id.optional || PlaceFactsView.hasFacts(effective[id]?.first)
+
     private fun compute(id: SectionId, r: SectionResult, destinations: List<String>?, streaming: Boolean): Pair<SectionData, JsonObject> {
         val ordered = if (id == SectionId.FLIGHTS || id == SectionId.WEATHER) r.raw else orderSectionByCity(r.raw, destinations)
         val resolved = if (streaming) ordered else clearPendingVerification(mapOf(id to ordered)).getValue(id)
@@ -155,7 +160,7 @@ internal class ResultsStateBuilder {
         val trip = tripResults(effective)
         val query = local.query
         val sections =
-            SectionArrangement.arrange(visible).map { arranged ->
+            SectionArrangement.arrange(visible).filter { optionalShown(it.id, effective) }.map { arranged ->
                 val id = arranged.id
                 val entry = effective[id]
                 val (data, count) = entry?.let { (d, raw) -> ResultsTextFilter.filter(d, raw, query) } ?: (null to Int.MAX_VALUE)
@@ -337,8 +342,12 @@ internal class ResultsStateBuilder {
             return SearchResultsState(
                 request = request,
                 sections = sections,
-                // Only what was stored is done; the rest is "not loaded" (never "No results").
-                statuses = SectionId.entries.associateWith { if (it in sections) SectionStatus.DONE else SectionStatus.WAITING },
+                // Only what was stored is done; the rest is "not loaded" (never "No results"). An optional
+                // section has no status at all unless it was stored.
+                statuses =
+                    SectionId.entries
+                        .filter { !it.optional || it in sections }
+                        .associateWith { if (it in sections) SectionStatus.DONE else SectionStatus.WAITING },
                 phase = StreamPhase.DONE,
             )
         }

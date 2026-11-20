@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Place facts (web results:facts.*, agents.facts, official.source|asOf|disagree). -->
+    <string name="section_place_facts">Datos del lugar</string>
+    <string name="facts_ai_label">Sugerido por IA, sin verificar</string>
+    <string name="facts_ai_note">Los datos sugeridos por IA proceden del conocimiento general del modelo y no tienen fuente. Compruébalos antes de fiarte de ellos.</string>
+    <string name="facts_machine_translated">Traducción automática del idioma original</string>
+    <string name="facts_places_label">Lugares</string>
+    <string name="facts_groups_label">Grupos de datos</string>
+    <string name="facts_scope_city">Ciudad</string>
+    <string name="facts_scope_place">Destino</string>
+    <string name="facts_scope_region">Región</string>
+    <string name="facts_scope_country">País</string>
+    <string name="facts_group_historical">Históricos</string>
+    <string name="facts_group_fun">Curiosos</string>
+    <string name="facts_group_popular">Populares</string>
+    <string name="facts_group_unbelievable">Increíbles</string>
+    <string name="facts_group_little_known">Poco conocidos</string>
+    <string name="facts_source">Fuente: %1$s</string>
+    <string name="facts_as_of">a %1$s</string>
+    <string name="facts_conflict">Las fuentes no coinciden: consulta el sitio oficial.</string>
+    <string name="facts_group_count">%1$s (%2$d)</string>
+    <string name="facts_place_chip">%1$s · %2$s</string>
+    <string name="facts_place_prefix">"%1$s: "</string>
+</resources>

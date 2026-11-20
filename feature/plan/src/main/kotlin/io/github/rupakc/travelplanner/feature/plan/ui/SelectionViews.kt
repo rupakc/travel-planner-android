@@ -42,6 +42,7 @@ import io.github.rupakc.travelplanner.core.domain.plan.CostCategory
 import io.github.rupakc.travelplanner.core.domain.plan.CostPart
 import io.github.rupakc.travelplanner.core.model.section.SectionId
 import io.github.rupakc.travelplanner.core.ui.PriceText
+import io.github.rupakc.travelplanner.core.ui.facts.SelectedPlaceFact
 import io.github.rupakc.travelplanner.core.ui.format.localPrice
 import io.github.rupakc.travelplanner.feature.plan.R
 import io.github.rupakc.travelplanner.feature.plan.model.PlanCategory
@@ -71,6 +72,7 @@ internal fun PlanCategory.title(): String =
             PlanCategory.SIM -> R.string.plan_cat_sim
             PlanCategory.GETTING_AROUND -> R.string.plan_cat_getting_around
             PlanCategory.TIPS -> R.string.plan_cat_tips
+            PlanCategory.PLACE_FACTS -> R.string.plan_cat_place_facts
             PlanCategory.EVENTS -> R.string.plan_cat_events
             PlanCategory.NOTES -> R.string.plan_cat_notes
             PlanCategory.ITINERARY_SLOTS -> R.string.plan_cat_itinerary
@@ -142,17 +144,22 @@ private fun SelectionRow(
         verticalAlignment = Alignment.Top,
     ) {
         Column(Modifier.weight(1f).padding(top = TravelTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xxs)) {
-            entryOverline(entry)?.let {
-                Text(it, style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.primary)
+            val fact = entry.fact
+            if (fact != null) {
+                SelectedPlaceFact(fact, onOpenLink)
+            } else {
+                entryOverline(entry)?.let {
+                    Text(it, style = TravelTheme.typography.labelMedium, color = TravelTheme.colors.primary)
+                }
+                Text(title, style = TravelTheme.typography.bodyLarge)
+                entry.dataGb?.let {
+                    Text(stringResource(R.string.plan_data_gb, it), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+                }
+                entry.details.forEach {
+                    Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
+                }
+                EntryPrice(entry)
             }
-            Text(title, style = TravelTheme.typography.bodyLarge)
-            entry.dataGb?.let {
-                Text(stringResource(R.string.plan_data_gb, it), style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
-            }
-            entry.details.forEach {
-                Text(it, style = TravelTheme.typography.bodySmall, color = TravelTheme.colors.onSurfaceVariant)
-            }
-            EntryPrice(entry)
         }
         if (link != null) {
             val label = stringResource(R.string.plan_open_link_a11y, title)

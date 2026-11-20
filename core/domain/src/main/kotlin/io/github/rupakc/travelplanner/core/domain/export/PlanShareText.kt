@@ -1,6 +1,8 @@
 package io.github.rupakc.travelplanner.core.domain.export
 
+import io.github.rupakc.travelplanner.core.domain.facts.PlaceFactsView
 import io.github.rupakc.travelplanner.core.domain.format.formatPrice
+import io.github.rupakc.travelplanner.core.model.plan.PlaceFactPick
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.section.Flight
 import kotlinx.serialization.json.JsonObject
@@ -28,6 +30,14 @@ data class PlanTextLabels(
     val perNight: (String) -> String,
     /** "Estimate" (web label for estimated prices) */
     val estimate: String,
+    /** "Place facts" (web print `placeFacts`); the section is left out while it is blank. */
+    val placeFacts: String = "",
+    /** "AI-suggested, not verified", under every AI fact. */
+    val aiFact: String = "",
+    /** "Source: %s", a crawler fact's source name. */
+    val source: (String) -> String = { it },
+    /** "as of %s", after a crawler fact's source name (the day only, YYYY-MM-DD). */
+    val asOf: (String) -> String = { it },
 )
 
 /**
@@ -70,6 +80,7 @@ object PlanShareText {
             }
             section(labels.gettingAround, selections.gettingAround) { o -> listOfNotNull(o.name, o.priceInfo).joinToString(", ") + link(o.bookingUrl) }
             section(labels.tips, selections.tips) { it.title.orEmpty() }
+            if (labels.placeFacts.isNotBlank()) section(labels.placeFacts, selections.placeFacts) { factLine(it, labels) }
 
             if (itineraryDays.isNotEmpty()) {
                 appendLine()
@@ -96,6 +107,22 @@ object PlanShareText {
         appendLine()
         appendLine(title)
         lines.forEach { appendLine("  • $it") }
+    }
+
+    /**
+     * A place fact as the printed plan shows it (web `planPrint.factLine`): "Place: text", then its source with the
+     * as-of day, the source link, the attribution and the licence link; a fact without a crawler source name gets
+     * the AI label instead, so shared text never carries an unlabelled, unsourced fact.
+     */
+    private fun factLine(f: PlaceFactPick, labels: PlanTextLabels): String {
+        val text = f.text?.takeIf(String::isNotBlank) ?: return ""
+        val head = listOfNotNull(f.place?.takeIf(String::isNotBlank), text).joinToString(": ")
+        val c = f.citation?.takeIf { f.isCrawler }
+        val name = c?.name?.takeIf(String::isNotBlank)
+        if (c == null || name == null) return if (labels.aiFact.isNotBlank()) head + "\n    " + labels.aiFact else head
+        val asOf = PlaceFactsView.day(c.asOf)?.let { " · " + labels.asOf(it) } ?: ""
+        val attribution = c.attribution?.takeIf(String::isNotBlank)?.let { "\n    $it" } ?: ""
+        return head + "\n    " + labels.source(name) + asOf + link(c.url) + attribution + link(c.licenceUrl)
     }
 
     private fun named(name: String?, price: Double?): String =

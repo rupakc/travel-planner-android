@@ -8,6 +8,7 @@ import androidx.core.content.FileProvider
 import io.github.rupakc.travelplanner.core.domain.export.PlanCalendarEvent
 import io.github.rupakc.travelplanner.core.domain.export.PlanShareText
 import io.github.rupakc.travelplanner.core.domain.export.PlanTextLabels
+import io.github.rupakc.travelplanner.core.ui.R as CoreUiR
 import io.github.rupakc.travelplanner.feature.plan.R
 import java.io.File
 import java.time.ZoneId
@@ -125,6 +126,10 @@ internal object PlatformExport {
                 estimatedCost = { r.getString(R.string.plan_text_estimated_cost, it) },
                 perNight = { r.getString(R.string.plan_per_night, it) },
                 estimate = r.getString(R.string.plan_text_estimate),
+                placeFacts = r.getString(R.string.plan_cat_place_facts),
+                aiFact = r.getString(CoreUiR.string.facts_ai_label),
+                source = { r.getString(CoreUiR.string.facts_source, it) },
+                asOf = { r.getString(CoreUiR.string.facts_as_of, it) },
             )
         return PlanShareText.build(
             planName = input.planName.ifBlank { r.getString(R.string.plan_trip_unnamed) },

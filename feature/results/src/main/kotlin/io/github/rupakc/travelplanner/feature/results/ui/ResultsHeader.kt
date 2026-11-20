@@ -99,7 +99,7 @@ fun TravelSearchRequest.destinationName(names: Map<String, String> = emptyMap())
 @Composable
 internal fun TripSummary(state: ResultsUiState, modifier: Modifier = Modifier) {
     val request = state.request ?: return
-    val total = SectionId.entries.size
+    val total = SectionId.CORE.size
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(TravelTheme.spacing.xs)) {
         val names = state.placeNames
         Text(
@@ -141,7 +141,7 @@ internal fun TripSummary(state: ResultsUiState, modifier: Modifier = Modifier) {
 /** Stream status: planning / ready / interrupted / failed / restored. */
 @Composable
 internal fun StreamBanner(state: ResultsUiState, onRetry: () -> Unit, onRunSaved: () -> Unit, modifier: Modifier = Modifier) {
-    val total = SectionId.entries.size
+    val total = SectionId.CORE.size
     val live = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
     when {
         state.canRunSavedSearch -> {

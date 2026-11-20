@@ -19,7 +19,13 @@ import io.github.rupakc.travelplanner.core.designsystem.component.TpButtonVarian
  * specific ("Add Hotel Lisboa to My Plan"). Wire [onToggle] to `CurrentPlanStore.toggle`.
  */
 @Composable
-fun AddToPlanButton(selected: Boolean, itemName: String, onToggle: () -> Unit, modifier: Modifier = Modifier) {
+fun AddToPlanButton(
+    selected: Boolean,
+    itemName: String,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+    tid: String = "ui.plan_added",
+) {
     val a11y = stringResource(if (selected) R.string.plan_remove_a11y else R.string.plan_add_a11y, itemName)
     TpButton(
         text = stringResource(if (selected) R.string.plan_added else R.string.plan_add),
@@ -32,6 +38,6 @@ fun AddToPlanButton(selected: Boolean, itemName: String, onToggle: () -> Unit, m
             },
         variant = if (selected) TpButtonVariant.Tonal else TpButtonVariant.Secondary,
         leadingIcon = if (selected) Icons.Filled.Check else Icons.Filled.Add,
-        tid = "ui.plan_added",
+        tid = tid,
     )
 }

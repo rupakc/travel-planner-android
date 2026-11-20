@@ -25,7 +25,7 @@ class EventDecodingTest {
     fun `search fixture covers every section, confidence, pricing, agent status, unknown and done`() {
         val events = Fixtures.searchEvents(Fixtures.SEARCH_FULL)
         val sections = events.filterIsInstance<SearchEvent.Section>().map { it.id }.toSet()
-        assertEquals(SectionId.entries.toSet(), sections)
+        assertEquals(SectionId.CORE.toSet(), sections)
         assertTrue(events.any { it is SearchEvent.Confidence && it.data.grade == "green" && it.data.subScores["visa_ease"]?.score == 20 })
         assertTrue(events.any { it is SearchEvent.PricingAdvisor && it.data.recommendation == "wait" })
         assertTrue(events.any { it is SearchEvent.AgentStatus && it.agent == "flights" })

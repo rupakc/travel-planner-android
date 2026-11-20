@@ -484,7 +484,8 @@ objects you received, not by constructing new ones, whenever you have them.
 ### 3.2 Search state (`SearchRepository.current`)
 
 `SearchResultsState`: `request`, `sections: Map<SectionId, SectionResult(id, data, raw, source)>`,
-`statuses: Map<SectionId, SectionStatus>` (WAITING/LOADING/ENHANCING/DONE — web state machine),
+`statuses: Map<SectionId, SectionStatus>` (WAITING/LOADING/ENHANCING/DONE — web state machine; the optional
+`PLACE_FACTS` has no entry until its first event, and `readyCount` counts `SectionId.CORE` only),
 `confidence`, `pricingAdvisor`, `phase` (IDLE/STREAMING/DONE/INTERRUPTED/FAILED/CANCELLED), `error`, `retries`;
 helper `state.section<HotelsData>(SectionId.HOTELS)`. Replace-by-type, keep-old-on-AI-error and one retry
 without `done` are already applied. `SearchResultsReducer.sectionsJson(state)` (in `….core.data.impl`)
@@ -516,7 +517,9 @@ the share page, Alerts (fare cards) and trip reminders. Chat needs none: the bac
   `PlacesData`(`PlaceToSee`), `WalkingToursData`, `EventsData`(`TravelEvent`), `VisaData`, `SimData`(`SimPlan`),
   `TipsData`(`Tip`), `EmergencyCardData`, `GettingAroundData`(`TransportOption`), `ForexData`, `ItineraryData`
   (`ItineraryDay`, `ItinerarySlot`), `StressTestData`, `PackingListData`; plus `ConfidenceData`, `PricingAdvisorData`,
-  `UndecodedSection` (raw fallback). `SectionId` enum (web order, `wire` names, `staticBacked`, `phaseOne`).
+  `PlaceFactsData`(`PlaceFactsPlace`, `PlaceFact`, `FactCitation`), `UndecodedSection` (raw fallback). `SectionId` enum
+  (web order, `wire` names, `staticBacked`, `phaseOne`, `optional`; `CORE` = the 16 non-optional ones). `DataSource` is
+  `STATIC`, `CRAWLER` (Place facts Phase 0) or `AI`; `isPhaseZero` covers the first two.
 - `SearchEvent`: `Section(id, source, data, raw)`, `Confidence`, `PricingAdvisor`, `AgentStatus`, `Done`, `Unknown`.
 - `ChatEvent`: `Delta`, `Suggestions`, `SessionContextUpdate`, `PlanAction(action, field, data)` (+`fieldKind`),
   `PlanningStart`, `TripMap`, `ItineraryGenerating`, `ComprehensiveItinerary(data: ChatItinerary?, error, raw)`,
@@ -724,7 +727,7 @@ Everything is Hilt-injected; details in [Telemetry-and-Privacy](Telemetry-and-Pr
 ## 8. Results sections contract (`feature:results`, package `….feature.results.sections`)
 
 ```kotlin
-/** The 16 results sections in web `AGENT_ORDER` (api-contract §3.2). */
+/** The 16 results sections in web `AGENT_ORDER` (api-contract §3.2), plus the optional Place facts after Tips. */
 enum class ResultsSection(val id: SectionId) {
     Flights(SectionId.FLIGHTS),
     Weather(SectionId.WEATHER),
@@ -736,6 +739,7 @@ enum class ResultsSection(val id: SectionId) {
     Visa(SectionId.VISA),
     Sim(SectionId.SIM),
     Tips(SectionId.TIPS),
+    PlaceFacts(SectionId.PLACE_FACTS),
     EmergencyCard(SectionId.EMERGENCY_CARD),
     GettingAround(SectionId.GETTING_AROUND),
     Forex(SectionId.FOREX),

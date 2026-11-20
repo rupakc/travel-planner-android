@@ -9,7 +9,8 @@ import io.github.rupakc.travelplanner.core.network.sse.SseParser
  * Recorded SSE streams built from api-contract.md examples (resources/fixtures):
  * `search_full.sse` (every search event type, keepalives, a re-yield, an unknown type, done),
  * `search_interrupted.sse` (no done), `chat_qa.sse`, `chat_planning.sse` (ends with planning_done),
- * `chat_fallback.sse` (plan actions, section results, import_link, error, legacy message, ignored types).
+ * `chat_fallback.sse` (plan actions, section results, import_link, error, legacy message, ignored types),
+ * `search_facts.sse` (the optional Place facts section: crawler facts, then the AI-merged section).
  */
 object Fixtures {
     const val SEARCH_FULL = "search_full.sse"
@@ -17,6 +18,7 @@ object Fixtures {
     const val CHAT_QA = "chat_qa.sse"
     const val CHAT_PLANNING = "chat_planning.sse"
     const val CHAT_FALLBACK = "chat_fallback.sse"
+    const val SEARCH_FACTS = "search_facts.sse"
 
     fun read(name: String): String =
         checkNotNull(Fixtures::class.java.classLoader?.getResourceAsStream("fixtures/$name")) { "Missing fixture $name" }
