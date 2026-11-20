@@ -69,6 +69,22 @@ Model chip "≈ N kg CO₂e" (`EmissionsChip`) when a result carries `emissions`
 linked to TIM. Strings: `core/ui/src/main/res/values*/strings_carbon.xml`, copied from the web's `results:carbon.*`, `emissions.*` and
 `official.source|asOf` in all seven languages.
 
+## Place facts (`facts` section)
+
+Port of the web `PlaceFactsSection` (web `docs/Place-Facts.md`). `/api/search` may stream a `facts` section: first `source: "crawler"`
+(sourced facts, shown with "Enhancing…"), then `source: "ai"` (the merged section, AI facts only for empty groups). It is
+`SectionId.PLACE_FACTS` (`optional`): no status until it arrives, left out of the progress count, and listed after Tips only when
+`PlaceFactsView.places` finds at least one non-blank fact, so an older backend (or `features.place_facts` = 0, which sends no `facts`
+events) shows nothing. A crawler event never replaces AI facts (retry replay) and an AI error never replaces facts; the backend never
+streams a `facts` error anyway. `PlaceFactsBody` (`core:ui` `facts/`) has place chips (several places), group chips with counts
+(historical, fun, popular, unbelievable, little-known), crawler facts with their source line (name with link, as-of date, licence
+attribution linked to the licence, "sources disagree"), "Machine-translated from the source language" when flagged, AI facts with the
+"AI-suggested, not verified" pill and never a source, and the AI note. A fact's `lang` and a single quoted value's `value_lang` become
+span `LocaleList`s (`und` and bad tags dropped). Each fact can go into My Plan as `selections.place_facts`
+(`{id, text, fact_type, place, origin, lang, value_lang, citation}`, citation null for AI facts, written only when non-empty, as the
+web); My Plan shows it with `SelectedPlaceFact` and "Share as text" prints it with its source or the AI label. The web's
+`POST /api/place-facts` is not called: there is no retry for a section that never streams an error.
+
 ## Share links 2.0 (`features.sharing >= 1`)
 
 `SharesApi` (`POST/GET /shares`, `DELETE /shares/{token}`) is called only when `JourneyFlags.sharing` is on; the app shell then provides `LocalShareLauncher` (`core:ui`), which opens `ShareCreateRoute` (`feature:share`). Without the flag the launcher is null: the plan keeps the legacy `POST /plans/{id}/share` link, the recap keeps its text share and the savings tally shows no share button. Entry points: plan detail, trip recap (the trip id is the plan id), savings tally; each reads the launcher, so features never depend on each other.
