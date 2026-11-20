@@ -1,6 +1,7 @@
 package io.github.rupakc.travelplanner.feature.plan.model
 
 import io.github.rupakc.travelplanner.core.model.json.TravelJson
+import io.github.rupakc.travelplanner.core.model.plan.PlaceFactPick
 import io.github.rupakc.travelplanner.core.model.plan.Plan
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.section.Activity
@@ -199,5 +200,20 @@ class PlanModelsTest {
         assertEquals("Go early", itinerary.notes["1-morning"])
         assertEquals(40.0, slot.slot.estimatedCostUsd!!, 0.0)
         assertFalse(slot.slot.fromLink == true)
+    }
+
+    @Test
+    fun `place facts form their own group after tips and remove by id`() {
+        val crawler = PlaceFactPick(id = "c:1", text = "Berlin was founded in 1237.", place = "Berlin", origin = "crawler")
+        val ai = PlaceFactPick(id = "a:2", text = "AI fact", place = "Berlin", origin = "ai")
+        val blank = PlaceFactPick(id = "a:3", text = " ", origin = "ai")
+        val selections = PlanSelections(placeFacts = listOf(crawler, ai, blank))
+        val group = SelectionGroups.of(selections).single()
+        assertEquals(PlanCategory.PLACE_FACTS, group.category)
+        assertEquals(listOf("c:1", "a:2"), group.entries.map { it.fact?.id })
+        assertEquals("AI fact", group.entries[1].title)
+        val removed = SelectionGroups.remove(selections, group.entries[0].removal!!)
+        assertEquals(listOf("a:2", "a:3"), removed.placeFacts.map { it.id })
+        assertTrue(PlanCategory.entries.indexOf(PlanCategory.PLACE_FACTS) == PlanCategory.entries.indexOf(PlanCategory.TIPS) + 1)
     }
 }

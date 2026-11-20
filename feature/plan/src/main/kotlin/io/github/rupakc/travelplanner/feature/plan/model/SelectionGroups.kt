@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import io.github.rupakc.travelplanner.core.domain.itinerary.PlanItinerary
 import io.github.rupakc.travelplanner.core.domain.itinerary.ScheduledDay
 import io.github.rupakc.travelplanner.core.domain.itinerary.SlotEdit
+import io.github.rupakc.travelplanner.core.model.plan.PlaceFactPick
 import io.github.rupakc.travelplanner.core.model.plan.PlanItem
 import io.github.rupakc.travelplanner.core.model.plan.PlanSelections
 import io.github.rupakc.travelplanner.core.model.section.Flight
@@ -26,6 +27,7 @@ internal enum class PlanCategory(val section: SectionId) {
     SIM(SectionId.SIM),
     GETTING_AROUND(SectionId.GETTING_AROUND),
     TIPS(SectionId.TIPS),
+    PLACE_FACTS(SectionId.PLACE_FACTS),
     EVENTS(SectionId.EVENTS),
     NOTES(SectionId.ITINERARY),
     ITINERARY_SLOTS(SectionId.ITINERARY),
@@ -63,6 +65,8 @@ internal data class SelectionEntry(
     /** Packing list progress. */
     val packedCount: Int? = null,
     val packTotal: Int? = null,
+    /** A place fact: shown as the web's `SelectedFact` (text, then its source line or the AI label). */
+    val fact: PlaceFactPick? = null,
     val removal: Removal? = null,
 )
 
@@ -165,6 +169,17 @@ internal object SelectionGroups {
                         details = listOfNotNull(t.body),
                         url = t.sourceUrl,
                         removal = Removal.Item(PlanItem.TipItem(t)),
+                    )
+                },
+            ),
+            group(
+                PlanCategory.PLACE_FACTS,
+                selections.placeFacts.filter { !it.text.isNullOrBlank() }.map { f ->
+                    SelectionEntry(
+                        key = "fact|${f.id}",
+                        title = f.text,
+                        fact = f,
+                        removal = Removal.Item(PlanItem.PlaceFactItem(f)),
                     )
                 },
             ),

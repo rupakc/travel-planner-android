@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/** The 16 results sections in web `AGENT_ORDER` (api-contract §3.2). */
+/** The 16 results sections in web `AGENT_ORDER` (api-contract §3.2), plus the optional Place facts after Tips. */
 enum class ResultsSection(val id: SectionId) {
     Flights(SectionId.FLIGHTS),
     Weather(SectionId.WEATHER),
@@ -28,6 +28,7 @@ enum class ResultsSection(val id: SectionId) {
     Visa(SectionId.VISA),
     Sim(SectionId.SIM),
     Tips(SectionId.TIPS),
+    PlaceFacts(SectionId.PLACE_FACTS),
     EmergencyCard(SectionId.EMERGENCY_CARD),
     GettingAround(SectionId.GETTING_AROUND),
     Forex(SectionId.FOREX),

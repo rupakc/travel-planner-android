@@ -31,6 +31,7 @@ import io.github.rupakc.travelplanner.core.model.section.GettingAroundData
 import io.github.rupakc.travelplanner.core.model.section.HotelsData
 import io.github.rupakc.travelplanner.core.model.section.ItineraryData
 import io.github.rupakc.travelplanner.core.model.section.PackingListData
+import io.github.rupakc.travelplanner.core.model.section.PlaceFactsData
 import io.github.rupakc.travelplanner.core.model.section.PlacesData
 import io.github.rupakc.travelplanner.core.model.section.SectionData
 import io.github.rupakc.travelplanner.core.model.section.SectionStatus
@@ -40,6 +41,7 @@ import io.github.rupakc.travelplanner.core.model.section.TipsData
 import io.github.rupakc.travelplanner.core.model.section.VisaData
 import io.github.rupakc.travelplanner.core.model.section.WalkingToursData
 import io.github.rupakc.travelplanner.core.model.section.WeatherData
+import io.github.rupakc.travelplanner.core.ui.R as CoreUiR
 import io.github.rupakc.travelplanner.core.ui.SectionScaffold
 import io.github.rupakc.travelplanner.core.ui.VerificationChip
 import io.github.rupakc.travelplanner.feature.results.R
@@ -179,6 +181,7 @@ private fun loadingMessages(section: ResultsSection): List<Int> =
         ResultsSection.Visa -> listOf(R.string.results_loading_visa)
         ResultsSection.Sim -> listOf(R.string.results_loading_sim)
         ResultsSection.Tips -> listOf(R.string.results_loading_tips)
+        ResultsSection.PlaceFacts -> listOf(CoreUiR.string.section_place_facts)
         ResultsSection.EmergencyCard -> listOf(R.string.results_loading_emergency)
         ResultsSection.GettingAround -> listOf(R.string.results_loading_getting_around)
         ResultsSection.Forex -> listOf(R.string.results_loading_forex)
@@ -201,6 +204,7 @@ internal fun SectionContent(section: ResultsSection, data: SectionData, actions:
         ResultsSection.Visa -> (data as? VisaData)?.let { VisaSectionContent(it, actions, modifier) }
         ResultsSection.Sim -> (data as? SimData)?.let { SimSectionContent(it, actions, modifier) }
         ResultsSection.Tips -> (data as? TipsData)?.let { TipsSectionContent(it, actions, modifier) }
+        ResultsSection.PlaceFacts -> (data as? PlaceFactsData)?.let { PlaceFactsSectionContent(it, actions, modifier) }
         ResultsSection.EmergencyCard -> (data as? EmergencyCardData)?.let { EmergencyCardSectionContent(it, actions, modifier) }
         ResultsSection.GettingAround -> (data as? GettingAroundData)?.let { GettingAroundSectionContent(it, actions, modifier) }
         ResultsSection.Forex -> (data as? ForexData)?.let { ForexSectionContent(it, actions, modifier) }

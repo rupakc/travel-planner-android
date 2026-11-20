@@ -28,6 +28,7 @@ import io.github.rupakc.travelplanner.core.model.section.SectionStatus
 import io.github.rupakc.travelplanner.core.model.section.VisaData
 import io.github.rupakc.travelplanner.core.model.settings.Session
 import io.github.rupakc.travelplanner.core.model.settings.TravellerProfile
+import io.github.rupakc.travelplanner.core.model.stream.EventDecoder
 import io.github.rupakc.travelplanner.core.model.stream.SearchEvent
 import io.github.rupakc.travelplanner.core.testing.Fixtures
 import io.github.rupakc.travelplanner.core.testing.MainDispatcherRule
@@ -182,6 +183,39 @@ class ResultsViewModelTest {
                 vm.onEvent(ResultsEvent.RetryStream)
                 assertEquals(StreamPhase.DONE, expectMostRecentItem().phase)
                 assertEquals(2, search.started.size)
+            }
+        }
+
+    @Test
+    fun `place facts are listed after tips only when the stream sent facts`() =
+        runTest {
+            search.events = Fixtures.searchEvents(Fixtures.SEARCH_FACTS)
+            val vm = vm()
+            vm.state.test {
+                search.start(request)
+                val s = expectMostRecentItem()
+                val ids = s.sections.map { it.id }
+                assertEquals(ids.indexOf(SectionId.TIPS) + 1, ids.indexOf(SectionId.PLACE_FACTS))
+                assertEquals(SectionStatus.DONE, s.section(SectionId.PLACE_FACTS).status)
+                assertEquals(SectionId.CORE.size + 1, s.sections.size)
+            }
+        }
+
+    @Test
+    fun `a stream with an empty or failed facts section lists no place facts`() =
+        runTest {
+            search.events =
+                listOf(
+                    EventDecoder.decodeSearch("""{"type":"facts","data":{"places":[{"key":"k","groups":{"fun":[{"text":" "}]}}]},"source":"crawler"}""")!!,
+                    EventDecoder.decodeSearch("""{"type":"facts","data":{"error":"no_facts"},"source":"ai"}""")!!,
+                    SearchEvent.Done,
+                )
+            val vm = vm()
+            vm.state.test {
+                search.start(request)
+                val s = expectMostRecentItem()
+                assertFalse(s.sections.any { it.id == SectionId.PLACE_FACTS })
+                assertEquals(SectionId.CORE.size, s.sections.size)
             }
         }
 
@@ -783,7 +817,8 @@ class ResultsViewModelTest {
             vm.state.test {
                 search.start(request)
                 val s = expectMostRecentItem()
-                assertEquals(SectionId.entries.size, s.sections.size)
+                // The optional Place facts section is not listed: the fixture stream sends no facts.
+                assertEquals(SectionId.CORE.size, s.sections.size)
                 val events = s.section(SectionId.EVENTS)
                 assertFalse(events.relevant)
                 assertFalse(events.expanded)

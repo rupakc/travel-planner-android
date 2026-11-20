@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Place facts in My Plan (web plan:print.section.placeFacts, sections:drawer.removeFact). -->
+    <string name="plan_cat_place_facts">Fakten zum Ort</string>
+</resources>
