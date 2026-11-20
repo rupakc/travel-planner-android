@@ -60,6 +60,17 @@ class PlaceFactsModelTest {
     }
 
     @Test
+    fun `a malformed place, groups value or citation is skipped without hiding the other places`() {
+        val good = """{"key":"city:1","name":"Berlin","groups":{"fun":[{"id":"a:1","text":"AI fact","origin":"ai"},
+            {"id":"c:2","text":"Bad citation","origin":"crawler","citation":"x"}]}}"""
+        val json = """{"places":["x",42,null,{"key":"city:2","name":"Paris","groups":"oops"},$good]}"""
+        val data = SectionDecoder.decode(SectionId.PLACE_FACTS, TravelJson.parseToJsonElement(json).jsonObject) as PlaceFactsData
+        assertEquals(listOf("Paris", "Berlin"), data.places.map { it.name })
+        assertTrue(data.places[0].groups.isEmpty())
+        assertEquals(listOf("a:1"), data.places[1].groups.getValue("fun").map { it.id })
+    }
+
+    @Test
     fun `place facts is optional and stays out of the core sections`() {
         assertTrue(SectionId.PLACE_FACTS.optional)
         assertEquals(16, SectionId.CORE.size)

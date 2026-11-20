@@ -1,14 +1,22 @@
 package io.github.rupakc.travelplanner.core.model.section
 
+import io.github.rupakc.travelplanner.core.model.carbon.TolerantObjectListSerializer
 import io.github.rupakc.travelplanner.core.model.json.EmptyJsonObject
 import io.github.rupakc.travelplanner.core.model.json.LenientBoolean
 import io.github.rupakc.travelplanner.core.model.json.LenientInt
 import io.github.rupakc.travelplanner.core.model.json.LenientString
 import io.github.rupakc.travelplanner.core.model.json.RawBacked
 import io.github.rupakc.travelplanner.core.model.json.RawBackedListSerializer
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonObject
 
 /**
@@ -18,7 +26,7 @@ import kotlinx.serialization.json.JsonObject
  */
 @Serializable
 data class PlaceFactsData(
-    val places: List<PlaceFactsPlace> = emptyList(),
+    @Serializable(with = PlaceFactsPlaceListSerializer::class) val places: List<PlaceFactsPlace> = emptyList(),
     @SerialName("fact_types") val factTypes: List<String> = emptyList(),
     override val error: String? = null,
     override val verification: Verification? = null,
@@ -34,8 +42,25 @@ data class PlaceFactsPlace(
     @SerialName("country_name") val countryName: String? = null,
     val destination: String? = null,
     @SerialName("geonames_id") val geonamesId: LenientInt = null,
-    val groups: Map<String, PlaceFactList> = emptyMap(),
+    @Serializable(with = PlaceFactGroupsSerializer::class) val groups: Map<String, PlaceFactList> = emptyMap(),
 )
+
+/** `places[]`: an item that is not an object or does not decode is skipped, so one bad place never hides the card. */
+object PlaceFactsPlaceListSerializer : TolerantObjectListSerializer<PlaceFactsPlace>(PlaceFactsPlace.serializer())
+
+/** `groups`: anything but an object is no groups; each group is a tolerant [PlaceFactList]. */
+object PlaceFactGroupsSerializer : KSerializer<Map<String, List<PlaceFact>>> {
+    private val delegate = MapSerializer(String.serializer(), PlaceFactListSerializer)
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun deserialize(decoder: Decoder): Map<String, List<PlaceFact>> {
+        if (decoder !is JsonDecoder) return delegate.deserialize(decoder)
+        val obj = decoder.decodeJsonElement() as? JsonObject ?: return emptyMap()
+        return obj.mapValues { (_, v) -> decoder.json.decodeFromJsonElement(PlaceFactListSerializer, v) }
+    }
+
+    override fun serialize(encoder: Encoder, value: Map<String, List<PlaceFact>>) = delegate.serialize(encoder, value)
+}
 
 /**
  * One fact. [origin] is `crawler` (sourced, with [citation]) or `ai` ("AI-suggested, not verified", no source).

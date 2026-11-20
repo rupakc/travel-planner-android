@@ -342,8 +342,12 @@ internal class ResultsStateBuilder {
             return SearchResultsState(
                 request = request,
                 sections = sections,
-                // Only what was stored is done; the rest is "not loaded" (never "No results").
-                statuses = SectionId.entries.associateWith { if (it in sections) SectionStatus.DONE else SectionStatus.WAITING },
+                // Only what was stored is done; the rest is "not loaded" (never "No results"). An optional
+                // section has no status at all unless it was stored.
+                statuses =
+                    SectionId.entries
+                        .filter { !it.optional || it in sections }
+                        .associateWith { if (it in sections) SectionStatus.DONE else SectionStatus.WAITING },
                 phase = StreamPhase.DONE,
             )
         }

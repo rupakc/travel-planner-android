@@ -230,7 +230,7 @@ private fun FactCard(fact: PlaceFact, selected: Boolean, onToggle: () -> Unit, o
             } else {
                 AiFactLabel()
             }
-            AddToPlanButton(selected, text, onToggle)
+            AddToPlanButton(selected, text, onToggle, tid = "results.fact.add")
         }
     }
 }

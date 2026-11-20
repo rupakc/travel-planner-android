@@ -131,7 +131,9 @@ class PlaceFactsViewTest {
                     listOf(
                         PlaceFactsView.selection(crawler, berlin),
                         PlaceFactsView.selection(ai, berlin),
-                        PlaceFactsView.selection(crawler.copy(id = "c:bad", citation = cit.copy(url = "javascript:x")), berlin),
+                        PlaceFactsView.selection(crawler.copy(id = "c:bad", citation = cit.copy(url = "javascript:x", licenceUrl = "javascript:y")), berlin),
+                        PlaceFactsView.selection(crawler.copy(id = "c:anon", text = "Nameless source", citation = cit.copy(name = " ")), berlin),
+                        PlaceFactsView.selection(crawler.copy(id = "c:none", text = "No citation", citation = null), berlin),
                     ),
             )
         val labels =
@@ -153,14 +155,18 @@ class PlaceFactsViewTest {
                 placeFacts = "Place facts",
                 aiFact = "AI-suggested, not verified",
                 source = { "Source: $it" },
+                asOf = { "as of $it" },
             )
         val text = PlanShareText.build("Berlin", emptyList(), selections, emptyList(), null, labels)
         val sourced =
-            "Place facts\n  • Berlin: Berlin was founded in 1237.\n    Source: Wikidata\n" +
-                "    https://www.wikidata.org/wiki/Q64\n    Wikidata (CC0 1.0)"
+            "Place facts\n  • Berlin: Berlin was founded in 1237.\n    Source: Wikidata · as of 2026-11-20\n" +
+                "    https://www.wikidata.org/wiki/Q64\n    Wikidata (CC0 1.0)\n    https://creativecommons.org/publicdomain/zero/1.0/"
         assertTrue(text, text.contains(sourced))
         assertTrue(text, text.contains("  • Berlin: AI fact\n    AI-suggested, not verified"))
         assertFalse(text, text.contains("javascript"))
+        // A crawler pick without a source name, or without a citation, is printed with the AI label (web print).
+        assertTrue(text, text.contains("  • Berlin: Nameless source\n    AI-suggested, not verified"))
+        assertTrue(text, text.contains("  • Berlin: No citation\n    AI-suggested, not verified"))
         // Without a label the section is left out (older callers).
         val old = PlanShareText.build("Berlin", emptyList(), selections, emptyList(), null, labels.copy(placeFacts = ""))
         assertFalse(old.contains("Berlin was founded"))

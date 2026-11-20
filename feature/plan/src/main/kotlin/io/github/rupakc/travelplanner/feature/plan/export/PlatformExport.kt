@@ -129,6 +129,7 @@ internal object PlatformExport {
                 placeFacts = r.getString(R.string.plan_cat_place_facts),
                 aiFact = r.getString(CoreUiR.string.facts_ai_label),
                 source = { r.getString(CoreUiR.string.facts_source, it) },
+                asOf = { r.getString(CoreUiR.string.facts_as_of, it) },
             )
         return PlanShareText.build(
             planName = input.planName.ifBlank { r.getString(R.string.plan_trip_unnamed) },
