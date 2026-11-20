@@ -43,7 +43,7 @@ object SearchResultsReducer {
             }
         }
 
-    /** Stream end: every section not done becomes done (web parity). */
+    /** Stream end: every section not done becomes done (web parity); an optional section that never arrived stays absent. */
     fun finish(state: SearchResultsState, phase: StreamPhase): SearchResultsState =
         state.copy(statuses = state.statuses.mapValues { SectionStatus.DONE }, phase = phase)
 
@@ -53,10 +53,11 @@ object SearchResultsReducer {
     private fun onSection(state: SearchResultsState, event: SearchEvent.Section): SearchResultsState {
         val existing = state.sections[event.id]
         val existingGoodAi = existing != null && existing.source == DataSource.AI && !existing.data.isError
+        val phaseZero = event.source?.isPhaseZero == true
         val keepOld =
-            // an AI error never replaces good data; Phase-0 static data replayed on the retry never replaces AI data (review M2)
-            (event.data.isError && event.source != DataSource.STATIC && existing != null && !existing.data.isError) ||
-                (event.source == DataSource.STATIC && existingGoodAi)
+            // an AI error never replaces good data; Phase-0 static (or crawler facts) data replayed on the retry never replaces AI data (review M2)
+            (event.data.isError && !phaseZero && existing != null && !existing.data.isError) ||
+                (phaseZero && existingGoodAi)
         val sections =
             if (keepOld) {
                 state.sections
@@ -67,9 +68,13 @@ object SearchResultsReducer {
         val current = state.statuses[event.id]
         val status =
             when {
-                event.source == DataSource.STATIC && existingGoodAi -> SectionStatus.DONE
-                event.source == DataSource.STATIC && current != SectionStatus.DONE -> SectionStatus.ENHANCING
-                event.source == DataSource.STATIC -> SectionStatus.DONE
+                phaseZero && existingGoodAi -> SectionStatus.DONE
+
+                // Crawler facts (Place facts Phase 0) show "Enhancing…" until the AI pass or the stream end, like static data.
+                phaseZero && current != SectionStatus.DONE -> SectionStatus.ENHANCING
+
+                phaseZero -> SectionStatus.DONE
+
                 else -> SectionStatus.DONE
             }
         return state.copy(sections = sections).withStatus(event.id, status)

@@ -50,7 +50,7 @@ class SearchRepositoryImplTest {
             server.enqueue(sse(Fixtures.SEARCH_FULL))
             val state = repository().results(request).last()
             assertEquals(StreamPhase.DONE, state.phase)
-            assertEquals(SectionId.entries.toSet(), state.sections.keys)
+            assertEquals(SectionId.CORE.toSet(), state.sections.keys)
             assertTrue(state.statuses.values.all { it == SectionStatus.DONE })
             // the enriched re-yield replaced the first hotels event
             assertEquals(true, (state.sections[SectionId.HOTELS]?.data as HotelsData).results.single().linkVerified)

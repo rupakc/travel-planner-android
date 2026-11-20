@@ -42,6 +42,11 @@ data class FeaturesDto(
     val play: LenientInt = null,
     /** Trip carbon footprint version: 1 = `POST /carbon/trip` exists; null or 0 on older backends. */
     val carbon: LenientInt = null,
+    /**
+     * Place facts (`1`/`0`): informational. The app shows the section only when the stream sends a `facts` section
+     * with at least one fact, which a backend with the feature off (or an older one) never does.
+     */
+    @SerialName("place_facts") val placeFacts: LenientInt = null,
 )
 
 /** `auth` of `GET /api/config`. [signupMode] is `open` | `invite`. */

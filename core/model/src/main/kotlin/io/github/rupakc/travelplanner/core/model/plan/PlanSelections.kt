@@ -51,6 +51,8 @@ data class PlanSelections(
     val walkingTours: List<WalkingTour> = emptyList(),
     val sim: SimPlan? = null,
     val tips: List<Tip> = emptyList(),
+    /** `place_facts` (web Place facts): written only when non-empty, as the web does (it is not in `EMPTY_SELECTIONS`). */
+    val placeFacts: List<PlaceFactPick> = emptyList(),
     val gettingAround: List<TransportOption> = emptyList(),
     val events: List<TravelEvent> = emptyList(),
     /** `{ "<slotKey>": "text" }` */
@@ -73,7 +75,7 @@ data class PlanSelections(
     val count: Int
         get() =
             (if (flight != null) 1 else 0) + flights.size + (if (hotel != null) 1 else 0) + activities.size +
-                placesToSee.size + walkingTours.size + (if (sim != null) 1 else 0) + gettingAround.size + tips.size +
+                placesToSee.size + walkingTours.size + (if (sim != null) 1 else 0) + gettingAround.size + tips.size + placeFacts.size +
                 events.size + itinerarySlots.size + (if (packingList != null) 1 else 0)
 
     val isEmpty: Boolean get() = count == 0
@@ -97,6 +99,7 @@ object SelectionKeys {
     const val WALKING_TOURS = "walking_tours"
     const val SIM = "sim"
     const val TIPS = "tips"
+    const val PLACE_FACTS = "place_facts"
     const val GETTING_AROUND = "getting_around"
     const val EVENTS = "events"
     const val ITINERARY_NOTES = "itinerary_notes"
@@ -116,6 +119,7 @@ object SelectionKeys {
             WALKING_TOURS,
             SIM,
             TIPS,
+            PLACE_FACTS,
             GETTING_AROUND,
             EVENTS,
             ITINERARY_NOTES,
@@ -151,6 +155,7 @@ object PlanSelectionsSerializer : KSerializer<PlanSelections> {
             walkingTours = decodeRawBackedList(WalkingTour.serializer(), obj[SelectionKeys.WALKING_TOURS], json),
             sim = decodeRawBacked(SimPlan.serializer(), obj[SelectionKeys.SIM], json),
             tips = decodeRawBackedList(Tip.serializer(), obj[SelectionKeys.TIPS], json),
+            placeFacts = decodeRawBackedList(PlaceFactPick.serializer(), obj[SelectionKeys.PLACE_FACTS], json),
             gettingAround = decodeRawBackedList(TransportOption.serializer(), obj[SelectionKeys.GETTING_AROUND], json),
             events = decodeRawBackedList(TravelEvent.serializer(), obj[SelectionKeys.EVENTS], json),
             itineraryNotes =
@@ -185,6 +190,7 @@ object PlanSelectionsSerializer : KSerializer<PlanSelections> {
             many(SelectionKeys.WALKING_TOURS, value.walkingTours, WalkingTour.serializer())
             one(SelectionKeys.SIM, value.sim, SimPlan.serializer())
             many(SelectionKeys.TIPS, value.tips, Tip.serializer())
+            if (value.placeFacts.isNotEmpty()) many(SelectionKeys.PLACE_FACTS, value.placeFacts, PlaceFactPick.serializer())
             many(SelectionKeys.GETTING_AROUND, value.gettingAround, TransportOption.serializer())
             many(SelectionKeys.EVENTS, value.events, TravelEvent.serializer())
             put(SelectionKeys.ITINERARY_NOTES, JsonObject(value.itineraryNotes.mapValues { JsonPrimitive(it.value) }))

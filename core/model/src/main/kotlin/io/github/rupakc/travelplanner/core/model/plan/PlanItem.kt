@@ -56,6 +56,11 @@ sealed interface PlanItem {
         override val key: String get() = tip.title.orEmpty()
     }
 
+    /** A place fact; dedupe by its `id` (web `factSelection`). */
+    data class PlaceFactItem(val fact: PlaceFactPick) : PlanItem {
+        override val key: String get() = fact.id.orEmpty()
+    }
+
     data class TransportItem(val option: TransportOption) : PlanItem {
         override val key: String get() = option.name.orEmpty()
     }
@@ -104,6 +109,10 @@ object PlanSelectionRules {
 
             is PlanItem.TipItem -> {
                 selections.tips.any { it.title == item.tip.title }
+            }
+
+            is PlanItem.PlaceFactItem -> {
+                selections.placeFacts.any { it.id == item.fact.id }
             }
 
             is PlanItem.TransportItem -> {
@@ -155,6 +164,10 @@ object PlanSelectionRules {
 
             is PlanItem.TipItem -> {
                 selections.copy(tips = selections.tips.toggled(item.tip, selected) { it.title })
+            }
+
+            is PlanItem.PlaceFactItem -> {
+                selections.copy(placeFacts = selections.placeFacts.toggled(item.fact, selected) { it.id })
             }
 
             is PlanItem.TransportItem -> {

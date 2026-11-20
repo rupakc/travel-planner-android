@@ -30,7 +30,8 @@ data class SearchResultsState(
     /** Number of automatic retries used (web: one retry when the stream ends without `done`). */
     val retries: Int = 0,
 ) {
-    val readyCount: Int get() = statuses.count { it.value == SectionStatus.DONE || it.value == SectionStatus.ENHANCING }
+    /** Ready sections among [SectionId.CORE] (an optional section never moves the progress count). */
+    val readyCount: Int get() = statuses.count { !it.key.optional && (it.value == SectionStatus.DONE || it.value == SectionStatus.ENHANCING) }
 
     inline fun <reified T : SectionData> section(id: SectionId): T? = sections[id]?.data as? T
 
@@ -38,7 +39,8 @@ data class SearchResultsState(
     fun sectionsJson(): JsonObject = JsonObject(sections.values.associate { it.id.wire to it.raw })
 
     companion object {
+        /** Every [SectionId.CORE] section; an optional section gets its status from its first event. */
         fun initialStatuses(): Map<SectionId, SectionStatus> =
-            SectionId.entries.associateWith { if (it.phaseOne) SectionStatus.LOADING else SectionStatus.WAITING }
+            SectionId.CORE.associateWith { if (it.phaseOne) SectionStatus.LOADING else SectionStatus.WAITING }
     }
 }
